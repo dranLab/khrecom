@@ -153,12 +153,12 @@ One row per merge into main (`partials.py --summary` before and after).
 ## Summary
 
 ```
-PARTIAL: 199 (165 in 48 headers, 34 in 20 .cpp); MATCH: 948
-  by category: method 46, data member 10, type 14, fwd decl 2, #include 14, changed in place 45, padding 2, path override 1, gate 5, guessed 9, header-level 33, stand-in 13, other 5
+PARTIAL: 190 (156 in 44 headers, 34 in 20 .cpp); MATCH: 982
+  by category: method 46, data member 10, type 14, fwd decl 2, #include 14, changed in place 45, padding 2, path override 1, gate 5, guessed 9, header-level 24, stand-in 13, other 5
 stand-ins: 14 foreign in 9 files (12 names), 198 unattributed, 154 own
 duplicate class names across headers: 0
 padding: 2 arrays, 0 accessors
-mechanisms: 677 sites (0 untagged); #line: 1241
+mechanisms: 676 sites (0 untagged); #line: 1241
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
 classes: complete 874, superset 12, partial 0, gated 3, missing 7, unattributed 309
 ```
@@ -212,12 +212,11 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Form/Menu/SaveLoadUtil.h` | 0 | 3/1/0/0 | 4 |
 | `Game/Atel/CommandAccepter.h` | 1 | 1/0/0/0 | 15 |
 | `Game/Atel/EventTrap.h` | 0 | 4/1/0/0 | 3 |
-| `Game/AttachMotion.h` | 1 | 1/0/0/0 | 155 |
 | `Game/AttackMotion.h` | 1 | 3/0/0/0 | 154 |
 | `Game/CardBattle.h` | 1 | 6/0/0/0 | 146 |
 | `Game/CardKindEnum.h` | 1 | 1/0/0/0 | 100 |
 | `Game/Collision/CollInfo.h` | 1 | 1/0/0/0 | 177 |
-| `Game/Collision/CollObj.h` | 3 | 13/0/0/0 | 174 |
+| `Game/Collision/CollObj.h` | 2 | 13/0/0/0 | 174 |
 | `Game/Collision/CollUtilA.h` | 1 | 11/0/0/0 | 26 |
 | `Game/Debug/DWTBGM.h` | 1 | 0/0/0/0 | 1 |
 | `Game/Enemy/BattleEnemy.h` | 23 | 0/1/0/0 | 58 |
@@ -225,20 +224,17 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Entity.h` | 2 | 2/0/0/0 | 150 |
 | `Game/EntityFactory.h` | 1 | 2/0/0/0 | 49 |
 | `Game/Map.h` | 4 | 11/1/0/0 | 9 |
-| `Game/Movement.h` | 5 | 1/0/0/0 | 105 |
+| `Game/Movement.h` | 4 | 1/0/0/0 | 105 |
 | `Game/OsdDef.h` | 1 | 5/1/0/0 | 7 |
 | `Game/Player/DWTPlayer.h` | 2 | 0/0/0/0 | 5 |
 | `Game/Player/Player.h` | 32 | 2/1/0/0 | 72 |
 | `Game/Player/PlayerAnim.h` | 1 | 1/0/0/0 | 1 |
-| `Game/Player/PlayerAttack.h` | 2 | 1/0/0/0 | 26 |
+| `Game/Player/PlayerAttack.h` | 1 | 1/0/0/0 | 26 |
 | `Game/Player/PlayerGauge.h` | 3 | 6/1/0/0 | 15 |
 | `Game/PoolList.h` | 1 | 0/0/0/0 | 53 |
 | `Game/SceneEnv.h` | 1 | 1/0/0/0 | 38 |
 | `Game/SceneInfo.h` | 1 | 30/0/0/0 | 86 |
-| `System/Buf.h` | 1 | 1/0/0/0 | 38 |
 | `System/Com.h` | 1 | 0/0/0/0 | 8 |
-| `System/Coord.h` | 1 | 1/0/0/0 | 27 |
-| `System/Graphic/2d/2DMan.h` | 1 | 3/0/0/0 | 166 |
 | `System/Graphic/Camera.h` | 5 | 6/1/0/0 | 109 |
 | `System/Graphic/Effect/EffectMan.h` | 1 | 2/0/0/0 | 173 |
 | `System/Graphic/Effect/ObjType.h` | 1 | 1/0/0/0 | 177 |
@@ -247,8 +243,8 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/Effect/libppp/draw/global_w.h` | 1 | 0/0/0/0 | 9 |
 | `System/Graphic/Effect/libppp/draw/md.h` | 2 | 0/0/0/0 | 41 |
 | `System/Graphic/Effect/libppp/pppPart.h` | 25 | 24/0/0/0 | 215 |
-| `System/Graphic/Gprim.h` | 3 | 15/0/0/0 | 231 |
-| `System/Graphic/Model.h` | 3 | 8/0/0/0 | 70 |
+| `System/Graphic/Gprim.h` | 2 | 15/0/0/0 | 231 |
+| `System/Graphic/Model.h` | 2 | 8/0/0/0 | 70 |
 | `System/Graphic/Str.h` | 1 | 0/0/0/0 | 140 |
 | `System/Graphic/TexInfo.h` | 1 | 2/0/0/0 | 234 |
 | `System/Graphic/modeldata.h` | 2 | 3/0/0/1 | 82 |
@@ -376,7 +372,7 @@ or `untagged`.
 | placeholder | `_modelCreate*` | 1 | 1 | placeholder: an inline function's strings, in the original .rodata order |
 | placeholder | `_monstroEventBattleEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
 | placeholder | `_premiumPrizeMessage*` | 12 | 12 | Placeholders for an unknown header's inline functions (prize messages) that come next in .rodata. |
-| placeholder | `_roPh*` | 3 | 3 | placeholder: an inline function's strings, in the original .rodata order |
+| placeholder | `_roPh*` | 2 | 2 | placeholder: an inline function's strings, in the original .rodata order |
 | placeholder | `_roPh0a*` | 1 | 1 | placeholder: an inline function's strings, in the original .rodata order |
 | placeholder | `_roulettePrizeMessage*` | 12 | 12 | placeholder: an inline function's strings, in the original .rodata order |
 | placeholder | `_sampleEnemyEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |

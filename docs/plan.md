@@ -50,7 +50,7 @@ every change that is merged without regenerating. Regenerating all four takes ab
   5 units take a data section from assembly.
 - **Libraries:** 38 parked, 5 not attempted, 27 hand-written (stay assembly), 5 units with data from assembly;
   details in `docs/sdk-leftovers.md`.
-- **Header cleanup:** PARTIAL 198 (164 in 47 headers, 34 in 20 .cpp), 14 foreign stand-ins in 9 files, 0
+- **Header cleanup:** PARTIAL 190 (156 in 44 headers, 34 in 20 .cpp), 14 foreign stand-ins in 9 files, 0
   duplicate classes, 0 untagged mechanisms; classes complete 873, superset 12, gated 3, missing 8.
   `tools/partials.py --queue` has the ready items.
 - **Method that paid off (2026-11-06):** read `build/asmlines.py` before permuting. Most long-parked drafts had a

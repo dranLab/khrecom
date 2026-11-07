@@ -1,4 +1,4 @@
-// PARTIAL: added for Game/Gimmick/GimmickBreakable
+
 #ifndef GAME_MOVEMENT_H
 #define GAME_MOVEMENT_H
 

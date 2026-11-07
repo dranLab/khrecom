@@ -1,4 +1,4 @@
-// PARTIAL: added for Game/Gimmick/GimmickPlantChild
+
 #ifndef SYSTEM_GRAPHIC_MODEL_H
 #define SYSTEM_GRAPHIC_MODEL_H
 
