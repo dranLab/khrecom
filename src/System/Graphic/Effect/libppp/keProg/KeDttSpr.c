@@ -1,7 +1,7 @@
 #include "KeDttSpr.h"
 #include "System/Graphic/Effect/libppp/draw/draw_w.h"
 
-/* MATCH: GPR instructions inside the VU0/MMI asm, as in the original's instruction stream; the split form (C + one asm per VU0/MMI instruction) is not attempted yet: build/progress/cleanup-libppp-mips-asm.md */
+/* MATCH: one asm per VU0 instruction, the three constants in C (qmtc2 "r" operands; the 64-bit one comes out as the same ori/dsll chain). The two matrix pointers are read once into locals before the sequence (the volatile asms flush cse, so a->VSMat in each operand would reload it); vs pinned to v1 (unpinned it takes v0, which the constants use). "memory" on each lqc2: it reads what C stored */
 void KeDttSpr_MkGifPk_Pre(KeaDttSpr_MkGifPk *a) {
     struct {
         u_long p[16];
@@ -42,50 +42,48 @@ void KeDttSpr_MkGifPk_Pre(KeaDttSpr_MkGifPk *a) {
         u_long t1 = (u_long)((sceGsXyoffset *)&a->XYOFFSET)->OFY - 8;
         w->ofs[1] = t1;
     }
-    __asm__ __volatile__(
-        "lqc2 $vf25, 0x0(%0)\n"
-        "lqc2 $vf27, 0x10(%0)\n"
-        "lqc2 $vf29, 0x20(%0)\n"
-        "lqc2 $vf21, 0x30(%0)\n"
-        "lqc2 $vf14, 0x40(%0)\n"
-        "lqc2 $vf20, 0x50(%0)\n"
-        "lqc2 $vf9, 0x60(%0)\n"
-        "lqc2 $vf3, 0x70(%0)\n"
-        "lqc2 $vf2, 0x0(%2)\n"
-        "lqc2 $vf31, 0x10(%2)\n"
-        "vadd.y $vf2, $vf0, $vf31\n"
-        "lui $v0, 0x3a80\n"
-        "qmtc2.ni $v0, $vf24\n"
-        "lqc2 $vf4, 0x0(%1)\n"
-        "lqc2 $vf5, 0x10(%1)\n"
-        "lqc2 $vf6, 0x20(%1)\n"
-        "lqc2 $vf7, 0x30(%1)\n"
-        "lqc2 $vf11, 0x80(%0)\n"
-        "vitof4.xyzw $vf11, $vf11\n"
-        "lqc2 $vf31, 0x50(%3)\n"
-        "vmove.x $vf15, $vf0\n"
-        "vaddw.y $vf15, $vf0, $vf31w\n"
-        "vaddz.x $vf17, $vf0, $vf31z\n"
-        "vmove.y $vf17, $vf0\n"
-        "dli $v0, 0x3f3504f33f3504f3\n"
-        "qmtc2.ni $v0, $vf16\n"
-        "vmul.xy $vf16, $vf16, $vf2\n"
-        "lqc2 $vf1, 0x30(%3)\n"
-        "vmul.xy $vf1, $vf2, $vf1\n"
-        "vmulz.xy $vf18, $vf2, $vf1z\n"
-        "vmulz.xy $vf19, $vf16, $vf1z\n"
-        "vmul.x $vf16, $vf16, $vf17\n"
-        "vmul.y $vf16, $vf16, $vf15\n"
-        "vmul.y $vf15, $vf15, $vf2\n"
-        "vmul.x $vf17, $vf17, $vf2\n"
-        "lui $v0, 0x4580\n"
-        "qmtc2.ni $v0, $vf28\n"
-        "vaddx.y $vf28, $vf0, $vf28x\n"
-        "vaddw.z $vf26, $vf0, $vf0w\n"
-        "vsubw.w $vf30, $vf0, $vf0w\n"
-        :
-        : "r"(w), "r"(a->LSMat), "r"(a->VSMat), "r"(a)
-        : "$2", "memory");
+    {
+        sceVu0FMATRIX *ls = a->LSMat;
+        register sceVu0FMATRIX *vs asm("$3") = a->VSMat;
+
+        __asm__ __volatile__("lqc2 $vf25, 0x0(%0)" : : "r"(w) : "memory");
+        __asm__ __volatile__("lqc2 $vf27, 0x10(%0)" : : "r"(w) : "memory");
+        __asm__ __volatile__("lqc2 $vf29, 0x20(%0)" : : "r"(w) : "memory");
+        __asm__ __volatile__("lqc2 $vf21, 0x30(%0)" : : "r"(w) : "memory");
+        __asm__ __volatile__("lqc2 $vf14, 0x40(%0)" : : "r"(w) : "memory");
+        __asm__ __volatile__("lqc2 $vf20, 0x50(%0)" : : "r"(w) : "memory");
+        __asm__ __volatile__("lqc2 $vf9, 0x60(%0)" : : "r"(w) : "memory");
+        __asm__ __volatile__("lqc2 $vf3, 0x70(%0)" : : "r"(w) : "memory");
+        __asm__ __volatile__("lqc2 $vf2, 0x0(%0)" : : "r"(vs) : "memory");
+        __asm__ __volatile__("lqc2 $vf31, 0x10(%0)" : : "r"(vs) : "memory");
+        __asm__ __volatile__("vadd.y $vf2, $vf0, $vf31");
+        __asm__ __volatile__("qmtc2.ni %0, $vf24" : : "r"((u_long)0x3a800000));
+        __asm__ __volatile__("lqc2 $vf4, 0x0(%0)" : : "r"(ls) : "memory");
+        __asm__ __volatile__("lqc2 $vf5, 0x10(%0)" : : "r"(ls) : "memory");
+        __asm__ __volatile__("lqc2 $vf6, 0x20(%0)" : : "r"(ls) : "memory");
+        __asm__ __volatile__("lqc2 $vf7, 0x30(%0)" : : "r"(ls) : "memory");
+        __asm__ __volatile__("lqc2 $vf11, 0x80(%0)" : : "r"(w) : "memory");
+        __asm__ __volatile__("vitof4.xyzw $vf11, $vf11");
+        __asm__ __volatile__("lqc2 $vf31, 0x50(%0)" : : "r"(a) : "memory");
+        __asm__ __volatile__("vmove.x $vf15, $vf0");
+        __asm__ __volatile__("vaddw.y $vf15, $vf0, $vf31w");
+        __asm__ __volatile__("vaddz.x $vf17, $vf0, $vf31z");
+        __asm__ __volatile__("vmove.y $vf17, $vf0");
+        __asm__ __volatile__("qmtc2.ni %0, $vf16" : : "r"((u_long)0x3f3504f33f3504f3));
+        __asm__ __volatile__("vmul.xy $vf16, $vf16, $vf2");
+        __asm__ __volatile__("lqc2 $vf1, 0x30(%0)" : : "r"(a) : "memory");
+        __asm__ __volatile__("vmul.xy $vf1, $vf2, $vf1");
+        __asm__ __volatile__("vmulz.xy $vf18, $vf2, $vf1z");
+        __asm__ __volatile__("vmulz.xy $vf19, $vf16, $vf1z");
+        __asm__ __volatile__("vmul.x $vf16, $vf16, $vf17");
+        __asm__ __volatile__("vmul.y $vf16, $vf16, $vf15");
+        __asm__ __volatile__("vmul.y $vf15, $vf15, $vf2");
+        __asm__ __volatile__("vmul.x $vf17, $vf17, $vf2");
+        __asm__ __volatile__("qmtc2.ni %0, $vf28" : : "r"((u_long)0x45800000));
+        __asm__ __volatile__("vaddx.y $vf28, $vf0, $vf28x");
+        __asm__ __volatile__("vaddw.z $vf26, $vf0, $vf0w");
+        __asm__ __volatile__("vsubw.w $vf30, $vf0, $vf0w");
+    }
     op_spr_free(sizeof(*w));
 }
 
