@@ -226,8 +226,10 @@ units' `.rodata`, so keep the header's line layout (add members in place, `#line
 - Allowed inline asm: the VU0/MMI/COP2 instructions the original wrote as inline asm (see the ref and the
   vu0-asm-function-conversion / ppp-keshptail-patterns memories); empty `asm volatile("" ...)` barriers as a
   lever, with a comment. MIPS arithmetic stays in C (user's rule).
-- Only the unit's `src/U.cpp`/`.h` and the headers its classes need; a new or extended header of another unit
-  gets `// PARTIAL: added for <unit>` while incomplete (hook edits A1/A2 may touch other files).
+- Only the unit's `src/U.cpp`/`.h` and the headers its classes need. Never add a `// PARTIAL` marker, a stand-in or
+  anything against the ref to another unit's header (the header cleanup below removes them); a missing
+  declaration goes in exactly as the ref has it. A match that needs more (e.g. a member private in the ref) is
+  not the original's source: park it (user, 2026-11-07; hook edits A1/A2 may touch other files).
 
 **V5: the gate.** `tools/check.sh` exits 0 before every merge into `main`, again on `main` after it, and at the
 end of every session.
