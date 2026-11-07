@@ -23,13 +23,6 @@ inline void* operator new[](size_t size, char* msg) throw() {
     return com_malloc_d(size, msg, RET_ADDR());
 }
 
-struct G_RGBA { /* PARTIAL: stand-in for System/Graphic/Gprim G_RGBA: strings: the original effect has none of Gprim.h's strings */
-    UBYTE r;
-    UBYTE g;
-    UBYTE b;
-    UBYTE a;
-};
-
 struct _DPX_HEADER {
     u_short DpxVer;
     u_short Head;
