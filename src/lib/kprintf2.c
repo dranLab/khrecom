@@ -79,13 +79,9 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/kprintf2", ftoi);
 
 static int _sceSnprintf_pf(PutcFunc func, void *ctx, unsigned int *size, const char *fmt, ...);
 
-/* Parked: 16 lines differ - blocked by the unit's asm .rodata: with its literals compiled (decomp-permuter's build)
-   the ftoi result in a temporary before the "0.%d" call matches; the original's D_004FEC90.. labels as externs do not
-   (69 lines: extern doubles are not constants) */
-#if 0
 int printfloat(PutcFunc func, void *ctx, unsigned int *size, double d)
 {
-    int n = 0, e = 0;
+    int n = 0, e = 0, i;
 
     if (*size == 0) {
         return 0;
@@ -107,7 +103,8 @@ int printfloat(PutcFunc func, void *ctx, unsigned int *size, double d)
             e++;
         }
     }
-    n += _sceSnprintf_pf(func, ctx, size, "0.%d", ftoi((unsigned long)(d * 1000000.0)));
+    i = ftoi((unsigned long)(d * 1000000.0));
+    n += _sceSnprintf_pf(func, ctx, size, "0.%d", i);
     if (e >= 0) {
         n += _sceSnprintf_pf(func, ctx, size, "e+%d", e);
     } else {
@@ -115,16 +112,6 @@ int printfloat(PutcFunc func, void *ctx, unsigned int *size, double d)
     }
     return n;
 }
-#endif
-int printfloat(PutcFunc func, void *ctx, unsigned int *size, double d);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/kprintf2", printfloat);
-/* printfloat's strings and constants (the function is still assembly). */
-asm(".rdata\n.align 3\nD_004FEC90:\n.asciz \"0.%d\"\n.align 3\nD_004FEC98:\n.asciz \"e+%d\"\n"
-    ".align 3\nD_004FECA0:\n.asciz \"e%d\"\n"
-    ".align 3\nD_004FECA8:\n.word 0x9999999A\n.word 0x3FB99999\n"
-    "D_004FECB0:\n.word 0x9999999A\n.word 0x3FB99999\n"
-    "D_004FECB8:\n.word 0\n.word 0x412E8480\n"
-    ".text\n");
 
 #define F_MINUS 0x1
 #define F_PLUS 0x2
