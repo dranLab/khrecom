@@ -813,30 +813,30 @@ INT CCollUtil::_detectMCD(CCollision& collision) {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", _detectMCD__9CCollUtilR10CCollision);
 #endif
-/* Parked: 39 of 213 lines, 4 bytes long - two passes, renew test and info merge as the original; left: the pPrimInfo2/i
-   init order and an extra delay-slot load at the second pass, the attr byte's `andi` copy (a0) and the return-1 block
-   (the original sets v0 after the m_pDetectMatA/ChipA/NormalA stores). */
-#if 0
 INT CCollUtil::detectMap(FVECTOR* pWS, FVECTOR* pWE) {
     FVECTOR vecT;
     PRIM_INFO2* pPrimInfo2;
     INT i;
     FMATRIX* pMatLW;
     INT fgRenewInfo;
-    if (m_PrimInfoIdx) {
-        pPrimInfo2 = NULL;
-        for (i = 0, m_pPrimInfoCurrent = m_pPrimInfo; i < m_PrimInfoIdx; i++, m_pPrimInfoCurrent++) {
-            if (m_pPrimInfoCurrent->pInfo2 != pPrimInfo2) {
-                pPrimInfo2 = m_pPrimInfoCurrent->pInfo2;
-                m_vCk0 = pPrimInfo2->vLS;
-                m_vCk1 = pPrimInfo2->vLE;
-                m_vCkVec = pPrimInfo2->vLVec;
-            }
-            if (detectPolygon()) break;
+    if (!m_PrimInfoIdx) return 0;
+    pPrimInfo2 = NULL;
+    asm volatile(""); /* MATCH: the original clears pPrimInfo2 before it loads m_pPrimInfo (sched order) */
+    m_pPrimInfoCurrent = m_pPrimInfo;
+    for (i = 0; i < m_PrimInfoIdx; i++, m_pPrimInfoCurrent++) {
+        if (m_pPrimInfoCurrent->pInfo2 != pPrimInfo2) {
+            pPrimInfo2 = m_pPrimInfoCurrent->pInfo2;
+            m_vCk0 = pPrimInfo2->vLS;
+            m_vCk1 = pPrimInfo2->vLE;
+            m_vCkVec = pPrimInfo2->vLVec;
         }
-        if (i == m_PrimInfoIdx && m_SphereDetectFg) {
+        if (detectPolygon()) break;
+    }
+    if (i == m_PrimInfoIdx) {
+        if (m_SphereDetectFg) {
+            m_pPrimInfoCurrent = m_pPrimInfo;
             pPrimInfo2 = NULL;
-            for (i = 0, m_pPrimInfoCurrent = m_pPrimInfo; i < m_PrimInfoIdx; i++, m_pPrimInfoCurrent++) {
+            for (i = 0; i < m_PrimInfoIdx; i++, m_pPrimInfoCurrent++) {
                 if (!m_pPrimInfoCurrent->fgLine) continue;
                 if (m_pPrimInfoCurrent->pInfo2 != pPrimInfo2) {
                     pPrimInfo2 = m_pPrimInfoCurrent->pInfo2;
@@ -846,12 +846,13 @@ INT CCollUtil::detectMap(FVECTOR* pWS, FVECTOR* pWE) {
                     m_CkVecl = InnerProduct(m_vCkVec);
                     m_CkVecl2 = _sqrtf(m_CkVecl);
                 }
-                if (detectPLine()) break;
-                if (detectPSphere()) break;
+                if (detectPLine() || detectPSphere()) break;
             }
+            if (i == m_PrimInfoIdx) return 0;
+        } else {
+            return 0;
         }
     }
-    if (i == m_PrimInfoIdx) return 0;
     pMatLW = pPrimInfo2->pMatLW;
     ApplyMatrix(*pWE, *pMatLW, m_vCk1);
     vecT = m_vNormal;
@@ -872,21 +873,17 @@ INT CCollUtil::detectMap(FVECTOR* pWS, FVECTOR* pWE) {
             m_iInfo2.info = (m_iInfo2.info & 0x00FFFF00) | (m_iInfo.info & 0xFF0000FF);
         }
     }
-    BYTE attr = m_iInfo.infoATTR;
-    if (!attr) return 1;
-    if (m_iInfo2.infoATTR) return 1;
-    m_iInfo2.infoATTR = attr;
-    if (attr == 6) {
-        m_vNormal2.set(0.0f, 0.0f, 1.0f, 0.0f);
+    if (m_iInfo.infoATTR && !m_iInfo2.infoATTR) {
+        m_iInfo2.infoATTR = m_iInfo.infoATTR;
+        if (m_iInfo.infoATTR == 6) {
+            m_vNormal2.set(0.0f, 0.0f, 1.0f, 0.0f);
+        }
+        m_pDetectMatA = m_pPrimInfoCurrent->pInfo2->pMatLW;
+        m_pDetectChipA = m_pPrimInfoCurrent->pInfo2->pMcChip;
+        m_vNormalA = m_pPrimInfoCurrent->pInfo2->pNorm[m_pPrimInfoCurrent->pPrim->n0];
     }
-    m_vNormalA = m_pPrimInfoCurrent->pInfo2->pNorm[m_pPrimInfoCurrent->pPrim->n0];
-    m_pDetectMatA = m_pPrimInfoCurrent->pInfo2->pMatLW;
-    m_pDetectChipA = m_pPrimInfoCurrent->pInfo2->pMcChip;
     return 1;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", detectMap__9CCollUtilP7FVECTORT1);
-#endif
 INT CCollUtil::detectPolygon() {
     PRIM_INFO2* pPrimInfo2;
     MC_PRIM* pPrim;
