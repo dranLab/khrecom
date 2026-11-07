@@ -14,9 +14,10 @@ def patched_functions(path):
 permuter.functions = patched_functions
 orig_dis = permuter.disassemble
 permuter.disassemble = lambda obj, name, size: orig_dis(obj, mangled if name == method else name, size)
-def find_function(text, name):
-    for m in re.finditer(r"^[A-Za-z_][^;{}]*\b" + re.escape(name) + r"\s*\(([^;{}]*)\)\s*(const\s*)?\{", text, re.M):
-        if psub not in m.group(1):
+def find_function(text, pattern):
+    # permuter passes definition_pattern(); of its matches, take the overload whose parameter list has psub
+    for m in re.finditer(pattern, text, re.M):
+        if psub not in m.group(0)[m.group(0).find("("):]:
             continue
         start = m.end() - 1; depth = 0; i = start
         while i < len(text):
@@ -29,7 +30,7 @@ def find_function(text, name):
             elif text.startswith("/*", i): i = text.index("*/", i) + 1
             elif text.startswith("//", i): i = text.index("\n", i)
             i += 1
-    raise SystemExit(f"function {name} ({psub}) not found")
+    raise SystemExit(f"function {method} ({psub}) not found")
 permuter.find_function = find_function
 sys.argv = ['permuter.py', unit, method] + sys.argv[5:]
 permuter.main()
