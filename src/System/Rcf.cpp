@@ -1236,8 +1236,6 @@ void _skipDbgLine() {
 void CRcf::prepareLoadCategoryInfo() {
     s_nDbgReadStep = 0;
 }
-/* Near-match: register allocation */
-#if 0
 INT CRcf::loadNextCategoryInfo(INT nCategory, CHAR* pOutLabel, INT nLabelMax, INT* pOutMemberID) {
     switch (s_nDbgReadStep) {
     case 0: {
@@ -1249,7 +1247,9 @@ INT CRcf::loadNextCategoryInfo(INT nCategory, CHAR* pOutLabel, INT nLabelMax, IN
         ASSERT(s_pDbgFileBuf);
         sprintf(szFileName, "cdrom0:\\rcf\\g%03d.rcf", nCategory);
         if (CFileIO::loadFile(szFileName, *s_pDbgFileBuf, 0) < 0) {
-            goto dispose;
+            if (s_pDbgFileBuf) delete s_pDbgFileBuf;
+            s_pDbgFileBuf = __null;
+            return 2;
         }
         s_nDbgFilePtr = 0;
         s_nDbgReadStep++;
@@ -1264,7 +1264,7 @@ INT CRcf::loadNextCategoryInfo(INT nCategory, CHAR* pOutLabel, INT nLabelMax, IN
             char szTmp[1024];
             p += 2;
             s_nDbgFilePtr += 2;
-            for (i = 0; *p && *p != '$' && i < 255 && !_isStr_CR(p); i++, p++) {
+            for (i = 0; *p && *p != '$' && i < 255 && !_isStr_CR(p); p++, i++) {
                 szDataName[i] = *p;
             }
             szDataName[i] = 0;
@@ -1293,21 +1293,10 @@ INT CRcf::loadNextCategoryInfo(INT nCategory, CHAR* pOutLabel, INT nLabelMax, IN
         return 0;
     }
     s_nDbgReadStep = 0;
-dispose:
     if (s_pDbgFileBuf) delete s_pDbgFileBuf;
     s_pDbgFileBuf = __null;
     return 2;
 }
-#else
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) void _loadNextCategoryInfo_strings(INT n) {
-    TRACE(__FILE__ "(2113)");
-    if (!n) AssertApp(__FILE__, 0, "s_pDbgFileBuf", 0);
-    TRACE("cdrom0:\\rcf\\g%03d.rcf");
-    TRACE("%04d %s");
-}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", loadNextCategoryInfo__4CRcfiPciPi);
-#endif
 BOOL isTokenSCENE(const CHAR* p) {
     return strncmp("$SCENE", p, 6) == 0;
 }
