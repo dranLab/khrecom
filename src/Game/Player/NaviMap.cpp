@@ -20,7 +20,6 @@
 #include "Game/Debug/DebugWork.h"
 #include "System/MainApp.h"
 #include "System/HeapMan.h"
-#include "include_asm.h"
 
 
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
@@ -329,16 +328,7 @@ static inline void _viewScreenMatrix(FMATRIX& matOut, FLOAT fInAx, FLOAT fInAy) 
 static inline FLOAT _deg2rad(FLOAT r) { return r * 3.1415927f / 180.0f; }
 
 static inline FLOAT _roundRot(FLOAT fInRot) {
-    FLOAT r;
-    if (fInRot < -3.1415927f) {
-        r = fInRot + 6.2831855f;
-    } else {
-        r = fInRot;
-        if (3.1415927f < r) {
-            r -= 6.2831855f;
-        }
-    }
-    return r;
+    return (fInRot < -3.1415927f) ? fInRot + 6.2831855f : (3.1415927f < fInRot) ? fInRot - 6.2831855f : fInRot;
 }
 
 namespace Gauge {
@@ -487,23 +477,6 @@ void CNaviMap::_initialize() {
     }
 }
 
-
-}  // namespace Gauge
-
-/* main's jump tables (the function is still assembly). */
-asm(".rdata\n.align 4\njtbl_00497810:\n"
-    ".word .L0025EB64\n.word .L0025EA5C\n.word .L0025EB0C\n.word .L0025EB64\n.word .L0025EB64\n.word .L0025EB64\n"
-    ".align 4\njtbl_00497830:\n"
-    ".word .L0025ECE4\n.word .L0025EB8C\n.word .L0025EC10\n.word .L0025ECA4\n.word .L0025ECE4\n.word .L0025ECE4\n"
-    ".text");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/NaviMap", main__Q25Gauge8CNaviMap);
-
-namespace Gauge {
-
-// Not matching: in the debug-rotation block (g_dw.player.iTemp == 2) the original keeps PI in $f3 from before the
-// branch and loads 180.0f/-PI in $f2/$f1 (100.0f and -PI share $f1); here 180.0f is hoisted too and the registers of
-// 180.0f/-PI swap (9 lines). Everything else matches; the "deg" temporary only reproduces the PI hoisting.
-#if 0
 void CNaviMap::main() {
     if (CSceneEnv::isStopGauge()) {
         return;
@@ -631,8 +604,7 @@ void CNaviMap::main() {
         CCoord& crd = Crd(0);
         _unitMatrixVu0(crd.m_Local);
         FVECTOR rot;
-        FLOAT deg = 55.0f;
-        rot.x = _deg2rad(deg);
+        rot.x = _roundRot(_deg2rad(55.0f));
         rot.y = 0.0f;
         if (2 == DebugWork::g_dw.player.iTemp) {
             rot = DebugWork::g_dw.player.vTemp;
@@ -652,8 +624,6 @@ void CNaviMap::main() {
         }
     }
 }
-
-#endif
 
 void CNaviMap::disp() {
     if (CGameWork::getByte(0, 0x67)) {
