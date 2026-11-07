@@ -280,8 +280,10 @@ static void channel_conv_joint(At3Work *w)
     int x;
     int y;
     int m;
+    int j;
 
     sp = (int (*)[3320])w->ch;
+    j = 0;
     for (band = 0; band < 4; band++) {
         g1 = 0x8000;
         g0 = 0x8000;
@@ -295,8 +297,8 @@ static void channel_conv_joint(At3Work *w)
             g1 = w->joint[0].g[1];
             g0 = w->joint[0].g[0];
         }
-        pw = w->joint[0].w[band];
         nw = w->joint[1].w[band];
+        pw = w->joint[0].w[band];
         w0 = pw[0];
         w1 = pw[1];
         dw0 = (nw[0] - w0) >> 3;
@@ -312,7 +314,7 @@ static void channel_conv_joint(At3Work *w)
         ndw1 = -dw1;
         ndg0 = -dg0;
         ndg1 = -dg1;
-        pr = &((int (*)[136])(w->ch[1]))[band * 3][23];
+        pr = &((int (*)[136])(w->ch[1]))[j + band][23];
         for (k = 0; k < 256; k++) {
             n0 = w0;
             h0 = g0;
@@ -334,6 +336,7 @@ static void channel_conv_joint(At3Work *w)
             pr[k - 3320] = ((m >> 8) * h0) >> 6;
             pr[k] = (((x - m) >> 8) * h1) >> 6;
         }
+        j += 2;
     }
 }
 #else
@@ -772,31 +775,35 @@ static int unpack_mddata(At3Chan *ch, int rev, At3Work *w)
     int nbands;
     int band;
     int n;
+    int nb;
     int i;
+    int *gp;
 
     jg = 0;
     if (rev) {
         jg = read_unpack_from_msb(4, w);
-        for (i = 0; i < 4; i++) {
-            jw[i] = read_unpack_from_msb(2, w);
+        for (band = 0; band < 4; band++) {
+            jw[band] = read_unpack_from_msb(2, w);
         }
         w->bitpos += 2;
     } else {
         w->bitpos += 6;
     }
     nbands = read_unpack_from_msb(2, w) + 1;
+    gp = &gain[0][0][1];
     band = 0;
     do {
         n = read_unpack_from_msb(3, w);
         for (i = 0; i < n; i++) {
-            gain[band][i][1] = read_unpack_from_msb(4, w);
+            gp[band * 16 + i * 2] = read_unpack_from_msb(4, w);
             gain[band][i][0] = read_unpack_from_msb(5, w) << 3;
         }
-        gain[band][n][1] = 4;
-        gain[band][n][0] = 0xFF;
+        gp[band * 16 + i * 2] = 4;
+        gain[band][i][0] = 0xFF;
     } while (++band < nbands);
     for (; band < 4; band++) {
-        gain[band][0][1] = 4;
+        int *lev = &gain[0][0][1];
+        lev[band * 16] = 4;
         gain[band][0][0] = 0xFF;
     }
     memcpy(&ch->qmfhead, &ch->qmfsave, sizeof(At3Blk23));
@@ -809,19 +816,19 @@ static int unpack_mddata(At3Chan *ch, int rev, At3Work *w)
     if (getNoiseSpectrum((char *)ch, read_unpack_from_msb(5, w) + 1, w) == -1) {
         return -1;
     }
-    n = nbands;
+    nb = nbands;
     if (nbands << 8 < w->maxpos) {
-        n = (w->maxpos + 0xF7) / 256;
+        nb = (w->maxpos + 0xF7) / 256;
     }
     band = 0;
     do {
-        if (imdct((char *)ch, band, gain[band][0][0])) {
+        if (imdct((char *)ch, band, gp[band * 16])) {
             f2t_nodata(ch->band, band);
         }
         if (gainc_window((char *)ch, band) == -1) {
             return -1;
         }
-    } while (++band < n);
+    } while (++band < nb);
     for (; band < 4; band++) {
         f2t_nodata(ch->band, band);
         if (gainc_window((char *)ch, band) == -1) {
@@ -833,8 +840,8 @@ static int unpack_mddata(At3Chan *ch, int rev, At3Work *w)
         w->joint[1] = w->joint[0];
         w->joint[0].n = nbands;
         w->joint[0].g = chwtTable[jg];
-        for (i = 0; i < 4; i++) {
-            w->joint[0].w[i] = chswTable[jw[i]];
+        for (band = 0; band < 4; band++) {
+            w->joint[0].w[band] = chswTable[jw[band]];
         }
     }
     memcpy(ch->gain, gain, sizeof(gain));
@@ -871,10 +878,8 @@ int at3dec_proc(At3Work *w)
         if (rev) {
             src = w->stream;
             d = w->buf;
-            pad = 0xF8;
-            p = src + w->frameSize + off - 1;
-            while (*p == pad && _before(src, p)) {
-                p--;
+            p = src + w->frameSize + off;
+            while (*--p == 0xF8 && src < p) {
             }
             while (src < p) {
                 *d++ = *p--;
