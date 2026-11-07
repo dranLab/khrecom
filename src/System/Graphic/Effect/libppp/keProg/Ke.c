@@ -200,35 +200,30 @@ void KeVu0SubVecXY(float *d, float *t, float *s) {
         : "memory");
 }
 
-/* MATCH: GPR instructions inside the VU0/MMI asm, as in the original's instruction stream; the split form (C + one asm per VU0/MMI instruction) is not attempted yet: build/progress/cleanup-libppp-mips-asm.md */
+/* MATCH: one asm per VU0 instruction; the constant, the flag test and the branch are C. `li %0, 0` stays asm: the original's dead load (its delay-slot instruction written outside .set noreorder, so the assembler put a nop in the slot and the li runs on the fall-through, overwritten at once); C drops a dead store (`f = 0;`: 2 lines, reorg then fills the slot with the li 0x8000) */
 void KeVu0PacAddVecXY(int *d, float *t, float *s) {
-    __asm__ __volatile__(
-        "lqc2 $vf1, 0x0(%1)\n"
-        "lqc2 $vf2, 0x0(%2)\n"
-        "vadd.xy $vf1, $vf1, $vf2\n"
-        "vftoi4.xy $vf31, $vf1\n"
-        "vftoi0.zw $vf31, $vf1\n"
-        "dli $v0, 0x4580000045800000\n"
-        "qmtc2.ni $v0, $vf29\n"
-        "ctc2.ni $0, $vi16\n"
-        "vsub.xyw $vf0, $vf1, $vf0\n"
-        "vsub.xy $vf0, $vf29, $vf1\n"
-        "vnop\n"
-        "vnop\n"
-        "vnop\n"
-        "vnop\n"
-        "cfc2.ni $v0, $vi16\n"
-        "andi $v0, $v0, 0xc0\n"
-        "beqz $v0, 1f\n"
-        "li $v0, 0\n"
-        "li $v0, 0x8000\n"
-        "ctc2.ni $v0, $vi1\n"
-        "vmfir.w $vf31, $vi1\n"
-        "1:\n"
-        "sqc2 $vf31, 0x0(%0)\n"
-        :
-        : "r"(d), "r"(t), "r"(s)
-        : "$2", "memory");
+    int f;
+
+    __asm__ __volatile__("lqc2 $vf1, 0x0(%0)" : : "r"(t) : "memory");
+    __asm__ __volatile__("lqc2 $vf2, 0x0(%0)" : : "r"(s) : "memory");
+    __asm__ __volatile__("vadd.xy $vf1, $vf1, $vf2");
+    __asm__ __volatile__("vftoi4.xy $vf31, $vf1");
+    __asm__ __volatile__("vftoi0.zw $vf31, $vf1");
+    __asm__ __volatile__("qmtc2.ni %0, $vf29" : : "r"((u_long)0x4580000045800000));
+    __asm__ __volatile__("ctc2.ni $0, $vi16");
+    __asm__ __volatile__("vsub.xyw $vf0, $vf1, $vf0");
+    __asm__ __volatile__("vsub.xy $vf0, $vf29, $vf1");
+    __asm__ __volatile__("vnop");
+    __asm__ __volatile__("vnop");
+    __asm__ __volatile__("vnop");
+    __asm__ __volatile__("vnop");
+    __asm__ __volatile__("cfc2.ni %0, $vi16" : "=r"(f));
+    if (f & 0xc0) {
+        __asm__ __volatile__("li %0, 0" : "=r"(f));
+        __asm__ __volatile__("ctc2.ni %0, $vi1" : : "r"(0x8000));
+        __asm__ __volatile__("vmfir.w $vf31, $vi1");
+    }
+    __asm__ __volatile__("sqc2 $vf31, 0x0(%0)" : : "r"(d) : "memory");
 }
 
 /* MATCH: GPR instructions inside the VU0/MMI asm, as in the original's instruction stream; the split form (C + one asm per VU0/MMI instruction) is not attempted yet: build/progress/cleanup-libppp-mips-asm.md */
