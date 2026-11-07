@@ -144,7 +144,12 @@ void _request_call(RpcCallPkt *call, struct rpc_data *rd);
 
 void _request_rdata(RpcOtherDataPkt *rdata, struct rpc_data *rd);
 
-/* Parked: 62 lines differ (permuter score) */
+/* Parked: 2 of 138 lines, same size (2026-11-07, was 44): the RPCINIT test is an early return (the sibcall to sceSifSetReg
+   at the end); the init stores in this order (hill-climbed over all orders from 3 starts, all end at 2). Left: the
+   client_table store (sw a3,28(s0)) issues after the first handler call's `ori a0`/`move a2` instead of before them, a
+   sched2 tie in one cycle (the pid store, lo_sum base, conflicts with the int stores only after reload). Barriers after any
+   store 26-41, value/32/&_data_table in locals 33-56, volatile 41; permuter (15 min, 31k) and decomp-permuter (15 min)
+   found nothing below. */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/sifrpc", sceSifInitRpc);
 #if 0
 void sceSifInitRpc(unsigned int mode)
@@ -158,28 +163,29 @@ void sceSifInitRpc(unsigned int mode)
     EIntr();
     sceSifInitCmd();
     DIntr();
-    _data_table.client_table_len = 32;
-    _data_table.pid = 1;
-    _data_table.rdata_table = UNCACHED(_free_buffer);
     _data_table.pkt_table = UNCACHED(_packet_buffer);
-    _data_table.client_table = UNCACHED(_free_buffer2);
     _data_table.pkt_table_len = 32;
     _data_table.unused1 = 0;
     _data_table.unused2 = 0;
     _data_table.rdata_table_len = 32;
+    _data_table.client_table_len = 32;
+    _data_table.pid = 1;
     _data_table.rdata_table_idx = 0;
+    _data_table.rdata_table = UNCACHED(_free_buffer);
+    _data_table.client_table = UNCACHED(_free_buffer2);
     sceSifAddCmdHandler(SIF_CMD_RPC_END, (void *)_request_end, &_data_table);
     sceSifAddCmdHandler(SIF_CMD_RPC_BIND, (void *)_request_bind, &_data_table);
     sceSifAddCmdHandler(SIF_CMD_RPC_CALL, (void *)_request_call, &_data_table);
     sceSifAddCmdHandler(SIF_CMD_RPC_RDATA, (void *)_request_rdata, &_data_table);
     EIntr();
-    if (sceSifGetReg(SIF_SYSREG_RPCINIT) == 0) {
-        ((sceSifCmdHdr *)(_packet_buffer + 0x40))->opt = 1;
-        sceSifSendCmd(SIF_CMD_INIT_CMD, _packet_buffer + 0x40, sizeof(sceSifCmdHdr), 0, 0, 0);
-        while (!sceSifGetSreg(0)) {
-        }
-        sceSifSetReg(SIF_SYSREG_RPCINIT, 1);
+    if (sceSifGetReg(SIF_SYSREG_RPCINIT) != 0) {
+        return;
     }
+    ((sceSifCmdHdr *)(_packet_buffer + 0x40))->opt = 1;
+    sceSifSendCmd(SIF_CMD_INIT_CMD, _packet_buffer + 0x40, sizeof(sceSifCmdHdr), 0, 0, 0);
+    while (!sceSifGetSreg(0)) {
+    }
+    sceSifSetReg(SIF_SYSREG_RPCINIT, 1);
 }
 #endif
 
@@ -189,9 +195,9 @@ void sceSifExitRpc(void)
     _sceSifInitCheck = 0;
 }
 
-/* Parked: 1 line, 4 bytes short - in the pid == 1 arm the original also sets v1 = 1 (`li v1,1` after the old + 2): pid
-   is written again for the rpc_id store after the join. `pid = 1` in the arm folds away, before or after rd->pid++, also
-   across an empty asm or through a local; an asm output keeps it but disturbs the load (6 lines). */
+/* In the pid == 1 arm the original sets v1 = 1 again (`li v1,1` after the old + 2) for the rpc_id store after the join;
+   a plain `pid = 1` folds away (also across an empty asm or through a local), an asm output disturbs the load: pid lives
+   in v1 (register local), which keeps the arm's assignment. */
 static void *_sceRpcGetPacket(struct rpc_data *rd)
 {
     RpcPktHeader *packet;
