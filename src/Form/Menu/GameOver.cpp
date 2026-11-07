@@ -27,7 +27,7 @@ inline void _emptyStringPlaceholder2() { /* MATCH: placeholder: an inline functi
 
 inline void* operator new(size_t, void* p) throw() { return p; }
 
-#define NEW(line, T) new (com_malloc_d(sizeof(T), __FILE__ "(" #line ")", RET_ADDR())) T
+
 
 
 #include "Game/SceneEnv.h"
@@ -104,29 +104,29 @@ void CGameOver::main() {
         CSceneEnv::setStop((ObjType::eObjBit)iObjType);
         vPos._q = 0;
         vPos.w = 1.0f;
-        m_pScreenCtrl = NEW(115, C2DSeqCtrl);
+        m_pScreenCtrl = new (__FILE__ "(115)") C2DSeqCtrl;
         m_pScreenCtrl->setLayer(13);
         m_pScreenCtrl->addSeq(pSeqName, 3);
         m_pScreenCtrl->setPos(vPos);
         vColor._q = 0;
         vPos.y = m_bHeartless ? 0.0f : 56.0f;
         rgba.col = 0x80707070;
-        m_pSelectCtrl[0] = NEW(124, C2DSeqCtrl);
+        m_pSelectCtrl[0] = new (__FILE__ "(124)") C2DSeqCtrl;
         m_pSelectCtrl[0]->setLayer(13);
         m_pSelectCtrl[0]->addSeq(pSeqName, 9);
         m_pSelectCtrl[0]->enableColorCtrl(TRUE);
         m_pSelectCtrl[0]->setPos(vPos);
-        p2DFnt = NEW(129, C2DFnt)(0, 0, &rgba, 17, "Continue", 0x42);
+        p2DFnt = new (__FILE__ "(129)") C2DFnt(0, 0, &rgba, 17, "Continue", 0x42);
         m_pSelectFnt[0] = p2DFnt;
         _setFntLayer(p2DFnt, 13, 0);
         m_pSelectCtrl[0]->addFntShift(pSeqName, p2DFnt, 0.0f, 9.0f);
-        m_pSelectCtrl[1] = NEW(134, C2DSeqCtrl);
+        m_pSelectCtrl[1] = new (__FILE__ "(134)") C2DSeqCtrl;
         m_pSelectCtrl[1]->setLayer(13);
         m_pSelectCtrl[1]->addSeq(pSeqName, 9);
         m_pSelectCtrl[1]->enableColorCtrl(TRUE);
         vPos.y += 32.0f;
         m_pSelectCtrl[1]->setPos(vPos);
-        p2DFnt = NEW(141, C2DFnt)(0, 0, &rgba, 17, "Return to Title", 0x42);
+        p2DFnt = new (__FILE__ "(141)") C2DFnt(0, 0, &rgba, 17, "Return to Title", 0x42);
         m_pSelectFnt[1] = p2DFnt;
         _setFntLayer(p2DFnt, 13, 0);
         m_pSelectCtrl[1]->addFntShift(pSeqName, p2DFnt, 0.0f, 9.0f);
@@ -137,7 +137,7 @@ void CGameOver::main() {
             m_pScreenCtrl->replaceSeq(0, pSeqName, 4);
             m_pSelectCtrl[0]->replaceSeq(0, pSeqName, 7);
             m_pSelectCtrl[1]->replaceSeq(0, pSeqName, 10);
-            m_pLightCtrl = NEW(157, C2DSeqCtrl);
+            m_pLightCtrl = new (__FILE__ "(157)") C2DSeqCtrl;
             m_pLightCtrl->setLayer(14);
             m_pLightCtrl->addSeq(pSeqName, 0);
             m_vPosLightCurrent.set(350.0f, 175.0f, 0.0f);
@@ -145,7 +145,7 @@ void CGameOver::main() {
                 m_vPosLightCurrent.y += 56.0f;
             }
             m_pLightCtrl->setPos(m_vPosLightCurrent);
-            m_pCursorCtrl = NEW(164, C2DSeqCtrl);
+            m_pCursorCtrl = new (__FILE__ "(164)") C2DSeqCtrl;
             m_pCursorCtrl->setLayer(14);
             m_pCursorCtrl->addSeq(pSeqName, 1);
             vPos = m_vPosLightCurrent;

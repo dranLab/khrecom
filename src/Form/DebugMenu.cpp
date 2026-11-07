@@ -27,8 +27,8 @@ extern "C" int strcmp(const char* a, const char* b);
 
 inline void* operator new(size_t, void* p) throw() { return p; }
 
-#define NEW(line, T) new (com_malloc_d(sizeof(T), __FILE__ "(" #line ")", RET_ADDR())) T
-#define NEW_SIZE(line, size, T) new (com_malloc_d(size, __FILE__ "(" #line ")", RET_ADDR())) T
+
+
 #define ASSERT_LINE(line, e) if (!(e)) AssertApp(__FILE__, line, #e, 0)
 
 extern CHAR* __BUILD;
@@ -281,7 +281,7 @@ static BOOL _menuUpDown_LoadMark();
 
 CDebugMenu::CDebugMenu(CTask* pInParent) : CTask(pInParent, PRI_SYSTEM) {
     CSceneInfo::doneChangeScene();
-    m_pL = NEW(344, CDebugMenuLocal)(*this);
+    m_pL = new (__FILE__ "(344)") CDebugMenuLocal(*this);
 }
 
 CDebugMenu::~CDebugMenu() {
@@ -552,7 +552,7 @@ void CDebugMenuLocal::_setupParam() {
     }
     for (i = 0; i < 2; i++) {
         if (!m_pTileWindow[i]) {
-            m_pTileWindow[i] = NEW(705, CTile);
+            m_pTileWindow[i] = new (__FILE__ "(705)") CTile;
         }
         INT y = i * 4;
         m_pTileWindow[i]->m_P0.set((-209 + y) << 4, (-170 + y) << 4);
@@ -564,13 +564,13 @@ void CDebugMenuLocal::_setupParam() {
     color.set(0x20, 0x20, 0x20, 0x80);
     color2.set(0x28, 0x38, 0x80, 0x80);
     if (!m_pStrTitle) {
-        m_pStrTitle = NEW(718, CFnt)(0, -124, &color2, 28, "reC-N proj. Debug Menu", 0x42, 0xFFFF28);
+        m_pStrTitle = new (__FILE__ "(718)") CFnt(0, -124, &color2, 28, "reC-N proj. Debug Menu", 0x42, 0xFFFF28);
         m_pStrTitle->setLayerFG(3);
     }
     if (!m_pStrVersion) {
         char szTmp[256];
         sprintf(szTmp, " - Build : %s -", __BUILD);
-        m_pStrVersion = NEW(728, CFnt)(0, -104, &color, 12, NULL, 2, 0xFFFF28);
+        m_pStrVersion = new (__FILE__ "(728)") CFnt(0, -104, &color, 12, NULL, 2, 0xFFFF28);
         m_pStrVersion->allocText(szTmp);
         m_pStrVersion->setLayerFG(2);
     }
@@ -578,22 +578,22 @@ void CDebugMenuLocal::_setupParam() {
         INT nY = i * 22 - 74;
         if (!m_pStrMenu[i]) {
             m_pStrMenu[i] =
-                NEW(740, CFnt)(-160, nY, &color, 16, s_pszMenuItem[s_Param._nSelectIndex][i], 0, 0xFFFF28);
+                new (__FILE__ "(740)") CFnt(-160, nY, &color, 16, s_pszMenuItem[s_Param._nSelectIndex][i], 0, 0xFFFF28);
             m_pStrMenu[i]->setLayerFG(2);
         }
         if (!m_pStrBody[i]) {
-            m_pStrBody[i] = NEW(745, CFnt)(-80, nY, &color, 16, NULL, 0, 0xFFFF28);
+            m_pStrBody[i] = new (__FILE__ "(745)") CFnt(-80, nY, &color, 16, NULL, 0, 0xFFFF28);
             m_pStrBody[i]->setLayerFG(2);
         }
     }
     _setMenuColor();
     if (!m_pStrMemoca) {
-        m_pStrMemoca = NEW(756, CFnt)(-110, 162, &color, 13, NULL, 0, 0xFFFF28);
+        m_pStrMemoca = new (__FILE__ "(756)") CFnt(-110, 162, &color, 13, NULL, 0, 0xFFFF28);
         m_pStrMemoca->setLayerFG(2);
     }
     _setMemocaMessage(0);
     if (!m_pStrLoadGame) {
-        m_pStrLoadGame = NEW(764, CFnt)(-110, 146, &color, 13,
+        m_pStrLoadGame = new (__FILE__ "(764)") CFnt(-110, 146, &color, 13,
                                         "Push \xf9W\x81\xa0\xf9" "A Button \x81\xa8 LOAD GAME", 0, 0xFFFF28);
         m_pStrLoadGame->setLayerFG(2);
     }
@@ -618,14 +618,14 @@ void CDebugMenuLocal::_setupParam() {
 }
 
 void CDebugMenuLocal::_setupRcfSceneInfo() {
-    s_pErrSceneInfo = NEW(798, RcfSceneInfo);
+    s_pErrSceneInfo = new (__FILE__ "(798)") RcfSceneInfo;
     ASSERT_LINE(799, s_pErrSceneInfo);
     _ref(s_pErrSceneInfo)->_szTitle[0] = 0;
     _ref(s_pErrSceneInfo)->_nGroup = 0;
     _ref(s_pErrSceneInfo)->_nMember = 1;
     _ref(s_pErrSceneInfo)->_nAtelCount = 0;
     _ref(s_pErrSceneInfo)->_nRcfMapIdx = 0;
-    s_pErrMapInfo = NEW(806, RcfMapInfo);
+    s_pErrMapInfo = new (__FILE__ "(806)") RcfMapInfo;
     ASSERT_LINE(807, s_pErrMapInfo);
     _ref(s_pErrMapInfo)->_szTitle[0] = 0;
     _ref(s_pErrMapInfo)->_nGroup = 0;
@@ -1573,7 +1573,7 @@ void CDebugMenuLocal::_saveDebugParam() {
         }
         break;
     case 4:
-        s_pTmpBuf = NEW(1998, CBuf);
+        s_pTmpBuf = new (__FILE__ "(1998)") CBuf;
         if (CMemoca::reqLoadSysTest(*s_pTmpBuf)) {
             _setMemocaMessage(3);
             m_nDebugStep = 5;
@@ -1603,7 +1603,7 @@ void CDebugMenuLocal::_prepareLoadGame() {
 void CDebugMenuLocal::_loadGame() {
     switch (m_nDebugStep) {
     case 6:
-        NEW_SIZE(2046, 0x50, CSaveLoad)(&m_Parent, SLMODE_LOAD, GAMECLEAR_NONE);
+        new (__FILE__ "(2046)") CSaveLoad(&m_Parent, SLMODE_LOAD, GAMECLEAR_NONE);
         m_nDebugStep = 7;
         break;
     case 7:
@@ -1750,7 +1750,7 @@ void CScreenCheck::_initCreateLine() {
 }
 
 CTile* CScreenCheck::_createLine() {
-    CTile* pTile = NEW(2233, CTile);
+    CTile* pTile = new (__FILE__ "(2233)") CTile;
     m_pTileLines[m_nLineMax] = pTile;
     if (pTile) {
         m_nLineMax++;
@@ -1761,7 +1761,7 @@ CTile* CScreenCheck::_createLine() {
 CColorCheck::CColorCheck(CTask* pInParent) : CTask(pInParent, PRI_DEFAULT) {
     INT i;
     for (i = 0; i < 7; i++) {
-        CPolyG4* p = NEW(2256, CPolyG4);
+        CPolyG4* p = new (__FILE__ "(2256)") CPolyG4;
         m_pPolyBar[i] = p;
         p->m_P0.set(-0x12C0, (i * 50 - 200) << 4);
         p->m_P1.set(0x12C0, (i * 50 - 200) << 4);

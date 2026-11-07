@@ -274,7 +274,7 @@ void CRcfCD::initialize() {
 
     s_nGroupCount = 0;
 #line 282
-    s_pCdMemberDataList = new (com_malloc_d(sizeof(CDMemberList), __FILE__ "(282)", RET_ADDR())) CDMemberList;
+    s_pCdMemberDataList = new (__FILE__ "(282)") CDMemberList;
     s_pCdMember = NULL;
     while ((nLocale = _checkCdContents()) == -1) DelayThread(1000);
     CRcf::setLocale(nLocale);
@@ -471,7 +471,7 @@ static void _allocBuf(CD_MEMBER_DATA& info, INT nAlignSize, BYTE*& pExtBuff) {
     while (!p) {
         if (!info._pBuff) {
 #line 658
-            info._pBuff = new (com_malloc_d(sizeof(CBuf), __FILE__ "(658)", RET_ADDR())) CBuf;
+            info._pBuff = new (__FILE__ "(658)") CBuf;
             if (!info._pBuff) continue;
         }
         if (pExtBuff) {
@@ -555,7 +555,7 @@ INT _analyzeCdMemberHeader(BYTE*& pExtBuff) {
                 CRsrcDB::addRsrcTag(*pData, nGroupID, CRcf::isSceneManagedMode());
             } else {
 #line 794
-                CD_MEMBER_DATA* pInfo = new (com_malloc_d(sizeof(CD_MEMBER_DATA), __FILE__ "(794)", RET_ADDR())) CD_MEMBER_DATA;
+                CD_MEMBER_DATA* pInfo = new (__FILE__ "(794)") CD_MEMBER_DATA;
                 ASSERT(pInfo);
                 pInfo->setData(*pCdHed, s_pCurrentGrp->_nStart);
                 if (!pInfo->_nGroupID) pInfo->_nGroupID = s_nCurrentGrp;

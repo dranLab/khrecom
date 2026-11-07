@@ -251,7 +251,7 @@ void CBossDeadDemo::soraBossDeadDemoMain_() {
         enemy->setEntityFlag(0x80000000, 0x10000);
         enemy->makeExpPrize();
 #line 389
-        m_pPathCamera = new (com_malloc_d(sizeof(CPathCamera), __FILE__ "(389)", RET_ADDR())) CPathCamera(g_pPlayer);
+        m_pPathCamera = new (__FILE__ "(389)") CPathCamera(g_pPlayer);
         ASSERT(m_pPathCamera);
         m_pPathCamera->setLocal(TRUE);
         m_pPathCamera->init("cut001_01", TRUE, FALSE, 0x80);
@@ -414,7 +414,7 @@ void CBossDeadDemo::rikuBossDeadDemoMain_() {
         enemy->setEntityFlag(0x80000000, 0x10000);
         enemy->makeExpPrize();
 #line 664
-        m_pPathCamera = new (com_malloc_d(sizeof(CPathCamera), __FILE__ "(664)", RET_ADDR())) CPathCamera(g_pPlayer);
+        m_pPathCamera = new (__FILE__ "(664)") CPathCamera(g_pPlayer);
         ASSERT(m_pPathCamera);
         m_pPathCamera->setLocal(TRUE);
         m_pPathCamera->init("cut001_01", TRUE, FALSE, 0x80);
@@ -555,7 +555,7 @@ void CBossDeadDemo::rikuBossDeadDemoMain_() {
 
 #line 884
 CEntity* CBossDeadDemo::createGetCard_(const CHAR* inAttachBoneName, INT inMotNo) {
-    CEntity* card = new (com_malloc_d(sizeof(CEntity), __FILE__ "(886)", RET_ADDR())) CEntity(g_pPlayer, (ObjType::eObjType)2);
+    CEntity* card = new (__FILE__ "(886)") CEntity(g_pPlayer, (ObjType::eObjType)2);
     if (card && card->initalize(10, m_iCardID)) {
         card->Crd(0).setParent(&g_pPlayer->Crd(g_pPlayer->getBoneIndex(inAttachBoneName, 0)));
         card->changeMotion(inMotNo, 0, 0, 0, 0, 0);

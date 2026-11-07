@@ -230,7 +230,7 @@ void C2DSprObj::initSprite(INT inNum, SPR_GROUP* pSprGroupe, SPR_PARTS* pSprPart
     pSprPrim->polyGT4.m_T3.set(fU1, fV1);
     if (pSprParts->u0 == 0 && pSprParts->v0 == 0 && pSprParts->u1 == 0 && pSprParts->v1 == 0 && m_nPoly == 1) {
 #line 194
-        m_pScissoring = new (com_malloc_d(sizeof(CScissoring), __FILE__ "(194)", RET_ADDR())) CScissoring;
+        m_pScissoring = new (__FILE__ "(194)") CScissoring;
         m_pScissoring->setLayerFG(nLayerFG);
         m_pScissoring->setSemiTrans(ALPHA_BLEND);
     }

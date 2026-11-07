@@ -122,7 +122,7 @@ public:
 #line 155 RSRCDATA_H_PATH
     CRsrcData(const RsrcInfo& info, CBuf& data) {
         init(info);
-        m_pDataSrc = new (com_malloc_d(sizeof(CBuf), __FILE__ "(156)", RSRCDATA_RET_ADDR())) CBuf;
+        m_pDataSrc = new (__FILE__ "(156)") CBuf;
         data.copyTo(*m_pDataSrc);
     }
     CRsrcData(const RsrcInfo& info) : m_pDataSrc(NULL) { init(info); }

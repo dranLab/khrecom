@@ -193,31 +193,31 @@ void CMinigameManager::initialize() {
     switch (getMinigameType()) {
     case 0:
 #line 138
-        m_pGame = new (com_malloc_d(sizeof(CMini100AcreVegPanicMain), __FILE__ "(138)", RET_ADDR())) CMini100AcreVegPanicMain(this);
+        m_pGame = new (__FILE__ "(138)") CMini100AcreVegPanicMain(this);
         m_nClearEventFlagIdx = 0xF;
         m_nClearNextScene = 0xA29;
         break;
     case 1:
 #line 144
-        m_pGame = new (com_malloc_d(sizeof(CMini100AcreBalloonGlider), __FILE__ "(144)", RET_ADDR())) CMini100AcreBalloonGlider(this);
+        m_pGame = new (__FILE__ "(144)") CMini100AcreBalloonGlider(this);
         m_nClearEventFlagIdx = 0xB;
         m_nClearNextScene = 0x899;
         break;
     case 2:
 #line 150
-        m_pGame = new (com_malloc_d(sizeof(CMini100AcreTiggerJump), __FILE__ "(150)", RET_ADDR())) CMini100AcreTiggerJump(this);
+        m_pGame = new (__FILE__ "(150)") CMini100AcreTiggerJump(this);
         m_nClearEventFlagIdx = 0xE;
         m_nClearNextScene = 0x9C5;
         break;
     case 3:
 #line 156
-        m_pGame = new (com_malloc_d(sizeof(CMini100AcreWildDive), __FILE__ "(156)", RET_ADDR())) CMini100AcreWildDive(this);
+        m_pGame = new (__FILE__ "(156)") CMini100AcreWildDive(this);
         m_nClearEventFlagIdx = 0xC;
         m_nClearNextScene = 0x8FD;
         break;
     case 4:
 #line 162
-        m_pGame = new (com_malloc_d(sizeof(CMini100AcreBeeBattleMain), __FILE__ "(162)", RET_ADDR())) CMini100AcreBeeBattleMain(this);
+        m_pGame = new (__FILE__ "(162)") CMini100AcreBeeBattleMain(this);
         m_nClearEventFlagIdx = 0xD;
         m_nClearNextScene = 0x961;
         break;
@@ -230,7 +230,7 @@ void CMinigameManager::initialize() {
     } else {
         CTask* pGame = CTaskMan::getSysTask(1);
 #line 181
-        new (com_malloc_d(0x600, __FILE__ "(181)", RET_ADDR())) PLM::CPlayerManager(pGame);
+        new (__FILE__ "(181)") PLM::CPlayerManager(pGame);
         PLM::createPlayer(0, NULL, 0);
         m_nClearEventFlagIdx = -1;
         m_nClearNextScene = 0;
@@ -279,7 +279,7 @@ void CMinigameManager::stateEndMenu() {
         break;
     case 1: {
 #line 257
-        CTask* pTask = new (com_malloc_d(sizeof(CPause), __FILE__ "(257)", RET_ADDR())) CPause(this, 3);
+        CTask* pTask = new (__FILE__ "(257)") CPause(this, 3);
         if (pTask) {
             m_hEndMenu = pTask->getHandle();
             m_nStep++;

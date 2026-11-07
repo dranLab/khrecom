@@ -20,7 +20,7 @@ CDeFocus* CDeFocus::m_pInstance = NULL;
 void CDeFocus::create(CTask* p) {
     if (!m_pInstance) {
 #line 28
-        m_pInstance = new (com_malloc_d(sizeof(CDeFocus), __FILE__ "(28)", RET_ADDR())) CDeFocus(p);
+        m_pInstance = new (__FILE__ "(28)") CDeFocus(p);
         ASSERT(m_pInstance);
     }
 }

@@ -274,7 +274,7 @@ static const CARD_DATA cardDataTbl[224] = {
 
 inline void* operator new(size_t, void* p) throw() { return p; }
 
-#define NEW(line, T) new (com_malloc_d(sizeof(T), __FILE__ "(" #line ")", RET_ADDR())) T
+
 #define ASSERT_AT(line, e) if (!(e)) AssertApp(__FILE__, line, #e, 0)
 
 
@@ -413,7 +413,7 @@ CCamp::CCamp(CTask* p, BOOL bWorldmapMode) : CMenu(p, 0) {
     m_pSeqName = "camp:00";
     m_bPlayerKind = CGame::isRikuGame();
     m_bPooWorld = CSceneInfo::getCurrentWorldID() == 10;
-    m_pZFill = NEW(100, CZFill);
+    m_pZFill = new (__FILE__ "(100)") CZFill;
     m_pZFill->setLayerFG(11);
     m_pTextWnd = NULL;
     m_pBaseCtrl = NULL;
@@ -1079,7 +1079,7 @@ void CCamp::main() {
         }
     loaded:
         rgba.col = 0x80806228;
-        m_pHelpFnt = NEW(791, CStrPrim)(-0x65, -(SCREEN_HEIGHT / 2) + 0x144, &rgba, 0xE, NULL, 0x40, 0xFFFF28);
+        m_pHelpFnt = new (__FILE__ "(791)") CStrPrim(-0x65, -(SCREEN_HEIGHT / 2) + 0x144, &rgba, 0xE, NULL, 0x40, 0xFFFF28);
         m_pHelpFnt->setLayerFG(15);
         m_pHelpFnt->setSpace(-10, 48);
         CPlayer::exportStatus();
@@ -1089,7 +1089,7 @@ void CCamp::main() {
     case 3:
         D2::C2DMan::setLayer(0xC);
         m_hLay = D2::C2DMan::create(m_pLadName, 8);
-        m_pBaseCtrl = NEW(810, C2DSeqCtrl);
+        m_pBaseCtrl = new (__FILE__ "(810)") C2DSeqCtrl;
         m_pBaseCtrl->setLayer(0xB);
         m_pBaseCtrl->addSeq(m_pLadName, 0, 0);
         vec.init();
@@ -1154,10 +1154,10 @@ void CCamp::main() {
         break;
     case 8:
         if (!m_pCursorCtrl) {
-            m_pCursorCtrl = NEW(928, C2DSeqCtrl);
+            m_pCursorCtrl = new (__FILE__ "(928)") C2DSeqCtrl;
             m_pCursorCtrl->setLayer(0xD);
             m_pCursorCtrl->addSeq(m_pSeqName, 0x12);
-            m_pLightCtrl = NEW(931, C2DSeqCtrl);
+            m_pLightCtrl = new (__FILE__ "(931)") C2DSeqCtrl;
             m_pLightCtrl->setLayer(0xD);
             m_pLightCtrl->addSeq(m_pSeqName, 0x14);
         }
@@ -1355,7 +1355,7 @@ void CCamp::main() {
         m_nStep = 0xD;
         break;
     case 25:
-        m_hEtcMenu = (NEW(1209, CWorldWarp)(this, TRUE))->getHandle();
+        m_hEtcMenu = (new (__FILE__ "(1209)") CWorldWarp(this, TRUE))->getHandle();
         m_nStep = 0x1A;
         break;
     case 26:
@@ -1417,7 +1417,7 @@ void CCamp::main() {
             break;
         }
         CGameWork::setFlag(0, 0x84, TRUE);
-        m_pTextWnd = NEW(1282, CTextWnd)(*this, FALSE);
+        m_pTextWnd = new (__FILE__ "(1282)") CTextWnd(*this, FALSE);
         m_pTextWnd->setObjType((ObjType::eObjType)0x10);
         CBaseWnd::setLayerFG(0x17);
         /* m_pTextWnd through a reference: its loads stay after the setLayerFG stores */
@@ -1997,31 +1997,31 @@ INT CCamp::deckCheckErrorWinMenu(BOOL bCardDelete) {
 
     switch (m_nErrorWinStep) {
     case 0:
-        m_pDeckCheckErrorButton = NEW(2042, CButton);
+        m_pDeckCheckErrorButton = new (__FILE__ "(2042)") CButton;
         vec.set(-256.0f, -192.0f, 0.0f, 1.0f);
         m_pDeckCheckErrorButton->init(m_pSeqName, 0x14, errorWinSeqTbl, vec, NULL, CCtdMan::getText(m_nError + 0x5004FF), 0xF, 0.0f,
                                       60.0f, 0x42, NULL, -1);
         m_pDeckCheckErrorButton->get2DSeqCtrl()->addSeqShift(pSqdName, 0x73, -148.0f, 22.0f);
         rgba.col = 0x80080880;
-        p2DFnt = NEW(2052, C2DFnt)(0, 0, &rgba, 0xF, CCtdMan::getText(0x500800), 0x40);
+        p2DFnt = new (__FILE__ "(2052)") C2DFnt(0, 0, &rgba, 0xF, CCtdMan::getText(0x500800), 0x40);
         m_pDeckCheckErrorButton->get2DSeqCtrl()->addFntShift(m_pSeqName, p2DFnt, -120.0f, 18.0f);
         m_pDeckCheckErrorButton->setFontSpace(0, 0x60);
         if (bCardDelete) {
             m_nSelYesNo = 1;
-            m_pButtonYenNo[0] = NEW(2061, CButton);
+            m_pButtonYenNo[0] = new (__FILE__ "(2061)") CButton;
             C2DMan::getLayPosition(m_pLadName, 6, 1, vec, 1);
             vec.y += 70.0f;
             pSeqCtrlTmp = m_pDeckCheckErrorButton->get2DSeqCtrl();
             m_pButtonYenNo[0]->init(m_pSeqName, 0x14, buttonYesNoSeqTbl, vec, pSeqCtrlTmp, CCtdMan::getText(0x500700), 0xF, 0.0f,
                                     0.0f, 0x42, NULL, -1);
-            m_pButtonYenNo[1] = NEW(2067, CButton);
+            m_pButtonYenNo[1] = new (__FILE__ "(2067)") CButton;
             C2DMan::getLayPosition(m_pLadName, 6, 2, vec, 1);
             vec.y += 70.0f;
             pSeqCtrlTmp = m_pDeckCheckErrorButton->get2DSeqCtrl();
             m_pButtonYenNo[1]->init(m_pSeqName, 0x14, buttonYesNoSeqTbl, vec, pSeqCtrlTmp, CCtdMan::getText(0x500701), 0xF, 0.0f,
                                     0.0f, 0x42, NULL, -1);
         } else {
-            m_pButtonYenNo[1] = NEW(2078, CButton);
+            m_pButtonYenNo[1] = new (__FILE__ "(2078)") CButton;
             C2DMan::getLayPosition(m_pLadName, 6, 2, vec, 1);
             vec.y += 70.0f;
             pSeqCtrlTmp = m_pDeckCheckErrorButton->get2DSeqCtrl();
@@ -2039,7 +2039,7 @@ INT CCamp::deckCheckErrorWinMenu(BOOL bCardDelete) {
             m_pButtonYenNo[1]->setSequence(CButton::BS_ACTIVE, FALSE);
             pSeqCtrlTmp = m_pButtonYenNo[1]->get2DSeqCtrl();
             if (!m_pYNCursorCtrl) {
-                m_pYNCursorCtrl = NEW(2105, C2DSeqCtrl);
+                m_pYNCursorCtrl = new (__FILE__ "(2105)") C2DSeqCtrl;
                 m_pYNCursorCtrl->setLayer(0x14);
                 m_pYNCursorCtrl->addSeqShift(m_pSeqName, 0x12, -48.0f, -14.0f);
             }
@@ -2049,7 +2049,7 @@ INT CCamp::deckCheckErrorWinMenu(BOOL bCardDelete) {
             vec.y += -74.0f;
             m_vYNPosLightTarget = vec;
             if (!m_pYNLightCtrl) {
-                m_pYNLightCtrl = NEW(2117, C2DSeqCtrl);
+                m_pYNLightCtrl = new (__FILE__ "(2117)") C2DSeqCtrl;
                 m_pYNLightCtrl->setLayer(0x14);
                 m_pYNLightCtrl->addSeq(m_pSeqName, 0x14);
                 m_vYNPosLightCurrent = m_vYNPosLightTarget;
@@ -2308,7 +2308,7 @@ INT CCamp::techWinMenu() {
                 CSound::playSE(5, -1, 0x40);
                 break;
             }
-            NEW(2453, CTechHelp)(this, m_nTechKind);
+            new (__FILE__ "(2453)") CTechHelp(this, m_nTechKind);
             m_nTechWinStep = 3;
         } else if (CPadHandler::isButtonRpt(0x101000)) {
             if (--m_nTechSelect < 0) {
@@ -2897,7 +2897,7 @@ INT CCamp::statusWinMenu() {
             CSound::playSE(4, -1, 0x40);
             m_nSubStep = 3;
         } else if (_isButtonTrg(0x40, 0)) {
-            NEW(3237, CTechHelp)(this, m_techCateTbl[m_nStatusTechSelect][0]);
+            new (__FILE__ "(3237)") CTechHelp(this, m_techCateTbl[m_nStatusTechSelect][0]);
             m_nSubStep = 5;
             break;
         } else if (_isButtonRpt(0x101000, 0)) {
@@ -3729,34 +3729,34 @@ void CCamp::setDeckCard(INT nSetCmd) {
     switch (nSetCmd) {
     case 1:
         if (!m_pDeckCardCtrl[0]) {
-            p2DSeqCtrl = m_pDeckCardCtrl[0] = NEW(4317, C2DSeqCtrl);
+            p2DSeqCtrl = m_pDeckCardCtrl[0] = new (__FILE__ "(4317)") C2DSeqCtrl;
             p2DSeqCtrl->setLayer(0x11);
             p2DSeqCtrl->enableColorCtrl(TRUE);
             C2DMan::getLayPosition(m_pLadName, 5, 8, vec, 0);
             p2DSeqCtrl->setPos(vec);
             p2DSeqCtrl->addSeq(m_pSeqName, 0xA5);
-            p2DSeqCtrl = m_pDeckCardCtrl[2] = NEW(4326, C2DSeqCtrl);
+            p2DSeqCtrl = m_pDeckCardCtrl[2] = new (__FILE__ "(4326)") C2DSeqCtrl;
             p2DSeqCtrl->enableColorCtrl(TRUE);
             p2DSeqCtrl->setLayer(0x10);
             C2DMan::getLayPosition(m_pLadName, 7, 0, vec, 0);
             p2DSeqCtrl->addSeqShift(m_pSeqName, 0xD1, vec.x, vec.y);
             p2DSeqCtrl->setParent(m_pDeckCardCtrl[0]);
             rgba.col = 0x807C7C7C;
-            m_pDeckCardFnt[0] = NEW(4334, C2DFnt)(0, 0, &rgba, 0xC, NULL, 0x40);
+            m_pDeckCardFnt[0] = new (__FILE__ "(4334)") C2DFnt(0, 0, &rgba, 0xC, NULL, 0x40);
             p2DSeqCtrl->addFntShift(m_pSeqName, m_pDeckCardFnt[0], 16.0f, 3.0f);
             rgba.col = 0x80007878;
             for (INT i = 0; i < 4; i++) {
-                m_pDeckCardFnt[i + 1] = NEW(4341, C2DFnt)(0, 0, &rgba, 0xC, NULL, 0x40);
+                m_pDeckCardFnt[i + 1] = new (__FILE__ "(4341)") C2DFnt(0, 0, &rgba, 0xC, NULL, 0x40);
                 p2DSeqCtrl->addFntShift(m_pSeqName, m_pDeckCardFnt[i + 1], i * 38.0f + -62.0f, 18.0f);
             }
-            p2DSeqCtrl = m_pDeckCardCtrl[1] = NEW(4347, C2DSeqCtrl);
+            p2DSeqCtrl = m_pDeckCardCtrl[1] = new (__FILE__ "(4347)") C2DSeqCtrl;
             p2DSeqCtrl->setLayer(0x10);
             p2DSeqCtrl->enableColorCtrl(TRUE);
             p2DSeqCtrl->addSeq(m_pSeqName, 0xE8);
             p2DSeqCtrl->setParent(m_pDeckCardCtrl[0]);
             for (INT i = 0; i < 3; i++) {
                 for (INT j = 0; j < 3; j++) {
-                    p2DCard = m_pDeckCardCard[i * 3 + j] = NEW(4357, C2DCard);
+                    p2DCard = m_pDeckCardCard[i * 3 + j] = new (__FILE__ "(4357)") C2DCard;
                     p2DCard->setParent(m_pDeckCardCtrl[0]);
                     p2DCard->setLayer(0x11);
                     p2DCard->enableColorCtrl(TRUE);
@@ -3765,7 +3765,7 @@ void CCamp::setDeckCard(INT nSetCmd) {
                     p2DCard->addSeq(m_pSeqName, 0xB6);
                 }
             }
-            m_pDeckCardScrollBar = NEW(4369, CScrollBar);
+            m_pDeckCardScrollBar = new (__FILE__ "(4369)") CScrollBar;
             vec.set(68.0f, -56.0f, 0.0f, 1.0f);
             m_pDeckCardScrollBar->init(m_pSeqName, 0x11, scrollBarSeqTbl, vec, 118.0f, m_pDeckCardCtrl[0]);
         } else {
@@ -3877,25 +3877,25 @@ INT CCamp::setDeckDeck(INT nSetCmd) {
     switch (nSetCmd) {
     case 1:
         if (!m_pDeckDeckCtrl[0]) {
-            p2DSeqCtrl = m_pDeckDeckCtrl[0] = NEW(4546, C2DSeqCtrl);
+            p2DSeqCtrl = m_pDeckDeckCtrl[0] = new (__FILE__ "(4546)") C2DSeqCtrl;
             p2DSeqCtrl->setLayer(0x11);
             p2DSeqCtrl->enableColorCtrl(TRUE);
             C2DMan::getLayPosition(m_pLadName, 5, 9, vec, 0);
             p2DSeqCtrl->setPos(vec);
             p2DSeqCtrl->addSeq(m_pSeqName, 0xAB);
-            p2DSeqCtrl = m_pDeckDeckCtrl[1] = NEW(4554, C2DSeqCtrl);
+            p2DSeqCtrl = m_pDeckDeckCtrl[1] = new (__FILE__ "(4554)") C2DSeqCtrl;
             p2DSeqCtrl->enableColorCtrl(TRUE);
             p2DSeqCtrl->setLayer(0x10);
             p2DSeqCtrl->setParent(m_pDeckDeckCtrl[0]);
             C2DMan::getLayPosition(m_pLadName, 4, 0, vec, 0);
             p2DSeqCtrl->addSeqShift(m_pSeqName, !m_bPlayerKind ? 0xC0 : 0x15C, vec.x, vec.y);
             rgba.col = 0x807C7C7C;
-            m_pDeckDeckFnt[1] = NEW(4563, C2DFnt)(0, 0, &rgba, 0xD, NULL, 0x40);
+            m_pDeckDeckFnt[1] = new (__FILE__ "(4563)") C2DFnt(0, 0, &rgba, 0xD, NULL, 0x40);
             p2DSeqCtrl->addFntShift(m_pSeqName, m_pDeckDeckFnt[1], -60.0f, 21.0f);
             if (!m_bPlayerKind) {
-                m_pDeckDeckFnt[2] = NEW(4568, C2DFnt)(0, 0, &rgba, 0xD, NULL, 0x40);
+                m_pDeckDeckFnt[2] = new (__FILE__ "(4568)") C2DFnt(0, 0, &rgba, 0xD, NULL, 0x40);
                 p2DSeqCtrl->addFntShift(m_pSeqName, m_pDeckDeckFnt[2], 0.0f, 21.0f);
-                p2DSeqCtrl = m_pDeckDeckCtrl[2] = NEW(4579, C2DSeqCtrl);
+                p2DSeqCtrl = m_pDeckDeckCtrl[2] = new (__FILE__ "(4579)") C2DSeqCtrl;
                 p2DSeqCtrl->setLayer(0xF);
                 p2DSeqCtrl->enableColorCtrl(TRUE);
                 p2DSeqCtrl->setParent(m_pDeckDeckCtrl[1]);
@@ -3907,14 +3907,14 @@ INT CCamp::setDeckDeck(INT nSetCmd) {
                 } else {
                     p2DSeqCtrl->enableDisp(1, FALSE);
                 }
-                m_pDeckDeckFnt[0] = NEW(4591, C2DFnt)(0, 0, &rgba, 0xE, CCard::getDeckName(m_nDeckNoSelect), 0x40);
+                m_pDeckDeckFnt[0] = new (__FILE__ "(4591)") C2DFnt(0, 0, &rgba, 0xE, CCard::getDeckName(m_nDeckNoSelect), 0x40);
                 p2DSeqObj = p2DSeqCtrl->addFntShift(m_pSeqName, m_pDeckDeckFnt[0], -73.0f, -9.0f);
                 p2DSeqObj->changeLayer(0x10);
             }
             for (INT i = 0; i < 3; i++) {
                 for (INT j = 0; j < 3; j++) {
                     C2DMan::getLayPosition(m_pLadName, 4, i * 3 + j + 3, vec, 0);
-                    p2DCard = m_pDeckDeckCard[i * 3 + j] = NEW(4611, C2DCard);
+                    p2DCard = m_pDeckDeckCard[i * 3 + j] = new (__FILE__ "(4611)") C2DCard;
                     p2DCard->setParent(m_pDeckDeckCtrl[0]);
                     p2DCard->setLayer(0x11);
                     p2DCard->enableColorCtrl(TRUE);
@@ -3927,7 +3927,7 @@ INT CCamp::setDeckDeck(INT nSetCmd) {
                 card = m_pDeck[i];
                 p2DCard->create(card);
             }
-            m_pDeckDeckScrollBar = NEW(4643, CScrollBar);
+            m_pDeckDeckScrollBar = new (__FILE__ "(4643)") CScrollBar;
             vec.set(68.0f, -56.0f, 0.0f, 1.0f);
             m_pDeckDeckScrollBar->init(m_pSeqName, 0x11, scrollBarSeqTbl, vec, 118.0f, m_pDeckDeckCtrl[0]);
         } else {
@@ -4048,7 +4048,7 @@ INT CCamp::setDeckInfo(INT nSetCmd) {
     switch (nSetCmd) {
     case 1:
         if (!m_pDeckInfoCtrl) {
-            m_pDeckInfoCtrl = NEW(4843, C2DSeqCtrl);
+            m_pDeckInfoCtrl = new (__FILE__ "(4843)") C2DSeqCtrl;
             m_pDeckInfoCtrl->setLayer(0x11);
             m_pDeckInfoCtrl->enableColorCtrl(TRUE);
             C2DMan::getLayPosition(m_pLadName, 3, 0xB, vec, 0);
@@ -4070,25 +4070,25 @@ INT CCamp::setDeckInfo(INT nSetCmd) {
                     nFntSize = 0xB;
                     vec.set(16.0f, 8.0f - i * 24.0f, 0.0f, 1.0f);
                 }
-                p2DFnt = m_pDeckInfoFnt[i] = NEW(4878, C2DFnt)(0, 0, &rgba, nFntSize, NULL, 0x40);
+                p2DFnt = m_pDeckInfoFnt[i] = new (__FILE__ "(4878)") C2DFnt(0, 0, &rgba, nFntSize, NULL, 0x40);
                 m_pDeckInfoCtrl->addFntShift(m_pSeqName, p2DFnt, vec.x, vec.y);
             }
             for (INT i = 0; i < 2; i++) {
                 for (INT j = 0; j < 5; j++) {
                     INT idx = i * 5 + j;
-                    p2DSeqCtrl = m_pDeckInfoNumCtrl[idx] = NEW(4888, C2DSeqCtrl);
+                    p2DSeqCtrl = m_pDeckInfoNumCtrl[idx] = new (__FILE__ "(4888)") C2DSeqCtrl;
                     p2DSeqCtrl->setParent(m_pDeckInfoCtrl);
                     p2DSeqCtrl->setLayer(0x11);
                     p2DSeqCtrl->enableColorCtrl(TRUE);
                     C2DMan::getLayPosition(m_pLadName, 2, idx + 2, vec, 0);
                     p2DSeqCtrl->setLocalPos(vec);
                     p2DSeqCtrl->addSeq(m_pSeqName, idx * 2 + 0x60);
-                    p2DFnt = m_pDeckInfoNumFnt[idx] = NEW(4897, C2DFnt)(0, 0, &rgba, 0xC, NULL, 0x40);
+                    p2DFnt = m_pDeckInfoNumFnt[idx] = new (__FILE__ "(4897)") C2DFnt(0, 0, &rgba, 0xC, NULL, 0x40);
                     p2DFnt->allocText(chrTmp);
                     p2DSeqCtrl->addFntShift(m_pSeqName, p2DFnt, 14.0f, 6.0f);
                 }
             }
-            m_pDeckInfoCard = NEW(4906, C2DCard);
+            m_pDeckInfoCard = new (__FILE__ "(4906)") C2DCard;
             m_pDeckInfoCard->setLayer(0x11);
             m_pDeckInfoCard->enableColorCtrl(TRUE);
             m_pDeckInfoCard->setParent(m_pDeckInfoCtrl);
@@ -4096,7 +4096,7 @@ INT CCamp::setDeckInfo(INT nSetCmd) {
             m_pDeckInfoCard->setLocalPos(vec);
             m_pDeckInfoCard->addSeq(m_pSeqName, 0x158);
             if (!m_bPlayerKind) {
-                m_pDeckInfoIOCtrl = NEW(4917, C2DSeqCtrl)(1);
+                m_pDeckInfoIOCtrl = new (__FILE__ "(4917)") C2DSeqCtrl(1);
                 m_pDeckInfoIOCtrl->setLayer(0x11);
                 vec.set(0.0f, 0.0f, 0.0f, 1.0f);
                 m_pDeckInfoIOCtrl->setPos(vec);
@@ -4311,18 +4311,18 @@ INT CCamp::setButtonHelp(INT nSetCmd, INT nMode, INT nKind) {
             nKind = 9;
         }
         if (!*pp2DSeqCtrl) {
-            *pp2DSeqCtrl = NEW(5220, C2DSeqCtrl);
+            *pp2DSeqCtrl = new (__FILE__ "(5220)") C2DSeqCtrl;
             (*pp2DSeqCtrl)->setLayer(0x10);
             (*pp2DSeqCtrl)->enableColorCtrl(TRUE);
             vec.set(0.0f, 0.0f, 0.0f, 1.0f);
             (*pp2DSeqCtrl)->setPos(vec);
             (*pp2DSeqCtrl)->addSeq(m_pSeqName, buttonHelpSeqTbl[nKind]);
             rgba.col = 0x807C7C7C;
-            *pp2DFnt = NEW(5227, C2DFnt)(0, 0, &rgba, 0xD, CCtdMan::getText(nKind + 0x500900), 0x40);
+            *pp2DFnt = new (__FILE__ "(5227)") C2DFnt(0, 0, &rgba, 0xD, CCtdMan::getText(nKind + 0x500900), 0x40);
             (*pp2DSeqCtrl)->addFntShift(m_pSeqName, *pp2DFnt, 0.0f, 1.0f);
             if (nMode == 0 && nKind == 0) {
                 vec.set(-150.0f, -27.0f, 0.0f, 1.0f);
-                m_pButtonHelpSubButton = NEW(5237, CButton);
+                m_pButtonHelpSubButton = new (__FILE__ "(5237)") CButton;
                 m_pButtonHelpSubButton->init(m_pSeqName, 0x11, buttonHelpSeqTbl, vec, *pp2DSeqCtrl, CCtdMan::getText(0x500907),
                                              0xD, 0.0f, 0.0f, 0x40, &rgba, 7);
             }
@@ -4406,23 +4406,23 @@ INT CCamp::setTechWin(INT nSetCmd) {
     switch (nSetCmd) {
     case 0:
         if (!m_pTechWinCtrl) {
-            m_pTechWinCtrl = NEW(5381, C2DSeqCtrl);
+            m_pTechWinCtrl = new (__FILE__ "(5381)") C2DSeqCtrl;
             m_pTechWinCtrl->setLayer(0x14);
             m_pTechWinCtrl->enableColorCtrl(TRUE);
             C2DMan::getLayPosition(m_pLadName, 0xF, 1, vec, 0);
             m_pTechWinCtrl->setPos(vec);
             m_pTechWinCtrl->addSeq(m_pSeqName, 0xD2);
             rgba.col = 0x807C7C7C;
-            m_pTechWinFnt = NEW(5390, C2DFnt)(0, 0, &rgba, 0x10, pStrListTitle, 0x42);
+            m_pTechWinFnt = new (__FILE__ "(5390)") C2DFnt(0, 0, &rgba, 0x10, pStrListTitle, 0x42);
             m_pTechWinCtrl->addFntShift(m_pSeqName, m_pTechWinFnt, 0.0f, -98.0f);
-            m_pTechWinScrollBar = NEW(5395, CScrollBar);
+            m_pTechWinScrollBar = new (__FILE__ "(5395)") CScrollBar;
             vec.set(228.0f, -70.0f, 0.0f, 1.0f);
             m_pTechWinScrollBar->init(m_pSeqName, 0x14, scrollBarSeqTbl, vec, 186.0f, m_pTechWinCtrl);
             m_nTechSelectMax = !m_bPlayerKind ? 83 : 13;
         } else {
             m_pTechWinCtrl->replaceSeq(0, m_pSeqName, 0xD2);
         }
-        m_pTechWinBC = NEW(5412, CButtonCursor)(0x15, m_pTechWinCtrl, 0xD8);
+        m_pTechWinBC = new (__FILE__ "(5412)") CButtonCursor(0x15, m_pTechWinCtrl, 0xD8);
         break;
     case 1:
         if (m_pTechWinCtrl->isEnd(0)) {
@@ -4483,7 +4483,7 @@ INT CCamp::setTechWin(INT nSetCmd) {
                 }
             }
             C2DMan::getLayPosition(m_pLadName, 0x10, i + 2, vec, 0);
-            CButton* pButton = m_pTechButton[i] = NEW(5482, CButton);
+            CButton* pButton = m_pTechButton[i] = new (__FILE__ "(5482)") CButton;
             nTechSelectTop++;
             pButton->init(m_pSeqName, 0x14, techSeqTbl, vec, m_pTechWinCtrl, CTechnic::getName(nTechKind), 0xF, 1.0f, 1.0f, 0x40,
                           &rgba, nTechSeqIdx);
@@ -4500,7 +4500,7 @@ INT CCamp::setTechWin(INT nSetCmd) {
             }
             if (!(nTechSeqIdx & 1)) {
                 nTechSeqIdx >>= 1;
-                m_pTechCategoryFnt[nTechCateCnt] = NEW(5516, C2DFnt)(0, 0, (G_RGBA*)&techColorTbl[nTechSeqIdx], 0x10, pTechCateNameTbl[nTechSeqIdx], 0x42);
+                m_pTechCategoryFnt[nTechCateCnt] = new (__FILE__ "(5516)") C2DFnt(0, 0, (G_RGBA*)&techColorTbl[nTechSeqIdx], 0x10, pTechCateNameTbl[nTechSeqIdx], 0x42);
                 pButton->get2DSeqCtrl()->addFntShift(m_pSeqName, m_pTechCategoryFnt[nTechCateCnt++], -90.0f, 1.0f);
             }
         }
@@ -4595,13 +4595,13 @@ INT CCamp::setDeckSetWin(INT nSetCmd) {
     switch (nSetCmd) {
     case 0:
         if (!m_pDeckSetWinCtrl) {
-            m_pDeckSetWinCtrl = NEW(5594, C2DSeqCtrl);
+            m_pDeckSetWinCtrl = new (__FILE__ "(5594)") C2DSeqCtrl;
             m_pDeckSetWinCtrl->setLayer(0x10);
             m_pDeckSetWinCtrl->enableColorCtrl(TRUE);
             vec.set(0.0f, 0.0f, 0.0f, 1.0f);
             m_pDeckSetWinCtrl->setPos(vec);
             m_pDeckSetWinCtrl->addSeq(m_pSeqName, decksetWinSeqTbl[fgSetOrClear]);
-            m_pDeckSetBC = NEW(5600, CButtonCursor)(0x12, m_pDeckSetWinCtrl, 0xCB);
+            m_pDeckSetBC = new (__FILE__ "(5600)") CButtonCursor(0x12, m_pDeckSetWinCtrl, 0xCB);
         } else {
             m_pDeckSetWinCtrl->replaceSeq(0, m_pSeqName, decksetWinSeqTbl[fgSetOrClear]);
         }
@@ -4647,17 +4647,17 @@ INT CCamp::setDeckSetWin(INT nSetCmd) {
         C2DMan::getLayPosition(m_pLadName, 0xD, 3, vec2, 0);
         for (INT i = 0; i < 3; i++) {
             INT nSetSeqIdx = i == CCard::getCurrentDeckNo() ? 0 : 2;
-            CButton* pButton = m_pDeckSetButton[i] = NEW(5656, CButton);
+            CButton* pButton = m_pDeckSetButton[i] = new (__FILE__ "(5656)") CButton;
             pButton->init(m_pSeqName, 0x10, decksetSeqTbl, vec, m_pDeckSetWinCtrl, CCard::getDeckName(i), 0xE, 2.0f, 1.0f,
                           0x40, NULL, nSetSeqIdx + fgSetOrClear);
             if (nSetSeqIdx == 0) {
-                m_pDeckSetEquipFnt = NEW(5663, C2DFnt)(0, 0, &rgba, 0xD, CCtdMan::getText(0x500003), 0x40);
+                m_pDeckSetEquipFnt = new (__FILE__ "(5663)") C2DFnt(0, 0, &rgba, 0xD, CCtdMan::getText(0x500003), 0x40);
                 pButton->get2DSeqCtrl()->addFntShift(m_pSeqName, m_pDeckSetEquipFnt, 149.0f, 0.0f);
                 rgba2.col = 0x80404080;
             } else {
                 rgba2.col = !fgSetOrClear ? 0x80406331 : 0x80404040;
             }
-            pButton = m_pDeckSetButton[i + 3] = NEW(5674, CButton);
+            pButton = m_pDeckSetButton[i + 3] = new (__FILE__ "(5674)") CButton;
             pButton->init(m_pSeqName, 0x10, decksetSeqTbl, vec2, m_pDeckSetWinCtrl, CCtdMan::getText(i + 0x500000), 0xE, 14.0f, 1.0f,
                           0x40, &rgba2, ++nSetSeqIdx + fgSetOrClear);
             vec.y += 26.0f;
@@ -4707,23 +4707,23 @@ INT CCamp::setMapCardWin(INT nSetCmd) {
         initCardMapKind(m_nMCSelCateSelect);
         if (!m_pMCInfoWinCtrl) {
             rgba.col = 0x807C7C7C;
-            m_pMCInfoWinCtrl = NEW(5731, C2DSeqCtrl);
+            m_pMCInfoWinCtrl = new (__FILE__ "(5731)") C2DSeqCtrl;
             m_pMCInfoWinCtrl->setLayer(0x10);
             m_pMCInfoWinCtrl->enableColorCtrl(TRUE);
             C2DMan::getLayPosition(m_pLadName, 0x16, 2, vec, 0);
             m_pMCInfoWinCtrl->setPos(vec);
             m_pMCInfoWinCtrl->addSeq(m_pSeqName, 0x143);
-            m_pMCInfoFnt[0] = NEW(5737, C2DFnt)(0, 0, &rgba, 0xE, NULL, 0x40);
+            m_pMCInfoFnt[0] = new (__FILE__ "(5737)") C2DFnt(0, 0, &rgba, 0xE, NULL, 0x40);
             m_pMCInfoWinCtrl->addFntShift(m_pSeqName, m_pMCInfoFnt[0], -134.0f, -49.0f);
-            m_pMCInfoFnt[1] = NEW(5740, C2DFnt)(0, 0, &rgba, 0xD, CCtdMan::getText(0x500300), 0x40);
+            m_pMCInfoFnt[1] = new (__FILE__ "(5740)") C2DFnt(0, 0, &rgba, 0xD, CCtdMan::getText(0x500300), 0x40);
             m_pMCInfoWinCtrl->addFntShift(m_pSeqName, m_pMCInfoFnt[1], -72.0f, 6.0f);
-            m_pMCInfoFnt[2] = NEW(5743, C2DFnt)(0, 0, &rgba, 0xD, CCtdMan::getText(0x500301), 0x40);
+            m_pMCInfoFnt[2] = new (__FILE__ "(5743)") C2DFnt(0, 0, &rgba, 0xD, CCtdMan::getText(0x500301), 0x40);
             m_pMCInfoWinCtrl->addFntShift(m_pSeqName, m_pMCInfoFnt[2], -72.0f, 43.0f);
-            m_pMCInfoFnt[3] = NEW(5747, C2DFnt)(0, 0, &rgba, 0xE, NULL, 0x40);
+            m_pMCInfoFnt[3] = new (__FILE__ "(5747)") C2DFnt(0, 0, &rgba, 0xE, NULL, 0x40);
             m_pMCInfoWinCtrl->addFntShift(m_pSeqName, m_pMCInfoFnt[3], -137.0f, 102.0f);
             m_pMCInfoWinCtrl->addSeq(m_pSeqName, 0x13D);
             m_pMCInfoWinCtrl->addSeq(m_pSeqName, 0x13D);
-            m_pMCInfoCard = NEW(5753, C2DCard);
+            m_pMCInfoCard = new (__FILE__ "(5753)") C2DCard;
             m_pMCInfoCard->setParent(m_pMCInfoWinCtrl);
             m_pMCInfoCard->setLayer(0x11);
             m_pMCInfoCard->enableColorCtrl(TRUE);
@@ -4732,13 +4732,13 @@ INT CCamp::setMapCardWin(INT nSetCmd) {
             for (INT i = 0; i < 2; i++) {
                 for (INT j = 0; j < 5; j++) {
                     idx = i * 5 + j;
-                    p2DSeqCtrl = m_pMCInfoNumCtrl[idx] = NEW(5764, C2DSeqCtrl);
+                    p2DSeqCtrl = m_pMCInfoNumCtrl[idx] = new (__FILE__ "(5764)") C2DSeqCtrl;
                     p2DSeqCtrl->setParent(m_pMCInfoWinCtrl);
                     p2DSeqCtrl->setLayer(0x11);
                     p2DSeqCtrl->enableColorCtrl(TRUE);
                     p2DSeqCtrl->setLocalPos(vec);
                     p2DSeqCtrl->addSeq(m_pSeqName, idx * 2 + 0x60);
-                    p2DFnt = m_pMCInfoNumFnt[idx] = NEW(5772, C2DFnt)(0, 0, &rgba, 0xD, NULL, 0x40);
+                    p2DFnt = m_pMCInfoNumFnt[idx] = new (__FILE__ "(5772)") C2DFnt(0, 0, &rgba, 0xD, NULL, 0x40);
                     p2DFnt->allocText(chrTmp);
                     p2DSeqCtrl->addFntShift(m_pSeqName, p2DFnt, 14.0f, 7.0f);
                     vec.y += 20.0f;
@@ -4746,33 +4746,33 @@ INT CCamp::setMapCardWin(INT nSetCmd) {
                 vec.x += 62.0f;
                 vec.y -= 100.0f;
             }
-            p2DSeqCtrl = m_pMCSelWinCtrl[0] = NEW(5784, C2DSeqCtrl);
+            p2DSeqCtrl = m_pMCSelWinCtrl[0] = new (__FILE__ "(5784)") C2DSeqCtrl;
             p2DSeqCtrl->setLayer(0x11);
             p2DSeqCtrl->enableColorCtrl(TRUE);
             C2DMan::getLayPosition(m_pLadName, 0x16, 1, vec, 0);
             p2DSeqCtrl->setPos(vec);
             p2DSeqCtrl->addSeq(m_pSeqName, 0x13A);
-            p2DSeqCtrl = m_pMCSelWinCtrl[1] = NEW(5792, C2DSeqCtrl);
+            p2DSeqCtrl = m_pMCSelWinCtrl[1] = new (__FILE__ "(5792)") C2DSeqCtrl;
             p2DSeqCtrl->setLayer(0x10);
             p2DSeqCtrl->enableColorCtrl(TRUE);
             p2DSeqCtrl->setParent(m_pMCSelWinCtrl[0]);
             C2DMan::getLayPosition(m_pLadName, 0x15, 0, vec, 0);
             p2DSeqCtrl->addSeqShift(m_pSeqName, 0x14B, vec.x, vec.y);
-            m_pMCFnt[0] = NEW(5799, C2DFnt)(0, 0, &rgba, 0xC, NULL, 0x40);
+            m_pMCFnt[0] = new (__FILE__ "(5799)") C2DFnt(0, 0, &rgba, 0xC, NULL, 0x40);
             p2DSeqCtrl->addFntShift(m_pSeqName, m_pMCFnt[0], 22.0f, 1.0f);
             rgba.col = 0x80007878;
             for (INT i = 0; i < 4; i++) {
-                m_pMCFnt[i + 1] = NEW(5804, C2DFnt)(0, 0, &rgba, 0xC, NULL, 0x40);
+                m_pMCFnt[i + 1] = new (__FILE__ "(5804)") C2DFnt(0, 0, &rgba, 0xC, NULL, 0x40);
                 p2DSeqCtrl->addFntShift(m_pSeqName, m_pMCFnt[i + 1], i * 38.0f + -58.0f, 18.0f);
             }
-            p2DSeqCtrl = m_pMCSelWinCtrl[2] = NEW(5810, C2DSeqCtrl);
+            p2DSeqCtrl = m_pMCSelWinCtrl[2] = new (__FILE__ "(5810)") C2DSeqCtrl;
             p2DSeqCtrl->setLayer(0xF);
             p2DSeqCtrl->enableColorCtrl(TRUE);
             p2DSeqCtrl->setParent(m_pMCSelWinCtrl[0]);
             p2DSeqCtrl->addSeq(m_pSeqName, 0x14A);
             for (INT i = 0; i < 3; i++) {
                 for (INT j = 0; j < 3; j++) {
-                    p2DCard = m_pMCCard[i * 3 + j] = NEW(5820, C2DCard);
+                    p2DCard = m_pMCCard[i * 3 + j] = new (__FILE__ "(5820)") C2DCard;
                     p2DCard->setParent(m_pMCSelWinCtrl[0]);
                     p2DCard->setLayer(0x11);
                     p2DCard->enableColorCtrl(TRUE);
@@ -4781,7 +4781,7 @@ INT CCamp::setMapCardWin(INT nSetCmd) {
                     p2DCard->addSeq(m_pSeqName, 0xB6);
                 }
             }
-            m_pMCSelScrollBar = NEW(5832, CScrollBar);
+            m_pMCSelScrollBar = new (__FILE__ "(5832)") CScrollBar;
             vec.set(68.0f, -56.0f, 0.0f);
             m_pMCSelScrollBar->init(m_pSeqName, 0x14, scrollBarSeqTbl, vec, 117.0f, m_pMCSelWinCtrl[0]);
         } else {
@@ -5022,24 +5022,24 @@ INT CCamp::setStatusWin(INT nSetCmd) {
         m_nStatusMax = !m_bPlayerKind ? 9 : 7;
         m_nTechSelectMax = !m_bPlayerKind ? 0x56 : 0xE;
         if (!m_pStatusWinCtrl) {
-            m_pStatusWinCtrl = NEW(6082, C2DSeqCtrl);
+            m_pStatusWinCtrl = new (__FILE__ "(6082)") C2DSeqCtrl;
             m_pStatusWinCtrl->setLayer(0x10);
             m_pStatusWinCtrl->enableColorCtrl(TRUE);
             C2DMan::getLayPosition(m_pLadName, 0x11, 3, vec, 0);
             m_pStatusWinCtrl->setPos(vec);
             m_pStatusWinCtrl->addSeq(m_pSeqName, 0x125);
-            p2DSeqCtrl = m_pStatusTechWinCtrl[0] = NEW(6089, C2DSeqCtrl);
+            p2DSeqCtrl = m_pStatusTechWinCtrl[0] = new (__FILE__ "(6089)") C2DSeqCtrl;
             p2DSeqCtrl->setLayer(0x11);
             p2DSeqCtrl->enableColorCtrl(TRUE);
             C2DMan::getLayPosition(m_pLadName, 0x11, 2, vec, 0);
             p2DSeqCtrl->setPos(vec);
             p2DSeqCtrl->addSeq(m_pSeqName, 0x14C);
-            p2DSeqCtrl = m_pStatusTechWinCtrl[1] = NEW(6096, C2DSeqCtrl);
+            p2DSeqCtrl = m_pStatusTechWinCtrl[1] = new (__FILE__ "(6096)") C2DSeqCtrl;
             p2DSeqCtrl->setLayer(0x10);
             p2DSeqCtrl->enableColorCtrl(TRUE);
             p2DSeqCtrl->addSeq(m_pSeqName, !m_bPlayerKind ? 0x14F : 0x154);
             p2DSeqCtrl->setParent(m_pStatusTechWinCtrl[0]);
-            m_pStatusBC = NEW(6103, CButtonCursor)(0x12, m_pStatusTechWinCtrl[0], 0x12D);
+            m_pStatusBC = new (__FILE__ "(6103)") CButtonCursor(0x12, m_pStatusTechWinCtrl[0], 0x12D);
             idxStart = m_bPlayerKind * 7;
             idxStart2 = m_bPlayerKind * 9;
             nFriendCnt = 0;
@@ -5047,7 +5047,7 @@ INT CCamp::setStatusWin(INT nSetCmd) {
             for (INT i = 0; i < m_nStatusMax; i++) {
                 C2DMan::getLayPosition(m_pLadName, !m_bPlayerKind ? 0x11 : 0x13, i + 4, vec, 1);
                 vec.y += 8.0f;
-                CButton* pButton = m_pStatusButton[i] = NEW(6115, CButton);
+                CButton* pButton = m_pStatusButton[i] = new (__FILE__ "(6115)") CButton;
                 pButton->init(m_pSeqName, 0x10, statusSeqTbl, vec, m_pStatusWinCtrl,
                                          i < 7 ? CCtdMan::getText(i + idxStart + 0x500200) : NULL, 0xE, 0.0f, 1.0f, 0x40,
                                          NULL, idxStart2 + i);
@@ -5096,11 +5096,11 @@ INT CCamp::setStatusWin(INT nSetCmd) {
                 }
                 }
                 rgba.col = i < 5 ? 0x80046060 : (i == 5 && m_bPlayerKind ? 0x80046060 : 0x807C7C7C);
-                C2DFnt* p2DFnt = m_pStatusFnt[i] = NEW(6167, C2DFnt)(0, 0, &rgba, 0xE, NULL, 0x41);
+                C2DFnt* p2DFnt = m_pStatusFnt[i] = new (__FILE__ "(6167)") C2DFnt(0, 0, &rgba, 0xE, NULL, 0x41);
                 p2DFnt->allocText(pBuf);
                 pButton->get2DSeqCtrl()->addFntShift(m_pSeqName, p2DFnt, 220.0f, 1.0f);
             }
-            m_pStatusTechScrollBar = NEW(6173, CScrollBar);
+            m_pStatusTechScrollBar = new (__FILE__ "(6173)") CScrollBar;
             vec.set(133.0f, -56.0f, 0.0f);
             m_pStatusTechScrollBar->init(m_pSeqName, 0x14, scrollBarSeqTbl, vec, 157.0f, m_pStatusTechWinCtrl[0]);
         } else {
@@ -5207,7 +5207,7 @@ INT CCamp::setStatusWin(INT nSetCmd) {
                     }
                 }
                 C2DMan::getLayPosition(m_pLadName, 0x12, i + 2, vec, 0);
-                CButton* pButton = m_pStatusTechButton[i] = NEW(6303, CButton);
+                CButton* pButton = m_pStatusTechButton[i] = new (__FILE__ "(6303)") CButton;
                 pButton->init(m_pSeqName, 0x11, techSeqTbl, vec, m_pStatusTechWinCtrl[0], pStr, 0xF, 1.0f, 2.0f,
                                              0x40, &rgba, pTechCate[1]);
                 if (m_fgNewTbl[nTechKind]) {
@@ -5265,13 +5265,13 @@ INT CCamp::setConfigWin(INT nSetCmd) {
     switch (nSetCmd) {
     case 0:
         if (!m_pConfigWinCtrl) {
-            m_pConfigWinCtrl = NEW(6403, C2DSeqCtrl);
+            m_pConfigWinCtrl = new (__FILE__ "(6403)") C2DSeqCtrl;
             m_pConfigWinCtrl->setLayer(0x10);
             m_pConfigWinCtrl->enableColorCtrl(TRUE);
             vec.set(0.0f, 0.0f, 0.0f, 1.0f);
             m_pConfigWinCtrl->setPos(vec);
             m_pConfigWinCtrl->addSeq(m_pSeqName, 0xF7);
-            m_pConfigBC = NEW(6409, CButtonCursor)(0x12, m_pConfigWinCtrl, 0xFA);
+            m_pConfigBC = new (__FILE__ "(6409)") CButtonCursor(0x12, m_pConfigWinCtrl, 0xFA);
         } else {
             m_pConfigWinCtrl->replaceSeq(0, m_pSeqName, 0xF7);
         }
@@ -5311,7 +5311,7 @@ INT CCamp::setConfigWin(INT nSetCmd) {
             m_pConfigButton[i] = NULL;
         }
         for (INT i = 0; i < 7; i++) {
-            CButton* pButton = m_pConfigButton[i] = NEW(6460, CButton);
+            CButton* pButton = m_pConfigButton[i] = new (__FILE__ "(6460)") CButton;
             C2DMan::getLayPosition(m_pLadName, 0xB, i + 2, vec, 0);
             pButton->init(m_pSeqName, 0x10, configSeqTbl, vec, m_pConfigWinCtrl, CCtdMan::getText(i + 0x500100), 0xD, 0.0f, 2.0f,
                           0x42, NULL, -1);
@@ -5338,7 +5338,7 @@ INT CCamp::setConfigWin(INT nSetCmd) {
             } else {
                 nLine = 6;
             }
-            CButton* pButton = m_pConfigButton[idx] = NEW(6489, CButton);
+            CButton* pButton = m_pConfigButton[idx] = new (__FILE__ "(6489)") CButton;
             C2DMan::getLayPosition(m_pLadName, 0xB, i + 9, vec, 0);
             ctdIdx = i;
             if (nLine == 6) {
@@ -5359,6 +5359,8 @@ INT CCamp::setConfigWin(INT nSetCmd) {
     return ret;
 }
 
+/* MATCH: the emulated debug new (com_malloc_d + placement new) here: new (__FILE__ "(N)") T moves one spill
+   slot (112 -> 116); the other sites of the unit have the original form */
 INT CCamp::setWorldmap(INT nSetCmd) {
     static LPCTSTR pSeqName = "worldmap:00";
     static LPCTSTR pSeqName2 = "world_icon:00";
@@ -5398,11 +5400,11 @@ INT CCamp::setWorldmap(INT nSetCmd) {
         m_nSubStep = 0;
         if (!m_pWMNormaCtrl) {
             /* stored through a reference: in the original the next pSeqName load waits for this store */
-            _ref(m_pWMMoveCtrl) = NEW(6575, C2DSeqCtrl);
+            _ref(m_pWMMoveCtrl) = new (com_malloc_d(sizeof(C2DSeqCtrl), __FILE__ "(6575)", RET_ADDR())) C2DSeqCtrl;
             m_pWMMoveCtrl->addSeq(pSeqName, 0x4B);
             m_pWMMoveCtrl->enableColorCtrl(TRUE);
             m_nRoomCurrent = CSceneInfo::getCurrentRoomID() - 1;
-            m_pWMNormaCtrl = NEW(6580, C2DSeqCtrl);
+            m_pWMNormaCtrl = new (com_malloc_d(sizeof(C2DSeqCtrl), __FILE__ "(6580)", RET_ADDR())) C2DSeqCtrl;
             vec._q = 0;
             m_pWMNormaCtrl->setCol(vec);
             m_pWMNormaCtrl->setLayer(0xD);
@@ -5412,20 +5414,20 @@ INT CCamp::setWorldmap(INT nSetCmd) {
             m_pWMNormaCtrl->setLocalPos(vec);
             vec.init();
             if (!m_bPooWorld) {
-                m_pWMExplaneCtrl = NEW(6602, C2DSeqCtrl);
+                m_pWMExplaneCtrl = new (com_malloc_d(sizeof(C2DSeqCtrl), __FILE__ "(6602)", RET_ADDR())) C2DSeqCtrl;
                 m_pWMExplaneCtrl->setLayer(0xF);
                 m_pWMExplaneCtrl->addSeq(m_pSeqName, 0xB8);
                 m_pWMExplaneCtrl->setPos(vec);
                 m_pWMExplaneCtrl->enableColorCtrl(TRUE);
-                m_pWMExplaneFnt = NEW(6607, C2DFnt)(0, 0, &rgba, 0xE, pStrButton, 0x40);
+                m_pWMExplaneFnt = new (com_malloc_d(sizeof(C2DFnt), __FILE__ "(6607)", RET_ADDR())) C2DFnt(0, 0, &rgba, 0xE, pStrButton, 0x40);
                 m_pWMExplaneCtrl->addFntShift(m_pSeqName, m_pWMExplaneFnt, 0.0f, 1.0f);
             }
-            m_pWMCardCtrl = NEW(6612, C2DSeqCtrl);
+            m_pWMCardCtrl = new (com_malloc_d(sizeof(C2DSeqCtrl), __FILE__ "(6612)", RET_ADDR())) C2DSeqCtrl;
             m_pWMCardCtrl->setLayer(0xE);
             m_pWMCardCtrl->addSeq(pSeqName, 0x27);
             m_pWMCardCtrl->addSeq(pSeqName2, (m_bPooWorld && (CGameWork::getInt(0, 0x23) & 0x40)) ? 1 : 0);
             m_pWMCardCtrl->setPos(vec);
-            m_pWMFloorCtrl = NEW(6618, C2DSeqCtrl);
+            m_pWMFloorCtrl = new (com_malloc_d(sizeof(C2DSeqCtrl), __FILE__ "(6618)", RET_ADDR())) C2DSeqCtrl;
             m_pWMFloorCtrl->setLayer(0xE);
             m_pWMFloorCtrl->addSeq(pSeqName, 0x24);
             m_pWMFloorCtrl->setPos(vec);
@@ -5555,7 +5557,7 @@ INT CCamp::setWorldmap(INT nSetCmd) {
             for (INT i = 0; i < pFloorLayout->_nRoomCount; i++, pRoomSrcInfo++) {
                 INT nSearch;
                 pRoomInfo = CSceneInfo::getRoomInfo(pRoomSrcInfo->_nID);
-                p2DSeqCtrl = m_pRoomCtrl[i] = NEW(6755, C2DSeqCtrl);
+                p2DSeqCtrl = m_pRoomCtrl[i] = new (com_malloc_d(sizeof(C2DSeqCtrl), __FILE__ "(6755)", RET_ADDR())) C2DSeqCtrl;
                 p2DSeqCtrl->setParent(m_pWMMoveCtrl);
                 p2DSeqCtrl->setLayer(0xC);
                 p2DSeqCtrl->enableColorCtrl(TRUE);
@@ -5643,7 +5645,7 @@ INT CCamp::setWorldmap(INT nSetCmd) {
                         p2DSeqCtrl->enableDisp(3, FALSE);
                     }
                 }
-                p2DSeqCtrl = m_pWayCtrl[i] = NEW(6874, C2DSeqCtrl)(1);
+                p2DSeqCtrl = m_pWayCtrl[i] = new (com_malloc_d(sizeof(C2DSeqCtrl), __FILE__ "(6874)", RET_ADDR())) C2DSeqCtrl(1);
                 p2DSeqCtrl->setParent(m_pWMMoveCtrl);
                 p2DSeqCtrl->setLayer(0xB);
                 p2DSeqCtrl->enableColorCtrl(TRUE);
@@ -5667,13 +5669,13 @@ INT CCamp::setWorldmap(INT nSetCmd) {
                 cardID = pRoomInfo->getRoomNameCardID();
                 if (cardID == 0xB8 || cardID == 0xB6) {
                     C2DCard* p2DCard;
-                    p2DSeqCtrl = m_pShopAndSaveCtrl[nCard] = NEW(6898, C2DSeqCtrl);
+                    p2DSeqCtrl = m_pShopAndSaveCtrl[nCard] = new (com_malloc_d(sizeof(C2DSeqCtrl), __FILE__ "(6898)", RET_ADDR())) C2DSeqCtrl;
                     p2DSeqCtrl->setParent(m_pWMMoveCtrl);
                     p2DSeqCtrl->setLocalPos(vec2);
                     p2DSeqCtrl->addSeq(pSeqName, cardID == 0xB8 ? 0x53 : 0x55);
                     p2DSeqCtrl->enableDisp(FALSE);
                     _setCardNK(card, cardID, -1);
-                    p2DCard = m_pShopAndSave[nCard++] = NEW(6905, C2DCard);
+                    p2DCard = m_pShopAndSave[nCard++] = new (com_malloc_d(sizeof(C2DCard), __FILE__ "(6905)", RET_ADDR())) C2DCard;
                     p2DCard->setParent(p2DSeqCtrl);
                     p2DCard->setLayer(0xC);
                     p2DCard->create(card);
@@ -5681,7 +5683,7 @@ INT CCamp::setWorldmap(INT nSetCmd) {
                 }
             }
             m_fRoomCurrentTimer = 0.0f;
-            m_pMapCursorCtrl = NEW(6914, C2DSeqCtrl);
+            m_pMapCursorCtrl = new (com_malloc_d(sizeof(C2DSeqCtrl), __FILE__ "(6914)", RET_ADDR())) C2DSeqCtrl;
             m_pMapCursorCtrl->setLayer(0xD);
             m_pMapCursorCtrl->setParent(m_pWMMoveCtrl);
             vec = m_pRoomCtrl[m_nRoomCurrent]->m_seqControl.vPos;
@@ -5700,31 +5702,31 @@ INT CCamp::setWorldmap(INT nSetCmd) {
             m_vWMPosOld = m_vWMPosCurrent = m_vWMPosCurrent0 = m_vWMPosTarget;
             m_pMapCursorCtrl->addSeqShift(m_pSeqName, 0x12, -12.0f, -13.0f);
             m_pMapCursorCtrl->enableDisp(FALSE);
-            m_pMapGuideCtrl = NEW(6934, C2DSeqCtrl);
+            m_pMapGuideCtrl = new (com_malloc_d(sizeof(C2DSeqCtrl), __FILE__ "(6934)", RET_ADDR())) C2DSeqCtrl;
             m_pMapGuideCtrl->setLayer(0xD);
             m_pMapGuideCtrl->setParent(m_pWMMoveCtrl);
             m_pMapGuideCtrl->addSeqShift(m_pSeqName, 0xB7, 4.0f, -20.0f);
             m_pMapGuideCtrl->setLocalPos(vec);
             m_pMapGuideCtrl->enableDisp(FALSE);
-            m_pCurrentRoomPosCtrl = NEW(6940, C2DSeqCtrl)(1);
+            m_pCurrentRoomPosCtrl = new (com_malloc_d(sizeof(C2DSeqCtrl), __FILE__ "(6940)", RET_ADDR())) C2DSeqCtrl(1);
             m_pCurrentRoomPosCtrl->setLayer(0xD);
             m_pCurrentRoomPosCtrl->setParent(m_pWMMoveCtrl);
             m_pCurrentRoomPosCtrl->setLocalPos(vec);
             vec.init();
             pRoomInfo = CSceneInfo::getRoomInfo(m_roomMap[m_nRoomSelect]);
             cardID = pRoomInfo->getRoomNameCardID();
-            m_pWMRoomNameCtrl = NEW(6948, C2DSeqCtrl);
+            m_pWMRoomNameCtrl = new (com_malloc_d(sizeof(C2DSeqCtrl), __FILE__ "(6948)", RET_ADDR())) C2DSeqCtrl;
             m_pWMRoomNameCtrl->setLayer(0xE);
             m_pWMRoomNameCtrl->addSeq(pSeqName, 0x34);
             m_pWMRoomNameCtrl->setPos(vec);
-            m_pWMRoomNameFnt = NEW(6953, C2DFnt)(0, 0, &rgba, 0xF, NULL, 0x40);
+            m_pWMRoomNameFnt = new (com_malloc_d(sizeof(C2DFnt), __FILE__ "(6953)", RET_ADDR())) C2DFnt(0, 0, &rgba, 0xF, NULL, 0x40);
             m_pWMRoomNameCtrl->addFntShift(pSeqName, m_pWMRoomNameFnt, 0.0f, 7.0f);
             setWMRoomName(cardID, m_nRoomSelect, pRoomInfo, TRUE);
-            m_pWMNormaArrowCtrl = NEW(6958, C2DSeqCtrl);
+            m_pWMNormaArrowCtrl = new (com_malloc_d(sizeof(C2DSeqCtrl), __FILE__ "(6958)", RET_ADDR())) C2DSeqCtrl;
             m_pWMNormaArrowCtrl->setParent(m_pWMNormaCtrl);
             m_pWMNormaArrowCtrl->setLayer(0x10);
             for (INT i = 0; i < 4; i++) {
-                p2DSeqCtrl = m_pRoomNormaCtrl[i] = NEW(6962, C2DSeqCtrl);
+                p2DSeqCtrl = m_pRoomNormaCtrl[i] = new (com_malloc_d(sizeof(C2DSeqCtrl), __FILE__ "(6962)", RET_ADDR())) C2DSeqCtrl;
                 p2DSeqCtrl->setParent(m_pWMNormaCtrl);
                 p2DSeqCtrl->setLayer(0xD);
                 p2DSeqCtrl->addSeq(pSeqName, 0x3A);
@@ -6023,7 +6025,7 @@ void CCamp::setWorldmapCursor() {
                     INT nNI;
                     for (nNI = nNorma; nNI >= 0; nNI--) {
                         ASSERT_AT(7351, m_nRoomNorma < 4);
-                        C2DCard* p2DCard = m_pRoomNorma[m_nRoomNorma++] = NEW(7352, C2DCard)(1);
+                        C2DCard* p2DCard = m_pRoomNorma[m_nRoomNorma++] = new (__FILE__ "(7352)") C2DCard(1);
                         p2DCard->setParent(p2DSeqCtrl);
                         p2DCard->setLayer(0x10);
                         vec.set(nNI * 82.0f, 0.0f, 0.0f);
@@ -6113,12 +6115,12 @@ INT CCamp::setMainCmd(INT nSetCmd, INT nMode) {
             vec.w = 1.0f;
             vec.z = 0.0f;
             for (INT i = 0; i < m_nCurrentCmdMax; i++) {
-                p2DSeqCtrl = m_pMainCmdCtrl[i] = NEW(7430, C2DSeqCtrl);
+                p2DSeqCtrl = m_pMainCmdCtrl[i] = new (__FILE__ "(7430)") C2DSeqCtrl;
                 p2DSeqCtrl->setLayer(0xC);
                 p2DSeqCtrl->enableColorCtrl(TRUE);
                 p2DSeqCtrl->addSeq(m_pSeqName, 4);
                 p2DSeqCtrl->setPos(vec);
-                m_pMainCmdFnt[i] = NEW(7435, C2DFnt)(0, 0, &rgba, 0xF, m_pMainCmdName[m_bPlayerKind][0][i], 0x40);
+                m_pMainCmdFnt[i] = new (__FILE__ "(7435)") C2DFnt(0, 0, &rgba, 0xF, m_pMainCmdName[m_bPlayerKind][0][i], 0x40);
                 p2DSeqCtrl->addFntShift(m_pSeqName, m_pMainCmdFnt[i], 0.0f, 6.0f);
                 vec.y += 26.0f;
             }
@@ -6130,7 +6132,7 @@ INT CCamp::setMainCmd(INT nSetCmd, INT nMode) {
                     delete m_pMainCmdFnt[i];
                     asm volatile(""); /* MATCH: one more insn in the loop body: loop.c's second pass then leaves this + 336 in the loop, so &m_pMainCmdFnt[i] is recomputed from i each iteration (only m_pMainCmdCtrl[i] strength-reduced) */
                     m_pMainCmdFnt[i] = NULL;
-                    m_pMainCmdFnt[i] = NEW(7448, C2DFnt)(0, 0, &rgba, 0xF, m_pMainCmdName[m_bPlayerKind][nMode][i], 0x40);
+                    m_pMainCmdFnt[i] = new (__FILE__ "(7448)") C2DFnt(0, 0, &rgba, 0xF, m_pMainCmdName[m_bPlayerKind][nMode][i], 0x40);
                     p2DSeqCtrl->replaceFnt(1, m_pSeqName, m_pMainCmdFnt[i]);
                 }
                 m_nMainMode = nMode;
@@ -6166,12 +6168,12 @@ INT CCamp::setMainCmdHist(INT nSetCmd, INT nMode) {
             vec.w = 1.0f;
             vec.z = 0.0f;
             for (INT i = 0; i < 2; i++) {
-                p2DSeqCtrl = m_pMainCmdHistCtrl[i] = NEW(7499, C2DSeqCtrl);
+                p2DSeqCtrl = m_pMainCmdHistCtrl[i] = new (__FILE__ "(7499)") C2DSeqCtrl;
                 p2DSeqCtrl->setLayer(0xF);
                 p2DSeqCtrl->enableColorCtrl(TRUE);
                 p2DSeqCtrl->setPos(vec);
                 p2DSeqCtrl->addSeq(m_pSeqName, 8);
-                m_pMainCmdHistFnt[i] = NEW(7504, C2DFnt)(0, 0, &rgba, 0xF, NULL, 0x42);
+                m_pMainCmdHistFnt[i] = new (__FILE__ "(7504)") C2DFnt(0, 0, &rgba, 0xF, NULL, 0x42);
                 p2DSeqCtrl->addFntShift(m_pSeqName, m_pMainCmdHistFnt[i], 0.0f, 6.0f);
                 p2DSeqCtrl->enableDisp(FALSE);
                 vec.x += 118.0f;
@@ -6181,7 +6183,7 @@ INT CCamp::setMainCmdHist(INT nSetCmd, INT nMode) {
             p2DSeqCtrl->replaceSeq(0, m_pSeqName, 7);
             delete m_pMainCmdHistFnt[nMode];
             m_pMainCmdHistFnt[nMode] = NULL;
-            m_pMainCmdHistFnt[nMode] = NEW(7515, C2DFnt)(0, 0, &rgba, 0xF, m_pMainCmdName[m_bPlayerKind][nMode][m_nMainCmdSel], 0x40);
+            m_pMainCmdHistFnt[nMode] = new (__FILE__ "(7515)") C2DFnt(0, 0, &rgba, 0xF, m_pMainCmdName[m_bPlayerKind][nMode][m_nMainCmdSel], 0x40);
             p2DSeqCtrl->replaceFnt(1, m_pSeqName, m_pMainCmdHistFnt[nMode]);
             p2DSeqCtrl->enableDisp(TRUE);
         }
@@ -6192,7 +6194,7 @@ INT CCamp::setMainCmdHist(INT nSetCmd, INT nMode) {
             break;
         }
         if (!m_pMCHistLightCtrl[nMode]) {
-            m_pMCHistLightCtrl[nMode] = NEW(7532, C2DSeqCtrl);
+            m_pMCHistLightCtrl[nMode] = new (__FILE__ "(7532)") C2DSeqCtrl;
             p2DSeqCtrl = m_pMCHistLightCtrl[nMode];
             p2DSeqCtrl->setLayer(0xF);
             vec2 = m_pMainCmdHistCtrl[nMode]->m_seqControl.vPos;
@@ -6240,7 +6242,7 @@ INT CCamp::setStatusWin0(INT nSetCmd) {
 
     if (nSetCmd == 0) {
         if (!m_pWindow0Ctrl) {
-            m_pWindow0Ctrl = NEW(7600, C2DSeqCtrl);
+            m_pWindow0Ctrl = new (__FILE__ "(7600)") C2DSeqCtrl;
             m_pWindow0Ctrl->setLayer(0xF);
             m_pWindow0Ctrl->enableColorCtrl(TRUE);
             m_pWindow0Ctrl->addSeq(m_pSeqName, 0xA);
@@ -6250,20 +6252,20 @@ INT CCamp::setStatusWin0(INT nSetCmd) {
             }
             m_pWindow0Ctrl->setPos(vec);
             rgba.col = 0x807C7C7C;
-            m_pWindow0Fnt[0] = NEW(7610, C2DFnt)(0, 0, &rgba, 0xE, pStrEtc[m_bPlayerKind], 0x42);
+            m_pWindow0Fnt[0] = new (__FILE__ "(7610)") C2DFnt(0, 0, &rgba, 0xE, pStrEtc[m_bPlayerKind], 0x42);
             m_pWindow0Ctrl->addFntShift(m_pSeqName, m_pWindow0Fnt[0], 0.0f, -17.0f);
             rgba.col = 0x80007878;
-            m_pWindow0Fnt[1] = NEW(7615, C2DFnt)(0, 0, &rgba, 0xD, pStrEtc[2], 0x40);
+            m_pWindow0Fnt[1] = new (__FILE__ "(7615)") C2DFnt(0, 0, &rgba, 0xD, pStrEtc[2], 0x40);
             m_pWindow0Ctrl->addFntShift(m_pSeqName, m_pWindow0Fnt[1], -41.0f, 5.0f);
-            m_pWindow0Fnt[2] = NEW(7619, C2DFnt)(0, 0, &rgba, 0xD, NULL, 0x41);
+            m_pWindow0Fnt[2] = new (__FILE__ "(7619)") C2DFnt(0, 0, &rgba, 0xD, NULL, 0x41);
             p2DFnt = m_pWindow0Fnt[2];
             sprintf(chrTmp, pStrEtc[3], CStatus::getLV());
             p2DFnt->allocText(chrTmp);
             m_pWindow0Ctrl->addFntShift(m_pSeqName, p2DFnt, 43.0f, 5.0f);
             rgba.col = 0x80007800;
-            m_pWindow0Fnt[3] = NEW(7626, C2DFnt)(0, 0, &rgba, 0xD, pStrEtc[4], 0x40);
+            m_pWindow0Fnt[3] = new (__FILE__ "(7626)") C2DFnt(0, 0, &rgba, 0xD, pStrEtc[4], 0x40);
             m_pWindow0Ctrl->addFntShift(m_pSeqName, m_pWindow0Fnt[3], -41.0f, 21.0f);
-            m_pWindow0Fnt[4] = NEW(7630, C2DFnt)(0, 0, &rgba, 0xD, NULL, 0x41);
+            m_pWindow0Fnt[4] = new (__FILE__ "(7630)") C2DFnt(0, 0, &rgba, 0xD, NULL, 0x41);
             p2DFnt = m_pWindow0Fnt[4];
             sprintf(chrTmp, pStrEtc[5], CStatus::getHP(), CStatus::getHPMax());
             p2DFnt->allocText(chrTmp);
@@ -6296,14 +6298,14 @@ INT CCamp::setStatusWin1(INT nSetCmd) {
 
     if (nSetCmd == 0) {
         if (!m_pWindow1Ctrl) {
-            m_pWindow1Ctrl = NEW(7698, C2DSeqCtrl);
+            m_pWindow1Ctrl = new (__FILE__ "(7698)") C2DSeqCtrl;
             m_pWindow1Ctrl->setLayer(0xC);
             m_pWindow1Ctrl->enableColorCtrl(TRUE);
             m_pWindow1Ctrl->addSeq(m_pSeqName, baseSeqTbl[m_bPlayerKind][0]);
             C2DMan::getLayPosition(m_pLadName, 0, 8, vec, 0);
             m_pWindow1Ctrl->setPos(vec);
             rgba.col = 0x807C7C7C;
-            m_pWindow1Fnt = NEW(7706, C2DFnt)(0, 0, &rgba, 0xF, pStrFriend, 0x40);
+            m_pWindow1Fnt = new (__FILE__ "(7706)") C2DFnt(0, 0, &rgba, 0xF, pStrFriend, 0x40);
             m_pWindow1Ctrl->addFntShift(m_pSeqName, m_pWindow1Fnt, !m_bPlayerKind ? -83.0f : -32.0f, -44.0f);
             vec.x = !m_bPlayerKind ? -72.0f : 2.0f;
             register FLOAT fY asm("$f0") = 26.0f; /* MATCH: 26 in f0, 1 in f1 */
@@ -6318,7 +6320,7 @@ INT CCamp::setStatusWin1(INT nSetCmd) {
                 for (INT i = 0; i < 3; i++) {
                     INT kind = pPlayerManager->getAppearFriendCard(i, 1);
                     if (kind) {
-                        C2DCard* p2DCard = m_pWindow1Card[idx] = NEW(7721, C2DCard);
+                        C2DCard* p2DCard = m_pWindow1Card[idx] = new (__FILE__ "(7721)") C2DCard;
                         p2DCard->setParent(m_pWindow1Ctrl);
                         p2DCard->setLayer(0xC);
                         p2DCard->enableColorCtrl(TRUE);
@@ -6326,7 +6328,7 @@ INT CCamp::setStatusWin1(INT nSetCmd) {
                         vec.x += 74.0f;
                         _setCardNK(card, kind, -1);
                         m_pWindow1Card[idx]->create(card);
-                        m_pWin1EtcButton[idx] = NEW(7731, CButton);
+                        m_pWin1EtcButton[idx] = new (__FILE__ "(7731)") CButton;
                         pButton = m_pWin1EtcButton[idx];
                         INT nLay = m_bPlayerKind + 0xF;
                         C2DMan::getLayPosition(m_pLadName, 0, idx + nLay, vec2, 1);
@@ -6335,7 +6337,7 @@ INT CCamp::setStatusWin1(INT nSetCmd) {
                     }
                 }
                 if (!m_bPlayerKind) {
-                    m_pWin1EtcButton[3] = NEW(7745, CButton);
+                    m_pWin1EtcButton[3] = new (__FILE__ "(7745)") CButton;
                     pButton = m_pWin1EtcButton[3];
                     C2DMan::getLayPosition(m_pLadName, 0, 0x12, vec2, 1);
                     pButton->init(m_pSeqName, 0x14, deckNameSeqTbl, vec2, NULL,
@@ -6442,7 +6444,7 @@ void CCamp::setCursor2(INT nSelect, INT nMode, BOOL bMapCard) {
     switch (nMode) {
     case 0:
         if (!m_pCursor2Ctrl) {
-            m_pCursor2Ctrl = NEW(7862, C2DSeqCtrl)(1);
+            m_pCursor2Ctrl = new (__FILE__ "(7862)") C2DSeqCtrl(1);
             m_pCursor2Ctrl->setLayer(0x12);
             m_pCursor2Ctrl->setParent(!bMapCard ? m_pDeckCardCtrl[0] : m_pMCSelWinCtrl[0]);
             m_pCursor2Ctrl->addSeq(m_pSeqName, 0x9F);
@@ -6493,7 +6495,7 @@ void CCamp::setCursor3(INT nSelect, INT nMode, BOOL bMapCard) {
     switch (nMode) {
     case 0:
         if (!m_pCursor3Ctrl) {
-            m_pCursor3Ctrl = NEW(7935, C2DSeqCtrl);
+            m_pCursor3Ctrl = new (__FILE__ "(7935)") C2DSeqCtrl;
             m_pCursor3Ctrl->setLayer(0x12);
             m_pCursor3Ctrl->setParent(!bMapCard ? m_pDeckInfoCtrl : m_pMCInfoWinCtrl);
             m_pCursor3Ctrl->addSeqShift(m_pSeqName, 0xA0, 18.0f, 0.0f);
@@ -6549,7 +6551,7 @@ void CCamp::setCursor4(INT nSelect, INT nMode) {
     switch (nMode) {
     case 0:
         if (!m_pCursor4Ctrl) {
-            m_pCursor4Ctrl = NEW(8007, C2DSeqCtrl)(1);
+            m_pCursor4Ctrl = new (__FILE__ "(8007)") C2DSeqCtrl(1);
             m_pCursor4Ctrl->setLayer(0x13);
             m_pCursor4Ctrl->setParent(m_pDeckDeckCtrl[0]);
             m_pCursor4Ctrl->addSeq(m_pSeqName, m_bShortCutMode ? 0x103 : 0x9F);
@@ -6595,7 +6597,7 @@ void CCamp::setCursor4Hist(INT nSelect, INT nMode) {
     switch (nMode) {
     case 0:
         if (!m_pCursor4HistCtrl) {
-            m_pCursor4HistCtrl = NEW(8073, C2DSeqCtrl);
+            m_pCursor4HistCtrl = new (__FILE__ "(8073)") C2DSeqCtrl;
             m_pCursor4HistCtrl->setLayer(0x12);
             m_pCursor4HistCtrl->setParent(m_pDeckDeckCtrl[0]);
             m_pCursor4HistCtrl->addSeqShift(m_pSeqName, 0x11, -4.0f, -20.0f);
@@ -6626,7 +6628,7 @@ CButtonCursor::CButtonCursor(INT nLayer, C2DSeqCtrl* pParentCtrl, USHORT nCursor
     addSeq(pSeqName, nCursorSeq);
     addSeqShift(pSeqName, 0x12, 8.0f, 0.0f);
     enableDisp(FALSE);
-    m_pLightCtrl = NEW(8145, C2DSeqCtrl);
+    m_pLightCtrl = new (__FILE__ "(8145)") C2DSeqCtrl;
     m_pLightCtrl->setLayer(nLayer);
     m_pLightCtrl->addSeqShift(pSeqName, 0x14, 0.0f, 0.0f);
     m_pLightCtrl->enableDisp(FALSE);
@@ -7013,7 +7015,7 @@ void CCamp::setPoint(INT nSetCmd) {
         if (!m_pPointCtrl) {
             UINT nPoint = CStatus::getMP();
             sprintf(str, pStrNum, nPoint > 99999 ? 99999 : nPoint);
-            m_pPointCtrl = NEW(8586, C2DSeqCtrl);
+            m_pPointCtrl = new (__FILE__ "(8586)") C2DSeqCtrl;
             m_pPointCtrl->setLayer(0xF);
             m_pPointCtrl->addSeq(m_pSeqName, 0x3A);
             vec.init();
@@ -7046,7 +7048,7 @@ void CCamp::setTime(INT nSetCmd) {
         m_fgTimeDisp = 1;
         m_fgMinute = 0xFF;
         if (!m_pTimeCtrl) {
-            m_pTimeCtrl = NEW(8627, C2DSeqCtrl);
+            m_pTimeCtrl = new (__FILE__ "(8627)") C2DSeqCtrl;
             m_pTimeCtrl->setLayer(0xF);
             m_pTimeCtrl->addSeq(m_pSeqName, 0x40);
             vec.init();
@@ -7196,11 +7198,11 @@ void CCamp::setCurrentRoomName(INT nSetCmd) {
     case 0:
         if (!m_pTitleCtrl) {
             vec.init();
-            m_pTitleCtrl = NEW(8855, C2DSeqCtrl);
+            m_pTitleCtrl = new (__FILE__ "(8855)") C2DSeqCtrl;
             m_pTitleCtrl->setLayer(0xF);
             m_pTitleCtrl->addSeq(pWTSeqName, 0);
             m_pTitleCtrl->setPos(vec);
-            m_pCurrentRoomNameCtrl = NEW(8860, C2DSeqCtrl);
+            m_pCurrentRoomNameCtrl = new (__FILE__ "(8860)") C2DSeqCtrl;
             m_pCurrentRoomNameCtrl->setLayer(0xF);
             m_pCurrentRoomNameCtrl->enableColorCtrl(TRUE);
             m_pCurrentRoomNameCtrl->addSeq(m_pSeqName, 0x3D);
@@ -7211,7 +7213,7 @@ void CCamp::setCurrentRoomName(INT nSetCmd) {
             }
             _setCardNK(card, cardID, 0);
             rgba.col = 0x807C7C7C;
-            m_pCurrentRoomNameFnt = NEW(8871, C2DFnt)(0, 0, &rgba, 0xF, card.getName(), 0x241);
+            m_pCurrentRoomNameFnt = new (__FILE__ "(8871)") C2DFnt(0, 0, &rgba, 0xF, card.getName(), 0x241);
             m_pCurrentRoomNameFnt->setLayer(0xF, 0);
             m_pCurrentRoomNameCtrl->addFnt(m_pSeqName, m_pCurrentRoomNameFnt);
         } else {
@@ -7334,7 +7336,7 @@ void CCamp::setMainParty(INT nSetCmd) {
         vec2.setAll(1.0f);
         if (!m_pMenuModel) {
             INT idx = m_bPlayerKind * 2 + (CSceneInfo::getCurrentWorldID(TRUE) == 6);
-            m_pMenuModel = NEW(9037, CMenuModel)(this, playerRsrcIDTbl[idx] + 10000, NULL, !m_bPlayerKind ? -40 : -10, 55);
+            m_pMenuModel = new (__FILE__ "(9037)") CMenuModel(this, playerRsrcIDTbl[idx] + 10000, NULL, !m_bPlayerKind ? -40 : -10, 55);
             m_pMenuModel->changeAnim(2, FALSE);
             m_pMenuModel->setColorFade(vec, vec2, 16.0f);
             m_pMenuModel->setScale(0.1125f);

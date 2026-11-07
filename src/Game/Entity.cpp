@@ -167,7 +167,7 @@ CEntity::~CEntity() {
 INT CEntity::getTypeID() const { return 0x1000; }
 BOOL CEntity::initalize(INT inGroupID, INT inRsrcID) { return initalize(inGroupID, inRsrcID, 0); }
 BOOL CEntity::initalize(INT inGroupID, INT inRsrcID, UINT iFlag) {
-    m_pMove = new (com_malloc_d(sizeof(CMovement), __FILE__ "(146)", RET_ADDR())) CMovement(this);
+    m_pMove = new (__FILE__ "(146)") CMovement(this);
     if (!m_pMove) return FALSE;
     INT group = inGroupID * 10000 + inRsrcID;
     if (!initalizeModel(group, !(iFlag & 1))) return FALSE;
@@ -175,12 +175,12 @@ BOOL CEntity::initalize(INT inGroupID, INT inRsrcID, UINT iFlag) {
     initRideModel_(group);
     initEffect_(group);
     initSE_(group);
-    m_pEffectEx = new (com_malloc_d(sizeof(CEffectMotion), __FILE__ "(170)", RET_ADDR())) CEffectMotion(this);
+    m_pEffectEx = new (__FILE__ "(170)") CEffectMotion(this);
     if (!m_pEffectEx) return FALSE;
-    m_pSEEx = new (com_malloc_d(sizeof(CSEMotion), __FILE__ "(174)", RET_ADDR())) CSEMotion(this);
+    m_pSEEx = new (__FILE__ "(174)") CSEMotion(this);
     if (!m_pSEEx) return FALSE;
     if (DebugWork::g_dw.sys.m_iDagameNumber) {
-        m_pDamageString = new (com_malloc_d(sizeof(CFnt), __FILE__ "(181)", RET_ADDR())) CFnt;
+        m_pDamageString = new (__FILE__ "(181)") CFnt;
         if (m_pDamageString) {
             m_pDamageString->CFntM2::setStyle(0x8002);
             m_pDamageString->setSize(24);
@@ -893,14 +893,14 @@ BOOL CEntity::initalizeModel(INT inGroup, BOOL bLight) {
     if (bLight) {
         for (INT i = 0; i < m_iModelCount; i++) {
             if (pModelTbl[i]->enableLight()) {
-                m_pNLight = new (com_malloc_d(sizeof(CLightUnit), __FILE__ "(1728)", RET_ADDR())) CLightUnit;
+                m_pNLight = new (__FILE__ "(1728)") CLightUnit;
                 if (!m_pNLight) return FALSE;
                 break;
             }
         }
         for (INT i = 0; i < m_iModelCount; i++) {
             if (pModelTbl[i]->enablePointLight()) {
-                m_pGLight = new (com_malloc_d(sizeof(CGimmickLightUnit), __FILE__ "(1739)", RET_ADDR())) CGimmickLightUnit;
+                m_pGLight = new (__FILE__ "(1739)") CGimmickLightUnit;
                 if (!m_pGLight) return FALSE;
                 break;
             }
@@ -926,7 +926,7 @@ BOOL CEntity::initalizeModel(INT inGroup, BOOL bLight) {
         if ((UINT)inGroup / 10000 == 11) m_pModels[i].m_nFlag |= 0x40;
     }
     enableFade2Path(TRUE, -1);
-    m_pAnim = new (com_malloc_d(sizeof(CAnim), __FILE__ "(1788)", RET_ADDR())) CAnim;
+    m_pAnim = new (__FILE__ "(1788)") CAnim;
     if (!m_pAnim) return FALSE;
     m_pAnim->link(this, CRsrcDB::getRsrcANN(inGroup), pModelTbl[0]);
     m_pAnim->init(0, 0);
@@ -1229,12 +1229,12 @@ BOOL CEntity::initCollision_(INT inGroupID, INT inRsrcID) {
     if (!header) return FALSE;
     if (header->addrMapping()) {
         if (header->iBodyCollParamNum > 0) {
-            m_pBodyColl = new (com_malloc_d(sizeof(CBodyCollision), __FILE__ "(2525)", RET_ADDR())) CBodyCollision(this);
+            m_pBodyColl = new (__FILE__ "(2525)") CBodyCollision(this);
             if (!m_pBodyColl) return FALSE;
             m_pBodyColl->initalize(header->pBodyCollParam, header->iBodyCollParamNum);
         }
         if (header->iAtkCollParamNum > 0) {
-            m_pAttack = new (com_malloc_d(sizeof(CAttackMotion), __FILE__ "(2535)", RET_ADDR())) CAttackMotion(this);
+            m_pAttack = new (__FILE__ "(2535)") CAttackMotion(this);
             if (!m_pAttack) return FALSE;
             m_pAttack->initialize(header->pAtkCollParam, header->iAtkCollParamNum);
         }
@@ -1244,28 +1244,28 @@ BOOL CEntity::initCollision_(INT inGroupID, INT inRsrcID) {
     return FALSE;
 }
 BOOL CEntity::initEffect_(INT inID) {
-    m_pEffect = new (com_malloc_d(sizeof(CEffectMotion), __FILE__ "(2563)", RET_ADDR())) CEffectMotion(this);
+    m_pEffect = new (__FILE__ "(2563)") CEffectMotion(this);
     if (!m_pEffect) return FALSE;
     return m_pEffect->initalize(inID);
 }
 BOOL CEntity::initEffectEx_(INT inID) {
-    m_pEffectEx = new (com_malloc_d(sizeof(CEffectMotion), __FILE__ "(2574)", RET_ADDR())) CEffectMotion(this);
+    m_pEffectEx = new (__FILE__ "(2574)") CEffectMotion(this);
     if (!m_pEffectEx) return FALSE;
     return m_pEffectEx->initalize(inID);
 }
 BOOL CEntity::initEffectEx_(const CHAR* inRsrcName) {
-    m_pEffectEx = new (com_malloc_d(sizeof(CEffectMotion), __FILE__ "(2585)", RET_ADDR())) CEffectMotion(this);
+    m_pEffectEx = new (__FILE__ "(2585)") CEffectMotion(this);
     if (!m_pEffectEx) return FALSE;
     return m_pEffectEx->initalize(inRsrcName);
 }
 BOOL CEntity::initSE_(INT inID) {
-    CSEMotion* pSE = new (com_malloc_d(sizeof(CSEMotion), __FILE__ "(2596)", RET_ADDR())) CSEMotion(this);
+    CSEMotion* pSE = new (__FILE__ "(2596)") CSEMotion(this);
     m_pSE = pSE;
     if (!pSE) return FALSE;
     return pSE->initalize(inID);
 }
 BOOL CEntity::initSEEx_(INT inID) {
-    CSEMotion* pSE = new (com_malloc_d(sizeof(CSEMotion), __FILE__ "(2607)", RET_ADDR())) CSEMotion(this);
+    CSEMotion* pSE = new (__FILE__ "(2607)") CSEMotion(this);
     m_pSEEx = pSE;
     if (!pSE) return FALSE;
     return pSE->initalize(inID);
@@ -1273,11 +1273,11 @@ BOOL CEntity::initSEEx_(INT inID) {
 BOOL CEntity::initRideModel_(INT inGroup) {
     void* ocd = CRsrcDB::getRsrcOCD(inGroup);
     if (!ocd) return FALSE;
-    m_pRideModel = new (com_malloc_d(sizeof(CRideModel), __FILE__ "(2622)", RET_ADDR())) CRideModel;
+    m_pRideModel = new (__FILE__ "(2622)") CRideModel;
     if (!m_pRideModel) return FALSE;
     m_pRideModel->init(ocd, this);
     m_pRideModel->on();
-    if (DebugWork::g_dw.collision.uiFlag & 1) new (com_malloc_d(sizeof(CCollRideModelDisp), __FILE__ "(2632)", RET_ADDR())) CCollRideModelDisp(this, m_pRideModel, TRUE);
+    if (DebugWork::g_dw.collision.uiFlag & 1) new (__FILE__ "(2632)") CCollRideModelDisp(this, m_pRideModel, TRUE);
     return TRUE;
 }
 void CEntity::updateTimer_() {

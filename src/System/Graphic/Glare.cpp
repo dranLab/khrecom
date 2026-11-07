@@ -24,14 +24,14 @@ CGlare* CGlare::m_pInstance = NULL;
 #line 26
 void CGlare::create(CTask* p) {
     if (!m_pInstance) {
-        m_pInstance = new (com_malloc_d(sizeof(CGlare), __FILE__ "(28)", RET_ADDR())) CGlare(p);
+        m_pInstance = new (__FILE__ "(28)") CGlare(p);
         if (!m_pInstance) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
     }
 }
 
 #line 39
 CGlare::CGlare(CTask* p) : CTask(p, 0x4000) {
-    m_pGlare = new (com_malloc_d(sizeof(CGlarePrim), __FILE__ "(40)", RET_ADDR())) CGlarePrim;
+    m_pGlare = new (__FILE__ "(40)") CGlarePrim;
     if (!m_pGlare) AssertApp(__FILE__, __LINE__, "m_pGlare", 0);
     m_iFlags = 8;
     m_iKey = 0xFF;

@@ -147,7 +147,7 @@ BOOL CMonstroEventBattle::setup() {
     m_iTotalDead = (INT)param->getValue(MonstroEventBattle::_totalDead());
     m_tqGaugeDownTimer = m_tqGaugeDown = (TIMEQ)(param->getValue(MonstroEventBattle::_gaugeDown()) * 60.0f * 50.0f);
 #line 99
-    CMostroGauge* gauge = new (com_malloc_d(sizeof(CMostroGauge), __FILE__ "(99)", RET_ADDR())) CMostroGauge(this);
+    CMostroGauge* gauge = new (__FILE__ "(99)") CMostroGauge(this);
     if (!gauge) return FALSE;
     m_hGauge = gauge->getHandle();
     CGameWork::setFlag(1, 5, TRUE);

@@ -169,7 +169,7 @@ void CEnemySpadesoldier::beginStateDead() {
                 playSmallDamageSE();
             }
         }
-        demo = new (com_malloc_d(sizeof(CBossDeadDemo), __FILE__ "(180)", RET_ADDR())) CBossDeadDemo(this, 0);
+        demo = new (__FILE__ "(180)") CBossDeadDemo(this, 0);
         if (demo) {
             demo->setup(getHandle(), &Spadesoldier::g_vDeadDemoPlayerPos, -1);
         }

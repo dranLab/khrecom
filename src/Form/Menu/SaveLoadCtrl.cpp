@@ -184,7 +184,7 @@ void C2DSeqCursorCtrl::setupSeq(const CHAR* pszLad, SHORT nUnit, SHORT nSeqNorma
 
 void C2DSeqLightMarkAgent::setupSeq(SeqTbl stbl, const CHAR* pszLad, SHORT nUnit, SHORT nLayer, BOOL bFollow) {
 #line 264
-    D2::C2DSeqCtrl* pCtrl = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(264)", RET_ADDR())) D2::C2DSeqCtrl;
+    D2::C2DSeqCtrl* pCtrl = new (__FILE__ "(264)") D2::C2DSeqCtrl;
     pCtrl->addSeq(pszLad, nUnit, stbl._tbl[0]);
     pCtrl->changeLayer(nLayer);
     pCtrl->enableColorCtrl(TRUE);
@@ -224,12 +224,12 @@ void C2DSeqLightMarkAgent::updatePos() {
 
 void C2DSeqSelectable::setupSeq(SeqTbl stbl, const CHAR* pszLad, SHORT nUnit, SHORT nActiveSeq, SHORT nLayer) {
 #line 338
-    D2::C2DSeqCtrl* pCtrl = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(338)", RET_ADDR())) D2::C2DSeqCtrl;
+    D2::C2DSeqCtrl* pCtrl = new (__FILE__ "(338)") D2::C2DSeqCtrl;
     pCtrl->addSeq(pszLad, nUnit, stbl._tbl[0]);
     pCtrl->changeLayer(nLayer);
     pCtrl->enableColorCtrl(TRUE);
 #line 343
-    m_pCaption = new (com_malloc_d(sizeof(D2::C2DFnt), __FILE__ "(343)", RET_ADDR())) D2::C2DFnt(0, 0, NULL, 16, NULL, 0);
+    m_pCaption = new (__FILE__ "(343)") D2::C2DFnt(0, 0, NULL, 16, NULL, 0);
     m_pCaption->setStyle(0x40);
     pCtrl->addFnt(pszLad, nUnit, m_pCaption);
     C2DSeqAgent::setupSeq(*pCtrl, pszLad, nUnit, 0);
@@ -290,7 +290,7 @@ void C2DSeqScrollbarCtrl::setupSeq(D2::C2DSeqCtrl* pParent, const C2DSeqAgent::S
     ASSERT(pTbl);
     for (i = 0; i < 3; i++) {
 #line 444
-        D2::C2DSeqCtrl* pCtrl = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(444)", RET_ADDR())) D2::C2DSeqCtrl;
+        D2::C2DSeqCtrl* pCtrl = new (__FILE__ "(444)") D2::C2DSeqCtrl;
         pCtrl->addSeq(pszLad, nUnit, pTbl[i]._tbl[0]);
         pCtrl->changeLayer(nLayer);
         pCtrl->enableColorCtrl(TRUE);

@@ -3110,7 +3110,7 @@ static BOOL DebugCameraOn(CDebugWindow* pObj, INT inY, INT inParam) {
                     pM = pR;
                 }
 #line 450
-                DebugWork::g_dw.nakamich.m_pDCam = new (com_malloc_d(sizeof(CNakCamera), __FILE__ "(450)", RET_ADDR())) CNakCamera(pM, 1, 0x300, &vPos, 3.1415927f, (void**)&DebugWork::g_dw.nakamich.m_pDCam);
+                DebugWork::g_dw.nakamich.m_pDCam = new (__FILE__ "(450)") CNakCamera(pM, 1, 0x300, &vPos, 3.1415927f, (void**)&DebugWork::g_dw.nakamich.m_pDCam);
                 DebugWork::g_dw.nakamich.m_pDCam->Action(0);
                 DebugWork::g_dw.nakamich.m_pDCam->SetDebugViewAngle(-1e7f);
             }

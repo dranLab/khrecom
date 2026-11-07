@@ -698,8 +698,8 @@ void CSaveLoadUI::exeInit() {
         changeState(18);
         break;
     }
-    m_pMemoca = new (com_malloc_d(sizeof(CMemocaAgent), __FILE__ "(708)", RET_ADDR())) CMemocaAgent(this);
-    m_pGameDataEntries = new (com_malloc_d(sizeof(CMemocaDataEntries), __FILE__ "(709)", RET_ADDR())) CMemocaDataEntries(99);
+    m_pMemoca = new (__FILE__ "(708)") CMemocaAgent(this);
+    m_pGameDataEntries = new (__FILE__ "(709)") CMemocaDataEntries(99);
 }
 void CSaveLoadUI::endInit() {}
 void CSaveLoadUI::preCheckBoot() {
@@ -820,7 +820,7 @@ void CSaveLoadUI::preLayIn() {
 void CSaveLoadUI::exeLayIn() {}
 void CSaveLoadUI::preLayOut() {
     if (m_mode == SLMODE_LOAD && s_bSaveLoadDone) {
-        _ref(s_pFadeMask) = new (com_malloc_d(sizeof(CFadeIOMask), __FILE__ "(915)", RET_ADDR()))
+        _ref(s_pFadeMask) = new (__FILE__ "(915)")
             CFadeIOMask(*CTaskMan::getTask(m_hParent)->getParent(), 0x18);
         s_pFadeMask->reqBlackOut(30, 1.0f);
         CSound::fadeoutAllBGM(30);
@@ -1535,7 +1535,7 @@ void CSaveLoadUI::exeMessageOnly() {
 }
 C2DSeqAgent* CSaveLoadUI::createMainFrame() {
     C2DSeqAgent::SeqTbl tbl[2] = {{{2, 4, 5}}, {{3, 5, 6}}};
-    C2DSeqAgent* pAgent = new (com_malloc_d(sizeof(C2DSeqAgent), __FILE__ "(1990)", RET_ADDR())) C2DSeqAgent(this);
+    C2DSeqAgent* pAgent = new (__FILE__ "(1990)") C2DSeqAgent(this);
     pAgent->setupSeq(m_pszLad, 11);
     pAgent->setupState(tbl[getRsrcType()], callbackMainFrame, callbackMainFrame);
     return pAgent;
@@ -1546,13 +1546,13 @@ C2DSeqAgent* CSaveLoadUI::createWorldIcon(D2::C2DSeqCtrl*& pOutCtrl) {
     C2DSeqAgent::SeqTbl tbl = {{0, 1, 2}};
     FVECTOR v;
     C2DSeqAgent* pAgent;
-    pOutCtrl = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(2006)", RET_ADDR())) D2::C2DSeqCtrl;
+    pOutCtrl = new (__FILE__ "(2006)") D2::C2DSeqCtrl;
     pOutCtrl->addSeq(s_pszWorldIcon, 0, tbl._tbl[0]);
     pOutCtrl->changeLayer(12);
     v.init();
     pOutCtrl->setPos(v);
     pOutCtrl->enableColorCtrl(TRUE);
-    pAgent = new (com_malloc_d(sizeof(C2DSeqAgent), __FILE__ "(2014)", RET_ADDR())) C2DSeqAgent(this);
+    pAgent = new (__FILE__ "(2014)") C2DSeqAgent(this);
     pAgent->setupSeq(*pOutCtrl, s_pszWorldIcon, 0, 0);
     pAgent->setupState(tbl);
     return pAgent;
@@ -1569,7 +1569,7 @@ C2DSeqAgent* CSaveLoadUI::createRoomName(D2::C2DSeqCtrl*& pOutCtrl) {
     C2DSeqAgent::SeqTbl tbl = {{42, 43, 44}};
     FVECTOR v;
     BYTE nCardID;
-    pOutCtrl = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(2028)", RET_ADDR())) D2::C2DSeqCtrl;
+    pOutCtrl = new (__FILE__ "(2028)") D2::C2DSeqCtrl;
     nCardID = 0;
     pOutCtrl->addSeq(m_pszLad, m_nMainSeqUnit, tbl._tbl[0]);
     pOutCtrl->changeLayer(12);
@@ -1586,10 +1586,10 @@ C2DSeqAgent* CSaveLoadUI::createRoomName(D2::C2DSeqCtrl*& pOutCtrl) {
     G_RGBA rgba;
     rgba.col = 0x80707070;
     D2::C2DFnt* pFnt =
-        new (com_malloc_d(sizeof(D2::C2DFnt), __FILE__ "(2047)", RET_ADDR())) D2::C2DFnt(0, 0, &rgba, 16, card.getName(), 0x241);
+        new (__FILE__ "(2047)") D2::C2DFnt(0, 0, &rgba, 16, card.getName(), 0x241);
     pOutCtrl->addFnt(m_pszLad, m_nMainSeqUnit, pFnt);
     pOutCtrl->enableColorCtrl(TRUE);
-    C2DSeqAgent* pAgent = new (com_malloc_d(sizeof(C2DSeqAgent), __FILE__ "(2051)", RET_ADDR())) C2DSeqAgent(this);
+    C2DSeqAgent* pAgent = new (__FILE__ "(2051)") C2DSeqAgent(this);
     pAgent->setupSeq(*pOutCtrl, m_pszLad, m_nMainSeqUnit, 0);
     pAgent->setupState(tbl);
     return pAgent;
@@ -1598,7 +1598,7 @@ C2DSeqCursorCtrl* CSaveLoadUI::createCursor() {
     short tbl[2][2] = {{8, 7}, {8, 7}};
     SHORT* pTbl = tbl[getRsrcType()];
     C2DSeqCursorCtrl* pCursor =
-        new (com_malloc_d(sizeof(C2DSeqCursorCtrl), __FILE__ "(2068)", RET_ADDR())) C2DSeqCursorCtrl;
+        new (__FILE__ "(2068)") C2DSeqCursorCtrl;
     pCursor->setupSeq(m_pszLad, m_nMainSeqUnit, pTbl[0], pTbl[1]);
     return pCursor;
 }
@@ -1606,7 +1606,7 @@ C2DSeqLightMarkAgent* CSaveLoadUI::createLightMark(LIGHTMARK_TYPE nType, INT nLa
     C2DSeqAgent::SeqTbl tbl[2][2] = {{{{33, 34, 35}}, {{33, 34, 35}}}, {{{9, 10, 11}}, {{9, 10, 11}}}};
     C2DSeqAgent::SeqTbl& t = tbl[nType][getRsrcType()];
     C2DSeqLightMarkAgent* pLight =
-        new (com_malloc_d(sizeof(C2DSeqLightMarkAgent), __FILE__ "(2086)", RET_ADDR())) C2DSeqLightMarkAgent(this);
+        new (__FILE__ "(2086)") C2DSeqLightMarkAgent(this);
     pLight->setupSeq(t, m_pszLad, m_nMainSeqUnit, nLayer, bFollow);
     pLight->setupState(t);
     return pLight;
@@ -1615,20 +1615,20 @@ C2DSeqAgent* CSaveLoadUI::createTimeLabel(D2::C2DSeqCtrl*& pOutCtrl) {
     C2DSeqAgent::SeqTbl tbl = {{45, 46, 47}};
     FVECTOR v;
     C2DSeqAgent* pAgent;
-    pOutCtrl = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(2101)", RET_ADDR())) D2::C2DSeqCtrl;
+    pOutCtrl = new (__FILE__ "(2101)") D2::C2DSeqCtrl;
     pOutCtrl->addSeq(m_pszLad, m_nMainSeqUnit, tbl._tbl[0]);
     pOutCtrl->changeLayer(12);
     v.init();
     if (CGame::isRikuGame()) v.y = -35.0f;
     pOutCtrl->setPos(v);
     pOutCtrl->enableColorCtrl(TRUE);
-    pAgent = new (com_malloc_d(sizeof(C2DSeqAgent), __FILE__ "(2110)", RET_ADDR())) C2DSeqAgent(this);
+    pAgent = new (__FILE__ "(2110)") C2DSeqAgent(this);
     pAgent->setupSeq(*pOutCtrl, m_pszLad, m_nMainSeqUnit, 0);
     pAgent->setupState(tbl);
     return pAgent;
 }
 C2DSeqTimeCtrl* CSaveLoadUI::createTimeCtrl() {
-    C2DSeqTimeCtrl* pCtrl = new (com_malloc_d(sizeof(C2DSeqTimeCtrl), __FILE__ "(2122)", RET_ADDR())) C2DSeqTimeCtrl;
+    C2DSeqTimeCtrl* pCtrl = new (__FILE__ "(2122)") C2DSeqTimeCtrl;
     pCtrl->setupSeq(m_pszLad, m_nMainSeqUnit, 22, 32, 65);
     pCtrl->setLayer(12);
     FVECTOR v;
@@ -1641,20 +1641,20 @@ C2DSeqAgent* CSaveLoadUI::createMPLabel(D2::C2DSeqCtrl*& pOutCtrl) {
     C2DSeqAgent::SeqTbl tbl = {{39, 40, 41}};
     FVECTOR v;
     C2DSeqAgent* pAgent;
-    pOutCtrl = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(2142)", RET_ADDR())) D2::C2DSeqCtrl;
+    pOutCtrl = new (__FILE__ "(2142)") D2::C2DSeqCtrl;
     pOutCtrl->addSeq(m_pszLad, m_nMainSeqUnit, tbl._tbl[0]);
     pOutCtrl->changeLayer(12);
     v.init();
     pOutCtrl->setPos(v);
     pOutCtrl->enableColorCtrl(TRUE);
-    pAgent = new (com_malloc_d(sizeof(C2DSeqAgent), __FILE__ "(2150)", RET_ADDR())) C2DSeqAgent(this);
+    pAgent = new (__FILE__ "(2150)") C2DSeqAgent(this);
     pAgent->setupSeq(*pOutCtrl, m_pszLad, m_nMainSeqUnit, 0);
     pAgent->setupState(tbl);
     return pAgent;
 }
 C2DSeqNumericCtrl* CSaveLoadUI::createMPCtrl() {
     C2DSeqNumericCtrl* pCtrl =
-        new (com_malloc_d(sizeof(C2DSeqNumericCtrl), __FILE__ "(2162)", RET_ADDR())) C2DSeqNumericCtrl;
+        new (__FILE__ "(2162)") C2DSeqNumericCtrl;
     pCtrl->setupSeq(m_pszLad, m_nMainSeqUnit, 12, 65, 99999);
     pCtrl->setLayer(12);
     FVECTOR v;
@@ -1666,7 +1666,7 @@ C2DSeqNumericCtrl* CSaveLoadUI::createMPCtrl() {
 C2DSeqAgent* CSaveLoadUI::createMainHelp(D2::C2DSeqCtrl*& pOutCtrl, D2::C2DFnt*& pOutFnt) {
     C2DSeqAgent::SeqTbl tbl[2] = {{{89, 90, 91}}, {{90, 91, 92}}};
     _LayoutInfo ltbl[2] = {{3, 9}, {4, 9}};
-    pOutCtrl = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(2189)", RET_ADDR())) D2::C2DSeqCtrl;
+    pOutCtrl = new (__FILE__ "(2189)") D2::C2DSeqCtrl;
     C2DSeqAgent::SeqTbl& t = tbl[getRsrcType()];
     pOutCtrl->addSeq(m_pszLad, m_nMainSeqUnit, t._tbl[0]);
     pOutCtrl->changeLayer(12);
@@ -1674,14 +1674,14 @@ C2DSeqAgent* CSaveLoadUI::createMainHelp(D2::C2DSeqCtrl*& pOutCtrl, D2::C2DFnt*&
     rgba.col = 0x80707070;
     _LayoutInfo& info = ltbl[getRsrcType()];
     m_szMainFrameHelpStr[0] = '\0';
-    pOutFnt = new (com_malloc_d(sizeof(D2::C2DFnt), __FILE__ "(2198)", RET_ADDR()))
+    pOutFnt = new (__FILE__ "(2198)")
         D2::C2DFnt(0, 0, &rgba, 16, m_szMainFrameHelpStr, 64);
     pOutCtrl->addFnt(m_pszLad, m_nMainSeqUnit, pOutFnt);
     pOutCtrl->enableColorCtrl(TRUE);
     FVECTOR vPos;
     D2::C2DMan::getLayPosition(m_pszLad, info._nLayIdx, info._nSeqIdx, vPos, FALSE);
     pOutCtrl->setPos(vPos);
-    C2DSeqAgent* pAgent = new (com_malloc_d(sizeof(C2DSeqAgent), __FILE__ "(2206)", RET_ADDR())) C2DSeqAgent(this);
+    C2DSeqAgent* pAgent = new (__FILE__ "(2206)") C2DSeqAgent(this);
     pAgent->setupSeq(*pOutCtrl, m_pszLad, m_nMainSeqUnit, 0);
     pAgent->setupState(t);
     return pAgent;
@@ -1693,7 +1693,7 @@ C2DSeqAgent* CSaveLoadUI::createResultPlate(D2::C2DSeqCtrl*& pOutCtrl, D2::C2DFn
     _LayoutInfo ltbl[2][2] = {{{3, 4}, {4, 4}}, {{3, 5}, {4, 5}}};
     float ftbl[2][2] = {{4.0f, 16.0f}, {-44.0f, 7.0f}};
     C2DSeqAgent::SeqTbl& t = tbl[nIdx][getRsrcType()];
-    pOutCtrl = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(2234)", RET_ADDR())) D2::C2DSeqCtrl;
+    pOutCtrl = new (__FILE__ "(2234)") D2::C2DSeqCtrl;
     pOutCtrl->addSeq(m_pszLad, m_nMainSeqUnit, t._tbl[0]);
     pOutCtrl->changeLayer(12);
     _LayoutInfo& info = ltbl[nIdx][getRsrcType()];
@@ -1701,11 +1701,11 @@ C2DSeqAgent* CSaveLoadUI::createResultPlate(D2::C2DSeqCtrl*& pOutCtrl, D2::C2DFn
     rgba.col = 0x80707070;
     switch (nIdx) {
     case 0:
-        pOutFnt = new (com_malloc_d(sizeof(D2::C2DFnt), __FILE__ "(2244)", RET_ADDR()))
+        pOutFnt = new (__FILE__ "(2244)")
             D2::C2DFnt(0, 0, &rgba, 15, s_pStrSaveLoad[getRsrcType()], 0x40);
         break;
     case 1:
-        pOutFnt = new (com_malloc_d(sizeof(D2::C2DFnt), __FILE__ "(2247)", RET_ADDR()))
+        pOutFnt = new (__FILE__ "(2247)")
             D2::C2DFnt(0, 0, &rgba, 15, s_pStrSlot[m_nSlot], 0x40);
         break;
     }
@@ -1715,7 +1715,7 @@ C2DSeqAgent* CSaveLoadUI::createResultPlate(D2::C2DSeqCtrl*& pOutCtrl, D2::C2DFn
     FVECTOR vPos;
     D2::C2DMan::getLayPosition(m_pszLad, info._nLayIdx, info._nSeqIdx, vPos, FALSE);
     pOutCtrl->setPos(vPos);
-    C2DSeqAgent* pAgent = new (com_malloc_d(sizeof(C2DSeqAgent), __FILE__ "(2258)", RET_ADDR())) C2DSeqAgent(this);
+    C2DSeqAgent* pAgent = new (__FILE__ "(2258)") C2DSeqAgent(this);
     pAgent->setupSeq(*pOutCtrl, m_pszLad, m_nMainSeqUnit, 0);
     pAgent->setupState(t, callbackResultPlate, NULL);
     return pAgent;
@@ -1726,7 +1726,7 @@ C2DSeqSelectable* CSaveLoadUI::createSelSlotPlate(INT nIdx) {
     _LayoutInfo ltbl[2] = {{3, 6}, {4, 6}};
     C2DSeqAgent::SeqTbl& t = tbl[getRsrcType()];
     C2DSeqSelectable* pPlate =
-        new (com_malloc_d(sizeof(C2DSeqSelectable), __FILE__ "(2279)", RET_ADDR())) C2DSeqSelectable(this);
+        new (__FILE__ "(2279)") C2DSeqSelectable(this);
     pPlate->setupSeq(t, m_pszLad, m_nMainSeqUnit, actTbl[getRsrcType()], 12);
     G_RGBA rgba;
     rgba.col = 0x80707070;
@@ -1749,19 +1749,19 @@ C2DSeqAgent* CSaveLoadUI::createMemocaInfo(D2::C2DSeqCtrl*& pOutCtrl, D2::C2DSeq
     C2DSeqAgent::SeqTbl t = {{107, 108, 109}};
     _LayoutInfo info = {3, 8};
     FVECTOR vPos;
-    pOutCtrl = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(2311)", RET_ADDR())) D2::C2DSeqCtrl;
+    pOutCtrl = new (__FILE__ "(2311)") D2::C2DSeqCtrl;
     pOutCtrl->addSeq(m_pszLad, m_nMainSeqUnit, t._tbl[0]);
     pOutCtrl->changeLayer(12);
     D2::C2DMan::getLayPosition(m_pszLad, info._nLayIdx, info._nSeqIdx, vPos, FALSE);
     pOutCtrl->setPos(vPos);
-    C2DSeqAgent* pAgent = new (com_malloc_d(sizeof(C2DSeqAgent), __FILE__ "(2319)", RET_ADDR())) C2DSeqAgent(this);
+    C2DSeqAgent* pAgent = new (__FILE__ "(2319)") C2DSeqAgent(this);
     pAgent->setupSeq(*pOutCtrl, m_pszLad, m_nMainSeqUnit, 0);
     pAgent->setupState(t, callbackMemocaInfo, callbackMemocaInfo);
     unsigned short barTbl[3] = {55, 57, 56};
     _LayoutInfo barInfo = {6, 1};
     unsigned int fntCol[3] = {0x80208000, 0x80204080, 0x80804020};
     for (INT i = 0; i < 3; i++) {
-        D2::C2DSeqCtrl* pCtrl = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(2331)", RET_ADDR())) D2::C2DSeqCtrl;
+        D2::C2DSeqCtrl* pCtrl = new (__FILE__ "(2331)") D2::C2DSeqCtrl;
         *ppOutInfoBar++ = pCtrl;
         pCtrl->addSeq(m_pszLad, m_nMainSeqUnit, barTbl[i]);
         pCtrl->setParent(pOutCtrl);
@@ -1772,7 +1772,7 @@ C2DSeqAgent* CSaveLoadUI::createMemocaInfo(D2::C2DSeqCtrl*& pOutCtrl, D2::C2DSeq
         G_RGBA col;
         col.col = fntCol[i];
         m_szMemocaInfoStr[i][0] = '\0';
-        D2::C2DFnt* pFont = new (com_malloc_d(sizeof(D2::C2DFnt), __FILE__ "(2344)", RET_ADDR()))
+        D2::C2DFnt* pFont = new (__FILE__ "(2344)")
             D2::C2DFnt(0, 0, &col, 12, m_szMemocaInfoStr[i], 0x40);
         pOutCtrl->addFntShift(m_pszLad, m_nMainSeqUnit, pFont, -36.0f, i * 58.0f - 52.0f);
     }
@@ -1782,19 +1782,19 @@ C2DSeqAgent* CSaveLoadUI::createDataListContainer(D2::C2DSeqCtrl*& pOutCtrl, C2D
     C2DSeqAgent::SeqTbl tbl[2] = {{{96, 97, 98}}, {{93, 94, 95}}};
     _LayoutInfo ltbl[2] = {{3, 3}, {4, 3}};
     C2DSeqAgent::SeqTbl& t = tbl[getRsrcType()];
-    pOutCtrl = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(2364)", RET_ADDR())) D2::C2DSeqCtrl;
+    pOutCtrl = new (__FILE__ "(2364)") D2::C2DSeqCtrl;
     pOutCtrl->addSeq(m_pszLad, m_nMainSeqUnit, t._tbl[0]);
     pOutCtrl->changeLayer(12);
     FVECTOR vPos;
     _LayoutInfo& info = ltbl[getRsrcType()];
     D2::C2DMan::getLayPosition(m_pszLad, info._nLayIdx, info._nSeqIdx, vPos, FALSE);
     pOutCtrl->setPos(vPos);
-    C2DSeqAgent* pAgent = new (com_malloc_d(sizeof(C2DSeqAgent), __FILE__ "(2373)", RET_ADDR())) C2DSeqAgent(this);
+    C2DSeqAgent* pAgent = new (__FILE__ "(2373)") C2DSeqAgent(this);
     pAgent->setupSeq(*pOutCtrl, m_pszLad, m_nMainSeqUnit, 0);
     pAgent->setupState(t, callbackDataList, callbackDataList);
     C2DSeqAgent::SeqTbl scr_tbl[2][3] = {{{{83, 84, 85}}, {{80, 81, 82}}, {{86, 87, 88}}},
                                           {{{84, 85, 86}}, {{81, 82, 83}}, {{87, 88, 89}}}};
-    pOutScrollbar = new (com_malloc_d(sizeof(C2DSeqScrollbarCtrl), __FILE__ "(2386)", RET_ADDR())) C2DSeqScrollbarCtrl(this);
+    pOutScrollbar = new (__FILE__ "(2386)") C2DSeqScrollbarCtrl(this);
     pOutScrollbar->setupSeq(pOutCtrl, scr_tbl[getRsrcType()], m_pszLad, m_nMainSeqUnit, 12, 100);
     pOutScrollbar->setScrollRange(166.0f, 99, 4, FALSE);
     vPos.x = 176.0f;
@@ -1808,7 +1808,7 @@ C2DSeqSelectable* CSaveLoadUI::createDataItemPlate(D2::C2DSeqCtrl& parent, D2::C
     _LayoutInfo ltbl[2] = {{7, 1}, {8, 1}};
     const C2DSeqAgent::SeqTbl& t = s_seqDataPlateTbl[0][getRsrcType()];
     C2DSeqSelectable* pPlate =
-        new (com_malloc_d(sizeof(C2DSeqSelectable), __FILE__ "(2428)", RET_ADDR())) C2DSeqSelectable(this);
+        new (__FILE__ "(2428)") C2DSeqSelectable(this);
     pPlate->setupSeq(t, m_pszLad, m_nMainSeqUnit, s_seqDataActPlateTbl[0][getRsrcType()], 12);
     pPlate->setCtrlParent(&parent);
     G_RGBA rgba;
@@ -1826,7 +1826,7 @@ C2DSeqSelectable* CSaveLoadUI::createDataItemPlate(D2::C2DSeqCtrl& parent, D2::C
 
     short cirTbl[2] = {75, 79};
     _LayoutInfo cirltbl[2] = {{1, 1}, {1, 1}};
-    pOutNumCircle = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(2451)", RET_ADDR())) D2::C2DSeqCtrl;
+    pOutNumCircle = new (__FILE__ "(2451)") D2::C2DSeqCtrl;
     pOutNumCircle->setParent(pPlate->getSeqCtrl());
     pOutNumCircle->addSeq(m_pszLad, m_nMainSeqUnit, cirTbl[getRsrcType()]);
     _LayoutInfo& info2 = cirltbl[getRsrcType()];
@@ -1835,12 +1835,12 @@ C2DSeqSelectable* CSaveLoadUI::createDataItemPlate(D2::C2DSeqCtrl& parent, D2::C
     pOutNumCircle->changeLayer(12);
     pOutNumCircle->enableColorCtrl(TRUE);
     rgba.col = 0x80707070;
-    pOutNumFnt = new (com_malloc_d(sizeof(D2::C2DFnt), __FILE__ "(2462)", RET_ADDR()))
+    pOutNumFnt = new (__FILE__ "(2462)")
         D2::C2DFnt(0, 0, &rgba, 12, m_szDataItemID[nIdx], 0x40);
     pOutNumCircle->addFntShift(m_pszLad, m_nMainSeqUnit, pOutNumFnt, -6.5f, 5.5f);
 
     _LayoutInfo icontbl[2] = {{1, 2}, {1, 2}};
-    pOutIcon = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(2469)", RET_ADDR())) D2::C2DSeqCtrl;
+    pOutIcon = new (__FILE__ "(2469)") D2::C2DSeqCtrl;
     pOutIcon->setParent(pPlate->getSeqCtrl());
     pOutIcon->addSeq(m_pszLad, m_nIconSeqUnit, 0);
     _LayoutInfo& info3 = icontbl[getRsrcType()];
@@ -1849,13 +1849,13 @@ C2DSeqSelectable* CSaveLoadUI::createDataItemPlate(D2::C2DSeqCtrl& parent, D2::C
     pOutIcon->changeLayer(12);
     pOutIcon->enableColorCtrl(TRUE);
     rgba.col = 0x802864FA;
-    D2::C2DFnt* pTimeFnt = new (com_malloc_d(sizeof(D2::C2DFnt), __FILE__ "(2481)", RET_ADDR()))
+    D2::C2DFnt* pTimeFnt = new (__FILE__ "(2481)")
         D2::C2DFnt(0, 0, &rgba, 12, m_szDataItemTime[nIdx], 0x40);
     pPlate->getSeqCtrl()->addFntShift(m_pszLad, m_nMainSeqUnit, pTimeFnt, 112.0f, 20.0f);
 
     short clrIcon[2] = {118, 115};
     _LayoutInfo clr_icontbl[2] = {{1, 3}, {1, 3}};
-    pOutClearIcon = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(2492)", RET_ADDR())) D2::C2DSeqCtrl;
+    pOutClearIcon = new (__FILE__ "(2492)") D2::C2DSeqCtrl;
     pOutClearIcon->setParent(pPlate->getSeqCtrl());
     pOutClearIcon->addSeq(m_pszLad, m_nMainSeqUnit, clrIcon[getRsrcType()]);
     _LayoutInfo& info4 = clr_icontbl[getRsrcType()];
@@ -1869,17 +1869,17 @@ C2DSeqAgent* CSaveLoadUI::createMessageDlg(D2::C2DSeqCtrl*& pOutCtrl, D2::C2DFnt
     C2DSeqAgent::SeqTbl tbl[4] = {{{52, 53, 54}}, {{52, 53, 54}}, {{55, 56, 57}}, {{55, 56, 57}}};
     _LayoutInfo ltbl[4] = {{0, 0}, {0, 0}, {2, 0}, {2, 0}};
     C2DSeqAgent::SeqTbl& t = tbl[m_mode];
-    pOutCtrl = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(2522)", RET_ADDR())) D2::C2DSeqCtrl;
+    pOutCtrl = new (__FILE__ "(2522)") D2::C2DSeqCtrl;
     pOutCtrl->addSeq(m_pszLad, m_nMainSeqUnit, t._tbl[0]);
     pOutCtrl->changeLayer(14);
     G_RGBA rgba;
     rgba.col = 0x80707070;
-    D2::C2DFnt* pBody = new (com_malloc_d(sizeof(D2::C2DFnt), __FILE__ "(2528)", RET_ADDR()))
+    D2::C2DFnt* pBody = new (__FILE__ "(2528)")
         D2::C2DFnt(0, 0, &rgba, 14, m_szMessageDlgStr, 0x46);
     pBody->setSpace(0, 80);
     pOutCtrl->addFnt(m_pszLad, m_nMainSeqUnit, pBody);
     rgba.col = 0x80000070;
-    pOutFntInf = new (com_malloc_d(sizeof(D2::C2DFnt), __FILE__ "(2533)", RET_ADDR()))
+    pOutFntInf = new (__FILE__ "(2533)")
         D2::C2DFnt(0, 0, &rgba, 15, NULL, 0x40);
     pOutCtrl->addFntShift(m_pszLad, m_nMainSeqUnit, pOutFntInf, -120.0f, -56.0f);
     pOutCtrl->enableColorCtrl(TRUE);
@@ -1887,7 +1887,7 @@ C2DSeqAgent* CSaveLoadUI::createMessageDlg(D2::C2DSeqCtrl*& pOutCtrl, D2::C2DFnt
     _LayoutInfo& info = ltbl[m_mode];
     D2::C2DMan::getLayPosition(m_pszLad, info._nLayIdx, info._nSeqIdx, vPos, FALSE);
     pOutCtrl->setPos(vPos);
-    C2DSeqAgent* pAgent = new (com_malloc_d(sizeof(C2DSeqAgent), __FILE__ "(2542)", RET_ADDR())) C2DSeqAgent(this);
+    C2DSeqAgent* pAgent = new (__FILE__ "(2542)") C2DSeqAgent(this);
     pAgent->setupSeq(*pOutCtrl, m_pszLad, m_nMainSeqUnit, 0);
     pAgent->setupState(t, callbackMessageDlg, callbackMessageDlg);
     return pAgent;
@@ -1898,7 +1898,7 @@ C2DSeqSelectable* CSaveLoadUI::createMessageDlgBtn(D2::C2DSeqCtrl* pParent, INT 
     _LayoutInfo ltbl[4][2] = {{{0, 1}, {0, 2}}, {{0, 1}, {0, 2}}, {{2, 2}, {2, 1}}, {{2, 2}, {2, 1}}};
     C2DSeqAgent::SeqTbl& t = tbl[getRsrcType()];
     C2DSeqSelectable* pBtn =
-        new (com_malloc_d(sizeof(C2DSeqSelectable), __FILE__ "(2567)", RET_ADDR())) C2DSeqSelectable(this);
+        new (__FILE__ "(2567)") C2DSeqSelectable(this);
     pBtn->setupSeq(t, m_pszLad, m_nMainSeqUnit, actTbl[getRsrcType()], 14);
     pBtn->getSeqCtrl()->setParent(pParent);
     G_RGBA rgba;
@@ -2491,13 +2491,13 @@ HANDLE CSaveLoad::m_hThis = 0;
 CSaveLoad::CSaveLoad(CTask* pParent, SAVELOAD mode, GAMECLEAR clear) : CTask(pParent, 0x8000) {
     m_nFlag = 0;
     construct(mode);
-    new (com_malloc_d(sizeof(CSaveLoadUI), __FILE__ "(3485)", RET_ADDR())) CSaveLoadUI(*this, mode, clear);
+    new (__FILE__ "(3485)") CSaveLoadUI(*this, mode, clear);
 }
 CSaveLoad::CSaveLoad(CTask* pParent, SLMSG msg) : CTask(pParent, 0x8000) {
     m_nFlag = 0;
     construct(SLMODE_MESSAGE);
     s_nMessage = msg;
-    new (com_malloc_d(sizeof(CSaveLoadUI), __FILE__ "(3493)", RET_ADDR())) CSaveLoadUI(*this, SLMODE_MESSAGE, GAMECLEAR_NONE);
+    new (__FILE__ "(3493)") CSaveLoadUI(*this, SLMODE_MESSAGE, GAMECLEAR_NONE);
 }
 CSaveLoad::~CSaveLoad() {
     _ref(m_hThis) = 0;
@@ -2553,7 +2553,7 @@ public:
         m_nStep = 0;
         m_nFlag = 0;
         s_hSystemDataChecker = getHandle();
-        m_pMemoca = new (com_malloc_d(sizeof(CMemocaAgent), __FILE__ "(3599)", RET_ADDR())) CMemocaAgent(this);
+        m_pMemoca = new (__FILE__ "(3599)") CMemocaAgent(this);
     }
     virtual ~CSystemDataCheckerLocal() { s_hSystemDataChecker = 0; }
     virtual void main();
@@ -2585,7 +2585,7 @@ void CSystemDataChecker::start() {
         TRACE("\x82\xb7\x82\xc5\x82\xc9 CSystemDataChecker \x82\xcd\x8bN\x93\xae\x8d\xcf\x82\xdd\x82\xc5\x82\xb7\n");
         return;
     }
-    new (com_malloc_d(sizeof(CSystemDataCheckerLocal), __FILE__ "(3687)", RET_ADDR())) CSystemDataCheckerLocal(CTaskMan::getSysTask(0));
+    new (__FILE__ "(3687)") CSystemDataCheckerLocal(CTaskMan::getSysTask(0));
 }
 void CSystemDataChecker::abort() {
     if (!s_hSystemDataChecker) return;

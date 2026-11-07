@@ -79,7 +79,7 @@ INT CNowLoading::getMode() {
 void CNowLoading::start() {
     if (!s_pInstance) {
 #line 121
-        s_pInstance = new (com_malloc_d(sizeof(CNowLoading), __FILE__ "(121)", RET_ADDR()))
+        s_pInstance = new (__FILE__ "(121)")
             CNowLoading(CTaskMan::getSysTask(0));
     }
     if (s_pInstance) {
@@ -140,7 +140,7 @@ void CNowLoading::disp() {
 void CNowLoading::setupSprite() {
     if (!m_pSprite) {
 #line 236
-        m_pSprite = new (com_malloc_d(sizeof(CSprt), __FILE__ "(236)", RET_ADDR())) CSprt;
+        m_pSprite = new (__FILE__ "(236)") CSprt;
         if (!m_pSprite) AssertApp(__FILE__, __LINE__, "m_pSprite", 0);
     }
     m_nX = 208;

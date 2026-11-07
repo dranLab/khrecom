@@ -39,12 +39,12 @@ void CCollObj::init(COLL_KIND collKind, COLL_TYPE collType, HANDLE hTask, INT fg
     switch (collType) {
     case COLL_TYPE_POINT:
 #line 51
-        m_pCollision = new (com_malloc_d(sizeof(CPointCollision), __FILE__ "(51)", RET_ADDR())) CPointCollision;
+        m_pCollision = new (__FILE__ "(51)") CPointCollision;
         break;
     case COLL_TYPE_SPHERE:
     case COLL_TYPE_CAPSULE: {
 #line 55
-        CSphereCollision* pSphere = new (com_malloc_d(sizeof(CSphereCollision), __FILE__ "(55)", RET_ADDR())) CSphereCollision;
+        CSphereCollision* pSphere = new (__FILE__ "(55)") CSphereCollision;
         m_pCollision = pSphere;
         if (collKind & 1) pSphere->m_shiftY = 0;
         break;
@@ -52,27 +52,27 @@ void CCollObj::init(COLL_KIND collKind, COLL_TYPE collType, HANDLE hTask, INT fg
     case COLL_TYPE_COLUMN:
     case COLL_TYPE_COLUMNR:
 #line 65
-        m_pCollision = new (com_malloc_d(sizeof(CColumnCollision), __FILE__ "(65)", RET_ADDR())) CColumnCollision;
+        m_pCollision = new (__FILE__ "(65)") CColumnCollision;
         break;
     case COLL_TYPE_POLY3:
 #line 71
-        m_pCollision = new (com_malloc_d(sizeof(CPoly3Collision), __FILE__ "(71)", RET_ADDR())) CPoly3Collision;
+        m_pCollision = new (__FILE__ "(71)") CPoly3Collision;
         break;
     case COLL_TYPE_MODEL:
 #line 74
-        m_pCollision = new (com_malloc_d(sizeof(CModelCollision), __FILE__ "(74)", RET_ADDR())) CModelCollision;
+        m_pCollision = new (__FILE__ "(74)") CModelCollision;
         break;
     case COLL_TYPE_ETC:
 #line 77
-        m_pCollision = new (com_malloc_d(sizeof(CEtcCollision), __FILE__ "(77)", RET_ADDR())) CEtcCollision;
+        m_pCollision = new (__FILE__ "(77)") CEtcCollision;
         break;
     case COLL_TYPE_CIRCLE:
 #line 80
-        m_pCollision = new (com_malloc_d(sizeof(CCircleCollision), __FILE__ "(80)", RET_ADDR())) CCircleCollision;
+        m_pCollision = new (__FILE__ "(80)") CCircleCollision;
         break;
     case COLL_TYPE_INFINITY:
 #line 83
-        m_pCollision = new (com_malloc_d(sizeof(CInfinityCollision), __FILE__ "(83)", RET_ADDR())) CInfinityCollision;
+        m_pCollision = new (__FILE__ "(83)") CInfinityCollision;
         break;
     default:
         return;
@@ -172,13 +172,13 @@ void CCollObj::setShiftY(FLOAT inShiftY) {
 
 #line 215
 void CCollObj::collisionInit() {
-    m_pCollListP = new (com_malloc_d(sizeof(CCollisionList), __FILE__ "(216)", RET_ADDR())) CCollisionList;
-    m_pCollListE = new (com_malloc_d(sizeof(CCollisionList), __FILE__ "(217)", RET_ADDR())) CCollisionList;
-    m_pCollListI = new (com_malloc_d(sizeof(CCollisionList), __FILE__ "(218)", RET_ADDR())) CCollisionList;
-    m_pCollListR = new (com_malloc_d(sizeof(CCollisionList), __FILE__ "(219)", RET_ADDR())) CCollisionList;
-    m_pCollListR2 = new (com_malloc_d(sizeof(CCollisionList), __FILE__ "(220)", RET_ADDR())) CCollisionList;
-    m_pCollListRC = new (com_malloc_d(sizeof(CCollisionList), __FILE__ "(221)", RET_ADDR())) CCollisionList;
-    m_pCollListA = new (com_malloc_d(sizeof(CCollisionList), __FILE__ "(223)", RET_ADDR())) CCollisionList;
+    m_pCollListP = new (__FILE__ "(216)") CCollisionList;
+    m_pCollListE = new (__FILE__ "(217)") CCollisionList;
+    m_pCollListI = new (__FILE__ "(218)") CCollisionList;
+    m_pCollListR = new (__FILE__ "(219)") CCollisionList;
+    m_pCollListR2 = new (__FILE__ "(220)") CCollisionList;
+    m_pCollListRC = new (__FILE__ "(221)") CCollisionList;
+    m_pCollListA = new (__FILE__ "(223)") CCollisionList;
 }
 
 void CCollObj::collisionDelete() {

@@ -352,7 +352,7 @@ void CAudioDecImpl::getIopEmptyArea(INT& pd0, INT& d0, INT& pd1, INT& d1, INT nP
 }
 
 void CAudioDec::create() {
-    s_pAudioDec = new (com_malloc_d(sizeof(CAudioDecImpl), __FILE__ "(631)", RET_ADDR())) CAudioDecImpl;
+    s_pAudioDec = new (__FILE__ "(631)") CAudioDecImpl;
     if (!s_pAudioDec) {
         AssertApp(__FILE__, 632, "s_pAudioDec", 0);
     }
@@ -411,7 +411,7 @@ void CAudioDec::reset() {
     if (s_pAudioDec) {
         s_pAudioDec->reset();
     } else {
-        s_pAudioDec = new (com_malloc_d(sizeof(CAudioDecImpl), __FILE__ "(701)", RET_ADDR())) CAudioDecImpl;
+        s_pAudioDec = new (__FILE__ "(701)") CAudioDecImpl;
     }
 }
 

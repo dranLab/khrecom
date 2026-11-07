@@ -49,7 +49,7 @@ CCollMapCamera::CCollMapCamera() {
     CCMCSemiModelList*& rList = m_pSemiModelList;
     if (!rList) {
 #line 24
-        rList = new (com_malloc_d(sizeof(CCMCSemiModelList), __FILE__ "(24)", RET_ADDR())) CCMCSemiModelList;
+        rList = new (__FILE__ "(24)") CCMCSemiModelList;
         m_fgListExist = FALSE;
     } else {
         m_fgListExist = TRUE;
@@ -117,7 +117,7 @@ INT CCollMapCamera::collideMapTrueCamera(INT fgContinue) {
                     }
                     if (!fgExist) {
 #line 134
-                        CMCSemiModel* pEntry = new (com_malloc_d(sizeof(CMCSemiModel), __FILE__ "(134)", RET_ADDR())) CMCSemiModel;
+                        CMCSemiModel* pEntry = new (__FILE__ "(134)") CMCSemiModel;
                         pEntry->center = vTrans;
                         pEntry->transparency = 1.0f;
                         pEntry->flag = 1;

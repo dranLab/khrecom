@@ -166,7 +166,7 @@ void CRootTask::_phaseInit() {
             CModelMan::reset();
             pRootTop = getSysTask(14);
 #line 195
-            new (com_malloc_d(sizeof(CTexCtrl), __FILE__ "(195)", RET_ADDR())) CTexCtrl(this);
+            new (__FILE__ "(195)") CTexCtrl(this);
             CFrecFont::setupFonts();
             CSceneInfo::clear();
             ATEL::CChatMan::initialize();
@@ -237,7 +237,7 @@ void CRootTask::_preparePhaseChkMemoca() {
     m_nStep = 0;
     if (*pCount == 0) {
 #line 317
-        new (com_malloc_d(sizeof(CSaveLoad), __FILE__ "(317)", RET_ADDR())) CSaveLoad(this, SLMODE_BOOT, GAMECLEAR_NONE);
+        new (__FILE__ "(317)") CSaveLoad(this, SLMODE_BOOT, GAMECLEAR_NONE);
     } else {
         m_nStep = 1;
     }
@@ -253,7 +253,7 @@ void CRootTask::_phaseChkMemoca() {
         break;
     case 1:
 #line 340
-        m_pMemoca = new (com_malloc_d(sizeof(CMemocaAgent), __FILE__ "(340)", RET_ADDR())) CMemocaAgent(this);
+        m_pMemoca = new (__FILE__ "(340)") CMemocaAgent(this);
         if (!(m_pMemoca)) AssertApp(__FILE__, __LINE__, "m_pMemoca", 0);
         m_pMemoca->reqLoadSysData();
         m_nStep = 2;

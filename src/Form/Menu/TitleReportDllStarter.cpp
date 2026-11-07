@@ -96,14 +96,14 @@ void CTitleReportDllStarter::stateDllLoad() {
         switch (m_LaunchMode) {
         case 0:
 #line 126
-            m_hChildTask = (new (com_malloc_d(sizeof(BattleReport::CBtlReport), __FILE__ "(126)", RET_ADDR()))
+            m_hChildTask = (new (__FILE__ "(126)")
                                 BattleReport::CBtlReport(this, m_nParam))->getHandle();
             break;
         case 1:
             break;
         case 2:
 #line 128
-            new (com_malloc_d(sizeof(CTitle), __FILE__ "(128)", RET_ADDR())) CTitle(this);
+            new (__FILE__ "(128)") CTitle(this);
             break;
         }
         changeState(2);

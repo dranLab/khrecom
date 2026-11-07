@@ -108,7 +108,7 @@ extern "C" char D_0047E328[];
 
 
 
-#define GAME_NEW(line, T) new (com_malloc_d(sizeof(T), __FILE__ "(" #line ")", RET_ADDR())) T
+
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 
 class CGameSub;
@@ -333,7 +333,7 @@ void CGameMain::pause(BOOL bOn, INT nMode) {
     if (bOn) {
         CSound::pauseAllSE();
 #line 523
-        CPause* p = GAME_NEW(523, CPause)(this, nMode);
+        CPause* p = new (__FILE__ "(523)") CPause(this, nMode);
         ASSERT(p);
         m_hPause = p->getHandle();
         m_nGameProcFlag |= 0x400;
@@ -349,7 +349,7 @@ void CGameMain::camp(BOOL bOn) {
         CSound::pauseAllSE();
         if (CGame::isSoraGame()) PLM::removeBattlePlayerRsrc(0);
 #line 553
-        CCamp* p = GAME_NEW(553, CCamp)(this, 0);
+        CCamp* p = new (__FILE__ "(553)") CCamp(this, 0);
         ASSERT(p);
         m_hCamp = p->getHandle();
         m_nGameProcFlag |= 0x400;
@@ -364,7 +364,7 @@ void CGameMain::worldMap(BOOL bOn) {
     if (bOn) {
         CSound::pauseAllSE();
 #line 578
-        CCamp* p = GAME_NEW(578, CCamp)(this, 1);
+        CCamp* p = new (__FILE__ "(578)") CCamp(this, 1);
         ASSERT(p);
         m_hWorldMap = p->getHandle();
         m_nGameProcFlag |= 0x400;
@@ -624,7 +624,7 @@ void CGameMain::setupBattleRsrc() {
         }
         if (!m_pSubBattle) {
 #line 1066
-            m_pSubBattle = GAME_NEW(1066, CGameSubBattle)();
+            m_pSubBattle = new (__FILE__ "(1066)") CGameSubBattle();
             ASSERT(m_pSubBattle);
         }
         reqLoadInconstGameRsrc();
@@ -670,7 +670,7 @@ void CGameMain::setupField() {
         resumeTaskInGame(1);
         if (!m_pSubField) {
 #line 1156
-            m_pSubField = GAME_NEW(1156, CGameSubField)();
+            m_pSubField = new (__FILE__ "(1156)") CGameSubField();
             if (!CSceneInfo::isEventScene()) {
                 reqLoadInconstGameRsrc();
                 reqLoadInconstWorldRsrc();
@@ -1222,7 +1222,7 @@ BOOL CGameMain::reqSave() {
     if (!isPauseEnable()) return FALSE;
     m_nGameProcFlag |= 0x1000;
 #line 2190
-    GAME_NEW(2190, CSaveLoad)(this, (SAVELOAD)0, (GAMECLEAR)0);
+    new (__FILE__ "(2190)") CSaveLoad(this, (SAVELOAD)0, (GAMECLEAR)0);
     return TRUE;
 }
 BOOL CGameMain::reqGameOver(BOOL bHeartless) {
@@ -1249,7 +1249,7 @@ void CGameMain::preGameover() {
     ASSERT(0 == (m_nGameProcFlag & _PROCFLAG_GAMEOVER_PROC));
     m_nGameProcFlag |= _PROCFLAG_GAMEOVER_PROC;
 #line 2239
-    GAME_NEW(2239, CGameOver)(this, (m_nGameProcFlag >> 1) & 1);
+    new (__FILE__ "(2239)") CGameOver(this, (m_nGameProcFlag >> 1) & 1);
 }
 void CGameMain::gameover() {
     if (m_nGameProcFlag & 0x30) {
@@ -1373,16 +1373,16 @@ void CGame::main() {
     case 0:
         CMainApp::startCountPlayTime();
 #line 2551
-        s_pMain = GAME_NEW(2551, CGameMain)(*this);
+        s_pMain = new (__FILE__ "(2551)") CGameMain(*this);
         ASSERT(s_pMain);
 #line 2555
-        s_pFadeMask = GAME_NEW(2555, CFadeIOMask)(*this, 0xb);
+        s_pFadeMask = new (__FILE__ "(2555)") CFadeIOMask(*this, 0xb);
         s_nFadeProcPrio = FADE_PROC_PRIO_0;
         CAtel::createScreenFader();
 #line 2561
-        GAME_NEW(2561, CPreGameParent)(this);
+        new (__FILE__ "(2561)") CPreGameParent(this);
 #line 2564
-        GAME_NEW(2564, CGameParent)(this);
+        new (__FILE__ "(2564)") CGameParent(this);
         s_nGameStep = 1;
         break;
     case 1:
@@ -1561,7 +1561,7 @@ void CGame::startTheaterMode(CTask* pParent, BOOL bSora, SHORT nArea, SHORT nSce
     CSceneInfo::reqChangeScene(nArea, nScene, -1, 1, 1);
     CSceneInfo::update();
 #line 2961
-    GAME_NEW(2961, CGame)(pParent);
+    new (__FILE__ "(2961)") CGame(pParent);
 }
 BOOL CGame::isExitTheaterMode() {
     BOOL bRes = (s_pMain == NULL);

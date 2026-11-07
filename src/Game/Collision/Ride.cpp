@@ -77,7 +77,7 @@ static inline void _unitMatrixVu0(FMATRIX& m) {
 
 #line 20
 CRide::CRide() {
-    m_pRiderList = new (com_malloc_d(sizeof(CRiderList), D_00489670, RET_ADDR())) CRiderList;
+    m_pRiderList = new (D_00489670) CRiderList;
     m_fgOnLook = 0;
 }
 

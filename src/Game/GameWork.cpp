@@ -33,7 +33,7 @@ using STORAGE::MCWork2;
 
 inline void* operator new(size_t, void* p) throw() { return p; }
 
-#define NEW(line, T) new (com_malloc_d(sizeof(T), __FILE__ "(" #line ")", RET_ADDR())) T
+
 
 MCWork* CGameWork::m_pMCWork = NULL;
 MCWork2* CGameWork::m_pMCWork2 = NULL;
@@ -60,22 +60,22 @@ void CGameWork::initialize() {
     UINT* pSize = s_SizeTbl;
     INT i;
     for (i = 0; i < 2; i++) {
-        m_ppWorkTbl[i][0] = NEW(64, CIntWork)(*pSize++);
-        m_ppWorkTbl[i][1] = NEW(65, CByteWork)(*pSize++);
-        m_ppWorkTbl[i][2] = NEW(66, CBitWork)(*pSize++);
+        m_ppWorkTbl[i][0] = new (__FILE__ "(64)") CIntWork(*pSize++);
+        m_ppWorkTbl[i][1] = new (__FILE__ "(65)") CByteWork(*pSize++);
+        m_ppWorkTbl[i][2] = new (__FILE__ "(66)") CBitWork(*pSize++);
     }
     pSize = s_SizeTbl;
     for (i = 0; i < 2; i++) {
-        m_ppWorkBackupTbl[i][0] = NEW(71, CIntWork)(*pSize++);
-        m_ppWorkBackupTbl[i][1] = NEW(72, CByteWork)(*pSize++);
-        m_ppWorkBackupTbl[i][2] = NEW(73, CBitWork)(*pSize++);
+        m_ppWorkBackupTbl[i][0] = new (__FILE__ "(71)") CIntWork(*pSize++);
+        m_ppWorkBackupTbl[i][1] = new (__FILE__ "(72)") CByteWork(*pSize++);
+        m_ppWorkBackupTbl[i][2] = new (__FILE__ "(73)") CBitWork(*pSize++);
         m_ppWorkBackupTbl2nd[i][0] = NULL;
         m_ppWorkBackupTbl2nd[i][1] = NULL;
         m_ppWorkBackupTbl2nd[i][2] = NULL;
     }
-    m_pMCWork = NEW(78, MCWork);
-    m_pMCWork2 = NEW(79, MCWork2);
-    m_pMCWorkBackup = NEW(80, MCWork);
+    m_pMCWork = new (__FILE__ "(78)") MCWork;
+    m_pMCWork2 = new (__FILE__ "(79)") MCWork2;
+    m_pMCWorkBackup = new (__FILE__ "(80)") MCWork;
     m_pMCWorkBackup2nd = NULL;
     resetAll();
 }
@@ -217,11 +217,11 @@ void CGameWork::backup(BACKUP b) {
     if (b == BACKUP_SECONDARY) {
         UINT* pSize = s_SizeTbl;
         for (INT i = 0; i < 2; i++) {
-            if (!m_ppWorkBackupTbl2nd[i][0]) m_ppWorkBackupTbl2nd[i][0] = NEW(336, CIntWork)(*pSize++);
-            if (!m_ppWorkBackupTbl2nd[i][1]) m_ppWorkBackupTbl2nd[i][1] = NEW(338, CByteWork)(*pSize++);
-            if (!m_ppWorkBackupTbl2nd[i][2]) m_ppWorkBackupTbl2nd[i][2] = NEW(340, CBitWork)(*pSize++);
+            if (!m_ppWorkBackupTbl2nd[i][0]) m_ppWorkBackupTbl2nd[i][0] = new (__FILE__ "(336)") CIntWork(*pSize++);
+            if (!m_ppWorkBackupTbl2nd[i][1]) m_ppWorkBackupTbl2nd[i][1] = new (__FILE__ "(338)") CByteWork(*pSize++);
+            if (!m_ppWorkBackupTbl2nd[i][2]) m_ppWorkBackupTbl2nd[i][2] = new (__FILE__ "(340)") CBitWork(*pSize++);
         }
-        if (!m_pMCWorkBackup2nd) m_pMCWorkBackup2nd = NEW(343, MCWork);
+        if (!m_pMCWorkBackup2nd) m_pMCWorkBackup2nd = new (__FILE__ "(343)") MCWork;
     }
     CPlayer::exportStatus();
     for (INT i = 0; i < 2; i++) {

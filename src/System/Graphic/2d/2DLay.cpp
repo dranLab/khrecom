@@ -93,7 +93,7 @@ HANDLE C2DLay::create(UINT inNo) {
     LAY_LAYOUT* pLayout = &m_pLayLayout[inNo];
     UINT nPos = pLayout->pos;
     UINT nMax = pLayout->max;
-    C2DLayObj* p2DLayObj = new (com_malloc_d(sizeof(C2DLayObj), __FILE__ "(84)", RET_ADDR())) C2DLayObj;
+    C2DLayObj* p2DLayObj = new (__FILE__ "(84)") C2DLayObj;
     HANDLE handle = p2DLayObj->create(m_hBase, nMax, &m_pLayScreen[nPos], m_pSeqHandle);
     if (!handle && p2DLayObj) delete p2DLayObj;
     return handle;

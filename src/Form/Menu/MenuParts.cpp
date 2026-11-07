@@ -9,7 +9,7 @@
 
 inline void* operator new(size_t, void* p) throw() { return p; }
 
-#define NEW(line, T) new (com_malloc_d(sizeof(T), __FILE__ "(" #line ")", RET_ADDR())) T
+
 
 using namespace D2;
 
@@ -41,7 +41,7 @@ void CScrollBar::init(const CHAR* pSeqName, USHORT nLayer, USHORT* pSeqTbl, FVEC
     m_fBasicPoasY = vPos.y;
     for (INT i = 0; i < 3; i++) {
 #line 58
-        C2DSeqCtrl* pCtrl = m_pScrollBar[i] = NEW(58, C2DSeqCtrl);
+        C2DSeqCtrl* pCtrl = m_pScrollBar[i] = new (__FILE__ "(58)") C2DSeqCtrl;
         pCtrl->setLayer(nLayer);
         pCtrl->enableColorCtrl(TRUE);
         pCtrl->addSeq((LPCTSTR)pSeqName, pSeqTbl[i]);
@@ -108,7 +108,7 @@ void CButton::init(const CHAR* pSeqName, USHORT nLayer, const USHORT* pSeqTbl, F
     m_pSeqName = pSeqName;
     m_pSeqTbl = pSeqTbl;
 #line 161
-    (m_pButton = NEW(161, C2DSeqCtrl))->setLayer(nLayer);
+    (m_pButton = new (__FILE__ "(161)") C2DSeqCtrl)->setLayer(nLayer);
     m_pButton->enableColorCtrl(TRUE);
     m_currentSeq = (BUTTON_SEQ)(nSeqIdx < 0 ? 1 : nSeqIdx + 1);
     m_pButton->addSeq((LPCTSTR)pSeqName, pSeqTbl[m_currentSeq - 1]);
@@ -123,7 +123,7 @@ void CButton::init(const CHAR* pSeqName, USHORT nLayer, const USHORT* pSeqTbl, F
             rgba.c = 0x807C7C7C;
         }
 #line 179
-        m_pFnt = NEW(179, C2DFnt)(0, 0, &rgba, iFontSize, NULL, iFontStyle);
+        m_pFnt = new (__FILE__ "(179)") C2DFnt(0, 0, &rgba, iFontSize, NULL, iFontStyle);
         m_pFnt->allocText(pButtonFont);
         m_pButton->addFntShift((LPCTSTR)pSeqName, m_pFnt, fShiftX, fShiftY);
     }

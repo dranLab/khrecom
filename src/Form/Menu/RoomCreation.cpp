@@ -39,7 +39,7 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 #include "Game/AttachCard.h"
 #include "include_asm.h"
 
-#define NEW(line, T) new (com_malloc_d(sizeof(T), __FILE__ "(" #line ")", RET_ADDR())) T
+
 
 
 /* Game/CardKind's card table: a static in the original's header, emitted (with its strings) at the end of
@@ -605,14 +605,14 @@ void CRoomCreation::main() {
     case 2:
         m_hLay = C2DMan::create(m_pLadName, 4);
 #line 330
-        m_pTitleCtrl = NEW(330, C2DSeqCtrl);
+        m_pTitleCtrl = new (__FILE__ "(330)") C2DSeqCtrl;
         m_pTitleCtrl->setLayer(12);
         m_pTitleCtrl->addSeq(pSeqName2, 0);
         m_pTitleCtrl->addSeq(m_pSeqName, 0x7A);
         vPos.init();
         m_pTitleCtrl->setPos(vPos);
 #line 337
-        m_pCurrentRoomNameCtrl = NEW(337, C2DSeqCtrl);
+        m_pCurrentRoomNameCtrl = new (__FILE__ "(337)") C2DSeqCtrl;
         m_pCurrentRoomNameCtrl->setLayer(12);
         m_pCurrentRoomNameCtrl->enableColorCtrl(TRUE);
         m_pCurrentRoomNameCtrl->addSeq(m_pSeqName, 0x7A);
@@ -621,7 +621,7 @@ void CRoomCreation::main() {
         _setCard(card, m_pRoomInfo->getRoomNameCardID(), 0);
         rgba.col = 0x807C7C7C;
 #line 346
-        m_pCurrentRoomNameFnt = NEW(346, C2DFnt)(0, 0, &rgba, 15, card.getName(), 0x241);
+        m_pCurrentRoomNameFnt = new (__FILE__ "(346)") C2DFnt(0, 0, &rgba, 15, card.getName(), 0x241);
         _setFntLayer(m_pCurrentRoomNameFnt, 12, 0);
         m_pCurrentRoomNameCtrl->addFnt(m_pSeqName, m_pCurrentRoomNameFnt);
         CSound::playSE(0xC, -1, 0x40);
@@ -691,7 +691,7 @@ void CRoomCreation::main() {
         break;
     case 9: {
 #line 423
-        m_pPathCamera = NEW(423, CPathCamera)(this);
+        m_pPathCamera = new (__FILE__ "(423)") CPathCamera(this);
         m_pPathCamera->setLocal(TRUE);
         m_pPathCamera->init(m_pDoorInfo->_id >= 2 ? pCameraName[0] : pCameraName[1], TRUE, FALSE, 0x80);
         m_pPathCamera->run();
@@ -700,7 +700,7 @@ void CRoomCreation::main() {
         INT iBone = g_pPlayer->getBoneIndex(CGame::isSoraGame() ? pBoneName[0] : pBoneName[1], 0);
         pCoord = &g_pPlayer->Crd(iBone);
 #line 433
-        m_pAttachCard = NEW(433, CAttachCard)(g_pPlayer);
+        m_pAttachCard = new (__FILE__ "(433)") CAttachCard(g_pPlayer);
         if (CGame::isSoraGame()) {
             vColor.set(0.1f, -0.08f, 0.12f, 1.0f);
             FVECTOR* pColor2 = &vColor2;
@@ -899,7 +899,7 @@ INT CRoomCreation::menuMain() {
         if (m_fgKeyCard) {
             rgba.col = 0x807E7E7E;
 #line 602
-            m_pFntInstruction = NEW(602, CStrPrim)(1, -(SCREEN_HEIGHT / 2) + 100, &rgba, 0x16, pKeyStr, 0x1202, 0xFFFF28);
+            m_pFntInstruction = new (__FILE__ "(602)") CStrPrim(1, -(SCREEN_HEIGHT / 2) + 100, &rgba, 0x16, pKeyStr, 0x1202, 0xFFFF28);
             m_pFntInstruction->m_P0.set(0x18, -0x5C0, 0xFFFF280);
             m_pFntInstruction->setLayerFG(13);
             CGameWork::setByte(1, 0x140, 4);
@@ -909,13 +909,13 @@ INT CRoomCreation::menuMain() {
         vec.set(256.0f - fWidth * nNorma, SCREEN_HEIGHT / 2 - 22, 0.0f, 1.0f);
         for (INT i = nNorma; i >= 0; i--) {
 #line 618
-            C2DSeqCtrl* pCtrl = m_pCardNormaCtrl[i] = NEW(618, C2DSeqCtrl);
+            C2DSeqCtrl* pCtrl = m_pCardNormaCtrl[i] = new (__FILE__ "(618)") C2DSeqCtrl;
             pCardWinTmp = pCtrl;
             pCardWinTmp->enableColorCtrl(TRUE);
             pCardWinTmp->setPos(vec);
             pCardWinTmp->addSeq(m_pSeqName, 0x38);
 #line 623
-            C2DCard* pCard = m_pCardNorma[i] = NEW(623, C2DCard);
+            C2DCard* pCard = m_pCardNorma[i] = new (__FILE__ "(623)") C2DCard;
             pCard->enableColorCtrl(TRUE);
             pCard->setLayer(12);
             if (i == 0 && m_fgKeyCard) {
@@ -935,7 +935,7 @@ INT CRoomCreation::menuMain() {
             vec.x += fWidth + fWidth;
         }
 #line 647
-        m_pCardWinCtrl = NEW(647, C2DSeqCtrl);
+        m_pCardWinCtrl = new (__FILE__ "(647)") C2DSeqCtrl;
         m_pCardWinCtrl->setLayer(12);
         m_pCardWinCtrl->addSeq(m_pSeqName, 0x80);
         C2DMan::getLayPosition(m_pLadName, 0, 2, vec, 0);
@@ -944,7 +944,7 @@ INT CRoomCreation::menuMain() {
         vec2.init();
         for (INT i = 0; i < 6; i++) {
 #line 657
-            pCardWinTmp = m_pCardWinHolder[i] = NEW(657, C2DSeqCtrl);
+            pCardWinTmp = m_pCardWinHolder[i] = new (__FILE__ "(657)") C2DSeqCtrl;
             pCardWinTmp->setLayer(12);
             pCardWinTmp->enableColorCtrl(TRUE);
             pCardWinTmp->addSeq(m_pSeqName, 8);
@@ -953,7 +953,7 @@ INT CRoomCreation::menuMain() {
             pCardWinTmp->setLocalPos(vec2);
         }
 #line 667
-        pCardWinTmp = m_pCardWinInfo = NEW(667, C2DSeqCtrl);
+        pCardWinTmp = m_pCardWinInfo = new (__FILE__ "(667)") C2DSeqCtrl;
         pCardWinTmp->setLayer(12);
         pCardWinTmp->addSeq(m_pSeqName, 0x7D);
         C2DMan::getLayPosition(m_pLadName, 0, 4, vec2, 0);
@@ -961,49 +961,49 @@ INT CRoomCreation::menuMain() {
         m_pCardWinInfo->addSeq(m_pSeqName, 0x30);
         m_pCardWinInfo->addSeq(m_pSeqName, 0x30);
 #line 676
-        pCardWinTmp = m_pExplainCtrl[0] = NEW(676, C2DSeqCtrl);
+        pCardWinTmp = m_pExplainCtrl[0] = new (__FILE__ "(676)") C2DSeqCtrl;
         pCardWinTmp->setLayer(12);
         pCardWinTmp->addSeq(m_pSeqName, 0x59);
         C2DMan::getLayPosition(m_pLadName, 0, 5, vec2, 0);
         pCardWinTmp->setPos(vec2);
         rgba.col = 0x807C7C7C;
 #line 682
-        m_pExplainFnt[0] = NEW(682, C2DFnt)(0, 0, &rgba, 14, NULL, 0x240);
+        m_pExplainFnt[0] = new (__FILE__ "(682)") C2DFnt(0, 0, &rgba, 14, NULL, 0x240);
         m_pExplainFnt[0]->setLayer(12, 0);
         m_pExplainFnt[0]->setSpace(-2, 0);
         pCardWinTmp->addFntShift(m_pSeqName, m_pExplainFnt[0], 12.0f, 6.0f);
         pCardWinTmp->enableColorCtrl(TRUE);
 #line 691
-        pCardWinTmp = m_pExplainCtrl[1] = NEW(691, C2DSeqCtrl);
+        pCardWinTmp = m_pExplainCtrl[1] = new (__FILE__ "(691)") C2DSeqCtrl;
         pCardWinTmp->setLayer(12);
         pCardWinTmp->addSeq(m_pSeqName, 0x5F);
         C2DMan::getLayPosition(m_pLadName, 0, 6, vec2, 0);
         pCardWinTmp->setPos(vec2);
 #line 696
-        m_pExplainFnt[1] = NEW(696, C2DFnt)(0, 0, &rgba, 15, NULL, 0x240);
+        m_pExplainFnt[1] = new (__FILE__ "(696)") C2DFnt(0, 0, &rgba, 15, NULL, 0x240);
         m_pExplainFnt[1]->setLayer(12, 0);
         pCardWinTmp->addFntShift(m_pSeqName, m_pExplainFnt[1], 0.0f, 8.0f);
         pCardWinTmp->enableColorCtrl(TRUE);
         initInfoNum(vec);
         rgba.col = 0x807C7C7C;
 #line 707
-        m_pRoomNameFnt = NEW(707, C2DFnt)(0, 0, &rgba, 15, "", 0x240);
+        m_pRoomNameFnt = new (__FILE__ "(707)") C2DFnt(0, 0, &rgba, 15, "", 0x240);
         m_pRoomNameFnt->setLayer(12, 0);
         m_pCardWinCtrl->addFntShift(m_pSeqName, m_pRoomNameFnt, -176.0f, 48.0f);
         rgba.col = 0x80007878;
 #line 712
-        m_pCardVolFnt = NEW(712, C2DFnt)(0, 0, &rgba, 15, "", 0x241);
+        m_pCardVolFnt = new (__FILE__ "(712)") C2DFnt(0, 0, &rgba, 15, "", 0x241);
         m_pCardVolFnt->setLayer(12, 0);
         m_pCardWinCtrl->addFntShift(m_pSeqName, m_pCardVolFnt, 22.0f, 48.0f);
         initCard();
 #line 736
-        m_pScrollBar = NEW(736, CScrollBar);
+        m_pScrollBar = new (__FILE__ "(736)") CScrollBar;
         vec2.set(180.0f, -29.0f, 0.0f, 1.0f);
         m_pScrollBar->init(m_pSeqName, 12, scrollBarSeqTbl, vec2, 59.0f, m_pCardWinCtrl);
         selectDispCard();
         changeCursor(0, 0);
 #line 746
-        m_pCardNumCtrl = NEW(746, C2DSeqCtrl);
+        m_pCardNumCtrl = new (__FILE__ "(746)") C2DSeqCtrl;
         m_pCardNumCtrl->setLayer(13);
         m_pCardNumCtrl->addSeq(m_pSeqName, 0x26);
         C2DMan::getLayPosition(m_pLadName, 3, 0, vec, 0);
@@ -1407,7 +1407,7 @@ INT CRoomCreation::menuMain() {
 void CRoomCreation::initInfoNum(FVECTOR& vec) {
     FVECTOR vec2;
     for (INT i = 0; i < 10; i++) {
-        C2DSeqCtrl* pCtrl = m_pCardWinInfoNum[i] = NEW(1288, C2DSeqCtrl);
+        C2DSeqCtrl* pCtrl = m_pCardWinInfoNum[i] = new (__FILE__ "(1288)") C2DSeqCtrl;
         pCtrl->setLayer(12);
         pCtrl->addSeq("room01:00", i * 2 + 0x11);
         pCtrl->setParent(m_pCardWinCtrl);
@@ -1458,7 +1458,7 @@ void CRoomCreation::initCard() {
         INT cardKind = m_nCardKind[i];
         if (m_nCategorySelect == 0 || cardDataTbl[cardKind].nCategory1 - 8 == m_nCategorySelect) {
             _setCard(card, cardKind, -1);
-            C2DCard* pCard = m_pCardWinCard[m_nCardSelectMax] = NEW(1355, C2DCard);
+            C2DCard* pCard = m_pCardWinCard[m_nCardSelectMax] = new (__FILE__ "(1355)") C2DCard;
             pCard->setLayer(12);
             pCard->enableColorCtrl(TRUE);
             pCard->create(card);
@@ -1471,13 +1471,13 @@ void CRoomCreation::initCard() {
         }
     }
     if (!m_pCardSampleCtrl) {
-        m_pCardSampleCtrl = NEW(1370, C2DSeqCtrl);
+        m_pCardSampleCtrl = new (__FILE__ "(1370)") C2DSeqCtrl;
         vec.set(0.0f, -20.0f, 0.0f, 1.0f);
         m_pCardSampleCtrl->setLocalPos(vec);
         m_pCardSampleCtrl->addSeq("room01:00", 9);
         m_pCardSampleCtrl->setParent(m_pCardWinInfo);
         if (m_pCardWinCard[m_nCardSelect]) {
-            m_pCardSample = NEW(1376, C2DCard);
+            m_pCardSample = new (__FILE__ "(1376)") C2DCard;
             m_pCardSample->setLayer(12);
             m_pCardSample->create(m_pCardWinCard[m_nCardSelect]->m_card);
             m_pCardSample->setParent(m_pCardSampleCtrl);
@@ -1525,7 +1525,7 @@ void CRoomCreation::initNumHolder(FVECTOR& vec) {
     rgba.col = 0x80006060;
     vec2.init();
     for (INT i = 0; i < 10; i++) {
-        C2DSeqCtrl* pCtrl = m_pCardNumHolder[i] = NEW(1462, C2DSeqCtrl);
+        C2DSeqCtrl* pCtrl = m_pCardNumHolder[i] = new (__FILE__ "(1462)") C2DSeqCtrl;
         pCtrl->setLayer(13);
         pCtrl->addSeq("room01:00", 0x24);
         pCtrl->setParent(m_pCardNumCtrl);
@@ -1536,7 +1536,7 @@ void CRoomCreation::initNumHolder(FVECTOR& vec) {
         pCtrl->addSeqShift("room01:00", i * 2 + 0x3C, 10.0f, 24.0f);
         pCtrl->enableDisp(FALSE);
         sprintf(chrBuf, pStr, i);
-        m_pCardNumFnt[i] = NEW(1474, C2DFnt)(0, 0, &rgba, 15, "", 0x40);
+        m_pCardNumFnt[i] = new (__FILE__ "(1474)") C2DFnt(0, 0, &rgba, 15, "", 0x40);
         m_pCardNumFnt[i]->allocText(chrBuf);
         pCtrl->addFntShift("room01:00", m_pCardNumFnt[i], 34.0f, 40.0f);
     }
@@ -1643,7 +1643,7 @@ void CRoomCreation::changeCursor(INT nSel, INT nIdx) {
     static LPCTSTR pCardSeqName = "card:00";
     FLOAT* fPos;
     if (!m_pCursorCtrl) {
-        m_pCursorCtrl = NEW(1662, C2DSeqCtrl);
+        m_pCursorCtrl = new (__FILE__ "(1662)") C2DSeqCtrl;
         m_pCursorCtrl->setLayer(14);
         m_pCursorCtrl->addSeq(m_pSeqName, 0);
         m_pCursorCtrl->addSeqShift(m_pSeqName, 1, 0.0f, -32.0f);

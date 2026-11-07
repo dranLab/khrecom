@@ -13,7 +13,7 @@
 
 inline void* operator new(size_t, void* p) throw() { return p; }
 
-#define NEW(line, T) new (com_malloc_d(sizeof(T), __FILE__ "(" #line ")", RET_ADDR())) T
+
 
 
 
@@ -161,27 +161,27 @@ void CPause::main() {
         break;
     case 2:
         _initPos(pos);
-        m_pScreenCtrl = NEW(197, C2DSeqCtrl);
+        m_pScreenCtrl = new (__FILE__ "(197)") C2DSeqCtrl;
         m_pScreenCtrl->setLayer(12);
         m_pScreenCtrl->setPos(pos);
         if (bgSeqTbl[nPauseKind]) {
             m_pScreenCtrl->addSeq(pSeqName, bgSeqTbl[nPauseKind]);
         }
         if (selectSeqTbl[nPauseKind][0]) {
-            m_pSelectCtrl = NEW(205, C2DSeqCtrl);
+            m_pSelectCtrl = new (__FILE__ "(205)") C2DSeqCtrl;
             m_pSelectCtrl->setLayer(12);
             m_pSelectCtrl->addSeq(pSeqName, selectSeqTbl[nPauseKind][0]);
             m_pSelectCtrl->setPos(pos);
         }
         rgba.col = 0x80707070;
         for (INT i = 0; i < m_nSelectMax; i++) {
-            m_pSelectFnt[i] = p2DFnt = NEW(213, C2DFnt)(0, 0, &rgba, 17, selectWordTbl[nPauseKind][i], 0x42);
+            m_pSelectFnt[i] = p2DFnt = new (__FILE__ "(213)") C2DFnt(0, 0, &rgba, 17, selectWordTbl[nPauseKind][i], 0x42);
             _setFntLayer(p2DFnt, 12, 0);
             m_pSelectCtrl->addFntShift(pSeqName, p2DFnt, 0.0f, i * 33.0f + 9.0f);
             rgba.col = 0x80303030;
         }
         if (m_nSelectMax) {
-            m_pCursorCtrl = NEW(221, C2DSeqCtrl);
+            m_pCursorCtrl = new (__FILE__ "(221)") C2DSeqCtrl;
             m_pCursorCtrl->setLayer(13);
             m_pCursorCtrl->addSeq(pSeqName, 0);
             m_vPosCursorCurrent.set(350.0f, m_fCursorBaseY, 0.0f);

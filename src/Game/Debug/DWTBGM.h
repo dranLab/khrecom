@@ -49,7 +49,7 @@ public:
     static void create(CTask* p) {
         if (!_pInstance) {
 #line 79 "Game/Debug/DWTBGM.h"
-            _pInstance = new (com_malloc_d(sizeof(CDebugBGMChanger), __FILE__ "(79)", RET_ADDR())) CDebugBGMChanger(p);
+            _pInstance = new (__FILE__ "(79)") CDebugBGMChanger(p);
         }
     }
     static void destroy() {

@@ -79,7 +79,7 @@ void CEnemyLargebody::stateAttack2() {
             param._fCycle = 10.0f;
             param._nTime = 50;
             param._fPower = 0.25f;
-            new (com_malloc_d(sizeof(CCameraQuakeV), __FILE__ "(105)", RET_ADDR())) CCameraQuakeV(*pCamera, &param, 0.25f);
+            new (__FILE__ "(105)") CCameraQuakeV(*pCamera, &param, 0.25f);
             m_iStep = 1;
         }
         break;

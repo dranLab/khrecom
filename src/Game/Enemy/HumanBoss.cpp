@@ -505,7 +505,7 @@ void CHumanBoss::beginStateDead() {
     }
     setTexAnmSeq(0, HumanBoss::DeadEyeSeqName);
     setTexAnmSeq(1, HumanBoss::DeadLipSeqName);
-    demo = new (com_malloc_d(sizeof(CBossDeadDemo), __FILE__ "(483)", RET_ADDR())) CBossDeadDemo(this, 0);
+    demo = new (__FILE__ "(483)") CBossDeadDemo(this, 0);
     if (demo) {
         demo->setup(getHandle(), __null, -1);
     }
@@ -616,7 +616,7 @@ void CHumanBoss::setupCardRevolver() {
         deck[j] = v;
     }
 #line 622
-    m_pCardRevolver = new (com_malloc_d(sizeof(CardBattle::CCardRevolver), __FILE__ "(622)", RET_ADDR())) CardBattle::CCardRevolver(this, deck, 2, -1);
+    m_pCardRevolver = new (__FILE__ "(622)") CardBattle::CCardRevolver(this, deck, 2, -1);
 #line 623
     ASSERT(m_pCardRevolver);
     if (deck) delete[] deck;

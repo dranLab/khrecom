@@ -184,58 +184,58 @@ CTask* CMainTaskFactory::createMainTask(MAINTASK_ID nID, CTask* pParent) {
         return CTitleReportDllStarter::create(pParent, 0, 1);
 #line 64
     case MAINTASK_ID_GAME:
-        return new (com_malloc_d(0x40, __FILE__ "(65)", RET_ADDR())) CGame(pParent);
+        return new (__FILE__ "(65)") CGame(pParent);
 #line 68
     case MAINTASK_ID_GAME_JF_HALLOWEEN:
-        return new (com_malloc_d(0x40, __FILE__ "(68)", RET_ADDR())) CGame(pParent, 7);
+        return new (__FILE__ "(68)") CGame(pParent, 7);
     case MAINTASK_ID_GAME_TGS_NORMAL:
-        return new (com_malloc_d(0x40, __FILE__ "(69)", RET_ADDR())) CGame(pParent, 5);
+        return new (__FILE__ "(69)") CGame(pParent, 5);
     case MAINTASK_ID_GAME_JF_VEXEN:
-        return new (com_malloc_d(0x40, __FILE__ "(70)", RET_ADDR())) CGame(pParent, 8);
+        return new (__FILE__ "(70)") CGame(pParent, 8);
     case MAINTASK_ID_DEBUG_GAME:
-        return new (com_malloc_d(0x40, __FILE__ "(71)", RET_ADDR())) CGame(pParent, 1);
+        return new (__FILE__ "(71)") CGame(pParent, 1);
     case MAINTASK_ID_DEBUG_MENU:
-        return (CTask*)new (com_malloc_d(0x50, __FILE__ "(73)", RET_ADDR())) CDebugMenu(pParent);
+        return (CTask*)new (__FILE__ "(73)") CDebugMenu(pParent);
     case MAINTASK_ID_DEBUG_COLOR:
-        return (CTask*)new (com_malloc_d(0x70, __FILE__ "(75)", RET_ADDR())) CColorCheck(pParent);
+        return (CTask*)new (__FILE__ "(75)") CColorCheck(pParent);
     case MAINTASK_ID_DEBUG_SCREEN:
-        return (CTask*)new (com_malloc_d(0xD0, __FILE__ "(76)", RET_ADDR())) CScreenCheck(pParent);
+        return (CTask*)new (__FILE__ "(76)") CScreenCheck(pParent);
     case MAINTASK_ID_DEBUG_KISIWADA:
-        return new (com_malloc_d(sizeof(CKishiwadaTest), __FILE__ "(78)", RET_ADDR())) CKishiwadaTest(pParent);
+        return new (__FILE__ "(78)") CKishiwadaTest(pParent);
     case MAINTASK_ID_DEBUG_KIKUCHI:
-        return new (com_malloc_d(sizeof(CKikuchiTest), __FILE__ "(79)", RET_ADDR())) CKikuchiTest(pParent);
+        return new (__FILE__ "(79)") CKikuchiTest(pParent);
     case MAINTASK_ID_DEBUG_KOU:
-        return new (com_malloc_d(sizeof(CKouTest), __FILE__ "(80)", RET_ADDR())) CKouTest(pParent);
+        return new (__FILE__ "(80)") CKouTest(pParent);
     case MAINTASK_ID_DEBUG_GOTO:
-        return new (com_malloc_d(sizeof(CGotoTest), __FILE__ "(81)", RET_ADDR())) CGotoTest(pParent);
+        return new (__FILE__ "(81)") CGotoTest(pParent);
     case MAINTASK_ID_DEBUG_NAKAMICHI:
-        return new (com_malloc_d(sizeof(CNakamichiTest), __FILE__ "(82)", RET_ADDR())) CNakamichiTest(pParent);
+        return new (__FILE__ "(82)") CNakamichiTest(pParent);
     case MAINTASK_ID_DEBUG_MATSUOKA:
-        return new (com_malloc_d(sizeof(CMatsuokaTest), __FILE__ "(83)", RET_ADDR())) CMatsuokaTest(pParent);
+        return new (__FILE__ "(83)") CMatsuokaTest(pParent);
     case MAINTASK_ID_DEBUG_KATAOKA:
-        return new (com_malloc_d(sizeof(CKataokaTest), __FILE__ "(84)", RET_ADDR())) CKataokaTest(pParent);
+        return new (__FILE__ "(84)") CKataokaTest(pParent);
     case MAINTASK_ID_DEBUG_KAHARA:
-        return new (com_malloc_d(sizeof(CKaharaTest), __FILE__ "(85)", RET_ADDR())) CKaharaTest(pParent);
+        return new (__FILE__ "(85)") CKaharaTest(pParent);
     case MAINTASK_ID_DEBUG_NAKASHIMA:
-        return new (com_malloc_d(sizeof(CNakashimaTest), __FILE__ "(86)", RET_ADDR())) CNakashimaTest(pParent);
+        return new (__FILE__ "(86)") CNakashimaTest(pParent);
     case MAINTASK_ID_DEBUG_COLLISIN_EDITOR:
-        return new (com_malloc_d(sizeof(CollisionEditor::CCollisionEditor), __FILE__ "(88)", RET_ADDR())) CollisionEditor::CCollisionEditor(pParent);
+        return new (__FILE__ "(88)") CollisionEditor::CCollisionEditor(pParent);
     case MAINTASK_ID_DEBUG_SET_EDITOR:
-        return new (com_malloc_d(sizeof(SetEditor::CSetEditor), __FILE__ "(89)", RET_ADDR())) SetEditor::CSetEditor(pParent);
+        return new (__FILE__ "(89)") SetEditor::CSetEditor(pParent);
     case MAINTASK_ID_DEBUG_ATTACH_EDITOR:
-        return new (com_malloc_d(sizeof(AttachEditor::CAttachEditor), __FILE__ "(91)", RET_ADDR())) AttachEditor::CAttachEditor(pParent);
+        return new (__FILE__ "(91)") AttachEditor::CAttachEditor(pParent);
     case MAINTASK_ID_DEBUG_FONT_VIEWER:
-        return new (com_malloc_d(sizeof(CFontViewer), __FILE__ "(92)", RET_ADDR())) CFontViewer(pParent);
+        return new (__FILE__ "(92)") CFontViewer(pParent);
     case MAINTASK_ID_MAPVIEWER:
-        return new (com_malloc_d(sizeof(CMapViewer), __FILE__ "(94)", RET_ADDR())) CMapViewer(pParent);
+        return new (__FILE__ "(94)") CMapViewer(pParent);
     case MAINTASK_ID_MODELVIEWER:
-        return new (com_malloc_d(sizeof(CModelViewer), __FILE__ "(95)", RET_ADDR())) CModelViewer(pParent);
+        return new (__FILE__ "(95)") CModelViewer(pParent);
     case MAINTASK_ID_EFFECTVIEWER:
-        return new (com_malloc_d(sizeof(CEffectViewer), __FILE__ "(96)", RET_ADDR())) CEffectViewer(pParent);
+        return new (__FILE__ "(96)") CEffectViewer(pParent);
     case MAINTASK_ID_2DVIEWER:
-        return new (com_malloc_d(sizeof(C2DViewer), __FILE__ "(97)", RET_ADDR())) C2DViewer(pParent);
+        return new (__FILE__ "(97)") C2DViewer(pParent);
     case MAINTASK_ID_MOVIE_TEST:
-        return new (com_malloc_d(sizeof(CMovieTest), __FILE__ "(98)", RET_ADDR())) CMovieTest(pParent);
+        return new (__FILE__ "(98)") CMovieTest(pParent);
     default:
         TRACE("\x8a\x59\x93\x96\x82\xb7\x82\xe9\x81\x75\x83\x81\x83\x43\x83\x93TASK\x81\x76\x82\xaa\x91\xb6\x8d\xdd\x82\xb5\x82\xdc\x82\xb9\x82\xf1\x81\x69 ID = %d \x81\x6a\n", nID);
         return NULL;

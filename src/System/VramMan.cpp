@@ -87,7 +87,7 @@ private:
 public:
     CVtransReq(const TexInfo& inTexInfo, CBuf& inSrc) : m_bTrans(FALSE) {
         m_TexInfo = inTexInfo;
-        m_pSrcData = new (com_malloc_d(sizeof(CBuf), __FILE__ "(43)", RET_ADDR())) CBuf;
+        m_pSrcData = new (__FILE__ "(43)") CBuf;
         if (m_pSrcData) inSrc.copyTo(*m_pSrcData);
     }
     virtual ~CVtransReq() {
@@ -574,7 +574,7 @@ BOOL CVramMan::reqTransTex(const TexInfo& texInfo, CBuf& data) {
         (texInfo._TexInfo._pImage != NULL || texInfo._ClutInfo._pImage != NULL)) {
         WaitSema(s_nTransSema);
 #line 701
-        CVtransReq* pReq = new (com_malloc_d(sizeof(CVtransReq), __FILE__ "(701)", RET_ADDR())) CVtransReq(texInfo, data);
+        CVtransReq* pReq = new (__FILE__ "(701)") CVtransReq(texInfo, data);
         if (pReq) {
             s_TransQueue.pushBack(*pReq);
             bResult = TRUE;

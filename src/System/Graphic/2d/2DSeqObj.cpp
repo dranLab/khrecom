@@ -52,7 +52,7 @@ C2DSeqObj::C2DSeqObj(SeqControl* pSeqControl) {
 #line 40
 void C2DSeqObj::initialize() {
     m_uiID++;
-    m_p2DObjList = new (com_malloc_d(sizeof(C2DObjList), __FILE__ "(43)", RET_ADDR())) C2DObjList;
+    m_p2DObjList = new (__FILE__ "(43)") C2DObjList;
     m_qTimeExt = -1;
     m_bEnable = 1;
     m_qTime = 0;
@@ -114,7 +114,7 @@ HANDLE C2DSeqObj::create(HANDLE handle, const TexInfo* pTexInfo, SEQ_SEQUENCE* p
 C2DSprObj* C2DSeqObj::createSub(UINT nSpr, const TexInfo* pTexInfo, SPR_GROUP* pSprGroupe, SPR_PARTS* pSprParts) {
     C2DSprObj* p2DSprObj;
     INT i;
-    p2DSprObj = new (com_malloc_d(sizeof(C2DSprObj), __FILE__ "(142)", RET_ADDR())) C2DSprObj(m_pSeqControl, pTexInfo);
+    p2DSprObj = new (__FILE__ "(142)") C2DSprObj(m_pSeqControl, pTexInfo);
     p2DSprObj->init(nSpr);
     for (i = 0; i < nSpr; i++) {
         p2DSprObj->initSprite(i, &pSprGroupe[i], &pSprParts[pSprGroupe[i].parts_id]);
@@ -129,7 +129,7 @@ HANDLE C2DSeqObj::createFnt(HANDLE handle, C2DFnt* p2DFnt) {
     m_bSeq = 1;
     m_nLoop = 0;
     m_nLoopFrame = 0;
-    p2DFntObj = new (com_malloc_d(sizeof(C2DFntObj), __FILE__ "(164)", RET_ADDR())) C2DFntObj(m_pSeqControl);
+    p2DFntObj = new (__FILE__ "(164)") C2DFntObj(m_pSeqControl);
     m_qTimeMax = p2DFntObj->init(p2DFnt);
     get2DObjList()->pushBack(*p2DFntObj);
     m_hBaseHandle = handle;
@@ -196,7 +196,7 @@ void C2DSeqObj::_disp() {
     if (fgScissoringEnd) {
         if (!m_pScissoringEnd) {
 #line 253
-            m_pScissoringEnd = new (com_malloc_d(sizeof(CScissoring), __FILE__ "(253)", RET_ADDR())) CScissoring;
+            m_pScissoringEnd = new (__FILE__ "(253)") CScissoring;
             m_pScissoringEnd->setSemiTrans(ALPHA_BLEND);
             m_pScissoringEnd->setDefault();
         }

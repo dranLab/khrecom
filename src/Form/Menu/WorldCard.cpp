@@ -297,7 +297,7 @@ CWorldCardSeq* CWorldCardSeq::m_pInstance = NULL;
 void CWorldCardSeq::create(CTask* in_pCTask, INT in_CreateType) {
     if (!m_pInstance) {
 #line 74
-        new (com_malloc_d(sizeof(CWorldCardSeq), __FILE__ "(74)", RET_ADDR())) CWorldCardSeq(in_pCTask, in_CreateType);
+        new (__FILE__ "(74)") CWorldCardSeq(in_pCTask, in_CreateType);
     }
 }
 
@@ -429,7 +429,7 @@ C2DSeqStrings* CWorldCardSeq::createSeq(INT in_SeqIndex, INT in_SeqType, INT in_
     info.nIdx = in_SeqIndex;
     D2::C2DMan::getLayPosition("get_wcard.lad", info.nLayout, info.nIdx, vPos, FALSE);
 #line 342
-    C2DSeqStrings* pAgent = new (com_malloc_d(sizeof(C2DSeqStrings), __FILE__ "(342)", RET_ADDR())) C2DSeqStrings(this);
+    C2DSeqStrings* pAgent = new (__FILE__ "(342)") C2DSeqStrings(this);
     pAgent->setupSeq(t, "get_wcard.lad", 0, in_pStr, in_DispLayer, 16);
     pAgent->setupState(t);
     pAgent->setPos(vPos);
@@ -524,7 +524,7 @@ void CWorldCardSeq::WorldWndOne(INT in_CardKind, const CHAR* in_pStr) {
     m_pStrings[1]->start();
     _setCard(card, in_CardKind, 0);
 #line 473
-    m_pCard[0] = new (com_malloc_d(sizeof(C2DCard), __FILE__ "(473)", RET_ADDR())) C2DCard;
+    m_pCard[0] = new (__FILE__ "(473)") C2DCard;
     m_pCard[0]->create(card);
     m_pCard[0]->setParent(m_pStrings[1]->getSeqCtrl());
 }
@@ -539,7 +539,7 @@ void CWorldCardSeq::WorldWndFour(INT* in_CardKindTable, const CHAR* in_pStr) {
         m_pStrings[i + 1]->start();
         _setCard(card, in_CardKindTable[i], 0);
 #line 497
-        m_pCard[i] = new (com_malloc_d(sizeof(C2DCard), __FILE__ "(497)", RET_ADDR())) C2DCard;
+        m_pCard[i] = new (__FILE__ "(497)") C2DCard;
         m_pCard[i]->create(card);
         m_pCard[i]->setParent(m_pStrings[i + 1]->getSeqCtrl());
     }
@@ -555,7 +555,7 @@ void CWorldCardSeq::WorldWndFive(INT* in_CardKindTable, const CHAR* in_pStr) {
         m_pStrings[i + 1]->start();
         _setCard(card, in_CardKindTable[i], 0);
 #line 522
-        m_pCard[i] = new (com_malloc_d(sizeof(C2DCard), __FILE__ "(522)", RET_ADDR())) C2DCard;
+        m_pCard[i] = new (__FILE__ "(522)") C2DCard;
         m_pCard[i]->create(card);
         m_pCard[i]->setParent(m_pStrings[i + 1]->getSeqCtrl());
     }

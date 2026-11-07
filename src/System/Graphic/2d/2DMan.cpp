@@ -41,8 +41,8 @@ C2DMan::D2MAN_LEVEL C2DMan::m_nLevelReq;
 
 C2DMan::C2DMan(CTask* p) : CTaskSecondary(p) {
 #line 49
-    m_p2DBaseList = new (com_malloc_d(sizeof(C2DBaseList), __FILE__ "(49)", RET_ADDR())) C2DBaseList;
-    _ref(m_p2DOSLCManager) = new (com_malloc_d(sizeof(C2DOSLCManager), __FILE__ "(50)", RET_ADDR())) C2DOSLCManager;
+    m_p2DBaseList = new (__FILE__ "(49)") C2DBaseList;
+    _ref(m_p2DOSLCManager) = new (__FILE__ "(50)") C2DOSLCManager;
     m_p2DOSLCManager->createContainer();
     m_nLayer = 11;
     m_nLevel = D2MAN_LEVEL0;
@@ -93,15 +93,15 @@ HANDLE C2DMan::init(void* inFile, const CHAR* pBaseName) {
     switch (*(UINT*)inFile) {
     case 0x44525053:
 #line 171
-        p2DBase = new (com_malloc_d(sizeof(C2DSpr), __FILE__ "(171)", RET_ADDR())) C2DSpr;
+        p2DBase = new (__FILE__ "(171)") C2DSpr;
         break;
     case 0x44514553:
 #line 174
-        p2DBase = new (com_malloc_d(sizeof(C2DSeq), __FILE__ "(174)", RET_ADDR())) C2DSeq;
+        p2DBase = new (__FILE__ "(174)") C2DSeq;
         break;
     case 0x4459414C:
 #line 177
-        p2DBase = new (com_malloc_d(sizeof(C2DLay), __FILE__ "(177)", RET_ADDR())) C2DLay;
+        p2DBase = new (__FILE__ "(177)") C2DLay;
         break;
     }
     if (!p2DBase) {

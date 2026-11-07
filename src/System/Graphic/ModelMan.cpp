@@ -139,23 +139,23 @@ MODEL_SEND_CACHE s_sModelCache __attribute__((aligned(64)));
 void CModelMan::initialize() {
     CDispListBase** ppList = s_pDispListTbl;
 
-    ppList[2] = new (com_malloc_d(sizeof(CDispListBG), __FILE__ "(69)", RET_ADDR())) CDispListBG;
+    ppList[2] = new (__FILE__ "(69)") CDispListBG;
 
 
 
 
 
 
-    ppList[1] = new (com_malloc_d(sizeof(CDispListSemiSingle), __FILE__ "(76)", RET_ADDR())) CDispListSemiSingle;
-    ppList[7] = new (com_malloc_d(sizeof(CDispListShadowDraw), __FILE__ "(77)", RET_ADDR())) CDispListShadowDraw;
-    ppList[8] = new (com_malloc_d(sizeof(CDispListShadowMap), __FILE__ "(78)", RET_ADDR())) CDispListShadowMap;
-    ppList[0] = new (com_malloc_d(sizeof(CDispListSemi), __FILE__ "(79)", RET_ADDR())) CDispListSemi;
+    ppList[1] = new (__FILE__ "(76)") CDispListSemiSingle;
+    ppList[7] = new (__FILE__ "(77)") CDispListShadowDraw;
+    ppList[8] = new (__FILE__ "(78)") CDispListShadowMap;
+    ppList[0] = new (__FILE__ "(79)") CDispListSemi;
 
-    ppList[4] = new (com_malloc_d(sizeof(CDispListSemiSingleSort), __FILE__ "(81)", RET_ADDR())) CDispListSemiSingleSort;
-    ppList[5] = new (com_malloc_d(sizeof(CDispListSemiZSingleSort), __FILE__ "(82)", RET_ADDR())) CDispListSemiZSingleSort;
-    ppList[6] = new (com_malloc_d(sizeof(CDispListSemiLastSingleSort), __FILE__ "(83)", RET_ADDR())) CDispListSemiLastSingleSort;
+    ppList[4] = new (__FILE__ "(81)") CDispListSemiSingleSort;
+    ppList[5] = new (__FILE__ "(82)") CDispListSemiZSingleSort;
+    ppList[6] = new (__FILE__ "(83)") CDispListSemiLastSingleSort;
 
-    ppList[3] = new (com_malloc_d(sizeof(CDispListFG), __FILE__ "(85)", RET_ADDR())) CDispListFG;
+    ppList[3] = new (__FILE__ "(85)") CDispListFG;
     s_pSemiList = NULL;
     s_nSemiListNum = 0;
     s_sLayerInfo._nInfo = 0;
