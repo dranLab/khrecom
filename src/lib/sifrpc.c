@@ -288,7 +288,9 @@ static unsigned long _alarm_rdata(int id, unsigned long schedule, unsigned long 
     return 0x800;
 }
 
-/* Parked: the original copies the packet fields in strict load/store order, ours lets the scheduler hoist loads */
+/* Parked: 7 of 59 lines (2026-11-07, was 10): the strict load/store order is stores of alias set 0: through a union, every
+   later read reloads, also the call's arguments (int casts on both sides do not: cse keeps those). pkt_addr's store is
+   plain: receive loads ahead of it. Left: v0/v1 alternate the other way through the three last copies, a sched1 tie. */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/sifrpc", _request_rdata);
 #if 0
 static void _request_rdata(RpcOtherDataPkt *rdata, struct rpc_data *rd)
@@ -300,12 +302,13 @@ static void _request_rdata(RpcOtherDataPkt *rdata, struct rpc_data *rd)
     } else {
         rend = _sceRpcGetFPacket(rd);
     }
+#define _COPY(f, g) (((union { int i; } *)&rend->f)->i = (int)rdata->g)
     rend->rpc.pkt_addr = rdata->rpc.pkt_addr;
-    rend->receive = rdata->receive;
+    _COPY(receive, receive);
     rend->cid = SIF_CMD_RPC_RDATA;
-    rend->src = rdata->src;
-    rend->dest = rdata->dest;
-    rend->size = rdata->size;
+    _COPY(src, src);
+    _COPY(dest, dest);
+    _COPY(size, size);
     if (!isceSifSendCmd(SIF_CMD_RPC_END, rend, 0x40, rdata->src, rdata->dest, rdata->size)) {
         iSetTimerAlarm(0x800, _alarm_rdata, rend);
     }

@@ -41,12 +41,12 @@ every change that is merged without regenerating. Regenerating all four takes ab
 
 ## Where things stand (2026-11-07)
 
-- **Progress:** 11996 of 12311 functions matched: game 11227 of 11323, libraries 769 of 988 (plus 151 hand-written).
+- **Progress:** 11998 of 12311 functions matched: game 11228 of 11323, libraries 770 of 988 (plus 151 hand-written).
   `tools/check.sh` proves the image, but its function totals are too high: it strips `#if 0.*?#endif` before it counts
   `INCLUDE_ASM`, so a parked `#if 0 ... #else INCLUDE_ASM #endif` counts as done (about 12 functions on 2026-11-07). Count
   game functions with `grep -rhE '^INCLUDE_ASM' src --include=*.cpp --include=*.c --exclude-dir=lib | wc -l`. Fixing the regex is a
   change to `tools/`: ask first.
-- **Game:** 91 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note).
+- **Game:** 90 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note).
   5 units take a data section from assembly.
 - **Libraries:** 38 parked, 5 not attempted, 27 hand-written (stay assembly), 5 units with data from assembly;
   details in `docs/sdk-leftovers.md`.
