@@ -41,7 +41,9 @@ overrides:
     cflags: -O2 -G0
     source_root: null
   - match: lib/*                # Sony SDK: libkernl, libmpeg, libdma, ... (one toolchain; the libs that matched 2.95.3 match it too)
-    compiler: ee-gcc2.9-991111  # kCopy in alarm.c only matches the 991111 family; libmpeg error.c saves with sd (2.95.3: sq)
+    compiler: ee-gcc2.9-991111-01  # the 991111 patch release: its only change is nops before div.s (EE erratum), and
+                                   # lib/timer has the only two div.s of the Sony code (all other units build the same).
+                                   # kCopy in alarm.c only matches the 991111 family; libmpeg error.c saves with sd (2.95.3: sq)
     cflags: -O2 -G0 -g
     source_root: null
     assembler: ee-gcc2.96       # GNU ee-as 2.10, not Ps2EeAs: it fills open delay slots, pads short loops (lib/diei)

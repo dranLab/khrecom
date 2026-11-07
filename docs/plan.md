@@ -41,11 +41,9 @@ every change that is merged without regenerating. Regenerating all four takes ab
 
 ## Where things stand (2026-11-07)
 
-- **Progress:** 12002 of 12311 functions matched: game 11229 of 11323, libraries 773 of 988 (plus 151 hand-written).
-  `tools/check.sh` proves the image, but its function totals are too high: it strips `#if 0.*?#endif` before it counts
-  `INCLUDE_ASM`, so a parked `#if 0 ... #else INCLUDE_ASM #endif` counts as done (about 12 functions on 2026-11-07). Count
-  game functions with `grep -rhE '^INCLUDE_ASM' src --include=*.cpp --include=*.c --exclude-dir=lib | wc -l`. Fixing the regex is a
-  change to `tools/`: ask first.
+- **Progress:** 12004 of 12311 functions matched: game 11229 of 11323, libraries 775 of 988 (plus 151 hand-written).
+  `tools/check.sh` counts the 151 hand-written units as done too: its total is these matched functions plus 151
+  (fixed 2026-11-07: it used to count a parked `#if 0 ... #else INCLUDE_ASM #endif` as done).
 - **Game:** 89 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note).
   5 units take a data section from assembly.
 - **Libraries:** 38 parked, 5 not attempted, 27 hand-written (stay assembly), 5 units with data from assembly;
@@ -85,8 +83,10 @@ every change that is merged without regenerating. Regenerating all four takes ab
   (crossjump-block-end-call), an empty asm in one arm to stop one,
   and only then issue-order groups with empty barriers and register locals (issue-order-pins). Guarded order searches found
   nothing more on the five reverted drafts: their honest scores stand at 30, 27, 9, 5, 31 (setStockInfo then matched by reading the cross-jump).
-- **Re-measure before choosing (2026-11-07):** `build/remeasure.py Game`, `System`, `Form` score every parked draft (about 20
-  minutes, background) and `build/jm/rmsort.py` sorts them; notes go stale after header fixes (chkDamage's note listed four open
+- **Re-measure before choosing (2026-11-07):** `tools/drafts.py` scores every parked draft, closest first (about 10 minutes
+  with -j 12), whatever its layout, and gives the first error of a draft that does not build (`--failed`); notes go stale.
+  Its numbers are funcdiff's, except for the functions whose gcse order varies per compiler run (CRcf::finalize,
+  _parseRCF_EntryFile: gcse-pre-hash-order). Before it, `build/remeasure.py` and `build/jm/rmsort.py`; notes go stale after header fixes (chkDamage's note listed four open
   spots, two were gone). 15 drafts report build-failed because a stopgap data block or an extern declaration clashes when they are
   enabled: `build/jm/en.py` takes a variant that drops it. Those are unmeasured, not far: the three CollAttack checks were each 2 lines.
 - **Constructor with pool constants (2026-11-07):** CMovement went 53 -> 26 -> 0 once the two constants sat in `u_long128`
@@ -131,12 +131,15 @@ its data comes from source (or is recorded as blocked). Never leave a function t
 
 ## Working rules
 
-- Strictly sequential, in the main checkout: no sub-agents, workers, worktrees or parallel decompilation.
-  Parallel compiles inside `tools/permuter.py` and `tools/decomp_permuter.py` are fine.
+- Sequential in the main checkout by default. Parallel work only through `/decomp-pool` (user decision 2026-11-07):
+  one unit per `decomp-worker` in its own worktree, mode "parked" (the unit's drafts from `tools/drafts.py`) or
+  "new"; the coordinator merges one worker at a time with the gate. Parallel compiles inside `tools/permuter.py`,
+  `tools/decomp_permuter.py` and `tools/drafts.py` are fine.
 - No changes to `tools/`, `configure.py`, `config/` or the build flags, except `tools/partials.py` (approved)
   and `config/SLUS_217.99/symbol_addrs.txt` lines that name unnamed weak or vtable copies. Anything else: ask.
 - Only real C/C++ (see V4). Keep `MATCH: <reason>` on every kept mechanism.
-- There is no git remote: never push, rebase `main` or force anything. Never commit `iso/`, `ref/`, `asm/` or
+- Pushing `main` is the user's (origin is github.com/dranLab/khrecom; CI runs `tools/check.sh` on every push): never
+  push unless asked, never rebase `main` or force anything. Never commit `iso/`, `ref/`, `asm/` or
   `build/`. Never use `git stash`. Keep `docs/plan-partials-prompt.md`-style local files out of commits: add
   files by name, never `git add docs`.
 - Keep scratch files in `build/` (WSL wipes `/tmp`). Use `.venv/bin/python`.
@@ -381,6 +384,7 @@ header split the original didn't have, or make a class a template to hide its st
 | delay slot of a call and the v0/v1 pair after it | void-callee-v0 |
 | spill slots / regs of hoisted `this+off` addresses | gcse-bucket-count-lever, gcse-pre-hash-order |
 | registers swapped, same instructions | scheduling-mismatch-techniques, global-alloc-priority-lreg, asm-barrier-death-note-levers, loop-const-merge-and-load-order, asymmetric-giv-overloads, gcse-pre-hash-order |
+| preheader hoist order, constant hoisted only in ours | loop-two-pass-hoist-threshold, preheader-giv-init-order, loop-hoist-lifetime-store-order |
 | stores in another order | sched-store-order-reg-weight, volatile-delay-slots-store-permutation, small-union-ctor-stores, fixed-scalar-varying-struct-alias, join-store-per-arm |
 | the original reloads a global/member, ours keeps it (or the reverse) | global-reload-ref-helper, fixed-scalar-varying-struct-alias, const-global-reorg-redundant-load, mapenemy-unit-lessons |
 | tails merged or not merged, branch layout | gcc-crossjump-alias-rules, crossjump-dup-arm-stores, crossjump-case-label-chain, state-machine-break-vs-return, guard-plus-while-and-static-members, first-return-stub-ternary, bool-tail-shared-false |
@@ -427,7 +431,5 @@ Keep output small: one function's assembly at a time; `funcdiff` without `--full
 - **Waiting on a decision now:** the `D2MAN_H_PATH` (2DMan.h, `D2::C2DMan`) and `RSRCDATA_H_FULL`
   (`CRsrcData`/`RsrcInfo`/`CRsrcANN`) gates, 10 files: the string evidence for 2DMan.h is ambiguous (the 2D
   container message is in 166 originals, the 2DMan.h path in only about 119).
-- **Waiting on a decision now:** a `lib/timer` override to `ee-gcc2.9-991111-01` would match `TimerBusClock2Freq` and
-  `TimerFreq2BusClock` with no source change (both drafts match with it, no other function of the unit differs).
 - When the user runs a /loop unattended, decide these cases yourself, log the decision and continue
   (unattended-decide-stop-cases).

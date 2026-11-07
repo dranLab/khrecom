@@ -46,46 +46,38 @@ static void serialPutchar(int c)
     kputchar(c);
 }
 
-/* The integer value of x * 1e6 (x: the bits of a double) for "0.%d". */
-/* Parked: 9 lines differ */
-#if 0
+/* The integer value of the double whose bits are x (9999 when too large); printfloat passes it d * 1e6. */
 int ftoi(unsigned long x)
 {
-    long e = ((x << 1) >> 53) - 0x433;
-    unsigned long m;
+    long e = (x << 1) >> 53;
 
+    e -= 0x433;
     if (e < -0x35) {
         return 0;
     }
     if (e >= 13) {
         return 9999;
     }
-    m = ((x << 12) >> 12) | (1UL << 52);
+    x = (x << 12) >> 12;
+    x |= 1UL << 52;
     if (e < 0) {
-        m >>= (e = -e) - 2; /* e negated in place (decomp-permuter): 17 -> 9 lines */
-        if ((m & 3) == 3) {
-            m = (m >> 2) + 1;
+        x >>= (e = -e) - 2;
+        if ((x & 3) == 3) {
+            x = (x >> 2) + 1;
         } else {
-            m >>= 2;
+            x >>= 2;
         }
     } else {
-        m <<= e;
+        x <<= e;
     }
-    return m;
+    return x;
 }
-#endif
-int ftoi(unsigned long x);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/kprintf2", ftoi);
 
 static int _sceSnprintf_pf(PutcFunc func, void *ctx, unsigned int *size, const char *fmt, ...);
 
-/* Parked: 16 lines differ - blocked by the unit's asm .rodata: with its literals compiled (decomp-permuter's build)
-   the ftoi result in a temporary before the "0.%d" call matches; the original's D_004FEC90.. labels as externs do not
-   (69 lines: extern doubles are not constants) */
-#if 0
 int printfloat(PutcFunc func, void *ctx, unsigned int *size, double d)
 {
-    int n = 0, e = 0;
+    int n = 0, e = 0, i;
 
     if (*size == 0) {
         return 0;
@@ -107,7 +99,8 @@ int printfloat(PutcFunc func, void *ctx, unsigned int *size, double d)
             e++;
         }
     }
-    n += _sceSnprintf_pf(func, ctx, size, "0.%d", ftoi((unsigned long)(d * 1000000.0)));
+    i = ftoi((unsigned long)(d * 1000000.0));
+    n += _sceSnprintf_pf(func, ctx, size, "0.%d", i);
     if (e >= 0) {
         n += _sceSnprintf_pf(func, ctx, size, "e+%d", e);
     } else {
@@ -115,9 +108,6 @@ int printfloat(PutcFunc func, void *ctx, unsigned int *size, double d)
     }
     return n;
 }
-#endif
-int printfloat(PutcFunc func, void *ctx, unsigned int *size, double d);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/kprintf2", printfloat);
 
 #define F_MINUS 0x1
 #define F_PLUS 0x2
@@ -129,7 +119,13 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/kprintf2", printfloat);
 #define F_SHORT 0x80
 #define F_CHAR 0x100
 
-/* Parked: 4 lines differ (permuter score) */
+/* Parked: 2 of 853 lines, same size (2026-11-07): only the nop between c.eq.s and bc1f in the %f case (gcc writes
+   "#nop"; the original's assembler inserted it at the ".set noreorder" before bc1f). The 991111/991111-01 ee/bin/as
+   (GNU as 2.9-ee-991111) gives exactly that nop and the whole function matches, but it never fills a delay slot
+   (not even with -O), so ftoi's and kputchar's `jr ra` slots, which 2.10 fills, open up; 2.10/2.12 insert no
+   c.cond nop under any -mcpu/-mipsN, 990721 also adds one after mtc1. No source form found; the data and the
+   draft's literals are ready (its .rdata block below). tried: compare_compilers (all compilers, own and
+   unit assemblers), assembler option sweep on a snippet, permuter (earlier) */
 #if 0
 int _sceSnprintf(PutcFunc func, void *ctx, unsigned int size, const char *fmt, va_list ap)
 {
@@ -490,6 +486,29 @@ int _sceSnprintf(PutcFunc func, void *ctx, unsigned int size, const char *fmt, v
 #endif
 int _sceSnprintf(PutcFunc func, void *ctx, unsigned int size, const char *fmt, va_list ap);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/kprintf2", _sceSnprintf);
+/* _sceSnprintf's strings and jump table (the function is still assembly). */
+asm(".rdata\n.align 3\nD_004FECC0:\n.asciz \"0123456789abcdef\"\n"
+    ".align 3\nD_004FECD8:\n.asciz \"0123456789ABCDEF\"\n"
+    ".align 3\njtbl_004FECF0:\n"
+    ".word .L00385C34\n.word .L0038625C\n.word .L0038625C\n.word .L00385C3C\n.word .L0038625C\n"
+    ".word .L0038625C\n.word .L0038625C\n.word .L0038625C\n.word .L0038625C\n.word .L0038625C\n"
+    ".word .L0038625C\n.word .L00385B54\n.word .L0038625C\n.word .L00385B4C\n.word .L00385BAC\n"
+    ".word .L0038625C\n.word .L00385B5C\n.word .L00385B64\n.word .L00385B64\n.word .L00385B64\n"
+    ".word .L00385B64\n.word .L00385B64\n.word .L00385B64\n.word .L00385B64\n.word .L00385B64\n"
+    ".word .L00385B64\n.word .L0038625C\n.word .L0038625C\n.word .L0038625C\n.word .L0038625C\n"
+    ".word .L0038625C\n.word .L0038625C\n.word .L0038625C\n.word .L0038625C\n.word .L0038625C\n"
+    ".word .L0038625C\n.word .L0038625C\n.word .L0038625C\n.word .L0038625C\n.word .L0038625C\n"
+    ".word .L0038625C\n.word .L0038625C\n.word .L0038625C\n.word .L0038625C\n.word .L0038625C\n"
+    ".word .L0038625C\n.word .L0038625C\n.word .L0038625C\n.word .L0038625C\n.word .L0038625C\n"
+    ".word .L0038625C\n.word .L0038625C\n.word .L0038625C\n.word .L0038625C\n.word .L0038625C\n"
+    ".word .L0038625C\n.word .L00385D34\n.word .L0038625C\n.word .L0038625C\n.word .L0038625C\n"
+    ".word .L0038625C\n.word .L0038625C\n.word .L0038625C\n.word .L0038625C\n.word .L0038625C\n"
+    ".word .L0038625C\n.word .L0038625C\n.word .L00386178\n.word .L00385DF4\n.word .L00385FD0\n"
+    ".word .L00385FD0\n.word .L0038625C\n.word .L00385C4C\n.word .L00385DF4\n.word .L0038625C\n"
+    ".word .L0038625C\n.word .L00385C44\n.word .L0038625C\n.word .L0038625C\n.word .L00385C54\n"
+    ".word .L003861B0\n.word .L0038625C\n.word .L0038625C\n.word .L00386034\n.word .L0038625C\n"
+    ".word .L00385F0C\n.word .L0038625C\n.word .L0038625C\n.word .L00385D08\n"
+    ".text\n");
 
 /* Into a buffer: ctx is the write pointer; the last byte of the buffer gets the terminating 0. */
 static int snprintf_char(char **pbuf, unsigned int *size, int c)
@@ -588,4 +607,4 @@ void kprintf(const char *fmt, ...)
         EIntr();
     }
 }
-// SOURCE DATA: .data .bss
+// SOURCE DATA: .data .rodata .bss

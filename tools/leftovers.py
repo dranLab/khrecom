@@ -124,6 +124,21 @@ def scan(path, asm_names):
             else:
                 comment = text
             continue
+        m = re.match(r"^\s*#\s*if\s+0\s*(/\*|//)", line)
+        if m:  # a note on the `#if 0` line itself (`#if 0 /* near match: ... */`)
+            rest = line[m.start(1):]
+            if rest.startswith("/*") and "*/" not in rest:  # it continues on the next lines
+                text, j = comment_text([rest] + raw[i + 1:], 0)
+                i += j  # j counts from line i
+            else:
+                text, _ = comment_text([rest], 0)
+                i += 1
+            k = re.match(r"(Parked|Hand-written|Not attempted)\s*:\s*", text, re.I)
+            if k:
+                note = (k.group(1).lower(), text[k.end():])
+            elif text:
+                comment = text
+            continue
         name = defined_name(line)
         if name and active[i]:
             if line.rstrip().endswith("{") or (i + 1 < len(raw) and raw[i + 1].startswith("{")):

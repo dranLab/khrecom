@@ -26,7 +26,13 @@
       "Bash(git worktree list:*)",
       "Bash(git rev-parse:*)",
       "Edit(config/SLUS_217.99/symbol_addrs.txt)",
-      "Bash(git checkout -- config/SLUS_217.99/symbol_addrs.txt:*)"
+      "Bash(git checkout -- config/SLUS_217.99/symbol_addrs.txt:*)",
+	"Bash(.venv/bin/python tools/drafts.py:*)",
+	"Bash(.venv/bin/python tools/permuter.py:*)",
+	"Bash(.venv/bin/python tools/decomp_permuter.py:*)",
+	"Bash(.venv/bin/python tools/leftovers.py:*)",
+	"Bash(.venv/bin/python tools/imagediff.py:*)",
+	"Bash(python3 .claude/usage_gate.py:*)"
     ]
   }
 }
