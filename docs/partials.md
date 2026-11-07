@@ -153,12 +153,12 @@ One row per merge into main (`partials.py --summary` before and after).
 ## Summary
 
 ```
-PARTIAL: 190 (156 in 44 headers, 34 in 20 .cpp); MATCH: 1004
+PARTIAL: 190 (156 in 44 headers, 34 in 20 .cpp); MATCH: 1002
   by category: method 46, data member 10, type 14, fwd decl 2, #include 14, changed in place 45, padding 2, path override 1, gate 5, guessed 9, header-level 24, stand-in 13, other 5
 stand-ins: 14 foreign in 9 files (12 names), 198 unattributed, 154 own
 duplicate class names across headers: 0
 padding: 2 arrays, 0 accessors
-mechanisms: 675 sites (0 untagged); #line: 1238
+mechanisms: 673 sites (0 untagged); #line: 1238
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
 classes: complete 874, superset 12, partial 0, gated 3, missing 7, unattributed 309
 ```
@@ -321,7 +321,7 @@ or `untagged`.
 | placeholder | `_collUtilCreate*` | 1 | 1 | placeholder: an inline function's strings, in the original .rodata order |
 | placeholder | `_createEnemyMotionName*` | 1 | 1 | Placeholder: .rodata has "e123_062" after Anim.h's strings (from an unidentified header). |
 | placeholder | `_emptyString*` | 1 | 1 | placeholder: an inline function's strings, in the original .rodata order |
-| placeholder | `_emptyStringPlaceholder*` | 180 | 180 | Placeholder: an empty string follows CardBattle.h's strings in .rodata (an unknown header's inline function). |
+| placeholder | `_emptyStringPlaceholder*` | 178 | 178 | Placeholder: an empty string follows CardBattle.h's strings in .rodata (an unknown header's inline function). |
 | placeholder | `_emptyStringPlaceholderBattleCard*` | 1 | 1 | placeholder: an empty string follows CollUtil.h's strings in .rodata (as in Game/CardRevolver) |
 | placeholder | `_emptyStringPlaceholderCardRevolver*` | 1 | 1 | placeholder: an empty string follows CollUtil.h's strings in .rodata; which header it comes from is not known |
 | placeholder | `_emptyStringPlaceholderDebugPathData*` | 1 | 1 | placeholder: an empty string follows CardBattle.h's strings in .rodata; which header it comes from is not known |
