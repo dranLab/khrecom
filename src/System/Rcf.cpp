@@ -197,7 +197,7 @@ volatile INT s_nReadStep;
 volatile INT s_nReadThreadInfo;
 volatile BOOL s_bThreadEnable;
 volatile ULONG s_nReadRsrcID; /* MATCH: volatile (thread-shared; the original never moves its store into a delay slot) */
-INT s_nReadGroup;
+volatile INT s_nReadGroup; /* MATCH: volatile (thread-shared; _parseRCF_EntryFile loads it before the CBuf ctor stores) */
 volatile INT s_nReadFileSize;
 volatile INT s_nLinkOwnerGroup; /* volatile: _parseRCF_EntryFile reloads it in a bnezl slot (thread-shared, like s_nReadStep) */
 INT s_nFilePtr;
@@ -340,7 +340,11 @@ BOOL _doReadThreadEndInterval() {
     s_nReadThreadInfo++;
     return s_nReadThreadInfo == 0;
 }
-/* Near-match: register allocation of two statics and a loop-bound reload */
+/* Parked: 0 or 6 of 153 lines (2026-11-07), random per compile (matched 4 of 6 rebuilds): s_nRcfMapCount/s_nRcfSceneCount's
+ * hoisted %hi pseudos tie in global-alloc priority (3 refs / 120 insns each), the tie goes to the lower pseudo, and PRE numbers
+ * them in expression-hash bucket order; the SYMBOL_REF hash is over the name, whose anonymous-namespace suffix is random per
+ * compile (src_System_Rcf.cpp5vVlaa, ...PaOlaa). Needs a deterministic namespace name in the build, not source. The map delete[]
+ * loop's bound reload is fixed (cast pointer); tried: the two count stores swapped (wrong store order, still random). */
 #if 0
 void CRcf::finalize() {
     CMovieFiles::finalize();
@@ -356,7 +360,7 @@ void CRcf::finalize() {
     _clearQueue();
     if (s_pRcfSceneArray) delete[] s_pRcfSceneArray;
     s_pRcfSceneArray = __null;
-    if (s_pRcfMapArray) delete[] s_pRcfMapArray;
+    if (s_pRcfMapArray) delete[] *(RcfMapInfo**)&s_pRcfMapArray; /* MATCH: the loop reloads the bound after the inline dtor's vptr store (not a fixed scalar) */
     s_pRcfMapArray = __null;
     s_nRcfSceneCount = 0;
     s_nRcfMapCount = 0;
@@ -839,12 +843,6 @@ INT CRcf::getRsrcFileSize(ULONG nID) {
 INT CRcf::getCdStatus() {
     return 0;
 }
-/* Parked: 28 of 169 lines, same size - the 0x7F (sound list) branch's CBuf/RsrcInfo setup: the original loads
- * s_nReadGroup/s_nLinkOwnerGroup/s_bSceneManagedMode into t2/t0/t1 before the CBuf vtable lui and keeps the
- * constant 1 in a3; ours schedules the vtable first (t3/t1/t2, t0). Rest matches with s_nLinkOwnerGroup
- * volatile and `if (s_nLinkOwnerGroup) nGroupID = s_nLinkOwnerGroup;`. Tried: buf/info and szName
- * declaration order, hill.py over the info assignments, permuter 6 min. */
-#if 0
 INT _parseRCF_EntryFile(ULONG nGroup, INT nType) {
     char szFilePath[256];
     INT nRsrcID;
@@ -866,8 +864,8 @@ INT _parseRCF_EntryFile(ULONG nGroup, INT nType) {
         info._pszName = szFilePath;
         info._nGroupID = s_nReadGroup;
         info._nRefGroupID = s_nLinkOwnerGroup;
-        info._bSceneManaged = s_bSceneManagedMode;
         info._nRsrcType = 0x27;
+        info._bSceneManaged = s_bSceneManagedMode;
         CRsrcDB::addRsrc(info, buf, __null);
         _skipLine();
         return 0;
@@ -890,13 +888,6 @@ INT _parseRCF_EntryFile(ULONG nGroup, INT nType) {
     _skipLine();
     return 0;
 }
-#else
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) void _parseRCF_EntryFile_strings(INT n) {
-    TRACE("%07d%07d");
-}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", _parseRCF_EntryFile__FUii);
-#endif
 void _parseRCF_FirstEntryFile(CHAR* szFilePath, CHAR* szName, INT nGroupID, INT nRsrcID) {
     CBuf buf;
     INT nFileSize;
@@ -1175,25 +1166,21 @@ void _makeLocalizePath(CHAR* pszOut, const CHAR* pszSrc, INT nLocale) {
         strcpy(pszOut, pszSrc);
     }
 }
-/* Parked: _atolen: 5 of 79 lines, same size - _atoi's guard + while and return as there. Left: block order: the 0x case jumps
- * over the '$' block to a `nRet = 2` behind it, ours falls into its own. Gotos, an else with a goto, do/while(0) + break
- * all come out with the '$' block first (10 lines). The extra nop is the loop's alignment and moves with that. */
-#if 0
 INT _atolen(const CHAR* lpszInStr) {
     INT nRet = 0;
     const CHAR* p = lpszInStr;
 
     if (p) {
-        if (*p != '$') {
-            if (*p == '0' && p[1] == 'x') {
+        if (*p == '$' || (*p == '0' && p[1] == 'x')) {
+            if (*p == '$') {
+                p++;
+                nRet = 1;
+            } else {
                 p = lpszInStr + 2;
                 nRet = 2;
-            } else {
-                goto dec;
             }
         } else {
-            p++;
-            nRet = 1;
+            goto dec;
         }
         if (!*p) goto end;
         while (*p) {
@@ -1217,13 +1204,10 @@ INT _atolen(const CHAR* lpszInStr) {
 end:
     {
         register INT r asm("$2") = nRet;
-        asm volatile("" : : "r"(r));
+        asm volatile("" : : "r"(r)); /* MATCH: the move stays above the jr: its slot is a nop (as in _atoi) */
         return r;
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", _atolen__FPCc);
-#endif
 CHAR* _getDbgParsePtr() {
     return (CHAR*)s_pDbgFileBuf->getBufPtr() + s_nDbgFilePtr;
 }
