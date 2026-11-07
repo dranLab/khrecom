@@ -140,14 +140,15 @@ def ignore_asm(text: str) -> str:
 def setup(unit: str, func: str, workdir: Path) -> None:
     import yaml
     sys.path.insert(0, str(ROOT / "tools"))
-    from permuter import build_command, enable_draft, find_function  # (not loaded by the per-candidate --objdump)
+    from permuter import build_command, definition_pattern, enable_draft, find_function  # (not loaded by the per-candidate --objdump)
     version = sorted(p.name for p in (ROOT / "config").iterdir() if (p / f"{p.name}.yaml").exists())[0]
     build = yaml.safe_load((ROOT / "config" / version / f"{version}.yaml").read_text())["options"]["build_path"]
     source = ROOT / "src" / f"{unit}.c"
     if not source.exists():
         sys.exit(f"{source.relative_to(ROOT)} not found: decomp-permuter only parses C (for .cpp: tools/permuter.py)")
-    text = enable_draft(source.read_text(encoding="latin-1"), func)
-    start, end = find_function(text, func)
+    pattern = definition_pattern(func, None)  # C: no class qualifier
+    text = enable_draft(source.read_text(encoding="latin-1"), pattern, func)
+    start, end = find_function(text, pattern)
     if re.search(r"INCLUDE_ASM\([^)]*,\s*" + re.escape(func) + r"\s*\)", text[:start] + text[end:]):
         sys.exit(f"{func} is still INCLUDE_ASM'd outside its draft")
     obj = f"{build}/src/{unit}.o"
