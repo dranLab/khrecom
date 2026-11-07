@@ -30,6 +30,7 @@ typedef struct { /* 0x28 */
     u_short s3, t3;
 } OMD_FT4;
 
+/* MATCH: the original's own inline asm: .set noreorder with hand-filled delay slots, trapping add/addi; gcc emits neither from C (build/progress/cleanup-libppp-mips-asm.md) */
 static void init_spline(sceVu0FVECTOR *x, int n, sceVu0FVECTOR *table) {
     sceVu0FVECTOR d[32];
     static sceVu0FVECTOR c = { 4.0f, -1.0f, 0.0f, 0.0f };

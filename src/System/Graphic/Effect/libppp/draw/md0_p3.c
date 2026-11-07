@@ -15,6 +15,7 @@ extern u_long128 ot1_mpg_table[];
     "$2", "$3", "$4", "$5", "$6", "$7", "$8", "$9", "$10", "$11", "$12", "$13", "$14", "$15", "$16", "$17", \
         "$18", "$24"
 
+/* MATCH: inline asm blocks with GPR moves inside MMI/VU0 sequences: as C the copies change the allocation of the whole function (COPY_Q as a u_long128 copy: 60 lines; through a $2 local: 8 insns shorter); build/progress/cleanup-libppp-mips-asm.md */
 void *op_md_draw_path3(OMD_H *mdh, OMD_IN *mdi) {
     register char *iv asm("$19");
     register char *sp asm("$20");

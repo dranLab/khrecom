@@ -124,7 +124,13 @@ Numbers change with every merge: `tools/check.sh` (totals), `tools/leftovers.py 
    table at the top of `docs/asm-leftovers.md`).
 3. **Library leftovers**: the parked and not attempted functions of `docs/sdk-leftovers.md`, with its "Working on
    a library unit" section.
-4. **Header cleanup**, interleaved: one `tools/partials.py --queue` item between two work items (see "Header
+4. **libppp's MIPS-in-asm (decided 2026-11-07, kept with MATCH evidence):** 23 matched functions keep GPR instructions
+   in their asm. 7 are the original's hand-written asm (`.set noreorder` with hand-filled delay slots, trapping
+   add/addi: init_spline x3, KeDttMdl_MkGifPk x2, KeDttSpr_MkGifPk, op_md_draw_path3_fog); the md0 family's C forms
+   change the whole function (COPY_Q tested); pppColor's split form (C + one asm per VU0/MMI instruction, volatile
+   max for the "m" operand) reaches 3 lines: the route for the 10 not attempted yet (their MATCH comments say so).
+   kh1 has none of them in C. No matched function goes back to parked for this.
+5. **Header cleanup**, interleaved: one `tools/partials.py --queue` item between two work items (see "Header
    cleanup"). The items waiting on a user decision are listed under "When to stop and ask".
 
 Work on one unit at a time, one function at a time. A unit is done when every function is matched or parked and

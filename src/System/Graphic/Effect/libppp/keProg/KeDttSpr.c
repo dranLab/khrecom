@@ -1,6 +1,7 @@
 #include "KeDttSpr.h"
 #include "System/Graphic/Effect/libppp/draw/draw_w.h"
 
+/* MATCH: GPR instructions inside the VU0/MMI asm, as in the original's instruction stream; the split form (C + one asm per VU0/MMI instruction) is not attempted yet: build/progress/cleanup-libppp-mips-asm.md */
 void KeDttSpr_MkGifPk_Pre(KeaDttSpr_MkGifPk *a) {
     struct {
         u_long p[16];
@@ -91,6 +92,7 @@ void KeDttSpr_MkGifPk_Pre(KeaDttSpr_MkGifPk *a) {
 
 /* All but the tail matches: the original puts the 0x80 constant in a0, computes the new Pk into v0 and
  * stores Pk before Z. Tried return/branch shapes, store orders, register variables and clobber sets. */
+/* MATCH: the original's own inline asm: a trapping add, which gcc never emits for C arithmetic (build/progress/cleanup-libppp-mips-asm.md) */
 int KeDttSpr_MkGifPk(KeaDttSpr_MkGifPk *a) {
     sceVu0FVECTOR zz;
     register KeaDttSpr_MkGifPk *ra asm("$6") = a;

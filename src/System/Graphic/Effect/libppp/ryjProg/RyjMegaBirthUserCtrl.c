@@ -32,6 +32,7 @@ extern sceVu0FMATRIX ppvSCMatrix;
     "vmaddaz.xyzw $ACC, $vf15, $vf4z\n" \
     "vmaddw.xyzw $vf4, $vf16, $vf4w\n"
 
+/* MATCH: GPR instructions inside the VU0/MMI asm, as in the original's instruction stream; the split form (C + one asm per VU0/MMI instruction) is not attempted yet: build/progress/cleanup-libppp-mips-asm.md */
 void RyjMegaBirthUserCtrDrawShapeRefPos(int shape_id, pppCVECTOR *color, u_char fog, u_char near) {
     OSHAPE_IN_VU1 *shi0;
     OSHAPE_IN_VU1 *shi1;

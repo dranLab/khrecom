@@ -9,6 +9,7 @@ extern u_long128 ot1_mpg_table[];
 #define SP(type, off) (*(type *)(sp + (off)))
 #define COPY_Q(dst, src) __asm__ volatile("lq $2, 0(%1)\n\tsq $2, 0(%0)" : : "r"(dst), "r"(src) : "$2")
 
+/* MATCH: the original's own inline asm: .set noreorder with hand-filled delay slots; gcc emits neither from C (build/progress/cleanup-libppp-mips-asm.md) */
 void *op_md_draw_path3_fog(OMD_H *mdh, OMD_IN *mdi) {
     register char *sp asm("$19");
     register OS_FOG *fog asm("$12");
