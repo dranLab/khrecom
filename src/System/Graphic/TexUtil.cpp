@@ -693,49 +693,40 @@ void CTexUtil::makeWhiteClut(const TexInfo* inpInfo, INT inSrcBufIdx, INT inOutB
     }
 }
 
-/* Parked: 10 of 120 lines, same size - the mult between the allocTex call and its test (`r = allocTex(..);
- * nImageSize = w * h; if (r < 0)`, the original fills the bltz slot with it; 19 -> 10). Left: _nDistBufW, where the
- * original adds 64 to the (w-1) of an earlier block and shifts (ours (w-1)>>6 + 1; every source form with +64
- * folds to w+63 and is CSE'd with the first _align, 51 lines: nW1 locals, inline helpers, casts), the qwImage
- * sra position and one clut zero store (_nDistY last in the original). permuter 5 min (old form): no gain. */
-#if 0
 BOOL CTexUtil::setupTexInfo(TexInfo& outInfo, const BYTE* pInTex, INT nWidth, INT nHeight) {
     INT nTexSize;
     INT nTexPos;
     INT nClutPos;
 
     nTexSize = _align(_align(nWidth, 64) / 4 * nHeight, 64) / 64;
-    INT r = CVramMan::allocTex(nTexSize, 0, nTexPos, nClutPos, 0);
-    INT nImageSize = nWidth * nHeight;
-    if (r < 0) return FALSE;
+    if (CVramMan::allocTex(nTexSize, 0, nTexPos, nClutPos, 0) < 0) return FALSE;
     VTransInfo& tex = outInfo._TexInfo;
     VTransInfo& clut = outInfo._ClutInfo;
+    INT nAlignW = 64; /* as in getTransInfo; the ref omits it (a constant pseudo has no debug location) */
+    INT nImageSize = nWidth * nHeight >> 2;
     tex._nDistPos = nTexPos;
+    tex._nFormat = 0;
     tex._pImage = (ULONGLONG*)pInTex;
     tex._nDistX = 0;
     tex._nDistY = 0;
     tex._nDistW = nWidth;
-    tex._nFormat = 0;
     tex._nDistH = nHeight;
     tex._nTw = CTexUtil::getBitDepth(nWidth);
     tex._nTh = CTexUtil::getBitDepth(nHeight);
-    tex._nDistBufW = (UINT)(nWidth - 1) / 64 + 1;
-    tex._qwImage = nImageSize >> 2;
+    tex._nDistBufW = _align(nWidth, nAlignW) >> 6;
+    tex._qwImage = nImageSize;
     tex._nTransSize = nTexSize;
-    clut._nTransSize = 0;
     clut._nDistPos = 0;
     clut._nFormat = 0;
     clut._pImage = NULL;
     clut._nDistX = 0;
     clut._nDistY = 0;
     clut._nDistBufW = 1;
+    clut._nTransSize = 0;
     outInfo._nTPage = SCE_GS_SET_TEX0(nTexPos, tex._nDistBufW, tex._nFormat, tex._nTw, tex._nTh, 1, 0, nClutPos,
                                       clut._nFormat, 0, 0, 1);
     return TRUE;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/TexUtil", setupTexInfo__8CTexUtilR7TexInfoPCUcii);
-#endif
 
 /* Parked: 93 of 153 lines, 16 bytes short - control flow as the original (tex_cnv PSM 19/20 cases, getTransSize
  * else, allocTex, getTransInfo, TEX0). Left: the original keeps &outInfo._TexInfo/_ClutInfo in s1/s0 across the
