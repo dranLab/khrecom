@@ -866,17 +866,6 @@ int TsSdSePlayCheck(int num) {
     return 0;
 }
 
-/* TsSdSepPlayDBG's string literals, for its INCLUDE_ASM; remove with it. */
-asm(".section .rodata\n"
-    ".align 3\n.asciz \"EE:  TsSdSepPlayDBG: ERROR! NO WD!!! wave%04d.wd\\n\"\n"
-    ".align 3\n.asciz \"EE:  TsSdSepPlayDBG: @@@@@@@@@@ SEP PLAY OVER!!! @@@@@@@@@@ sep_num=%d\\n\"\n"
-    ".align 3\n.asciz \"EE:  TsSdSepPlayDBG: se_data_ee_id[%d]=%d\\n\"\n"
-    ".align 3\n.asciz \"EE: nowait_func_buff OVER!!: TsSdSepPlayDBG\\n\"\n"
-    ".previous");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Sound/driver/sddrv_ee", TsSdSepPlayDBG);
-
-/* Parked: 4 lines with the barrier above (2026-11-06): the lbu of byte 13 vs the hoisted lui/li of the scan loop; sep_size forms 4-11 lines. 2026-11-07: both bytes loaded before a barrier and pinned give the loads but sll/addu come before the lw (7), a fixed register for the pointer stops the giv (14). Earlier: Register allocation: sep_size's bytes and the sep_param scan loop get other temporaries (pointer/counter swapped). */
-#if 0
 void TsSdSepPlayDBG(int addr, int vol, int pan, int se_id, int mtrack, int dtime) {
     int sep_num;
     int sep_size;
@@ -895,9 +884,13 @@ void TsSdSepPlayDBG(int addr, int vol, int pan, int se_id, int mtrack, int dtime
         return;
     }
     sep_num = TsSdGetSepNum(addr);
-    do { /* MATCH: empty loop = scheduling barrier (decomp-permuter): 16 -> 4 lines */
-    } while (0);
-    sep_size = ((u_char *)addr)[12] + (((u_char *)addr)[13] << 8);
+    {
+        /* MATCH: the two bytes pinned to a0/v0: v0 keeps byte 13 after the move of sep_num in both schedulers, the
+           original's temporaries for the bytes and the sep_param scan loop (issue-order pins) */
+        register int lo asm("$4") = ((u_char *)addr)[12];
+        register int hi asm("$2") = ((u_char *)addr)[13];
+        sep_size = lo + (hi << 8);
+    }
     for (num = 0; num < 4; num++) {
         if (((sep_param[num] >> 23) & 3) != 2) {
             check = 0;
@@ -936,7 +929,6 @@ void TsSdSepPlayDBG(int addr, int vol, int pan, int se_id, int mtrack, int dtime
         TsPrintN("EE: nowait_func_buff OVER!!: TsSdSepPlayDBG\n");
     }
 }
-#endif
 
 void TsSdSepPlay(int addr, int vol, int pan) {
     TsSdSepPlayDBG(addr, vol, pan, 0, 0, 0);
