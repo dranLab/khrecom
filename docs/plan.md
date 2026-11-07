@@ -447,7 +447,10 @@ Keep output small: one function's assembly at a time; `funcdiff` without `--full
   owner; string evidence that contradicts the ref; a new kind of mechanism; completion that needs changes to
   matched C beyond ref type corrections; unifying `Gprim.h` and `GprimFull.h`; a new opt-out macro more than
   about 5 units need; no net decrease of stand-ins plus PARTIAL markers after 3 consecutive units.
-- **Waiting on a decision now:** the global operators (new/delete/placement new) back into System/HeapMan.h with
+- **Waiting on a decision now:** the original's .mdebug type order (build/progress/cleanup-Gprim.h.md) puts G_XY,
+  G_XYZ, G_RGBA, G_UV, G_ST and F_UL with the vector/coord headers (in all 274 originals with FVECTOR; Gprim.h's own
+  G_LAYER/CDrawable/FVERTEX in 234) and the C++ QWdata in a base-types header after the khtypes typedefs, against the
+  ref's placement and ~230 includers. And the global operators (new/delete/placement new) back into System/HeapMan.h with
   `new (__FILE__ "(N)") T` sites (see "Queue state"; ~170 includers, matched C changes). And the `D2MAN_H_PATH` (2DMan.h, `D2::C2DMan`) and `RSRCDATA_H_FULL`
   (`CRsrcData`/`RsrcInfo`/`CRsrcANN`) gates, 10 files: the string evidence for 2DMan.h is ambiguous (the 2D
   container message is in 166 originals, the 2DMan.h path in only about 119).
