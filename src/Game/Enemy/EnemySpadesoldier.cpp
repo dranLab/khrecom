@@ -44,6 +44,7 @@ namespace Message {
 
 
 #include "Game/Enemy/BossDeadDemo.h"
+#include "System/HeapMan.h"
 
 
 
@@ -53,7 +54,6 @@ namespace Message {
 
 inline void* operator new(size_t, void* p) throw() { return p; }
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 static inline FVECTOR _deadDemoPlayerPos(FLOAT inW) {
     FVECTOR v;

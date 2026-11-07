@@ -15,9 +15,9 @@ extern "C" float atan2f(float y, float x);
 
 inline void* operator new(size_t, void* p) throw() { return p; }
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 #include "System/Graphic/WorldEnv.h"
+#include "System/HeapMan.h"
 #line 24
 
 void Normalize(FVECTOR& v0, const FVECTOR& v1);

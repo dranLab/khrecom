@@ -82,9 +82,6 @@ void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT s);
 void AddVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void MulVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 extern "C" float atan2f(float, float);
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
-inline void* operator new[](size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
-inline void operator delete[](void* mem) { com_free(mem); }
 inline void* operator new(size_t, void* p) throw() { return p; }
 
 static inline FLOAT _sqrtf(FLOAT x) {

@@ -4,10 +4,10 @@
 #include "Game/Collision/CollUtil.h"
 #include "Game/Collision/CollObj.h"
 #include "System/Debug.h"
+#include "System/HeapMan.h"
 
 inline void* operator new(size_t, void* p) throw() { return p; }
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 CCollisionList* CCollObj::m_pCollListP = NULL;
 CCollisionList* CCollObj::m_pCollListE = NULL;

@@ -33,7 +33,6 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 
 #include "include_asm.h"
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 #include "Game/Gimmick/GimmickManager.h"
 
@@ -76,6 +75,7 @@ struct ChatWndCreateCTDParam {
 
 
 #include "Game/Player/PlayerGauge.h"
+#include "System/HeapMan.h"
 
 CGimmickTreasureBox::CGimmickTreasureBox(CTask* inParent) : CBaseGimmick(inParent) {
     m_Step = 0;

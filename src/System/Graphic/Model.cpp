@@ -59,6 +59,7 @@ INT checkBBox(const FMATRIX& mWorldMatrix, const BBOX* bbox);
 SHADERDESC* searchShaderDesc(USHORT mode);
 static void getApplyMatrixBBox(FVECTOR& vOutMax, FVECTOR& vOutMin, const FMATRIX& Mat, const FVECTOR& vInMax, const FVECTOR& vInMin);
 #include "System/VramMan.h"
+#include "System/HeapMan.h"
 
 
 
@@ -91,7 +92,6 @@ struct MAD_HEADER {
 INT getModelAttachData(const MODEL_ATTACH_DATA** outMad, INT iRId);
 }
 inline void* operator new(size_t, void* p) throw() { return p; }
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 static inline FLOAT _sqrtf(FLOAT x) {
     FLOAT ret;
     asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));

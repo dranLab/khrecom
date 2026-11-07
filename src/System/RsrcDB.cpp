@@ -14,10 +14,10 @@ inline void* operator new(unsigned int, void* p) throw() { return p; }
 #include "System/MainApp.h"
 #include "Game/SceneInfo.h"
 #include <string.h>
+#include "System/HeapMan.h"
 
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 
-inline void operator delete[](void* p) { com_free(p); }
 
 #define RSRC_NEW(line, T) new (com_malloc_d(sizeof(T), __FILE__ "(" #line ")", RSRCDATA_RET_ADDR())) T
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)

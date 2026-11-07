@@ -19,12 +19,7 @@
 #include "System/Debug.h"
 #include "Game/EffectMotion.h"
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
-inline void* operator new[](size_t size, char* msg) throw() {
-    return com_malloc_d(size, msg, RET_ADDR());
-}
-inline void operator delete[](void* mem) { com_free(mem); }
 
 /* MATCH: Placeholder for an unknown header's inline function: its empty string literal follows "System/RsrcData.h(156)" in
  * the original .rodata. */

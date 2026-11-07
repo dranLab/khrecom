@@ -4,7 +4,6 @@
 
 inline void* operator new(size_t, void* p) throw() { return p; }
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 extern "C" float cosf(float);
 extern "C" float sinf(float);
@@ -13,6 +12,7 @@ extern "C" float sinf(float);
 #line 16
 
 #include "System/Graphic/PackMan.h"
+#include "System/HeapMan.h"
 
 
 

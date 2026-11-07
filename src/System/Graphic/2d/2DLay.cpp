@@ -7,12 +7,12 @@
 #include "System/Graphic/2d/2DLayObj.h"
 #include "System/Task.h"
 #include <string.h>
+#include "System/HeapMan.h"
 
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 
 inline void* operator new(size_t, void* p) throw() { return p; }
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 namespace D2 {
 

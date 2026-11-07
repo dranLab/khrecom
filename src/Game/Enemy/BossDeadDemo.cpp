@@ -43,7 +43,6 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 template <class T> static inline T& _ref(T& v) { return v; }
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 #include "System/Graphic/PackMan.h"
 

@@ -15,7 +15,6 @@
 
 
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 #line 20
 CMenu::CMenu(CTask* p, INT fgUseCardArray) : CTask(p, 0x4000) {

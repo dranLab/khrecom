@@ -8,15 +8,7 @@
 #include "System/Graphic/Str.h"
 #include "Game/Collision/CollUtil.h"
 #include "System/Graphic/Effect/effect.h"
-/* defined before Game/Card.h, Game/Technic.h and Game/Status.h: their initialize() inlines it */
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
-inline void* operator new(size_t size, char* msg) throw() {
-    return com_malloc_d(size, msg, RET_ADDR());
-}
-inline void* operator new[](size_t size, char* msg) throw() {
-    return com_malloc_d(size, msg, RET_ADDR());
-}
 #include "Game/Card.h"
 #include "Game/Technic.h"
 #include "Game/Status.h"
@@ -32,7 +24,6 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 #include "Game/Debug/DebugWork.h"
 #include "include_asm.h"
 
-inline void operator delete[](void* mem) { com_free(mem); }
 
 struct SemaParam {
     int currentCount;

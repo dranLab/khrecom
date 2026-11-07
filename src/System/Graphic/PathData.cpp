@@ -45,7 +45,6 @@ void MulMatrix(FMATRIX& res, const FMATRIX& m0, const FMATRIX& m1);
 void FTOI15Vector(IVECTOR& v0, const FVECTOR& v1);
 void ITOF15Vector(FVECTOR& v0, const IVECTOR& v1);
 
-inline void operator delete[](void* mem) { com_free(mem); }
 #ifndef KH_PLACEMENT_NEW_DEFINED // MATCH: placement new is not in the ref headers (the units define it themselves); defined once per unit
 #define KH_PLACEMENT_NEW_DEFINED
 inline void* operator new(size_t, void* p) throw() { return p; }
@@ -58,10 +57,8 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 
 
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 
-inline void* operator new[](size_t n, char* pszFile) throw() { return com_malloc_d(n, pszFile, RET_ADDR()); }
 
 CPathVector::~CPathVector() {
     if (m_iStatus & 1) {

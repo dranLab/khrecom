@@ -11,15 +11,7 @@
 #include "Game/Collision/CollObj.h"
 #include "Game/Collision/Ride.h"
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
-inline void* operator new(size_t size, char* msg) throw() {
-    return com_malloc_d(size, msg, RET_ADDR());
-}
-inline void* operator new[](size_t size, char* msg) throw() {
-    return com_malloc_d(size, msg, RET_ADDR());
-}
-inline void operator delete[](void* pv) { com_free(pv); }
 
 #include "Game/Collision/CollDisp.h"
 #include "System/Graphic/Camera.h"
@@ -29,6 +21,7 @@ inline void operator delete[](void* pv) { com_free(pv); }
 #include "Game/Debug/DebugWork.h"
 #include "Game/GameWork.h"
 #include "include_asm.h"
+#include "System/HeapMan.h"
 
 template <class T> static inline T& _ref(T& v) { return v; }
 

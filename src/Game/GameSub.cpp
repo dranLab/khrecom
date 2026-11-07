@@ -16,7 +16,6 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 #include "Game/GameSub.h"
 #include "System/TaskMan.h"
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 #include "Game/Atel/Atel.h"
 
@@ -40,6 +39,7 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 
 
 #include "System/Rcf.h"
+#include "System/HeapMan.h"
 
 
 

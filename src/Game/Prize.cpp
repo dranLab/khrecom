@@ -22,7 +22,6 @@ inline void _emptyStringPlaceholder() {
 #include "System/Graphic/Model.h"
 #include "Game/Card.h"
 #include "System/HeapMan.h"
-inline void operator delete[](void* mem) { com_free(mem); }
 #include "Game/Prize.h"
 #include "System/Graphic/LightUnit.h"
 #include "System/LinkedBuf.h"
@@ -39,14 +38,7 @@ inline void operator delete[](void* mem) { com_free(mem); }
 #include <string.h>
 #include "include_asm.h"
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
-inline void* operator new(size_t size, char* msg) throw() {
-    return com_malloc_d(size, msg, RET_ADDR());
-}
-inline void* operator new[](size_t size, char* msg) throw() {
-    return com_malloc_d(size, msg, RET_ADDR());
-}
 
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 

@@ -24,10 +24,10 @@ inline void _emptyStringPlaceholder() {
 #include "System/Math3D.h"
 #include "Game/Debug/DebugWork.h"
 #include "include_asm.h"
+#include "System/HeapMan.h"
 
 inline void* operator new(size_t, void* p) throw() { return p; }
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 extern "C" {
 float sinf(float x);

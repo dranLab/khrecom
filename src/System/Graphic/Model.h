@@ -34,12 +34,6 @@ class CLightUnit;
 struct MODELDATA;
 
 #include "System/Graphic/ModelMan.h"
-/* MATCH: the debug new reads the return address inside an inline operator new, after the size and the string */
-inline void* operator new(size_t size, const char* pMsg) throw() {
-    UINT nRA;
-    __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA));
-    return com_malloc_d(size, (char*)pMsg, nRA);
-}
 
 class CSemiZModel;
 class CSemiModel : public CDrawable {

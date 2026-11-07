@@ -12,8 +12,8 @@ inline void* operator new(unsigned int, void* p) throw() { return p; }
 #include "Game/SceneEnv.h"
 #include "Game/Debug/DebugWork.h"
 #include <string.h>
+#include "System/HeapMan.h"
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 #define SJ_FOREACH(T, pEntry, list) \
     for (T *pEntry = (list).getHead(), *__pn = pEntry ? pEntry->getNext() : NULL; pEntry; \
          pEntry = __pn, __pn = __pn ? __pn->getNext() : NULL)

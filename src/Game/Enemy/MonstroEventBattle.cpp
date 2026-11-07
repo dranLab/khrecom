@@ -37,7 +37,6 @@ inline void _monstroEventBattleEmptyString() {
 #include "Form/Menu/MonstroGauge.h"
 
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 #include "Game/Player/Player.h"
 
@@ -62,6 +61,7 @@ inline void _monstroEventBattleEmptyString() {
 
 
 #include "System/RsrcDB.h"
+#include "System/HeapMan.h"
 
 
 

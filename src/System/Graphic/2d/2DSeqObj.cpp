@@ -12,7 +12,6 @@
 #include "System/Graphic/2d/2DSeq.h"
 inline void* operator new(size_t, void* p) throw() { return p; }
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 #define SJ_FOREACH(T, pEntry, list) \
     for (T *pEntry = (list).getHead(), *__pn = pEntry ? pEntry->getNext() : NULL; pEntry; \
@@ -21,6 +20,7 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 
 
 #include "System/RsrcDB.h"
+#include "System/HeapMan.h"
 
 
 

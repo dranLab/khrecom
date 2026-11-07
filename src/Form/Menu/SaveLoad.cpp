@@ -35,7 +35,6 @@ inline void C2DSeqSelectable::setCaptionSpace(INT nX, INT nY) {
     if (m_pCaption) m_pCaption->setSpace(nX, nY);
 }
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 namespace {
 BOOL s_bSaveLoadDone = 0;
@@ -543,6 +542,7 @@ static inline BOOL _isAgentState(C2DSeqAgent* p, INT nState) { return p->getStat
 #include "Game/SceneEnv.h"
 #line 566
 #include "System/Graphic/PackMan.h"
+#include "System/HeapMan.h"
 
 
 

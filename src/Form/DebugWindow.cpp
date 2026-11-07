@@ -12,6 +12,7 @@
 
 #include "Form/DebugWindow.h"
 #include "include_asm.h"
+#include "System/HeapMan.h"
 
 extern "C" size_t strlen(const char* s);
 extern "C" char* strcpy(char* dst, const char* src);
@@ -58,15 +59,7 @@ static inline void _unitMatrix(FMATRIX& m) {
                  : "memory");
 }
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
-inline void* operator new(size_t size, char* msg) throw() {
-    return com_malloc_d(size, msg, RET_ADDR());
-}
-inline void* operator new[](size_t size, char* msg) throw() {
-    return com_malloc_d(size, msg, RET_ADDR());
-}
-inline void operator delete[](void* mem) { com_free(mem); }
 
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 

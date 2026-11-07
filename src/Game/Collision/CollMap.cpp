@@ -11,7 +11,6 @@
 
 inline void* operator new(size_t, void* p) throw() { return p; }
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 /* iterates a CSJointListT, the current entry may be removed (original macro name unknown) */
 #define SJ_FOREACH(T, pEntry, list) \
@@ -19,6 +18,7 @@ inline void* operator new(size_t, void* p) throw() { return p; }
          pEntry = __pn, __pn = __pn ? __pn->getNext() : NULL)
 
 #include "System/Coord.h"
+#include "System/HeapMan.h"
 
 INT CCollMap::m_fgSameFrame = 0;
 BOOL CCollMap::m_bExceptBSCheck = 0;

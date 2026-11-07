@@ -18,7 +18,6 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 #include "Form/DebugMenu.h"
 #include "System/Vector.h"
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 extern INT SCREEN_HEIGHT;
 

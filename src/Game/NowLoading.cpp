@@ -5,7 +5,6 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 #include "System/TaskMan.h"
 #include "Game/NowLoading.h"
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 
 
@@ -23,6 +22,7 @@ class CRsrcData;
 
 
 #include "System/Rcf.h"
+#include "System/HeapMan.h"
 
 
 

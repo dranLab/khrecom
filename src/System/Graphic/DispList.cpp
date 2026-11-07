@@ -713,7 +713,6 @@ static BOOL chackBBOX(const FVECTOR& vMax, const FVECTOR& vMin, const FVECTOR& v
  * j++ in both paths (for/while, 74), if (pSdw) {...} j++ (62); goto/while forms earlier (2026-10-19). The draft
  * declares CShadowMapModel (ref: lost+found.h, owner unknown) and Math3D::VectorMaxMinXYZ itself. */
 #if 0
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 class CShadowMapModel : public CFadeModel {
     HANDLE m_hHnd;
 public:

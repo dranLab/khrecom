@@ -12,7 +12,6 @@
 #include "System/Sound/SoundMan.h"
 #include <string.h>
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 extern "C" void sceVu0InterVector(FVECTOR& v0, FVECTOR& v1, FVECTOR& v2, float t);
 void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
@@ -29,13 +28,10 @@ static inline void _setXYZ(G_XYZ& xyz, FIX4 _x, FIX4 _y) {
 static inline INT& _screenHeight() { return SCREEN_HEIGHT; }
 
 inline void* operator new[](size_t size) throw() { return com_malloc(size); }
-inline void operator delete[](void* mem) { com_free(mem); }
 
-inline void* operator new(size_t size, char* msg) throw() {
-    return com_malloc_d(size, msg, RET_ADDR());
-}
 
 #include "System/Graphic/TexInfo.h"
+#include "System/HeapMan.h"
 
 
 

@@ -6,7 +6,6 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 
 #include "Game/Atel/AtelCrossFade.h"
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 extern INT VSYNC_TIMEQ;
 extern INT SCREEN_HEIGHT;
@@ -50,6 +49,7 @@ void sceDmaSendN(sceDmaChan* d, void* addr, int size);
 }
 
 #include "include_asm.h"
+#include "System/HeapMan.h"
 
 namespace ATEL {
 CAtelCrossFade* CAtelCrossFade::m_pInstance = NULL;

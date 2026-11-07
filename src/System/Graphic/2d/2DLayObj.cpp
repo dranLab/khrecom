@@ -9,6 +9,7 @@
 
 #include "System/Graphic/2d/2DLay.h"
 #include "System/Graphic/2d/2DSeq.h"
+#include "System/HeapMan.h"
 
 
 
@@ -59,7 +60,6 @@ C2DLayObj::~C2DLayObj() {
     m_pSeqObjHandle = NULL;
 }
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 HANDLE C2DLayObj::create(HANDLE handle, UINT nScreen, LAY_SCREEN* pLayScreen, HANDLE* pSeqHandle) {
     UINT i;

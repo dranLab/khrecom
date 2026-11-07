@@ -32,10 +32,10 @@ inline void _emptyStringPlaceholderPlayerGauge() { TRACE(""); }
 #include "System/Sound/SoundMan.h"
 #include "System/Graphic/2d/2DFnt.h"
 #include "include_asm.h"
+#include "System/HeapMan.h"
 
 using namespace Gauge;
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 inline void* operator new(unsigned int, void* p) throw() { return p; }
 namespace Gauge {
 LPCSTR g_szLadGauge = "gauge.lad";
@@ -324,9 +324,6 @@ static inline void _setCardNum(CARD& c, USHORT kind, BYTE num) {
     c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0;
     c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1;
 }
-inline void* operator new(size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
-inline void operator delete[](void* mem) { com_free(mem); }
-inline void* operator new[](size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
 template <class T> static inline T& _ref(T& v) { return v; }
 
 CPlayerGauge::CPlayerGauge(CTask* p) : CTask(p, 0x4000), m_pNaviMap(NULL), m_pFriend(NULL) { _initialize(); }

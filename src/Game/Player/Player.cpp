@@ -166,7 +166,6 @@ public: CPlayerDebug(CTask* inParent); virtual ~CPlayerDebug();
 #include "Game/MinigameManager.h"
 #include "System/Sound/SoundMan.h"
 #line 188
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 CPlayer* g_pPlayer = NULL;
 CPlayer* CPlayer::m_pInstance = NULL;

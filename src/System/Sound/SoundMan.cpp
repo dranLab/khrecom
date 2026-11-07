@@ -62,7 +62,6 @@ void SubVector(FVECTOR& outV, const FVECTOR& inV0, const FVECTOR& inV1);
 FLOAT InnerProduct(const FVECTOR& inV0, const FVECTOR& inV1);
 
 inline void* operator new(size_t, void* p) throw() { return p; }
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 
 #define SEQ_VSB 0x10000000

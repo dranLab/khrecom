@@ -13,13 +13,7 @@
 #define _ASSERT_STR(e) #e
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, _ASSERT_STR(e), 0)
 
-inline void* operator new(size_t size, char* msg) throw() {
-    UINT nRA;
-    __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA));
-    return com_malloc_d(size, msg, nRA);
-}
 
-inline void operator delete[](void* pv) { com_free(pv); }
 
 CTask::CTask(CTask* pParent, INT nProcPrio)
     : m_nProcPrio(nProcPrio), m_pParent(NULL), m_listChildren(CTaskMan::getSLCManager()) {

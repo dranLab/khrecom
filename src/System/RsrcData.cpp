@@ -39,7 +39,6 @@ int snDllUnload(void* pDll);
 void* snDllGetFreeMemory(void* pDll);
 }
 
-inline void operator delete[](void* p) { com_free(p); }
 inline void* operator new[](size_t size, const char* pszFile) throw() {
     UINT nRA = RSRCDATA_RET_ADDR();
     return com_malloc_d(size, (char*)pszFile, nRA);
@@ -556,6 +555,7 @@ BOOL CRsrcAMF::setupAMF(MODELDATA* pData, BOOL bExitOnTexErr) {
 }
 
 #include "Game/Map.h"
+#include "System/HeapMan.h"
 
 
 

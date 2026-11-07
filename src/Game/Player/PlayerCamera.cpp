@@ -55,11 +55,12 @@ extern "C" float cosf(float x);
 
 inline void* operator new(size_t, void* p) throw() { return p; }
 
-static inline UINT RET_ADDR() {
+static inline UINT _retAddr() { /* the sites' inline form (step 2 turns them into new (msg) T) */
     UINT nRA;
     __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA));
     return nRA;
 }
+
 
 static inline FLOAT _fabsf(FLOAT x) {
     FLOAT ret;
@@ -256,7 +257,7 @@ CPlayerCamera::CPlayerCamera(CTask* pParent) : CCamera(pParent, -1), m_uiFlag(0)
     DebugWork::g_dw.player.m_szCamera[3] = m_strCamera3;
     DebugWork::g_dw.player.m_szCamera[4] = m_strCamera4;
 #line 269
-    m_pWindow = new (com_malloc_d(sizeof(CDebugWindow), __FILE__ "(269)", RET_ADDR())) CDebugWindow(this, DWTPlayer::debugPlayerCameraInfo);
+    m_pWindow = new (com_malloc_d(sizeof(CDebugWindow), __FILE__ "(269)", _retAddr())) CDebugWindow(this, DWTPlayer::debugPlayerCameraInfo);
     m_pWindow->dispOff(0);
     DebugWork::g_dw.player.iCamMode = 1;
     g_pCamData[0] = NULL;
@@ -476,7 +477,7 @@ void CPlayerCamera::initCamera(INT inMode, INT inReset, FVECTOR* inDir) {
         if (m_pLines) delete m_pLines;
         m_pLines = NULL;
 #line 608
-        m_pLines = new (com_malloc_d(sizeof(C3DLines), __FILE__ "(608)", RET_ADDR())) C3DLines;
+        m_pLines = new (com_malloc_d(sizeof(C3DLines), __FILE__ "(608)", _retAddr())) C3DLines;
         if (!(m_pLines)) AssertApp(__FILE__, __LINE__, "m_pLines", 0);
         m_pLines->m_pCrd = &Crd(0);
         _inversMatrix(m, Crd(0).getWorldMatrix());

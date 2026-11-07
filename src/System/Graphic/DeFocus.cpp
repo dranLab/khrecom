@@ -9,9 +9,9 @@
 #include "System/VramMan.h"
 #include "System/Math3D.h"
 #include "include_asm.h"
+#include "System/HeapMan.h"
 
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 inline void* operator new(size_t, void* p) throw() { return p; }
 

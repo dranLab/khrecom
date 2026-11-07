@@ -53,11 +53,7 @@ inline void _roulettePrizeMessage() { /* MATCH: placeholder: an inline function'
 #include "include_asm.h"
 extern "C" int sprintf(char* s, const char* fmt, ...);
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
-inline void* operator new(size_t size, char* msg) throw() {
-    return com_malloc_d(size, msg, RET_ADDR());
-}
 
 #include "System/RsrcDB.h"
 
@@ -85,6 +81,7 @@ inline void* operator new(size_t size, char* msg) throw() {
 
 
 #include "System/Graphic/PackMan.h"
+#include "System/HeapMan.h"
 
 
 

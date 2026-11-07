@@ -32,10 +32,10 @@ inline void _emptyStringPlaceholderDebugPathData() { TRACE(""); }
 #include "System/TaskMan.h"
 #include "include_asm.h"
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 inline void* operator new(unsigned int, void* p) throw() { return p; }
 extern "C" char* strcpy(char*, const char*);
 #include "System/RsrcDB.h"
+#include "System/HeapMan.h"
 
 
 

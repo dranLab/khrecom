@@ -32,11 +32,7 @@ inline void _emptyStringPlaceholder2() { /* MATCH: placeholder: an inline functi
 #include "System/HeapMan.h"
 #include "System/MainApp.h"
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
-inline void* operator new(size_t size, char* msg) throw() {
-    return com_malloc_d(size, msg, RET_ADDR());
-}
 
 /* A store through a reference is not an in-struct access: the scheduler keeps a following global load after it. */
 template <class T> static inline T& _ref(T& v) { return v; }

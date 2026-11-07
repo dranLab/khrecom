@@ -29,11 +29,6 @@ extern INT VSYNC_TIMEQ;
 
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 
-inline void* operator new(size_t size, char* msg) throw() {
-    UINT nRA;
-    __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA));
-    return com_malloc_d(size, msg, nRA);
-}
 
 #define PAD_MAX 2
 #define ROBOT_PAD_MAX 24

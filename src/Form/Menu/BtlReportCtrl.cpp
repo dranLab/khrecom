@@ -14,12 +14,12 @@
 #include "System/Graphic/2d/2DSeqCtrl.h"
 #include "Form/Menu/BtlReportCtrl.h"
 #include <string.h>
+#include "System/HeapMan.h"
 
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 
 inline void* operator new(size_t, void* p) throw() { return p; }
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 C2DSeqStrings::C2DSeqStrings(CTask* pParent) : C2DSeqAgent(pParent) {
     m_pCtrl = NULL;

@@ -9,7 +9,6 @@
 #include "System/Debug.h"
 #include "System/HeapMan.h"
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 
 inline void* operator new(size_t, void* p) throw() { return p; }

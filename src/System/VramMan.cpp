@@ -12,7 +12,6 @@
 
 #line 24
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 
 inline void* operator new(size_t, void* p) throw() { return p; }

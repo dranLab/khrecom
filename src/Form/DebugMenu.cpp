@@ -27,7 +27,6 @@ extern "C" int strcmp(const char* a, const char* b);
 
 inline void* operator new(size_t, void* p) throw() { return p; }
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 #define NEW(line, T) new (com_malloc_d(sizeof(T), __FILE__ "(" #line ")", RET_ADDR())) T
 #define NEW_SIZE(line, size, T) new (com_malloc_d(size, __FILE__ "(" #line ")", RET_ADDR())) T
 #define ASSERT_LINE(line, e) if (!(e)) AssertApp(__FILE__, line, #e, 0)

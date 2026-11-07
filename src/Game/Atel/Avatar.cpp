@@ -104,6 +104,7 @@ void AddVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT t);
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 #include "System/RsrcDB.h"
+#include "System/HeapMan.h"
 
 
 
@@ -124,7 +125,6 @@ static inline void _unitMatrixVu0(FMATRIX& m) {
                  : "r"(&m)
                  : "memory");
 }
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 inline void* operator new(size_t, void* p) throw() { return p; }
 
 CAvatar::CAvatar(CTask* pParent)

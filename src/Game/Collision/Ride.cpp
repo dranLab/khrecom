@@ -14,7 +14,6 @@
 
 inline void* operator new(size_t, void* p) throw() { return p; }
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 extern char D_004895C0[]; /* "c:/KHCOM/MainApp/Game/Collision/CollUtil.h" */
 extern char D_00489638[]; /* "m_pInstance" */
 extern char D_00489670[]; /* "c:/KHCOM/MainApp/Game/Collision/Ride.cpp(23)" */

@@ -19,6 +19,7 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 
 
 #include "System/RsrcDB.h"
+#include "System/HeapMan.h"
 
 
 
@@ -33,7 +34,6 @@ void (*s_pExtEndHandler)() = NULL;
 char s_szSysMessage[256];
 }
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 static void _openWnd();
 static void _callbackSysMessageLoop(C2DSeqAgent& agent);

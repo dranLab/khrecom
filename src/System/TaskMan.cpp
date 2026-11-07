@@ -45,11 +45,7 @@ template <class T> static inline T& _ref(T& v) { return v; }
 
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
-inline void* operator new(size_t size, char* msg) throw() {
-    return com_malloc_d(size, msg, RET_ADDR());
-}
 
 /* The unit's .text ends with an unnamed copy of CSLCListT<CTask>'s inline destructor (and .rodata has one of its
  * vtable): our compiled copies are only kept with these lines in config/SLUS_217.99/symbol_addrs.txt

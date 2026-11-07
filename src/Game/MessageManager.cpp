@@ -3,10 +3,10 @@
 #include "Game/MessageManager.h"
 #include "System/TaskMan.h"
 #include "Game/Entity.h"
+#include "System/HeapMan.h"
 
 inline void* operator new(size_t, void* p) throw() { return p; }
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 namespace Message {
 
