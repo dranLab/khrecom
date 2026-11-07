@@ -348,7 +348,6 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/libat3dec", channel_conv_joint);
 typedef struct {
     int v[4];
 } At3Tbl4;
-extern const At3Tbl4 D_004FCEF0;
 extern unsigned short cc[];
 extern short ca[];
 extern int mx[];
@@ -359,7 +358,7 @@ void imdct_ch2(int *a, int *b, int *coef, int *tbl);
 
 int imdct(char *ch, int band, int gain)
 {
-    At3Tbl4 tbl = D_004FCEF0; /* {0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF}: the unit's .rodata is still asm */
+    At3Tbl4 tbl = {{0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF}};
     int *src;
     int *w = ((At3Chan *)ch)->spec + band * 256;
     int i, max, shift, step, half, k, n;
@@ -484,9 +483,6 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/libat3dec", imdct);
 __asm__(".rdata\n.align 4\nD_004FCEF0:\n.word 0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF\n.text\n"); /* imdct's At3Tbl4 initializer */
 #endif
 
-/* Parked: 10 lines off (23 before the early `lt` compare, decomp-permuter): the original sets the return value -1 at
-   the top of the loop (the conditional returns branch straight to the epilogue) */
-#if 0
 #define GAINC_STEP()                                                    \
     *p = ((*p >> 11) * subgaintable[sh & 7]) >> ((sh >> 3) + 4);        \
     p++;                                                                \
@@ -495,8 +491,8 @@ __asm__(".rdata\n.align 4\nD_004FCEF0:\n.word 0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF\n.t
 static int gainc_window(char *ch, int band)
 {
     int *g = (int *)(ch + 0x32D4) + band * 16;
-    int *end = ((At3Band *)ch)[band].ov;
     int *p = ((At3Band *)ch)[band].spec;
+    int *end = ((At3Band *)ch)[band].ov;
     unsigned int sh;
     unsigned int step;
 
@@ -504,12 +500,11 @@ static int gainc_window(char *ch, int band)
         return -1;
     }
     do {
-        int lt = p < ((At3Band *)ch)[band].spec + g[0] + 1;
+        sh = g[1];
         if (end < ((At3Band *)ch)[band].spec + g[0] + 1) {
             return -1;
         }
-        sh = g[1];
-        if (!lt) {
+        if (!(p < ((At3Band *)ch)[band].spec + g[0] + 1)) {
             return -1;
         }
         if (sh >= 16) {
@@ -520,7 +515,7 @@ static int gainc_window(char *ch, int band)
             p++;
         } while (p < ((At3Band *)ch)[band].spec + g[0] + 1);
         if (!(p < end)) {
-            do { return 0; } while (0); /* MATCH: the loop note (decomp-permuter): 11 -> 10 lines */
+            break;
         }
         g += 2;
         step = g[1] - sh;
@@ -536,9 +531,6 @@ static int gainc_window(char *ch, int band)
     } while (p < end);
     return 0;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/libat3dec", gainc_window);
-#endif
 
 void iqmf(char *ch)
 {
