@@ -35,9 +35,11 @@ shows a draft's diff after you switch its `#if 0` to `#if 1` (the permuters swit
 - **Validation:** funcdiff, then the full build's SHA-1 (`ninja`), then `tools/check.sh` before a merge. funcdiff
   normalizes relocation targets, so a swap of two globals' `%hi` registers in the same 64 KB page shows as a
   MATCH that the SHA-1 rejects (`_sceCd_cbLoop`).
-- **Data:** a unit whose `.rodata` still comes from asm (`kprintf2`, `libat3dec`, ...) strips the compiled
-  `.rodata`: a draft with string literals or double constants doesn't link there (`printfloat`); the original's
-  labels as externs work for strings but not for doubles (not constants any more).
+- **Data:** a unit whose `.rodata` still comes from asm strips the compiled `.rodata`: a draft with string literals
+  or double constants doesn't link there (extern labels work for strings, not for doubles). Bring the data from
+  source first, also with INCLUDE_ASM functions left: C literals for C-owned labels, `asm(".rdata\n.align 3\n...")`
+  blocks of ROM words (a jump table as symbolic `.word .Lxxx`) right after each asm owner's INCLUDE_ASM; delete a
+  block with its INCLUDE_ASM (memory note source-data-owner-blocks; kprintf2 2026-11-07, filestub).
 
 ## Levers that worked in lib/
 
@@ -62,11 +64,11 @@ shows a draft's diff after you switch its `#if 0` to `#if 1` (the permuters swit
   reproduce it. Locals for the copied pointer/field and a `do { } while (0)` around one copy got `_request_end`
   (47 -> 11) and `_request_call` (45 -> 8) close; try the same on the others. Same family: sifcmd's
   `_sceSifCmdIntrHdlr` (registers only).
-- **kprintf2** (`_sceSnprintf`, `printfloat`, `ftoi` parked; `.rodata` stays asm): `_sceSnprintf` is off only by a
-  `nop` between `c.eq.s` and `bc1f` (gcc writes `#nop`); no assembler here gives that nop together with the
-  unit's other code (2.9 gas inserts it but also one after `mtc1` and fills no `j $31`; 2.10/2.12 insert none).
-  `printfloat` matches with its literals compiled (ftoi's result in a temporary first), so it waits for the
-  unit's `.rodata` from source.
+- **kprintf2** (`_sceSnprintf` parked, 2 lines; data from source 2026-11-07, `printfloat` and `ftoi` matched):
+  `_sceSnprintf` is off only by a `nop` between `c.eq.s` and `bc1f` (gcc writes `#nop`). GNU as 2.9-ee-991111
+  (`ee-gcc2.9-991111{,-01}/ee/bin/as`) gives exactly that and matches every other function except `ftoi` and
+  `kputchar`, whose `jr ra` slots it never fills (2.10 does; gcc can't: a DI->SI truncation of length 8, a
+  volatile store). 2.10/2.12 insert no c.cond nop with any `-mcpu`/`-mipsN`; 990721's as also adds one after `mtc1`.
 - **filestub** (`_sceFs_Rcv_Intr`, jump table as file-scope asm): only the prologue differs, two swapped registers
   around the `ee_retbuf_sel` store (an empty `asm volatile` barrier moves it, but isn't source).
   `~/kh1/src/lib/libkernl/filestub.c` (an older libkernl, matched) was the base; ours adds named semaphores,
@@ -170,9 +172,7 @@ Sorted by unit, then size. `instr`: instructions in the original.
 | `lib/nodebug/strround` | `fftoa` | 367 | parked | fftoa: register allocation still differs (x, exp, n, ... one s-register off) |
 | `lib/nodebug/strround` | `_vfprintf_r` | 1041 | not attempted |  |
 | `lib/nodebug/_setlocale_r` | `memchr` | 59 | hand-written | MMI (128-bit compares) |
-| `lib/kprintf2` | `_sceSnprintf` | 837 | parked | 4 lines differ (permuter score) |
-| `lib/kprintf2` | `printfloat` | 118 | parked | 16 lines differ - blocked by the unit's asm .rodata: with its literals compiled (decomp-permuter's build) the ftoi result in a temporary before the "0.%d" call matches; the original's D_004FEC90.. labels as externs do not (69 lines: extern doubles are not constants) |
-| `lib/kprintf2` | `ftoi` | 36 | parked | 9 lines differ |
+| `lib/kprintf2` | `_sceSnprintf` | 837 | parked | 2 of 853 lines, same size (2026-11-07): only the nop between c.eq.s and bc1f in the %f case (gcc writes "#nop"; the original's assembler inserted it at the ".set noreorder" before bc1f). The 991111/991111-01 ee/bin/as (GNU as 2.9-ee-991111) gives exactly that nop and the whole function matches, … |
 | `lib/sifcmd` | `_sceSifCmdIntrHdlr` | 82 | parked | the C below has the original's shape and size, but its registers differ (pkt/size in a2/a0 instead of a3/a1, the scaled index kept apart from id) |
 | `lib/sifrpc` | `sceSifInitRpc` | 103 | parked | 62 lines differ (permuter score) |
 | `lib/sifrpc` | `_request_rdata` | 52 | parked | 7 of 59 lines (2026-11-07, was 10): the strict load/store order is stores of alias set 0: through a union, every later read reloads, also the call's arguments (int casts on both sides do not: cse keeps those). pkt_addr's store is plain: receive loads ahead of it. Left: v0/v1 alternate the other … |
@@ -192,10 +192,9 @@ Not listed in the unit's `// SOURCE DATA:` line.
 | `lib/graphdev_sceGsExecStoreImage` | .data .rodata |
 | `lib/libat3dec` | .data .rodata |
 | `lib/nodebug/__assert` | .rodata |
-| `lib/kprintf2` | .rodata |
 | `lib/src/gcc/libgcc2___umoddi3` | .rodata |
 
-Totals: 16 units without a source file (1 with code); 18 units with INCLUDE_ASM functions: 31 parked, 1 not attempted, 27 hand-written; 5 units take a data section from assembly.
+Totals: 16 units without a source file (1 with code); 18 units with INCLUDE_ASM functions: 29 parked, 1 not attempted, 27 hand-written; 4 units take a data section from assembly.
 
 Generated by `tools/leftovers.py lib`.
 <!-- leftovers:lib:end -->
