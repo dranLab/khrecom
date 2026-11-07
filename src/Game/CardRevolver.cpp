@@ -2739,17 +2739,10 @@ void CCardRevolver::deleteStock() {
     delete m_pSeqCtrlStock_Num10;
     m_pSeqCtrlStock_Num10 = NULL;
 }
-/* Parked: 5 lines off (brace-initialized pos, 2026-11-06; 22 before): the first m_uiUser == 1 arm's `sw y; jal setPos` should cross-jump into the else arm's, but sched1 puts (use (const_int 0)) after the else arm's call (it ends a block), so jump2's find_cross_jump compares USE with the arm's jump and stops. y forms in that arm change nothing, two places: the first block has CStockFolder::setStockInfo's open issue (the original issues
-   the div before the pos.init() zero stores and the changeTexture zero arguments, ours after); the num > 0 arms
-   load a0/a1 for setPos at the top of each arm with one shared jal in the original. A setPos per arm gives that
-   setup but no cross-jump (sched1 puts a (use (const_int 0)) after a block-ending call, jump2 then stops), and
-   pos.x += 15 duplicated into both arms cross-jumps but moves the add into the arm. Worked: setText before
-   ofsY = 0, m_uiStockState before m_uiStockCategory in default. Tried: 5 pos.init placements; permuter 5 min
-   (4399 candidates, 41 -> 37, applied). */
-#if 0
 void CCardRevolver::setStockInfo() {
     CB_LAYOUT* pLayout;
     FLOAT ofsY;
+    register FLOAT fX asm("$f0"); /* MATCH: pos.x read in each arm below */
     INT num;
     INT category;
     if (m_uiUser == 2) {
@@ -2795,13 +2788,18 @@ void CCardRevolver::setStockInfo() {
             pos.x = pLayout->x + 0x1A;
             pos.y = pLayout->y - 0xB + ofsY;
             m_pSeqCtrlStock_Num10->setPos(pos);
+            fX = pos.x;
         } else {
             pos.x = pLayout->x - 0x2B;
             pos.y = pLayout->y - 0xC;
             m_pSeqCtrlStock_Num10->setPos(pos);
+            fX = pos.x;
         }
-        pos.x += 15.0f;
-        m_pSeqCtrlStock_Num01->setPos(pos);
+        /* MATCH: the load after each call keeps the call off the block end, so the arms cross-jump; a1 before the add */
+        register FVECTOR* pPos asm("$5") = &pos;
+        __asm__ volatile("" : : "r"(pPos));
+        pos.x = fX + 15.0f;
+        m_pSeqCtrlStock_Num01->setPos(*pPos);
     } else {
         if (m_uiUser == 1) {
             pos.x = pLayout->x + 0x1A;
@@ -2848,10 +2846,6 @@ void CCardRevolver::setStockInfo() {
     m_pSeqCtrlStock->enableDisp(TRUE);
     m_uiStockState = 1;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", setStockInfo__Q210CardBattle13CCardRevolver);
-#endif
-__asm__(".rdata\n.align 4\n.word 0x001E8AF4\n.word 0x001E8B00\n.word 0x001E8B0C\n.word 0x001E8B24\n.word 0x001E8B0C\n.word 0x001E8B24\n.word 0x001E8B18\n.word 0x00000000\n.text\n");
 void CCardRevolver::changeDarkMode(HANDLE inHandle, INT inFlag) {
     changeOwner(inHandle);
     if (inFlag) m_uiFlag |= 0x100;
