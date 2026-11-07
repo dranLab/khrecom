@@ -1077,7 +1077,8 @@ static inline INT _hexValue(INT c) {
 
 /* Parked: _atoi: 7 of 78 lines, same size - hex/decimal paths and the isupper branch (_tolower) as the original; left:
  * the decimal loop: the original's top is not aligned and p++ stays last. Real loop forms give the align nop and move
- * p++ (for (;; p++), while, tests in the condition); a goto loop drops it but loses the hoisted lui/li 10. */
+ * p++ (for (;; p++), while, tests in the condition); a goto loop drops it but loses the hoisted lui/li 10. 2026-11-07: a goto loop with the constant in a pinned local still needs the table pointer hoisted by hand
+ * (19 lines): the hoists need a real loop, the unaligned top needs none. */
 #if 0
 INT _atoi(const CHAR* lpszInStr) {
     INT nRet = 0;

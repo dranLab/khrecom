@@ -596,7 +596,7 @@ void CPlayerDRiku::exeSpeedStep() {
         initIdle(-1, 1);
     }
 }
-/* Parked: 7 lines off, registers only: in the card branch the original keeps %hi(g_pBattleCardList) in t0 and the shared constant 1 (m_iAttackNo == 1, _upKind's shift) in a2, ours t1 and t0. Worked: CPlayer::setAttack's form, the player-flag 0x80000 arm first, `pre == 7 || isAir()` for the last hit, case 7 with its own body. Tried: _ref forms of the m_AtkKind/m_AtkAttr stores, up declared early or inline, an unsigned compare; permuter 15 min (7238 candidates, stays 8). */
+/* Parked: 7 lines off, registers only: in the card branch the original keeps %hi(g_pBattleCardList) in t0 and the shared constant 1 (m_iAttackNo == 1, _upKind's shift) in a2, ours t1 and t0. Worked: CPlayer::setAttack's form, the player-flag 0x80000 arm first, `pre == 7 || isAir()` for the last hit, case 7 with its own body. Tried: _ref forms of the m_AtkKind/m_AtkAttr stores, up declared early or inline, an unsigned compare; permuter 15 min (7238 candidates, stays 8). 2026-11-07: a pinned list pointer folds back to the symbol unless an operand keeps it, and that operand moves other registers (16). */
 #if 0
 void CPlayerDRiku::setAttack() {
     CEntity* pTarget;
