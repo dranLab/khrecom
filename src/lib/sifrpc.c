@@ -547,19 +547,15 @@ int sceSifCallRpc(sceSifClientData *cd, unsigned int fno, unsigned int mode, voi
 }
 #endif
 
-/* Parked: the original copies the packet fields in strict load/store order, ours lets the scheduler hoist loads */
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/sifrpc", sceSifCheckStatRpc);
-#if 0
 int sceSifCheckStatRpc(sceSifClientData *cd)
 {
     RpcPktHeader *packet = cd->rpcd.paddr;
 
-    if (packet && cd->rpcd.pid == packet->rpc_id && (packet->rec_id & PACKET_F_ALLOC)) {
-        return 1;
+    if (!packet || cd->rpcd.pid != packet->rpc_id || !(packet->rec_id & PACKET_F_ALLOC)) {
+        return 0;
     }
-    return 0;
+    return 1;
 }
-#endif
 
 void sceSifSetRpcQueue(sceSifQueueData *qd, int key)
 {
