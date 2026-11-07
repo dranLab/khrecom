@@ -1175,9 +1175,9 @@ void _makeLocalizePath(CHAR* pszOut, const CHAR* pszSrc, INT nLocale) {
         strcpy(pszOut, pszSrc);
     }
 }
-/* Parked: _atolen: 14 of 81 lines, 4 bytes short - _atoi's shape (one return, goto exits, '$' test first with
- * the 0x case inside `if (*p != '$')`); left: the same isupper branch-vs-movz in _hexValue as _atoi, and the
- * original's block order (0x case jumps over the '$' block to `nRet = 2`, p = lpszInStr + 2 from a0). */
+/* Parked: _atolen: 5 of 79 lines, same size - _atoi's guard + while and return as there. Left: block order: the 0x case jumps
+ * over the '$' block to a `nRet = 2` behind it, ours falls into its own. Gotos, an else with a goto, do/while(0) + break
+ * all come out with the '$' block first (10 lines). The extra nop is the loop's alignment and moves with that. */
 #if 0
 INT _atolen(const CHAR* lpszInStr) {
     INT nRet = 0;
@@ -1195,6 +1195,7 @@ INT _atolen(const CHAR* lpszInStr) {
             p++;
             nRet = 1;
         }
+        if (!*p) goto end;
         while (*p) {
             if (_hexValue(*p) < 0) {
                 goto end;
@@ -1214,7 +1215,11 @@ INT _atolen(const CHAR* lpszInStr) {
         }
     }
 end:
-    return nRet;
+    {
+        register INT r asm("$2") = nRet;
+        asm volatile("" : : "r"(r));
+        return r;
+    }
 }
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", _atolen__FPCc);
