@@ -80,7 +80,7 @@ public:
         m_Radius = m_shiftY = 0.0f;
     }
     virtual ~CCollision() {} /* 0x70 */
-    void initForMap(/* parameters unknown */);
+    void initForMap() { m_fgStatus = 0; } /* body from Game/Collision/CollUtilF _checkLadderUp (the ctor store before it is dead: flow drops it); the ref declares it without a body */
     void initForObj(/* parameters unknown */);
     void setStartPos(const FVECTOR& inPos) { m_inWS = inPos; }
     void setEndPos(const FVECTOR& inPos) { m_inWE = inPos; }
