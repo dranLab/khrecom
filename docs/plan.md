@@ -340,7 +340,8 @@ and VECTOR_H_SET_CALL all change the image, so they stay. The global operators a
 asm: __builtin_return_address reloads ra), new, delete, delete[], new(size_t, char*), new[] and placement new, all
 throw(); the sites are `new (__FILE__ "(N)") T` (Camp's setWorldmap keeps the emulated form, MATCH), the local copies
 and the KH_PLACEMENT_NEW_DEFINED gate are gone. MapEnemy.h, SceneInfo.h, CollUtilA.h and Coord.h list gate users
-without a feature macro.
+without a feature macro. Game/Collision/CollObj.h is done (2026-11-08): CollUtilF's stand-ins went once
+_checkLadderUp calls an inline `initForMap()` (m_fgStatus = 0) after the constructor (flow drops the ctor's dead store).
 
 **A4. The ladder**, when completing a header would break another unit's `.rodata` (stop at the first step that
 works): forward declarations instead of includes; move the type to the header the original used (string
