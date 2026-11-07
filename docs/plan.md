@@ -41,10 +41,10 @@ every change that is merged without regenerating. Regenerating all four takes ab
 
 ## Where things stand (2026-11-07)
 
-- **Progress:** 12037 of 12311 functions matched: game 11254 of 11323, libraries 783 of 988 (plus 151 hand-written).
+- **Progress:** 12040 of 12311 functions matched: game 11257 of 11323, libraries 783 of 988 (plus 151 hand-written).
   `tools/check.sh` counts the 151 hand-written units as done too: its total is these matched functions plus 151
   (fixed 2026-11-07: it used to count a parked `#if 0 ... #else INCLUDE_ASM #endif` as done).
-- **Game:** 69 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note).
+- **Game:** 66 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note).
   5 units take a data section from assembly.
 - **Libraries:** 18 parked, 1 not attempted, 27 hand-written (stay assembly), no unit with data from assembly
   (the last two, __assert and __umoddi3, needed the split / link-alignment fixes of 2026-11-07);
@@ -133,7 +133,7 @@ its data comes from source (or is recorded as blocked). Never leave a function t
 ## Working rules
 
 - Sequential in the main checkout by default. Parallel work only through `/decomp-pool` (user decision 2026-11-07):
-  one unit per `decomp-worker` in its own worktree, mode "parked" (the unit's drafts from `tools/drafts.py`) or
+  one unit per `decomp-worker` in its own worktree (that is this rule's form for a pool worker, not a deviation), mode "parked" (the unit's drafts from `tools/drafts.py`) or
   "new"; the coordinator merges one worker at a time with the gate. Parallel compiles inside `tools/permuter.py`,
   `tools/decomp_permuter.py` and `tools/drafts.py` are fine.
 - No changes to `tools/`, `configure.py`, `config/` or the build flags, except `tools/partials.py` (approved)
@@ -426,7 +426,7 @@ Helpers in `tools/helpers/` (moved from `build/` 2026-11-07, run from the reposi
 copy it to `build/` to change it for an experiment): the method helpers named above, and `vtry.py` (enable a draft, apply
 text variants, funcdiff each; `tryv.py`/`applyv.py`/`permfn.py` around it), `vifelse.py` / `ifeshow.sh` (the same for
 `#if 0 ... #else` drafts), `dumpvar.py` (compile a variant with gcc dump flags such as `-dl -dg -dS`),
-`permute_overload.py` (tools/permuter.py on an overloaded or const method), `hill.py` (statement-order hill climb),
+`permute_overload.py` (superseded by `tools/permuter.py --overload <params>`), `hill.py` (statement-order hill climb),
 `rocmp.py` (rodata check), `vsgen.py`, `gpconv.py`, `coord_conv.py`, `swap_keep.py` (replace a stand-in with an
 include, keeping the line count). `draftlib.py` is their shared draft finder (every layout, as `tools/drafts.py`).
 One-off scripts of earlier sessions stay in the main checkout's `build/` (named in the memory notes; not maintained).

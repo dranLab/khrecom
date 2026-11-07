@@ -181,7 +181,31 @@ def enable_draft(text: str, pattern: str, symbol: str) -> str:
                                                    text[opened[0]:end], re.M)}
     for n in names:
         text = re.sub(r"^\s*INCLUDE_ASM\([^)]*,\s*" + re.escape(n) + r"\s*\);\s*$", "", text, flags=re.M)
+        text = drop_owned_stopgap(text, n)
     return text
+
+
+def drop_owned_stopgap(text: str, symbol: str) -> str:
+    """Remove the data block a still-INCLUDE_ASM'd function owns, marked `// <symbol>: its .rodata/.data, for its
+    INCLUDE_ASM; remove with it.` and followed by asm(...) statements: with the draft compiled, the function emits that
+    data itself (its statics too, which the assembler would see twice)."""
+    lines = text.split("\n")
+    out, i = [], 0
+    owner = re.compile(r"^// " + re.escape(symbol) + r": its .*remove with it")
+    while i < len(lines):
+        if not owner.match(lines[i]):
+            out.append(lines[i])
+            i += 1
+            continue
+        start = i
+        i += 1  # the comment line
+        while i < len(lines) and re.match(r"\s*(?:__asm__|asm)\s*(?:volatile\s*)?\(", lines[i]):
+            while i < len(lines) and not lines[i].rstrip().endswith(");"):
+                i += 1
+            i += 1  # the statement's last line
+        # blank lines in its place, as for the INCLUDE_ASM: later __LINE__s (assert/allocation messages) stay put
+        out.extend([""] * (i - start))
+    return "\n".join(out)
 
 
 # ---------------------------------------------------------------------------------------------------------------
@@ -508,6 +532,8 @@ def main() -> None:
     parser.add_argument("--seed", type=int, default=None)
     parser.add_argument("--unsafe", action="store_true", help="also reorder statements that look dependent")
     parser.add_argument("--depth", type=int, default=3, help="up to this many mutations per candidate (default 3)")
+    parser.add_argument("--overload", metavar="PARAMS", help="the function has overloads in the unit: take the definition "
+                        "whose parameter list contains PARAMS (e.g. 'const FVECTOR&')")
     args = parser.parse_args()
 
     version = sorted(p.name for p in (ROOT / "config").iterdir() if (p / f"{p.name}.yaml").exists())[0]
@@ -521,6 +547,12 @@ def main() -> None:
 
     symbol, name, cls = resolve(args.function, functions(expected))
     pattern = definition_pattern(name, cls)
+    if args.overload:  # only the definition whose parameter list contains the substring
+        pattern = pattern.replace(r"\s*\([^;{}]*\)", r"\s*\((?=[^;{}]*?" + re.escape(args.overload) + r")[^;{}]*\)", 1)
+    defs = [m.group(0)[m.group(0).index("("):].split(")")[0] + ")" for m in re.finditer(pattern, start_text, re.M)]
+    if len(defs) > 1:
+        sys.exit(f"{cls + '::' if cls else ''}{name} has {len(defs)} definitions in the source: " + "; ".join(defs) +
+                 " - pick one with --overload <a substring of its parameters>")
     if symbol != args.function or cls:
         print(f"{args.function}: symbol {symbol}, defined as {cls + '::' if cls else ''}{name}", flush=True)
     text = enable_draft(start_text, pattern, symbol)

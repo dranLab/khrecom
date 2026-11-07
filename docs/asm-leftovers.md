@@ -25,7 +25,7 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 
 | unit | functions left | instr left | parked | data from asm |
 |---|---:|---:|---:|---|
-| `Game/Player/PlayerDRiku` | 3 | 5073 | 3 |  |
+| `Game/Player/PlayerDRiku` | 1 | 3473 | 1 |  |
 | `Form/Menu/Camp` | 3 | 2631 | 3 |  |
 | `System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly` | 3 | 2143 | 3 | .bss .data .rodata |
 | `Form/Menu/RoomCreation` | 1 | 1995 | 1 |  |
@@ -48,7 +48,6 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `System/Graphic/Effect/libppp/keProg/pppKeShpTail3` | 1 | 514 | 1 |  |
 | `System/Graphic/PathData` | 1 | 489 | 1 |  |
 | `System/Graphic/Glare` | 1 | 446 | 1 |  |
-| `Game/Player/NaviMap` | 1 | 425 | 1 |  |
 | `Game/Collision/CollMap` | 2 | 365 | 2 |  |
 | `Game/Player/PlayerCamera` | 1 | 332 | 1 |  |
 | `Game/SceneInfo` | 2 | 314 | 2 |  |
@@ -132,13 +131,10 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Game/Atel/Atel` | `setScreenFader__5CAtelifi` | 189 | 37 of 206 lines, 16 bytes short - logic, switch and jump table match. Left: the original computes the layer as `beqz; b then (li v0,1); else: b end (li 1); then: li 10` (a jump-evaluated boolean threaded away) and keeps nLayer in s1; ours branches once, which rotates the s-registers … |
 | `Game/Atel/AtelCrossFade` | `drawCrossFadeImage__Q24ATEL14CAtelCrossFade` | 188 | (comment) Near-match: the second loop schedules the packet stores differently and hoists the GIF tag constant. |
 | `Game/Atel/Avatar` | `RotateAvatarMain__Q24ATEL7CAvatar` | 139 | 8 lines - the first isOverAvatarRotTimeLimit() comes out as xori; the original builds bRes with li 1 + movz (its weak copy is xori too). Inline/caller forms and 8 min of permuter (9k candidates) did not change it. The VU0 add/clip block (FVECTOR::addRot in the ref) is written out here: through an … |
-| `Game/Player/NaviMap` | `main__Q25Gauge8CNaviMap` | 425 | (comment) Not matching: in the debug-rotation block (g_dw.player.iTemp == 2) the original keeps PI in $f3 from before the branch and loads 180.0f/-PI in $f2/$f1 (100.0f and -PI share $f1); here 180.0f is hoisted too and the registers of 180.0f/-PI swap (9 lines). Everything else matches; the "deg" … |
 | `Game/Player/Player` | `exeHang__7CPlayer` | 550 | 23 lines differ, all FP-register/load-order of the two angle wraps: the original loads m_fDir first ($f0) then m_fAnalogViewDir ($f1) for `view - dir + PI` (ours the reverse), and in the drop-off arm it loads dir into $f12 in the branch delay slots and copies it to $f22 after getPos (ours loads … |
 | `Game/Player/Player` | `initAttack__7CPlayeri` | 104 | same spot as initAttackField: around the g_fGravity load the original keeps the %hi in v0 (later s0) and stores m_JumpState after the load; ours uses v1 and stores it before, and the g_CardBreakTime %hi moves. The flag block (battle 0x10/0x80000/8, then trg 4) and the ternary m_iComboBoost match. … |
 | `Game/Player/PlayerCamera` | `procFieldNormal__Q212PlayerCamera13CPlayerCamera` | 332 |  |
-| `Game/Player/PlayerDRiku` | `setAttack__Q22PL12CPlayerDRiku` | 451 | 7 lines off, registers only: in the card branch the original keeps %hi(g_pBattleCardList) in t0 and the shared constant 1 (m_iAttackNo == 1, _upKind's shift) in a2, ours t1 and t0. Worked: CPlayer::setAttack's form, the player-flag 0x80000 arm first, `pre == 7 \|\| isAir()` for the last hit, case 7 … |
-| `Game/Player/PlayerDRiku` | `exeStockSkill__Q22PL12CPlayerDRiku` | 3473 | structurally complete (35 cases in the original order, Riku's 0x6cc-0x6f9 group renumbered to 0x712-0x73f), same frame, 8 bytes long, 173 of 3903 lines off: case 1's attack-ID switch keeps a compare for the empty case 0x690 in the original; cross-jumped tails differ (0x67c's flag-and-return tail, … |
-| `Game/Player/PlayerDRiku` | `setMagic__Q22PL12CPlayerDRikuiii` | 1149 | same structure and size within 8 bytes, 310 of 1363 lines off: the BULLET_PARAM field stores and the member loads feeding them are scheduled differently in every case (the original loads m_AtkKind, m_AtkAttr, m_iAttackPower in that order and stores them together), plus registers in the stock-skill … |
+| `Game/Player/PlayerDRiku` | `exeStockSkill__Q22PL12CPlayerDRiku` | 3473 | 108 of 3890 lines (2026-11-07), same size: cross-jumped tails differ (ours merges the 0x683 setAnimSkillEx+setPlayerFlag(0x100000) tail into 0x6xx's copy, the original keeps 0x683's whole and merges the later copy into the setAnimRsrcEx tail at 2525); the sched2 order around global float loads in … |
 | `Game/Player/PlayerRiku` | `setMagic__Q22PL11CPlayerRikuiii` | 520 | (comment) Best attempt (same structure): BULLET_PARAM field stores and the attack-power loads are scheduled differently. |
 | `Game/Enemy/BattleEnemy` | `initEnemyParam__12CBattleEnemyiii` | 245 | 34 lines - the Riku-game scan loop: the original places the getRsrcData() ternary before the inline getExtraParam's found block and keeps the parameter in s0 (ours: s2, blocks swapped); the rest (seek loops, relocation, floor mapping, basic param) matches; tried: while/for/continue loop forms, … |
 | `Game/Enemy/EnemyWhitemushroom` | `damage___19CEnemyWhitemushroom` | 184 | 3 of 211 lines (2026-11-07): case 4, the vptr load for getLockOnPos comes after all six setupFade stores, the original has it right after the two TIMEQ stores (sw 284/280) and before swc1 268, sw 288, sw 228, sw 272; tried: all store orders, flag forms, barriers, temporaries, call forms, pointer … |
@@ -151,7 +147,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Form/Menu/Camp` | `setWorldmapCursor__5CCamp` | 853 | 35 of 939 lines differ (62 before _NORMA_PIECES; re-measured 2026-11-07). Left: pDoorInfo and nNI (not nNorma) have s4/s3 for s3/s4: global-alloc priority (-dl: pDoorInfo 28 refs over 187 insns = 0.60, nNI 22 over 121 = 0.73, so nNI is allocated first and takes s3); the original allocates … |
 | `Form/Menu/RoomCreation` | `menuMain__13CRoomCreation` | 1995 | (comment) menuMain: 78 of 2211 lines, 8 bytes short (92 and 0x50 short before _NORMA_PIECES, 2026-11-07): the by-value NormaSrc arguments are written out now; left: case 0's registers (v1 + s7 where the original keeps a0, s4/s6/s8 from there). To enable this draft, also drop the data block after … |
 
-Totals: 69 functions (31222 instructions) in 44 units, 69 of them parked; 5 units take a data section from assembly.
+Totals: 66 functions (29197 instructions) in 43 units, 66 of them parked; 5 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->
