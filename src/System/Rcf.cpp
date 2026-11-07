@@ -344,7 +344,10 @@ BOOL _doReadThreadEndInterval() {
  * hoisted %hi pseudos tie in global-alloc priority (3 refs / 120 insns each), the tie goes to the lower pseudo, and PRE numbers
  * them in expression-hash bucket order; the SYMBOL_REF hash is over the name, whose anonymous-namespace suffix is random per
  * compile (src_System_Rcf.cpp5vVlaa, ...PaOlaa). Needs a deterministic namespace name in the build, not source. The map delete[]
- * loop's bound reload is fixed (cast pointer); tried: the two count stores swapped (wrong store order, still random). */
+ * loop's bound reload is fixed (cast pointer); tried: the two count stores swapped (wrong store order, still random).
+ * 2026-11-07, the suffix: cc1plus's value from its PID and the time (GetCurrentProcessId + GetSystemTimeAsFileTime); a PID
+ * namespace fixes the PID, a .ii with rewritten line markers gives the original c__KHCOM_MainApp_System_Rcf.cpp prefix, but
+ * wibo 1.2.0 can't fix the time: the original name (...cppA0aaaa) needs a patched wibo. Parked by the user's decision. */
 #if 0
 void CRcf::finalize() {
     CMovieFiles::finalize();
