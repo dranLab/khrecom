@@ -85,12 +85,6 @@ static void _dispRefImageField(_sceMpegDecoder *d, _sceMpegPicture *top, _sceMpe
 /* fields shown per picture, by picture structure and repeat flags */
 static int _showCount[16] = { 2, 0, 2, 0, 2, 3, 2, 3, 0, 0, 0, 0, 2, 4, 0, 6 };
 
-/* keeps _dispRefImage's string in .rodata while it is asm */
-static inline const char *_dispRefImage_string(void)
-{
-    return "Too small buffer size for %dx%d picture\n";
-}
-
 #define D8_CHCR ((volatile unsigned int *)0x1000D000)
 #define D8_MADR ((volatile unsigned int *)0x1000D010)
 #define D8_QWC ((volatile unsigned int *)0x1000D020)
@@ -159,15 +153,9 @@ static void _cpr8(_sceMpegDecoder *d, _sceMpegPicture *pict)
         dst0 += d->stride * 0xC0;
     }
 }
-/* Parked: 24 of 189 lines, 4 bytes long (2026-11-06, first attempt). Worked: ptsStep, lastPts, ptsField and showCount are
-   volatile (reloaded across __muldi3, a full ld before the truncation), one embedded read of ptsStep, the flag word's
-   or tree (96 forms searched). Left: the original reloads tags in the beqz delay slot, filled by GNU as, not gcc (as only
-   swaps the insn right before the branch, so the lw has to follow the `and`; hasPts/outputMode/nextPts look volatile
-   too: gcc must not fill that slot from the target, and _dispRefImageField reloads hasPts after the same store).
-   Tried: volatile tags (the lw lands above the `and`, 24-30 lines), tags through a union (order right, slot still
-   nop, 32), all on one line for the $LM rule. `*pPts = pict->pts` goes through s5 there; the size test's flag is in s0.
-   _dispRefImageField is this body twice: wait for this one. */
-#if 0
+/* MATCH: the volatile fields and the two non-volatile casts set scheduler ties: a volatile load depends on every later
+   volatile access, so it wins a tie on dependents; the ptsStep and lastPts reads here must lose theirs. The flag word's
+   three locals keep their pairs, which one expression does not (gcc 2.9 re-pairs the terms). */
 static void _dispRefImage(_sceMpegDecoder *d, _sceMpegPicture *pict, int n)
 {
     char buf[256];
@@ -177,30 +165,32 @@ static void _dispRefImage(_sceMpegDecoder *d, _sceMpegPicture *pict, int n)
     long *pFlags = &tags[4];
     int ok;
 
-    if (d->hasPts) {
-        long v = pict->pts;
-        if (v < 0 && d->lastPts >= 0) {
-            int n = d->showCount;
-            long odd = n & 1;
-            long step;
-            int adj = odd & (d->ptsField & 1) & ((step = d->ptsStep) & 1);
-            tags[2] = d->lastPts + ((int)((step * n) >> 1) + adj);
-            odd &= d->ptsStep;
-            tags = d->tags;
-            if (odd) d->ptsField++;
-        } else {
-            *pPts = v;
-        }
-    } else {
+    if (d->hasPts && pict->pts < 0 && d->lastPts >= 0) {
+        int n = d->showCount;
+        long odd = n & 1;
+        long step;
+        int r;
+        int ia;
+        long adj = odd & (d->ptsField & 1);
+        { long sb = (step = *(long *)&d->ptsStep) & 1; adj &= sb; }
+        ia = adj;
+        r = (int)((step * n) >> 1) + ia;
+        tags[2] = *(int *)&d->lastPts + r;
+        odd &= d->ptsStep; asm volatile(""); /* MATCH: the reload lands after the `and`, for as to take into the beqz slot */ tags = *(long * volatile *)&d->tags; if (odd) d->ptsField++; } else {
         *pPts = pict->pts;
     }
-    if (d->outputMode == 2 && d->nextPts >= 0) {
+    if (*(volatile int *)&d->outputMode == 2 && d->nextPts >= 0) {
         *pPts = d->nextPts;
         d->outputMode = 0;
         d->nextPts = -1;
     }
     *pDts = pict->dts;
-    *pFlags = (((long)pict->flag3C << 6) | ((long)pict->flag40 << 5)) | ((pict->flag2C | ((long)pict->flag34 << 8)) | (((long)pict->flag30 << 3) | ((long)pict->flag38 << 7)));
+    {
+        long a = ((long)pict->flag40 << 5) | ((long)pict->flag3C << 6);
+        long b = ((long)pict->flag34 << 8) | (long)pict->flag2C;
+        long c = ((long)pict->flag38 << 7) | ((long)pict->flag30 << 3);
+        *pFlags = (b | a) | c;
+    }
     d->lastPts = tags[2];
     d->showCount = (unsigned int)_showCount[(int)(tags[4] >> 5) & 0xF];
     d->vE0 = pict->v5C;
@@ -219,6 +209,7 @@ static void _dispRefImage(_sceMpegDecoder *d, _sceMpegPicture *pict, int n)
     if (!ok) {
         sceSnprintf(buf, 256, "Too small buffer size for %dx%d picture\n", pict->w, pict->h);
         _sceMpegError(d, buf);
+        asm volatile("" : "=r"(ok) : "0"(ok)); /* MATCH: ok stays live across the call; cse would fold this test from the branch above */
         if (!ok) return;
     }
     if (pict->pictType == 1) {
@@ -234,9 +225,6 @@ static void _dispRefImage(_sceMpegDecoder *d, _sceMpegPicture *pict, int n)
         d->outputReady = 1;
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/output", _dispRefImage);
-#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/output", _dispRefImageField);
 /* gcc still thinks it is in .rdata (the next string follows without a section change) */
 __asm__(".rdata");
