@@ -232,10 +232,14 @@ void pppStartVu1ShapeProg(int fog) {
 }
 
 
-/* Parked: 11 of 142 lines (2026-11-07): t3/t4 swapped between the -16 mask (local) and &sh->spvu1 (global; then 0x70/0x13000000
-   follow), and `or a0,a1,a0` (the call argument) issued before `addiu t6,a1,32` instead of after the tag 2 next store;
-   the tag stores now match. tried: tag field orders (id/next/qwc per tag), sp = dspa0 + (spaPktSize >> 4) (34 -> 11),
-   spPktSize in qwords (folds the sra) */
+/* Parked: 4 of 143 lines (2026-11-07): `or a0,a1,a0` (the call argument) issues before `addiu t6,a1,32` instead of after
+   tag 2's next store, and tag 3's `sb t4,3(t6)` comes after its p[1] store instead of first. With tag 3 written
+   id/next/qwc like the others its stores match, but t3/t4 swap: local-alloc then ranks the 0x70 constant (2 refs, 38
+   insns) above the -16 mask (3 refs, 60), the mask avoids t3 (0x70 is born right after its death) and &sh->spvu1 takes
+   t3; writing id last lengthens 0x70's life to 44 (11 -> 4 lines), so the original has some other way to that.
+   tried: tag field orders (all per tag), sp = dspa0 + (spaPktSize >> 4) (34 -> 11), spPktSize in qwords (folds the sra),
+   pkt++, (int) casts, a shared 0x80000000 local; decomp-permuter 15 min on the 11-line form (only a wrong-semantics
+   output gained) */
 #if 0
 #line 346
 void pppVu1ShapeDraw(OSHAPE_VU1 *sh, OSHAPE_IN_VU1 *vu1shi) {
@@ -306,7 +310,7 @@ void pppVu1ShapeDraw(OSHAPE_VU1 *sh, OSHAPE_IN_VU1 *vu1shi) {
     pkt = (sceDmaTag *)(sp + 3);
 
 
-    pkt->id = 0x70; pkt->next = 0; pkt->qwc = 0;
+    pkt->next = 0; pkt->qwc = 0; pkt->id = 0x70;
     pkt->p[0] = 0x13000000;
     pkt->p[1] = 0x17000000;
 
@@ -320,12 +324,12 @@ asm(".section .rodata\n.align 3\n.asciz \"c:/KHCOM/MainApp/System/Graphic/Effect
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/draw/shape", pppVu1ShapeDraw);
 #endif
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/draw/shape", op_shape_draw);
-
-/* Close: 18 of 1680 lines off. The six VU0 loops are the original asm (taken from the disassembly), the
-   rest matches except register allocation: the join copies the loop count (t1) to a0 before the
-   zero-extension and the "move" placement differs, and the 0x3000 division in the first site uses
-   swapped dividend/divisor registers (v1/v0 in the original). */
+/* Parked: 18 of 1680 lines (2026-11-07), 4 bytes short; and not honest C (V4): the six VU0 loops, the DMA send/wait
+   block and the two OT-add inlines are the original's instruction stream copied from the disassembly (about 1190 asm
+   lines, some 400 of them plain MIPS: loads, stores, branches, address arithmetic, .set noreorder delay slots, the
+   DMA busy-wait nops). In the C between them: at the join after the loops the count (t1) is copied to a0 before the
+   zero-extension (move/li placement, v0/v1/a0), and the two `/ 0x3000` OT divisions have dividend and divisor in
+   swapped registers (v1/v0 in the original). tried: earlier sessions (no record); 2026-11-07 only the V4 review */
 #if 0
 #define SCE_GIF_SET_TAG(nloop, eop, pre, prim, flg, nreg)                                                \
     ((u_long)(nloop) | ((u_long)(eop) << 15) | ((u_long)(pre) << 46) | ((u_long)(prim) << 47) |       \
@@ -1837,6 +1841,8 @@ void *op_shape_draw(OSHAPE_VU1 *sh, OSHAPE_IN *shi, int nPacketSize) {
         return (void *)*(word *)&shi->packet;
     }
 }
+#else
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/draw/shape", op_shape_draw);
 #endif
 
 void *pppGetVu1DrawSpad0(void) {
