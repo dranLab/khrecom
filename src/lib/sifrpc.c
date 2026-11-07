@@ -480,9 +480,9 @@ static void _request_call(RpcCallPkt *call, struct rpc_data *rd)
 }
 #endif
 
-/* Parked: the original copies the packet fields in strict load/store order, ours lets the scheduler hoist loads */
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/sifrpc", sceSifCallRpc);
-#if 0
+/* MATCH: a store of alias set 0: every later read reloads and stays behind it, which is the pair-by-pair copy order */
+#define _PKT_STORE(lv, m) (((union { void *p; int i; } *)&(lv))->m)
+
 int sceSifCallRpc(sceSifClientData *cd, unsigned int fno, unsigned int mode, void *send, int ssize, void *receive,
                   int rsize, sceSifEndFunc end_func, void *end_para)
 {
@@ -498,13 +498,16 @@ int sceSifCallRpc(sceSifClientData *cd, unsigned int fno, unsigned int mode, voi
     cd->rpcd.paddr = call;
     cd->func = end_func;
     cd->gp = (void *)GetGP();
-    call->fno = fno;
-    call->ssize = ssize;
-    call->receive = receive;
-    call->rsize = rsize;
-    call->rpc.pkt_addr = call;
-    call->client = cd;
-    call->server = cd->serve;
+    _PKT_STORE(call->fno, i) = fno;
+    _PKT_STORE(call->ssize, i) = ssize;
+    _PKT_STORE(call->receive, p) = receive;
+    _PKT_STORE(call->rsize, i) = rsize;
+    _PKT_STORE(call->rpc.pkt_addr, p) = call;
+    {
+        void *serve = cd->serve;
+        _PKT_STORE(call->client, p) = cd;
+        call->server = serve;
+    }
     if (!(mode & SIF_RPCM_NOWBDC)) {
         if (send == receive) {
             sceSifWriteBackDCache(send, ssize < rsize ? rsize : ssize);
@@ -538,7 +541,7 @@ int sceSifCallRpc(sceSifClientData *cd, unsigned int fno, unsigned int mode, voi
         _sceRpcFreePacket(&call->rpc);
         return -3;
     }
-    call->rmode = 1;
+    _PKT_STORE(call->rmode, i) = 1;
     if (!sceSifSendCmd(SIF_CMD_RPC_CALL, call, 0x40, send, cd->buff, ssize)) {
         DeleteSema(cd->rpcd.tid);
         _sceRpcFreePacket(&call->rpc);
@@ -548,7 +551,6 @@ int sceSifCallRpc(sceSifClientData *cd, unsigned int fno, unsigned int mode, voi
     DeleteSema(cd->rpcd.tid);
     return 0;
 }
-#endif
 
 int sceSifCheckStatRpc(sceSifClientData *cd)
 {
@@ -733,6 +735,4 @@ void sceSifRpcLoop(sceSifQueueData *qd)
         SleepThread();
     }
 }
-/* sceSifCallRpc's semaphore name, while that function is still assembly */
-static const char sifrpc_call_name[] __attribute__((aligned(8))) = "SceSifrpcCall";
 // SOURCE DATA: .data .rodata .bss
