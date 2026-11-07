@@ -162,7 +162,7 @@ static void channel_conv_joint(At3Work *w)
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/libat3dec", channel_conv_joint);
 #endif
 
-/* Parked: first draft (2026-11-07) */
+/* Parked: first draft (2026-11-07), 394 of 486 lines, 24 bytes short: the frame is 16 bytes larger (one more spill) */
 #if 0
 typedef struct {
     int v[4];
@@ -179,28 +179,33 @@ void imdct_ch2(int *a, int *b, int *coef, int *tbl);
 int imdct(char *ch, int band, int gain)
 {
     At3Tbl4 tbl = D_004FCEF0; /* {0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF}: the unit's .rodata is still asm */
-    int *src = ((At3Chan *)ch)->spec + band * 256;
-    int *w;
+    int *src;
+    int *w = ((At3Chan *)ch)->spec + band * 256;
     int i, max, shift, step, half, k, n;
     int *p;
     At3Band *b;
     int *s;
 
     if (band & 1) {
-        int *q = src + 127;
+        int *q = ((At3Chan *)ch)->spec + band * 256 + 127;
+        int *d;
+        src = w;
         w = ((At3Chan *)ch)->spec;
+        d = w;
         for (i = 0; i < 128; i++) {
-            w[i] = q[128] - *src++;
-            w[i + 128] = *q--;
+            d[0] = q[128] - *src++;
+            d[128] = *q--;
+            d++;
         }
     } else {
-        int *q = src + 255;
-        w = src;
+        int *q;
+        w = ((At3Chan *)ch)->spec + band * 256;
+        q = ((At3Chan *)ch)->spec + band * 256 + 255;
+        src = w;
         for (i = 127; i >= 0; i--) {
-            *w = *w - *q--;
-            w++;
+            *src = *src - *q--;
+            src++;
         }
-        w = src;
     }
     max = 0;
     for (i = 127, p = w; i >= 0; i--, p++) {
