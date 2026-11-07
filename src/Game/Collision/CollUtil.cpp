@@ -546,24 +546,24 @@ static inline INT _dotN(FVECTOR& v) {
                  "sll %0, %0, 0" : "=r"(ret) : "r"(&v));
     return ret;
 }
-/* MATCH: read by the parked detectMCInit draft only (the ref has iTmp and ret and no parameter) */
-static inline FLOAT _vf4x() {
-    INT iTmp;
-    FLOAT ret;
-    asm volatile("qmfc2.ni %0, $vf4" : "=r"(ret));
-    return ret;
-}
 #define _dotNf(v)                                               \
     ({                                                          \
-        asm volatile("lqc2 $vf4, 0x0(%0)\n"                     \
+        INT iTmp;                                               \
+        FLOAT ret;                                              \
+        asm volatile("lqc2 $vf4, 0x0(%1)\n"                     \
                      "vmulax.x $ACC, $vf21, $vf4x\n"            \
                      "vmadday.x $ACC, $vf22, $vf4y\n"           \
-                     "vmaddz.x $vf4, $vf23, $vf4z" : : "r"(&v)); \
-        _vf4x();                                                \
+                     "vmaddz.x $vf4, $vf23, $vf4z\n"            \
+                     "qmfc2.ni %0, $vf4" : "=r"(iTmp) : "r"(&v)); \
+        asm volatile("mtc1 %1, %0\n"                            \
+                     "nop\n" : "=f"(ret) : "r"(iTmp));           \
+        ret;                                                    \
     })
-/* Parked: 14 of 185 lines, same size - the helpers and the i/iPrimIdx loop follow the ref's locals. Left: reload's
-   t8/t9 for the two qmfc2 (ours v0: iTmp read before written, "+r" as in EffectMan's _lengthVf4, but here it then outranks the pChip/&vCk copies, 28 lines) and with them d0 in f2 and the results in f1/f0; both orders of the setup loads
-   (t3/t4 addiu, lw 56/400) and two sw pairs. */
+/* Parked: 14 of 185 lines, same size - the helpers and the i/iPrimIdx loop follow the ref's locals; _dotNf is qmfc2 + mtc1/nop
+   with iTmp and ret as in DispList. Left: t8/t9 for the two qmfc2 (ours v0). A t-reg that high means iTmp is allocated after
+   the globals, so it is live across blocks in the original: read before written, but "+r" as in EffectMan's _lengthVf4
+   then outranks the pChip/&vCk copies (28 lines). With them d0 in f2 and the results in f1/f0; both orders of the setup
+   loads (t3/t4 addiu, lw 56/400) and two sw pairs. */
 #if 0
 void CCollUtil::detectMCInit(MC_CHIP* pChip, INT iArea) {
     FVECTOR vCk0;
