@@ -45,3 +45,4 @@ Thumbs.db
 
 # --- Worktrees of Claude Code sub-agents ---
 .claude/worktrees/
+.claude/settings.local.json
