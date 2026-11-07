@@ -410,9 +410,8 @@ static inline unsigned char *_bsAddr(_sceMpegBs *bs, int bits)
         __asm__ volatile("move %0, $gp\n\tmove $gp, %1" : "=&r"(__old) : "r"(__old));           \
     })
 
-/* Parked: 4 lines off (2026-11-07, was 6): sw v0,32(sp) and the zero store of ret are swapped in _bsInit's store group, and
-   allGp reloads into v1 where the original has v0. ret after _bsInit moves more of the group (10), before it with a barrier
-   moves the frame setup (18). */
+/* Parked: 2 lines off (2026-11-07, was 4: allFunc set between ret and allGp, decomp-permuter): allGp reloads into v1 where
+   the original has v0. Reload hands out spill registers round-robin, so the choice hangs on the reloads before it. */
 #if 0
 int sceMpegDemuxPssRing(sceMpeg *mp, unsigned char *pss, int size, unsigned char *ring, int ringsize)
 {
@@ -426,12 +425,13 @@ int sceMpegDemuxPssRing(sceMpeg *mp, unsigned char *pss, int size, unsigned char
     _sceMpegStrCb *cb = (_sceMpegStrCb *)d->x60;
     int ret;
     int allGp;
-    sceMpegCallback allFunc = 0;
+    sceMpegCallback allFunc;
     int cont = 1;
     int end = size * 8;
     int i;
 
     ret = 0;
+    allFunc = 0;
     allGp = 0;
     _bsInit(&bsBody, pss, ring, ringsize);
     bs = &bsBody;
