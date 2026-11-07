@@ -1,8 +1,6 @@
-/* .rodata comes from the original assembly: the unit's data starts at 0x48959C (4 mod 8) with the end of
- * CSphereCollision's vtable and a copy of CCollision's, so string literals (8-byte aligned) can't be placed from
- * source. The code refers to the original's strings by their labels instead. */
-
 #include "Game/Collision/CollUtilA.h"
+#define COLLUTIL_H_PATH "c:/KHCOM/MainApp/Game/Collision/CollUtil.h" /* MATCH: the original's path in CollUtil.h's strings */
+#include "Game/Collision/CollUtil.h"
 #include "System/HeapMan.h"
 #include "System/Task.h"
 #include "System/TaskMan.h"
@@ -11,34 +9,7 @@
 #include "System/Debug.h"
 #include "Game/Collision/Ride.h"
 
-
-
-
-extern char D_004895C0[]; /* "c:/KHCOM/MainApp/Game/Collision/CollUtil.h" */
-extern char D_00489638[]; /* "m_pInstance" */
-extern char D_00489670[]; /* "c:/KHCOM/MainApp/Game/Collision/Ride.cpp(23)" */
-extern char D_004896A0[]; /* "...Ride.cpp(124)" */
-extern char D_004896D0[]; /* "c:/KHCOM/MainApp/Game/Collision/Ride.cpp" */
-extern char D_00489700[]; /* "m_pMatIOld" */
-extern char D_00489710[]; /* "...Ride.cpp(131)" */
-extern char D_00489740[]; /* "CRideModel : BoundingSphere半径 %f\n" */
-extern char D_00489768[]; /* "CRideModel : BoundingSphere半径 %fに設定\n" */
-extern char D_00489798[]; /* "CRideModel : 当り判定データが %d 個 存在します。\n" */
-extern char D_004897D0[]; /* "inMat&&m_pMatIOld" */
-extern char D_004897E8[]; /* "(inIdx>=0)&&(m_MCDInfo.iChipSuu > inIdx)" */
-extern char D_00489818[]; /* "(m_pOCDWork)&&(inIdx>=0)&&(m_MCDInfo.iChipSuu>inIdx)" */
-extern char D_00489850[]; /* "(m_pMatIOld)&&(m_MCDInfo.pMatrix)" */
-#define ASSERT_S(e, s) if (!(e)) AssertApp(D_004896D0, __LINE__, s, 0)
-
-/* Game/Collision/CollUtil.h's accessor (line 194), with the original's strings */
-inline CCollUtil& CCollUtil::instance() {
-    CCollUtil*& p = m_pInstance;
-    if (!p) AssertApp(D_004895C0, 194, D_00489638, 0);
-    return *p;
-}
-inline void CCollUtil::initializeData(void* pData, MCD_INFO* pMCDInfo) {
-    instance()._initializeData(pData, pMCDInfo);
-}
+#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 
 /* iterates a CSJointListT, the current entry may be removed (original macro name unknown) */
 #define SJ_FOREACH(T, pEntry, list) \
@@ -77,7 +48,7 @@ static inline void _unitMatrixVu0(FMATRIX& m) {
 
 #line 20
 CRide::CRide() {
-    m_pRiderList = new (D_00489670) CRiderList;
+    m_pRiderList = new (__FILE__ "(23)") CRiderList;
     m_fgOnLook = 0;
 }
 
@@ -137,14 +108,14 @@ void CRideModel::init(void* pOCDData, CTask* pBFObj) {
     m_pOCDWork = NULL;
     CCollUtil::initializeData(pOCDData, &m_MCDInfo);
 #line 124
-    m_pMatIOld = (FMATRIX*)com_malloc_d((u_long)(UINT)(m_MCDInfo.iChipSuu + 1) * sizeof(FMATRIX), D_004896A0, RET_ADDR());
-    ASSERT_S(m_pMatIOld, D_00489700);
+    m_pMatIOld = (FMATRIX*)com_malloc_d((u_long)(UINT)(m_MCDInfo.iChipSuu + 1) * sizeof(FMATRIX), __FILE__ "(124)", RET_ADDR());
+    ASSERT(m_pMatIOld);
     sceVu0InversMatrix(*m_pMatIOld, *lMat);
     m_fBSRadius2 = 0;
     m_MCDInfo.pMatrixIOld = m_pMatIOld;
     if (m_MCDInfo.iChipSuu > 0) {
 #line 131
-        m_pOCDWork = (OCD_WORK*)com_malloc_d(m_MCDInfo.iChipSuu, D_00489710, RET_ADDR());
+        m_pOCDWork = (OCD_WORK*)com_malloc_d(m_MCDInfo.iChipSuu, __FILE__ "(131)", RET_ADDR());
         FMATRIX* pPartsMat = m_pMatIOld + 1;
         MC_CHIP* pChip = m_MCDInfo.pMCChip;
         for (INT i = 0; i < m_MCDInfo.iChipSuu; i++, pPartsMat++, pChip++) {
@@ -168,21 +139,21 @@ void CRideModel::init(void* pOCDData, CTask* pBFObj) {
             if (fMax < fMin) fMax = fMin;
             fMax += 2.0f;
             if (m_fBSRadius2 < fMax) m_fBSRadius2 = fMax;
-            TRACE(D_00489740, fMax);
+            TRACE("CRideModel : BoundingSphere\x94\xbc\x8c" "a %f\n", fMax);
         }
         m_pOCDWork[0].fgEnable = 1;
-        TRACE(D_00489768, m_fBSRadius2);
+        TRACE("CRideModel : BoundingSphere\x94\xbc\x8c" "a %f\x82\xc9\x90\xdd\x92\xe8\n", m_fBSRadius2);
         m_fBSRadius2 = m_fBSRadius2 * m_fBSRadius2;
     }
     if (m_MCDInfo.iChipSuu >= 2) {
-        TRACE(D_00489798, m_MCDInfo.iChipSuu);
+        TRACE("CRideModel : \x93\x96\x82\xe8\x94\xbb\x92\xe8\x83" "f\x81[\x83^\x82\xaa %d \x8c\xc2 \x91\xb6\x8d\xdd\x82\xb5\x82\xdc\x82\xb7\x81" "B\n", m_MCDInfo.iChipSuu);
     }
     CCollObj::init(COLL_KIND_OBJECT, COLL_TYPE_MODEL, pBFObj->getHandle(), 0);
 }
 
 #line 184
 void CRideModel::setAttachMatrix(const FMATRIX* inMat) {
-    ASSERT_S(inMat&&m_pMatIOld, D_004897D0);
+    ASSERT(inMat&&m_pMatIOld);
     m_MCDInfo.pMatrix = (FMATRIX*)inMat;
     sceVu0InversMatrix(*m_pMatIOld, *inMat);
 }
@@ -194,28 +165,28 @@ FMATRIX* CRideModel::getAttachMatrix() {
 
 #line 201
 void CRideModel::setChipLocalMatrix(INT inIdx, const FMATRIX* inMat) {
-    ASSERT_S(m_pMatIOld, D_00489700);
-    ASSERT_S((inIdx>=0)&&(m_MCDInfo.iChipSuu > inIdx), D_004897E8);
+    ASSERT(m_pMatIOld);
+    ASSERT((inIdx>=0)&&(m_MCDInfo.iChipSuu > inIdx));
     FMATRIX* pMat = &m_pMatIOld[inIdx + 1];
     *pMat = *inMat;
 }
 
 #line 211
 FMATRIX* CRideModel::getChipLocalMatrix(INT inIdx) {
-    ASSERT_S(m_pMatIOld, D_00489700);
-    ASSERT_S((inIdx>=0)&&(m_MCDInfo.iChipSuu > inIdx), D_004897E8);
+    ASSERT(m_pMatIOld);
+    ASSERT((inIdx>=0)&&(m_MCDInfo.iChipSuu > inIdx));
     return &m_pMatIOld[inIdx + 1];
 }
 
 #line 219
 void CRideModel::enableChipCollision(INT inIdx, BOOL inSw) {
-    ASSERT_S((m_pOCDWork)&&(inIdx>=0)&&(m_MCDInfo.iChipSuu>inIdx), D_00489818);
+    ASSERT((m_pOCDWork)&&(inIdx>=0)&&(m_MCDInfo.iChipSuu>inIdx));
     m_pOCDWork[inIdx].fgEnable = (inSw != 0);
 }
 
 #line 227
 void CRideModel::setOldMatrix() {
-    ASSERT_S((m_pMatIOld)&&(m_MCDInfo.pMatrix), D_00489850);
+    ASSERT((m_pMatIOld)&&(m_MCDInfo.pMatrix));
     sceVu0InversMatrix(*m_pMatIOld, *m_MCDInfo.pMatrix);
 }
 
@@ -289,4 +260,4 @@ void CRideEtc::hoseiRiders() {
     SJ_FOREACH(CRider, pRider, *m_pRiderList) {
     }
 }
-
+// SOURCE DATA: .rodata
