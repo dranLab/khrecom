@@ -138,9 +138,6 @@ void CFrecFont::finalize() {
 
 BOOL _setupFontClutExt(const RsrcInfo& info, const TIM2_PICTUREHEADER& head);
 
-/* Matches except for the order of two loop-invariant CSA values that loop.c hoists ((nCSA + 6) << 56 is computed
- * before (nCSA + 2) << 56 in the original). */
-#if 0
 BOOL CFrecFont::setupFontTex(const RsrcInfo& info, const CBuf& src) {
     TIM2_PICTUREHEADER* pHead = Tim2GetPictureHeader(src.getBufPtr(), 0);
     if (!pHead || pHead->ImageType != 4) {
@@ -171,8 +168,8 @@ BOOL CFrecFont::setupFontTex(const RsrcInfo& info, const CBuf& src) {
     memset(&t, 0, sizeof(t));
     INT nDiv = pHead->ImageHeight > 256 ? 2 : 1;
     font._nPageMax = nDiv * 2;
-    VTransInfo& tex = t._TexInfo;
     for (INT i = 0; i < nDiv; i++) {
+        VTransInfo& tex = t._TexInfo;
         CTexUtil::getTransInfo(*pHead, tex, t._ClutInfo, nTexPos, font._nClutPos);
         tex._nFormat = i ? 0x2C : 0x24;
         if (!i) {
@@ -193,7 +190,7 @@ BOOL CFrecFont::setupFontTex(const RsrcInfo& info, const CBuf& src) {
         CBuf tmp;
         tmp.attachBuf((BYTE*)tex._pImage, -1);
         CVramMan::reqTransTex(t, tmp);
-        ULONGLONG nCSA = n & 1;
+        ULONGLONG nCSA = n & 1U;
         ULONGLONG nTex0 = (ULONGLONG)nTexPos | (ULONGLONG)tex._nDistBufW << 14 |
                           (ULONGLONG)tex._nFormat << 20 | (ULONGLONG)tex._nTw << 26 |
                           (ULONGLONG)tex._nTh << 30 | (ULONGLONG)1 << 34 |
@@ -213,9 +210,6 @@ BOOL CFrecFont::setupFontTex(const RsrcInfo& info, const CBuf& src) {
     }
     return TRUE;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/FrecFont", setupFontTex__9CFrecFontRC8RsrcInfoRC4CBuf);
-#endif
 
 void CFrecFont::setupFonts() {
     for (INT i = 0; i < s_nAvailableFontTypes; i++) {
