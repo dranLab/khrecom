@@ -150,17 +150,18 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-07 | cleanup: CHeapMan moved to HeapMan.h (6 local copies gone), Model uses VramMan.h | 199 | 14 | 0 | 677 (0) | 948 |
 | 2026-11-07 | cleanup/System-Graphic-Gprim.h: effect's G_RGBA copy dropped (forward declaration), pppEiDrawShipoly's QWdata is its own | 188 | 13 | 0 | 673 (0) | 1002 |
 | 2026-11-07 | tools/partials.py reads the ref's .c files (measure only: the libppp C units' own types no longer count as foreign copies) | 188 | 11 | 0 | 673 (0) | 1002 |
+| 2026-11-07 | cleanup/heapman-operators: the global operators in System/HeapMan.h, sites `new (__FILE__ "(N)") T`, ~300 local copies and the placement-new gate gone | 186 | 11 | 0 | 668 (0) | 1002 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 188 (156 in 44 headers, 32 in 18 .cpp); MATCH: 1008
-  by category: method 46, data member 10, type 14, fwd decl 2, #include 14, changed in place 45, padding 2, path override 1, gate 5, guessed 9, header-level 24, stand-in 11, other 5
+PARTIAL: 186 (156 in 44 headers, 30 in 17 .cpp); MATCH: 1002
+  by category: method 46, data member 10, type 14, fwd decl 2, #include 14, changed in place 43, padding 2, path override 1, gate 5, guessed 9, header-level 24, stand-in 11, other 5
 stand-ins: 11 foreign in 6 files (9 names), 170 unattributed, 184 own
 duplicate class names across headers: 0
 padding: 2 arrays, 0 accessors
-mechanisms: 673 sites (0 untagged); #line: 1239
+mechanisms: 668 sites (0 untagged); #line: 1239
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
 classes: complete 1169, superset 17, partial 1, gated 3, missing 6, unattributed 8
 ```
@@ -173,7 +174,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 
 | risk | benefit | item | state | counts | classes | why |
 |---|---:|---|---|---|---|---|
-| R1 | 4.0 | `System/LinkedBuf.h` | ready | 0 stand-in files, 0 dup headers, 4 gate users |  () |  (gate) |
 | R1 | 3.0 | `Game/Entity.h` | ready | 0 stand-in files, 0 dup headers, 3 gate users |  () |  (gate) |
 | R1 | 2.0 | `Game/Enemy/MapEnemy.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
 | R1 | 2.0 | `Game/SceneInfo.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
@@ -270,7 +270,6 @@ or `untagged`.
 | feature | `COLLOBJ_H_INFO_AS_INT` | 1 | 1 | getDetectInfo as INT (see CollObj.h) |
 | feature | `ENTITY_H_SETFLAG_DIRECT` | 2 | 2 | setEntityFlag(0, 0x1000) as a plain and (createAvatar) |
 | feature | `GAME_COLLISION_COLLOBJ_H` | 1 | 1 | Game/Collision/CollUtil.h tests it (collideMap, see below) |
-| feature | `KH_PLACEMENT_NEW_DEFINED` | 4 | 4 | placement new is not in the ref headers (the units define it themselves); defined once per unit |
 | feature | `MODELDATA_H_TEXINFO` | 6 | 6 | TexInfoStub (the original has its assert strings) |
 | feature | `MODELDATA_H_TEXINFO_CTOR` | 2 | 2 | RSRC_NEW(TexInfo) in _setupTexData runs the constructor (memset) |
 | feature | `VECTOR_H_SET_CALL` | 1 | 1 | FVECTOR::setCall (the original calls FVECTOR::set out of line) |
@@ -279,7 +278,6 @@ or `untagged`.
 | feature site | `COLLOBJ_H_INFO_AS_INT` | 1 | 1 | System/Graphic/TriangleIK was written against an INT result: with the union its else branch schedules the TRACE arguments differently |
 | feature site | `ENTITY_H_SETFLAG_DIRECT` | 2 | 2 | the plain form, for Game/Atel/Atel (createAvatar) and Game/Atel/Avatar (ctor, InitAvatar) |
 | feature site | `GAME_COLLISION_COLLOBJ_H` | 1 | 1 | the collision classes' collideMap, when Game/Collision/CollObj.h came first (see there) |
-| feature site | `KH_PLACEMENT_NEW_DEFINED` | 1 | 1 | placement new is not in the ref headers (the units define it themselves); defined once per unit |
 | feature site | `MODELDATA_H_TEXINFO` | 1 | 1 | only includers whose original .rodata has TexInfoStub's assert strings |
 | feature site | `MODELDATA_H_TEXINFO_CTOR` | 1 | 1 | only System/RsrcData (new TexInfo) has the constructor; the other units memset their locals themselves |
 | feature site | `VECTOR_H_SET_CALL` | 1 | 1 | setCall is defined before set, so it keeps a call (ModelMan calls FVECTOR::set out of line) |
