@@ -226,8 +226,10 @@ units' `.rodata`, so keep the header's line layout (add members in place, `#line
 - Allowed inline asm: the VU0/MMI/COP2 instructions the original wrote as inline asm (see the ref and the
   vu0-asm-function-conversion / ppp-keshptail-patterns memories); empty `asm volatile("" ...)` barriers as a
   lever, with a comment. MIPS arithmetic stays in C (user's rule).
-- Only the unit's `src/U.cpp`/`.h` and the headers its classes need; a new or extended header of another unit
-  gets `// PARTIAL: added for <unit>` while incomplete (hook edits A1/A2 may touch other files).
+- Only the unit's `src/U.cpp`/`.h` and the headers its classes need. Never add a `// PARTIAL` marker, a stand-in or
+  anything against the ref to another unit's header (the header cleanup below removes them); a missing
+  declaration goes in exactly as the ref has it. A match that needs more (e.g. a member private in the ref) is
+  not the original's source: park it (user, 2026-11-07; hook edits A1/A2 may touch other files).
 
 **V5: the gate.** `tools/check.sh` exits 0 before every merge into `main`, again on `main` after it, and at the
 end of every session.
@@ -393,7 +395,6 @@ header split the original didn't have, or make a class a template to hide its st
 | reload/spill register one off after inline asms | asm-inout-earlyclobber-reload |
 | a giv step at the loop end in the original, mid-loop in ours | separate-biv-for-increment |
 | peeled first test + rotated loop with `bnezl` | goto-layout-reorg-prediction (dlmalloc: goto body after the return) |
-| a pointer kept in a register copy through a loop, the count reloaded differently | direct-member-vs-inline-getter (no inlined `this` in the ref locals) |
 | stores in another order | sched-store-order-reg-weight, volatile-delay-slots-store-permutation, small-union-ctor-stores, fixed-scalar-varying-struct-alias, join-store-per-arm |
 | the original reloads a global/member, ours keeps it (or the reverse) | global-reload-ref-helper, fixed-scalar-varying-struct-alias, const-global-reorg-redundant-load, mapenemy-unit-lessons |
 | tails merged or not merged, branch layout | gcc-crossjump-alias-rules, crossjump-dup-arm-stores, crossjump-case-label-chain, state-machine-break-vs-return, guard-plus-while-and-static-members, first-return-stub-ternary, bool-tail-shared-false |

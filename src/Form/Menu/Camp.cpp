@@ -733,11 +733,6 @@ void CCamp::removeRsrc() {
     }
 }
 
-/* Parked: 9 of 337 lines (2026-11-07, volatile read of m_pCardInfo): li t1,396 vs lui t3 in the preheader, and the next loop's i in a0 for v1 (a register local on it wrecks the function: 77). Earlier: 26 of 342 lines differ: loop.c hoists the CCard::m_pCardInfo load of the 3-deck copy out of the outer
-   loop (the original reloads it each iteration: the stack-array stores must alias it there). tried: destination
-   pointer, direct m_pCardInfo->_deck[i] without _ref, pointer post-increment, _ref on the store; permuter 6 min (3640
-   candidates, no gain). */
-#if 0
 void CCamp::initCardKind(INT nInDeck, INT nInCategory, BOOL bCardDelete) {
     CARD* pDeck;
 
@@ -775,16 +770,17 @@ void CCamp::initCardKind(INT nInDeck, INT nInCategory, BOOL bCardDelete) {
             deckTmp[i].m_nId = 0;
         }
         for (INT i = 0; i < 3; i++) {
-            CARD* pDst = cardTmp[i];
             pCardTmp = (*(CARD_INFO* volatile*)&CCard::m_pCardInfo)->_deck[(USHORT)i]; /* MATCH: reloaded per iteration, getDeck's load hoists */
+            CARD* pDst = cardTmp[i];
             for (INT j = 0; j < 99; j++) {
                 pDst[j] = pCardTmp[j];
             }
         }
         nDeckTmpMax = 0;
         for (INT i = 0; i < 3; i++) {
+            pCardTmp = cardTmp[i];
             for (INT j = 0; j < 99; j++) {
-                CARD card = cardTmp[i][j];
+                CARD card = pCardTmp[j];
                 if (card.m_nId) {
                     deckTmp[nDeckTmpMax++] = card;
                     for (INT k = 0; k < 3; k++) {
@@ -855,9 +851,6 @@ void CCamp::initCardKind(INT nInDeck, INT nInCategory, BOOL bCardDelete) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", initCardKind__5CCampiii);
-#endif
 
 void CCamp::initDeck(INT nInDeck, INT nInCategory) {
     INT nSCIndex;
@@ -4034,12 +4027,6 @@ INT CCamp::setDeckDeck(INT nSetCmd) {
     return 1;
 }
 
-/* Parked: 3 of 1048 lines differ in the last loop: v0/v1 swapped for the nColSeq != 0x73 compare (nColSeq is spilled;
-   reload loads it into v0 where the original has the 0x73 in v0). The addu order (this + sel * 2) is fixed by
-   `(BYTE*)this + (m_nKindCategorySelect << 1) + 6464` (4 -> 3). tried: without _ref (24 lines), _ref(*(p + i)),
-   _ref(m_nKind)[i], != 0, !i, swapped operand/condition orders, !(a && b); permuter 7 min (4293) and 15 min (9220
-   candidates), no gain. */
-#if 0
 INT CCamp::setDeckInfo(INT nSetCmd) {
     static char* pStrNum[4] = { "%d", "\x81~%02d", "", "--" };
     FVECTOR vec;
@@ -4277,13 +4264,17 @@ INT CCamp::setDeckInfo(INT nSetCmd) {
         for (INT i = 0; i < 10; i++) {
             p2DSeqCtrl = m_pDeckInfoNumCtrl[i];
             if (!m_nCardInOut && card.m_nKind) {
-                if (_ref(*(USHORT*)((BYTE*)this + (m_nKindCategorySelect << 1) + 6464)) && (nColSeq != 0x73 || i == 0)) {
+                if (m_nKind[m_nKindCategorySelect]) {
+                  if (nColSeq != 0x73 || i == 0) {
                     char chrNum[16];
                     INT nOff = (m_nKind10Tbl[idx][i] == 0);
                     p2DSeqCtrl->enableDisp(TRUE);
                     p2DSeqCtrl->replaceSeq(0, m_pSeqName, nColSeq + i * 2 + nOff);
                     sprintf(chrNum, pStrNum[1], m_nKind10Tbl[idx][i]);
                     m_pDeckInfoNumFnt[i]->allocText(chrNum);
+                  } else {
+                    p2DSeqCtrl->enableDisp(FALSE);
+                  }
                 } else {
                     p2DSeqCtrl->enableDisp(FALSE);
                 }
@@ -4304,47 +4295,6 @@ INT CCamp::setDeckInfo(INT nSetCmd) {
     }
     return 1;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", setDeckInfo__5CCampi);
-#endif
-// setDeckInfo__5CCampi: its .rodata/.data, for its INCLUDE_ASM; remove with it.
-asm(".section .rodata\n"
-    ".align 4\n"
-    " D_004E33E0:\n"
-    ".byte 0x25,0x64,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x81,0x7E,0x25,0x30,0x32,0x64,0x00,0x00\n"
-    ".byte 0x2D,0x2D,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x34,0x38,0x34,0x33,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x34,0x38,0x37,0x38,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x34,0x38,0x38,0x38,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x34,0x38,0x39,0x37,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x34,0x39,0x30,0x36,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x34,0x39,0x31,0x37,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x24,0x4B,0x31,0x00,0x40,0x59,0x31,0x00,0x90,0x50,0x31,0x00,0x14,0x51,0x31,0x00\n"
-    ".byte 0x40,0x59,0x31,0x00,0xE8,0x51,0x31,0x00,0x40,0x52,0x31,0x00,0x40,0x59,0x31,0x00\n"
-    ".byte 0x40,0x59,0x31,0x00,0xA8,0x52,0x31,0x00,0xDC,0x52,0x31,0x00,0xFC,0x53,0x31,0x00\n"
-    ".byte 0x78,0x58,0x31,0x00,0x80,0x53,0x31,0x00,0xD0,0x53,0x31,0x00,0x30,0x59,0x31,0x00\n"
-    ".byte 0xFC,0x53,0x31,0x00,0x00,0x00,0x00,0x00\n"
-    ".section .data\n"
-    ".align 3\n"
-    " pStrNum.4431:\n"
-    ".byte 0xE0,0x33,0x4E,0x00,0xE8,0x33,0x4E,0x00,0x48,0x29,0x4E,0x00,0xF0,0x33,0x4E,0x00\n"
-    " colSeqTbl.4432:\n"
-    ".byte 0x00,0x74,0x4B,0x4B,0x5F,0x5F,0x5F,0x73\n"
-    ".section .text");
 
 INT CCamp::setButtonHelp(INT nSetCmd, INT nMode, INT nKind) {
     FVECTOR vec;
@@ -4426,10 +4376,14 @@ INT CCamp::setButtonHelp(INT nSetCmd, INT nMode, INT nKind) {
     return 1;
 }
 
-/* Parked: 53 of 621 lines differ: in the sleight-list loop the original spills pTechCateTbl and nTechCateCnt and
-   recomputes &pTechCateTbl[nTechSelectTop] from the spilled pointer every iteration; ours strength-reduces it into
-   an s-register (the same giv difference as setMainCmd's font loop). tried: the ref's unused nLine as the loop
-   counter, non-const table pointer, compare operand order (kept: load order); permuter 6 min (68 -> 65). */
+/* Parked: 53 of 621 lines (2026-11-07; tools/drafts.py's "build failed" is the data block after the INCLUDE_ASM, which
+   also defines this function's statics: drop it to build the draft): in the sleight-list loop the original reloads the
+   spilled pTechCateTbl at the loop head and recomputes &pTechCateTbl[nTechSelectTop] from nTechSelectTop (s6, +1 per
+   iteration) every time; ours strength-reduces it (-dL: giv 1104, benefit 7, lifetime 3, reduced: lifetime*66*benefit
+   is far above the 182 insns, so no insn-count/threshold change can stop it; the original's giv was never recognized
+   or had benefit <= 0). The spill slots then differ (orig 0xC8 pTechCateTbl, 0xCC nTechCateCnt). tried: the ref's
+   unused nLine as the loop counter, non-const table pointer, compare operand order (kept: load order), _ref() on the
+   table pointer/its assignment/nTechCateCnt (56-70); permuter 6 min (68 -> 65), 15 min 2026-11-07. */
 #if 0
 INT CCamp::setTechWin(INT nSetCmd) {
     FVECTOR vec;
@@ -4716,7 +4670,8 @@ INT CCamp::setDeckSetWin(INT nSetCmd) {
     return ret;
 }
 
-/* Parked: same size, 33 of 1409 lines differ: the stack slots of the spilled hoisted addresses (&m_pMCInfoNumCtrl,
+/* Parked: same size, 33 of 1409 lines differ (re-measured 2026-11-07; tools/drafts.py's "build failed" is the data
+   block after the INCLUDE_ASM: drop it to build the draft): the stack slots of the spilled hoisted addresses (&m_pMCInfoNumCtrl,
    &m_pMCInfoNumFnt, &m_pMCFnt, &m_pMCCard, &m_nMapKind, i + 1) are assigned in another order (orig 0x74 NumFnt,
    0x78 MapKind, 0x7c i+1, 0x84 MCCard, 0x88 MCFnt, 0x8c NumCtrl; ours ascending by member offset) - stable across
    rebuilds, likely gcse hash-table order; plus one s0 move around a C2DFnt new. tried: ref declaration order,
@@ -5900,11 +5855,16 @@ INT CCamp::setWorldmap(INT nSetCmd) {
     }
     return ret;
 }
-/* Parked: 35 of 939 lines differ (62 before _NORMA_PIECES, 2026-11-07). Left: pDoorInfo and nNorma have s4/s3 for s3/s4; an
-   operand barrier on pDoorInfo does not flip them. To enable this draft, drop the data block after its INCLUDE_ASM: it
-   defines pSeqName.4483 too (Ps2EeAs then crashes). tried: while/do/for shapes of the 0x40 block (`while (isButtonTrg(0x40)) { if (m_bPooWorld) break;
-   ... break; }` gives the original's block order), nested `if (< 4) if (>= 0)` against the sltiu fold, ref locals
-   (id, block-scoped i), set(1,1,1,1) instead of setAll, setLayer before the vec.set. */
+/* Parked: 35 of 939 lines differ (62 before _NORMA_PIECES; re-measured 2026-11-07). Left: pDoorInfo and nNI (not
+   nNorma) have s4/s3 for s3/s4: global-alloc priority (-dl: pDoorInfo 28 refs over 187 insns = 0.60, nNI 22 over 121
+   = 0.73, so nNI is allocated first and takes s3); the original allocates pDoorInfo first. An operand barrier on
+   pDoorInfo does not flip them. To enable this draft, drop the data block after its INCLUDE_ASM: it defines
+   pSeqName.4483 too (Ps2EeAs then crashes; that is tools/drafts.py's "build failed"). tried: while/do/for shapes of
+   the 0x40 block (`while (isButtonTrg(0x40)) { if (m_bPooWorld) break; ... break; }` gives the original's block
+   order), nested `if (< 4) if (>= 0)` against the sltiu fold, ref locals (id, block-scoped i; nNormaIndex/nNorma/
+   fgKeyCard declared at the block top as the ref lists them), set(1,1,1,1) instead of setAll, setLayer before the
+   vec.set, the door search as a pointer loop (37) or pDoorInfo set after the k loop (53), for-scoped nNI, the
+   getNorma* calls on nNI + nNormaIndex without the USHORT n, an empty asm in the nNI loop (44). */
 #if 0
 void CCamp::setWorldmapCursor() {
     RoomInfo* pRoomInfo;
@@ -6140,12 +6100,6 @@ asm(".section .rodata\n"
     " pStrButton.4484:\n"
     ".byte 0x48,0x40,0x4E,0x00,0xF8,0x43,0x4E,0x00\n"
     ".section .text");
-/* Parked: 17 of 276 lines, 8 bytes short (40 before each loop got its own i, as in the ref; was 81, 53 before 2026-11-05: _ref(m_pMainCmdFnt)[i] in the font-replacing loop keeps its own address computation): with the ref's function-level `INT i` plus a block `INT i` in the else
-   branch `this` is in s0 as in the original; left: in the font-replacing loop the original recomputes
-   &m_pMainCmdFnt[i] from i each iteration (only m_pMainCmdCtrl[i] strength-reduced), ours folds both into one giv;
-   the create loop's first test uses a1 (nSetCmd == 0) in the original. tried: SAFE_DELETE / template inline /
-   reference local for the delete. */
-#if 0
 INT CCamp::setMainCmd(INT nSetCmd, INT nMode) {
     FVECTOR vec;
     FVECTOR vec2;
@@ -6174,10 +6128,11 @@ INT CCamp::setMainCmd(INT nSetCmd, INT nMode) {
                 m_nCurrentCmdMax = nMode ? (!m_bPlayerKind ? 6 : 2) : 7;
                 for (INT i = 0; i < m_nCurrentCmdMax; i++) {
                     p2DSeqCtrl = m_pMainCmdCtrl[i];
-                    delete _ref(m_pMainCmdFnt)[i];
-                    _ref(m_pMainCmdFnt)[i] = NULL;
-                    _ref(m_pMainCmdFnt)[i] = NEW(7448, C2DFnt)(0, 0, &rgba, 0xF, m_pMainCmdName[m_bPlayerKind][nMode][i], 0x40);
-                    p2DSeqCtrl->replaceFnt(1, m_pSeqName, _ref(m_pMainCmdFnt)[i]);
+                    delete m_pMainCmdFnt[i];
+                    asm volatile(""); /* MATCH: one more insn in the loop body: loop.c's second pass then leaves this + 336 in the loop, so &m_pMainCmdFnt[i] is recomputed from i each iteration (only m_pMainCmdCtrl[i] strength-reduced) */
+                    m_pMainCmdFnt[i] = NULL;
+                    m_pMainCmdFnt[i] = NEW(7448, C2DFnt)(0, 0, &rgba, 0xF, m_pMainCmdName[m_bPlayerKind][nMode][i], 0x40);
+                    p2DSeqCtrl->replaceFnt(1, m_pSeqName, m_pMainCmdFnt[i]);
                 }
                 m_nMainMode = nMode;
             }
@@ -6196,22 +6151,6 @@ INT CCamp::setMainCmd(INT nSetCmd, INT nMode) {
     }
     return 1;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", setMainCmd__5CCampii);
-#endif
-// setMainCmd__5CCampii: its .rodata/.data, for its INCLUDE_ASM; remove with it.
-asm(".section .rodata\n"
-    ".align 4\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x37,0x34,0x33,0x30,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x37,0x34,0x33,0x35,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x37,0x34,0x34,0x38,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".section .text");
 
 INT CCamp::setMainCmdHist(INT nSetCmd, INT nMode) {
     FVECTOR vec;
