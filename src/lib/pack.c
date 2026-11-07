@@ -410,8 +410,9 @@ static inline unsigned char *_bsAddr(_sceMpegBs *bs, int bits)
         __asm__ volatile("move %0, $gp\n\tmove $gp, %1" : "=&r"(__old) : "r"(__old));           \
     })
 
-/* Parked: 6 lines off: the zero store of allData, the delay slot of the first pack header test, the reload register of
-   allGp */
+/* Parked: 4 lines off (2026-11-07, was 6): sw v0,32(sp) and the zero store of ret are swapped in _bsInit's store group, and
+   allGp reloads into v1 where the original has v0. ret after _bsInit moves more of the group (10), before it with a barrier
+   moves the frame setup (18). */
 #if 0
 int sceMpegDemuxPssRing(sceMpeg *mp, unsigned char *pss, int size, unsigned char *ring, int ringsize)
 {
@@ -421,7 +422,7 @@ int sceMpegDemuxPssRing(sceMpeg *mp, unsigned char *pss, int size, unsigned char
     _sceMpegBs *bs;
     _sceMpegHdr *h = &hdr;
     _sceMpegDecoder *d = mp->sys;
-    int allData;
+    int allData = 0;
     _sceMpegStrCb *cb = (_sceMpegStrCb *)d->x60;
     int ret;
     int allGp;
@@ -431,7 +432,6 @@ int sceMpegDemuxPssRing(sceMpeg *mp, unsigned char *pss, int size, unsigned char
     int i;
 
     ret = 0;
-    allData = 0;
     allGp = 0;
     _bsInit(&bsBody, pss, ring, ringsize);
     bs = &bsBody;
@@ -447,6 +447,7 @@ int sceMpegDemuxPssRing(sceMpeg *mp, unsigned char *pss, int size, unsigned char
         if (_showBits(bs, 32) == 0x1BA) {
             _pack_header(bs, &h->ph);
         }
+        __asm__ volatile("" : : : "$4"); /* MATCH: a0 is dead here: the first test's slot takes the move a0,s1 */
         while ((bs->buf >> 40) == 1 && _showBits(bs, 32) != 0x1BA && _showBits(bs, 32) != 0x1B9) {
             if ((int)bs->pos >= end || !cont) {
                 goto done;
