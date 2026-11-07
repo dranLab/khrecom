@@ -6090,12 +6090,6 @@ asm(".section .rodata\n"
     " pStrButton.4484:\n"
     ".byte 0x48,0x40,0x4E,0x00,0xF8,0x43,0x4E,0x00\n"
     ".section .text");
-/* Parked: 17 of 276 lines, 8 bytes short (40 before each loop got its own i, as in the ref; was 81, 53 before 2026-11-05: _ref(m_pMainCmdFnt)[i] in the font-replacing loop keeps its own address computation): with the ref's function-level `INT i` plus a block `INT i` in the else
-   branch `this` is in s0 as in the original; left: in the font-replacing loop the original recomputes
-   &m_pMainCmdFnt[i] from i each iteration (only m_pMainCmdCtrl[i] strength-reduced), ours folds both into one giv;
-   the create loop's first test uses a1 (nSetCmd == 0) in the original. tried: SAFE_DELETE / template inline /
-   reference local for the delete. */
-#if 0
 INT CCamp::setMainCmd(INT nSetCmd, INT nMode) {
     FVECTOR vec;
     FVECTOR vec2;
@@ -6124,10 +6118,11 @@ INT CCamp::setMainCmd(INT nSetCmd, INT nMode) {
                 m_nCurrentCmdMax = nMode ? (!m_bPlayerKind ? 6 : 2) : 7;
                 for (INT i = 0; i < m_nCurrentCmdMax; i++) {
                     p2DSeqCtrl = m_pMainCmdCtrl[i];
-                    delete _ref(m_pMainCmdFnt)[i];
-                    _ref(m_pMainCmdFnt)[i] = NULL;
-                    _ref(m_pMainCmdFnt)[i] = NEW(7448, C2DFnt)(0, 0, &rgba, 0xF, m_pMainCmdName[m_bPlayerKind][nMode][i], 0x40);
-                    p2DSeqCtrl->replaceFnt(1, m_pSeqName, _ref(m_pMainCmdFnt)[i]);
+                    delete m_pMainCmdFnt[i];
+                    asm volatile(""); /* MATCH: one more insn in the loop body: loop.c's second pass then leaves this + 336 in the loop, so &m_pMainCmdFnt[i] is recomputed from i each iteration (only m_pMainCmdCtrl[i] strength-reduced) */
+                    m_pMainCmdFnt[i] = NULL;
+                    m_pMainCmdFnt[i] = NEW(7448, C2DFnt)(0, 0, &rgba, 0xF, m_pMainCmdName[m_bPlayerKind][nMode][i], 0x40);
+                    p2DSeqCtrl->replaceFnt(1, m_pSeqName, m_pMainCmdFnt[i]);
                 }
                 m_nMainMode = nMode;
             }
@@ -6146,22 +6141,6 @@ INT CCamp::setMainCmd(INT nSetCmd, INT nMode) {
     }
     return 1;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", setMainCmd__5CCampii);
-#endif
-// setMainCmd__5CCampii: its .rodata/.data, for its INCLUDE_ASM; remove with it.
-asm(".section .rodata\n"
-    ".align 4\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x37,0x34,0x33,0x30,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x37,0x34,0x33,0x35,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x37,0x34,0x34,0x38,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".section .text");
 
 INT CCamp::setMainCmdHist(INT nSetCmd, INT nMode) {
     FVECTOR vec;
