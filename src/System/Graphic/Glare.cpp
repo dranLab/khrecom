@@ -168,8 +168,8 @@ static QWdata* setTspriteNoSlice(QWdata* qp, FIX4 ofsx, FIX4 ofsy, FIX4 u0, FIX4
     return qp;
 }
 
-/* not matching: register allocation differs (the original keeps the -1 of its divisions by 32 in a saved register
- * from the start); with it the function-local statics ofsX/ofsY, so .data comes from the original assembly */
+/* not matching, 382 of 629 lines (2026-11-07; needs `qp = (QWdata*)pkOpenGifTag` and the two extern statics below dropped to
+ * build): register allocation differs (the original keeps the -1 of its divisions by 32 in a saved register from the start); with it the function-local statics ofsX/ofsY, so .data comes from the original assembly */
 /* makePkt's function-local statics, for its INCLUDE_ASM; remove with it. */
 FIX4 ofsX_asm __asm__("ofsX.1914") = -80;
 FIX4 ofsY_asm __asm__("ofsY.1915") = -16;
