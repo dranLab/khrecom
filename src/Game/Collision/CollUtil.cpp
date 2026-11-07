@@ -657,7 +657,9 @@ extern char D_00489390[]; /* "m_pPrimInfo2" */
  * Left: ours hoists iArea0*4 out of the retry loop and spills it (104(sp); the original recomputes the sll per pass), so
  * the spill slots of &m_vCkS/iLoopCnt/pPrimIdx0 move by 4 and iArea0/&m_vCkE swap s4/s5; the 5-tries exit
  * (original `beqz` to the block + `b` back, ours `bnez` to the top: expand_end_loop uses the break's condjump as the loop
- * end; while/for/do/goto-over/body-decl forms all give it); `beqz` vs `beqzl` at the ret test. */
+ * end; while/for/do/goto-over/body-decl forms all give it); `beqz` vs `beqzl` at the ret test. The sll is gcse PRE
+ * (iArea0<<2 at 953 reaches 971); tried: distancePoint as a CCollUtil inline member (CollUtil.h:410 in the markers, no
+ * change); permuter 15 min on this draft (26643 candidates): no gain. */
 #if 0
 INT CCollUtil::_detectMCD(CCollision& collision) {
     INT i;
