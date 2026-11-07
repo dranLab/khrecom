@@ -328,9 +328,14 @@ log in `build/progress/cleanup-<name>.md`; merge with the `--summary` deltas; ad
 
 **Queue state (2026-11-07):** the R1 "gate" items are feature macros a unit defines before the include. Dropping each
 one's `#define`s and rebuilding: ENTITY_H_SETFLAG_DIRECT, MODELDATA_H_TEXINFO_CTOR, GAME_COLLISION_COLLOBJ_H (CollUtil)
-and VECTOR_H_SET_CALL all change the image, so they stay. KH_PLACEMENT_NEW_DEFINED (LinkedBuf.h) guards one of about 40
-identical placement-new definitions in .cpp files (some without `throw()`): one shared definition is a wide, codegen-free
-change for its own branch. MapEnemy.h, SceneInfo.h, CollUtilA.h and Coord.h list gate users without a feature macro.
+and VECTOR_H_SET_CALL all change the image, so they stay. KH_PLACEMENT_NEW_DEFINED (LinkedBuf.h): checked 2026-11-07
+(build/progress/cleanup-placement-new-Form.md): the original's .mdebug line labels put all global operators in
+System/HeapMan.h (new 134, delete 136/137, `new(size_t, char*)` throw() 150-153, `new[]` 156-159, placement new 168), and
+the units wrote `new (__FILE__ "(N)") T`; ours emulate that with `new (com_malloc_d(...)) T` plus about 95 local
+placement-new copies (40 local `new(size_t, char*)`, 33 `new[]`, 34 `delete`). Moving them to HeapMan.h is not
+codegen-free per se and reaches ~170 includers: waiting on the user (see "When to stop and ask"). LinkedBuf.h's MATCH
+comment ("the units define it themselves") is wrong. MapEnemy.h, SceneInfo.h, CollUtilA.h and Coord.h list gate users
+without a feature macro.
 
 **A4. The ladder**, when completing a header would break another unit's `.rodata` (stop at the first step that
 works): forward declarations instead of includes; move the type to the header the original used (string
@@ -442,7 +447,8 @@ Keep output small: one function's assembly at a time; `funcdiff` without `--full
   owner; string evidence that contradicts the ref; a new kind of mechanism; completion that needs changes to
   matched C beyond ref type corrections; unifying `Gprim.h` and `GprimFull.h`; a new opt-out macro more than
   about 5 units need; no net decrease of stand-ins plus PARTIAL markers after 3 consecutive units.
-- **Waiting on a decision now:** the `D2MAN_H_PATH` (2DMan.h, `D2::C2DMan`) and `RSRCDATA_H_FULL`
+- **Waiting on a decision now:** the global operators (new/delete/placement new) back into System/HeapMan.h with
+  `new (__FILE__ "(N)") T` sites (see "Queue state"; ~170 includers, matched C changes). And the `D2MAN_H_PATH` (2DMan.h, `D2::C2DMan`) and `RSRCDATA_H_FULL`
   (`CRsrcData`/`RsrcInfo`/`CRsrcANN`) gates, 10 files: the string evidence for 2DMan.h is ambiguous (the 2D
   container message is in 166 originals, the 2DMan.h path in only about 119).
 - When the user runs a /loop unattended, decide these cases yourself, log the decision and continue

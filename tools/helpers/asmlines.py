@@ -11,7 +11,7 @@ for f in read_mdebug(Path('iso/SLUS_217.99')):
         if s.st in (6,14): on=(s.name==func)
         if on and s.st==5:
             if s.name.startswith('$LM'): marks.append((s.value,cur.split('/')[-1],s.index))
-            elif s.index==586628: cur=s.name
+            elif s.name.endswith(('.h', '.cpp', '.c', '.hpp')): cur=s.name  # a file change (inlined header code)
 import subprocess
 asm=subprocess.run(['.venv/bin/python','tools/asm.py',unit,func],capture_output=True,text=True).stdout.split('\n')
 start=marks[0][0]
