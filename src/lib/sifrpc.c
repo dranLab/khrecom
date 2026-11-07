@@ -293,7 +293,9 @@ static unsigned long _alarm_rdata(int id, unsigned long schedule, unsigned long 
 
 /* Parked: 7 of 59 lines (2026-11-07, was 10): the strict load/store order is stores of alias set 0: through a union, every
    later read reloads, also the call's arguments (int casts on both sides do not: cse keeps those). pkt_addr's store is
-   plain: receive loads ahead of it. Left: v0/v1 alternate the other way through the three last copies, a sched1 tie. */
+   plain: receive loads ahead of it. Left: v0/v1 alternate the other way through the three last copies, a sched1 tie.
+   decomp-permuter (7 min) reaches 2 lines only with `rdata++; rdata--;` before the size copy: rejected, not source; an empty
+   barrier there instead gives 15. */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/sifrpc", _request_rdata);
 #if 0
 static void _request_rdata(RpcOtherDataPkt *rdata, struct rpc_data *rd)
