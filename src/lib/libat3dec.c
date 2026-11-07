@@ -162,7 +162,7 @@ static void channel_conv_joint(At3Work *w)
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/libat3dec", channel_conv_joint);
 #endif
 
-/* Parked: first draft (2026-11-07), 387 of 480 lines, 40 bytes short: the frame is 16 bytes larger (one more spill); the
+/* Parked: first draft (2026-11-07), 358 of 478 lines: the frame is 16 bytes larger (one more spill); the
    prologue through the shift search follows the original (movn abs, the shift loop from 12) apart from registers */
 #if 0
 typedef struct {
@@ -234,19 +234,19 @@ int imdct(char *ch, int band, int gain)
         n = step * 2;
         half = step / 2;
         do {
+            k = n;
             p = w;
-            if (n < 5) {
-                int *q = p + n;
-                k = n;
+            if (k >= 5) {
+                imdct_sub(p, p + n - 4, k);
+                p += step;
+            } else {
+                int *q = p + k;
                 do {
                     p[0] = (p[0] - q[-1]) >> 1;
                     p[1] = (p[1] - q[-2]) >> 1;
                     k -= 4;
                     p += 2;
                 } while (k > 0);
-            } else {
-                imdct_sub(p, p + n * 2 - 4, n);
-                p += step;
             }
             if (p == w + 2) {
                 imdct_ch2(w + step, w, &coefpost[0x2FC + half * 4], tbl.v);
