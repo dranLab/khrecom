@@ -245,8 +245,10 @@ static void *_sceRpcGetFPacket2(struct rpc_data *rd, int rid)
     return (char *)rd->client_table + rid * 0x40;
 }
 
-/* Parked: 11 lines (47 before the client/buff locals, decomp-permuter) - the original tests 0x8000000A first with a
-   range check (more cases in its switch?), ours 0x80000009 */
+/* Parked: 2 of 53 lines, same size (2026-11-07, was 11): the 0x8000000A-first range check is a third case node (RDATA, only
+   break), the client a local before the tid test (kept in s1 across the call), the bind copy's buff load behind the serve
+   store (empty barrier). Left: buff in v0 for v1: the barrier splits the block; a union store there reloads rend->client
+   (9), the client read before the switch changes the arms (20). */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/sifrpc", _request_end);
 #if 0
 static void _request_end(RpcRendPkt *rend, struct rpc_data *rd)
@@ -263,18 +265,21 @@ static void _request_end(RpcRendPkt *rend, struct rpc_data *rd)
         }
         break;
     case SIF_CMD_RPC_BIND:
-        rend->client->serve = rend->server;
         {
-            void *buff = rend->buff;
-            rend->client->buff = buff;
+            sceSifClientData *c = rend->client;
+            c->serve = rend->server;
+            asm volatile("");
+            c->buff = rend->buff;
         }
         break;
-    }
-    if (rend->client->rpcd.tid >= 0) {
-        iSignalSema(rend->client->rpcd.tid);
+    case 0x8000000C:
+        break;
     }
     {
         sceSifClientData *cd = rend->client;
+        if (cd->rpcd.tid >= 0) {
+            iSignalSema(cd->rpcd.tid);
+        }
         _sceRpcFreePacket(cd->rpcd.paddr);
         cd->rpcd.paddr = 0;
     }
