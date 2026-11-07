@@ -1240,6 +1240,8 @@ void CCardRevolver::initReload(INT inMode) {
    ifs, switch with `case 8: break;` first and case 4 falling into default, `card = NULL` in the for-increment,
    the m_uiFlag &= ~0x20000 block placed after the first return (goto notyet out of the second loop), indexed
    second loop. Tried: all 6 increment orders, pointer second loop; permuter 5 min (5990 candidates, no gain). */
+/* Parked: 14 of 138 lines (2026-11-07): the reload loop: i and the card offset have each other's registers (t0/a2) and the
+   offset steps first; all six orders of the for increments: 14 or 19. */
 #if 0
 extern "C" char D_0047AE98[]; /* "CCardRevolver::exeReload(); RELOAD end.\n" */
 extern "C" char D_0047AEC8[]; /* "CCardRevolver::exeReload(); RELOAD complete!\n" */
