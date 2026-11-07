@@ -22,6 +22,19 @@ void dump_heap(char* pszFileName, bool bCreate);
 
 void dbgReportHeapPerFile();
 
+class CHeapMan {
+public:
+    static void createHeap(void* base, size_t capacity);
+    static void resetHeap();
+    static size_t getFreeHeapSize();
+    static size_t getUsedHeapSize();
+    static float getUsedHeapRatio();
+    static size_t getAllHeapSize();
+    static size_t getMaxFreeBlockSize();
+    static void reportMemory();
+    static CHAR* getDebugComment(void* pMem);
+};
+
 inline void operator delete(void* mem) { com_free(mem); }
 
 #endif /* SYSTEM_HEAPMAN_H */

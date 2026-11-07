@@ -193,14 +193,14 @@ extern "C" char _gp[];
 #include "System/Graphic/WorldEnv.h"
 #line 257
 
-class CHeapMan { /* PARTIAL: stand-in for System/HeapMan CHeapMan: owner not written */
-public:
-    static FLOAT getUsedHeapRatio();
-    static void resetHeap();
-    static void reportMemory();
-    static INT getFreeHeapSize();
-    static INT getMaxFreeBlockSize();
-};
+#include "System/HeapMan.h"
+
+
+
+
+
+
+
 
 #include "Form/DebugWindow.h"
 

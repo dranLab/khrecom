@@ -58,10 +58,10 @@ extern const FVECTOR ONE_VECTOR;
 INT checkBBox(const FMATRIX& mWorldMatrix, const BBOX* bbox);
 SHADERDESC* searchShaderDesc(USHORT mode);
 void getApplyMatrixBBox(FVECTOR& vOutMax, FVECTOR& vOutMin, const FMATRIX& Mat, const FVECTOR& vInMax, const FVECTOR& vInMin); /* static in the original (parked, asm glabel) */
-namespace VRAM { /* PARTIAL: stand-in for System/VramMan VRAM: owner not written */
-extern INT _TEX_TMP1_START;
-extern INT _CLUT_TMP1_START;
-}
+#include "System/VramMan.h"
+
+
+
 inline void* operator new[](size_t, void* p) throw() { return p; }
 extern "C" int strncmp(const char*, const char*, unsigned int);
 class CShadowMapModel : public CFadeModel { /* PARTIAL: stand-in for CShadowMapModel: owner not written */

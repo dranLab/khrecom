@@ -5,10 +5,10 @@
 #include "System/MainApp.h"
 #include "System/HeapMan.h"
 
-class CHeapMan {
-public:
-    static CHAR* getDebugComment(void* pv);
-};
+
+
+
+
 
 #define _ASSERT_STR(e) #e
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, _ASSERT_STR(e), 0)
