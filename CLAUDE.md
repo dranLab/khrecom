@@ -18,8 +18,12 @@ Everything runs in Linux (WSL), from the repo root, with the project's venv: `.v
   symbol); `check.sh` runs it when the checksum fails. funcdiff ignores data: wrong data from source shows here.
 - `.venv/bin/python tools/asm.py <unit> [<function>...]` - the original's functions (size, weak/global) or their
   assembly, compact (a third of the raw `.s`); `--data` for the unit's data.
+- `.venv/bin/python tools/drafts.py [--part game|lib] [--unit <unit>] [--failed] [-j N]` - every parked draft built in a copy
+  and measured (funcdiff's line count, closest first), wherever it sits relative to its INCLUDE_ASM; a draft that does not
+  build gives its first error. The re-measure step: notes go stale when headers change.
 - `.venv/bin/python tools/permuter.py <unit> <function> [--minutes N] [-j N]` - random source mutations of one nearly
   matching function (statement/declaration order, operand order, temporaries, ...), compiled in parallel and scored
+  (C and C++: the function is its symbol or a source name unique in the unit)
   against the original; the best variant goes to `build/permuter/<function>/best.c` (+ `best.diff`). Parked drafts
   under `#if 0` are switched on in its copies; the real source is never touched. Check a result's semantics.
 - `.venv/bin/python tools/decomp_permuter.py <unit> <function> [--minutes N] [-j N]` - for `.c` units only: runs
@@ -113,7 +117,7 @@ The plan for all remaining work (state, work order, per-function loop, validatio
 
 | Family | Toolchain (verified on) |
 |---|---|
-| Sony SDK (`lib/*`: libkernl, libmpeg, libdma, ...) | ee-gcc2.9-991111 + ee-as 2.10 (`assembler: ee-gcc2.96`), `-O2 -G0 -g`: one toolchain for all Sony libs (alarm: kCopy only matches 991111; libmpeg error.c saves with `sd`, 2.95.3 with `sq`). A function that only matches another compiler usually needs a source change (alalc: an inverted `if`) |
+| Sony SDK (`lib/*`: libkernl, libmpeg, libdma, ...) | ee-gcc2.9-991111-01 + ee-as 2.10 (`assembler: ee-gcc2.96`), `-O2 -G0 -g`: one toolchain for all Sony libs. 991111-01 is the 991111 patch release, only `div.s` differs (erratum nops; lib/timer has the only two) (alarm: kCopy only matches the 991111 family; libmpeg error.c saves with `sd`, 2.95.3 with `sq`). A function that only matches another compiler usually needs a source change (alalc: an inverted `if`) |
 | libat3dec (`lib/init`, `lib/hncAt3dec`) | ee-gcc2.96 + its ee-as 2.10, `-O2 -G0 -g` (atrac2_mode_* only match 2.96; hncAt3dec saves registers 8 bytes apart, the Sony 991111 builds 16) |
 | libgcc (`lib/src/gcc/*`, from GCC 2.9's libgcc2.c) | ee-gcc2.9-991111 + the 2.9 ee-as of ee-gcc2.9-990721 (`assembler: ee-gcc2.9-990721`): __floatdisf leaves a `jal` delay slot open that GNU as 2.10 would fill. Source is GCC's own (`src/lib/src/gcc/libgcc2.h` has the types and `umul_ppmm`); the EH runtime (L_eh, `-fexceptions`) is libgcc2.c of 1999-03-24, frame.c that of 2.95.3 |
 | newlib libm (`lib/src/newlib/*`, fdlibm) | ee-gcc2.9-991111-01 `-O2 -G0 -g -fno-builtin` + its own 2.9 as (`assembler: ee-gcc2.9-991111-01`): this compiler pads `div.s` with nops (EE erratum; ef_fmod, kf_tan), -fno-builtin keeps fabsf a call, its as adds hazard nops (mfc1, c.cond) only where gcc enters `.set noreorder` and moves no stores into `jr` slots. Source is newlib's own; `src/lib/src/newlib/libm/fdlibm.h` has the macros |

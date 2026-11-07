@@ -53,6 +53,7 @@ import json, os, re, sys
 from pathlib import Path
 sys.path.insert(0, "tools")
 from compare_compilers import functions, pair_unnamed
+from progress import active_lines
 full, changed = os.environ["CHECK_FULL"] == "1", set(os.environ["CHECK_CHANGED"].split())
 lines, shown, complete = [], [], 0
 config = [u for u in json.load(open("objdiff.json"))["units"] if "base_path" in u]
@@ -76,7 +77,9 @@ for u in sorted(json.load(open("build/report.json"))["units"], key=lambda u: u["
         continue
     m = u.get("measures", {})
     # INCLUDE_ASM'd functions are the original assembly: objdiff counts them as matching, but they aren't done.
-    source = re.sub(r"#if 0.*?#endif", "", Path(units[u["name"]]).read_text(encoding="latin-1"), flags=re.S)
+    # Only the compiled lines: a parked draft's INCLUDE_ASM sits in the #else of its `#if 0`, which a plain
+    # `#if 0.*?#endif` strip would remove too (it counted every parked function as done).
+    source = "\n".join(active_lines(Path(units[u["name"]]).read_text(encoding="latin-1")))
     asm = set(re.findall(r"INCLUDE_ASM\([^,]+,\s*([^)\s]+)\s*\)", source))
     fns = u.get("functions", [])
     open_fns = [f["name"] for f in fns if f.get("fuzzy_match_percent", 0) < 100]
