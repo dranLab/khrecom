@@ -131,12 +131,15 @@ its data comes from source (or is recorded as blocked). Never leave a function t
 
 ## Working rules
 
-- Strictly sequential, in the main checkout: no sub-agents, workers, worktrees or parallel decompilation.
-  Parallel compiles inside `tools/permuter.py` and `tools/decomp_permuter.py` are fine.
+- Sequential in the main checkout by default. Parallel work only through `/decomp-pool` (user decision 2026-11-07):
+  one unit per `decomp-worker` in its own worktree, mode "parked" (the unit's drafts from `tools/drafts.py`) or
+  "new"; the coordinator merges one worker at a time with the gate. Parallel compiles inside `tools/permuter.py`,
+  `tools/decomp_permuter.py` and `tools/drafts.py` are fine.
 - No changes to `tools/`, `configure.py`, `config/` or the build flags, except `tools/partials.py` (approved)
   and `config/SLUS_217.99/symbol_addrs.txt` lines that name unnamed weak or vtable copies. Anything else: ask.
 - Only real C/C++ (see V4). Keep `MATCH: <reason>` on every kept mechanism.
-- There is no git remote: never push, rebase `main` or force anything. Never commit `iso/`, `ref/`, `asm/` or
+- Pushing `main` is the user's (origin is github.com/dranLab/khrecom; CI runs `tools/check.sh` on every push): never
+  push unless asked, never rebase `main` or force anything. Never commit `iso/`, `ref/`, `asm/` or
   `build/`. Never use `git stash`. Keep `docs/plan-partials-prompt.md`-style local files out of commits: add
   files by name, never `git add docs`.
 - Keep scratch files in `build/` (WSL wipes `/tmp`). Use `.venv/bin/python`.

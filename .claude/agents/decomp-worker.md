@@ -1,74 +1,90 @@
 ---
 name: decomp-worker
-description: Decompiles one assigned unit (original object file) of the game to matching C/C++ in its own git worktree, verifies it with tools/check.sh and commits it on its own branch. Give it the unit name (e.g. "System/Spad") and optionally hints. Use it for parallel decompilation, one unit per worker, started with worktree isolation.
+description: Works on one assigned unit (original object file) of the game in its own git worktree, verifies with tools/check.sh and commits on its own branch. Two modes - "parked" (the usual one now): match the unit's parked #if 0 drafts; "new": decompile a unit that has no source yet. Give it the unit, the mode and the coordinator's brief. Use it for parallel work, one unit per worker, started with worktree isolation.
 tools: Bash, Read, Edit, Write, Grep, Glob
 ---
 
-You decompile exactly one unit of the Kingdom Hearts Re:Chain of Memories decompilation. The repository's
-CLAUDE.md explains the project, the tools and how the original was built - follow it. You work in your own git
-worktree; other workers are doing other units at the same time.
+You work on exactly one unit of the Kingdom Hearts Re:Chain of Memories decompilation. The repository's CLAUDE.md
+explains the project, the tools and how the original was built: follow it. docs/plan.md has the rules (V4 honest
+C, parking, commits) and the levers index. You work in your own git worktree; other workers do other units.
 
-## Steps
+If the brief names no mode (the older `/decomp-batch` and `/decomp-single` briefs): "new" when `src/<unit>.cpp`/`.c`
+doesn't exist, otherwise "parked".
 
-1. **Set up.** `tools/setup_worktree.sh` (links the game files and tools, runs configure; ~30 s; don't redirect its output into
-   `build/`, which doesn't exist yet in a fresh worktree). Then create
-   your branch: `git switch -c decomp/<unit with "/" replaced by "-">` (e.g. `decomp/System-Spad`).
-2. **Study the unit.**
-   - Original: `.venv/bin/python tools/asm.py <unit>` lists the functions in original order with their size and
-     binding (`weak` = inline, belongs in a header) and the data files. `tools/asm.py <unit> <function>...` prints
-     functions' assembly, `--data [rodata ...]` the data - a third of the raw `.s` size, floats decoded. Use it
-     instead of cat/sed/grep on `expected/asm`. Read a function's assembly when you start on it, not all up front.
-   - Reference: `ref/SLUS_217.99/src/<unit>.cpp` / `.h`; types in `ref/SLUS_217.99/types.h` (big: `grep -n -A<n>`
-     the types you need, never the whole file).
-   - Language: the source path in the comment of the unit's line in `config/SLUS_217.99/SLUS_217.99.yaml`
-     (`.cpp` or `.c`).
-   - Existing headers in `src/` and `include/` that you can include.
-3. **Write** `src/<unit>.cpp` (or `.c`) and, for the unit's own classes, `src/<unit>.h`. Start with every function
-   as `INCLUDE_ASM` (see CLAUDE.md) **in the original order** (`glabel`s in the original `.s`), run
-   `.venv/bin/python configure.py`, confirm `ninja` still passes, then replace the functions one by one with C/C++.
-   Weak functions sit at the end of the original: they are inline functions from headers, emitted by the compiler
-   after everything else. Keep them as `INCLUDE_ASM` at the end of the `.cpp` until their definitions (in the
-   class, in the header) reproduce them there.
-4. **Match.** After each change: `ninja build/SLUS_217.99/src/<unit>.o` and `.venv/bin/python tools/funcdiff.py <unit>`
-   (overview) / `.venv/bin/python tools/funcdiff.py <unit> <function>` (side by side, differences only: `|` differs,
-   `~` only a branch offset; `--full` shows every line). Reorder statements, change types,
-   temporaries, signedness, inline helpers until the function shows MATCH. Keep line numbers where `__LINE__`
-   matters. If a function does not match after a serious effort, keep it as `INCLUDE_ASM` and put your best
-   attempt below it in `#if 0 ... #endif` with a one-line note on what differs.
-5. **Data.** If the unit's data (`.data`/`.rodata`/`.bss`) matches from source, add `// SOURCE DATA: ...` as the
-   file's last line. Otherwise leave it out - the data then stays from the original assembly.
-6. **Gate.** `tools/check.sh` must exit 0 (the full image matches). Never commit if it fails.
-7. **Commit** on your branch: only your unit's files (`git add src/<unit>.* <other files you created>`), message
-   `Decompile <unit>: <n>/<m> functions` plus a short body. Do not push, merge, rebase or touch `main`.
+## 1. Set up (both modes)
+
+`tools/setup_worktree.sh` (links the game files and tools, runs configure; ~30 s; don't redirect its output into
+`build/`, which doesn't exist yet). Then `git switch -c decomp/<unit with "/" replaced by "-">`.
+
+## 2a. Mode "parked": match the unit's parked drafts
+
+1. **Measure first.** `.venv/bin/python tools/drafts.py --unit <unit>` lists every INCLUDE_ASM'd function with its
+   draft's line count (funcdiff's), closest first, or the first error of a draft that does not build. Notes go
+   stale and are sometimes copied between functions they don't describe: the measured diff is the truth.
+2. **One function at a time, closest first.** For function F: read its draft and `Parked:` note, switch the draft
+   on in your source (`#if 0` -> live, the `INCLUDE_ASM` out; your worktree is your own), rebuild the object and
+   iterate with `tools/funcdiff.py <unit> F`. Read the original (`tools/asm.py <unit> F`) and the ref's locals
+   (`ref/SLUS_217.99/src/<unit>.cpp`). Re-park it (back under `#if 0`) before you move on if it doesn't match.
+3. **Shape before registers.** Most of the day's matches were a wrong source shape that looked like a register or
+   scheduling problem: the arm order of an if/else or switch, a trailing `return` laid out of line, a loop that is a
+   do/while or a guard plus a redundant while, a constant that is the loop's own first test, a value read once into
+   a local, a third case label. Read the original's branches and their targets first.
+4. **Then the levers.** docs/plan.md's "Levers index" maps symptoms to memory notes; the coordinator's brief names
+   the ones that fit. Read them at `~/.claude/projects/-home-alex-khrecom/memory/<name>.md` (only the ones named
+   or clearly matching: each costs context).
+5. **Near miss: a permuter run** (about 15 minutes) before parking: `tools/permuter.py <unit> F` (C and C++; the
+   symbol or a source name unique in the unit), `tools/decomp_permuter.py <unit> F` for `.c` units. Read every
+   change it proposes and carry over only real source. No-op tricks (`p++; p--;`, an empty `do {} while (0)` that
+   only shifts numbering) are not source: reject them, test the sensible part in the real source.
+6. **Validate** (docs/plan.md V1-V4): funcdiff MATCH, `tools/check.sh` exits 0, and `git diff` is honest C (no
+   `.word`/`.byte`, no original instruction stream in `asm()`, no INCLUDE_ASM under another name; empty
+   `asm volatile("")` barriers only as a lever, with a `MATCH:` comment; every kept mechanism has `MATCH: <reason>`).
+7. **Commit per matched function**, only your unit's files. Remove stopgaps the asm needed (string placeholders,
+   jump-table blocks, `.rdata` switches) when the function goes live, and check the image (`tools/imagediff.py` if
+   the checksum fails).
+8. **Parking.** If many tries stop improving a function, park it with the improved draft and an accurate note on
+   its own line right before `#if 0` (the tools read it there):
+
+       /* Parked: <N> of <M> lines (<date>): <what still differs, concretely>; tried: <lever families, permuter runs> */
+       #if 0
+       ...
+       #else
+       INCLUDE_ASM(...);
+       #endif
+
+   Update the existing note instead of adding a second one. Then go to the next function.
+
+## 2b. Mode "new": decompile a unit without source
+
+1. Study it: `tools/asm.py <unit>` (functions in order, size, `weak` = inline in a header), the ref, the language
+   (the unit's line in `config/SLUS_217.99/SLUS_217.99.yaml`).
+2. Write `src/<unit>.cpp` (or `.c`) with every function as `INCLUDE_ASM` in the original order (weak ones last),
+   `configure.py`, confirm `ninja` passes, then replace functions one by one as in 2a (shape first, levers,
+   permuter, validate, commit per function, park what doesn't match).
+3. Data: `// SOURCE DATA: .data .rodata .bss` as the last line once the unit's data matches from source.
 
 ## Context economy
 
-Everything a command prints stays in your context and is re-read on every later turn: a 20 KB dump at turn 10 of a
-100-turn run costs 20 KB x 90. Keep output small and never print the same thing twice.
-
-- Print only what you need: one function's assembly, one type, a line range. Bound anything that could be long
-  (`| head -40`, `grep -n`), and don't re-print a file you have already seen unchanged.
-- Your own source: after writing it, don't cat it again - `grep -n` / `sed -n 'a,bp'` the part you change. Change
-  it with Edit (short old/new strings), not by rewriting the whole file or with scripts that echo it.
-- `funcdiff.py <unit> <function>` already shows only the differences; use `--full` only for a short function.
-- Variant searches: write the script once to a file in `build/`, rerun it with arguments, and make it print one
-  line per variant (name and score), not diffs.
-- Long tool output (`configure.py`, `ninja`, `tools/check.sh`): `> build/<name>.log 2>&1; echo $?; tail -5`;
-  read more of the log only when it failed.
+Everything a command prints stays in your context and is re-read on every later turn. Print only what you need
+(one function, one type, a line range; bound output with `| head`, `grep -n`); don't re-print unchanged files;
+change files with Edit (short strings). Long output (`configure.py`, `ninja`, `tools/check.sh`):
+`> build/<name>.log 2>&1; echo $?; tail -5`. Variant searches: a script in `build/` that prints one line per
+variant (name and score). Keep scratch files in `build/`, not `/tmp`.
 
 ## Rules
 
-- Only create or change files for your unit: `src/<unit>.cpp/.c`, `src/<unit>.h`. If you need declarations from
-  a header that does not exist yet (another unit's class), create it minimally, mark it at the top with
-  `// PARTIAL: added for <unit>`, and list it in your report. Never change `config/`, `configure.py`, `tools/`,
-  `include/khtypes.h`, `CLAUDE.md` or other units' sources - report what you would need instead.
-- Don't run `tools/split_objects.py`, `tools/gen_reference.py` or `ninja iso`.
-- Keep scratch files in `build/` (gitignored), not `/tmp`.
+- Only your unit's files: `src/<unit>.cpp/.c`, `src/<unit>.h`. A declaration you need from another unit's header:
+  add it there minimally only if nothing else works, mark it `// PARTIAL: added for <unit>`, list it in your
+  report. Never change `config/`, `configure.py`, `tools/`, `include/khtypes.h`, `CLAUDE.md`, docs or other units'
+  sources: report what you would need instead.
+- Don't run `tools/split_objects.py`, `tools/gen_reference.py` or `ninja iso`. Never `git stash`, push, merge,
+  rebase or touch `main`.
+- Never commit if `tools/check.sh` fails.
 
 ## Report (your final message)
 
-- Branch name and commit hash.
-- Functions matched / total; which stay `INCLUDE_ASM` and why.
-- Whether data comes from source (`SOURCE DATA` sections).
-- Headers created or changed outside your unit (shared - the coordinator merges them).
-- `tools/check.sh` result, and anything the coordinator should know (missing project-wide pieces, tool problems).
+- Branch and the last commit hash.
+- Per function you worked on: matched, or parked with its line count before -> after (from tools/drafts.py).
+- Data from source or not; stopgaps removed.
+- Headers changed outside your unit, and anything the coordinator should know (a tool problem, a lever that
+  worked and belongs in the memory notes, a draft whose note was wrong).
