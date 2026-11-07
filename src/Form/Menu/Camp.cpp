@@ -5900,10 +5900,9 @@ INT CCamp::setWorldmap(INT nSetCmd) {
     }
     return ret;
 }
-/* Parked: 62 of 941 lines differ. The RCNORMA::NormaSrc argument of createNorma is built from four lhu of its
-   stack copy in the original (extract_bit_field pieces), one ld in ours - the open issue of
-   RoomCreation::menuMain and C2DCard::replaceNorma; the s3/s4 and spill-slot (0x64/0x68) swaps around it follow
-   from that. tried: while/do/for shapes of the 0x40 block (`while (isButtonTrg(0x40)) { if (m_bPooWorld) break;
+/* Parked: 35 of 939 lines differ (62 before _NORMA_PIECES, 2026-11-07). Left: pDoorInfo and nNorma have s4/s3 for s3/s4; an
+   operand barrier on pDoorInfo does not flip them. To enable this draft, drop the data block after its INCLUDE_ASM: it
+   defines pSeqName.4483 too (Ps2EeAs then crashes). tried: while/do/for shapes of the 0x40 block (`while (isButtonTrg(0x40)) { if (m_bPooWorld) break;
    ... break; }` gives the original's block order), nested `if (< 4) if (>= 0)` against the sltiu fold, ref locals
    (id, block-scoped i), set(1,1,1,1) instead of setAll, setLayer before the vec.set. */
 #if 0
@@ -6078,7 +6077,10 @@ void CCamp::setWorldmapCursor() {
                             normaSrc._nColor = pDoorInfo->getNormaColor(n);
                             normaSrc._nNumber = pDoorInfo->getNormaNumber(n);
                             normaSrc._nOp = pDoorInfo->getNormaOperation(n);
-                            p2DCard->createNorma(normaSrc, 0);
+                            {
+                                RCNORMA::NormaSrc t = normaSrc;
+                                _createNormaRaw(p2DCard, _NORMA_PIECES(t), 0);
+                            }
                         }
                     }
                 }

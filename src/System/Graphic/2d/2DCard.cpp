@@ -368,26 +368,11 @@ void C2DCard::createEmpty() {
     addSeq(m_pSeqName, 1);
 }
 
-/* MATCH: the original passes inNorma to createNorma as four lhu of a stack copy combined into a1 (gcc's unaligned-argument
- * path, extract_bit_field in 16-bit pieces). No struct shape or installed compiler gives that from a plain call (bitfields,
- * arrays, nested, packed, union, ctor/dtor/copy ctor: one ld or ldl/ldr), so the pieces are written out and the same
- * symbol is called with the 64-bit value; the bytes in a1 are the struct's. */
-extern void _createNormaRaw(C2DCard* pThis, ULONGLONG inNorma, INT inStatus) __asm__("createNorma__7C2DCardGQ27RCNORMA8NormaSrci");
 void C2DCard::replaceNorma(RCNORMA::NormaSrc inNorma, INT inStatus) {
     destroy();
     RCNORMA::NormaSrc t = inNorma;
-    register ULONGLONG lo asm("$2") = (USHORT)t._nOp;
-    register ULONGLONG num asm("$7") = (USHORT)t._nNumber;
-    ULONGLONG hi = (USHORT)t._nColor;
-    lo <<= 16;
-    register ULONGLONG top asm("$3") = (USHORT)t.__nDummy;
-    lo |= num;
-    hi <<= 32;
-    hi |= lo;
-    top <<= 48;
-    _createNormaRaw(this, top | hi, inStatus);
+    _createNormaRaw(this, _NORMA_PIECES(t), inStatus);
 }
-
 void C2DCard::createNorma(RCNORMA::NormaSrc inNorma, INT inStatus) {
     static BYTE wakuTbl[4] = { 0x20, 0x22, 0x21, 0x1F };
     static BYTE rgbUpperTbl[4] = { 0x00, 0x07, 0x05, 0x03 };

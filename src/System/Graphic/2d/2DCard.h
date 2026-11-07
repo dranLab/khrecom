@@ -41,4 +41,22 @@ private:
     void createBack();
 };
 
+
+/* MATCH: a by-value NormaSrc reaches a1 as four lhu of a stack copy combined with dsll/or (gcc's unaligned-argument path,
+   extract_bit_field in 16-bit pieces). No struct shape or installed compiler gives that from a plain call, so the pieces are
+   written out and createNorma/replaceNorma are called with the 64-bit value: the bytes in a1 are the struct's. */
+#define _NORMA_PIECES(t) ({ \
+    register ULONGLONG lo asm("$2") = (USHORT)(t)._nOp; \
+    register ULONGLONG num asm("$7") = (USHORT)(t)._nNumber; \
+    ULONGLONG hi = (USHORT)(t)._nColor; \
+    lo <<= 16; \
+    register ULONGLONG top asm("$3") = (USHORT)(t).__nDummy; \
+    lo |= num; \
+    hi <<= 32; \
+    hi |= lo; \
+    top <<= 48; \
+    top | hi; })
+extern void _createNormaRaw(C2DCard* pThis, ULONGLONG inNorma, INT inStatus) __asm__("createNorma__7C2DCardGQ27RCNORMA8NormaSrci");
+extern void _replaceNormaRaw(C2DCard* pThis, ULONGLONG inNorma, INT inStatus) __asm__("replaceNorma__7C2DCardGQ27RCNORMA8NormaSrci");
+
 #endif /* SYSTEM_GRAPHIC_2D_2DCARD_H */
