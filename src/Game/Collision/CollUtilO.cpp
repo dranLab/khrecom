@@ -1,5 +1,8 @@
-/* .rodata comes from the original assembly: the split puts the unit's data at 0x4893B4 (4 mod 8), so string
- * literals can't be placed from source; the code refers to the original's strings by their labels. */
+/* .rodata comes from the original assembly: the split gives this unit 0x4893D8-0x4895C0, which also holds the
+ * .rodata of Game/Collision/CollUtilA (0x4893D8: CollUtil.h's strings) and CollUtilF (0x489460: the same strings,
+ * CCollision's vtable); this unit's own starts at 0x489500 (CollUtil.h's strings, then the CSphereCollision and
+ * CCollision vtables). Until the split has those boundaries, the code refers to the original's strings by their
+ * labels. */
 
 #include "Game/Collision/CollUtilA.h"
 #include "System/HeapMan.h"
