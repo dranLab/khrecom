@@ -971,14 +971,6 @@ BOOL CHumanBoss::enemyCardProc(const CARD* inActiveCard) {
     return TRUE;
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/HumanBoss", itemCardProc__10CHumanBossPC4CARD);
-asm(".rdata\n.align 4\njtbl_004C3C80:\n"
-    ".word .L002CCED0\n.word .L002CCED8\n.word .L002CCEE0\n.word .L002CCEE8\n.word .L002CCEF0\n.word .L002CCEF8\n"
-    ".align 4\njtbl_004C3CA0:\n"
-    ".word .L002CD008\n.word .L002CD008\n.word .L002CD008\n.word .L002CD044\n.word .L002CD044\n.word .L002CD080\n"
-    ".text\n");
-/* near match: one rollDeck tail is cross-jumped (the original keeps both copies) */
-#if 0
 BOOL CHumanBoss::itemCardProc(const CARD* inActiveCard) {
     INT noReloadNum;
     INT cardNum;
@@ -1070,15 +1062,20 @@ BOOL CHumanBoss::itemCardProc(const CARD* inActiveCard) {
     }
     if (isEndRollDeck()) {
     use:
+        __asm__ volatile(""); /* MATCH: reorg cannot take the move a0,s1 for the branches into here */
         if (setPlayCard(10)) {
             m_iUseItem = inActiveCard->m_nKind;
         }
         return TRUE;
     }
-    if ((noReloadNum > 0 && cardNum - haveCardNum < noReloadNum) || remainCard * 100 / cardNum >= 26) {
+    if (noReloadNum > 0 && cardNum - haveCardNum < noReloadNum) {
+        __asm__ volatile("" : : : "$2"); /* MATCH: v0 is dead here: reorg fills the test's slot from the li v0,100 behind it */
+    roll:
         m_pCardRevolver->rollDeck(1, 0, 300);
+        __asm__ volatile(""); /* MATCH: keeps this tail: jump2 would cross-jump it into the last one */
         return TRUE;
     }
+    if (remainCard * 100 / cardNum >= 26) goto roll;
     remainCard >>= 1;
     if (remainCard <= 0) {
         remainCard = 1;
@@ -1086,10 +1083,13 @@ BOOL CHumanBoss::itemCardProc(const CARD* inActiveCard) {
     if (RND::genrand_int31() % remainCard == 0) {
         goto use;
     }
-    m_pCardRevolver->rollDeck(1, 0, 300);
+    {
+        register INT nCount asm("$5") = 1; /* MATCH: li a1 before the member load, for the mfhi test's slot */
+        __asm__ volatile("" : : "r"(nCount));
+        m_pCardRevolver->rollDeck(nCount, 0, 300);
+    }
     return TRUE;
 }
-#endif
 
 /* placeholder for stockActProc (INCLUDE_ASM): its strings */
 __attribute__((section(".sdata"))) void _stockActProc_placeholder(INT n) {
