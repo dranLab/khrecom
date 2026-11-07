@@ -41,10 +41,10 @@ every change that is merged without regenerating. Regenerating all four takes ab
 
 ## Where things stand (2026-11-07)
 
-- **Progress:** 12042 of 12311 functions matched: game 11259 of 11323, libraries 783 of 988 (plus 151 hand-written).
+- **Progress:** 12044 of 12311 functions matched: game 11261 of 11323, libraries 783 of 988 (plus 151 hand-written).
   `tools/check.sh` counts the 151 hand-written units as done too: its total is these matched functions plus 151
   (fixed 2026-11-07: it used to count a parked `#if 0 ... #else INCLUDE_ASM #endif` as done).
-- **Game:** 64 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note).
+- **Game:** 62 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note).
   5 units take a data section from assembly.
 - **Libraries:** 18 parked, 1 not attempted, 27 hand-written (stay assembly), no unit with data from assembly
   (the last two, __assert and __umoddi3, needed the split / link-alignment fixes of 2026-11-07);
@@ -118,7 +118,7 @@ Numbers change with every merge: `tools/check.sh` (totals), `tools/leftovers.py 
    reading the private member matched but is not the original: reverted 2026-11-07).
    The hand-kept table at the top of
    `docs/asm-leftovers.md` lists the blockers that need more than a source change.
-2. **Data from source** (2026-11-07: CollUtil's `.rodata` is 0x20 of 0x304 while its three functions are assembly: it needs them first)
+2. **Data from source** (2026-11-07: CollUtil's .rodata needs a split fix first: the cut at 0x4893B4 falls inside CSphereCollision's vtable; CollUtil's ends at 0x4893D8 with CCollision's vtable, which probably also lifts CollUtilO's 4-mod-8 blocker: waits on the user)
    for the units that still take a section from asm: `pppEiDrawShipoly` (.bss .data .rodata) and
    `CollUtil` (.rodata). `Ride` and `CollUtilO` can't (`.rodata` at 4 mod 8), `sddrv_ee`'s `.bss` is blocked (see the
    table at the top of `docs/asm-leftovers.md`).

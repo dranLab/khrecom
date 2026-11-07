@@ -33,7 +33,6 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `System/Graphic/Effect/libppp/draw/shape` | 2 | 1771 | 2 |  |
 | `System/Graphic/Model` | 3 | 1153 | 3 |  |
 | `System/Graphic/DeFocus` | 2 | 1014 | 2 |  |
-| `Game/Collision/CollUtil` | 3 | 781 | 3 | .rodata |
 | `System/Graphic/Effect/libppp/keProg/KeTh` | 1 | 685 | 1 |  |
 | `System/Graphic/FrecFont` | 1 | 656 | 1 |  |
 | `Game/Player/Player` | 2 | 654 | 2 |  |
@@ -47,6 +46,7 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `System/Graphic/Effect/libppp/keProg/pppKeShpTail3` | 1 | 514 | 1 |  |
 | `System/Graphic/PathData` | 1 | 489 | 1 |  |
 | `System/Graphic/Glare` | 1 | 446 | 1 |  |
+| `Game/Collision/CollUtil` | 1 | 424 | 1 | .rodata |
 | `Game/Collision/CollMap` | 2 | 365 | 2 |  |
 | `Game/Player/PlayerCamera` | 1 | 332 | 1 |  |
 | `Game/CardRevolver` | 1 | 321 | 1 |  |
@@ -123,9 +123,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Game/Collision/CollDisp` | `setBodyLines__9CCollDispP14CCollisionList` | 95 | 38 of 105 lines (2026-11-07), same size: the s registers come out rotated by one through the loop (this s1 for s2, ...). The ref has no pColl/type locals but dropping either is worse (53-66); swapping their declarations: 38-39. |
 | `Game/Collision/CollMap` | `collideRide__8CCollMapi` | 224 | (comment) collideRide and collideRideR2 don't match yet. collideRide: the original's `pRideAtari = NULL` store is not a "fixed scalar" to the scheduler (it is ordered before the coll constructor's stores), as if pRideAtari's address had been taken before; every way of doing that here also moves … |
 | `Game/Collision/CollMap` | `collideRideR2__8CCollMapR10CCollisionPP5CRidei` | 141 |  |
-| `Game/Collision/CollUtil` | `detectMCInit__9CCollUtilP7MC_CHIPi` | 169 | 14 of 185 lines, same size - the helpers and the i/iPrimIdx loop follow the ref's locals; _dotNf is qmfc2 + mtc1/nop with iTmp and ret as in DispList. Left: t8/t9 for the two qmfc2 (ours v0). A t-reg that high means iTmp is allocated after the globals, so it is live across blocks in the original: … |
-| `Game/Collision/CollUtil` | `_detectMCD__9CCollUtilR10CCollision` | 424 | _detectMCD: 146 of 467 lines, 8 bytes short - structure as the original (MCD path of _detectOCD: area chip table walk, two allocSpad asserts, same segment loop); ret declared after i for its spill slot, the vf4 asm before the vCkS reference. Left: this in s3 instead of s2 (most lines), the retry … |
-| `Game/Collision/CollUtil` | `detectMap__9CCollUtilP7FVECTORT1` | 188 | 39 of 213 lines, 4 bytes long - two passes, renew test and info merge as the original; left: the pPrimInfo2/i init order and an extra delay-slot load at the second pass, the attr byte's `andi` copy (a0) and the return-1 block (the original sets v0 after the m_pDetectMatA/ChipA/NormalA stores). |
+| `Game/Collision/CollUtil` | `_detectMCD__9CCollUtilR10CCollision` | 424 | _detectMCD: 35 of 458 lines, same size (2026-11-07) - statements in marker order, chip loop as for (pPrimIdx = pPrimIdx0; iCnt; iCnt--) with its own iArea (this now in s2 as the original), vf4 load via an inline. Left: ours hoists iArea0*4 out of the retry loop and spills it (104(sp); the original … |
 | `Game/Atel/Atel` | `setScreenFader__5CAtelifi` | 189 | 37 of 206 lines, 16 bytes short - logic, switch and jump table match. Left: the original computes the layer as `beqz; b then (li v0,1); else: b end (li 1); then: li 10` (a jump-evaluated boolean threaded away) and keeps nLayer in s1; ours branches once, which rotates the s-registers … |
 | `Game/Atel/AtelCrossFade` | `drawCrossFadeImage__Q24ATEL14CAtelCrossFade` | 188 | (comment) Near-match: the second loop schedules the packet stores differently and hoists the GIF tag constant. |
 | `Game/Atel/Avatar` | `RotateAvatarMain__Q24ATEL7CAvatar` | 139 | 8 lines - the first isOverAvatarRotTimeLimit() comes out as xori; the original builds bRes with li 1 + movz (its weak copy is xori too). Inline/caller forms and 8 min of permuter (9k candidates) did not change it. The VU0 add/clip block (FVECTOR::addRot in the ref) is written out here: through an … |
@@ -145,7 +143,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Form/Menu/Camp` | `setWorldmapCursor__5CCamp` | 853 | 35 of 939 lines differ (62 before _NORMA_PIECES; re-measured 2026-11-07). Left: pDoorInfo and nNI (not nNorma) have s4/s3 for s3/s4: global-alloc priority (-dl: pDoorInfo 28 refs over 187 insns = 0.60, nNI 22 over 121 = 0.73, so nNI is allocated first and takes s3); the original allocates … |
 | `Form/Menu/RoomCreation` | `menuMain__13CRoomCreation` | 1995 | (comment) menuMain: 78 of 2211 lines, 8 bytes short (92 and 0x50 short before _NORMA_PIECES, 2026-11-07): the by-value NormaSrc arguments are written out now; left: case 0's registers (v1 + s7 where the original keeps a0, s4/s6/s8 from there). To enable this draft, also drop the data block after … |
 
-Totals: 64 functions (28805 instructions) in 43 units, 64 of them parked; 5 units take a data section from assembly.
+Totals: 62 functions (28448 instructions) in 43 units, 62 of them parked; 5 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->
