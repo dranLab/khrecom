@@ -1214,14 +1214,7 @@ static INT _McWriteIconSys(const CHAR* pszName) {
     return r;
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Memoca", _McCheckDataFileExist__FiPCc);
-/* placeholder for _McCheckDataFileExist (INCLUDE_ASM): its strings */
-__attribute__((section(".sdata"))) void _McCheckDataFileExist_placeholder(char* p) {
-    sprintf(p, "/%s/*", p);
-    TRACE("icon.sys");
-}
-#if 0 /* near match: the loop entry test compares the directory count with 0 (the original: with the copy of nRes) */
-static INT _McCheckDataFileExist(INT nMode, const CHAR* pszName) {
+INT _McCheckDataFileExist(INT nMode, const CHAR* pszName) {
     INT nRes;
     char szTmp[256];
     INT r = -9999;
@@ -1230,14 +1223,11 @@ static INT _McCheckDataFileExist(INT nMode, const CHAR* pszName) {
 
     sprintf(szTmp, "/%s/*", pszName);
     nRes = _McGetDirFileEntries(szTmp);
-    if (nRes == -9999) {
-        return -9999;
-    }
-    if (nRes != 0) {
-        r = nRes;
-    } else {
+    if (nRes != r) {
+    if (nRes == 0) {
+        asm volatile("" : : : "$16"); /* MATCH: s0 is dead here, for reorg: the bnez slot takes r = nRes unannulled */
         s_nStatus = 0;
-        for (i = 0, pInfo = s_DirInfo; i < s_nDirentCount; i++, pInfo++) {
+        for (i = nRes, pInfo = s_DirInfo; i < s_nDirentCount; i++, pInfo++) {
             if (pInfo->EntryName[0] == '.') {
                 continue;
             }
@@ -1255,10 +1245,13 @@ static INT _McCheckDataFileExist(INT nMode, const CHAR* pszName) {
         } else {
             r = nMode == 1 ? -8 : -12;
         }
+    } else {
+        r = nRes;
     }
     return r;
+    }
+    return -9999;
 }
-#endif
 
 static void _getMcDirPath(CHAR* pszOutPath, const CHAR* pszDir) {
     sprintf(pszOutPath, "/%s", pszDir);
