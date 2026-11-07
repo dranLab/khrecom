@@ -33,21 +33,21 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `Form/Menu/RoomCreation` | 1 | 1995 | 1 |  |
 | `Game/Map` | 2 | 1952 | 2 |  |
 | `System/Graphic/Effect/libppp/draw/shape` | 2 | 1771 | 2 |  |
-| `Game/Player/Player` | 5 | 1764 | 5 |  |
+| `Game/Player/Player` | 3 | 1615 | 3 |  |
 | `Game/CardRevolver` | 6 | 1410 | 6 |  |
 | `System/Graphic/Model` | 5 | 1277 | 5 |  |
 | `Game/Player/Friend` | 1 | 1274 | 1 |  |
-| `Game/Enemy/HumanBoss` | 7 | 1088 | 7 |  |
 | `System/Graphic/PathData` | 2 | 1075 | 2 |  |
+| `Game/Enemy/HumanBoss` | 6 | 1030 | 6 |  |
 | `System/Graphic/DeFocus` | 2 | 1014 | 2 |  |
 | `System/Graphic/FrecFont` | 2 | 908 | 2 |  |
 | `Game/Collision/CollUtil` | 3 | 781 | 3 | .rodata |
 | `System/Graphic/2d/2DSprObj` | 2 | 763 | 2 |  |
 | `System/Graphic/Effect/libppp/keProg/KeTh` | 1 | 685 | 1 |  |
-| `Form/DebugWindow` | 2 | 667 | 2 |  |
 | `System/Graphic/TexUtil` | 4 | 651 | 4 |  |
 | `System/Graphic/HermitePathCamera` | 1 | 632 | 1 |  |
 | `System/Rcf` | 5 | 552 | 5 |  |
+| `Form/DebugWindow` | 1 | 549 | 1 |  |
 | `System/Graphic/PackMan` | 2 | 540 | 2 |  |
 | `System/Graphic/Effect/libppp/keProg/pppKeShpTail3X` | 1 | 532 | 1 |  |
 | `Game/Atel/Avatar` | 3 | 531 | 3 |  |
@@ -63,7 +63,6 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `Game/Collision/CollAttack` | 3 | 334 | 3 |  |
 | `Game/Player/PlayerCamera` | 1 | 332 | 1 |  |
 | `Game/Enemy/BattleEnemy` | 2 | 327 | 2 |  |
-| `Form/Menu/SaveLoad` | 2 | 320 | 2 |  |
 | `Game/SceneInfo` | 2 | 314 | 2 |  |
 | `System/Graphic/Effect/libppp/partMng` | 1 | 292 | 1 |  |
 | `Game/Enemy/MapEnemy` | 1 | 290 | 1 |  |
@@ -79,18 +78,16 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `System/Movie/MSVideo` | 1 | 180 | 1 |  |
 | `System/Graphic/Effect/libppp/pppPart` | 1 | 168 | 1 |  |
 | `System/Graphic/WorldEnv` | 1 | 128 | 1 |  |
+| `Form/Menu/SaveLoad` | 1 | 126 | 1 |  |
 | `Form/Menu/JiminyMemo` | 1 | 122 | 1 |  |
 | `Game/Collision/CollUtilO` | 1 | 121 | 1 | .rodata |
 | `Game/BattleCard` | 1 | 117 | 1 |  |
-| `Game/Gimmick/GimmickPlantParent` | 1 | 108 | 1 |  |
 | `System/Graphic/Effect/effect` | 1 | 105 | 1 |  |
 | `Game/Movement` | 1 | 105 |  |  |
 | `Game/Card` | 1 | 95 | 1 |  |
 | `Game/CardBattle` | 1 | 89 | 1 |  |
-| `Game/Player/PlayerGauge` | 1 | 77 | 1 |  |
 | `Game/Player/SummonTink` | 1 | 37 | 1 |  |
 | `System/Graphic/Anim` | 1 | 33 | 1 |  |
-| `Game/Atel/VSME` | 1 | 32 | 1 |  |
 | `System/Graphic/2d/2DCard` | 1 | 30 | 1 |  |
 | `System/dlmalloc` | 1 | 14 | 1 |  |
 
@@ -161,7 +158,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `System/Rcf` | `loadNextCategoryInfo__4CRcfiPciPi` | 174 | (comment) Near-match: register allocation |
 | `System/RcfCD` | `_startCdRead__Fii` | 41 | 4-8 lines, varying between identical builds (the draft above is the C) - the hoisted lui's of the s_n*_R statics get s5/s6 in an order that changes per compiler run (gcse PRE hash order, memory gcse-pre-hash-order); store orders tried (all worse). Kept asm because the result is not reproducible. |
 | `System/RcfCD` | `_analyzeCdMemberHeader__FRPUc` | 190 | 31 lines (draft above) - the member-header walk's pointer advance is if-converted (movn s2,s4,s4) here and branchy in the original, and the alloc/assert blocks are laid out differently; not iterated further. |
-| `System/RcfCD` | `_addRsrcFileToDB__FUiiRPUc` | 159 | 4 lines (draft above) - `addiu s0,sp,32` (&info) and the _nLinkID load are scheduled before the group test in the original, after it here. tried: permuter 10 min, 33k candidates: no gain. |
+| `System/RcfCD` | `_addRsrcFileToDB__FUiiRPUc` | 159 | 4 lines (draft above) - `addiu s0,sp,32` (&info) and the _nLinkID load are scheduled before the group test in the original, after it here. tried: permuter 10 min, 33k candidates: no gain. 2026-11-07: ours has the addiu in the beq slot, the original fills that slot with move a0,s3 from the arm. One … |
 | `System/TaskMan` | `update__8CTaskManiii` | 135 | 4 lines - the barrier settles nTQ/bPause (s5/s6). Left: the TaskMainParam stores: the original issues the nTQ store early and _SecondaryArray's after _nSysLag's; a scheduling tie across the clear() block. |
 | `System/TaskMan` | `_invokePrimary_Main__8CTaskManR13TaskMainParamR5CTask` | 82 |  |
 | `Game/BattleCard` | `destroy__Q210CardBattle11CBattleCardi` | 117 | 5 lines - the original keeps two copies of `addGimmickCount(-1); break;` (cases 0xe and 6); our jump2 cross-jumps case 0xe's tail into case 6. Per-case flag sets, gotos, labels, argument spellings and block scopes all merge too (synthetic tests build/ps/cj/d*.cpp, e*.cpp, f1.cpp). |
@@ -193,25 +190,20 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Game/Atel/Avatar` | `_$_Q24ATEL7CAvatar` | 95 | 6 lines - the implicit lineY/lineX destructor calls get s5/s4 instead of s4/s5: their address pseudos tie on priority (2 refs / 17 insns) and ours numbers lineX first (lreg dump); no body form changed it. The draft uses the full classes of Gprim.h (inline ~C3DLine/~CGPrim). |
 | `Game/Atel/Avatar` | `onMove__Q24ATEL7CAvatariPvi` | 297 | 1 line (was 53) - the final test: the original has `slti 3`, then `bne s6, 0` twice; the switch's range node gives bltz for the first. The empty asm in case 0 settled the registers: pV 3 refs / 13 insns outranked p 14 / 187 by a hair. An INT local keeps slti but the second zero test folds (even … |
 | `Game/Atel/Avatar` | `RotateAvatarMain__Q24ATEL7CAvatar` | 139 | 8 lines - the first isOverAvatarRotTimeLimit() comes out as xori; the original builds bRes with li 1 + movz (its weak copy is xori too). Inline/caller forms and 8 min of permuter (9k candidates) did not change it. The VU0 add/clip block (FVECTOR::addRot in the ref) is written out here: through an … |
-| `Game/Atel/VSME` | `acWaitReq__Q24ATEL4CVSMRQ24ATEL5Actorii` | 32 | same instructions and order except the wait_timer product: the original multiplies into LO ("mult $zero,s1,v1" + mflo before the sh), ours with the 3-operand mult into v1 (gcc's mulsi3_mult3 "l" vs "d" alternative, chosen by regclass: LO only when the product feeds a plain register copy, as for a … |
 | `Game/Player/Friend` | `setMagic__Q26Friend7CFriendi` | 1274 |  |
 | `Game/Player/NaviMap` | `main__Q25Gauge8CNaviMap` | 425 | (comment) Not matching: in the debug-rotation block (g_dw.player.iTemp == 2) the original keeps PI in $f3 from before the branch and loads 180.0f/-PI in $f2/$f1 (100.0f and -PI share $f1); here 180.0f is hoisted too and the registers of 180.0f/-PI swap (9 lines). Everything else matches; the "deg" … |
 | `Game/Player/Player` | `exeHang__7CPlayer` | 550 | 23 lines differ, all FP-register/load-order of the two angle wraps: the original loads m_fDir first ($f0) then m_fAnalogViewDir ($f1) for `view - dir + PI` (ours the reverse), and in the drop-off arm it loads dir into $f12 in the branch delay slots and copies it to $f22 after getPos (ours loads … |
-| `Game/Player/Player` | `initAttackField__7CPlayeri` | 81 | registers match; only the stores after the g_fGravity load are scheduled differently (the original stores m_JumpState right after the load and m_fJumpGravity before the g_CardBreakTime load; ours stores them later). tried: all 24 orders of the JumpState/CardBreakTime/JumpGravity/JumpSpdY block, … |
 | `Game/Player/Player` | `initAttack__7CPlayeri` | 104 | same spot as initAttackField: around the g_fGravity load the original keeps the %hi in v0 (later s0) and stores m_JumpState after the load; ours uses v1 and stores it before, and the g_CardBreakTime %hi moves. The flag block (battle 0x10/0x80000/8, then trg 4) and the ternary m_iComboBoost match. … |
 | `Game/Player/Player` | `chkDamage__7CPlayer` | 961 | 8 lines differ (2026-11-06, was 20: both vel brace-initialized, m_fDir store between brace and copy; markers at 9456/9593: por, sq 0x30, swc1 y 0x34, lq 0x30, sq 0x20 all on one line, so a temporary copied straight into vec; (FVECTOR){..} does not compile at the first site, braces at both sites … |
-| `Game/Player/Player` | `setConfuse__7CPlayerii` | 68 | in the set arm the original loads ConditionFlag (v1), li 21000 (v0), PadFlag (a2); this order gets the registers right but schedules the PadFlag load first; source order cond/tq/pad gives the load order but swaps v0/a2 (tq/pad). tried: all 6 statement orders x tq forms (ternary, param default, … |
 | `Game/Player/PlayerCamera` | `procFieldNormal__Q212PlayerCamera13CPlayerCamera` | 332 |  |
 | `Game/Player/PlayerDRiku` | `setAttack__Q22PL12CPlayerDRiku` | 451 | 7 lines off, registers only: in the card branch the original keeps %hi(g_pBattleCardList) in t0 and the shared constant 1 (m_iAttackNo == 1, _upKind's shift) in a2, ours t1 and t0. Worked: CPlayer::setAttack's form, the player-flag 0x80000 arm first, `pre == 7 \|\| isAir()` for the last hit, case 7 … |
 | `Game/Player/PlayerDRiku` | `exeStockSkill__Q22PL12CPlayerDRiku` | 3473 | structurally complete (35 cases in the original order, Riku's 0x6cc-0x6f9 group renumbered to 0x712-0x73f), same frame, 8 bytes long, 173 of 3903 lines off: case 1's attack-ID switch keeps a compare for the empty case 0x690 in the original; cross-jumped tails differ (0x67c's flag-and-return tail, … |
 | `Game/Player/PlayerDRiku` | `setMagic__Q22PL12CPlayerDRikuiii` | 1149 | same structure and size within 8 bytes, 310 of 1363 lines off: the BULLET_PARAM field stores and the member loads feeding them are scheduled differently in every case (the original loads m_AtkKind, m_AtkAttr, m_iAttackPower in that order and stores them together), plus registers in the stock-skill … |
-| `Game/Player/PlayerGauge` | `setCharge__Q25Gauge12CEscapeGaugef` | 77 | 3 lines off, the getLayPosition argument loads: the original sets a2 first and a1 (7) last (in the jal delay slot), ours a1 first. Worked: case 2 with its own copy of case 1's body (separate tree nodes 1/0/2/3, cross-jumped later), case 0 falling into it. Tried: _ref(g_szLadCockpit), FALSE vs 0, … |
 | `Game/Player/PlayerRiku` | `setMagic__Q22PL11CPlayerRikuiii` | 520 | (comment) Best attempt (same structure): BULLET_PARAM field stores and the attack-power loads are scheduled differently. |
 | `Game/Player/SummonTink` | `initRecover__Q26Summon11CSummonTink` | 37 | (comment) Best attempt: same size; combine folds the Crd() result straight into a3 ("move a3,v0" right after the call), so the effect name's address lands in v0 instead of v1 and the lui/lw are scheduled later. |
 | `Game/Enemy/BattleEnemy` | `setupFlick__12CBattleEnemy` | 82 | the 30-degree constant (0.5235988f) is loaded once into $f20 and reused for sinf, cosf and calcOrbitSpeedFromDistance in ours; the original reloads it (lui/ori/mtc1) before each call and keeps the sinf result in $f20 instead (vel.y stored after cosf); tried: field stores vs vel.set(), … |
 | `Game/Enemy/BattleEnemy` | `initEnemyParam__12CBattleEnemyiii` | 245 | 34 lines - the Riku-game scan loop: the original places the getRsrcData() ternary before the inline getExtraParam's found block and keeps the parameter in s0 (ours: s2, blocks swapped); the rest (seek loops, relocation, floor mapping, basic param) matches; tried: while/for/continue loop forms, … |
 | `Game/Enemy/EnemyWhitemushroom` | `damage___19CEnemyWhitemushroom` | 184 | (comment) Near-match (3 lines): in case 4 the original loads the vtable pointer for getLockOnPos right after the two TIMEQ stores of setupFade; here the vtable entry loads depend on all six setupFade stores (unknown alias), so the vptr load ranks below them and comes last. Tried (~45 min): … |
-| `Game/Enemy/HumanBoss` | `initalize__10CHumanBossiiUi` | 58 | (comment) near match: the store of the entity flag is scheduled before the load of m_iParam |
 | `Game/Enemy/HumanBoss` | `getAttackCardNum__C10CHumanBossUi` | 43 | (comment) near match, 20 lines (2026-11-05, was 27): the goto-built outer loop reloads iCardCount/pCards like the original (a for loop hoists them); left: the original hoists the m_pEnemyParam load once (t2), ours reloads it too. The ref lists card/j at function level and no getEnemyParam inline |
 | `Game/Enemy/HumanBoss` | `setupCardRevolver__10CHumanBoss` | 334 | 21 of 371 lines - the param pointer is carried in a register copy through the build and enemy-card loops (the original's `move a3,v1`; ours reloads getEnemyParam() in the enemy-card loop body). Levers that got it here: the id % 10000 in a local, UINT search index, one INT i per loop, `cards = … |
 | `Game/Enemy/HumanBoss` | `setupAct__10CHumanBoss` | 181 | 21 of 371 lines - the param pointer is carried in a register copy through the build and enemy-card loops (the original's `move a3,v1`; ours reloads getEnemyParam() in the enemy-card loop body). Levers that got it here: the id % 10000 in a local, UINT search index, one INT i per loop, `cards = … |
@@ -219,9 +211,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Game/Enemy/HumanBoss` | `normalActProc__10CHumanBossPC4CARD` | 142 | (comment) near match, 7 lines: both setDoBattleAct/useCard tails kept (goto ret from the first, 2026-11-05; was 20); left: s5/s6 swap of the -1 constant and &tmp[count] (global-alloc tie), one move a0,s0 after the div |
 | `Game/Enemy/HumanBoss` | `setStockCard__10CHumanBossPC4CARD` | 88 | (comment) near match: delay slots and one cross-jumped return differ |
 | `Game/Enemy/MapEnemy` | `getRandomTargetPos__9CMapEnemyR7FVECTORfi` | 290 | (comment) near-match (one getOutPos() is if-converted; s3/s4 swapped): kept as INCLUDE_ASM |
-| `Game/Gimmick/GimmickPlantParent` | `beginStateHitAttack__19CGimmickPlantParent` | 108 | (comment) Only the scheduling before saveStat differs: ours puts "sb m_Stat" before "li a1,1" (delay slot gets li a1). Both issue in the same cycle (sched2 log); the emission order is sched1's, where the store with its dying source goes first. Tried (2026-10-20): saveStat(m_Stat = 1), an INT/BYTE … |
 | `Form/DebugWindow` | `disp__12CDebugWindow` | 549 | (comment) Close: the reload registers of the spilled WW/sign (t0 instead of a3) and the loop's line-font position stores (G_XYZ pointer formed before the x store) differ. |
-| `Form/DebugWindow` | `main__10CNakCamera` | 118 | (comment) Only the scheduling differs: the m_fProjectionDist store after ViewAngleToProjection is placed after the CDeFocus instance load (the original stores it first, with %hi in v0). |
 | `Form/Menu/Camp` | `initCardKind__5CCampiii` | 331 | 26 of 342 lines differ: loop.c hoists the CCard::m_pCardInfo load of the 3-deck copy out of the outer loop (the original reloads it each iteration: the stack-array stores must alias it there). tried: destination pointer, direct m_pCardInfo->_deck[i] without _ref, pointer post-increment, _ref on … |
 | `Form/Menu/Camp` | `setDeckInfo__5CCampi` | 951 | 3 of 1048 lines differ in the last loop: v0/v1 swapped for the nColSeq != 0x73 compare (nColSeq is spilled; reload loads it into v0 where the original has the 0x73 in v0). The addu order (this + sel 2) is fixed by `(BYTE*)this + (m_nKindCategorySelect << 1) + 6464` (4 -> 3). tried: without _ref … |
 | `Form/Menu/Camp` | `setTechWin__5CCampi` | 551 | 53 of 621 lines differ: in the sleight-list loop the original spills pTechCateTbl and nTechCateCnt and recomputes &pTechCateTbl[nTechSelectTop] from the spilled pointer every iteration; ours strength-reduces it into an s-register (the same giv difference as setMainCmd's font loop). tried: the … |
@@ -232,9 +222,8 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Form/Menu/JiminyMemo` | `ScrollBarChange__11CJiminyMemoPPQ22D210C2DSeqCtrlffiii` | 122 | 22 lines: ours hoists the 2.0f of case 2 out of the loop (an extra saved f24, frame +16, 0.01f moves from f23 to f24); the original loads it inside case 2 like ScrollBarInit does. Everything else matches. tried: y expression forms (temp, parenthesised, vec = vPos + .y), case order, INT i at the … |
 | `Form/Menu/RoomCreation` | `menuMain__13CRoomCreation` | 1995 | (comment) menuMain: the RCNORMA::NormaSrc by-value arguments (createNorma/replaceNorma) are built from four halfword loads in the original, ld in ours; the register allocation in case 0 follows from that (0x50 bytes shorter). |
 | `Form/Menu/SaveLoad` | `exeMessageDlg__11CSaveLoadUI` | 126 | the case-1 OK tail (m_nDlgResult = 1; CSound::playSE(2, -1, 64)) is cross-jumped into the identical tail of case 2/3 in ours, the original keeps both copies; also the lockPadControl(TRUE) tail loads into v1 (original v0) and one nop in the select loop; tried: switch vs if/else chain, combined … |
-| `Form/Menu/SaveLoad` | `createBootInfoMsg__11CSaveLoadUIiPc` | 194 | 2 lines - the original fills the beqz (nSlot) delay slot with the else branch's first `move a1, s0` (pszForm), ours keeps it in the else block; everything else matches; tried: if/else polarity, szSlot at function scope, a nested slot-sprintf inline, case orders, locals for each CTD text, permuter … |
 
-Totals: 129 functions (43326 instructions) in 66 units, 128 of them parked; 5 units take a data section from assembly.
+Totals: 121 functions (42590 instructions) in 63 units, 120 of them parked; 5 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->

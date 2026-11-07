@@ -404,7 +404,10 @@ INT CAvatar::onSetPosPathTop(INT nCmd, void* pParam, INT nID) {
 /* Parked: 1 line (was 53) - the final test: the original has `slti 3`, then `bne s6, 0` twice; the switch's range node
    gives bltz for the first. The empty asm in case 0 settled the registers: pV 3 refs / 13 insns outranked p 14 / 187
    by a hair. An INT local keeps slti but the second zero test folds (even across an empty asm, in a nested switch);
-   if on the USHORT gives sltiu. */
+   if on the USHORT gives sltiu. 2026-11-07: `INT nTest = nType; if (nTest < 3) if (nType == 0) { asm volatile("" : "+r"(nType));
+   if (nType == 0) ...` gives the exact tail but 2 more refs put nType (8 refs / 200, pri 1200) above pV (750): it needs 7 refs.
+   "=r" alone splits the pseudo (frame +16), asm on nTest copies through v0, a register local on s6 reserves s6 for the whole
+   function, a case 0 / case 1,2 tree changes the structure. */
 #if 0
 INT CAvatar::onMove(INT nCmd, void* pParam, INT nID) {
     AvatarMoveParam* p = (AvatarMoveParam*)pParam;

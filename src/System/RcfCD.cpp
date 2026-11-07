@@ -794,7 +794,9 @@ __attribute__((section(".sdata"))) static void _addRsrcFileToDB_c(UINT nGroup, I
     s_pCdMemberDataList->resetParam();
 }
 /* Parked: 4 lines (draft above) - `addiu s0,sp,32` (&info) and the _nLinkID load are scheduled before the group
- * test in the original, after it here. tried: permuter 10 min, 33k candidates: no gain. */
+ * test in the original, after it here. tried: permuter 10 min, 33k candidates: no gain. 2026-11-07: ours has the addiu in the
+ * beq slot, the original fills that slot with move a0,s3 from the arm. One shared RsrcInfo is wrong (the ref has two, 51 lines),
+ * a scope around the test moves the ctor stores (15 offsets). */
 #if 0
 static void _addRsrcFileToDB(UINT nGroup, INT nType, BYTE*& pExtBuff) {
     BOOL bDeletable = pExtBuff == NULL;
