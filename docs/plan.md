@@ -453,8 +453,9 @@ Keep output small: one function's assembly at a time; `funcdiff` without `--full
   about 5 units need; no net decrease of stand-ins plus PARTIAL markers after 3 consecutive units.
 - **Done (cleanup/vector-types, merged 2026-11-07):** F_UL, G_XY, G_XYZ, G_RGBA, G_UV,
   G_ST at the end of System/Vector.h and the C++ QWdata after khtypes.h's u_int128 (the original's .mdebug type order,
-  against the ref's placement; user decision). **Waiting on a decision now:** the `D2MAN_H_PATH` (2DMan.h, `D2::C2DMan`) and `RSRCDATA_H_FULL`
-  (`CRsrcData`/`RsrcInfo`/`CRsrcANN`) gates, 10 files: the string evidence for 2DMan.h is ambiguous (the 2D
-  container message is in 166 originals, the 2DMan.h path in only about 119).
+  against the ref's placement; user decision). The former `D2MAN_H_PATH`/`RSRCDATA_H_FULL` entry is settled (checked 2026-11-07): RSRCDATA_H_FULL was dropped
+  on 2026-11-02 (bfbdb0dd), 2DMan.h's classes are complete and ungated in all 166 includers (strings ok), and
+  D2MAN_H_PATH is a path override like GPRIM_H_PATH: the 2d units name the header `c:/KHCOM/MainApp/...` (without it
+  2DLay's assert strings change, tested). Nothing waits on a decision here.
 - When the user runs a /loop unattended, decide these cases yourself, log the decision and continue
   (unattended-decide-stop-cases).
