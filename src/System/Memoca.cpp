@@ -392,25 +392,7 @@ static void _convertMcTitle(CHAR* pszOut, const CHAR* pszSrc) {
     }
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Memoca", _setupIconSys__FPCc);
-__asm__(".section .sdata\n");
-/* placeholder for _setupIconSys (INCLUDE_ASM): its strings, and the icon tables it copies */
-__attribute__((section(".sdata"))) void _setupIconSys_placeholder(char* p, int n) {
-    TRACE("\x82j\x82g\x81@\x82q\x82" "d\x81" "F\x81@\x82" "b\x82\x8f\x82l\x82r\x82\x99\x82\x93\x82\x94\x82\x85\x82\x8d\x81@\x82" "c\x82\x81\x82\x94\x82\x81");
-    TRACE("frec_sys.ico");
-    if (!p) AssertApp(__FILE__, 0, "pszTitle", 0);
-    sprintf(p, "\x82j\x82g\x81@\x82q\x82" "d\x81" "F\x81@\x82" "b\x82\x8f\x82l\x81@[%02d]%s", n, p);
-    TRACE("frec_dat.ico");
-    TRACE("\x81uKHCOM\x81v\x83" "f\x83o\x83" "b\x83O\x8a\xc2\x8b\xab");
-    TRACE("slime1.ico");
-    TRACE("PS2D");
-    memcpy(p, _ivBgColor, sizeof(_ivBgColor));
-    memcpy(p, _vLightDir, sizeof(_vLightDir));
-    memcpy(p, _vLightCol, sizeof(_vLightCol));
-    memcpy(p, _vAmbient, sizeof(_vAmbient));
-}
-#if 0 /* near match: the "PS2D" copy loads its last byte with lb (the original: lbu) */
-static void _setupIconSys(const CHAR* pszName) {
+void _setupIconSys(const CHAR* pszName) {
     CHAR* pszTitle = s_pszTitle;
     USHORT nLF = s_nOffsLF;
     char szTmp[80];
@@ -460,7 +442,6 @@ static void _setupIconSys(const CHAR* pszName) {
     memcpy(s_Icon.LightColor, _vLightCol, sizeof(_vLightCol));
     memcpy(s_Icon.Ambient, _vAmbient, sizeof(_vAmbient));
 }
-#endif
 
 static INT _checkCard(INT nPort) {
     INT r = -9999;
@@ -1266,8 +1247,9 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Memoca", _McWriteIcons__FPCc);
 __attribute__((section(".sdata"))) void _McWriteIcons_placeholder() {
     TRACE("\x83\x81\x83\x82\x83J\x83" "A\x83" "C\x83R\x83\x93\x81" "E\x83\x8a\x83\\\x81[\x83X\x82\xaa\x8c\xa9\x82\xc2\x82\xa9\x82\xe8\x82\xdc\x82\xb9\x82\xf1\n");
 }
-#if 0 /* near match: both resource null tests are merged into one (the original keeps two) */
-static INT _McWriteIcons(const CHAR* pszName) {
+/* Parked: near match: both resource null tests are merged into one (the original keeps two) */
+#if 0
+INT _McWriteIcons(const CHAR* pszName) {
     INT r = -9999;
     INT nRes;
     char szTmp[256];
