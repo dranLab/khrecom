@@ -125,7 +125,7 @@ static inline void _unitMatrixVu0(FMATRIX& m) {
                  : "r"(&m)
                  : "memory");
 }
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 CAvatar::CAvatar(CTask* pParent)
     : CEntity(pParent, (ObjType::eObjType)4), m_nState(0) {

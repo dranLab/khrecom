@@ -36,7 +36,7 @@ inline void _emptyStringPlaceholderPlayerGauge() { TRACE(""); }
 
 using namespace Gauge;
 
-inline void* operator new(unsigned int, void* p) throw() { return p; }
+
 namespace Gauge {
 LPCSTR g_szLadGauge = "gauge.lad";
 LPCSTR g_szSeqFace = "gauge:00";

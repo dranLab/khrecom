@@ -260,7 +260,7 @@ static const CARD_DATA cardDataTbl[224] = {
     { { 0x00 }, 0, 0, 0, "" }, // 223
 };
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 
 

@@ -32,7 +32,7 @@ inline void _emptyStringPlaceholder() {
 #include "Game/GameWork.h"
 #include "Game/SceneInfo.h"
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 
 

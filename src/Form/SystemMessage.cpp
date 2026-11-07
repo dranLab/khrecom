@@ -24,7 +24,7 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 
 
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 namespace {
 C2DSeqAgent* s_pSysWindowAgent = NULL;

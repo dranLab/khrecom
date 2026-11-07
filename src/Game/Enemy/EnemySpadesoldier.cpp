@@ -52,7 +52,7 @@ namespace Message {
 
 
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 
 static inline FVECTOR _deadDemoPlayerPos(FLOAT inW) {

@@ -12,7 +12,7 @@
 #include "Game/Collision/Ride.h"
 
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 extern char D_004895C0[]; /* "c:/KHCOM/MainApp/Game/Collision/CollUtil.h" */
 extern char D_00489638[]; /* "m_pInstance" */

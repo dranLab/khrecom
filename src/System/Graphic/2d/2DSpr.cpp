@@ -8,7 +8,7 @@
 #include "System/Task.h"
 #include <string.h>
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 
 

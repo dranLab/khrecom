@@ -13,7 +13,7 @@
 #include <math.h>
 extern "C" float atan2f(float y, float x);
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 
 #include "System/Graphic/WorldEnv.h"

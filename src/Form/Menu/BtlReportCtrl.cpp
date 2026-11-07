@@ -18,7 +18,7 @@
 
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 
 C2DSeqStrings::C2DSeqStrings(CTask* pParent) : C2DSeqAgent(pParent) {

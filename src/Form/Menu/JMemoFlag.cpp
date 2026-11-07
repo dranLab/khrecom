@@ -14,7 +14,7 @@
 #include "Game/Game.h"
 
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 #include "System/RsrcDB.h"
 

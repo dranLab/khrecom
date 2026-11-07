@@ -82,7 +82,7 @@ void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT s);
 void AddVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void MulVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 extern "C" float atan2f(float, float);
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 static inline FLOAT _sqrtf(FLOAT x) {
     FLOAT ret;

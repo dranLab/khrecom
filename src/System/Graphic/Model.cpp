@@ -91,7 +91,7 @@ struct MAD_HEADER {
 };
 INT getModelAttachData(const MODEL_ATTACH_DATA** outMad, INT iRId);
 }
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 static inline FLOAT _sqrtf(FLOAT x) {
     FLOAT ret;
     asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));

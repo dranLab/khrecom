@@ -10,7 +10,7 @@
 #include "System/Graphic/2d/2DFntObj.h"
 #include "System/Graphic/2d/2DSpr.h"
 #include "System/Graphic/2d/2DSeq.h"
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 
 #define SJ_FOREACH(T, pEntry, list) \

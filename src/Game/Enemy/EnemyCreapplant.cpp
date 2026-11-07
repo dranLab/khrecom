@@ -20,7 +20,7 @@
 #include "System/HeapMan.h"
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 extern CEntity* g_pPlayer; /* a CPlayer (Game/Player/Player.h) */
 FVECTOR getPlayerPos(BOOL flag);

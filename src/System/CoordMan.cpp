@@ -8,7 +8,7 @@
 #define _ASSERT_STR(e) #e
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, _ASSERT_STR(e), 0)
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 
 class CCoordsSLCManager : public ISLCManagerT<CCoords>, private CFifoFpl {

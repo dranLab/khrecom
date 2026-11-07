@@ -13,7 +13,7 @@
 #include "System/Debug.h"
 #include "include_asm.h"
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 

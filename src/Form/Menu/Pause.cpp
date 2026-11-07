@@ -11,7 +11,7 @@
 #include "System/Graphic/2d/2DFnt.h"
 #include "Game/GameWork.h"
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 
 

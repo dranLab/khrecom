@@ -16,7 +16,7 @@
 
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 
 

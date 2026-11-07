@@ -75,13 +75,7 @@ inline void _roulettePrizeMessage() { /* MATCH: placeholder: an inline function'
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" float atan2f(float y, float x);
 
-inline void* operator new(size_t, void* p) throw() { return p; }
 
-static inline UINT _retAddr() { /* the sites' inline form (step 2 turns them into new (msg) T) */
-    UINT nRA;
-    __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA));
-    return nRA;
-}
 
 #include "System/Rcf.h"
 

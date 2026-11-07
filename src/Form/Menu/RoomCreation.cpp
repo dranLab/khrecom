@@ -16,7 +16,7 @@ inline void _emptyStringPlaceholder() {
 
 
 #include "Game/Card.h"
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 #include "System/Graphic/Effect/effect.h"
 #include "System/Ctd/CtdMan.h"
 #include "Form/Menu/RoomCreation.h"

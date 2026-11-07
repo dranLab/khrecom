@@ -34,7 +34,7 @@ inline void _emptyStringPlaceholder0() {
 #include "Game/CardRevolver.h"
 #include "include_asm.h"
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 using namespace CardBattle;
 

@@ -16,7 +16,7 @@
 #include "System/TaskMan.h"
 #include "System/HeapMan.h"
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 
 static inline void _unitMatrixVu0(FMATRIX& m) {

@@ -25,7 +25,7 @@ extern "C" char* strcpy(char* dst, const char* src);
 extern "C" char* strcat(char* dst, const char* src);
 extern "C" int strcmp(const char* a, const char* b);
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 
 

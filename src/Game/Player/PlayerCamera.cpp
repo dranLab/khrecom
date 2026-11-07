@@ -53,13 +53,7 @@ extern "C" void sceVu0InversMatrix(FMATRIX& m0, const FMATRIX& m1);
 extern "C" float sinf(float x);
 extern "C" float cosf(float x);
 
-inline void* operator new(size_t, void* p) throw() { return p; }
 
-static inline UINT _retAddr() { /* the sites' inline form (step 2 turns them into new (msg) T) */
-    UINT nRA;
-    __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA));
-    return nRA;
-}
 
 
 static inline FLOAT _fabsf(FLOAT x) {

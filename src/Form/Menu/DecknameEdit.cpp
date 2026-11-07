@@ -27,7 +27,7 @@ void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 
 
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)

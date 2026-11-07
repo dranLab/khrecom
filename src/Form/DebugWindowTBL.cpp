@@ -54,7 +54,7 @@ static INT _HEAP_START = (((INT)_end - 1) / 64 + 1) * 64;
 static INT _HEAP_SIZE = 0x2000000 - 0x40000 - _HEAP_START;
 }
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 
 static inline void _unitVectorVu0(FVECTOR& v) {

@@ -92,7 +92,7 @@ public:
     void dumpTag() const;
 };
 
-#define RSRCDATA_RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
+
 
 class CRsrcData {
     friend class CRsrcDB;

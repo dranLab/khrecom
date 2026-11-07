@@ -5,7 +5,7 @@
 #include "System/HeapMan.h"
 extern "C" int sprintf(char*, const char*, ...);
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 
 class CCtd : public CSJointT<CCtd> {

@@ -26,7 +26,7 @@ inline void _emptyStringPlaceholder() {
 #include "include_asm.h"
 #include "System/HeapMan.h"
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 
 extern "C" {

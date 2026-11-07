@@ -25,7 +25,7 @@ inline void _emptyStringPlaceholder2() { /* MATCH: placeholder: an inline functi
 #include "Game/Game.h"
 #include "Game/GameWork.h"
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 
 

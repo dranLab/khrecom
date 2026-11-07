@@ -1,5 +1,5 @@
 
-inline void* operator new(unsigned int, void* p) throw() { return p; }
+
 #define RSRCDATA_H_PATH "c:/KHCOM/MainApp/System/RsrcData.h" /* MATCH: this unit names RsrcData.h so (header default "System/RsrcData.h") */
 #define CTDMAN_H_PATH "c:/KHCOM/MainApp/System/CTD/CtdMan.h" /* MATCH: this unit names CtdMan.h so (header default "System/CTD/CtdMan.h") */
 #define MODELDATA_H_TEXINFO /* MATCH: TexInfoStub (the original has its assert strings) */
@@ -39,10 +39,10 @@ int snDllUnload(void* pDll);
 void* snDllGetFreeMemory(void* pDll);
 }
 
-inline void* operator new[](size_t size, const char* pszFile) throw() {
-    UINT nRA = RSRCDATA_RET_ADDR();
-    return com_malloc_d(size, (char*)pszFile, nRA);
-}
+
+
+
+
 
 
 #define RSRC_ALLOC(line, n) operator new(n, __FILE__ "(" #line ")")

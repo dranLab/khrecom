@@ -140,7 +140,7 @@ namespace PLM {
 CPlayer* createPlayer(UINT nKind, CTask* pParent, INT nParam);
 }
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 CMiniGameBase* CMinigameManager::m_pGame = NULL;
 HANDLE CMinigameManager::m_hHelp = 0;

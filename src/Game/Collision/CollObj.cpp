@@ -6,7 +6,7 @@
 #include "System/Debug.h"
 #include "System/HeapMan.h"
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 
 CCollisionList* CCollObj::m_pCollListP = NULL;

@@ -6,7 +6,7 @@
 #include <string.h>
 #include "include_asm.h"
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 
 typedef struct {

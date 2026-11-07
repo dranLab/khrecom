@@ -7,7 +7,7 @@
 #include "System/Graphic/2d/2DSeqCtrl.h"
 #include "System/Graphic/2d/2DFnt.h"
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 
 

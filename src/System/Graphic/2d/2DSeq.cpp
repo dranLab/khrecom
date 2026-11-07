@@ -32,7 +32,7 @@ inline void _gprimCopy(_GPrimCopy<FVERTEX>* p) {
 #include "System/Task.h"
 #include <string.h>
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 
 

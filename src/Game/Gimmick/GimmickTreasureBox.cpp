@@ -16,7 +16,7 @@ inline void _emptyStringPlaceholder() {
     TRACE("");
 }
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 #include "Game/Atel/ChatMan.h"
 
 #include "System/Graphic/PathCamera.h"

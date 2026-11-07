@@ -31,7 +31,7 @@ using STORAGE::MCWork2;
 
 
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 
 

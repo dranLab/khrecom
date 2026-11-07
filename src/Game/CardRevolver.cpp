@@ -31,7 +31,7 @@ inline void _emptyStringPlaceholderCardRevolver() { TRACE(""); }
 
 using namespace CardBattle;
 
-inline void* operator new(unsigned int, void* p) throw() { return p; }
+
 
 namespace CardBattle {
 static LPCSTR g_szLadCockpit = "Cockpit.lad";

@@ -38,7 +38,7 @@ inline void _bossDeadDemoEmptyString() {
 #include "System/Math3D.h"
 #include "System/Debug.h"
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 template <class T> static inline T& _ref(T& v) { return v; }

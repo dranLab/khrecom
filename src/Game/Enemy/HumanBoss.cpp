@@ -42,7 +42,7 @@ inline void _humanBossEmptyString() {
 #include "Game/Enemy/BossDeadDemo.h"
 #include "System/HeapMan.h"
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 
 

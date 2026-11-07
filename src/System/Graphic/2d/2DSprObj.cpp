@@ -47,7 +47,7 @@ using namespace D2;
 
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 
 

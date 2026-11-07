@@ -378,7 +378,7 @@ void CardBattle::initLayoutData() {
         lay.y = (INT)vPos.y;
     }
 }
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 CardBattle::CBattleCard::CBattleCard(CTask* pParent, INT inIndex, INT inNumber, INT inUser, INT inState)
     : CTask(pParent, 0x4000) {
     m_uiFlag = 0;

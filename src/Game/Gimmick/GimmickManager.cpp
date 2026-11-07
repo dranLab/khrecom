@@ -35,7 +35,7 @@ inline void _emptyStringPlaceholder() {
 #include "System/Vector.h"
 #include "System/Com.h"
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 
 

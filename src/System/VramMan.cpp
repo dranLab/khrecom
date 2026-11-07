@@ -14,7 +14,7 @@
 
 
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 struct SemaParam {
     int currentCount;

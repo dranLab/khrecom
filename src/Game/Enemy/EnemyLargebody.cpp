@@ -19,7 +19,7 @@ inline void _enemyLargebodyEmptyString() {
 #include "System/Graphic/WorldEnv.h"
 #include "System/HeapMan.h"
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 
 namespace Largebody {

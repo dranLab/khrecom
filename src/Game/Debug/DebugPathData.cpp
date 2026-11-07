@@ -32,7 +32,7 @@ inline void _emptyStringPlaceholderDebugPathData() { TRACE(""); }
 #include "System/TaskMan.h"
 #include "include_asm.h"
 
-inline void* operator new(unsigned int, void* p) throw() { return p; }
+
 extern "C" char* strcpy(char*, const char*);
 #include "System/RsrcDB.h"
 #include "System/HeapMan.h"

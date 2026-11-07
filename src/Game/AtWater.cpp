@@ -2,7 +2,7 @@
 #include "Game/AtWater.h"
 #include "System/Math3D.h"
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 
 extern "C" float cosf(float);
