@@ -269,22 +269,21 @@ void CSummonTink::fadeEffRecover(INT inFlag) {
     }
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/SummonTink", initRecover__Q26Summon11CSummonTink);
-
-/* Best attempt: same size; combine folds the Crd() result straight into a3 ("move a3,v0" right after the
- * call), so the effect name's address lands in v0 instead of v1 and the lui/lw are scheduled later. */
-#if 0
 void CSummonTink::initRecover() {
     m_tqEffRecover = 1000;
     if (m_hEffRecover > 0) return;
     FVECTOR pos;
     pos.init();
+    /* MATCH: the barriers and register locals keep the original's issue order around the two calls */
+    __asm__ volatile("");
     register const CCoord* crd asm("$2") = &Crd(1);
-    m_hEffRecover = attachEffect(g_szDpxSumTinkB, 0, crd, &pos, 0, 0.0f);
+    register FLOAT fZero asm("$f12") = 0.0f;
+    register const CHAR* pName asm("$5") = g_szDpxSumTinkB;
+    __asm__ volatile("" : : "r"(crd), "r"(pName), "f"(fZero));
+    m_hEffRecover = attachEffect(pName, 0, crd, &pos, 0, fZero);
     CEffect* effect = CEffectMan::getEffect(m_hEffRecover);
     if (effect) effect->m_iFlag |= 4;
 }
-#endif
 
 } // namespace Summon
 

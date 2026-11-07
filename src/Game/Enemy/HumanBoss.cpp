@@ -1372,7 +1372,8 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/HumanBoss", setStockCard__1
 __attribute__((section(".sdata"))) void _setStockCard_placeholder() {
     TRACE_USER((USER)5, "getStock() = %d, TotalNumber = %d, CurrentNumber = %d, min = %d, max = %d\n");
 }
-/* near match: delay slots and one cross-jumped return differ */
+/* near match, 3 lines (2026-11-07): the first beqz of the || takes the subu from the fall-through in the original, sw zero from the
+ * target in ours (v0 looks live there; a clobber after the store does not change it) */
 #if 0
 BOOL CHumanBoss::setStockCard(const CARD* inActiveCard) {
     SHORT totalNumber = m_iStockTotalNumber + inActiveCard->m_nNumber;
@@ -1388,6 +1389,7 @@ BOOL CHumanBoss::setStockCard(const CARD* inActiveCard) {
             }
             if (m_iStockRollCount >= 5) {
                 setHumanBossFlag(0x80, 0);
+                __asm__ volatile(""); /* MATCH: keeps this return's own tail */
             }
             return FALSE;
         }
