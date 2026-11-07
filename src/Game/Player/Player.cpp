@@ -3895,13 +3895,6 @@ void CPlayer::resetAction(INT inMode) {
         break;
     }
 }
-/* Parked: registers match; only the stores after the g_fGravity load are scheduled differently (the original
-   stores m_JumpState right after the load and m_fJumpGravity before the g_CardBreakTime load; ours stores
-   them later). tried: all 24 orders of the JumpState/CardBreakTime/JumpGravity/JumpSpdY block, cast loads
-   (*(FLOAT*)&g_fGravity, *(INT*)&g_CardBreakTime[7]) and cast stores, gravity via a local / *=, moving
-   statements before isAir(), asm barriers; best 6 lines. The *(FLOAT*)& store on m_fMoveSpdXZ and the
-   chained m_fDistXZ = m_fDistY = 0.0f fixed the rest. tools/permuter.py can't run on C++ methods. Retried 2026-10-25: the $LM line order (gravity 6612, JumpState 6613, CardBreakTime 6614, SpdY 6615) breaks the registers (9 lines; v0 li 3 issued before the gravity load, CardBreakTime %hi in a0); all 24 orders with the casts (best 9), *(FLOAT*)&/*(INT*)& and _ref() reads of both globals: no better than this draft's 6. */
-#if 0
 void CPlayer::initAttackField(INT inNo) {
     setPlayerState(PL::ATTACK_FLD);
     m_iAerialAnimShift = 0;
@@ -3915,9 +3908,17 @@ void CPlayer::initAttackField(INT inNo) {
     m_bNextTrg = FALSE;
     m_iNextAttack = 0;
     *(FLOAT*)&m_fMoveSpdXZ = isAir() ? m_fJumpSpdXZ : m_fWalkSpeed;
+    /* MATCH: the empty barriers and pBreak in v1 hold the load, the store and the %hi in the original's issue order;
+       the original's $LM lines have gravity first, then JumpState, CardBreakTime, SpdY. */
+    FLOAT fScale = 0.16f;
+    FLOAT fGravity = PL::g_fGravity;
+    __asm__ volatile("");
     m_JumpState = 3;
-    m_tqCardBreakTime = PL::g_CardBreakTime[7];
-    m_fJumpGravity = PL::g_fGravity * 0.16f;
+    __asm__ volatile("");
+    register TIMEQ* pBreak asm("$3") = PL::g_CardBreakTime;
+    __asm__ volatile("");
+    m_fJumpGravity = fGravity * fScale;
+    m_tqCardBreakTime = pBreak[7];
     m_fJumpSpdY = 0.0f;
     setAttack();
     m_fDistXZ = m_fDistY = 0.0f;
@@ -3929,9 +3930,6 @@ void CPlayer::initAttackField(INT inNo) {
     }
     onWeapon(1);
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initAttackField__7CPlayeri);
-#endif
 void CPlayer::exeAttackField() {
     TIMEQ frameTQ = getMotionCurrentTime();
     TIMEQ frame = frameTQ / 50;
