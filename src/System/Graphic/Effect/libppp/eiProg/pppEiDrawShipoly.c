@@ -193,7 +193,7 @@ extern int ppvZFrameBase;
 void pppSendGsPacket(u_long128 *pkt_top);
 void pppWaitDmaGs(void);
 
-typedef union { /* PARTIAL: stand-in for System/Graphic/Gprim QWdata: this unit is C, Gprim.h is C++ */
+typedef union { /* this unit's own QWdata (the ref's pppEiDrawShipoly.c and the original's .mdebug: a typedef of this file, after get_st), not Gprim.h's union of other members */
     u_long128 u128;
     u_long u64[2];
     u_int u32[4];

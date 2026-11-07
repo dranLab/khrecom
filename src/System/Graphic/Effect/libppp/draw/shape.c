@@ -231,72 +231,105 @@ void pppStartVu1ShapeProg(int fog) {
     }
 }
 
-/* pppVu1ShapeDraw's strings, for its INCLUDE_ASM; remove with it. */
-asm(".section .rodata\n.align 3\n.asciz \"c:/KHCOM/MainApp/System/Graphic/Effect/libppp/draw/shape.c\"\n"
-    ".align 3\n.asciz \"sh_counter <= 12\"\n.align 3\n.previous");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/draw/shape", pppVu1ShapeDraw);
 
-/* Close: 8 lines off - the DMA tag field stores (id/next/qwc/p[]) of tags 0, 2 and 3 are scheduled
-   differently; no field order reproduces all four tags at once (registers shift when tags 2/3 match). */
+/* Parked: 4 of 143 lines (2026-11-07): `or a0,a1,a0` (the call argument) issues before `addiu t6,a1,32` instead of after
+   tag 2's next store, and tag 3's `sb t4,3(t6)` comes after its p[1] store instead of first. With tag 3 written
+   id/next/qwc like the others its stores match, but t3/t4 swap: local-alloc then ranks the 0x70 constant (2 refs, 38
+   insns) above the -16 mask (3 refs, 60), the mask avoids t3 (0x70 is born right after its death) and &sh->spvu1 takes
+   t3; writing id last lengthens 0x70's life to 44 (11 -> 4 lines), so the original has some other way to that.
+   tried: tag field orders (all per tag), sp = dspa0 + (spaPktSize >> 4) (34 -> 11), spPktSize in qwords (folds the sra),
+   pkt++, (int) casts, a shared 0x80000000 local; decomp-permuter 15 min on the 11-line form (only a wrong-semantics
+   output gained) */
 #if 0
-#define SETTAG0(t, q, i, n, a, b) (t)->id = (i); (t)->next = (n); (t)->p[1] = (b); (t)->qwc = (q); (t)->p[0] = (a)
-#define SETTAG1(t, q, i, n, a, b) (t)->id = (i); (t)->next = (n); (t)->qwc = (q); (t)->p[0] = (a); (t)->p[1] = (b)
-#define SETTAG2(t, q, i, n, a, b) (t)->next = (n); (t)->qwc = (q); (t)->id = (i); (t)->p[0] = (a); (t)->p[1] = (b)
-#define SETTAG3(t, q, i, n, a, b) (t)->next = (n); (t)->qwc = (q); (t)->id = (i); (t)->p[0] = (a); (t)->p[1] = (b)
-
+#line 346
 void pppVu1ShapeDraw(OSHAPE_VU1 *sh, OSHAPE_IN_VU1 *vu1shi) {
     int spPktSize;
     int spaPktSize;
     int i;
-    long128 *sp;
-    sceDmaTag *pkt;
-    OSPRITE_VU1A *spa;
-    OSPRITE_VU1A *dspa0;
-    OSPRITE_VU1A *dspa;
-    int sh_counter;
-    float y;
-
+    long128 *sp; sceDmaTag *pkt; OSPRITE_VU1A *spa; OSPRITE_VU1A *dspa0; OSPRITE_VU1A *dspa; int sh_counter; float y;
     sh_counter = sh->counter;
-    if (sh_counter > 12) {
-        sh_counter = 12;
-    }
-    if (!(sh_counter <= 12)) AssertApp(__FILE__, 364, "sh_counter <= 12", 0);
+
+    if (sh_counter > 12) sh_counter = 12;
+
+
+
+
+
+
+
+
+
+
+    if (!(sh_counter <= 12)) AssertApp(__FILE__, __LINE__, "sh_counter <= 12", 0);
+
+
     if (ppvMonochrome) {
         y = vu1shi->r * 0.3f + vu1shi->g * 0.59f + vu1shi->b * 0.11f;
         vu1shi->b = vu1shi->g = vu1shi->r = y;
     }
+
     vu1shi->shape_flag = sh->flag;
     vu1shi->counter = sh_counter;
     *(u_long *)&vu1shi->tex0_l = *(u_long *)&sh->tex0_l;
-    dspa0 = (OSPRITE_VU1A *)(vu1shi + 1);
-    spa = dspa0;
+
     dspa = (OSPRITE_VU1A *)((char *)sh + sh->spvu1a);
-    i = sh_counter;
-    while (i--) {
+    spa = dspa0 = (OSPRITE_VU1A *)(vu1shi + 1);
+
+    i = sh_counter; while (i--) {
+
         *(u_long *)spa++ = *(u_long *)dspa++;
     }
+
+
     spaPktSize = ((long)(sh_counter * 8) + 15) & ~15;
-    sp = (long128 *)(spaPktSize + (int)dspa0);
+    sp = (long128 *)dspa0 + (spaPktSize >> 4);
+
+
+
+
     pkt = (sceDmaTag *)sp;
-    SETTAG0(pkt, 7, 0x30, (sceDmaTag *)((u_int)vu1shi | 0x80000000), 0x10000000, 0x6C078000);
-    spPktSize = ((long)(sh->spvu1a - 0x20) + 15) & ~15;
+
+    pkt->id = 0x30; pkt->next = (sceDmaTag *)((u_int)vu1shi | 0x80000000); pkt->qwc = 7;
+
+    pkt->p[0] = 0x10000000;
+    pkt->p[1] = 0x6C078000;
     pkt = (sceDmaTag *)(sp + 1);
-    SETTAG1(pkt, spPktSize >> 4, 0x30, (sceDmaTag *)sh->spvu1, 0, 0x6D008007 | ((spPktSize >> 4) << 17));
+
+
+    spPktSize = ((long)(sh->spvu1a - 0x20) + 15) & ~15;
+
+    pkt->id = 0x30; pkt->next = (sceDmaTag *)sh->spvu1; pkt->qwc = spPktSize >> 4;
+    pkt->p[0] = 0;
+    pkt->p[1] = 0x6D008007 | ((spPktSize >> 4) << 17);
     pkt = (sceDmaTag *)(sp + 2);
-    SETTAG2(pkt, spaPktSize >> 4, 0x30, (sceDmaTag *)((u_int)dspa0 | 0x80000000), 0,
-           0x6E00C02B | ((spaPktSize >> 4) << 18));
+
+
+    pkt->id = 0x30; pkt->next = (sceDmaTag *)((u_int)dspa0 | 0x80000000); pkt->qwc = spaPktSize >> 4;
+    pkt->p[0] = 0;
+    pkt->p[1] = 0x6E00C02B | ((spaPktSize >> 4) << 18);
     pkt = (sceDmaTag *)(sp + 3);
-    SETTAG3(pkt, 0, 0x70, 0, 0x13000000, 0x17000000);
+
+
+    pkt->next = 0; pkt->qwc = 0; pkt->id = 0x70;
+    pkt->p[0] = 0x13000000;
+    pkt->p[1] = 0x17000000;
+
+
     pppSendTagVif1Packet((sceDmaTag *)((u_int)sp | 0x80000000));
 }
+#else
+/* pppVu1ShapeDraw's strings, for its INCLUDE_ASM; remove with it. */
+asm(".section .rodata\n.align 3\n.asciz \"c:/KHCOM/MainApp/System/Graphic/Effect/libppp/draw/shape.c\"\n"
+    ".align 3\n.asciz \"sh_counter <= 12\"\n.align 3\n.previous");
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/draw/shape", pppVu1ShapeDraw);
 #endif
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/draw/shape", op_shape_draw);
-
-/* Close: 18 of 1680 lines off. The six VU0 loops are the original asm (taken from the disassembly), the
-   rest matches except register allocation: the join copies the loop count (t1) to a0 before the
-   zero-extension and the "move" placement differs, and the 0x3000 division in the first site uses
-   swapped dividend/divisor registers (v1/v0 in the original). */
+/* Parked: 18 of 1680 lines (2026-11-07), 4 bytes short; and not honest C (V4): the six VU0 loops, the DMA send/wait
+   block and the two OT-add inlines are the original's instruction stream copied from the disassembly (about 1190 asm
+   lines, some 400 of them plain MIPS: loads, stores, branches, address arithmetic, .set noreorder delay slots, the
+   DMA busy-wait nops). In the C between them: at the join after the loops the count (t1) is copied to a0 before the
+   zero-extension (move/li placement, v0/v1/a0), and the two `/ 0x3000` OT divisions have dividend and divisor in
+   swapped registers (v1/v0 in the original). tried: earlier sessions (no record); 2026-11-07 only the V4 review */
 #if 0
 #define SCE_GIF_SET_TAG(nloop, eop, pre, prim, flg, nreg)                                                \
     ((u_long)(nloop) | ((u_long)(eop) << 15) | ((u_long)(pre) << 46) | ((u_long)(prim) << 47) |       \
@@ -1808,6 +1841,8 @@ void *op_shape_draw(OSHAPE_VU1 *sh, OSHAPE_IN *shi, int nPacketSize) {
         return (void *)*(word *)&shi->packet;
     }
 }
+#else
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/draw/shape", op_shape_draw);
 #endif
 
 void *pppGetVu1DrawSpad0(void) {
