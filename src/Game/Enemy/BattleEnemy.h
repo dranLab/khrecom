@@ -42,7 +42,7 @@ inline void _battleEnemyCheckIndex(INT inIndex, INT inState) {
 class CBattleEnemyManager; struct MES_CARD_INFO;
 
 class CBattleEnemy : public CEntity {
-private:
+private: friend class CHumanBoss; /* MATCH: CHumanBoss reads m_pEnemyParam directly (getAttackCardNum, setupCardRevolver: the inline getter changes PRE) */
     // PARTIAL: split into the original members for Game/Enemy/BattleEnemy (same layout)
     FVECTOR m_vHitBackVel;       /* 0x1d0 */
     FVECTOR m_vConfusePlayerPos; /* 0x1e0 */

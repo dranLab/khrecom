@@ -21,9 +21,9 @@ If the brief names no mode: "new" when `src/<unit>.cpp`/`.c` doesn't exist, othe
 
 - **Header cleanup resolves `// PARTIAL` markers; never add one.** No PARTIAL marker, stand-in, extra member or
   changed access specifier in any header, nothing against ref/SLUS_217.99 (types.h, src/*.h). A missing
-  declaration goes in exactly as the ref declares it, following A0. A match that needs more (e.g. reading a member
-  that is private in the ref) is not the original's source: find the ref-legal form (the ref's exact signatures:
-  const, return types) or park the function. Before you report: `git diff main... | grep '^+.*PARTIAL'` prints
+  declaration goes in exactly as the ref declares it, following A0. A match that needs a member private in the ref:
+  a `friend class X;` on an existing line of that class, with a MATCH reason (user decision 2026-11-07; the ref can't
+  show friends), never a changed access specifier. Anything more is not the original's source: park the function. Before you report: `git diff main... | grep '^+.*PARTIAL'` prints
   nothing.
 - **V4, honest C:** real C/C++ for what the original does; no `.word`/`.byte` instructions, no instruction stream in
   `asm()`, no INCLUDE_ASM under another name, no branch-target tricks; inline asm only for the original's

@@ -584,14 +584,8 @@ void CCardRevolver::exeWait() {
         m_iState = 1;
     }
 }
-/* Parked: 27 of 426 lines (2026-11-07): the TRACE argument loads of the first two card dumps: the original loads
-   uiFlag into v1 and uiOwner last into v0, ours the reverse, and the kind load comes after iHandMax. Cause found: with
-   stack arguments, calls.c precomputes every argument that contains a call (all inline getters) in argument order;
-   the original evaluated kind and number after them, i.e. without a call: `pBC->m_cardData.m_nKind` and
-   `pBC->m_cardData.m_nNumber` in all three dumps match exactly, but m_cardData is private in the ref (a friend
-   declaration in BattleCard.h would be needed; not done, user rule). Draft has the ref locals (pBC, block-local
-   i/pBC in dumps 2 and 3). Tried: getCardData()->m_nKind, kind/owner accessor forms; permuter 4 min (no gain). */
-#if 0
+/* MATCH: the card dumps read m_cardData directly (friend in BattleCard.h): the original evaluates kind and number
+   after the getter-call arguments of the stack-passed TRACE, so they contain no call */
 void CCardRevolver::main() {
     INT i;
     CBattleCard* pBC;
@@ -606,8 +600,8 @@ void CCardRevolver::main() {
         for (i = 0; i < m_nLimit; i++) {
             pBC = &m_pCards[i];
             if (pBC) {
-                TRACE("%3d: [Card%03d:%d(%d)] iStock=%d, iHand=%d/%d, uiFlag=%08x, uiOwner=%d,\n", i, pBC->getCardKind(),
-                      pBC->getCardData()->m_nNumber, pBC->getBaseCardNumber(), pBC->getStock(), pBC->getHand(),
+                TRACE("%3d: [Card%03d:%d(%d)] iStock=%d, iHand=%d/%d, uiFlag=%08x, uiOwner=%d,\n", i, pBC->m_cardData.m_nKind,
+                      pBC->m_cardData.m_nNumber, pBC->getBaseCardNumber(), pBC->getStock(), pBC->getHand(),
                       pBC->getHandMax(), pBC->getFlag(), pBC->getCardOwner());
             } else {
                 TRACE("%3d: NULL,\n", i);
@@ -663,8 +657,8 @@ void CCardRevolver::main() {
             for (i = 0; i < m_nLimit; i++) {
                 pBC = &m_pCards[i];
                 if (pBC) {
-                    TRACE("%3d: [Card%03d:%d(%d)] iStock=%d, iHand=%d/%d, uiFlag=%08x, uiOwner=%d,\n", i, pBC->getCardKind(),
-                          pBC->getCardData()->m_nNumber, pBC->getBaseCardNumber(), pBC->getStock(), pBC->getHand(),
+                    TRACE("%3d: [Card%03d:%d(%d)] iStock=%d, iHand=%d/%d, uiFlag=%08x, uiOwner=%d,\n", i, pBC->m_cardData.m_nKind,
+                          pBC->m_cardData.m_nNumber, pBC->getBaseCardNumber(), pBC->getStock(), pBC->getHand(),
                           pBC->getHandMax(), pBC->getFlag(), pBC->getCardOwner());
                 } else {
                     TRACE("%3d: NULL,\n", i);
@@ -683,8 +677,8 @@ void CCardRevolver::main() {
             for (i = 0; i < m_nLimit; i++) {
                 pBC = &m_pCards[i];
                 if (pBC) {
-                    TRACE("%3d: [Card%03d:%d] iStock=%d, iHand=%d/%d, uiFlag=%08x, uiOwner=%d,\n", i, pBC->getCardKind(),
-                          pBC->getCardData()->m_nNumber, pBC->getStock(), pBC->getHand(), pBC->getHandMax(),
+                    TRACE("%3d: [Card%03d:%d] iStock=%d, iHand=%d/%d, uiFlag=%08x, uiOwner=%d,\n", i, pBC->m_cardData.m_nKind,
+                          pBC->m_cardData.m_nNumber, pBC->getStock(), pBC->getHand(), pBC->getHandMax(),
                           pBC->getFlag(), pBC->getCardOwner());
                 } else {
                     TRACE("%3d: NULL,\n", i);
@@ -694,10 +688,6 @@ void CCardRevolver::main() {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", main__Q210CardBattle13CCardRevolver);
-#endif
-__asm__(".rdata\n.align 3\n.word 0x52434C50\n.word 0x3D3D203A\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x000A3D3D\n.word 0x3A766552\n.word 0x646F4D20\n.word 0x203D2065\n.word 0x45444F4D\n.word 0x524F4E5F\n.word 0x0A4C414D\n.word 0x00000000\n.word 0x00000000\n.word 0x3A766552\n.word 0x6F546E20\n.word 0x206C6174\n.word 0x6425203D\n.word 0x526E202C\n.word 0x69616D65\n.word 0x203D206E\n.word 0x202C6425\n.word 0x7463416E\n.word 0x20657669\n.word 0x6425203D\n.word 0x00000A2C\n.word 0x3A766552\n.word 0x694C6E20\n.word 0x2074696D\n.word 0x6425203D\n.word 0x456E202C\n.word 0x61727478\n.word 0x25203D20\n.word 0x69202C64\n.word 0x2078614D\n.word 0x6425203D\n.word 0x0000000A\n.word 0x00000000\n.word 0x3A766552\n.word 0x63416220\n.word 0x65766974\n.word 0x25203D20\n.word 0x74202C64\n.word 0x6D695471\n.word 0x3D207265\n.word 0x2C642520\n.word 0x46697520\n.word 0x2067616C\n.word 0x3025203D\n.word 0x0A2C7838\n.word 0x00000000\n.word 0x00000000\n.word 0x52434C50\n.word 0x6143203A\n.word 0x2D736472\n.word 0x2D2D2D2D\n.word 0x2D2D2D2D\n.word 0x2D2D2D2D\n.word 0x2D2D2D2D\n.word 0x2D2D2D2D\n.word 0x2D2D2D2D\n.word 0x2D2D2D2D\n.word 0x0A2D2D2D\n.word 0x00000000\n.word 0x3A643325\n.word 0x61435B20\n.word 0x30256472\n.word 0x253A6433\n.word 0x64252864\n.word 0x69205D29\n.word 0x636F7453\n.word 0x64253D6B\n.word 0x4869202C\n.word 0x3D646E61\n.word 0x252F6425\n.word 0x75202C64\n.word 0x616C4669\n.word 0x30253D67\n.word 0x202C7838\n.word 0x774F6975\n.word 0x3D72656E\n.word 0x0A2C6425\n.word 0x00000000\n.word 0x00000000\n.word 0x3A643325\n.word 0x4C554E20\n.word 0x000A2C4C\n.word 0x00000000\n.word 0x52434E45\n.word 0x3D3D203A\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x000A3D3D\n.word 0x52434E45\n.word 0x6143203A\n.word 0x2D736472\n.word 0x2D2D2D2D\n.word 0x2D2D2D2D\n.word 0x2D2D2D2D\n.word 0x2D2D2D2D\n.word 0x2D2D2D2D\n.word 0x2D2D2D2D\n.word 0x2D2D2D2D\n.word 0x0A2D2D2D\n.word 0x00000000\n.word 0x3A643325\n.word 0x61435B20\n.word 0x30256472\n.word 0x253A6433\n.word 0x69205D64\n.word 0x636F7453\n.word 0x64253D6B\n.word 0x4869202C\n.word 0x3D646E61\n.word 0x252F6425\n.word 0x75202C64\n.word 0x616C4669\n.word 0x30253D67\n.word 0x202C7838\n.word 0x774F6975\n.word 0x3D72656E\n.word 0x0A2C6425\n.word 0x00000000\n.word 0x001E2810\n.word 0x001E2820\n.word 0x001E2888\n.word 0x001E2898\n.word 0x001E28A8\n.word 0x00000000\n.text\n");
 void CCardRevolver::exeMain() {
     if (DebugWork::g_dw.player.iDeckDbgDisp) {
         if (!(m_uiFlag & 0x10)) rollDeck(0, 0, 300);

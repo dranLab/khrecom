@@ -23,7 +23,7 @@ extern CB_LAYOUT g_LayoutData[65];
 void initLayoutData();
 
 class CBattleCard : public CTask, public CFSM {
-    friend struct CBattleCardPH; // MATCH: placeholder of the parked constructor (Game/BattleCard)
+    friend struct CBattleCardPH; friend class CCardRevolver; // MATCH: placeholder of the parked constructor (Game/BattleCard); CCardRevolver::main reads m_cardData directly (the original evaluates kind and number after the getter calls: no call in them)
     CStateTemplate<CBattleCard> m_State[7]; /* 0x06c */
     INT m_iState;            /* 0x14c */
     CARD m_cardData;         /* 0x150 */
