@@ -733,7 +733,7 @@ void CCamp::removeRsrc() {
     }
 }
 
-/* Parked: 26 of 342 lines differ: loop.c hoists the CCard::m_pCardInfo load of the 3-deck copy out of the outer
+/* Parked: 9 of 337 lines (2026-11-07, volatile read of m_pCardInfo): li t1,396 vs lui t3 in the preheader, and the next loop's i in a0 for v1 (a register local on it wrecks the function: 77). Earlier: 26 of 342 lines differ: loop.c hoists the CCard::m_pCardInfo load of the 3-deck copy out of the outer
    loop (the original reloads it each iteration: the stack-array stores must alias it there). tried: destination
    pointer, direct m_pCardInfo->_deck[i] without _ref, pointer post-increment, _ref on the store; permuter 6 min (3640
    candidates, no gain). */
@@ -776,7 +776,7 @@ void CCamp::initCardKind(INT nInDeck, INT nInCategory, BOOL bCardDelete) {
         }
         for (INT i = 0; i < 3; i++) {
             CARD* pDst = cardTmp[i];
-            pCardTmp = CCard::getDeck(i);
+            pCardTmp = (*(CARD_INFO* volatile*)&CCard::m_pCardInfo)->_deck[(USHORT)i]; /* MATCH: reloaded per iteration, getDeck's load hoists */
             for (INT j = 0; j < 99; j++) {
                 pDst[j] = pCardTmp[j];
             }
