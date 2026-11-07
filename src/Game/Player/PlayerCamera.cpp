@@ -727,9 +727,6 @@ void CPlayerCamera::collideMapTrueCamera(const FVECTOR& inEye, const FVECTOR& in
     m_collMap.collideMapTrueCamera(0);
 }
 
-#if 0
-/* Only the first block's scheduling differs: the original zeroes ofs (por $v0/sq) after the copy of eye, ours
- * between eye's load and store (por $v1), so the zero gets another register (as in getPlayerCameraDir). */
 #line 1106
 void CPlayerCamera::procFieldNormal() {
     FVECTOR pos = getNowPlayerPos();
@@ -741,9 +738,7 @@ void CPlayerCamera::procFieldNormal() {
     BOOL bTouch = FALSE;
 
 #line 1116
-    FVECTOR ofs;
-    ofs._q = 0;
-    ofs.w = 1.0f;
+    FVECTOR ofs = { 0.0f, 0.0f, 0.0f, 1.0f };
     FVECTOR rot;
     calcDirection(rot, ofs, eye);
 
@@ -809,9 +804,6 @@ void CPlayerCamera::procFieldNormal() {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerCamera", procFieldNormal__Q212PlayerCamera13CPlayerCamera);
-#endif
 #line 1204
 void CPlayerCamera::procFieldParallel() {
     FVECTOR pos = getNowPlayerPos();
