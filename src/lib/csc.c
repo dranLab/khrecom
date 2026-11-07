@@ -2,7 +2,6 @@
    channel 4 feeding macroblocks and channel 3 returning RGB; large pictures go in chunks of 1023 macroblocks driven by
    DMA interrupt handlers. */
 #include "sdk/eekernel.h"
-#include "include_asm.h"
 #include "sdk/libmpeg.h"
 
 #define D_STAT ((volatile unsigned int *)0x1000E010)
@@ -87,9 +86,6 @@ int DisableDmac(int cause);
 static int _ch3dmaCSC(int ch, void *arg, void *addr);
 static int _ch4dma(int ch, void *arg, void *addr);
 
-/* Parked: _doCSC2 3 lines (6 before the do-while(0) around the DMA kick) - registers; _sceMpegCscStoreRefImage
-   in s1/s2 for the inlined CSC block's rgb/qwc. */
-#if 0
 static void _doCSC2(MpegSys *sys, void *rgb, int mbnum)
 {
     sceMpegCbData cb;
@@ -104,9 +100,8 @@ static void _doCSC2(MpegSys *sys, void *rgb, int mbnum)
     data.count = 0;
     IPU_WAIT();
     hid = AddDmacHandler2(3, _ch3dmaCSC, 0, &data);
-    *D_STAT = 8;
-    do { /* MATCH: a loop note around the DMA kick (a macro body?) fixes its registers (decomp-permuter) */
-        EnableDmac(3);
+    *D_STAT = 8; EnableDmac(3); /* MATCH: one line: the assembler moves the store into the jal slot */
+    do { /* MATCH: the interrupt-disabled DMA kick in a do-while(0) (a macro body?): its registers */
         oldei = DIntr();
         *D3_MADR = (unsigned int)rgb & 0x0fffffff;
         *D3_QWC = MB_CHUNK * 0x40;
@@ -114,10 +109,10 @@ static void _doCSC2(MpegSys *sys, void *rgb, int mbnum)
         if (oldei) {
             EIntr();
         }
-        *IPU_CMD = 0x70000000 | MB_CHUNK; /* CSC */
-        cb.type = 4;
-        _sceMpegDispatchMpegCallback(sys->mp, &cb);
     } while (0);
+    *IPU_CMD = 0x70000000 | MB_CHUNK; /* CSC */
+    cb.type = 4;
+    _sceMpegDispatchMpegCallback(sys->mp, &cb);
     while (data.count < data.nchunk) {
     }
     if (data.error) {
@@ -144,13 +139,13 @@ static inline void _doCSC1(MpegSys *sys, int mbnum)
 {
     sceMpegCbData cb;
     void *rgb = sys->rgbBuf;
+    unsigned int qwc = mbnum * 0x40; /* MATCH: in a local: rgb/qwc registers */
     int oldei;
-    unsigned int cmd;
 
     IPU_WAIT();
     oldei = DIntr();
     *D3_MADR = (unsigned int)rgb & 0x0fffffff;
-    *D3_QWC = mbnum * 0x40;
+    *D3_QWC = qwc;
     *D3_CHCR = 0x100;
     if (oldei) {
         EIntr();
@@ -188,7 +183,7 @@ void _sceMpegCscStoreRefImage(MpegSys *sys, MpegRefImage *ref)
     d4.addr = (unsigned int)ref->mbBuf & 0x0fffffff;
     if (d4.qwc > 0xffff) {
         hid = AddDmacHandler2(4, _ch4dma, 0, &d4);
-        *D_STAT = 0x10; EnableDmac(4);
+        *D_STAT = 0x10; EnableDmac(4); /* MATCH: one line: the store goes in the jal slot */
         oldei = DIntr();
         *D4_MADR = d4.addr;
         *D4_QWC = 0xffff;
@@ -209,7 +204,7 @@ void _sceMpegCscStoreRefImage(MpegSys *sys, MpegRefImage *ref)
         oldei = DIntr();
         *D4_MADR = (unsigned int)ref->mbBuf & 0x0fffffff;
         *D4_QWC = d4.qwc;
-        *D4_CHCR = 0x101; if (oldei) {
+        *D4_CHCR = 0x101; if (oldei) { /* MATCH: one line (delay slot fill) */
             EIntr();
         }
         d4.qwc = 0;
@@ -221,17 +216,6 @@ void _sceMpegCscStoreRefImage(MpegSys *sys, MpegRefImage *ref)
     }
     cb.type = 3;
     _sceMpegDispatchMpegCallback(sys->mp, &cb);
-}
-
-#endif
-void _doCSC2(MpegSys *sys, void *rgb, int mbnum);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/csc", _doCSC2);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/csc", _sceMpegCscStoreRefImage);
-
-/* Keeps _doCSC2's string in .rodata while it is assembly (never emitted). */
-static inline void _doCSC2_strings(MpegSys *sys)
-{
-    _sceMpegError(sys, "CSC handler error\n");
 }
 
 static int _ch3dmaCSC(int ch, void *arg, void *addr)
