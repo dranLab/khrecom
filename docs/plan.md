@@ -41,12 +41,13 @@ every change that is merged without regenerating. Regenerating all four takes ab
 
 ## Where things stand (2026-11-07)
 
-- **Progress:** 12004 of 12311 functions matched: game 11229 of 11323, libraries 775 of 988 (plus 151 hand-written).
+- **Progress:** 12020 of 12311 functions matched: game 11241 of 11323, libraries 779 of 988 (plus 151 hand-written).
   `tools/check.sh` counts the 151 hand-written units as done too: its total is these matched functions plus 151
   (fixed 2026-11-07: it used to count a parked `#if 0 ... #else INCLUDE_ASM #endif` as done).
-- **Game:** 89 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note).
+- **Game:** 82 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note).
   5 units take a data section from assembly.
-- **Libraries:** 38 parked, 5 not attempted, 27 hand-written (stay assembly), 5 units with data from assembly;
+- **Libraries:** 22 parked, 1 not attempted, 27 hand-written (stay assembly), 2 units with data from assembly
+  (__assert, __umoddi3: need a split / link-alignment change);
   details in `docs/sdk-leftovers.md`.
 - **Header cleanup:** PARTIAL 190 (156 in 44 headers, 34 in 20 .cpp), 14 foreign stand-ins in 9 files, 0
   duplicate classes, 0 untagged mechanisms; classes complete 873, superset 12, gated 3, missing 8.
@@ -389,6 +390,9 @@ header split the original didn't have, or make a class a template to hide its st
 | a hoisted constant is a copy of a variable initialised to it | volatile-asm-cse-flush (`asm volatile("" : : "i"(0))` after the init) |
 | array row base in its own register, no folded offset | row-base-pointer-register |
 | v0/v1 swapped in several switch arms, a tail cross-jumped only in ours | shared-switch-intermediate-var |
+| reload/spill register one off after inline asms | asm-inout-earlyclobber-reload |
+| a giv step at the loop end in the original, mid-loop in ours | separate-biv-for-increment |
+| peeled first test + rotated loop with `bnezl` | goto-layout-reorg-prediction (dlmalloc: goto body after the return) |
 | stores in another order | sched-store-order-reg-weight, volatile-delay-slots-store-permutation, small-union-ctor-stores, fixed-scalar-varying-struct-alias, join-store-per-arm |
 | the original reloads a global/member, ours keeps it (or the reverse) | global-reload-ref-helper, fixed-scalar-varying-struct-alias, const-global-reorg-redundant-load, mapenemy-unit-lessons |
 | tails merged or not merged, branch layout | gcc-crossjump-alias-rules, crossjump-dup-arm-stores, crossjump-case-label-chain, state-machine-break-vs-return, guard-plus-while-and-static-members, first-return-stub-ternary, bool-tail-shared-false |
