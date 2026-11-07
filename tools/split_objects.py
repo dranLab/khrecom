@@ -309,6 +309,34 @@ def split_data(section, lo, hi, order, files, owner, refs, elf_named, sizes=None
                 cuts[k] = (first, cuts[k][1], cuts[k][2])
                 stats["leading data moved to the next object"] += 1
 
+        # Objects that only include a header (its inline functions' strings, unused) have no reference into
+        # .rodata, so their blocks land in the next object's leading data. gcc merges identical strings within one
+        # object: when the leading data repeat their first string, each repeat starts a new object. If the repeats
+        # match the objects of the link order between the two cuts that have no data of their own, give each of
+        # those its block, in order (CollUtilA and CollUtilF: CollUtil.h's strings, before CollUtilO's).
+        pos = {o.name: i for i, o in enumerate(order)}
+        for k in range(1, len(cuts)):
+            start, name, last = cuts[k]
+            prev_name = cuts[k - 1][1]
+            if name not in pos or prev_name not in pos:
+                continue
+            between = [order[i].name for i in range(pos[prev_name] + 1, pos[name])
+                       if order[i].text is not None and order[i].fdr is not None]
+            if not between or not starts_text(start, cuts[k][2] + 1, read):
+                continue
+            head = read(start, 0x400)
+            head = head[:head.find(b"\0") + 1]  # the block's first string, with its NUL
+            limit = min(a for a in refs.get(pos[name], ()) if a >= start) if refs.get(pos[name]) else cuts[k][2]
+            repeats = [p for p in range(start + 4, limit + 1, 4) if read(p, len(head)) == head]  # incl. its own block
+            if len(repeats) != len(between):
+                continue
+            blocks = [start] + repeats
+            for nm, b in zip(between, blocks[:-1]):
+                cuts.append((b, nm, b))
+            cuts[k] = (blocks[-1], name, last)
+            stats["header-only objects given their strings"] += len(between)
+        cuts.sort()
+
     # Named symbols nobody claims come from objects without debug info: give them a unit of their own when they
     # come after everything known about the object in front of them.
     unclaimed = sorted((a, n) for a, n in elf_named if lo <= a < hi and a not in claimed)
