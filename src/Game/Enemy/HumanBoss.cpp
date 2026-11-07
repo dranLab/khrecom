@@ -355,7 +355,9 @@ BOOL CHumanBoss::initalize(INT inGroupID, INT inRsrcID, UINT iFlag) {
     return TRUE;
 }
 
-/* near match, 20 lines (2026-11-05, was 27): the goto-built outer loop reloads iCardCount/pCards like the original (a for loop hoists them); left: the original hoists the m_pEnemyParam load once (t2), ours reloads it too. The ref lists card/j at function level and no getEnemyParam inline */
+/* near match, 20 lines (2026-11-05, was 27): the goto-built outer loop reloads iCardCount/pCards like the original (a for loop hoists them); left: the original hoists the m_pEnemyParam load once (t2), ours reloads it too. The ref lists card/j at function level and no getEnemyParam inline
+   2026-11-07: a local for getEnemyParam() before the goto loop: 23 (the m_pEnemyParam reload goes, but iCardCount's load
+   moves to the top of the body); for/do-while forms with or without it: 27. */
 #if 0
 INT CHumanBoss::getAttackCardNum(UINT inFlag) const {
     INT cardNum;
