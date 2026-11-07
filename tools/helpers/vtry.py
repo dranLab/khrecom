@@ -6,7 +6,7 @@ from pathlib import Path
 u, f, vf = sys.argv[1:4]
 src = next(p for p in (Path('src')/(u+'.c'), Path('src')/(u+'.cpp')) if p.exists())
 obj = f'build/SLUS_217.99/src/{u}.o'
-orig = src.read_text(encoding='latin-1'); base = permuter.enable_draft(orig, f)
+orig = src.read_text(encoding='latin-1'); base = permuter.enable_draft(orig, permuter.definition_pattern(*permuter.demangle(f)), f)
 try:
     for n, var in enumerate(open(vf).read().split('\n=====\n')):
         t = base

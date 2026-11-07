@@ -41,10 +41,10 @@ every change that is merged without regenerating. Regenerating all four takes ab
 
 ## Where things stand (2026-11-07)
 
-- **Progress:** 12033 of 12311 functions matched: game 11250 of 11323, libraries 783 of 988 (plus 151 hand-written).
+- **Progress:** 12034 of 12311 functions matched: game 11251 of 11323, libraries 783 of 988 (plus 151 hand-written).
   `tools/check.sh` counts the 151 hand-written units as done too: its total is these matched functions plus 151
   (fixed 2026-11-07: it used to count a parked `#if 0 ... #else INCLUDE_ASM #endif` as done).
-- **Game:** 73 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note).
+- **Game:** 72 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note).
   5 units take a data section from assembly.
 - **Libraries:** 18 parked, 1 not attempted, 27 hand-written (stay assembly), no unit with data from assembly
   (the last two, __assert and __umoddi3, needed the split / link-alignment fixes of 2026-11-07);
@@ -328,9 +328,14 @@ log in `build/progress/cleanup-<name>.md`; merge with the `--summary` deltas; ad
 
 **Queue state (2026-11-07):** the R1 "gate" items are feature macros a unit defines before the include. Dropping each
 one's `#define`s and rebuilding: ENTITY_H_SETFLAG_DIRECT, MODELDATA_H_TEXINFO_CTOR, GAME_COLLISION_COLLOBJ_H (CollUtil)
-and VECTOR_H_SET_CALL all change the image, so they stay. KH_PLACEMENT_NEW_DEFINED (LinkedBuf.h) guards one of about 40
-identical placement-new definitions in .cpp files (some without `throw()`): one shared definition is a wide, codegen-free
-change for its own branch. MapEnemy.h, SceneInfo.h, CollUtilA.h and Coord.h list gate users without a feature macro.
+and VECTOR_H_SET_CALL all change the image, so they stay. KH_PLACEMENT_NEW_DEFINED (LinkedBuf.h): checked 2026-11-07
+(build/progress/cleanup-placement-new-Form.md): the original's .mdebug line labels put all global operators in
+System/HeapMan.h (new 134, delete 136/137, `new(size_t, char*)` throw() 150-153, `new[]` 156-159, placement new 168), and
+the units wrote `new (__FILE__ "(N)") T`; ours emulate that with `new (com_malloc_d(...)) T` plus about 95 local
+placement-new copies (40 local `new(size_t, char*)`, 33 `new[]`, 34 `delete`). Moving them to HeapMan.h is not
+codegen-free per se and reaches ~170 includers: waiting on the user (see "When to stop and ask"). LinkedBuf.h's MATCH
+comment ("the units define it themselves") is wrong. MapEnemy.h, SceneInfo.h, CollUtilA.h and Coord.h list gate users
+without a feature macro.
 
 **A4. The ladder**, when completing a header would break another unit's `.rodata` (stop at the first step that
 works): forward declarations instead of includes; move the type to the header the original used (string
@@ -396,6 +401,7 @@ header split the original didn't have, or make a class a template to hide its st
 | reload/spill register one off after inline asms | asm-inout-earlyclobber-reload |
 | a giv step at the loop end in the original, mid-loop in ours | separate-biv-for-increment |
 | peeled first test + rotated loop with `bnezl` | goto-layout-reorg-prediction (dlmalloc: goto body after the return) |
+| a table or argument load stuck after a local struct store | rodata-table-extern-const (the symbol is in `.rodata`: declare it const) |
 | stores in another order | sched-store-order-reg-weight, volatile-delay-slots-store-permutation, small-union-ctor-stores, fixed-scalar-varying-struct-alias, join-store-per-arm |
 | the original reloads a global/member, ours keeps it (or the reverse) | global-reload-ref-helper, fixed-scalar-varying-struct-alias, const-global-reorg-redundant-load, mapenemy-unit-lessons |
 | tails merged or not merged, branch layout | gcc-crossjump-alias-rules, crossjump-dup-arm-stores, crossjump-case-label-chain, state-machine-break-vs-return, guard-plus-while-and-static-members, first-return-stub-ternary, bool-tail-shared-false |
@@ -441,7 +447,8 @@ Keep output small: one function's assembly at a time; `funcdiff` without `--full
   owner; string evidence that contradicts the ref; a new kind of mechanism; completion that needs changes to
   matched C beyond ref type corrections; unifying `Gprim.h` and `GprimFull.h`; a new opt-out macro more than
   about 5 units need; no net decrease of stand-ins plus PARTIAL markers after 3 consecutive units.
-- **Waiting on a decision now:** the `D2MAN_H_PATH` (2DMan.h, `D2::C2DMan`) and `RSRCDATA_H_FULL`
+- **Waiting on a decision now:** the global operators (new/delete/placement new) back into System/HeapMan.h with
+  `new (__FILE__ "(N)") T` sites (see "Queue state"; ~170 includers, matched C changes). And the `D2MAN_H_PATH` (2DMan.h, `D2::C2DMan`) and `RSRCDATA_H_FULL`
   (`CRsrcData`/`RsrcInfo`/`CRsrcANN`) gates, 10 files: the string evidence for 2DMan.h is ambiguous (the 2D
   container message is in 166 originals, the 2DMan.h path in only about 119).
 - When the user runs a /loop unattended, decide these cases yourself, log the decision and continue
