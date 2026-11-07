@@ -40,9 +40,9 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `Game/Enemy/HumanBoss` | 6 | 1030 | 6 |  |
 | `System/Graphic/DeFocus` | 2 | 1014 | 2 |  |
 | `System/Graphic/FrecFont` | 2 | 908 | 2 |  |
-| `Game/CardRevolver` | 4 | 814 | 4 |  |
 | `Game/Collision/CollUtil` | 3 | 781 | 3 | .rodata |
 | `System/Graphic/2d/2DSprObj` | 2 | 763 | 2 |  |
+| `Game/CardRevolver` | 3 | 713 | 3 |  |
 | `System/Graphic/Effect/libppp/keProg/KeTh` | 1 | 685 | 1 |  |
 | `System/Graphic/TexUtil` | 4 | 651 | 4 |  |
 | `System/Graphic/HermitePathCamera` | 1 | 632 | 1 |  |
@@ -84,7 +84,6 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `Game/Card` | 1 | 95 | 1 |  |
 | `Game/Player/SummonTink` | 1 | 37 | 1 |  |
 | `System/Graphic/Anim` | 1 | 33 | 1 |  |
-| `System/Graphic/2d/2DCard` | 1 | 30 | 1 |  |
 | `System/dlmalloc` | 1 | 14 | 1 |  |
 
 Units with all functions in C but data from asm: `Game/Collision/Ride` (.rodata).
@@ -127,7 +126,6 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `System/Graphic/WorldEnv` | `initialize__9CWorldEnv` | 128 |  |
 | `System/Graphic/Gprim` | `makePkt__6CZFill` | 109 | 8 lines - two scheduling ties: the original loads 0x206 before the shared zero for the PRIM/PRMODE A+D pair, and strength-reduces i 64 + 63 with its increment at the loop end while i++ sits inside the SCISSOR expression (ours increments both there); this draft fixed the hoisted-constant order (XYZ … |
 | `System/Graphic/Gprim` | `makePkt__8CRotSprt` | 173 | the corner setup before the two calcVert calls (load/store order of b, c and ab: the original keeps a separate copy of m_P0.y for ab.set's _y parameter) and the register numbering that follows; a reference to m_P1 (not in the ref's locals) reproduces the original's s0 = &m_P1 read of m_P1.y in the … |
-| `System/Graphic/2d/2DCard` | `replaceNorma__7C2DCardGQ27RCNORMA8NormaSrci` | 30 | (comment) Not matching: the original passes inNorma to createNorma as four lhu from the parameter's stack slot combined with dsll/or into a1 (extract_bit_field in 16-bit pieces); ours copies the struct to an 8-aligned temporary and loads it with one ld. No struct shape tried (bitfields, arrays, … |
 | `System/Graphic/2d/2DSprObj` | `initForSeq__Q22D29C2DSprObjPQ22D213SEQ_ANIMATIONPQ22D210LAY_SCREEN` | 325 | 14 of 340 lines (2026-11-06, was 20: fVec2 is the brace init), all in the sway block. Markers: fVec.set(four sway values) (Coord.h:730) and m_vSway[i].set() (Coord.h:200); the stores come out sway0 x/y, fVec z/w, sway1, fVec x/y. Writing fVec.set + m_vSway[i].set(fVec...) fixes the source shape … |
 | `System/Graphic/2d/2DSprObj` | `move__Q22D29C2DSprObj` | 438 | 25 of 465 lines - only the vertex loop differs: the MMI colour multiply's 0xFF splat is a TImode constant here (`por v0,zero,zero` before `li`, the original only does `li`), the pmulth/tmp registers come out v1/v0 instead of a0/v1, the vertex-loop pointers get other registers and lCol is loaded … |
 | `System/Graphic/Effect/effect` | `Setup__11EFFECT_DATAPUxi` | 105 | 4 of 133 lines, same size - with i reused for the DPD loop and the ParNum TRACE before `p += 16` (draft below) the loop registers match; left: the two TRACE header reads go through data (s3) in the original, ours through p (s1), and `p += 16` sits before the ParNum TRACE there. The placeholder's … |
@@ -154,7 +152,6 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `System/TaskMan` | `update__8CTaskManiii` | 135 | 4 lines - the barrier settles nTQ/bPause (s5/s6). Left: the TaskMainParam stores: the original issues the nTQ store early and _SecondaryArray's after _nSysLag's; a scheduling tie across the clear() block. |
 | `Game/Card` | `getAttribute__5CCardG4CARDPPCcN32` | 95 | 30 of 124 lines, registers only: buf's address (3 uses / 38 insns) outranks the CCtdMan::m_pInstance address (4 / 110) in global-alloc priority, the original has them the other way round (s6/s5) and keeps card.m_nKind in a0. Worked: `pLF = buf; *pOutStrAttack = pLF;` (parameter registers, 53 -> … |
 | `Game/CardRevolver` | `main__Q210CardBattle13CCardRevolver` | 321 | 27 lines off, only the TRACE argument loads in the three card dumps: the original loads uiFlag into v1 and uiOwner last into v0 (the card pointer's register), ours the other way round. Worked: state switch with explicit returns, m_pCards[i] indexed directly (pBC temp moved the pointer to t4), … |
-| `Game/CardRevolver` | `changeMode__Q210CardBattle13CCardRevolverii` | 101 | 12 lines off, all in `limit`: the original loads m_nTotal[m_iMode] (lhu + sll 16) above the m_iMode branch and sign-extends (sra 16) only in that arm (interblock-scheduled split extension); ours branches first and uses lh. Worked: `if (inMode == -1) ^= 1; else =`, `!old_mode ? m_pCards : … |
 | `Game/CardRevolver` | `exeReload__Q210CardBattle13CCardRevolver` | 127 | 14 lines off: register allocation and latch order of the first loop - the original keeps i in t0 and the card offset in a2 (decremented first in the latch, in the continue paths' delay slots), ours the reverse; the second loop's i likewise. Worked (from 48 bytes over to same size): separate … |
 | `Game/CardRevolver` | `initAction__Q210CardBattle13CCardRevolver` | 265 | ~165 lines off, mostly register allocation: ours keeps one more value live across calls (the getStock() == -1 value is CSE'd into an s-register for the later getHand() test), so two flags spill instead of one (bReloadOC) and every flag moves one register. Structure found: decEnchantTime inside … |
 | `Game/Map` | `init__4CMapii` | 1046 | 87 of 1193 lines, same size - the bbox loop's &b (ApplyMatrix output) is hoisted into s2 here, the original recomputes it per iteration, which shifts the saved registers of xmin/xmax/zmin/zmax and the division block; for/do/ while/goto loop shapes, by-value apply inline and a 10 min permuter run … |
@@ -203,14 +200,14 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Form/Menu/Camp` | `setDeckInfo__5CCampi` | 951 | 3 of 1048 lines differ in the last loop: v0/v1 swapped for the nColSeq != 0x73 compare (nColSeq is spilled; reload loads it into v0 where the original has the 0x73 in v0). The addu order (this + sel 2) is fixed by `(BYTE*)this + (m_nKindCategorySelect << 1) + 6464` (4 -> 3). tried: without _ref … |
 | `Form/Menu/Camp` | `setTechWin__5CCampi` | 551 | 53 of 621 lines differ: in the sleight-list loop the original spills pTechCateTbl and nTechCateCnt and recomputes &pTechCateTbl[nTechSelectTop] from the spilled pointer every iteration; ours strength-reduces it into an s-register (the same giv difference as setMainCmd's font loop). tried: the … |
 | `Form/Menu/Camp` | `setMapCardWin__5CCampi` | 1227 | same size, 33 of 1409 lines differ: the stack slots of the spilled hoisted addresses (&m_pMCInfoNumCtrl, &m_pMCInfoNumFnt, &m_pMCFnt, &m_pMCCard, &m_nMapKind, i + 1) are assigned in another order (orig 0x74 NumFnt, 0x78 MapKind, 0x7c i+1, 0x84 MCCard, 0x88 MCFnt, 0x8c NumCtrl; ours ascending by … |
-| `Form/Menu/Camp` | `setWorldmapCursor__5CCamp` | 853 | 62 of 941 lines differ. The RCNORMA::NormaSrc argument of createNorma is built from four lhu of its stack copy in the original (extract_bit_field pieces), one ld in ours - the open issue of RoomCreation::menuMain and C2DCard::replaceNorma; the s3/s4 and spill-slot (0x64/0x68) swaps around it … |
+| `Form/Menu/Camp` | `setWorldmapCursor__5CCamp` | 853 | 35 of 939 lines differ (62 before _NORMA_PIECES, 2026-11-07). Left: pDoorInfo and nNorma have s4/s3 for s3/s4; an operand barrier on pDoorInfo does not flip them. To enable this draft, drop the data block after its INCLUDE_ASM: it defines pSeqName.4483 too (Ps2EeAs then crashes). tried: … |
 | `Form/Menu/Camp` | `setMainCmd__5CCampii` | 257 | 17 of 276 lines, 8 bytes short (40 before each loop got its own i, as in the ref; was 81, 53 before 2026-11-05: _ref(m_pMainCmdFnt)[i] in the font-replacing loop keeps its own address computation): with the ref's function-level `INT i` plus a block `INT i` in the else branch `this` is in s0 as in … |
 | `Form/Menu/Camp` | `setStatusWin1__5CCampi` | 429 | 13 of 487 lines differ (was 23): vec.set() (the ref's inlined `FVECTOR *this`) and a precomputed `m_bPlayerKind + 0xF` (permuter) fixed the rest; left: the original keeps &vec in v0 (y/w/z stores and the later fShift = vec.z load through it), so pPlayerManager is reloaded from its spill slot for … |
 | `Form/Menu/JiminyMemo` | `ScrollBarChange__11CJiminyMemoPPQ22D210C2DSeqCtrlffiii` | 122 | 22 lines: ours hoists the 2.0f of case 2 out of the loop (an extra saved f24, frame +16, 0.01f moves from f23 to f24); the original loads it inside case 2 like ScrollBarInit does. Everything else matches. tried: y expression forms (temp, parenthesised, vec = vPos + .y), case order, INT i at the … |
-| `Form/Menu/RoomCreation` | `menuMain__13CRoomCreation` | 1995 | (comment) menuMain: the RCNORMA::NormaSrc by-value arguments (createNorma/replaceNorma) are built from four halfword loads in the original, ld in ours; the register allocation in case 0 follows from that (0x50 bytes shorter). |
+| `Form/Menu/RoomCreation` | `menuMain__13CRoomCreation` | 1995 | (comment) menuMain: 78 of 2211 lines, 8 bytes short (92 and 0x50 short before _NORMA_PIECES, 2026-11-07): the by-value NormaSrc arguments are written out now; left: case 0's registers (v1 + s7 where the original keeps a0, s4/s6/s8 from there). To enable this draft, also drop the data block after … |
 | `Form/Menu/SaveLoad` | `exeMessageDlg__11CSaveLoadUI` | 126 | the case-1 OK tail (m_nDlgResult = 1; CSound::playSE(2, -1, 64)) is cross-jumped into the identical tail of case 2/3 in ours, the original keeps both copies; also the lockPadControl(TRUE) tail loads into v1 (original v0) and one nop in the select loop; tried: switch vs if/else chain, combined … |
 
-Totals: 111 functions (41165 instructions) in 59 units, 111 of them parked; 5 units take a data section from assembly.
+Totals: 109 functions (41034 instructions) in 58 units, 109 of them parked; 5 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->

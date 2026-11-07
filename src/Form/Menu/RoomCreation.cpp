@@ -869,8 +869,9 @@ asm(".section .rodata\n"
     ".word D_004EF9A0\n"
     ".previous\n");
 
-/* menuMain: the RCNORMA::NormaSrc by-value arguments (createNorma/replaceNorma) are built from four halfword loads
- * in the original, ld in ours; the register allocation in case 0 follows from that (0x50 bytes shorter). */
+/* menuMain: 78 of 2211 lines, 8 bytes short (92 and 0x50 short before _NORMA_PIECES, 2026-11-07): the by-value NormaSrc
+ * arguments are written out now; left: case 0's registers (v1 + s7 where the original keeps a0, s4/s6/s8 from there). To enable
+ * this draft, also drop the data block after its INCLUDE_ASM. */
 #if 0
 INT CRoomCreation::menuMain() {
     CARD card;
@@ -926,7 +927,10 @@ INT CRoomCreation::menuMain() {
                 normaSrc._nColor = m_pDoorInfo->getNormaColor(idx);
                 normaSrc._nNumber = m_pDoorInfo->getNormaNumber(idx);
                 normaSrc._nOp = m_pDoorInfo->getNormaOperation(idx);
-                pCard->createNorma(normaSrc, 0);
+                {
+                    RCNORMA::NormaSrc t = normaSrc;
+                    _createNormaRaw(pCard, _NORMA_PIECES(t), 0);
+                }
             }
             pCard->setParent(pCtrl);
             vec.x += fWidth + fWidth;
@@ -1243,7 +1247,10 @@ INT CRoomCreation::menuMain() {
                     normaSrc._nColor = m_pDoorInfo->getNormaColor(m_idxNorma);
                     normaSrc._nNumber = m_pDoorInfo->getNormaNumber(m_idxNorma);
                     normaSrc._nOp = m_pDoorInfo->getNormaOperation(m_idxNorma);
-                    m_pCardNorma[m_nNorma - 1]->replaceNorma(normaSrc, 0);
+                    {
+                        RCNORMA::NormaSrc t = normaSrc;
+                        _replaceNormaRaw(m_pCardNorma[m_nNorma - 1], _NORMA_PIECES(t), 0);
+                    }
                 }
                 m_pExplainFnt[1]->setText(getNormaInfo());
                 initCardData(1);
