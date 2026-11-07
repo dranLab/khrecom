@@ -84,9 +84,7 @@ private:
     INT m_iCardBreakSeIdentifyNo; /* 0x294 */
     CState* m_pDefaultState;     /* 0x298 */
     CState* m_pMainState;        /* 0x29c */
-protected: // PARTIAL: added for Game/Enemy/HumanBoss (reads m_pEnemyParam directly)
     ENEMY_PARAM* m_pEnemyParam;  /* 0x2a0 */
-private:
     struct BASIC_ENEMY_PARAM* m_pBasicParam; /* 0x2a4 */
     UBYTE m_MesCardInfo[0x24];   /* 0x2a8 MES_CARD_INFO */
     SHORT m_sStopDamageCount;    /* 0x2cc */

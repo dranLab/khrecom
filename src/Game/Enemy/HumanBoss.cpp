@@ -355,15 +355,23 @@ BOOL CHumanBoss::initalize(INT inGroupID, INT inRsrcID, UINT iFlag) {
     return TRUE;
 }
 
-/* MATCH: m_pEnemyParam read directly, not through the getEnemyParam() inline (the ref lists no inlined this) */
+/* Parked: 20 lines (2026-11-05, was 27): the goto-built outer loop reloads iCardCount/pCards like the original (a for loop hoists them); left: the original hoists the m_pEnemyParam load once (t2), ours reloads it too. The ref lists card/j at function level and no getEnemyParam inline
+   2026-11-07: a local for getEnemyParam() before the goto loop: 23 (the m_pEnemyParam reload goes, but iCardCount's load
+   moves to the top of the body); for/do-while forms with or without it: 27.
+   2026-11-07: a plain for loop reading m_pEnemyParam directly matches, but m_pEnemyParam is private in the ref
+   (CHumanBoss is no friend): not the original source, reverted. Lead: the ref declares `ENEMY_PARAM* getEnemyParam();`
+   non-const (ours is const) - but this method is const, so check how the original reached it. */
+#if 0
 INT CHumanBoss::getAttackCardNum(UINT inFlag) const {
     INT cardNum;
     INT i;
     ENEMY_CARD* card;
     INT j;
     cardNum = 0;
-    for (i = 0; i < m_pEnemyParam->iCardCount; i++) {
-        card = &m_pEnemyParam->pCards[i];
+    i = 0;
+    if (i < getEnemyParam()->iCardCount) {
+    loop:
+        card = &getEnemyParam()->pCards[i];
         for (j = 0; j < 10; j++) {
             if ((inFlag & 1) && (UINT)card->iCardKind < 4) {
                 cardNum += card->bNumber[j];
@@ -372,9 +380,13 @@ INT CHumanBoss::getAttackCardNum(UINT inFlag) const {
                 cardNum += card->bNumber[j];
             }
         }
+        if (++i < getEnemyParam()->iCardCount) goto loop;
     }
     return cardNum;
 }
+#else
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/HumanBoss", getAttackCardNum__C10CHumanBossUi);
+#endif
 
 INT CHumanBoss::getRemainCard(UINT inFlag) {
     INT num = 0;
@@ -509,8 +521,13 @@ void CHumanBoss::stateDead() {
 void CHumanBoss::endStateDead() {
 }
 
-/* MATCH: m_pEnemyParam read directly (the getEnemyParam() inline loses the register copy of the param pointer in the
-   loops); the id % 10000 in a local, UINT search index, one INT i per loop, `cards = deck` before ASSERT(deck) */
+/* Parked: 21 of 371 lines - the param pointer is carried in a register copy through the build and enemy-card loops
+   (the original's `move a3,v1`; ours reloads getEnemyParam() in the enemy-card loop body). Levers that got it here:
+   the id % 10000 in a local, UINT search index, one INT i per loop, `cards = deck` before ASSERT(deck) (callee-saved),
+   setHumanBossFlag(0, 1), BYTE card number, and a volatile read of the first loop's iCardCount (kept pointer, reloaded
+   count). Permuter 9 min: no gain. 2026-11-07: m_pEnemyParam read directly matches, but the member is private in the
+   ref: not the original source, reverted; try the ref's non-const getEnemyParam() signature. */
+#if 0
 static inline void _setCard(CARD& c, USHORT kind, BYTE num) { c.m_nId = 0; c.m_nKind2 = kind; c.m_nNumber2 = num; c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0; c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1; }
 void CHumanBoss::setupCardRevolver() {
     CARD_DATA* cardData;
@@ -518,7 +535,7 @@ void CHumanBoss::setupCardRevolver() {
     CARD* deck;
     CARD* cards;
 
-    if (!m_pEnemyParam) return;
+    if (!getEnemyParam()) return;
     UINT id = (UINT)getID() % 10000;
     cardData = __null;
     for (UINT n = 0; n < 12; n++) {
@@ -530,22 +547,22 @@ void CHumanBoss::setupCardRevolver() {
     }
     if (!cardData) return;
     cardNum = 1;
-    for (INT i = 0; i < m_pEnemyParam->iCardCount; i++) {
-        ENEMY_CARD* card = &m_pEnemyParam->pCards[i];
+    for (INT i = 0; i < *(volatile INT*)&getEnemyParam()->iCardCount; i++) {
+        ENEMY_CARD* card = &getEnemyParam()->pCards[i];
         INT j;
         for (j = 0; j < 10; j++) {
             if (card->iCardKind != 14) cardNum += card->bNumber[j];
         }
     }
-    cardNum += m_pEnemyParam->iEnemyCard;
+    cardNum += getEnemyParam()->iEnemyCard;
     m_iTotalCardNum = cardNum;
 #line 537
     deck = new (__FILE__ "(537)") CARD[cardNum];
     cards = deck;
 #line 539
     ASSERT(deck);
-    for (INT i = 0; i < m_pEnemyParam->iCardCount; i++) {
-        ENEMY_CARD* card = &m_pEnemyParam->pCards[i];
+    for (INT i = 0; i < getEnemyParam()->iCardCount; i++) {
+        ENEMY_CARD* card = &getEnemyParam()->pCards[i];
         INT cardKind;
         INT j;
         if (card->iCardKind == 14) continue;
@@ -591,8 +608,8 @@ void CHumanBoss::setupCardRevolver() {
             }
         }
     }
-    for (INT i = 0; i < m_pEnemyParam->iEnemyCard; i++) {
-        _setCard(*cards, m_pEnemyParam->byEnemyCards[i], 0xFF);
+    for (INT i = 0; i < getEnemyParam()->iEnemyCard; i++) {
+        _setCard(*cards, getEnemyParam()->byEnemyCards[i], 0xFF);
         cards++;
     }
     _setCard(*cards, 0xFF, 0);
@@ -607,9 +624,30 @@ void CHumanBoss::setupCardRevolver() {
 #line 623
     ASSERT(m_pCardRevolver);
     if (deck) delete[] deck;
-    if (m_pEnemyParam->iEnemyCard > 0) setHumanBossFlag(0, 1);
+    if (getEnemyParam()->iEnemyCard > 0) setHumanBossFlag(0, 1);
     m_iRemainCardNum = getAttackCardNum(3);
 }
+#else
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/HumanBoss", setupCardRevolver__10CHumanBoss);
+/* placeholder for setupCardRevolver (INCLUDE_ASM): its strings, then its jump table */
+__asm__(".section .sdata\n");
+__attribute__((section(".sdata"))) void _setupCardRevolver_placeholder(CHumanBoss* p, void* deck, void* rev) {
+#line 537
+    com_malloc_d(4, __FILE__ "(537)", (UINT)-1);
+#line 539
+    ASSERT(deck);
+#line 622
+    com_malloc_d(4, __FILE__ "(622)", (UINT)-1);
+#line 623
+    if (!rev) AssertApp(__FILE__, __LINE__, "m_pCardRevolver", 0);
+    TRACE(cardDataTbl[0].pName); /* keeps the card table (used by the asm) */
+}
+asm(".rdata\n.align 4\njtbl_004C3B00:\n"
+    ".word .L002CBD50\n.word .L002CBD50\n.word .L002CBD50\n.word .L002CBD50\n"
+    ".word .L002CBD50\n.word .L002CBD50\n.word .L002CBD50\n.word .L002CBD50\n"
+    ".word .L002CBD64\n.word .L002CBD6C\n.word .L002CBD74\n.word .L002CBD7C\n"
+    ".word .L002CBD84\n.word .L002CBD8C\n.text\n");
+#endif
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/HumanBoss", setupAct__10CHumanBoss);
 /* placeholder for setupAct (INCLUDE_ASM): its strings */
@@ -620,7 +658,7 @@ __attribute__((section(".sdata"))) void _setupAct_placeholder(void* p, void* q, 
     com_malloc_d(4, __FILE__ "(684)", (UINT)-1);
     if (!r) AssertApp(__FILE__, 0, "m_pStockData", 0);
 }
-/* Parked: 18 of 205 lines (2026-11-07): the normal arm's -1 (sMin/sMax) is its own hoisted register in the original (li s4,-1 after li s5,1), ours shares the compares' -1 (s2): loop.c (-dL) combines the arm's HImode -1 movable with the SImode compare constant ("matches 84"); the rest follows (14/12 store order, the assert's __FILE__ lui hoisted too in ours, a loop-align nop); tried: chain orders, separate stores, read-back, (SHORT)/0xFFFF/-1L, INT/SHORT/long locals, m_pEnemyParam direct (all 18), duplicated normal arm per branch (18, the arms' -1 become subregs), inverted/nested/else-if condition shapes (18-88); permuter 15 min: no gain */
+/* Parked: 18 of 205 lines (2026-11-07): the normal arm's -1 (sMin/sMax) is its own hoisted register in the original (li s4,-1 after li s5,1), ours shares the compares' -1 (s2): loop.c (-dL) combines the arm's HImode -1 movable with the SImode compare constant ("matches 84"); the rest follows (14/12 store order, the assert's __FILE__ lui hoisted too in ours, a loop-align nop); tried: chain orders, separate stores, read-back, (SHORT)/0xFFFF/-1L, INT/SHORT/long locals, m_pEnemyParam direct (all 18; private in the ref, so not used), duplicated normal arm per branch (18, the arms' -1 become subregs), inverted/nested/else-if condition shapes (18-88); permuter 15 min: no gain */
 #if 0
 void CHumanBoss::setupAct() {
     ACT_DATA tmp[8];
@@ -628,11 +666,11 @@ void CHumanBoss::setupAct() {
     ENEMY_ACT* act;
     INT i;
 
-    if (!m_pEnemyParam) {
+    if (!getEnemyParam()) {
         return;
     }
-    act = m_pEnemyParam->pActs;
-    for (i = 0; i < m_pEnemyParam->iActCount; i++, act++) {
+    act = getEnemyParam()->pActs;
+    for (i = 0; i < getEnemyParam()->iActCount; i++, act++) {
         if (act->iCard[0] == -1 && act->iCard[1] == -1 && act->iCard[2] == -1) {
             continue;
         }
