@@ -393,6 +393,7 @@ header split the original didn't have, or make a class a template to hide its st
 | reload/spill register one off after inline asms | asm-inout-earlyclobber-reload |
 | a giv step at the loop end in the original, mid-loop in ours | separate-biv-for-increment |
 | peeled first test + rotated loop with `bnezl` | goto-layout-reorg-prediction (dlmalloc: goto body after the return) |
+| a pointer kept in a register copy through a loop, the count reloaded differently | direct-member-vs-inline-getter (no inlined `this` in the ref locals) |
 | stores in another order | sched-store-order-reg-weight, volatile-delay-slots-store-permutation, small-union-ctor-stores, fixed-scalar-varying-struct-alias, join-store-per-arm |
 | the original reloads a global/member, ours keeps it (or the reverse) | global-reload-ref-helper, fixed-scalar-varying-struct-alias, const-global-reorg-redundant-load, mapenemy-unit-lessons |
 | tails merged or not merged, branch layout | gcc-crossjump-alias-rules, crossjump-dup-arm-stores, crossjump-case-label-chain, state-machine-break-vs-return, guard-plus-while-and-static-members, first-return-stub-ternary, bool-tail-shared-false |
