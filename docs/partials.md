@@ -157,7 +157,7 @@ One row per merge into main (`partials.py --summary` before and after).
 ## Summary
 
 ```
-PARTIAL: 185 (155 in 44 headers, 30 in 17 .cpp); MATCH: 1032
+PARTIAL: 185 (155 in 44 headers, 30 in 17 .cpp); MATCH: 1035
   by category: method 46, data member 10, type 14, fwd decl 2, #include 13, changed in place 43, padding 2, path override 1, gate 5, guessed 9, header-level 24, stand-in 11, other 5
 stand-ins: 11 foreign in 6 files (9 names), 170 unattributed, 184 own
 duplicate class names across headers: 0
