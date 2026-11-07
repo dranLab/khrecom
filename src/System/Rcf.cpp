@@ -1175,25 +1175,21 @@ void _makeLocalizePath(CHAR* pszOut, const CHAR* pszSrc, INT nLocale) {
         strcpy(pszOut, pszSrc);
     }
 }
-/* Parked: _atolen: 5 of 79 lines, same size - _atoi's guard + while and return as there. Left: block order: the 0x case jumps
- * over the '$' block to a `nRet = 2` behind it, ours falls into its own. Gotos, an else with a goto, do/while(0) + break
- * all come out with the '$' block first (10 lines). The extra nop is the loop's alignment and moves with that. */
-#if 0
 INT _atolen(const CHAR* lpszInStr) {
     INT nRet = 0;
     const CHAR* p = lpszInStr;
 
     if (p) {
-        if (*p != '$') {
-            if (*p == '0' && p[1] == 'x') {
+        if (*p == '$' || (*p == '0' && p[1] == 'x')) {
+            if (*p == '$') {
+                p++;
+                nRet = 1;
+            } else {
                 p = lpszInStr + 2;
                 nRet = 2;
-            } else {
-                goto dec;
             }
         } else {
-            p++;
-            nRet = 1;
+            goto dec;
         }
         if (!*p) goto end;
         while (*p) {
@@ -1217,13 +1213,10 @@ INT _atolen(const CHAR* lpszInStr) {
 end:
     {
         register INT r asm("$2") = nRet;
-        asm volatile("" : : "r"(r));
+        asm volatile("" : : "r"(r)); /* MATCH: the move stays above the jr: its slot is a nop (as in _atoi) */
         return r;
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", _atolen__FPCc);
-#endif
 CHAR* _getDbgParsePtr() {
     return (CHAR*)s_pDbgFileBuf->getBufPtr() + s_nDbgFilePtr;
 }
