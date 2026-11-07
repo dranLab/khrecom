@@ -4516,11 +4516,7 @@ INT CPlayer::startSingleAction() {
     m_iStepStockSkill++;
     return TRUE;
 }
-/* Parked: same spot as initAttackField: around the g_fGravity load the original keeps the %hi in v0 (later
-   s0) and stores m_JumpState after the load; ours uses v1 and stores it before, and the g_CardBreakTime %hi
-   moves. The flag block (battle 0x10/0x80000/8, then trg 4) and the ternary m_iComboBoost match.
-   tried: block perms (perm.py, hillmove.py), cast loads/stores on g_fGravity/g_CardBreakTime/
-   m_JumpState/m_fJumpGravity, gravity via a local; best 13 lines. tools/permuter.py can't run on C++ methods. Retried 2026-10-25: the $LM line order (gravity 7818 before JumpState 7819) also gives 13 lines: li 3 then issues before the gravity lwc1 (equal priority, later insn first) and the %hi(g_fGravity) moves from v0 to v1; same family as initAttackField. */
+/* Parked: 13 of 118 lines (2026-11-08): around the g_fGravity load the original has %hi(g_fGravity) in v0 and the 3 for m_JumpState in v1 (lwc1 before li v1,3; its PRE copy move s0,v0 after lw a0,m_uiCardID), ours hi in v1 and 3 in v0 (li before lwc1, move s0 right after it), and the g_CardBreakTime %hi issues earlier. The rest matches. Cause: local-alloc; sched1 issues the PRE copy right after the lui, so hi dies before li 3 is born and gets the other register; for the original's pair li 3 must be born inside hi's life and hi allocated first, which plain statement order can't give (hi's chain has the higher priority). The source order is the $LM order (gravity 7818, JumpState 7819, break time 7823, combo 7824). tried: casts on all four (32 combinations, plain/cast BCL), operand order, one-line forms, two-step gravity, register pins and barriers in the initAttackField form (15 layouts, best 10, none 0), tools/permuter.py 15 min (12, no gain). */
 #if 0
 void CPlayer::initAttack(INT inNo) {
     setPlayerState(PL::ATTACK);
@@ -4538,8 +4534,8 @@ void CPlayer::initAttack(INT inNo) {
     m_bNextTrg = FALSE;
     m_iNextAttack = 0;
     *(FLOAT*)&m_fMoveSpdXZ = isAir() ? m_fJumpSpdXZ : m_fWalkSpeed;
-    m_JumpState = 3;
     m_fJumpGravity = PL::g_fGravity * 0.16f;
+    m_JumpState = 3;
     m_tqCardBreakTime = PL::g_CardBreakTime[(*(BC_PARAM**)&CardBattle::g_pBattleCardList)[m_uiCardID].BREAK];
     m_iComboBoost = isConditionFlag(0x40000000) ? m_iComboBoost + 20 : 0;
     setAttack();
