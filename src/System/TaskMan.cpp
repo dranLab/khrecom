@@ -179,7 +179,8 @@ ISLCManagerT<CTask>& CTaskMan::getSLCManager() {
 }
 
 /* Parked: 4 lines - the barrier settles nTQ/bPause (s5/s6). Left: the TaskMainParam stores: the original issues the nTQ
-   store early and _SecondaryArray's after _nSysLag's; a scheduling tie across the clear() block. */
+   store early and _SecondaryArray's after _nSysLag's; a scheduling tie across the clear() block. 2026-11-07: the ref
+   lists no ctor for TaskMainParam, but brace init with these values builds a temporary (80 lines): the ctor stays. */
 #if 0
 #line 223
 void CTaskMan::update(TIMEQ nTQ, TIMEQ nDispTQ, BOOL bPause) {
