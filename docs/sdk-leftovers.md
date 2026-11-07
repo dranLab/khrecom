@@ -87,8 +87,8 @@ shows a draft's diff after you switch its `#if 0` to `#if 1` (the permuters swit
 - **eecdvd_sceCdCallback**: `_sceCd_cbLoop` matches by funcdiff with the exit block on one line and
   `sceCdCbfunc_num = cb_flag = 0`, but two hoisted luis swap registers (SHA-1 fails, gcse order of the symbols).
 - **mpc** (`_getRef0`): decomp-permuter can't parse it (a statement expression `({ ... })` in a condition).
-- **timer** (`TimerBusClock2Freq`, `TimerFreq2BusClock`): the original keeps `div.s` out of the call's delay
-  slot, which only ee-gcc2.96 does; the unit is built with the Sony toolchain (991111).
+- **timer** (`TimerBusClock2Freq`, `TimerFreq2BusClock`): both match as they stand under ee-gcc2.9-991111-01 (its `div.s`
+  erratum padding keeps it out of the call's delay slot), and no function of the unit differs there. Needs an override.
 - **lib/init**: a `j $31` left unfilled where the original filled it: the last statement and `}` on one line.
 
 ## Inventory
@@ -185,7 +185,7 @@ Sorted by unit, then size. `instr`: instructions in the original.
 | `lib/filestub` | `_sceFs_Rcv_Intr` | 237 | parked | 14 lines differ (permuter score) |
 | `lib/timer` | `cbTimerHandler` | 173 | parked | scheduling (32 lines; 45 before the handler's time argument in a local, decomp-permuter) |
 | `lib/timer` | `SetNextComp` | 100 | parked | loop shape (15 lines differ) |
-| `lib/timer` | `TimerBusClock2Freq` | 21 | parked | the original keeps div.s out of the call's delay slot (only ee-gcc2.96 does that) |
+| `lib/timer` | `TimerBusClock2Freq` | 21 | parked | matches as it stands under ee-gcc2.9-991111-01 (2026-11-07, compare_compilers with the draft live: both functions and the whole unit match; 991111 lacks the div.s erratum padding). Needs an override for lib/timer: the user's decision. |
 | `lib/timer` | `TimerFreq2BusClock` | 13 | parked | as TimerBusClock2Freq |
 
 ### Data sections from the original assembly

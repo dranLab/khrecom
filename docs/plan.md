@@ -421,5 +421,7 @@ Keep output small: one function's assembly at a time; `funcdiff` without `--full
 - **Waiting on a decision now:** the `D2MAN_H_PATH` (2DMan.h, `D2::C2DMan`) and `RSRCDATA_H_FULL`
   (`CRsrcData`/`RsrcInfo`/`CRsrcANN`) gates, 10 files: the string evidence for 2DMan.h is ambiguous (the 2D
   container message is in 166 originals, the 2DMan.h path in only about 119).
+- **Waiting on a decision now:** a `lib/timer` override to `ee-gcc2.9-991111-01` would match `TimerBusClock2Freq` and
+  `TimerFreq2BusClock` with no source change (both drafts match with it, no other function of the unit differs).
 - When the user runs a /loop unattended, decide these cases yourself, log the decision and continue
   (unattended-decide-stop-cases).
