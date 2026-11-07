@@ -305,33 +305,23 @@ void C2DSprObj::getFukidasiRect(FVECTOR2 (*vOut)[4]) {
         }
     }
 }
-/* Parked: 14 of 340 lines (2026-11-06, was 20: fVec2 is the brace init), all in the sway block. Markers: fVec.set(four
- * sway values) (Coord.h:730) and m_vSway[i].set() (Coord.h:200); the stores come out sway0 x/y, fVec z/w, sway1, fVec x/y.
- * Writing fVec.set + m_vSway[i].set(fVec...) fixes the source shape but moves the spill slots of the hoisted this+off
- * addresses (gcse bucket order, memory gcse-bucket-count-lever: about 8 more insns put them right) and then 16-20 lines
- * stay in that block; 144 orders with locals: 26 at best. Before: same size, same structure: the order of the independent address computations and
- * the 0.25f stores in the prologue (the original puts `addiu s3,sp,32` after the first two fVec2 stores) and the
- * load/store order of the sway block (the original loads x_sway[0], y_sway[0], x_sway[1], y_sway[1] in that order and
- * stores m_vSway[0] first); tried: fVec2 as fields/chain/set/setAll, iAlphaBlend order, six statement orders of the
- * sway block with and without temporaries, an 8 min permuter run (23 -> 23), a 15 min one (2026-11-02, 40k: 20 -> 20). The five `BOOL b = m_status.x_stop;
- * if (b)` blocks are what makes the original's dsll/dsra32/andi extraction. */
-#if 0
 TIMEQ C2DSprObj::initForSeq(SEQ_ANIMATION* pSeqAnim, LAY_SCREEN* pLayScreen) {
     IVECTOR iVec;
     FVECTOR fVec;
+    INT i;
     m_iStep = 1;
     m_status = pSeqAnim->status;
-    { BOOL b = m_status.base_stop; if (b) m_status.base_disable = 1; }
-    { BOOL b = m_status.ofs_stop; if (b) m_status.ofs_disable = 1; }
-    { BOOL b = m_status.rotate_stop; if (b) m_status.rotate_disable = 1; }
-    { BOOL b = m_status.color_stop; if (b) m_status.color_disable = 1; }
-    { BOOL b = m_status.scale_stop; if (b) m_status.scale_disable = 1; }
+    m_status.base_disable |= m_status.base_stop;
+    m_status.ofs_disable |= m_status.ofs_stop;
+    m_status.rotate_disable |= m_status.rotate_stop;
+    m_status.color_disable |= m_status.color_stop;
+    m_status.scale_disable |= m_status.scale_stop;
     FVECTOR fVec2 = { 0.25f, 0.25f, 0.25f, 0.25f };
     INT iAlphaBlend = pSeqAnim->alpha_blend;
     if (iAlphaBlend) {
-        ALPHA nInAlpha = iAlphaBlend == 1 ? ALPHA_PLUS : ALPHA_MINUS;
-        for (INT i = 0; i < m_nPoly; i++) {
-            m_pSprPrim[i].polyGT4.setSemiTrans(nInAlpha);
+        INT a = iAlphaBlend == 1 ? ALPHA_PLUS : ALPHA_MINUS;
+        for (i = 0; i < m_nPoly; i++) {
+            m_pSprPrim[i].polyGT4.setSemiTrans(a);
         }
     }
     m_qTime[0] = pSeqAnim->time[0] * 50;
@@ -375,21 +365,14 @@ TIMEQ C2DSprObj::initForSeq(SEQ_ANIMATION* pSeqAnim, LAY_SCREEN* pLayScreen) {
         m_vCurve.set(pSeqAnim->curve[0][0], pSeqAnim->curve[0][1], pSeqAnim->curve[1][0], pSeqAnim->curve[1][1]);
     }
     if (!m_status.sway_disable) {
-        FLOAT xs0 = pSeqAnim->x_sway[0];
-        FLOAT xs1 = pSeqAnim->x_sway[1];
-        FLOAT ys0 = pSeqAnim->y_sway[0];
-        FLOAT ys1 = pSeqAnim->y_sway[1];
-        m_vSway[1].set(xs1, ys1);
-        fVec.set(xs0, ys0, xs1, ys1);
-        m_vSway[0].set(xs0, ys0);
+        fVec.set(pSeqAnim->x_sway[0], pSeqAnim->y_sway[0], pSeqAnim->x_sway[1], pSeqAnim->y_sway[1]);
+        m_vSway[0].set(fVec.x, fVec.y);
         m_vRotate[0].w = (FLOAT)pSeqAnim->x_sway_count;
+        m_vSway[1].set(fVec.z, fVec.w);
         m_vRotate[1].w = (FLOAT)pSeqAnim->y_sway_count;
     }
     return m_qTime[1] + (m_status.last_cut ? 0 : 50);
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/2d/2DSprObj", initForSeq__Q22D29C2DSprObjPQ22D213SEQ_ANIMATIONPQ22D210LAY_SCREEN);
-#endif
 void C2DSprObj::_main(TIMEQ qTime) {
     FLOAT fRate;
     FVECTOR vec0;
@@ -461,12 +444,6 @@ void C2DSprObj::_main(TIMEQ qTime) {
         m_Flg &= ~1;
     }
 }
-/* Parked: 25 of 465 lines - only the vertex loop differs: the MMI colour multiply's 0xFF splat is a TImode
- * constant here (`por v0,zero,zero` before `li`, the original only does `li`), the pmulth/tmp registers come out
- * v1/v0 instead of a0/v1, the vertex-loop pointers get other registers and lCol is loaded before the expand.
- * tried: "0"(0xFF) / "r"(0xFF) / u_long constant forms (hoisted out of the loop: 27), separate pmulth result,
- * memory clobbers, pointer increment orders; permuter (method wrapper) 15 min, 49k candidates: 29 -> 27 only. */
-#if 0
 void MulMatrix(FMATRIX& m0, const FMATRIX& m1, const FMATRIX& m2);
 void MulVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void FTOI0Vector(IVECTOR& v0, const FVECTOR& v1);
@@ -486,20 +463,21 @@ static inline void _unitMatrixVu0(FMATRIX& m) {
                  : "memory");
 }
 static inline void _applyMatrix2(FVECTOR& v0, const FMATRIX& m0, const FVECTOR2& v2) {
-    asm volatile("ld $8, 0x0(%2)\n"
-                 "lqc2 $vf4, 0x0(%1)\n"
+    /* MATCH: the original passes the FVECTOR2 to qmtc2 in t0 ($8); an unpinned temp gets another register */
+    register ULONGLONG xy asm("$8") = v2._u64;
+    asm volatile("lqc2 $vf4, 0x0(%1)\n"
                  "lqc2 $vf5, 0x10(%1)\n"
                  "lqc2 $vf6, 0x20(%1)\n"
                  "lqc2 $vf7, 0x30(%1)\n"
-                 "qmtc2.ni $8, $vf8\n"
+                 "qmtc2.ni %2, $vf8\n"
                  "vmulax.xyzw $ACC, $vf4, $vf8x\n"
                  "vmadday.xyzw $ACC, $vf5, $vf8y\n"
                  "vmaddaz.xyzw $ACC, $vf6, $vf0z\n"
                  "vmaddw.xyzw $vf4, $vf7, $vf0w\n"
                  "sqc2 $vf4, 0x0(%0)\n"
                  :
-                 : "r"(&v0), "r"(&m0), "r"(&v2)
-                 : "$8", "memory");
+                 : "r"(&v0), "r"(&m0), "r"(xy)
+                 : "memory");
 }
 static inline void _ftoi4(IVECTOR& iVec, const FVECTOR& fVec) {
     asm volatile("lqc2 $vf4, 0x0(%1)\n"
@@ -509,22 +487,38 @@ static inline void _ftoi4(IVECTOR& iVec, const FVECTOR& fVec) {
                  : "r"(&iVec), "r"(&fVec)
                  : "memory");
 }
-static inline UINT _mulColor(UINT iCol, u_long128 iMul) {
+static inline u_long128 _colToVec(UINT iCol) {
     u_long128 ivCol;
+    __asm__ volatile("pextlb %0, $0, %1\n"
+                     "pextlh %0, $0, %0\n"
+                     : "=r"(ivCol)
+                     : "r"(iCol));
+    return ivCol;
+}
+static inline UINT _vecToCol(u_long128 iCol) {
+    UINT ivCol;
+    __asm__ volatile("ppach %0, $0, %1\n"
+                     "ppacb %0, $0, %0\n"
+                     : "=r"(ivCol)
+                     : "r"(iCol));
+    return ivCol;
+}
+/* MATCH: one asm statement, as in the original (all seven instructions carry one line marker, Gprim.h:821, here and
+ * in FrecFont's makePkt), including the 0xFF load: C can't place it there. A TImode `tmp = 0xFF` adds `por zero`, a
+ * constant operand ("0"/"r"(0xFF), u_long locals) is hoisted out of the vertex loop, a hard-register local puts the
+ * li in place but moves the iMul/product registers (5 lines). tmp is tied to ivCol: that keeps ivCol in v1 and the
+ * product in a0 as in the original. */
+static inline u_long128 _mulCol(u_long128 ivCol, u_long128 iMul) {
     u_long128 tmp;
-    __asm__ volatile("pextlb %0, $0, %1" : "=r"(ivCol) : "r"(iCol));
-    __asm__ volatile("pextlh %0, $0, %0" : "=r"(ivCol) : "0"(ivCol));
-    __asm__ volatile("pmulth %0, %1, %2" : "=r"(ivCol) : "r"(ivCol), "r"(iMul));
-    tmp = 0xFF;
-    __asm__ volatile("pextlw %0, %0, %0" : "=r"(tmp) : "0"(tmp));
-    __asm__ volatile("pcpyld %0, %0, %0" : "=r"(tmp) : "0"(tmp));
-    __asm__ volatile("psrlw %0, %0, 7" : "=r"(ivCol) : "0"(ivCol));
-    __asm__ volatile("pcgtw %0, %1, %0" : "=r"(tmp) : "r"(ivCol), "0"(tmp));
-    __asm__ volatile("por %0, %1, %0" : "=r"(tmp) : "r"(ivCol), "0"(tmp));
-    __asm__ volatile("ppach %0, $0, %0" : "=r"(tmp) : "0"(tmp));
-    UINT iRet;
-    __asm__ volatile("ppacb %0, $0, %1" : "=r"(iRet) : "r"(tmp));
-    return iRet;
+    __asm__ volatile("pmulth %1, %0, %2\n"
+                     "addiu %0, $0, 0xff\n"
+                     "pextlw %0, %0, %0\n"
+                     "pcpyld %0, %0, %0\n"
+                     "psrlw %1, %1, 7\n"
+                     "pcgtw %0, %1, %0\n"
+                     "por %0, %1, %0\n"
+                     : "=r"(tmp), "=r"(ivCol) : "r"(iMul), "0"(ivCol));
+    return tmp;
 }
 void C2DSprObj::move() {
     FVECTOR fVec;
@@ -628,7 +622,7 @@ void C2DSprObj::move() {
         pSprPrim->polyGT4.setTexNearest(!bBilinear);
         for (INT j = 0; j < 4; j++) {
             FVECTOR& v0 = fVec;
-            _applyMatrix2(v0, mat, *primPos);
+            _applyMatrix2(v0, mat, primPos[j]);
             _ftoi4(iVec, fVec);
             if (!bBilinear) {
                 iVec.x = (iVec.x & 0xFFFFFFF0) | 8;
@@ -636,16 +630,11 @@ void C2DSprObj::move() {
             }
             pXY->set(iVec.x, iVec.y);
             pXY++;
-            pRGBA->col = _mulColor(primCol->col, lCol);
-            primCol++;
+            pRGBA->col = _vecToCol(_mulCol(_colToVec(primCol[j].col), lCol));
             pRGBA++;
-            primPos++;
         }
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/2d/2DSprObj", move__Q22D29C2DSprObj);
-#endif
 void C2DSprObj::getRect(FVECTOR2* pvOut4, SprPrim& rSprPrim) {
     FVECTOR fVec;
     IVECTOR iVec;
