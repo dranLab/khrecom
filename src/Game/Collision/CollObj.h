@@ -94,9 +94,9 @@ public:
     virtual INT collideMap();
 };
 /* MATCH: collideMap inlines CCollUtil::instance (Game/Collision/CollUtil.h): defined here when CollUtil.h came
- * first (or the unit has its own accessor: COLLUTIL_H_LOCAL_ACCESSOR), else at the end of CollUtil.h
+ * first, else at the end of CollUtil.h
  * (Game/Gimmick/GimmickSearchLaser gets CollObj.h early via CardBattle.h) */
-#if (defined(GAME_COLLISION_COLLUTIL_H) && defined(GAME_COLLISION_COLLUTILA_H)) || defined(COLLUTIL_H_LOCAL_ACCESSOR)
+#if (defined(GAME_COLLISION_COLLUTIL_H) && defined(GAME_COLLISION_COLLUTILA_H))
 inline INT CPointCollision::collideMap() { return CCollUtil::instance()._detectMCD(*this); }
 #endif
 
@@ -112,7 +112,7 @@ public:
     }
     virtual INT collideMap();
 };
-#if (defined(GAME_COLLISION_COLLUTIL_H) && defined(GAME_COLLISION_COLLUTILA_H)) || defined(COLLUTIL_H_LOCAL_ACCESSOR)
+#if (defined(GAME_COLLISION_COLLUTIL_H) && defined(GAME_COLLISION_COLLUTILA_H))
 inline INT CSphereCollision::collideMap() { return CCollUtil::instance()._detectMCD(*this); } // MATCH: see above
 #endif
 

@@ -1,23 +1,8 @@
-/* .rodata comes from the original assembly: the split gives this unit 0x4893D8-0x4895C0, which also holds the
- * .rodata of Game/Collision/CollUtilA (0x4893D8: CollUtil.h's strings) and CollUtilF (0x489460: the same strings,
- * CCollision's vtable); this unit's own starts at 0x489500 (CollUtil.h's strings, then the CSphereCollision and
- * CCollision vtables). Until the split has those boundaries, the code refers to the original's strings by their
- * labels. */
-
 #include "Game/Collision/CollUtilA.h"
 #include "System/HeapMan.h"
 #include "System/MainApp.h"
-
-extern char D_00489500[]; /* "c:/KHCOM/MainApp/Game/Collision/CollUtil.h" */
-extern char D_00489578[]; /* "m_pInstance" */
-
-/* Game/Collision/CollUtil.h's accessor (line 194), with the original's strings */
-inline CCollUtil& CCollUtil::instance() {
-    CCollUtil*& p = m_pInstance;
-    if (!p) AssertApp(D_00489500, 194, D_00489578, 0);
-    return *p;
-}
-#define COLLUTIL_H_LOCAL_ACCESSOR /* MATCH: CollObj.h's collideMap inlines this accessor */
+#define COLLUTIL_H_PATH "c:/KHCOM/MainApp/Game/Collision/CollUtil.h" /* MATCH: the original's path in CollUtil.h's strings */
+#include "Game/Collision/CollUtil.h"
 #include "Game/Collision/CollObj.h"
 #include "include_asm.h"
 
@@ -680,3 +665,4 @@ INT CCollUtil::_detectSphereCircle(CSphereCollision& sphereColl0, CCircleCollisi
     sphereColl0.m_outDetect = circleColl1.m_outDetect;
     return 1;
 }
+// SOURCE DATA: .rodata

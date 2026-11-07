@@ -24,7 +24,7 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 |---|---:|---:|---:|---|
 | `Game/Player/PlayerDRiku` | 1 | 3473 | 1 |  |
 | `Form/Menu/Camp` | 3 | 2631 | 3 |  |
-| `System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly` | 3 | 2143 | 3 | .bss .data .rodata |
+| `System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly` | 3 | 2143 | 3 |  |
 | `Form/Menu/RoomCreation` | 1 | 1995 | 1 |  |
 | `Game/Map` | 2 | 1952 | 2 |  |
 | `System/Graphic/Effect/libppp/draw/shape` | 2 | 1771 | 2 |  |
@@ -42,7 +42,7 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `System/Graphic/Effect/libppp/keProg/pppKeShpTail3` | 1 | 514 | 1 |  |
 | `System/Graphic/PathData` | 1 | 489 | 1 |  |
 | `System/Graphic/Glare` | 1 | 446 | 1 |  |
-| `Game/Collision/CollUtil` | 1 | 424 | 1 | .rodata |
+| `Game/Collision/CollUtil` | 1 | 424 | 1 |  |
 | `Game/Collision/CollMap` | 2 | 365 | 2 |  |
 | `Game/SceneInfo` | 2 | 314 | 2 |  |
 | `System/Graphic/Effect/libppp/partMng` | 1 | 292 | 1 |  |
@@ -63,8 +63,6 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `System/Rcf` | 1 | 111 | 1 |  |
 | `Game/Card` | 1 | 95 | 1 |  |
 | `System/RcfCD` | 1 | 41 | 1 |  |
-
-Units with all functions in C but data from asm: `Game/Collision/CollUtilA` (.rodata), `Game/Collision/CollUtilF` (.rodata), `Game/Collision/CollUtilO` (.rodata).
 
 Units without a source file: `Game/Player/PlayerAnim`, `Game/Player/PlayerAttack`, `System/Graphic/Effect/libppp/draw/draw_w`, `System/Graphic/Effect/libppp/draw/draw_ws`, `System/Graphic/Effect/libppp/draw/global_w`, `System/Graphic/Effect/libppp/draw/md1`, `System/Graphic/Effect/libppp/draw/sin_t`, `System/Graphic/Effect/libppp/keProg/KeDMat`, `System/Graphic/Effect/libppp/pppfunctbl`, `cod/004FF700`, `cod/2C2B00`, `cod/3FF680`, `common`.
 
@@ -97,9 +95,9 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `System/Graphic/Effect/libppp/partMng` | `vramcache` | 292 | (comment) Register allocation: the original keeps abBlock (the VLA's address) on the stack and the assert's string addresses in s5/s6; here abBlock gets s7 and bUseBlockNum s3, so the file name's %hi lives in t0 (saved around the call, 16 more bytes of frame). The return blocks are also laid out … |
 | `System/Graphic/Effect/libppp/draw/shape` | `pppVu1ShapeDraw` | 133 | 4 of 143 lines (2026-11-07): `or a0,a1,a0` (the call argument) issues before `addiu t6,a1,32` instead of after tag 2's next store, and tag 3's `sb t4,3(t6)` comes after its p[1] store instead of first. With tag 3 written id/next/qwc like the others its stores match, but t3/t4 swap: local-alloc … |
 | `System/Graphic/Effect/libppp/draw/shape` | `op_shape_draw` | 1638 | 18 of 1680 lines (2026-11-07), 4 bytes short; and not honest C (V4): the six VU0 loops, the DMA send/wait block and the two OT-add inlines are the original's instruction stream copied from the disassembly (about 1190 asm lines, some 400 of them plain MIPS: loads, stores, branches, address … |
-| `System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly` | `drawShipoly` | 795 | (comment) register allocation differs; also short float loops (bc1t hazard nop lost by fix_short_loops) |
-| `System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly` | `drawDistShipoly` | 648 | (comment) register allocation of loop temporaries (v0/v1/a0) and a few float regs differs |
-| `System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly` | `pppEiDrawDrawShipoly` | 700 | (comment) 44 lines differ: Type!=0 copy loop hoists li -1 before lui 0x7000 (original after; spl is not an original local), Type 1 loop swaps a0/a1 (centv giv vs &dv) |
+| `System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly` | `drawShipoly` | 795 | 58 of 815 lines (2026-11-07): register allocation only, same layout: s1 in $f6 and the inner a1 in $f5 (the original the other way); i*16 for linev[.][i + 1] in a1 (original v1), so ret takes v1 (original a0) and r's mfc1 for InterVector, the 6000000 constant and the packet pointer sit one … |
+| `System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly` | `drawDistShipoly` | 648 | 24 of 674 lines (2026-11-07): register allocation in the inner j loop only: the original never takes v0 there (the (int)a for c0[3]/c1[3] in v1, the linev[0][i] reload in v1, the InterVector address pairs a0/v1, the RotTransPersST packet pointer a1/v1, the draw and poly_num reloads a0/a1), ours … |
+| `System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly` | `pppEiDrawDrawShipoly` | 700 | 40 of 743 lines (2026-11-07): Type!=0 copy loop: ours hoists li -1 before lui 0x7000 (the original after it; spl is not an original local, but without it the loop gets two givs and s3/s4 swap: 89 lines); Type 1 loop: centv giv and &dv swap a0/a1; Thin loop: i*16 in v0 (original a2), so the … |
 | `System/Graphic/Effect/libppp/keProg/KeTh` | `KeThBP_Update` | 685 | (comment) Best attempt: same code apart from register allocation (the original has flg in s7, pTp in fp and &vf._06 in s6; this gets fp/s6/s7) and the order of a few spill slots (preStep - rootStep, &vf._07, &vf._08, flg & 0x120, &pRP->InVec), which shifts scheduling around them. |
 | `System/Graphic/Effect/libppp/keProg/pppKeShpTail3` | `pppKeShpTail3Draw` | 514 |  |
 | `System/Graphic/Effect/libppp/keProg/pppKeShpTail3X` | `pppKeShpTail3XDraw` | 532 |  |
@@ -134,7 +132,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Form/Menu/Camp` | `setWorldmapCursor__5CCamp` | 853 | 35 of 939 lines differ (62 before _NORMA_PIECES; re-measured 2026-11-07). Left: pDoorInfo and nNI (not nNorma) have s4/s3 for s3/s4: global-alloc priority (-dl: pDoorInfo 28 refs over 187 insns = 0.60, nNI 22 over 121 = 0.73, so nNI is allocated first and takes s3); the original allocates … |
 | `Form/Menu/RoomCreation` | `menuMain__13CRoomCreation` | 1995 | (comment) menuMain: 78 of 2211 lines, 8 bytes short (92 and 0x50 short before _NORMA_PIECES, 2026-11-07): the by-value NormaSrc arguments are written out now; left: case 0's registers (v1 + s7 where the original keeps a0, s4/s6/s8 from there). To enable this draft, also drop the data block after … |
 
-Totals: 58 functions (27418 instructions) in 41 units, 58 of them parked; 6 units take a data section from assembly.
+Totals: 58 functions (27418 instructions) in 41 units, 58 of them parked; 1 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->

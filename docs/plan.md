@@ -118,10 +118,8 @@ Numbers change with every merge: `tools/check.sh` (totals), `tools/leftovers.py 
    CardRevolver main, HumanBoss getAttackCardNum/setupCardRevolver), never a changed access specifier.
    The hand-kept table at the top of
    `docs/asm-leftovers.md` lists the blockers that need more than a source change.
-2. **Data from source**: CollUtil and CollUtilO (.rodata); Ride's is done (2026-11-07). Both split fixes of 2026-11-07
-   are in (a code address is no string start; header-only CollUtilA/CollUtilF get their own .rodata), so CollUtilO's
-   own starts at 0x489500: recipe tested in build/progress/Game-Collision-CollUtilO.md (needs the symbol_addrs names
-   of its two vtable copies). `pppEiDrawShipoly` (.bss .data .rodata) as before. `sddrv_ee`'s `.bss` is blocked (see the
+2. **Data from source**: the Collision units (CollUtil, CollUtilO, CollUtilA, CollUtilF, Ride) and pppEiDrawShipoly are done
+   (2026-11-07, after two split fixes). `sddrv_ee`'s `.bss` is blocked (see the
    table at the top of `docs/asm-leftovers.md`).
 3. **Library leftovers**: the parked and not attempted functions of `docs/sdk-leftovers.md`, with its "Working on
    a library unit" section.
@@ -129,7 +127,9 @@ Numbers change with every merge: `tools/check.sh` (totals), `tools/leftovers.py 
    in their asm. 7 are the original's hand-written asm (`.set noreorder` with hand-filled delay slots, trapping
    add/addi: init_spline x3, KeDttMdl_MkGifPk x2, KeDttSpr_MkGifPk, op_md_draw_path3_fog); the md0 family's C forms
    change the whole function (COPY_Q tested); pppColor's split form (C + one asm per VU0/MMI instruction, volatile
-   max for the "m" operand) reaches 3 lines: the route for the 10 not attempted yet (their MATCH comments say so).
+   max for the "m" operand) reaches 3 lines. Converted since (2026-11-07/08): Ke.c's three (one dead insn each stays,
+   the rule's exception) and global.c's op_random/op_random_p (no MIPS left). Open: op_matrix_light4_vector,
+   KeDttSpr_MkGifPk_Pre, RyjMegaBirthUserCtrDrawShapeRefPos, pppRyjDrawMegaBirthPrize, pppColor (their comments say so).
    kh1 has none of them in C. No matched function goes back to parked for this.
 5. **Header cleanup**, interleaved: one `tools/partials.py --queue` item between two work items (see "Header
    cleanup"). The items waiting on a user decision are listed under "When to stop and ask".
