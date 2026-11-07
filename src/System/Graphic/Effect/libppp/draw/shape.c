@@ -231,64 +231,93 @@ void pppStartVu1ShapeProg(int fog) {
     }
 }
 
-/* pppVu1ShapeDraw's strings, for its INCLUDE_ASM; remove with it. */
-asm(".section .rodata\n.align 3\n.asciz \"c:/KHCOM/MainApp/System/Graphic/Effect/libppp/draw/shape.c\"\n"
-    ".align 3\n.asciz \"sh_counter <= 12\"\n.align 3\n.previous");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/draw/shape", pppVu1ShapeDraw);
 
-/* Close: 8 lines off - the DMA tag field stores (id/next/qwc/p[]) of tags 0, 2 and 3 are scheduled
-   differently; no field order reproduces all four tags at once (registers shift when tags 2/3 match). */
+/* Parked: 11 of 142 lines (2026-11-07): t3/t4 swapped between the -16 mask (local) and &sh->spvu1 (global; then 0x70/0x13000000
+   follow), and `or a0,a1,a0` (the call argument) issued before `addiu t6,a1,32` instead of after the tag 2 next store;
+   the tag stores now match. tried: tag field orders (id/next/qwc per tag), sp = dspa0 + (spaPktSize >> 4) (34 -> 11),
+   spPktSize in qwords (folds the sra) */
 #if 0
-#define SETTAG0(t, q, i, n, a, b) (t)->id = (i); (t)->next = (n); (t)->p[1] = (b); (t)->qwc = (q); (t)->p[0] = (a)
-#define SETTAG1(t, q, i, n, a, b) (t)->id = (i); (t)->next = (n); (t)->qwc = (q); (t)->p[0] = (a); (t)->p[1] = (b)
-#define SETTAG2(t, q, i, n, a, b) (t)->next = (n); (t)->qwc = (q); (t)->id = (i); (t)->p[0] = (a); (t)->p[1] = (b)
-#define SETTAG3(t, q, i, n, a, b) (t)->next = (n); (t)->qwc = (q); (t)->id = (i); (t)->p[0] = (a); (t)->p[1] = (b)
-
+#line 346
 void pppVu1ShapeDraw(OSHAPE_VU1 *sh, OSHAPE_IN_VU1 *vu1shi) {
     int spPktSize;
     int spaPktSize;
     int i;
-    long128 *sp;
-    sceDmaTag *pkt;
-    OSPRITE_VU1A *spa;
-    OSPRITE_VU1A *dspa0;
-    OSPRITE_VU1A *dspa;
-    int sh_counter;
-    float y;
-
+    long128 *sp; sceDmaTag *pkt; OSPRITE_VU1A *spa; OSPRITE_VU1A *dspa0; OSPRITE_VU1A *dspa; int sh_counter; float y;
     sh_counter = sh->counter;
-    if (sh_counter > 12) {
-        sh_counter = 12;
-    }
-    if (!(sh_counter <= 12)) AssertApp(__FILE__, 364, "sh_counter <= 12", 0);
+
+    if (sh_counter > 12) sh_counter = 12;
+
+
+
+
+
+
+
+
+
+
+    if (!(sh_counter <= 12)) AssertApp(__FILE__, __LINE__, "sh_counter <= 12", 0);
+
+
     if (ppvMonochrome) {
         y = vu1shi->r * 0.3f + vu1shi->g * 0.59f + vu1shi->b * 0.11f;
         vu1shi->b = vu1shi->g = vu1shi->r = y;
     }
+
     vu1shi->shape_flag = sh->flag;
     vu1shi->counter = sh_counter;
     *(u_long *)&vu1shi->tex0_l = *(u_long *)&sh->tex0_l;
-    dspa0 = (OSPRITE_VU1A *)(vu1shi + 1);
-    spa = dspa0;
+
     dspa = (OSPRITE_VU1A *)((char *)sh + sh->spvu1a);
-    i = sh_counter;
-    while (i--) {
+    spa = dspa0 = (OSPRITE_VU1A *)(vu1shi + 1);
+
+    i = sh_counter; while (i--) {
+
         *(u_long *)spa++ = *(u_long *)dspa++;
     }
+
+
     spaPktSize = ((long)(sh_counter * 8) + 15) & ~15;
-    sp = (long128 *)(spaPktSize + (int)dspa0);
+    sp = (long128 *)dspa0 + (spaPktSize >> 4);
+
+
+
+
     pkt = (sceDmaTag *)sp;
-    SETTAG0(pkt, 7, 0x30, (sceDmaTag *)((u_int)vu1shi | 0x80000000), 0x10000000, 0x6C078000);
-    spPktSize = ((long)(sh->spvu1a - 0x20) + 15) & ~15;
+
+    pkt->id = 0x30; pkt->next = (sceDmaTag *)((u_int)vu1shi | 0x80000000); pkt->qwc = 7;
+
+    pkt->p[0] = 0x10000000;
+    pkt->p[1] = 0x6C078000;
     pkt = (sceDmaTag *)(sp + 1);
-    SETTAG1(pkt, spPktSize >> 4, 0x30, (sceDmaTag *)sh->spvu1, 0, 0x6D008007 | ((spPktSize >> 4) << 17));
+
+
+    spPktSize = ((long)(sh->spvu1a - 0x20) + 15) & ~15;
+
+    pkt->id = 0x30; pkt->next = (sceDmaTag *)sh->spvu1; pkt->qwc = spPktSize >> 4;
+    pkt->p[0] = 0;
+    pkt->p[1] = 0x6D008007 | ((spPktSize >> 4) << 17);
     pkt = (sceDmaTag *)(sp + 2);
-    SETTAG2(pkt, spaPktSize >> 4, 0x30, (sceDmaTag *)((u_int)dspa0 | 0x80000000), 0,
-           0x6E00C02B | ((spaPktSize >> 4) << 18));
+
+
+    pkt->id = 0x30; pkt->next = (sceDmaTag *)((u_int)dspa0 | 0x80000000); pkt->qwc = spaPktSize >> 4;
+    pkt->p[0] = 0;
+    pkt->p[1] = 0x6E00C02B | ((spaPktSize >> 4) << 18);
     pkt = (sceDmaTag *)(sp + 3);
-    SETTAG3(pkt, 0, 0x70, 0, 0x13000000, 0x17000000);
+
+
+    pkt->id = 0x70; pkt->next = 0; pkt->qwc = 0;
+    pkt->p[0] = 0x13000000;
+    pkt->p[1] = 0x17000000;
+
+
     pppSendTagVif1Packet((sceDmaTag *)((u_int)sp | 0x80000000));
 }
+#else
+/* pppVu1ShapeDraw's strings, for its INCLUDE_ASM; remove with it. */
+asm(".section .rodata\n.align 3\n.asciz \"c:/KHCOM/MainApp/System/Graphic/Effect/libppp/draw/shape.c\"\n"
+    ".align 3\n.asciz \"sh_counter <= 12\"\n.align 3\n.previous");
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/draw/shape", pppVu1ShapeDraw);
 #endif
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/draw/shape", op_shape_draw);
