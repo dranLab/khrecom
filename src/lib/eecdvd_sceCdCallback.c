@@ -31,7 +31,7 @@ typedef struct {
     unsigned char buf2[64];
 } ReadIntrData;
 
-int scePrintf(const char *fmt, ...);
+void scePrintf(const char *fmt, ...); /* MATCH: void (no v0 result): sceCdLayerSearchFile reloads SCE_CD_debug into v0 after each call */
 void *memcpy(void *dst, const void *src, unsigned int n);
 int SignalSema(int sema);
 int PollSema(int sema);
@@ -299,8 +299,6 @@ static int PowerOffCB(void)
     return 1;
 }
 
-/* Parked: the 2nd/3rd SCE_CD_debug reloads land in v0 in the original, v1 here. */
-#if 0
 int sceCdLayerSearchFile(sceCdlFILE *fp, const char *name, int layer)
 {
     int i;
@@ -364,17 +362,6 @@ int sceCdLayerSearchFile(sceCdlFILE *fp, const char *name, int layer)
     SignalSema(_sceCd_ncmd_semid);
     return ret;
 }
-#endif
-/* sceCdLayerSearchFile's strings in .rodata while it is asm */
-__asm__(".rdata\n"
-        ".align 3\n.asciz \"Libcdvd bind err CdSearchFile\\n\"\n"
-        ".align 3\n.asciz \"ee call cmd search %s\\n\"\n"
-        ".align 3\n.asciz \"search name %s\\n\"\n"
-        ".align 3\n.asciz \"search size %d\\n\"\n"
-        ".align 3\n.asciz \"search loc lbn %d\\n\"\n"
-        ".text\n");
-
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/eecdvd_sceCdCallback", sceCdLayerSearchFile);
 
 int sceCdSearchFile(sceCdlFILE *fp, const char *name)
 {
