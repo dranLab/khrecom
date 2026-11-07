@@ -459,6 +459,9 @@ INT CAvatar::onMove(INT nCmd, void* pParam, INT nID) {
         return -1;
     }
     calcAvatarMoveSpeed(vVel);
+    /* 1 line left (2026-11-07): the original tests nType != 0 twice after the < 3 range check (ours: < 0, then != 0). Case 0
+       on its own (with or without the inner if), cases 1/2 as breaks or separate labels: 6 (the range check folds); an
+       (INT) if pair: 3. nType is USHORT in the ref. */
     switch (nType) { // MATCH: a switch compares the promoted int (slti), an if on the USHORT would be unsigned
     case 0: case 1: case 2:
         if (nType == 0) m_pMove->setVel(vVel);
