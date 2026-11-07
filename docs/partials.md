@@ -158,7 +158,7 @@ PARTIAL: 190 (156 in 44 headers, 34 in 20 .cpp); MATCH: 1002
 stand-ins: 14 foreign in 9 files (12 names), 198 unattributed, 154 own
 duplicate class names across headers: 0
 padding: 2 arrays, 0 accessors
-mechanisms: 673 sites (0 untagged); #line: 1238
+mechanisms: 673 sites (0 untagged); #line: 1239
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
 classes: complete 874, superset 12, partial 0, gated 3, missing 7, unattributed 309
 ```
