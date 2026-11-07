@@ -6114,12 +6114,6 @@ void CPlayer::exeBadCondition() {
         break;
     }
 }
-/* Parked: in the set arm the original loads ConditionFlag (v1), li 21000 (v0), PadFlag (a2); this order gets
-   the registers right but schedules the PadFlag load first; source order cond/tq/pad gives the load order but
-   swaps v0/a2 (tq/pad). tried: all 6 statement orders x tq forms (ternary, param default, ==0), UINT& pad,
-   (INT) casts, temporaries in both load orders, nested-if structure, asm barriers on tq; best 6 lines.
-   tools/permuter.py can't run on C++ methods. Retried 2026-10-25: $LM line tags put both flag updates before the m_tqConfuse store in both arms (cond/pad/tq: load order right, v0/a2 swapped and the tq/pad stores swapped); a Com.h-style reference flag helper for m_uiPadFlag, the 6 orders again with it (permblk.py, best 6), if/else, default-then-override and in-place inTime forms (13-29); still 6 lines. */
-#if 0
 void CPlayer::setConfuse(INT inFlag, TIMEQ inTime) {
     if (!inFlag) {
         setConditionFlag(0, 8);
@@ -6127,9 +6121,16 @@ void CPlayer::setConfuse(INT inFlag, TIMEQ inTime) {
         m_uiPadFlag = (INT)m_uiPadFlag & ~4;
         fadeEffect(m_hEffBad, 0);
     } else if (m_tqConfuse <= 0) {
-        m_tqConfuse = inTime ? inTime : 21000;
-        m_uiPadFlag |= 4;
-        setConditionFlag(8, 0);
+        /* MATCH: the barriers and the two register locals keep the original's issue order and registers. */
+        register UINT uiCond asm("$3") = m_uiConditionFlag;
+        register TIMEQ tq asm("$2") = 21000;
+        __asm__ volatile("");
+        UINT uiPad = m_uiPadFlag;
+        if (inTime) tq = inTime;
+        __asm__ volatile("");
+        m_tqConfuse = tq;
+        m_uiConditionFlag = uiCond | 8;
+        m_uiPadFlag = uiPad | 4;
         FVECTOR pos;
         pos.set(0.0f, 0.65f, 0.0f);
         m_hEffBad = attachEffect(PL::g_szDpxAbnormal, 2, &Crd(m_iBoneCenter), &pos, NULL, 0.0f);
@@ -6137,9 +6138,6 @@ void CPlayer::setConfuse(INT inFlag, TIMEQ inTime) {
         if (effect) effect->m_iFlag |= 4;
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setConfuse__7CPlayerii);
-#endif
 void CPlayer::exeConfuse() {
     if (m_uiConditionFlag & 8) {
         m_tqConfuse -= m_tqFrameRate;
