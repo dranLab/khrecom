@@ -26,7 +26,7 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | unit | functions left | instr left | parked | data from asm |
 |---|---:|---:|---:|---|
 | `Game/Player/PlayerDRiku` | 3 | 5073 | 3 |  |
-| `Form/Menu/Camp` | 6 | 4170 | 6 |  |
+| `Form/Menu/Camp` | 3 | 2631 | 3 |  |
 | `System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly` | 3 | 2143 | 3 | .bss .data .rodata |
 | `Form/Menu/RoomCreation` | 1 | 1995 | 1 |  |
 | `Game/Map` | 2 | 1952 | 2 |  |
@@ -41,8 +41,8 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `System/Graphic/Effect/libppp/keProg/KeTh` | 1 | 685 | 1 |  |
 | `Game/Player/Player` | 2 | 654 | 2 |  |
 | `System/Graphic/TexUtil` | 4 | 651 | 4 |  |
-| `Game/Enemy/HumanBoss` | 4 | 646 | 4 |  |
 | `System/Graphic/HermitePathCamera` | 1 | 632 | 1 |  |
+| `Game/Enemy/HumanBoss` | 3 | 558 | 3 |  |
 | `Form/DebugWindow` | 1 | 549 | 1 |  |
 | `System/Graphic/PackMan` | 2 | 540 | 2 |  |
 | `System/Graphic/Effect/libppp/keProg/pppKeShpTail3X` | 1 | 532 | 1 |  |
@@ -51,17 +51,15 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `System/Graphic/PathData` | 1 | 489 | 1 |  |
 | `System/Graphic/Glare` | 1 | 446 | 1 |  |
 | `Game/Player/NaviMap` | 1 | 425 | 1 |  |
-| `System/Sound/driver/sddrv_ee` | 2 | 403 | 2 | .bss |
 | `Game/Collision/CollMap` | 2 | 365 | 2 |  |
 | `Game/Player/PlayerCamera` | 1 | 332 | 1 |  |
 | `Game/SceneInfo` | 2 | 314 | 2 |  |
-| `System/Rcf` | 3 | 307 | 3 |  |
 | `System/Graphic/Effect/libppp/partMng` | 1 | 292 | 1 |  |
+| `System/Sound/driver/sddrv_ee` | 1 | 262 | 1 | .bss |
 | `Game/Collision/CollDisp` | 2 | 262 | 2 |  |
 | `System/Graphic/DispList` | 1 | 245 | 1 |  |
 | `Game/Enemy/BattleEnemy` | 1 | 245 | 1 |  |
 | `System/Math3D` | 1 | 234 | 1 |  |
-| `System/Wnd` | 1 | 225 | 1 |  |
 | `System/Graphic/ModelMan` | 1 | 204 | 1 |  |
 | `Game/Atel/Atel` | 1 | 189 | 1 |  |
 | `Game/Atel/AtelCrossFade` | 1 | 188 | 1 |  |
@@ -71,6 +69,7 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `System/TaskMan` | 1 | 135 | 1 |  |
 | `System/Graphic/WorldEnv` | 1 | 128 | 1 |  |
 | `Game/Collision/CollUtilO` | 1 | 121 | 1 | .rodata |
+| `System/Rcf` | 1 | 111 | 1 |  |
 | `Game/Card` | 1 | 95 | 1 |  |
 | `System/RcfCD` | 1 | 41 | 1 |  |
 
@@ -86,7 +85,6 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | unit | function | instr | note |
 |---|---|---:|---|
 | `System/Math3D` | `InvMatrix__6Math3DR7FMATRIXRC7FMATRIX` | 234 | (comment) Same code apart from register allocation: gcc hoists the 1e-8 constants and a "li 20" out of the outer loop (the original keeps them inside), which moves &c into s1. |
-| `System/Wnd` | `init__9CImageWndRt7CPointT1ZiRt6CSizeT1ZiT1T2PCcfG6G_RGBAT7i` | 225 | 5 of 240 lines (2026-11-07; was 14) - the flip block (w2 = w; w = 0 under fgFlip bits, 4 USHORTs) gets other registers (original w a1, h a2, w2 a3, h2 t0; ours w v1, h a1, h2 a2) and the T0..T3 stores another order. Tried (2026-11-05: decl/assignment forms of w, h, w2, h2, INT locals): declaration … |
 | `System/Graphic/DeFocus` | `_makePktDeFocus__12CDeFocusPrim` | 506 | 83 of 596 lines, same size - structure, branches and calls as the original (debug near/far override, auto near/far from the look distance, FRAME/TEST/ALPHA/PRIM A+D blocks with debug colours, sprites, defaults restore). Left: scheduling inside the A+D blocks (store pair order, the _FRAME0_START … |
 | `System/Graphic/DeFocus` | `_makePktBlur__9CBlurPrim` | 508 | 97 of 586 lines, 4 bytes long - structure as the original (debug override, camera-distance Z or 0xFFFF28, A+D header, 6-kind switch of set_tsprite32 patterns, defaults restore). Left: `this` and iZ swap s2/s3 (most lines), the Bak_ registers (original spills the colour, keeps the rate in fp) and … |
 | `System/Graphic/DispList` | `_drawOT__19CDispListShadowDrawR5OTtag` | 245 | 62 of 291 lines, 4 bytes long - logic matches (CShadowModel::getSize inline). Left: the original does not strength-reduce the draw loop over pBuf[j] (li 12 + mult every iteration), which frees an s-register: it keeps i in s6 and spills hHnd, ours spills i. Tried: hHnd as a function-level local or … |
@@ -117,12 +115,9 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `System/Graphic/Effect/libppp/keProg/KeTh` | `KeThBP_Update` | 685 | (comment) Best attempt: same code apart from register allocation (the original has flg in s7, pTp in fp and &vf._06 in s6; this gets fp/s6/s7) and the order of a few spill slots (preStep - rootStep, &vf._07, &vf._08, flg & 0x120, &pRP->InVec), which shifts scheduling around them. |
 | `System/Graphic/Effect/libppp/keProg/pppKeShpTail3` | `pppKeShpTail3Draw` | 514 |  |
 | `System/Graphic/Effect/libppp/keProg/pppKeShpTail3X` | `pppKeShpTail3XDraw` | 532 |  |
-| `System/Sound/driver/sddrv_ee` | `TsSdSepPlayDBG` | 141 | 4 lines with the barrier above (2026-11-06): the lbu of byte 13 vs the hoisted lui/li of the scan loop; sep_size forms 4-11 lines. 2026-11-07: both bytes loaded before a barrier and pinned give the loads but sll/addu come before the lw (7), a fixed register for the pointer stops the giv (14). … |
-| `System/Sound/driver/sddrv_ee` | `TsSdVsbPlay` | 262 | (comment) Register allocation: addr is spilled instead of kept in s8 (one more stack slot), so most registers differ. |
+| `System/Sound/driver/sddrv_ee` | `TsSdVsbPlay` | 262 | 28 of 324 lines (2026-11-07, was 217): every instruction matches except one register swap: the footer/end_flag pointer gets s0 and size/addr2/addr1-addr2 get s2 (original: the reverse). Global-alloc priority: the pointer 14 refs/59 insns = 0.712 beats addr2 4/12 = 0.667; it needs live > 63 or … |
 | `System/Movie/MSVideo` | `setLoadImageTagsYX__12CMoviePlayerPUiPviiiii` | 180 | (comment) Not matching: mby - 1 is not hoisted into a register for the inner loop (the original keeps it in s8 and spills i * 16), so the j++ / dsay increments are scheduled differently. |
-| `System/Rcf` | `finalize__4CRcf` | 111 | (comment) Near-match: register allocation of two statics and a loop-bound reload |
-| `System/Rcf` | `_parseRCF_EntryFile__FUii` | 123 | 28 of 169 lines, same size - the 0x7F (sound list) branch's CBuf/RsrcInfo setup: the original loads s_nReadGroup/s_nLinkOwnerGroup/s_bSceneManagedMode into t2/t0/t1 before the CBuf vtable lui and keeps the constant 1 in a3; ours schedules the vtable first (t3/t1/t2, t0). Rest matches with … |
-| `System/Rcf` | `_atolen__FPCc` | 73 | _atolen: 5 of 79 lines, same size - _atoi's guard + while and return as there. Left: block order: the 0x case jumps over the '$' block to a `nRet = 2` behind it, ours falls into its own. Gotos, an else with a goto, do/while(0) + break all come out with the '$' block first (10 lines). The extra nop … |
+| `System/Rcf` | `finalize__4CRcf` | 111 | 0 or 6 of 153 lines (2026-11-07), random per compile (matched 4 of 6 rebuilds): s_nRcfMapCount/s_nRcfSceneCount's hoisted %hi pseudos tie in global-alloc priority (3 refs / 120 insns each), the tie goes to the lower pseudo, and PRE numbers them in expression-hash bucket order; the SYMBOL_REF hash … |
 | `System/RcfCD` | `_startCdRead__Fii` | 41 | 4-8 lines, varying between identical builds (the draft above is the C) - the hoisted lui's of the s_n*_R statics get s5/s6 in an order that changes per compiler run (gcse PRE hash order, memory gcse-pre-hash-order); store orders tried (all worse). Kept asm because the result is not reproducible. |
 | `System/TaskMan` | `update__8CTaskManiii` | 135 | 4 lines - the barrier settles nTQ/bPause (s5/s6). Left: the TaskMainParam stores: the original issues the nTQ store early and _SecondaryArray's after _nSysLag's; a scheduling tie across the clear() block. 2026-11-07: the ref lists no ctor for TaskMainParam, but brace init with these values builds … |
 | `Game/Card` | `getAttribute__5CCardG4CARDPPCcN32` | 95 | 30 of 124 lines, registers only: buf's address (3 uses / 38 insns) outranks the CCtdMan::m_pInstance address (4 / 110) in global-alloc priority, the original has them the other way round (s6/s5) and keeps card.m_nKind in a0. Worked: `pLF = buf; *pOutStrAttack = pLF;` (parameter registers, 53 -> … |
@@ -154,21 +149,17 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Game/Player/PlayerDRiku` | `setMagic__Q22PL12CPlayerDRikuiii` | 1149 | same structure and size within 8 bytes, 310 of 1363 lines off: the BULLET_PARAM field stores and the member loads feeding them are scheduled differently in every case (the original loads m_AtkKind, m_AtkAttr, m_iAttackPower in that order and stores them together), plus registers in the stock-skill … |
 | `Game/Player/PlayerRiku` | `setMagic__Q22PL11CPlayerRikuiii` | 520 | (comment) Best attempt (same structure): BULLET_PARAM field stores and the attack-power loads are scheduled differently. |
 | `Game/Enemy/BattleEnemy` | `initEnemyParam__12CBattleEnemyiii` | 245 | 34 lines - the Riku-game scan loop: the original places the getRsrcData() ternary before the inline getExtraParam's found block and keeps the parameter in s0 (ours: s2, blocks swapped); the rest (seek loops, relocation, floor mapping, basic param) matches; tried: while/for/continue loop forms, … |
-| `Game/Enemy/EnemyWhitemushroom` | `damage___19CEnemyWhitemushroom` | 184 | (comment) Near-match (3 lines): in case 4 the original loads the vtable pointer for getLockOnPos right after the two TIMEQ stores of setupFade; here the vtable entry loads depend on all six setupFade stores (unknown alias), so the vptr load ranks below them and comes last. Tried (~45 min): … |
-| `Game/Enemy/HumanBoss` | `getAttackCardNum__C10CHumanBossUi` | 43 | (comment) near match, 20 lines (2026-11-05, was 27): the goto-built outer loop reloads iCardCount/pCards like the original (a for loop hoists them); left: the original hoists the m_pEnemyParam load once (t2), ours reloads it too. The ref lists card/j at function level and no getEnemyParam inline … |
+| `Game/Enemy/EnemyWhitemushroom` | `damage___19CEnemyWhitemushroom` | 184 | 3 of 211 lines (2026-11-07): case 4, the vptr load for getLockOnPos comes after all six setupFade stores, the original has it right after the two TIMEQ stores (sw 284/280) and before swc1 268, sw 288, sw 228, sw 272; tried: all store orders, flag forms, barriers, temporaries, call forms, pointer … |
+| `Game/Enemy/HumanBoss` | `getAttackCardNum__C10CHumanBossUi` | 43 | 20 lines (2026-11-05, was 27): the goto-built outer loop reloads iCardCount/pCards like the original (a for loop hoists them); left: the original hoists the m_pEnemyParam load once (t2), ours reloads it too. The ref lists card/j at function level and no getEnemyParam inline 2026-11-07: a local for … |
 | `Game/Enemy/HumanBoss` | `setupCardRevolver__10CHumanBoss` | 334 | 21 of 371 lines - the param pointer is carried in a register copy through the build and enemy-card loops (the original's `move a3,v1`; ours reloads getEnemyParam() in the enemy-card loop body). Levers that got it here: the id % 10000 in a local, UINT search index, one INT i per loop, `cards = … |
 | `Game/Enemy/HumanBoss` | `setupAct__10CHumanBoss` | 181 | 21 of 371 lines - the param pointer is carried in a register copy through the build and enemy-card loops (the original's `move a3,v1`; ours reloads getEnemyParam() in the enemy-card loop body). Levers that got it here: the id % 10000 in a local, UINT search index, one INT i per loop, `cards = … |
-| `Game/Enemy/HumanBoss` | `setStockCard__10CHumanBossPC4CARD` | 88 | (comment) near match, 3 lines (2026-11-07): the first beqz of the \|\| takes the subu from the fall-through in the original, sw zero from the target in ours (v0 looks live there; a clobber after the store does not change it) |
 | `Form/DebugWindow` | `disp__12CDebugWindow` | 549 | (comment) Close: the reload registers of the spilled WW/sign (t0 instead of a3) and the loop's line-font position stores (G_XYZ pointer formed before the x store) differ. |
-| `Form/Menu/Camp` | `initCardKind__5CCampiii` | 331 | 9 of 337 lines (2026-11-07, volatile read of m_pCardInfo): li t1,396 vs lui t3 in the preheader, and the next loop's i in a0 for v1 (a register local on it wrecks the function: 77). Earlier: 26 of 342 lines differ: loop.c hoists the CCard::m_pCardInfo load of the 3-deck copy out of the outer loop … |
-| `Form/Menu/Camp` | `setDeckInfo__5CCampi` | 951 | 3 of 1048 lines differ in the last loop: v0/v1 swapped for the nColSeq != 0x73 compare (nColSeq is spilled; reload loads it into v0 where the original has the 0x73 in v0). The addu order (this + sel 2) is fixed by `(BYTE*)this + (m_nKindCategorySelect << 1) + 6464` (4 -> 3). tried: without _ref … |
-| `Form/Menu/Camp` | `setTechWin__5CCampi` | 551 | 53 of 621 lines differ: in the sleight-list loop the original spills pTechCateTbl and nTechCateCnt and recomputes &pTechCateTbl[nTechSelectTop] from the spilled pointer every iteration; ours strength-reduces it into an s-register (the same giv difference as setMainCmd's font loop). tried: the … |
-| `Form/Menu/Camp` | `setMapCardWin__5CCampi` | 1227 | same size, 33 of 1409 lines differ: the stack slots of the spilled hoisted addresses (&m_pMCInfoNumCtrl, &m_pMCInfoNumFnt, &m_pMCFnt, &m_pMCCard, &m_nMapKind, i + 1) are assigned in another order (orig 0x74 NumFnt, 0x78 MapKind, 0x7c i+1, 0x84 MCCard, 0x88 MCFnt, 0x8c NumCtrl; ours ascending by … |
-| `Form/Menu/Camp` | `setWorldmapCursor__5CCamp` | 853 | 35 of 939 lines differ (62 before _NORMA_PIECES, 2026-11-07). Left: pDoorInfo and nNorma have s4/s3 for s3/s4; an operand barrier on pDoorInfo does not flip them. To enable this draft, drop the data block after its INCLUDE_ASM: it defines pSeqName.4483 too (Ps2EeAs then crashes). tried: … |
-| `Form/Menu/Camp` | `setMainCmd__5CCampii` | 257 | 17 of 276 lines, 8 bytes short (40 before each loop got its own i, as in the ref; was 81, 53 before 2026-11-05: _ref(m_pMainCmdFnt)[i] in the font-replacing loop keeps its own address computation): with the ref's function-level `INT i` plus a block `INT i` in the else branch `this` is in s0 as in … |
+| `Form/Menu/Camp` | `setTechWin__5CCampi` | 551 | 53 of 621 lines (2026-11-07; tools/drafts.py's "build failed" is the data block after the INCLUDE_ASM, which also defines this function's statics: drop it to build the draft): in the sleight-list loop the original reloads the spilled pTechCateTbl at the loop head and recomputes … |
+| `Form/Menu/Camp` | `setMapCardWin__5CCampi` | 1227 | same size, 33 of 1409 lines differ (re-measured 2026-11-07; tools/drafts.py's "build failed" is the data block after the INCLUDE_ASM: drop it to build the draft): the stack slots of the spilled hoisted addresses (&m_pMCInfoNumCtrl, &m_pMCInfoNumFnt, &m_pMCFnt, &m_pMCCard, &m_nMapKind, i + 1) are … |
+| `Form/Menu/Camp` | `setWorldmapCursor__5CCamp` | 853 | 35 of 939 lines differ (62 before _NORMA_PIECES; re-measured 2026-11-07). Left: pDoorInfo and nNI (not nNorma) have s4/s3 for s3/s4: global-alloc priority (-dl: pDoorInfo 28 refs over 187 insns = 0.60, nNI 22 over 121 = 0.73, so nNI is allocated first and takes s3); the original allocates … |
 | `Form/Menu/RoomCreation` | `menuMain__13CRoomCreation` | 1995 | (comment) menuMain: 78 of 2211 lines, 8 bytes short (92 and 0x50 short before _NORMA_PIECES, 2026-11-07): the by-value NormaSrc arguments are written out now; left: case 0's registers (v1 + s7 where the original keeps a0, s4/s6/s8 from there). To enable this draft, also drop the data block after … |
 
-Totals: 82 functions (35821 instructions) in 48 units, 82 of them parked; 5 units take a data section from assembly.
+Totals: 74 functions (33632 instructions) in 47 units, 74 of them parked; 5 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->
