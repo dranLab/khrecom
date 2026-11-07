@@ -565,6 +565,7 @@ static inline void _calcCk(FVECTOR& vCk0, FVECTOR& vCkVec, FVECTOR& vCk1, FVECTO
                  "sqc2 $vf6, 0x0(%4)\n"
                  "sqc2 $vf5, 0x0(%3)" : : "r"(&_vCkS0), "r"(&_vCkE), "r"(&vCk0), "r"(&vCkVec), "r"(&vCk1) : "memory");
 }
+static inline void _loadVf4(FVECTOR& v) { asm volatile("lqc2 $vf4, 0x0(%0)" : : "r"(&v)); }
 static inline FLOAT _dotNf(FVECTOR& v) {
     INT iTmp;
     FLOAT ret;
@@ -651,11 +652,12 @@ void CCollUtil::detectMCInit(MC_CHIP* pChip, INT iArea) {
 extern char D_00489380[]; /* "m_pPrimInfo" */
 extern char D_00489390[]; /* "m_pPrimInfo2" */
 
-/* Parked: _detectMCD: 146 of 467 lines, 8 bytes short - structure as the original (MCD path of _detectOCD: area
- * chip table walk, two allocSpad asserts, same segment loop); ret declared after i for its spill slot, the vf4 asm
- * before the vCkS reference. Left: this in s3 instead of s2 (most lines), the retry loop's bottom (original
- * `beqz` to the 5-tries block + `b` back, ours rotated `bnez`; while/for/do/goto/continue forms tried) and the
- * original recomputing iArea0*4 inside the retry loop. Permuter 8 min: no real gain. */
+/* Parked: _detectMCD: 35 of 458 lines, same size (2026-11-07) - statements in marker order, chip loop as
+ * for (pPrimIdx = pPrimIdx0; iCnt; iCnt--) with its own iArea (this now in s2 as the original), vf4 load via an inline.
+ * Left: ours hoists iArea0*4 out of the retry loop and spills it (104(sp); the original recomputes the sll per pass), so
+ * the spill slots of &m_vCkS/iLoopCnt/pPrimIdx0 move by 4 and iArea0/&m_vCkE swap s4/s5; the 5-tries exit
+ * (original `beqz` to the block + `b` back, ours `bnez` to the top: expand_end_loop uses the break's condjump as the loop
+ * end; while/for/do/goto-over/body-decl forms all give it); `beqz` vs `beqzl` at the ret test. */
 #if 0
 INT CCollUtil::_detectMCD(CCollision& collision) {
     INT i;
@@ -688,11 +690,10 @@ INT CCollUtil::_detectMCD(CCollision& collision) {
     *(FLOAT*)&m_SphereDetectFg = m_Radius;
     m_iKind = collision.m_Kind;
     m_vCkS0 = collision.m_inWS;
-    m_vCkS0.y += m_ShiftY;
     m_vCkE0 = collision.m_inWE;
-    m_vCkE0.w = 1.0f;
+    m_vCkS0.w = m_vCkE0.w = 1.0f;
+    m_vCkS0.y += m_ShiftY;
     m_vCkE0.y += m_ShiftY;
-    m_vCkS0.w = 1.0f;
     m_fgSliding = collision.m_fgStatus & 1;
     if (m_SphereDetectFg && (collision.m_fgStatus & 6)) {
         SubVectorXYZ(vec0, m_vCkE0, m_vCkS0);
@@ -730,10 +731,10 @@ INT CCollUtil::_detectMCD(CCollision& collision) {
     m_iInfo2.info = 0;
     pMCData = m_pMCDInfo->pMCData;
     pMCChip = m_pMCDInfo->pMCChip;
+    fMDVal2 = 1.0f / m_pMCDInfo->fMDVal2;
+    m_fMDVal = 1.0f / m_pMCDInfo->fMDVal;
     m_vCkE = m_vCkS0;
     m_vNormal2.init();
-    m_fMDVal = 1.0f / m_pMCDInfo->fMDVal;
-    fMDVal2 = 1.0f / m_pMCDInfo->fMDVal2;
     for (i = 0; i <= iLenCnt; i++) {
         if (iLenCnt != 0) {
             m_vCkS = m_vCkE;
@@ -749,33 +750,33 @@ INT CCollUtil::_detectMCD(CCollision& collision) {
             m_vCkE = m_vCkE0;
         }
         {
+            INT iIdx;
             INT iArea;
             USHORT* pPrimIdx0;
             USHORT* pPrimIdx;
             INT iLoopCnt;
             INT iArea0;
+            _loadVf4(m_vCkS);
+            FVECTOR& vCkS = m_vCkS;
             INT iCnt;
             MC_CHIP* pChip;
-            asm volatile("lqc2 $vf4, 0x0(%0)" : : "r"(&m_vCkS));
-            FVECTOR& vCkS = m_vCkS;
             iArea0 = __detectMCInitInit_Check(pMCData, fMDVal2);
             if (iArea0 < 0) continue;
-            pPrimIdx0 = &pMCData->prim[pMCData->tbl[iArea0][0]];
+            iIdx = pMCData->tbl[iArea0][0];
+            pPrimIdx0 = &pMCData->prim[iIdx];
             iLoopCnt = 0;
-            while (iLoopCnt < 5) {
+            while (1) {
                 if (iArea0 != -1) {
                     m_PrimInfoIdx = 0;
                     m_PrimInfoIdx2 = 0;
                     iCnt = pMCData->tbl[iArea0][1];
-                    if (iCnt) {
-                        pPrimIdx = pPrimIdx0;
-                        do {
-                            pChip = &pMCChip[*pPrimIdx++];
-                            if (!pChip->id) {
-                                iArea = __detectMCInitInit(pChip);
-                                if (iArea >= 0) detectMCInit(pChip, iArea);
-                            }
-                        } while (--iCnt);
+                    for (pPrimIdx = pPrimIdx0; iCnt; iCnt--) {
+                        INT iArea;
+                        pChip = &pMCChip[*pPrimIdx++];
+                        if (!pChip->id) {
+                            iArea = __detectMCInitInit(pChip);
+                            if (iArea >= 0) detectMCInit(pChip, iArea);
+                        }
                     }
                 }
                 if (!detectMap(&vCkS, &m_vCkE)) goto next;
@@ -785,14 +786,17 @@ INT CCollUtil::_detectMCD(CCollision& collision) {
                     iLenCnt = 0;
                     goto next;
                 }
-                iLoopCnt++;
+                if (++iLoopCnt >= 5) break;
             }
             m_vCkE = m_vCkS;
             iLenCnt = 0;
             m_vNormal2.set(0.0f, 1.0f, 0.0f, 0.0f);
         }
     next:
-        if (ret && (!m_fgSliding || !iLenCnt)) break;
+        if (ret) {
+            if (!m_fgSliding) break;
+            if (!iLenCnt) break;
+        }
     }
     SPAD::freeSpad(0x2400);
     SPAD::freeSpad(0x1000);
