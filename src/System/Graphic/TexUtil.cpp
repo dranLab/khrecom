@@ -717,44 +717,38 @@ BOOL CTexUtil::setupTexInfo(TexInfo& outInfo, const BYTE* pInTex, INT nWidth, IN
     return TRUE;
 }
 
-/* Parked: 93 of 153 lines, 16 bytes short - control flow as the original (tex_cnv PSM 19/20 cases, getTransSize
- * else, allocTex, getTransInfo, TEX0). Left: the original keeps &outInfo._TexInfo/_ClutInfo in s1/s0 across the
- * getTransInfo call (one more saved register, frame 0x90), which renumbers most registers; it also tests tex_cnv
- * with andi 4 where ours shifts (bitfield types and ==1/!=0 tests tried). */
-#if 0
 BOOL CTexUtil::setupTexInfoImd(TexInfo& outInfo, const BYTE* pInImd, INT nAllocType) {
-    const IMD_HEADER* pImd = (const IMD_HEADER*)pInImd;
     INT nTexSize = 0;
     INT nClutSize = 0;
     TIM2_PICTUREHEADER tim2Header;
     INT nTexPos;
     INT nClutPos;
 
-    if (pImd->tex_cnv) {
+    if (((IMD_HEADER*)pInImd)->tex_cnv) {
         tim2Header.ImageType = 3;
-        switch (pImd->tex_psm) {
+        switch (((IMD_HEADER*)pInImd)->tex_psm) {
         case 20:
-            tim2Header.ImageWidth = pImd->tex_w >> 1;
-            tim2Header.ImageHeight = pImd->tex_h >> 2;
             nClutSize = 1;
+            tim2Header.ImageWidth = ((IMD_HEADER*)pInImd)->tex_w >> 1;
+            tim2Header.ImageHeight = ((IMD_HEADER*)pInImd)->tex_h >> 2;
             outInfo._ClutInfo._qwImage = 4;
             outInfo._ClutInfo._nDistW = 8;
             outInfo._ClutInfo._nDistH = 2;
             break;
         case 19:
-            tim2Header.ImageWidth = pImd->tex_w >> 1;
-            tim2Header.ImageHeight = pImd->tex_h >> 1;
             nClutSize = 4;
+            tim2Header.ImageWidth = ((IMD_HEADER*)pInImd)->tex_w >> 1;
+            tim2Header.ImageHeight = ((IMD_HEADER*)pInImd)->tex_h >> 1;
             outInfo._ClutInfo._qwImage = 64;
             outInfo._ClutInfo._nDistW = 16;
             outInfo._ClutInfo._nDistH = 16;
             break;
         }
-        nTexSize = (_align(tim2Header.ImageWidth, 64) * tim2Header.ImageHeight & ~63) >> 6;
+        nTexSize = _align(_align(tim2Header.ImageWidth, 64) * tim2Header.ImageHeight, 64) / 64;
     } else {
-        tim2Header.ImageType = pImd->tex_type;
-        tim2Header.ImageWidth = pImd->tex_w;
-        tim2Header.ImageHeight = pImd->tex_h;
+        tim2Header.ImageType = ((IMD_HEADER*)pInImd)->tex_type;
+        tim2Header.ImageWidth = ((IMD_HEADER*)pInImd)->tex_w;
+        tim2Header.ImageHeight = ((IMD_HEADER*)pInImd)->tex_h;
         CTexUtil::getTransSize(tim2Header, nTexSize, nClutSize);
     }
     if (CVramMan::allocTex(nTexSize, nClutSize, nTexPos, nClutPos, nAllocType) < 0) return FALSE;
@@ -765,16 +759,18 @@ BOOL CTexUtil::setupTexInfoImd(TexInfo& outInfo, const BYTE* pInImd, INT nAllocT
         outInfo._nTexSize = 0;
         outInfo._nClutSize = 0;
     }
-    CTexUtil::getTransInfo(tim2Header, outInfo._TexInfo, outInfo._ClutInfo, nTexPos, nClutPos);
-    outInfo._TexInfo._pImage = (ULONGLONG*)(pInImd + pImd->tex_ofs);
-    outInfo._ClutInfo._pImage = (ULONGLONG*)(pInImd + pImd->clut_ofs);
-    outInfo._TexInfo._nTransSize = nTexSize;
-    outInfo._ClutInfo._nTransSize = nClutSize;
-    outInfo._nTPage = SCE_GS_SET_TEX0(nTexPos, pImd->tex_bw, pImd->tex_psm, pImd->tex_tw, pImd->tex_th, 1, 0, nClutPos,
-                                      outInfo._ClutInfo._nFormat, 0, 0, 1);
+    { /* block-local references: the debug info (and so the ref) has no entry for this block's locals */
+        VTransInfo& tex = outInfo._TexInfo;
+        VTransInfo& clut = outInfo._ClutInfo;
+        CTexUtil::getTransInfo(tim2Header, tex, clut, nTexPos, nClutPos);
+        tex._pImage = (ULONGLONG*)(pInImd + ((IMD_HEADER*)pInImd)->tex_ofs);
+        clut._pImage = (ULONGLONG*)(pInImd + ((IMD_HEADER*)pInImd)->clut_ofs);
+        tex._nTransSize = nTexSize;
+        clut._nTransSize = nClutSize;
+        outInfo._nTPage = SCE_GS_SET_TEX0(nTexPos, ((IMD_HEADER*)pInImd)->tex_bw, ((IMD_HEADER*)pInImd)->tex_psm,
+                                          ((IMD_HEADER*)pInImd)->tex_tw, ((IMD_HEADER*)pInImd)->tex_th, 1, 0,
+                                          nClutPos, clut._nFormat, 0, 0, 1);
+    }
     return TRUE;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/TexUtil", setupTexInfoImd__8CTexUtilR7TexInfoPCUci);
-#endif
 // SOURCE DATA: .data .rodata
