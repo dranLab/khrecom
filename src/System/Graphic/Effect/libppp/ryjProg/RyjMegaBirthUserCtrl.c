@@ -32,7 +32,6 @@ extern sceVu0FMATRIX ppvSCMatrix;
     "vmaddaz.xyzw $ACC, $vf15, $vf4z\n" \
     "vmaddw.xyzw $vf4, $vf16, $vf4w\n"
 
-/* MATCH: GPR instructions inside the VU0/MMI asm, as in the original's instruction stream; the split form (C + one asm per VU0/MMI instruction) is not attempted yet: build/progress/cleanup-libppp-mips-asm.md */
 void RyjMegaBirthUserCtrDrawShapeRefPos(int shape_id, pppCVECTOR *color, u_char fog, u_char near) {
     OSHAPE_IN_VU1 *shi0;
     OSHAPE_IN_VU1 *shi1;
@@ -88,18 +87,26 @@ void RyjMegaBirthUserCtrDrawShapeRefPos(int shape_id, pppCVECTOR *color, u_char 
             scale *= 0.1f;
         }
         if (rot == 0) {
-            __asm__ __volatile__(
-                "lq $8, 0x0(%1)\n"
-                "lq $9, 0x10(%1)\n"
-                "lq $10, 0x20(%1)\n"
-                "lq $11, 0x30(%1)\n"
-                "sq $8, 0x0(%0)\n"
-                "sq $9, 0x10(%0)\n"
-                "sq $10, 0x20(%0)\n"
-                "sq $11, 0x30(%0)"
-                :
-                : "r"(rot_matrix), "r"(ppvUnitMatrix)
-                : "$8", "$9", "$10", "$11", "memory");
+            /* MATCH: the copy goes through t0-t3, all loads before the stores */
+            register u_long128 m0 asm("$8");
+            register u_long128 m1 asm("$9");
+            register u_long128 m2 asm("$10");
+            register u_long128 m3 asm("$11");
+            u_long128 *src = (u_long128 *)ppvUnitMatrix;
+
+            /* MATCH: makes src opaque, so loop.c does not hoist &ppvUnitMatrix out of the loop (its lui/addiu stay here) */
+            asm volatile("" : "=r"(src) : "0"(src));
+            m0 = src[0];
+            m1 = src[1];
+            m2 = src[2];
+            m3 = src[3];
+            ((u_long128 *)rot_matrix)[0] = m0;
+            ((u_long128 *)rot_matrix)[1] = m1;
+            ((u_long128 *)rot_matrix)[2] = m2;
+            ((u_long128 *)rot_matrix)[3] = m3;
+            /* MATCH: src stays live past the loads (no REG_DEAD in the last one: sched1 keeps the source order), and the asm
+               stops reorg from moving the last sq into the b's delay slot */
+            asm volatile("" : : "r"(src));
         } else {
             s = eff_sin_t[(u_int)rot >> 4];
             c = eff_sin_t[((rot + 0x4000) >> 4) & 0xFFF];
@@ -124,6 +131,11 @@ void RyjMegaBirthUserCtrDrawShapeRefPos(int shape_id, pppCVECTOR *color, u_char 
         ah = (OANM_HEADER *)shape->shape;
         seq = &ah->seq[anm_seq];
         sh = (OSHAPE_VU1 *)((char *)ah + seq->sha);
+        /* MATCH: one asm for the VU0/COP2-only run (no GPR instruction inside). One asm per instruction was tried
+           (2026-11-08): 66 lines with the operands in $2/$3/$5/$6/$7 register locals, 52 with shi0 and anm_seq pinned
+           too. Each asm statement adds one insn to the life of every pseudo across the block, and shi0 (24 refs, life
+           114) beats rot (14 refs, life 50) by 0.842 to 0.840 in global-alloc priority: one extra empty asm already
+           swaps their s0/s1 (39 lines) */
         __asm__ __volatile__(
             "lqc2 $vf1, 0x0(%0)\n"
             "lqc2 $vf2, 0x10(%0)\n"
