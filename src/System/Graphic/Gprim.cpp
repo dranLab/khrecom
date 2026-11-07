@@ -7,7 +7,6 @@
 #include "System/Coord.h"
 #include "System/Tsin.h"
 #include "System/VramMan.h"
-#include "include_asm.h"
 
 extern INT SCREEN_HEIGHT;
 /* PARTIAL: System/RsrcData.h */
@@ -308,37 +307,26 @@ void CScissoring::setDefault() {
     p1.y = SCREEN_HEIGHT - 1;
     setRect(p0, p1);
 }
-/* Parked: 2 lines (2026-11-07, 0x206 pinned): only addiu a2,a2,64 sits mid-loop here, at the loop end in the original. `INT v = i + 1`
-   with v * 64 - 1 (as PackMan's packet) gets a2 = 63 and the end step but leaves a temp for i (13), a separate x biv or j loses i (9, 27).
-   Earlier: 8 lines - two scheduling ties: the original loads 0x206 before the shared zero for the PRIM/PRMODE A+D
- * pair, and strength-reduces i * 64 + 63 with its increment at the loop end while i++ sits inside the SCISSOR
- * expression (ours increments both there); this draft fixed the hoisted-constant order (XYZ helper with y first
- * and z by reference, as the original's PackMan.h inline) and i++ (line 277); tried before: _gifTag vs _AD, _ref
- * reloads, memory clobber, permuter 15 min x2; now also: _AD operand listing (breaks its other users), typed
- * zeros, swapped statements, ++i/(i+1) forms, separate x biv, for-increment variants, permuter 15 min (17083
- * candidates, no gain). CZFill's key function: the weak tail needs it */
-#if 0
 static inline u_long _gsXYZz(INT x, INT y, const FIX4& z) {
     return ((u_long)(y + 0x8000) << 16) | (u_long)(x + 0x8000) | ((u_long)(z >> 4) << 32);
 }
 void CZFill::makePkt() {
     QWdata* qp;
     INT i;
+    INT x;
 
     qp = (QWdata*)CPackMan::pkOpenGifTag(_gifTag(0x1000000000008000UL, 0xE));
 
     qp[0].ul128 = _AD(0x48, 0x32001);
     qp[1].ul128 = _AD(0x4F, (_ref(VRAM::_ZBUF_START) / 32) | 0x31000000);
-    {
-        register ULONGLONG uPrim asm("$3") = 0x206; /* MATCH: 0x206 before the shared zero */
-        __asm__ volatile("" : : "r"(uPrim));
-        qp[2].ul128 = _AD(0, uPrim);
-    }
+    u_long prim = 0x206; /* MATCH: 0x206 set before the shared zero of the PRIM/PRMODE pair */
+    qp[2].ul128 = _AD(0, prim);
     qp[3].ul128 = _AD(1, 0);
     qp += 4;
 
-    for (i = 0; i < 8; qp += 3) {
-        qp[0].ul128 = _AD(0x41, (u_long)(i * 64) | ((u_long)(i++ * 64 + 63) << 16) | ((u_long)(_ref(SCREEN_HEIGHT) - 1) << 48));
+    /* MATCH: x is its own biv (step at the loop end), i++ inside the SCISSOR expression */
+    for (i = 0, x = 63; i < 8; qp += 3, x += 64) {
+        qp[0].ul128 = _AD(0x41, (u_long)(i++ * 64) | ((u_long)x << 16) | ((u_long)(_ref(SCREEN_HEIGHT) - 1) << 48));
         qp[1].ul128 = _AD(5, _gsXYZz(-0x1000, -((_ref(SCREEN_HEIGHT) / 2) << 4), m_nZ));
         qp[2].ul128 = _AD(5, _gsXYZz(0x1000, (_ref(SCREEN_HEIGHT) / 2) << 4, m_nZ));
     }
@@ -348,9 +336,6 @@ void CZFill::makePkt() {
 
     CPackMan::pkCloseGifTag(&qp[3]);
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__6CZFill);
-#endif
 void CTile::makePkt() {
     QWdata giftag;
     giftag.ul64[0] = 0x4400000000008000UL;
@@ -512,16 +497,9 @@ CScreenColoredMask::CScreenColoredMask() {
     m_P0.set(-0x1000, -(_ref(SCREEN_HEIGHT) * 8));
     m_P1.set(0x1000, _ref(SCREEN_HEIGHT) * 8);
 }
-/* Parked: the corner setup before the two calcVert calls (load/store order of b, c and ab: the original keeps a
- * separate copy of m_P0.y for ab.set's _y parameter) and the register numbering that follows; a reference to m_P1
- * (not in the ref's locals) reproduces the original's s0 = &m_P1 read of m_P1.y in the second set (41 -> 39
- * lines); the ref also has no tex local although setTexture()'s result lives in s3 until its pkAddGsData; tried:
- * direct member stores, reference locals for m_P0/m_P1, cd.set before the first calcVert, mid-function
- * declarations, permuter 15 min (49 -> 48). CRotSprt's key function: the weak tail needs it */
-#if 0
 void CRotSprt::makePkt() {
-    G_XYZ c;
     G_XYZ b;
+    G_XYZ c;
     IVECTOR ab;
     IVECTOR cd;
     ULONGLONG tex;
@@ -530,20 +508,19 @@ void CRotSprt::makePkt() {
     }
     tex = setTexture();
 
+    /* MATCH: ab.y read through p0 (its own copy of m_P0.y); m_P1.y of cd read through p1 (s0 = &m_P1) */
+    const G_XYZ& p0 = m_P0;
     const G_XYZ& p1 = m_P1;
     b.set(m_P1.x, m_P0.y);
     c.set(m_P0.x, m_P1.y);
 
-    ab.set(m_P0.x, m_P0.y, b.x, b.y);
+    ab.set(m_P0.x, p0.y, b.x, b.y);
     calcVert(ab);
     cd.set(c.x, c.y, m_P1.x, p1.y);
     calcVert(cd);
 
     G_UV tb;
     G_UV tc;
-    tb.set(m_T1.u, m_T0.v);
-    tc.set(m_T0.u, m_T1.v);
-
     QWdata giftag;
     giftag.ul64[0] = 0xB400000000008000UL;
     giftag.ul64[1] = 0x43434343170UL;
@@ -551,6 +528,9 @@ void CRotSprt::makePkt() {
     FIX4 _x = m_Center.x + 0x8000;
     FIX4 _y = m_Center.y + 0x8000;
     FIX4 _z = m_Center.z >> 4;
+
+    tb.set(m_T1.u, m_T0.v);
+    tc.set(m_T0.u, m_T1.v);
     CPackMan::pkOpenGifTag(giftag.ul128);
     CPackMan::pkAddGsData((u_long)0x31C | ((u_long)isSemiTrans() << 6));
     CPackMan::pkAddGsData(tex);
@@ -565,9 +545,6 @@ void CRotSprt::makePkt() {
     CPackMan::pkAddGsData((u_long)(cd.z + _x) | ((u_long)(cd.w + _y) << 16) | ((u_long)_z << 32));
     CPackMan::pkCloseGifTag();
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__8CRotSprt);
-#endif
 static BOOL __isRect(const FVECTOR& v, const FVECTOR* vRect) {
     FVECTOR __CCTPrim_vDefRect;
     INT iRet;
