@@ -3185,21 +3185,6 @@ void CPlayer::initHang() {
     m_fJumpSpdY = 0.0f;
     if (m_pMarker) m_pMarker->cancelLockon(m_hLockon, 0);
 }
-/* Parked: 23 lines differ, all FP-register/load-order of the two angle wraps: the original loads m_fDir first ($f0)
-   then m_fAnalogViewDir ($f1) for `view - dir + PI` (ours the reverse), and in the drop-off arm it loads dir into $f12
-   in the branch delay slots and copies it to $f22 after getPos (ours loads $f22 directly and lui/mtc1 the 0.5f after
-   the call); the second wrap (dir - PI) keeps d in $f1 and r in $f12 (ours both in $f12). Everything else matches
-   (frame, switch layout, collision sequences, FVECTOR::set() for the pointer-addressed w stores, getAnalogHoukou()
-   for the pad pointer in s0). tried: ~20 variants (dir as a local before/after the branch, a/b operand locals,
-   operand order, _limitPI2 vs explicit if/else, rot.y/m_fDir store orders, d0 copy before getPos) and
-   tools/permuter.py through the method alias wrapper (6 min; its best only commuted the vStart/vEnd sums, worse).
-   Same family as the parked exeWall / exeWalk wraps. Retried 2026-10-25 ($LM tags): getDir() in the first
-   wrap and for dir, the model pointer read directly (m_pModels; the original inlines getModel, our Model.h only
-   defines it after Entity.h) -> 18 lines, but 8 bytes short: the two `mov.s` copies of the original are missing
-   (dir loaded into $f12 in the three branch delay slots and copied to $f22 after getPos, and the second wrap's
-   result r kept in $f12 apart from d = dir - PI in $f1 with the PI constant shared with the r > PI test); also the
-   0.5f (ofs.set / setRadius) is loaded into $f21 before getPos. tried: setDir(r), rot.y before setDir (23). */
-#if 0
 void CPlayer::exeHang() {
     FLOAT dir;
     Houkou houkou;
@@ -3242,7 +3227,7 @@ void CPlayer::exeHang() {
         if (getAnalogHoukou()) houkou = getHoukouFromAngle(r);
         else houkou = HOUKOU_NUTRAL;
         if (isTrgFlag(1) || getAnalogHoukou() == HOUKOU_DOWN || houkou == HOUKOU_DOWN) {
-            dir = getDir();
+            r = getDir(); dir = r;
             pos = getPos();
             ofs.set(0.0f, 0.0f, -0.6f);
             _unitMatrix(m);
@@ -3323,9 +3308,6 @@ void CPlayer::exeHang() {
         m_pCollMap->setHangPosition(rot, pos);
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeHang__7CPlayer);
-#endif
 void CPlayer::initAvoid() {
     if (isConditionFlag(0x10000000) && !isConditionFlag(0x400000)) {
         initFooting(2);
