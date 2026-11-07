@@ -1206,8 +1206,6 @@ BOOL CHumanBoss::stockActProc(const CARD* inActiveCard) {
     return FALSE;
 }
 
-/* near match, 7 lines: both setDoBattleAct/useCard tails kept (goto ret from the first, 2026-11-05; was 20); left: s5/s6 swap of the -1 constant and &tmp[count] (global-alloc tie), one move a0,s0 after the div */
-#if 0
 BOOL CHumanBoss::normalActProc(const CARD* inActiveCard) {
     ACT_DATA* tmp[8];
     INT count = 0;
@@ -1215,17 +1213,18 @@ BOOL CHumanBoss::normalActProc(const CARD* inActiveCard) {
     INT i;
     INT j;
     INT card;
+    register INT nNone asm("$22"); /* MATCH: the -1 in s6, &tmp[count] in s5 */
 
     for (i = 0; i < m_iNormalActNum; i++) {
         if (!m_pNormalActs[i].bEnable) {
             continue;
         }
-        for (j = 0; j < 2; j++) {
+        for (j = 0, nNone = -1; j < 2; j++) {
             card = m_pNormalActs[i].pAct->iCard[j];
-            if (card == -1) {
+            if (card == nNone) {
                 continue;
             }
-            if (m_pNormalActs[i].pAct->iCard[0] != -1 && m_pNormalActs[i].pAct->iCard[1] != -1) {
+            if (m_pNormalActs[i].pAct->iCard[0] != nNone && m_pNormalActs[i].pAct->iCard[1] != nNone) {
                 if (RND::genrand_int31() & 1) {
                     continue;
                 }
@@ -1257,9 +1256,6 @@ BOOL CHumanBoss::normalActProc(const CARD* inActiveCard) {
 ret:
     return TRUE;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/HumanBoss", normalActProc__10CHumanBossPC4CARD);
-#endif
 
 void CHumanBoss::setDoBattleAct(const ACT_DATA* inAct) {
 #line 1634
