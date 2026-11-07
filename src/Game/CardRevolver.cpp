@@ -588,10 +588,13 @@ void CCardRevolver::exeWait() {
         m_iState = 1;
     }
 }
-/* Parked: 27 lines off, only the TRACE argument loads in the three card dumps: the original loads uiFlag
-   into v1 and uiOwner last into v0 (the card pointer's register), ours the other way round. Worked: state
-   switch with explicit returns, m_pCards[i] indexed directly (pBC temp moved the pointer to t4), debug guards in
-   this order. Tried: kind/owner accessor forms; permuter 4 min (no gain). */
+/* Parked: 27 of 426 lines (2026-11-07): the TRACE argument loads of the first two card dumps: the original loads
+   uiFlag into v1 and uiOwner last into v0, ours the reverse, and the kind load comes after iHandMax. Cause found: with
+   stack arguments, calls.c precomputes every argument that contains a call (all inline getters) in argument order;
+   the original evaluated kind and number after them, i.e. without a call: `pBC->m_cardData.m_nKind` and
+   `pBC->m_cardData.m_nNumber` in all three dumps match exactly, but m_cardData is private in the ref (a friend
+   declaration in BattleCard.h would be needed; not done, user rule). Draft has the ref locals (pBC, block-local
+   i/pBC in dumps 2 and 3). Tried: getCardData()->m_nKind, kind/owner accessor forms; permuter 4 min (no gain). */
 #if 0
 void CCardRevolver::main() {
     INT i;
@@ -605,10 +608,11 @@ void CCardRevolver::main() {
         TRACE("Rev: bActive = %d, tqTimer = %d, uiFlag = %08x,\n", m_bActive, m_tqTimer, m_uiFlag);
         TRACE("PLCR: Cards--------------------------------\n");
         for (i = 0; i < m_nLimit; i++) {
-            if (&m_pCards[i]) {
-                TRACE("%3d: [Card%03d:%d(%d)] iStock=%d, iHand=%d/%d, uiFlag=%08x, uiOwner=%d,\n", i, m_pCards[i].getCardKind(),
-                      m_pCards[i].getCardData()->m_nNumber, m_pCards[i].getBaseCardNumber(), m_pCards[i].getStock(), m_pCards[i].getHand(),
-                      m_pCards[i].getHandMax(), m_pCards[i].getFlag(), m_pCards[i].getCardOwner());
+            pBC = &m_pCards[i];
+            if (pBC) {
+                TRACE("%3d: [Card%03d:%d(%d)] iStock=%d, iHand=%d/%d, uiFlag=%08x, uiOwner=%d,\n", i, pBC->getCardKind(),
+                      pBC->getCardData()->m_nNumber, pBC->getBaseCardNumber(), pBC->getStock(), pBC->getHand(),
+                      pBC->getHandMax(), pBC->getFlag(), pBC->getCardOwner());
             } else {
                 TRACE("%3d: NULL,\n", i);
             }
@@ -652,6 +656,8 @@ void CCardRevolver::main() {
     exeStock();
     if (dbgCheckUser(USR_PROG) && dbgButtonTrg(USR_SYSTEM, 2, 1)) {
         if (dbgButtonDown(USR_SYSTEM, 4, 1) && m_uiUser == 1) {
+            INT i;
+            CBattleCard* pBC;
             TRACE("PLCR: ========================================\n");
             TRACE("Rev: Mode = MODE_NORMAL\n");
             TRACE("Rev: nTotal = %d, nRemain = %d, nActive = %d,\n", m_nTotal[0], m_nRemain[0], m_nActive[0]);
@@ -659,10 +665,11 @@ void CCardRevolver::main() {
             TRACE("Rev: bActive = %d, tqTimer = %d, uiFlag = %08x,\n", m_bActive, m_tqTimer, m_uiFlag);
             TRACE("PLCR: Cards--------------------------------\n");
             for (i = 0; i < m_nLimit; i++) {
-                if (&m_pCards[i]) {
-                    TRACE("%3d: [Card%03d:%d(%d)] iStock=%d, iHand=%d/%d, uiFlag=%08x, uiOwner=%d,\n", i, m_pCards[i].getCardKind(),
-                          m_pCards[i].getCardData()->m_nNumber, m_pCards[i].getBaseCardNumber(), m_pCards[i].getStock(), m_pCards[i].getHand(),
-                          m_pCards[i].getHandMax(), m_pCards[i].getFlag(), m_pCards[i].getCardOwner());
+                pBC = &m_pCards[i];
+                if (pBC) {
+                    TRACE("%3d: [Card%03d:%d(%d)] iStock=%d, iHand=%d/%d, uiFlag=%08x, uiOwner=%d,\n", i, pBC->getCardKind(),
+                          pBC->getCardData()->m_nNumber, pBC->getBaseCardNumber(), pBC->getStock(), pBC->getHand(),
+                          pBC->getHandMax(), pBC->getFlag(), pBC->getCardOwner());
                 } else {
                     TRACE("%3d: NULL,\n", i);
                 }
@@ -670,16 +677,19 @@ void CCardRevolver::main() {
             TRACE("PLCR: ========================================\n");
         }
         if (dbgButtonDown(USR_SYSTEM, 1, 1) && m_uiUser == 2) {
+            INT i;
+            CBattleCard* pBC;
             TRACE("ENCR: ========================================\n");
             TRACE("Rev: nTotal = %d, nRemain = %d, nActive = %d,\n", m_nTotal[0], m_nRemain[0], m_nActive[0]);
             TRACE("Rev: nLimit = %d, nExtra = %d, iMax = %d\n", m_nLimit, m_nExtra, m_iMax);
             TRACE("Rev: bActive = %d, tqTimer = %d, uiFlag = %08x,\n", m_bActive, m_tqTimer, m_uiFlag);
             TRACE("ENCR: Cards--------------------------------\n");
             for (i = 0; i < m_nLimit; i++) {
-                if (&m_pCards[i]) {
-                    TRACE("%3d: [Card%03d:%d] iStock=%d, iHand=%d/%d, uiFlag=%08x, uiOwner=%d,\n", i, m_pCards[i].getCardKind(),
-                          m_pCards[i].getCardData()->m_nNumber, m_pCards[i].getStock(), m_pCards[i].getHand(), m_pCards[i].getHandMax(),
-                          m_pCards[i].getFlag(), m_pCards[i].getCardOwner());
+                pBC = &m_pCards[i];
+                if (pBC) {
+                    TRACE("%3d: [Card%03d:%d] iStock=%d, iHand=%d/%d, uiFlag=%08x, uiOwner=%d,\n", i, pBC->getCardKind(),
+                          pBC->getCardData()->m_nNumber, pBC->getStock(), pBC->getHand(), pBC->getHandMax(),
+                          pBC->getFlag(), pBC->getCardOwner());
                 } else {
                     TRACE("%3d: NULL,\n", i);
                 }
