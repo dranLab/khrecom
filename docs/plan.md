@@ -319,6 +319,12 @@ group of about 10 .cpp files, V3 each.
 log in `build/progress/cleanup-<name>.md`; merge with the `--summary` deltas; add a row to the trend table of
 `docs/partials.md`, then the docs block. Items over about 30 files are split by top directory.
 
+**Queue state (2026-11-07):** the R1 "gate" items are feature macros a unit defines before the include. Dropping each
+one's `#define`s and rebuilding: ENTITY_H_SETFLAG_DIRECT, MODELDATA_H_TEXINFO_CTOR, GAME_COLLISION_COLLOBJ_H (CollUtil)
+and VECTOR_H_SET_CALL all change the image, so they stay. KH_PLACEMENT_NEW_DEFINED (LinkedBuf.h) guards one of about 40
+identical placement-new definitions in .cpp files (some without `throw()`): one shared definition is a wide, codegen-free
+change for its own branch. MapEnemy.h, SceneInfo.h, CollUtilA.h and Coord.h list gate users without a feature macro.
+
 **A4. The ladder**, when completing a header would break another unit's `.rodata` (stop at the first step that
 works): forward declarations instead of includes; move the type to the header the original used (string
 evidence + ref owner); move types only the owner uses into its .cpp; for a weak function now emitted in a
