@@ -498,16 +498,9 @@ CScreenColoredMask::CScreenColoredMask() {
     m_P0.set(-0x1000, -(_ref(SCREEN_HEIGHT) * 8));
     m_P1.set(0x1000, _ref(SCREEN_HEIGHT) * 8);
 }
-/* Parked: the corner setup before the two calcVert calls (load/store order of b, c and ab: the original keeps a
- * separate copy of m_P0.y for ab.set's _y parameter) and the register numbering that follows; a reference to m_P1
- * (not in the ref's locals) reproduces the original's s0 = &m_P1 read of m_P1.y in the second set (41 -> 39
- * lines); the ref also has no tex local although setTexture()'s result lives in s3 until its pkAddGsData; tried:
- * direct member stores, reference locals for m_P0/m_P1, cd.set before the first calcVert, mid-function
- * declarations, permuter 15 min (49 -> 48). CRotSprt's key function: the weak tail needs it */
-#if 0
 void CRotSprt::makePkt() {
-    G_XYZ c;
     G_XYZ b;
+    G_XYZ c;
     IVECTOR ab;
     IVECTOR cd;
     ULONGLONG tex;
@@ -516,20 +509,19 @@ void CRotSprt::makePkt() {
     }
     tex = setTexture();
 
+    /* MATCH: ab.y read through p0 (its own copy of m_P0.y); m_P1.y of cd read through p1 (s0 = &m_P1) */
+    const G_XYZ& p0 = m_P0;
     const G_XYZ& p1 = m_P1;
     b.set(m_P1.x, m_P0.y);
     c.set(m_P0.x, m_P1.y);
 
-    ab.set(m_P0.x, m_P0.y, b.x, b.y);
+    ab.set(m_P0.x, p0.y, b.x, b.y);
     calcVert(ab);
     cd.set(c.x, c.y, m_P1.x, p1.y);
     calcVert(cd);
 
     G_UV tb;
     G_UV tc;
-    tb.set(m_T1.u, m_T0.v);
-    tc.set(m_T0.u, m_T1.v);
-
     QWdata giftag;
     giftag.ul64[0] = 0xB400000000008000UL;
     giftag.ul64[1] = 0x43434343170UL;
@@ -537,6 +529,9 @@ void CRotSprt::makePkt() {
     FIX4 _x = m_Center.x + 0x8000;
     FIX4 _y = m_Center.y + 0x8000;
     FIX4 _z = m_Center.z >> 4;
+
+    tb.set(m_T1.u, m_T0.v);
+    tc.set(m_T0.u, m_T1.v);
     CPackMan::pkOpenGifTag(giftag.ul128);
     CPackMan::pkAddGsData((u_long)0x31C | ((u_long)isSemiTrans() << 6));
     CPackMan::pkAddGsData(tex);
@@ -551,9 +546,6 @@ void CRotSprt::makePkt() {
     CPackMan::pkAddGsData((u_long)(cd.z + _x) | ((u_long)(cd.w + _y) << 16) | ((u_long)_z << 32));
     CPackMan::pkCloseGifTag();
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__8CRotSprt);
-#endif
 static BOOL __isRect(const FVECTOR& v, const FVECTOR* vRect) {
     FVECTOR __CCTPrim_vDefRect;
     INT iRet;
