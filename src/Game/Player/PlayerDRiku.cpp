@@ -1008,7 +1008,7 @@ void CPlayerDRiku::initStockSkill(INT inNo) {
     setTrgFlag(0, 0x40000);
     m_hMagicCore = 0;
 }
-/* Parked: structurally complete (35 cases in the original order, Riku's 0x6cc-0x6f9 group renumbered to 0x712-0x73f), same frame, 8 bytes long, 173 of 3903 lines off: case 1's attack-ID switch keeps a compare for the empty case 0x690 in the original; cross-jumped tails differ (0x67c's flag-and-return tail, 0x683); pTarget gets s2 instead of s0 in 0x69c; f0/f1 choices in 0x69c and 0x4a8; the original keeps 50 in s2 for the whole function; 0x4a8 has a dead (m_fAnalogViewDir - m_fDir) < -PI compare. Worked: two block-local FVECTORs in 0x4a8 (frame size), 0x69b's arrive/else arm order, 0x73c's offWeapon tail, 0x73d's setMagic(0xb9) loop with onWeapon(1). Tried: switch forms for case 1. Same family as the parked CPlayerRiku/CPlayerSora exeStockSkill drafts. */
+/* Parked: 108 of 3890 lines (2026-11-07), same size: cross-jumped tails differ (ours merges the 0x683 setAnimSkillEx+setPlayerFlag(0x100000) tail into 0x6xx's copy, the original keeps 0x683's whole and merges the later copy into the setAnimRsrcEx tail at 2525); the sched2 order around global float loads in 0x67c/0x67d (the original loads m_pMove before lbu WORK1 and g_fAntiGravity/g_fGravity, its m_pMove load must have a higher priority than ours' 11); pTarget gets s2 instead of s0 in 0x69c; f0/f1 choices in 0x69c and 0x4a8 (pos.y = m_vMarkPos.y + 5/7 arms); store order of the zero stores at 840/844 and 1188/972 in two later cases; 0x4a8 has a dead (m_fAnalogViewDir - m_fDir) < -PI compare. Worked: case 1's switch needs a third empty case above 0x690 (any value; 0x6ae here: the tree's root is then 0x690), m_pWeapon->isOnAttack() for the two onAttack tests (ref: two CPlayerWeapon inlines), 0xaa/0xab set the attack without m_AtkAttr (_setAttackNoAttr), _upKind/_limitPI as one expression, two block-local FVECTORs in 0x4a8, 0x69b's arrive/else arm order, 0x73c's offWeapon tail, 0x73d's setMagic(0xb9) loop with onWeapon(1). The ref writes the attack set out with CPlayer inlines (95 CPlayer* this scopes, 5 INT inState = Player.h:465's setter). Tried: switch forms for case 1. Same family as the parked CPlayerRiku/CPlayerSora exeStockSkill drafts. */
 #if 0
 static inline void _setAttack(CPlayerDRiku* p, UINT inID) {
     p->m_uiAttackID = inID;
@@ -1016,6 +1016,15 @@ static inline void _setAttack(CPlayerDRiku* p, UINT inID) {
     p->m_iAttackPower = p->m_iAP * CardBattle::g_pStockSkillList[p->m_iStockSkill].POWER[p->m_pAtkData->POWER] / 100;
     _ref(p->m_AtkKind) = (ATK_KIND)p->m_pAtkData->DAMAGE;
     _ref(p->m_AtkAttr) = (ATK_ATTR)CardBattle::g_pStockSkillList[p->m_iStockSkill].ATTR;
+    UINT up = _upKind(CardBattle::g_pStockSkillList[p->m_iStockSkill].UP_TYPE0,
+                      CardBattle::g_pStockSkillList[p->m_iStockSkill].UP_TYPE1);
+    p->calcEnchant_AttackPoint(p->m_iAttackPower, p->m_AtkKind, p->m_AtkAttr, up);
+}
+static inline void _setAttackNoAttr(CPlayerDRiku* p, UINT inID) {
+    p->m_uiAttackID = inID;
+    p->m_pAtkData = &g_AttackDataList[inID];
+    p->m_iAttackPower = p->m_iAP * CardBattle::g_pStockSkillList[p->m_iStockSkill].POWER[p->m_pAtkData->POWER] / 100;
+    _ref(p->m_AtkKind) = (ATK_KIND)p->m_pAtkData->DAMAGE;
     UINT up = _upKind(CardBattle::g_pStockSkillList[p->m_iStockSkill].UP_TYPE0,
                       CardBattle::g_pStockSkillList[p->m_iStockSkill].UP_TYPE1);
     p->calcEnchant_AttackPoint(p->m_iAttackPower, p->m_AtkKind, p->m_AtkAttr, up);
@@ -1072,6 +1081,7 @@ void CPlayerDRiku::exeStockSkill() {
         if (m_pAtkData->FLAG & 0x20) {
             switch (m_uiAttackID * 10) {
             case 0x690:
+            case 0x6ae:
                 break;
             case 0x67c:
                 setCastEffect(g_szDpxEX1580, 0x13, &Crd(m_iBoneCenter), NULL);
@@ -1254,7 +1264,7 @@ void CPlayerDRiku::exeStockSkill() {
         rot = getRot();
         m_pMove->homingMove(m_vWarpPos[1], 1.0f, m_pAtkData->MAX_SPEED * 0.01f);
         setRot(rot);
-        if (!m_pWeapon->getCollAttackID()) onAttack();
+        if (!m_pWeapon->isOnAttack()) onAttack();
         if (arriveTarget(m_vWarpPos[1], m_pAtkData->RADIUS * 0.1f) || getTimer() <= 0) {
             offAttack();
             clearSpeed();
@@ -1283,7 +1293,7 @@ void CPlayerDRiku::exeStockSkill() {
             pos.z = m_vStartPos.z;
             setOldPos(pos);
             m_iSubState = 0x69d;
-            _setAttack(this, 0xaa);
+            _setAttackNoAttr(this, 0xaa);
             m_pCam->changeNowPlayer(getHandle(), getHandle());
             m_pCam->changeCamMode(4, 0);
             m_bNextTrg = FALSE;
@@ -1320,7 +1330,7 @@ void CPlayerDRiku::exeStockSkill() {
         return;
     case 0x69d:
         setPlayerFlag(0x400000, 0);
-        if (frame >= m_pAtkData->COLL_START_FRAME && !m_pWeapon->getCollAttackID()) onAttack();
+        if (frame >= m_pAtkData->COLL_START_FRAME && !m_pWeapon->isOnAttack()) onAttack();
         if (frame >= m_pAtkData->WORK1 && !m_bNextTrg) {
             m_bNextTrg = TRUE;
             setMagic(0xab, -1, m_iStockSkill);
@@ -1343,7 +1353,7 @@ void CPlayerDRiku::exeStockSkill() {
             return;
         }
         if (m_nAttackCount == 1) {
-            _setAttack(this, 0xab);
+            _setAttackNoAttr(this, 0xab);
         }
         setMagic(0xab, 0, m_iStockSkill);
         setTimer(m_pAtkData->WORK0 * 50);
