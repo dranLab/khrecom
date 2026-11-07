@@ -41,12 +41,12 @@ every change that is merged without regenerating. Regenerating all four takes ab
 
 ## Where things stand (2026-11-07)
 
-- **Progress:** 11988 of 12311 functions matched: game 11221 of 11323, libraries 767 of 988 (plus 151 hand-written).
+- **Progress:** 11989 of 12311 functions matched: game 11222 of 11323, libraries 767 of 988 (plus 151 hand-written).
   `tools/check.sh` proves the image, but its function totals are too high: it strips `#if 0.*?#endif` before it counts
   `INCLUDE_ASM`, so a parked `#if 0 ... #else INCLUDE_ASM #endif` counts as done (about 12 functions on 2026-11-07). Count
   game functions with `grep -rhE '^INCLUDE_ASM' src --include=*.cpp --include=*.c --exclude-dir=lib | wc -l`. Fixing the regex is a
   change to `tools/`: ask first.
-- **Game:** 97 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note).
+- **Game:** 96 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note).
   5 units take a data section from assembly.
 - **Libraries:** 38 parked, 5 not attempted, 27 hand-written (stay assembly), 5 units with data from assembly;
   details in `docs/sdk-leftovers.md`.
@@ -74,12 +74,12 @@ every change that is merged without regenerating. Regenerating all four takes ab
   `build/permlines.py` sweeps the order of adjacent statements (no gain on initAttackField, setupFontTex). Check the helpers
   first: `asm volatile` against plain `asm`, and `=&r` where the original keeps inputs and output apart. See memory
   ref-locals-reveal-shape, ti-di-conversion-is-por.
-- **Read the scheduler and reorg, then pin (2026-11-07).** 34 functions in one sitting, most long parked as "scheduling tie"
+- **Read the scheduler and reorg, then pin (2026-11-07).** 35 functions in one sitting, most long parked as "scheduling tie"
   (setCharge, initAttackField, setConfuse, CHumanBoss::initalize, CNakCamera::main, beginStateHitAttack, acWaitReq,
   createBootInfoMsg, setStockInfo, CBattleCard::destroy, the Movement constructor, testPlayingCard, rollDeck,
   getApplyMatrixBBox, checkBBox, pppSetMatrix, _invokePrimary_Main, the last fan, _sceRpcGetPacket, changeMode, replaceNorma,
   itemCardProc, initRecover, chkDamage, _hokanRot, the three CollAttack checks, setStatusWin1, setupFlick,
-  exeMessageDlg, getRandomTargetPos, _sceCd_cbLoop, EFFECT_DATA::Setup). Dump `-dS -dR -fsched-verbose-9`, `build/jm/schedshow.py <.sched2> <fn signature> <rtl key>` prints the
+  exeMessageDlg, getRandomTargetPos, _sceCd_cbLoop, EFFECT_DATA::Setup, normalActProc). Dump `-dS -dR -fsched-verbose-9`, `build/jm/schedshow.py <.sched2> <fn signature> <rtl key>` prints the
   successors, priorities and issue order for the block. Ask what the original's order implies, in this order: a tail written out
   (call-arg-order-dependents), a cast store (fixed-scalar-varying-struct-alias), a clobber that marks a register dead for reorg, a load inside both arms for a cross-jump
   (crossjump-block-end-call), an empty asm in one arm to stop one,
@@ -362,6 +362,7 @@ header split the original didn't have, or make a class a template to hide its st
 | argument loads rotated before a call near a block end | call-arg-order-dependents |
 | member store issued before/after a global load's `lui` | fixed-scalar-varying-struct-alias |
 | same insns, issue order or v0/v1 wrong, no source order fixes it | issue-order-pins |
+| ours has an extra `move a0,..` before a call the original makes with a0 unset | the callee is `static`: read its body (getPlayerState) |
 | ours keeps a constant in a saved register, the original reloads it per call | pin it to the argument register in each call (setupFlick) |
 | ours if-converts one inline test, the original branches | empty asm in the arm (getRandomTargetPos) |
 | `lhu`, `sll 16`, `sra 16` split around a branch | sign-extension-by-hand |
