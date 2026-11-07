@@ -17,6 +17,7 @@ typedef struct _PRIZE_SHAPE { /* 0xc */
     float fScale;
 } PRIZE_SHAPE;
 
+/* MATCH: GPR instructions inside the VU0/MMI asm, as in the original's instruction stream; the split form (C + one asm per VU0/MMI instruction) is not attempted yet: build/progress/cleanup-libppp-mips-asm.md */
 void pppRyjDrawMegaBirthPrize(pppPObject *pobj, PRyjMegaBirthPrize *param, pppCtrlTable *ctbl) {
     PRIZE_SHAPE *prize_shape_list;
     sceVu0FMATRIX prize_type_mat_list[10];

@@ -1,5 +1,6 @@
 #include "pppColor.h"
 
+/* MATCH: max is the asm's "m" operand (stored to the stack, reloaded with lw inside the sequence); the split form reaches 3 lines (the ppvMonochrome test after it): build/progress/cleanup-libppp-mips-asm.md */
 void pppColor(pppPObject *pobj, PColor *p, pppCtrlTable *ctbl) {
     VColor *v = (VColor *)&pobj->val[ctbl->useVal[0]];
     pppMngSt *pMng;

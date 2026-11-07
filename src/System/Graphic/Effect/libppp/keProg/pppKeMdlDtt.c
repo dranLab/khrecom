@@ -43,6 +43,7 @@ typedef struct { /* 0x48 */
     void *Vtxs;
 } KeDttMdlMkGifPk;
 
+/* MATCH: the original's own inline asm: .set noreorder with hand-filled delay slots, a trapping add; gcc emits neither from C (build/progress/cleanup-libppp-mips-asm.md) */
 static inline void KeDttMdl_MkGifPk(KeDttMdlMkGifPk *Arg) {
     int i;
     short nItm;

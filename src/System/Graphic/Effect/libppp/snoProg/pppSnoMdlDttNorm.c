@@ -64,6 +64,7 @@ void pppSnoMdlDttNormCon2(pppPObject *pobj, pppCtrlTable *ctbl) {
     *(int *)&pThis->AccX = 0;
 }
 
+/* MATCH: the original's own inline asm: .set noreorder with hand-filled delay slots, trapping add; gcc emits neither from C (build/progress/cleanup-libppp-mips-asm.md) */
 static inline void KeDttMdl_MkGifPk(KeDttMdlMkGifPk *Arg, int acalc) {
     int pktid;
     float *pc2;

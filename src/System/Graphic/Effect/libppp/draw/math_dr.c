@@ -1,5 +1,6 @@
 #include "math_dr.h"
 
+/* MATCH: GPR instructions inside the VU0/MMI asm, as in the original's instruction stream; the split form (C + one asm per VU0/MMI instruction) is not attempted yet: build/progress/cleanup-libppp-mips-asm.md */
 void op_matrix_light4_vector(sceVu0FMATRIX *mout, sceVu0FMATRIX *lvmat, sceVu0FMATRIX *lwmat) {
     __asm__ __volatile__(
         "lui $v0, 0xbf80\n"

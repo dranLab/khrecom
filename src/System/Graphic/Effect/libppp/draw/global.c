@@ -219,6 +219,7 @@ void *op_oef2_a_get(OEF2_HEADER *table, int code, int number) {
     }
 }
 
+/* MATCH: GPR instructions inside the VU0/MMI asm, as in the original's instruction stream; the split form (C + one asm per VU0/MMI instruction) is not attempted yet: build/progress/cleanup-libppp-mips-asm.md */
 float op_random(float ran) {
     __asm__ __volatile__(
         "mfc1 $v0, $f12\n"
@@ -239,6 +240,7 @@ float op_random(float ran) {
         "vrinit $R, $vf25w\n");
 }
 
+/* MATCH: GPR instructions inside the VU0/MMI asm, as in the original's instruction stream; the split form (C + one asm per VU0/MMI instruction) is not attempted yet: build/progress/cleanup-libppp-mips-asm.md */
 float op_random_p(float ran) {
     __asm__ __volatile__(
         "mfc1 $v0, $f12\n"

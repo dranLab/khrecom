@@ -9,6 +9,7 @@ extern u_long128 ot1_mpg_table[];
 #define SPR(type, off) (*(type *)(spr + (off)))
 #define COPY_Q(dst, src) __asm__ volatile("lq $2, 0(%1)\n\tsq $2, 0(%0)" : : "r"(dst), "r"(src) : "$2")
 
+/* MATCH: inline asm blocks with GPR moves inside MMI/VU0 sequences: as C the copies change the allocation of the whole function (COPY_Q as a u_long128 copy: 60 lines; through a $2 local: 8 insns shorter); build/progress/cleanup-libppp-mips-asm.md */
 void *op_md_ot8_fog(OMD_H *mdh, OMD_IN *mdi) {
     register char *sp asm("$19");
     register OS_FOG *fog asm("$12");

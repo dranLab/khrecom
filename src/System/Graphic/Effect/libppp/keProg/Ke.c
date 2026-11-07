@@ -200,6 +200,7 @@ void KeVu0SubVecXY(float *d, float *t, float *s) {
         : "memory");
 }
 
+/* MATCH: GPR instructions inside the VU0/MMI asm, as in the original's instruction stream; the split form (C + one asm per VU0/MMI instruction) is not attempted yet: build/progress/cleanup-libppp-mips-asm.md */
 void KeVu0PacAddVecXY(int *d, float *t, float *s) {
     __asm__ __volatile__(
         "lqc2 $vf1, 0x0(%1)\n"
@@ -230,6 +231,7 @@ void KeVu0PacAddVecXY(int *d, float *t, float *s) {
         : "$2", "memory");
 }
 
+/* MATCH: GPR instructions inside the VU0/MMI asm, as in the original's instruction stream; the split form (C + one asm per VU0/MMI instruction) is not attempted yet: build/progress/cleanup-libppp-mips-asm.md */
 void KeVu0PacVec(int *d, float *s) {
     __asm__ __volatile__(
         "lqc2 $vf1, 0x0(%1)\n"
@@ -275,6 +277,7 @@ void KeVu0NormXY(float *d, float *s) {
         : "memory");
 }
 
+/* MATCH: GPR instructions inside the VU0/MMI asm, as in the original's instruction stream; the split form (C + one asm per VU0/MMI instruction) is not attempted yet: build/progress/cleanup-libppp-mips-asm.md */
 void KeVu0RTPersF(float *d, float *m[4], float *s) {
     __asm__ __volatile__(
         "lqc2 $vf1, 0x0(%1)\n"

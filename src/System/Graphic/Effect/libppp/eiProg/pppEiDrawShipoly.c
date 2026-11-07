@@ -265,6 +265,7 @@ static inline void RotTransPersST(float *stv, float *v, float *st_sub, float *st
     stv[3] = 1.0f;
 }
 
+/* MATCH: the original's own inline asm: .set noreorder with hand-filled delay slots, trapping add/addi; gcc emits neither from C (build/progress/cleanup-libppp-mips-asm.md) */
 static void init_spline(sceVu0FVECTOR *x, int n, sceVu0FVECTOR *data) {
     sceVu0FVECTOR *d;
     static sceVu0FVECTOR c = { 4.0f, -1.0f, 0.0f, 0.0f };
