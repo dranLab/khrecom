@@ -308,37 +308,26 @@ void CScissoring::setDefault() {
     p1.y = SCREEN_HEIGHT - 1;
     setRect(p0, p1);
 }
-/* Parked: 2 lines (2026-11-07, 0x206 pinned): only addiu a2,a2,64 sits mid-loop here, at the loop end in the original. `INT v = i + 1`
-   with v * 64 - 1 (as PackMan's packet) gets a2 = 63 and the end step but leaves a temp for i (13), a separate x biv or j loses i (9, 27).
-   Earlier: 8 lines - two scheduling ties: the original loads 0x206 before the shared zero for the PRIM/PRMODE A+D
- * pair, and strength-reduces i * 64 + 63 with its increment at the loop end while i++ sits inside the SCISSOR
- * expression (ours increments both there); this draft fixed the hoisted-constant order (XYZ helper with y first
- * and z by reference, as the original's PackMan.h inline) and i++ (line 277); tried before: _gifTag vs _AD, _ref
- * reloads, memory clobber, permuter 15 min x2; now also: _AD operand listing (breaks its other users), typed
- * zeros, swapped statements, ++i/(i+1) forms, separate x biv, for-increment variants, permuter 15 min (17083
- * candidates, no gain). CZFill's key function: the weak tail needs it */
-#if 0
 static inline u_long _gsXYZz(INT x, INT y, const FIX4& z) {
     return ((u_long)(y + 0x8000) << 16) | (u_long)(x + 0x8000) | ((u_long)(z >> 4) << 32);
 }
 void CZFill::makePkt() {
     QWdata* qp;
     INT i;
+    INT x;
 
     qp = (QWdata*)CPackMan::pkOpenGifTag(_gifTag(0x1000000000008000UL, 0xE));
 
     qp[0].ul128 = _AD(0x48, 0x32001);
     qp[1].ul128 = _AD(0x4F, (_ref(VRAM::_ZBUF_START) / 32) | 0x31000000);
-    {
-        register ULONGLONG uPrim asm("$3") = 0x206; /* MATCH: 0x206 before the shared zero */
-        __asm__ volatile("" : : "r"(uPrim));
-        qp[2].ul128 = _AD(0, uPrim);
-    }
+    u_long prim = 0x206; /* MATCH: 0x206 set before the shared zero of the PRIM/PRMODE pair */
+    qp[2].ul128 = _AD(0, prim);
     qp[3].ul128 = _AD(1, 0);
     qp += 4;
 
-    for (i = 0; i < 8; qp += 3) {
-        qp[0].ul128 = _AD(0x41, (u_long)(i * 64) | ((u_long)(i++ * 64 + 63) << 16) | ((u_long)(_ref(SCREEN_HEIGHT) - 1) << 48));
+    /* MATCH: x is its own biv (step at the loop end), i++ inside the SCISSOR expression */
+    for (i = 0, x = 63; i < 8; qp += 3, x += 64) {
+        qp[0].ul128 = _AD(0x41, (u_long)(i++ * 64) | ((u_long)x << 16) | ((u_long)(_ref(SCREEN_HEIGHT) - 1) << 48));
         qp[1].ul128 = _AD(5, _gsXYZz(-0x1000, -((_ref(SCREEN_HEIGHT) / 2) << 4), m_nZ));
         qp[2].ul128 = _AD(5, _gsXYZz(0x1000, (_ref(SCREEN_HEIGHT) / 2) << 4, m_nZ));
     }
@@ -348,9 +337,6 @@ void CZFill::makePkt() {
 
     CPackMan::pkCloseGifTag(&qp[3]);
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__6CZFill);
-#endif
 void CTile::makePkt() {
     QWdata giftag;
     giftag.ul64[0] = 0x4400000000008000UL;
