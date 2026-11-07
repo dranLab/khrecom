@@ -57,7 +57,7 @@ extern const FMATRIX ONE_MATRIX;
 extern const FVECTOR ONE_VECTOR;
 INT checkBBox(const FMATRIX& mWorldMatrix, const BBOX* bbox);
 SHADERDESC* searchShaderDesc(USHORT mode);
-void getApplyMatrixBBox(FVECTOR& vOutMax, FVECTOR& vOutMin, const FMATRIX& Mat, const FVECTOR& vInMax, const FVECTOR& vInMin); /* static in the original (parked, asm glabel) */
+static void getApplyMatrixBBox(FVECTOR& vOutMax, FVECTOR& vOutMin, const FMATRIX& Mat, const FVECTOR& vInMax, const FVECTOR& vInMin);
 #include "System/VramMan.h"
 
 
@@ -473,12 +473,11 @@ void CModel::getWorldBBoxScr(IVECTOR& vScr, const FMATRIX* pMWS) {
                  "vftoi4.xyz $vf8, $vf8");
     asm volatile("sqc2 $vf8, 0(%0)" : : "r"(&vScr) : "memory");
 }
-/* Parked: 3 lines off: the original stores vMN[1].z/.y through the &vMN[1] operand register (t1), ours through sp. Worked: vMN[i].set(MIN/MAX, ...) (default w = 1.0f), one asm statement with all operands, D_ labels for the +-1.7e38 constants. Tried: field stores, chained assignment, pointer local; permuter 10 min (32256 candidates, stays 3). */
-#if 0
 static void getApplyMatrixBBox(FVECTOR& vOutMax, FVECTOR& vOutMin, const FMATRIX& Mat, const FVECTOR& vInMax, const FVECTOR& vInMin) {
     FVECTOR vMN[2];
+    register FVECTOR* pMax asm("$9") = &vMN[1]; /* MATCH: the original keeps this operand's address in t1 for the two stores too */
     vMN[0].set(-1.70141183e+38f, -1.70141183e+38f, -1.70141183e+38f, 1.0f);
-    vMN[1].set(1.70141183e+38f, 1.70141183e+38f, 1.70141183e+38f, 1.0f);
+    pMax->set(1.70141183e+38f, 1.70141183e+38f, 1.70141183e+38f, 1.0f);
     asm volatile("lqc2 $vf4, 0x0(%0)\n"
                  "lqc2 $vf5, 0x10(%0)\n"
                  "lqc2 $vf6, 0x20(%0)\n"
@@ -549,14 +548,8 @@ static void getApplyMatrixBBox(FVECTOR& vOutMax, FVECTOR& vOutMin, const FMATRIX
                  "vmini.xyz $vf9, $vf9, $vf17\n"
                  "sqc2 $vf8, 0x0(%5)\n"
                  "sqc2 $vf9, 0x0(%6)"
-                 : : "r"(&Mat), "r"(&vMN[0]), "r"(&vMN[1]), "r"(&vInMax), "r"(&vInMin), "r"(&vOutMax), "r"(&vOutMin) : "memory");
+                 : : "r"(&Mat), "r"(&vMN[0]), "r"(pMax), "r"(&vInMax), "r"(&vInMin), "r"(&vOutMax), "r"(&vOutMin) : "memory");
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getApplyMatrixBBox__FR7FVECTORT0RC7FMATRIXRC7FVECTORT3);
-#endif
-/* MATCH: stripped placeholder (.sdata): the parked getApplyMatrixBBox's float constants at their .rodata position */
-__asm__(".section .sdata\n");
-BOOL __attribute__((section(".sdata"))) _getApplyMatrixBBox_rodata(FLOAT a, FLOAT b) { return a < -1.70141183e+38f && b > 1.70141183e+38f; }
 /* Parked: 38 lines off: the original keeps &pCrd->m_World as the strength-reduced loop pointer (s3 += 0xd0, counter counted down), &vMax/&vMin in s8/s7 for the init stores and the VU0 block, and loads the final bbox into f4/f5/f0..f3 in max-then-min order. Tried: pCrd[i] indexing (keeps the counter, 41 lines), _x/_y/_z temporaries, set helpers. */
 #if 0
 void CModel::calcWorldBBox(BOOL bCalc) {
