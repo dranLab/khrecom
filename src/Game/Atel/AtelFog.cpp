@@ -3,11 +3,12 @@
 #include "System/Task.h"
 #include <string.h>
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 #include "Game/Atel/AtelFog.h"
 #include "System/Graphic/WorldEnv.h"
 #include "include_asm.h"
+#include "System/HeapMan.h"
 
 extern INT VSYNC_TIMEQ;
 

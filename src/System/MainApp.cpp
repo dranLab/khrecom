@@ -12,7 +12,7 @@
 #include "Game/Card.h"
 #include "Game/Technic.h"
 #include "Game/Status.h"
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 #include "Game/Atel/AtelCrossFade.h"
 #include "System/MainApp.h"
 #include "System/Debug.h"

@@ -2,7 +2,7 @@
 #include "System/TaskMan.h"
 #include "System/Graphic/Gprim.h"
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 #include "Game/Atel/ChatMan.h"
 #include "System/Graphic/2d/2DMan.h"

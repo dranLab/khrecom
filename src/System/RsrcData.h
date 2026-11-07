@@ -14,8 +14,8 @@
 #include "System/Task.h"
 #include <string.h>
 
-/* MATCH: placement new for CRsrcData's inline allocation, declared only: the includers define it themselves */
-inline void* operator new(size_t, void* p) throw();
+
+
 
 extern "C" const char _ctype_[];
 #define RSRCDATA_TOLOWER(c) (((_ctype_ + 1)[c] & 1) ? (c) + 0x20 : (c))

@@ -3,7 +3,7 @@
 
 #define PATHDATACAMERA_H_PATH "System/Graphic/PathDataCamera.h" /* MATCH: this unit includes it by the relative path */
 #include <string.h>
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 /* .rodata starts with the strings of the included headers' inline functions, in this order. */
 #include "Game/Atel/CameraMan.h"

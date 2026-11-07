@@ -2,7 +2,7 @@
 #define TITLEREPORTDLLSTARTER_H_PATH "c:/KHCOM/MainApp/Form/Menu/TitleReportDllStarter.h" /* MATCH: this unit names TitleReportDllStarter.h so (header default "Form/Menu/TitleReportDllStarter.h") */
 #define SAVELOADCTRL_H_PATH "System/../Form/Menu/SaveLoadCtrl.h" /* MATCH: this unit names SaveLoadCtrl.h so (header default "Form/Menu/SaveLoadCtrl.h") */
 #include <string.h>
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 #include "System/TaskMan.h"
 #include "System/Task.h"
 #include "Form/Menu/TitleReportDllStarter.h"

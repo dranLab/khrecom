@@ -18,8 +18,8 @@
 #include "System/Graphic/2d/2DBase.h"
 #include "System/Graphic/2d/2DSeqObj.h"
 
-/* MATCH: placement new for C2DMan::initialize, declared only: the includers define it themselves (or never call it) */
-inline void* operator new(size_t, void* p) throw();
+
+
 
 namespace D2 {
 

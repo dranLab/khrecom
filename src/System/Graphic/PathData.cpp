@@ -45,10 +45,10 @@ void MulMatrix(FMATRIX& res, const FMATRIX& m0, const FMATRIX& m1);
 void FTOI15Vector(IVECTOR& v0, const FVECTOR& v1);
 void ITOF15Vector(FVECTOR& v0, const IVECTOR& v1);
 
-#ifndef KH_PLACEMENT_NEW_DEFINED // MATCH: placement new is not in the ref headers (the units define it themselves); defined once per unit
-#define KH_PLACEMENT_NEW_DEFINED
-inline void* operator new(size_t, void* p) throw() { return p; }
-#endif
+
+
+
+
 
 
 // PARTIAL: System/RsrcDB.h would add RsrcData.h's string to .rodata

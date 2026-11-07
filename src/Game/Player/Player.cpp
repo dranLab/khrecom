@@ -83,7 +83,7 @@ void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void Normalize(FVECTOR& outV, const FVECTOR& inV);
 FLOAT InnerProduct(const FVECTOR& inV0, const FVECTOR& inV1);
-inline void* operator new(size_t, void* p) throw() { return p; } template <class T> static inline T& _ref(T& v) { return v; } static inline UINT _upKind(INT inType0, INT inType1) { UINT up = inType0 > 0 ? 1 << (inType0 - 1) : 0; if (inType1 > 0) up |= 1 << (inType1 - 1); return up; }
+template <class T> static inline T& _ref(T& v) { return v; } static inline UINT _upKind(INT inType0, INT inType1) { UINT up = inType0 > 0 ? 1 << (inType0 - 1) : 0; if (inType1 > 0) up |= 1 << (inType1 - 1); return up; }
 static inline FLOAT _abs(FLOAT inValue) {
     FLOAT ret;
     __asm__ volatile("abs.s %0, %1" : "=f"(ret) : "f"(inValue));

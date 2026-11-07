@@ -9,7 +9,7 @@
 #include "System/Component.h"
 #include "System/Vector.h"
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 #include "Game/Atel/ChatMan.h"
 

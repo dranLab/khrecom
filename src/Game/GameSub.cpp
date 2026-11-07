@@ -7,7 +7,7 @@
 
 
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 #include "Game/Atel/CameraMan.h"
 #include "Game/Atel/AtelFog.h"

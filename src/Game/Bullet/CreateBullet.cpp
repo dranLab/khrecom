@@ -4,7 +4,7 @@
 #include "Game/Bullet/Bullet.h"
 #include "System/HeapMan.h"
 
-inline void* operator new(size_t, void* p) { return p; }
+
 
 /* Debug allocation: com_malloc_d gets the message "<file>(<line>)" and whatever $ra holds here. */
 #define NEW_D(p, T, line, args)                                                 \

@@ -3,7 +3,7 @@
 #include "System/MainTaskFactory.h"
 #include "System/HeapMan.h"
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 #include "Form/Menu/TitleReportDllStarter.h"
 #include "Game/Game.h"

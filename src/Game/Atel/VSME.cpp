@@ -8,7 +8,7 @@
 #include "khtypes.h"
 #include "System/Debug.h"
 #include "System/HeapMan.h"
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 /* .rodata starts with the strings of the included headers' inline functions, in this order. */
 #include "System/Graphic/Gprim.h"
 #include "Game/Atel/Avatar.h"

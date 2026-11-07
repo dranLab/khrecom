@@ -36,7 +36,8 @@ public:
 };
 
 /* The global operators, as the original's System/HeapMan.h has them (its .mdebug line labels: new 134, delete
- * 136/137, new(size_t, char*) 150-153, new[] 156-159; placement new 168). The sites are `new (__FILE__ "(N)") T`.
+ * 136/137, new(size_t, char*) 150-153, new[] 156-159, placement new 168, all throw() where the caller null-checks:
+ * placement new too, V3 decides). The sites are `new (__FILE__ "(N)") T`.
  * MATCH: RET_ADDR is inline asm (a move from $31): __builtin_return_address(0) reloads ra from the frame instead. */
 #define RET_ADDR() ({ size_t nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 inline void* operator new(size_t size) throw() { return com_malloc(size); }
@@ -44,5 +45,6 @@ inline void operator delete(void* mem) { com_free(mem); }
 inline void operator delete[](void* mem) { com_free(mem); }
 inline void* operator new(size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
 inline void* operator new[](size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
+inline void* operator new(size_t, void* p) throw() { return p; }
 
 #endif /* SYSTEM_HEAPMAN_H */

@@ -35,7 +35,7 @@ inline void _emptyStringPlaceholder2() { /* MATCH: placeholder: an inline functi
 #include "System/HeapMan.h"
 #include "Form/Menu/WorldWarp.h"
 
-inline void* operator new(size_t, void* p) { return p; }
+
 
 CGimmickWarpPoint::CGimmickWarpPoint(CTask* inParent) : CBaseGimmick(inParent) {
     m_Step = 0;

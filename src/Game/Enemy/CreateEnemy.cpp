@@ -60,7 +60,7 @@ inline void _createEnemyMotionName() {
 #include "System/Com.h"
 #include "System/Debug.h"
 
-inline void* operator new(size_t, void* p) { return p; }
+
 
 /* Enemies whose code is not in the main executable (map overlays): the original calls their constructors through
  * "jal 0". Only the constructor and the size matter here; the names are guesses from the debug info (classes and

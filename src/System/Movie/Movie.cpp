@@ -6,7 +6,7 @@
 #include "System/HeapMan.h"
 #include "System/Debug.h"
 
-inline void* operator new(size_t, void* p) { return p; }
+
 
 #include "System/Movie/MovieScript.h"
 

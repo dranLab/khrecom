@@ -15,10 +15,10 @@ __asm__(".rdata\n.align 3\n.word 0\n.word 0\n"); /* stays in .rdata: gcc has not
 #include "System/TaskMan.h"
 
 
-#ifndef KH_PLACEMENT_NEW_DEFINED // MATCH: placement new is not in the ref headers (the units define it themselves); defined once per unit
-#define KH_PLACEMENT_NEW_DEFINED
-inline void* operator new(size_t, void* p) throw() { return p; }
-#endif
+
+
+
+
 #include "Form/Menu/TitleReportDllStarter.h"
 #include "Game/SceneInfo.h"
 #include "Game/Card.h"

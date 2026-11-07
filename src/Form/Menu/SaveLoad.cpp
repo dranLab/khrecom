@@ -1,6 +1,6 @@
 #include "khtypes.h"
 #define FORM_MENU_SAVELOAD_CPP /* MATCH: unit gate (its header gives this unit its own parts); without it the unit compiles only against its full header (tested 2026-11-02) */
-inline void* operator new(unsigned int, void* p) throw() { return p; }
+
 #define SAVELOADCTRL_H_PATH "c:/KHCOM/MainApp/Form/Menu/SaveLoadCtrl.h" /* MATCH: this unit names SaveLoadCtrl.h so (header default "Form/Menu/SaveLoadCtrl.h") */
 /* .rodata starts with the strings of the included headers' inline functions, in this order. */
 #include "Form/Menu/SaveLoad.h"
