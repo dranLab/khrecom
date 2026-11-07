@@ -426,7 +426,7 @@ Helpers in `tools/helpers/` (moved from `build/` 2026-11-07, run from the reposi
 copy it to `build/` to change it for an experiment): the method helpers named above, and `vtry.py` (enable a draft, apply
 text variants, funcdiff each; `tryv.py`/`applyv.py`/`permfn.py` around it), `vifelse.py` / `ifeshow.sh` (the same for
 `#if 0 ... #else` drafts), `dumpvar.py` (compile a variant with gcc dump flags such as `-dl -dg -dS`),
-`permute_overload.py` (tools/permuter.py on an overloaded or const method), `hill.py` (statement-order hill climb),
+`permute_overload.py` (superseded by `tools/permuter.py --overload <params>`), `hill.py` (statement-order hill climb),
 `rocmp.py` (rodata check), `vsgen.py`, `gpconv.py`, `coord_conv.py`, `swap_keep.py` (replace a stand-in with an
 include, keeping the line count). `draftlib.py` is their shared draft finder (every layout, as `tools/drafts.py`).
 One-off scripts of earlier sessions stay in the main checkout's `build/` (named in the memory notes; not maintained).
