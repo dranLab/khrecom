@@ -1331,14 +1331,8 @@ BOOL CHumanBoss::canStockAct(const ACT_DATA* inAct) {
     return TRUE;
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/HumanBoss", setStockCard__10CHumanBossPC4CARD);
-/* placeholder for setStockCard (INCLUDE_ASM): its string */
-__attribute__((section(".sdata"))) void _setStockCard_placeholder() {
-    TRACE_USER((USER)5, "getStock() = %d, TotalNumber = %d, CurrentNumber = %d, min = %d, max = %d\n");
-}
-/* near match, 3 lines (2026-11-07): the first beqz of the || takes the subu from the fall-through in the original, sw zero from the
- * target in ours (v0 looks live there; a clobber after the store does not change it) */
-#if 0
+/* MATCH: the roll >= 5 test is the else-if of the reset test, one shared return FALSE after both (separate returns
+   cross-jump or change reorg's delay-slot fills) */
 BOOL CHumanBoss::setStockCard(const CARD* inActiveCard) {
     SHORT totalNumber = m_iStockTotalNumber + inActiveCard->m_nNumber;
 
@@ -1349,11 +1343,8 @@ BOOL CHumanBoss::setStockCard(const CARD* inActiveCard) {
                 clearStockTotalNumber();
                 returnStockAct(0);
                 selectStockAct();
-                return FALSE;
-            }
-            if (m_iStockRollCount >= 5) {
+            } else if (m_iStockRollCount >= 5) {
                 setHumanBossFlag(0x80, 0);
-                __asm__ volatile(""); /* MATCH: keeps this return's own tail */
             }
             return FALSE;
         }
@@ -1365,7 +1356,6 @@ BOOL CHumanBoss::setStockCard(const CARD* inActiveCard) {
     m_pCardRevolver->setStockCard();
     return TRUE;
 }
-#endif
 
 BOOL CHumanBoss::setPlayCard(INT inState) {
     if (!m_pCardRevolver->setPlayCard(0, 0)) {
