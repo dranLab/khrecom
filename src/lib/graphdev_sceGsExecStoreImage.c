@@ -1,5 +1,3 @@
-#include "include_asm.h"
-
 /* libgraph (Sony EE SDK): read an image from GS local memory over DMA channel 1 (VIF1, GS -> memory). */
 
 typedef unsigned int u_long128 __attribute__((mode(TI)));
@@ -61,22 +59,20 @@ typedef struct {
 
 void scePrintf(const char *fmt, ...);
 int GsGetIMR(void);
-unsigned long GsPutIMR(unsigned long imr);
+int GsPutIMR(int imr);
 
-/* Parked: close, but register allocation differs (the PSMCT24 tail, trxreg.RRW kept extracted instead of raw). */
-#if 0
 int sceGsExecStoreImage(sceGsStoreImage *sp, u_long128 *dstaddr)
 {
     static unsigned int init_mp3[4] __attribute__((aligned(16))) = { 0x06000000, 0, 0, 0 };
-    u_long128 tmp;
-    unsigned long imr;
+    union { u_long128 q; unsigned char c[16]; } tmp;
+    int imr;
     unsigned int count = 0;
     int qwc = 0, rest = 0, bytes = 0, dummy = 0;
     int w, h, rh, n, i, psm;
-    sceGsTrxreg trxreg = sp->trxreg;
+    int rqwc; /* MATCH: one variable for the padded quadword count of every case (its own pseudo across blocks) */
 
-    w = trxreg.RRW;
-    h = trxreg.RRH;
+    w = sp->trxreg.RRW;
+    h = sp->trxreg.RRH;
     psm = sp->bitbltbuf.SPSM;
     rh = 0;
     switch (psm) {
@@ -84,28 +80,30 @@ int sceGsExecStoreImage(sceGsStoreImage *sp, u_long128 *dstaddr)
     case 0x30: /* PSMZ32 */
         n = w * h * 4;
         bytes = n & 0xf;
-        qwc = (n >> 4) & 0xfffffff8;
         rest = (n >> 4) & 7;
+        qwc = (n >> 4) & 0xfffffff8;
         if (bytes == 0) {
             rh = h;
             dummy = 0;
         } else {
             rh = (h + 3) & 0xfffffffc;
-            dummy = (w * rh >> 2) - qwc - rest - 1;
+            rqwc = w * rh >> 2;
+            dummy = rqwc - qwc - rest - 1;
         }
         break;
     case 0x01: /* PSMCT24 */
     case 0x31: /* PSMZ24 */
         n = w * h * 3;
         bytes = n & 0xf;
-        qwc = (n >> 4) & 0xfffffff8;
         rest = (n >> 4) & 7;
+        qwc = (n >> 4) & 0xfffffff8;
         if (bytes == 0) {
             rh = h;
             dummy = 0;
         } else {
             rh = (h + 15) & 0xfffffff0;
-            dummy = (w * rh * 3 >> 4) - qwc - rest - 1;
+            rqwc = w * rh * 3 >> 4;
+            dummy = rqwc - qwc - rest - 1;
         }
         break;
     case 0x02: /* PSMCT16 */
@@ -114,50 +112,53 @@ int sceGsExecStoreImage(sceGsStoreImage *sp, u_long128 *dstaddr)
     case 0x3a: /* PSMZ16S */
         n = w * h * 2;
         bytes = n & 0xf;
-        qwc = (n >> 4) & 0xfffffff8;
         rest = (n >> 4) & 7;
+        qwc = (n >> 4) & 0xfffffff8;
         if (bytes == 0) {
             rh = h;
             dummy = 0;
         } else {
             rh = (h + 7) & 0xfffffff8;
-            dummy = (w * rh >> 3) - qwc - rest - 1;
+            rqwc = w * rh >> 3;
+            dummy = rqwc - qwc - rest - 1;
         }
         break;
     case 0x13: /* PSMT8 */
     case 0x1b: /* PSMT8H */
         n = w * h;
         bytes = n & 0xf;
-        qwc = (n >> 4) & 0xfffffff8;
         rest = (n >> 4) & 7;
+        qwc = (n >> 4) & 0xfffffff8;
         if (bytes == 0) {
             rh = h;
             dummy = 0;
         } else {
             rh = (h + 7) & 0xfffffff8;
-            dummy = (w * rh >> 4) - qwc - rest - 1;
+            rqwc = w * rh >> 4;
+            dummy = rqwc - qwc - rest - 1;
         }
         break;
     case 0x14: /* PSMT4 */
     case 0x24: /* PSMT4HL */
     case 0x2c: /* PSMT4HH */
-        n = w * h;
-        bytes = (n >> 1) & 0xf;
-        qwc = (n >> 5) & 0xfffffff8;
-        rest = (n >> 5) & 7;
+        n = w * h >> 1;
+        bytes = n & 0xf;
+        rest = (n >> 4) & 7;
+        qwc = (n >> 4) & 0xfffffff8;
         if (bytes == 0) {
             rh = h;
             dummy = 0;
         } else {
             rh = (h + 7) & 0xfffffff8;
-            dummy = (w * rh >> 5) - qwc - rest - 1;
+            rqwc = w * rh >> 5;
+            dummy = rqwc - qwc - rest - 1;
         }
         break;
     }
     if (bytes) {
         /* Read whole rows: the GS only sends complete quadwords. */
         *(volatile unsigned long *)((unsigned int)&sp->trxreg | 0x20000000) =
-            (unsigned long)(int)trxreg.RRW | (unsigned long)rh << 32;
+            (unsigned long)(int)sp->trxreg.RRW | (unsigned long)rh << 32;
     }
 
     while (*D1_CHCR & 0x100) {
@@ -225,9 +226,9 @@ int sceGsExecStoreImage(sceGsStoreImage *sp, u_long128 *dstaddr)
                 return -1;
             }
         }
-        tmp = *VIF1_FIFO;
+        tmp.q = *VIF1_FIFO;
         for (i = 0; i < bytes; i++) {
-            ((unsigned char *)&dstaddr[qwc + rest])[i] = *((unsigned char *)&tmp + i);
+            ((unsigned char *)&dstaddr[qwc + rest])[i] = tmp.c[i];
         }
         for (i = 0; i < dummy; i++) {
             while (!(*VIF1_STAT & 0x1f000000)) {
@@ -240,7 +241,7 @@ int sceGsExecStoreImage(sceGsStoreImage *sp, u_long128 *dstaddr)
                     return -1;
                 }
             }
-            tmp = *VIF1_FIFO;
+            tmp.q = *VIF1_FIFO;
         }
     }
     *VIF1_STAT = 0;
@@ -249,5 +250,4 @@ int sceGsExecStoreImage(sceGsStoreImage *sp, u_long128 *dstaddr)
     *VIF1_FIFO = *(u_long128 *)init_mp3;
     return 0;
 }
-#endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/graphdev_sceGsExecStoreImage", sceGsExecStoreImage);
+// SOURCE DATA: .data .rodata
