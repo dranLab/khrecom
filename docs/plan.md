@@ -130,7 +130,7 @@ Numbers change with every merge: `tools/check.sh` (totals), `tools/leftovers.py 
    max for the "m" operand) reaches 3 lines. Converted since (2026-11-07/08): Ke.c's three (one dead insn each stays,
    the rule's exception), global.c's op_random/op_random_p, KeDttSpr_MkGifPk_Pre (no MIPS left) and
    RyjMegaBirthUserCtrDrawShapeRefPos (its lq/sq copy in C; the VU0 run stays one asm: split 52 lines, a global-alloc
-   tie). Open: op_matrix_light4_vector, pppRyjDrawMegaBirthPrize, pppColor (their comments say so).
+   tie) and op_matrix_light4_vector. Open: pppRyjDrawMegaBirthPrize, pppColor (their comments say so).
    kh1 has none of them in C. No matched function goes back to parked for this.
 5. **Header cleanup**, interleaved: one `tools/partials.py --queue` item between two work items (see "Header
    cleanup"). The items waiting on a user decision are listed under "When to stop and ask".
