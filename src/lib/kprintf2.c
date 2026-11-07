@@ -119,7 +119,13 @@ int printfloat(PutcFunc func, void *ctx, unsigned int *size, double d)
 #define F_SHORT 0x80
 #define F_CHAR 0x100
 
-/* Parked: 4 lines differ (permuter score) */
+/* Parked: 2 of 853 lines, same size (2026-11-07): only the nop between c.eq.s and bc1f in the %f case (gcc writes
+   "#nop"; the original's assembler inserted it at the ".set noreorder" before bc1f). The 991111/991111-01 ee/bin/as
+   (GNU as 2.9-ee-991111) gives exactly that nop and the whole function matches, but it never fills a delay slot
+   (not even with -O), so ftoi's and kputchar's `jr ra` slots, which 2.10 fills, open up; 2.10/2.12 insert no
+   c.cond nop under any -mcpu/-mipsN, 990721 also adds one after mtc1. No source form found; the data and the
+   draft's literals are ready (its .rdata block below). tried: compare_compilers (all compilers, own and
+   unit assemblers), assembler option sweep on a snippet, permuter (earlier) */
 #if 0
 int _sceSnprintf(PutcFunc func, void *ctx, unsigned int size, const char *fmt, va_list ap)
 {
