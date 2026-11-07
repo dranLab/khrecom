@@ -443,6 +443,41 @@ def main() -> None:
             else:
                 kind = section.lstrip(".")
                 blocks[section] = [f"      - [0x{rom(a):06X}, {kind}, {n}]" for a, n in cuts]
+            if section == ".data":
+                # Objects without debug info and without code (newlib's impure.o) only show up here, as named
+                # .data. They can own data in the later sections too (impure.o's "C" locale string in .rodata,
+                # pointed at from its .data), so they join the link order: between the .data objects around
+                # them, before the first object there whose references in a later section come after theirs.
+                section_of = lambda a: next((n for n, (l, h) in ranges.items() if l <= a < h), None)
+                known = {o.name for o in order}
+                for k, (_, name) in enumerate(cuts):
+                    if name in known or name == "common":
+                        continue
+                    pos = {o.name: i for i, o in enumerate(order)}
+                    prv = next((n for _, n in reversed(cuts[:k]) if n in known), None)
+                    nxt = next((n for _, n in cuts[k + 1:] if n in known), None)
+                    lo_i, hi_i = (pos[prv] + 1 if prv else 0), (pos[nxt] if nxt else len(order))
+                    mine = [a for a in code_refs([Obj(name, None, None)], ROOT / opts["build_path"] / "expected" / "asm")
+                            .get(0, ()) if section_of(a) not in (None, ".data")]
+                    at = hi_i
+                    if mine:
+                        first, sec = min(mine), section_of(min(mine))
+                        for i in range(lo_i, hi_i):
+                            theirs = [a for a in refs.get(i, ()) if section_of(a) == sec]
+                            if theirs and min(theirs) > first:
+                                at = i
+                                break
+                    order.insert(at, Obj(name, None, None))
+                    refs = {(j + 1 if j >= at else j): v for j, v in refs.items()}
+                    known.add(name)
+                owner = owner_map(files, order)
+                refs = code_refs(order, ROOT / opts["build_path"] / "expected" / "asm")
+            elif section == ".rodata" and any(o.fdr is None and o.text is None for o in order):
+                # Only for .rodata: impure.o's .data also points at two .bss words that _vfwrite's code references
+                # too; which object owns them is not settled, so .bss keeps the split it had without these objects.
+                order[:] = [o for o in order if o.fdr is not None or o.text is not None]
+                owner = owner_map(files, order)
+                refs = code_refs(order, ROOT / opts["build_path"] / "expected" / "asm")
 
     if args.dry_run:
         for section, lines in blocks.items():
