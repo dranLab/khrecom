@@ -5089,25 +5089,6 @@ inline void _roPh20() { /* MATCH: placeholder: an inline function's strings, in 
     TRACE("CPlayer::chkDamage(); [REFRECT]  x(Now Card Play)\n");
     TRACE("PL::chkDamage(); kind=%d, \x81\xa6\x96\xa2\x8d\xec\x90\xac\x81i\x82\xc6\x82\xe8\x82\xa0\x82\xa6\x82\xb8\x8f\xac\x83_\x83\x81\x81[\x83W\x88\xb5\x82\xa2\x81j\n");
 }
-__asm__(".rdata\n.align 4\n.word .L0026EEC4\n.word .L0026ED00\n.word .L0026ECD8\n.word .L0026F018\n.word .L0026F018\n.word .L0026ED28\n.word .L0026EEE8\n.word .L0026EF64\n.word .L0026F018\n.word .L0026EEB4\n.word .L0026F018\n.word .L0026EF3C\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026EF94\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026EC40\n.word .L0026F018\n.word .L0026F018\n.word .L0026EF80\n.word .L0026EEC4\n.word .L0026ED00\n.word .L0026ECD8\n.word .L0026ECBC\n.word .L0026EFA8\n.word .L0026EFBC\n.word .L0026EC84\n.word .L0026EC70\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026EC30\n.word .L0026EEAC\n.text\n");
-/* Parked: 8 lines differ (2026-11-06, was 20: both vel brace-initialized, m_fDir store between brace and copy; markers at 9456/9593: por, sq 0x30, swc1 y 0x34, lq 0x30, sq 0x20 all on one line, so a temporary copied straight into vec; (FVECTOR){..} does not compile at the first site, braces at both sites add 16 bytes of frame), same size; structure, all branches, calls, the
-   40-entry jump table, frame and strings match. Left, four scheduling/register spots: (1) old_condition
-   (isConditionFlag(0x881803F)): the original loads the flag word into v1 and the mask into v0, ours the reverse;
-   (2) case 6 (knock-back): the {0, dir0, 0, 0} rotation temp gets v1 in the original (v0 ours, swapping the li 1 /
-   li 3 of m_bDmgInAir/m_JumpState) and its lq is issued after the m_JumpState/m_bDmgInAir stores; (3) case 33
-   (pronounce): the original stores m_fDir before loading the vptr for initPronounce, ours loads the vptr first
-   (equal sched2 priority, tie broken by RTL order; sched1 prefers our store because it frees $f0); (4) the
-   !bIsBackHit Homing block: the original issues lw m_pMove before the vel.y store and the m_fDir store before the
-   lq. Not missing FVECTOR constructors/operator=: types.h lists only the implicit ones, and the original
-   FMATRIX union holds FVECTOR v[4], which forbids user ones (ee-gcc error). Found: statement order from the
-   $LM line tags (build/asmlines.py), dir declared before dpos (frame), def_attr holding the attack attribute
-   first, the playSE id as a ternary of two calls (cross-jumped), bIsBackHit = FALSE after procDropMP, the case-6
-   gravity as *(FLOAT*)&PL::g_fGravity and the store order from a 120-permutation search (23 -> 20). tried: brace
-   init (memset), _rotY() by-value helper, _assign() reference copy, setDir(const FLOAT&), *(FLOAT*)& and
-   *(volatile FLOAT*)& stores of m_fDir, an "+f" asm on the Homing result (21), a memory asm barrier after the
-   case-33 store (18 lines, kept out: still not a match), old_condition as a direct/commuted expression or moved
-   before bIsBackHit (33), and tools/permuter.py through the method wrapper (15 min, 7332 candidates, no better). */
-#if 0
 BOOL CPlayer::chkDamage() {
     INT face;
     FVECTOR dir;
@@ -5175,7 +5156,10 @@ BOOL CPlayer::chkDamage() {
     SubVectorXYZ(dpos, dir, getPos());
     dir0 = atan2f(dpos.x, dpos.z);
     bIsBackHit = _abs(_limitPI(dir0 - m_fDir)) < 1.5707964f ? FALSE : TRUE;
-    old_condition = isConditionFlag(0x881803F);
+    {
+        register UINT uiFlag asm("$3") = m_uiConditionFlag; /* MATCH: isConditionFlag with the word in v1, the mask in v0 */
+        old_condition = uiFlag & 0x881803F;
+    }
     dmg0 = m_collBody.getDamage();
     kind = m_collBody.getDamageKind();
     def_attr = m_collBody.getDamageAttr();
@@ -5428,7 +5412,12 @@ BOOL CPlayer::chkDamage() {
             return TRUE;
         }
         m_fDir = Movement::Homing(m_fDir, dir0, 1.0f, m_fFrameRate);
-        initPronounce(1);
+        __asm__ volatile(""); /* MATCH: the m_fDir store, then a1, then the vptr load */
+        {
+            register INT nPronounce asm("$5") = 1;
+            __asm__ volatile("" : : "r"(nPronounce));
+            initPronounce(nPronounce);
+        }
         return TRUE;
     default:
         TRACE("PL::chkDamage(); kind=%d, \x81\xa6\x96\xa2\x8d\xec\x90\xac\x81i\x82\xc6\x82\xe8\x82\xa0\x82\xa6\x82\xb8\x8f\xac\x83_\x83\x81\x81[\x83W\x88\xb5\x82\xa2\x81j\n", kind);
@@ -5466,9 +5455,6 @@ BOOL CPlayer::chkDamage() {
     }
     return TRUE;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkDamage__7CPlayer);
-#endif
 __asm__(".rdata\n");
 void CPlayer::initFlip(INT inBreak) {
     FLOAT speed;
