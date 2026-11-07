@@ -49,7 +49,7 @@ every change that is merged without regenerating. Regenerating all four takes ab
 - **Libraries:** 18 parked, 1 not attempted, 27 hand-written (stay assembly), no unit with data from assembly
   (the last two, __assert and __umoddi3, needed the split / link-alignment fixes of 2026-11-07);
   details in `docs/sdk-leftovers.md`.
-- **Header cleanup:** PARTIAL 186 (156 in 44 headers, 30 in 17 .cpp), 11 foreign stand-ins in 6 files, 0
+- **Header cleanup:** PARTIAL 185 (155 in 44 headers, 30 in 17 .cpp), 11 foreign stand-ins in 6 files, 0
   duplicate classes, 0 untagged mechanisms; classes complete 873, superset 12, gated 3, missing 8.
   `tools/partials.py --queue` has the ready items.
 - **Method that paid off (2026-11-06):** read `tools/helpers/asmlines.py` before permuting. Most long-parked drafts had a
@@ -450,7 +450,7 @@ Keep output small: one function's assembly at a time; `funcdiff` without `--full
   owner; string evidence that contradicts the ref; a new kind of mechanism; completion that needs changes to
   matched C beyond ref type corrections; unifying `Gprim.h` and `GprimFull.h`; a new opt-out macro more than
   about 5 units need; no net decrease of stand-ins plus PARTIAL markers after 3 consecutive units.
-- **Done on branch cleanup/vector-types (2026-11-07, waits for the user's merge):** F_UL, G_XY, G_XYZ, G_RGBA, G_UV,
+- **Done (cleanup/vector-types, merged 2026-11-07):** F_UL, G_XY, G_XYZ, G_RGBA, G_UV,
   G_ST at the end of System/Vector.h and the C++ QWdata after khtypes.h's u_int128 (the original's .mdebug type order,
   against the ref's placement; user decision). **Waiting on a decision now:** the `D2MAN_H_PATH` (2DMan.h, `D2::C2DMan`) and `RSRCDATA_H_FULL`
   (`CRsrcData`/`RsrcInfo`/`CRsrcANN`) gates, 10 files: the string evidence for 2DMan.h is ambiguous (the 2D

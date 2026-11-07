@@ -151,19 +151,20 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-07 | cleanup/System-Graphic-Gprim.h: effect's G_RGBA copy dropped (forward declaration), pppEiDrawShipoly's QWdata is its own | 188 | 13 | 0 | 673 (0) | 1002 |
 | 2026-11-07 | tools/partials.py reads the ref's .c files (measure only: the libppp C units' own types no longer count as foreign copies) | 188 | 11 | 0 | 673 (0) | 1002 |
 | 2026-11-07 | cleanup/heapman-operators: the global operators in System/HeapMan.h, sites `new (__FILE__ "(N)") T`, ~300 local copies and the placement-new gate gone | 186 | 11 | 0 | 668 (0) | 1002 |
+| 2026-11-07 | cleanup/vector-types: F_UL, G_XY ... G_ST at the end of Vector.h, QWdata after khtypes.h's u_int128 (the original's type order) | 185 | 11 | 0 | 668 (0) | 1024 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 186 (156 in 44 headers, 30 in 17 .cpp); MATCH: 1024
-  by category: method 46, data member 10, type 14, fwd decl 2, #include 14, changed in place 43, padding 2, path override 1, gate 5, guessed 9, header-level 24, stand-in 11, other 5
+PARTIAL: 185 (155 in 44 headers, 30 in 17 .cpp); MATCH: 1024
+  by category: method 46, data member 10, type 14, fwd decl 2, #include 13, changed in place 43, padding 2, path override 1, gate 5, guessed 9, header-level 24, stand-in 11, other 5
 stand-ins: 11 foreign in 6 files (9 names), 170 unattributed, 184 own
 duplicate class names across headers: 0
 padding: 2 arrays, 0 accessors
-mechanisms: 668 sites (0 untagged); #line: 1239
+mechanisms: 668 sites (0 untagged); #line: 1242
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 1169, superset 17, partial 1, gated 3, missing 6, unattributed 8
+classes: complete 1168, superset 17, partial 1, gated 3, missing 6, unattributed 8
 ```
 
 ## Queue (top 20)
@@ -248,7 +249,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/Effect/libppp/eiProg/pppChrYSclXYZMatrix.h` | 0 | 1/1/0/0 | 1 |
 | `System/Graphic/Effect/libppp/keProg/pppKeTh.h` | 0 | 6/0/1/0 | 1 |
 | `System/Graphic/Effect/libppp/pppPart.h` | 25 | 24/0/0/0 | 215 |
-| `System/Graphic/Gprim.h` | 2 | 15/0/0/0 | 231 |
+| `System/Graphic/Gprim.h` | 1 | 9/0/0/0 | 231 |
 | `System/Graphic/Model.h` | 2 | 8/0/0/0 | 70 |
 | `System/Graphic/Str.h` | 1 | 0/0/0/0 | 140 |
 | `System/Graphic/TexInfo.h` | 1 | 2/0/0/0 | 234 |
@@ -256,7 +257,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/MainApp.h` | 2 | 1/0/0/1 | 270 |
 | `System/RsrcData.h` | 1 | 33/0/0/0 | 29 |
 | `System/SLContainer.h` | 4 | 0/0/0/0 | 252 |
-| `System/Vector.h` | 8 | 1/2/0/0 | 266 |
+| `System/Vector.h` | 8 | 7/2/0/0 | 266 |
 
 ## Mechanisms
 
