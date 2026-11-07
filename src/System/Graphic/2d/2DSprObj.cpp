@@ -444,12 +444,6 @@ void C2DSprObj::_main(TIMEQ qTime) {
         m_Flg &= ~1;
     }
 }
-/* Parked: 25 of 465 lines - only the vertex loop differs: the MMI colour multiply's 0xFF splat is a TImode
- * constant here (`por v0,zero,zero` before `li`, the original only does `li`), the pmulth/tmp registers come out
- * v1/v0 instead of a0/v1, the vertex-loop pointers get other registers and lCol is loaded before the expand.
- * tried: "0"(0xFF) / "r"(0xFF) / u_long constant forms (hoisted out of the loop: 27), separate pmulth result,
- * memory clobbers, pointer increment orders; permuter (method wrapper) 15 min, 49k candidates: 29 -> 27 only. */
-#if 0
 void MulMatrix(FMATRIX& m0, const FMATRIX& m1, const FMATRIX& m2);
 void MulVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void FTOI0Vector(IVECTOR& v0, const FVECTOR& v1);
@@ -469,20 +463,21 @@ static inline void _unitMatrixVu0(FMATRIX& m) {
                  : "memory");
 }
 static inline void _applyMatrix2(FVECTOR& v0, const FMATRIX& m0, const FVECTOR2& v2) {
-    asm volatile("ld $8, 0x0(%2)\n"
-                 "lqc2 $vf4, 0x0(%1)\n"
+    /* MATCH: the original passes the FVECTOR2 to qmtc2 in t0 ($8); an unpinned temp gets another register */
+    register ULONGLONG xy asm("$8") = v2._u64;
+    asm volatile("lqc2 $vf4, 0x0(%1)\n"
                  "lqc2 $vf5, 0x10(%1)\n"
                  "lqc2 $vf6, 0x20(%1)\n"
                  "lqc2 $vf7, 0x30(%1)\n"
-                 "qmtc2.ni $8, $vf8\n"
+                 "qmtc2.ni %2, $vf8\n"
                  "vmulax.xyzw $ACC, $vf4, $vf8x\n"
                  "vmadday.xyzw $ACC, $vf5, $vf8y\n"
                  "vmaddaz.xyzw $ACC, $vf6, $vf0z\n"
                  "vmaddw.xyzw $vf4, $vf7, $vf0w\n"
                  "sqc2 $vf4, 0x0(%0)\n"
                  :
-                 : "r"(&v0), "r"(&m0), "r"(&v2)
-                 : "$8", "memory");
+                 : "r"(&v0), "r"(&m0), "r"(xy)
+                 : "memory");
 }
 static inline void _ftoi4(IVECTOR& iVec, const FVECTOR& fVec) {
     asm volatile("lqc2 $vf4, 0x0(%1)\n"
@@ -492,22 +487,38 @@ static inline void _ftoi4(IVECTOR& iVec, const FVECTOR& fVec) {
                  : "r"(&iVec), "r"(&fVec)
                  : "memory");
 }
-static inline UINT _mulColor(UINT iCol, u_long128 iMul) {
+static inline u_long128 _colToVec(UINT iCol) {
     u_long128 ivCol;
+    __asm__ volatile("pextlb %0, $0, %1\n"
+                     "pextlh %0, $0, %0\n"
+                     : "=r"(ivCol)
+                     : "r"(iCol));
+    return ivCol;
+}
+static inline UINT _vecToCol(u_long128 iCol) {
+    UINT ivCol;
+    __asm__ volatile("ppach %0, $0, %1\n"
+                     "ppacb %0, $0, %0\n"
+                     : "=r"(ivCol)
+                     : "r"(iCol));
+    return ivCol;
+}
+/* MATCH: one asm statement, as in the original (all seven instructions carry one line marker, Gprim.h:821, here and
+ * in FrecFont's makePkt), including the 0xFF load: C can't place it there. A TImode `tmp = 0xFF` adds `por zero`, a
+ * constant operand ("0"/"r"(0xFF), u_long locals) is hoisted out of the vertex loop, a hard-register local puts the
+ * li in place but moves the iMul/product registers (5 lines). tmp is tied to ivCol: that keeps ivCol in v1 and the
+ * product in a0 as in the original. */
+static inline u_long128 _mulCol(u_long128 ivCol, u_long128 iMul) {
     u_long128 tmp;
-    __asm__ volatile("pextlb %0, $0, %1" : "=r"(ivCol) : "r"(iCol));
-    __asm__ volatile("pextlh %0, $0, %0" : "=r"(ivCol) : "0"(ivCol));
-    __asm__ volatile("pmulth %0, %1, %2" : "=r"(ivCol) : "r"(ivCol), "r"(iMul));
-    tmp = 0xFF;
-    __asm__ volatile("pextlw %0, %0, %0" : "=r"(tmp) : "0"(tmp));
-    __asm__ volatile("pcpyld %0, %0, %0" : "=r"(tmp) : "0"(tmp));
-    __asm__ volatile("psrlw %0, %0, 7" : "=r"(ivCol) : "0"(ivCol));
-    __asm__ volatile("pcgtw %0, %1, %0" : "=r"(tmp) : "r"(ivCol), "0"(tmp));
-    __asm__ volatile("por %0, %1, %0" : "=r"(tmp) : "r"(ivCol), "0"(tmp));
-    __asm__ volatile("ppach %0, $0, %0" : "=r"(tmp) : "0"(tmp));
-    UINT iRet;
-    __asm__ volatile("ppacb %0, $0, %1" : "=r"(iRet) : "r"(tmp));
-    return iRet;
+    __asm__ volatile("pmulth %1, %0, %2\n"
+                     "addiu %0, $0, 0xff\n"
+                     "pextlw %0, %0, %0\n"
+                     "pcpyld %0, %0, %0\n"
+                     "psrlw %1, %1, 7\n"
+                     "pcgtw %0, %1, %0\n"
+                     "por %0, %1, %0\n"
+                     : "=r"(tmp), "=r"(ivCol) : "r"(iMul), "0"(ivCol));
+    return tmp;
 }
 void C2DSprObj::move() {
     FVECTOR fVec;
@@ -611,7 +622,7 @@ void C2DSprObj::move() {
         pSprPrim->polyGT4.setTexNearest(!bBilinear);
         for (INT j = 0; j < 4; j++) {
             FVECTOR& v0 = fVec;
-            _applyMatrix2(v0, mat, *primPos);
+            _applyMatrix2(v0, mat, primPos[j]);
             _ftoi4(iVec, fVec);
             if (!bBilinear) {
                 iVec.x = (iVec.x & 0xFFFFFFF0) | 8;
@@ -619,16 +630,11 @@ void C2DSprObj::move() {
             }
             pXY->set(iVec.x, iVec.y);
             pXY++;
-            pRGBA->col = _mulColor(primCol->col, lCol);
-            primCol++;
+            pRGBA->col = _vecToCol(_mulCol(_colToVec(primCol[j].col), lCol));
             pRGBA++;
-            primPos++;
         }
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/2d/2DSprObj", move__Q22D29C2DSprObj);
-#endif
 void C2DSprObj::getRect(FVECTOR2* pvOut4, SprPrim& rSprPrim) {
     FVECTOR fVec;
     IVECTOR iVec;
