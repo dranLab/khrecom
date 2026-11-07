@@ -48,7 +48,7 @@ every change that is merged without regenerating. Regenerating all four takes ab
   5 units take a data section from assembly.
 - **Libraries:** 38 parked, 5 not attempted, 27 hand-written (stay assembly), 5 units with data from assembly;
   details in `docs/sdk-leftovers.md`.
-- **Header cleanup:** PARTIAL 202 (165 in 48 headers, 37 in 22 .cpp), 20 foreign stand-ins in 15 files, 0
+- **Header cleanup:** PARTIAL 201 (165 in 48 headers, 36 in 21 .cpp), 19 foreign stand-ins in 14 files, 0
   duplicate classes, 0 untagged mechanisms; classes complete 873, superset 12, gated 3, missing 8.
   `tools/partials.py --queue` has the ready items.
 - **Method that paid off (2026-11-06):** read `build/asmlines.py` before permuting. Most long-parked drafts had a
@@ -65,7 +65,7 @@ every change that is merged without regenerating. Regenerating all four takes ab
   conversion, `*(UINT*)&f` gives the `mfc1`). `build/reflocals.py > build/jm/reflocals.log`, then `build/refjoin.py 60`,
   ranks near misses; `build/remeasure.log` was refreshed 2026-11-06 evening (tried without gain: createBootInfoMsg,
   setStockInfo, _invokePrimary_Main, dispDebugLine, setCharge, setDeckInfo, pppSetMatrix, HumanBoss initalize, effect Setup,
-  checkBBox, setAttack (power forms), initEnemyParam (block order), sceVif1PkCloseUpkCode (the ref's locals: 25 -> 43-50)). `build/refextra.py 40` lists drafts with invented locals, the better lead. Parked notes go stale: read the current diff first (stateDestroy and setupDrawMode were one statement swap).
+  checkBBox, setAttack (power forms), initEnemyParam (block order), sceVif1PkCloseUpkCode (the ref's locals: 25 -> 43-50), setScreenFader, 2DSprObj move). `build/refextra.py 40` lists drafts with invented locals, the better lead. Parked notes go stale: read the current diff first (stateDestroy and setupDrawMode were one statement swap).
   A permuter queue over the eight drafts changed on 2026-11-06 gained on two (the last fan 3 -> 2, detectMCInit 18 -> 14);
   onMove, acWaitReq, update, _atoi, _atolen and checkBBox held. `build/regswap.py 60` separates pure register permutations (solve with the priority formula), `build/refcount.py` lists
   locals declared fewer times than in the ref (one variable per loop: Model::link), `build/banddiff.py lo hi` prints current diffs,

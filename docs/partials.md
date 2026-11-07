@@ -146,17 +146,18 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-03 | cleanup/player-inlines (CPlayer unit-gate pairs unified) | 222 | 22 | 0 | 691 (0) | 882 |
 | 2026-11-05 | catch-up: the unit merges since 2026-11-03 (placeholders and unit-gate sites dropped as their functions got matched; MATCH comments of the new matches) | 205 | 22 | 0 | 680 (0) | 930 |
 | 2026-11-06 | cleanup: JiminyMemo finish, CPause and CShadowModelMan stand-ins replaced by the owner headers (friends with MATCH) | 202 | 20 | 0 | 676 (0) | 930 |
+| 2026-11-07 | cleanup: MovieScript uses the real CTextWnd, CPointT, CSizeT (the old assembler crash is gone); _vf4x tagged | 201 | 19 | 0 | 677 (0) | 948 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 202 (165 in 48 headers, 37 in 22 .cpp); MATCH: 931
-  by category: method 46, data member 10, type 14, fwd decl 2, #include 14, changed in place 45, padding 2, path override 1, gate 5, guessed 9, header-level 33, stand-in 16, other 5
-stand-ins: 20 foreign in 15 files (14 names), 198 unattributed, 155 own
+PARTIAL: 201 (165 in 48 headers, 36 in 21 .cpp); MATCH: 948
+  by category: method 46, data member 10, type 14, fwd decl 2, #include 14, changed in place 45, padding 2, path override 1, gate 5, guessed 9, header-level 33, stand-in 15, other 5
+stand-ins: 19 foreign in 14 files (13 names), 198 unattributed, 155 own
 duplicate class names across headers: 0
 padding: 2 arrays, 0 accessors
-mechanisms: 676 sites (0 untagged); #line: 1245
+mechanisms: 677 sites (0 untagged); #line: 1241
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
 classes: complete 873, superset 12, partial 0, gated 3, missing 8, unattributed 309
 ```
@@ -174,7 +175,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 2.0 | `Game/Enemy/MapEnemy.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
 | R1 | 2.0 | `Game/SceneInfo.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
 | R1 | 2.0 | `System/Graphic/TexInfo.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
-| R1 | 2.0 | `System/Wnd.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CTextWnd (1 complete) | inline bodies or virtuals |
 | R1 | 1.0 | `Game/Collision/CollUtil.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R1 | 1.0 | `Game/Collision/CollUtilA.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R1 | 1.0 | `System/Coord.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
@@ -197,7 +197,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CMCSemiModel` | missing | Game/Collision/CollMapCamera.h | 1 |  |  |
 | `COLL_KIND` | complete | Game/Collision/CollObj.h | 1 |  |  |
 | `COLL_TYPE` | complete | Game/Collision/CollObj.h | 1 |  |  |
-| `CTextWnd` | complete | System/Wnd.h | 1 |  |  |
 | `ChatWndCreateCTDParam` | missing | Game/Atel/VSME.h | 1 |  |  |
 | `G_RGBA` | complete | System/Graphic/Gprim.h | 1 |  |  |
 | `PRIZE_DATA` | missing | Game/Enemy/BattleEnemy.h | 1 |  |  |
@@ -242,7 +241,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/2d/2DMan.h` | 1 | 3/0/0/0 | 166 |
 | `System/Graphic/Camera.h` | 5 | 6/1/0/0 | 109 |
 | `System/Graphic/Effect/EffectMan.h` | 1 | 2/0/0/0 | 173 |
-| `System/Graphic/Effect/ObjType.h` | 1 | 1/0/0/0 | 176 |
+| `System/Graphic/Effect/ObjType.h` | 1 | 1/0/0/0 | 177 |
 | `System/Graphic/Effect/effect.h` | 3 | 5/1/0/0 | 77 |
 | `System/Graphic/Effect/libppp/draw/draw_w.h` | 2 | 3/0/0/0 | 15 |
 | `System/Graphic/Effect/libppp/draw/global_w.h` | 1 | 0/0/0/0 | 9 |
@@ -255,7 +254,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/modeldata.h` | 2 | 3/0/0/1 | 82 |
 | `System/MainApp.h` | 2 | 1/0/0/1 | 270 |
 | `System/RsrcData.h` | 1 | 33/0/0/0 | 29 |
-| `System/SLContainer.h` | 4 | 0/0/0/0 | 251 |
+| `System/SLContainer.h` | 4 | 0/0/0/0 | 252 |
 | `System/Vector.h` | 8 | 1/2/0/0 | 266 |
 
 ## Mechanisms
@@ -383,6 +382,7 @@ or `untagged`.
 | placeholder | `_sampleEnemyEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
 | placeholder | `_saveLoadCtrlAlloc*` | 1 | 1 | placeholder: an inline function's strings, in the original .rodata order |
 | placeholder | `_statusEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
+| placeholder | `_vf4x*` | 1 | 1 | read by the parked detectMCInit draft only (the ref has iTmp and ret and no parameter) |
 | placeholder | `_vsmeMotionName*` | 1 | 1 | Placeholder: .rodata has "e123_062" after Anim.h's strings (from an unidentified header, as in Game/Enemy/CreateEnemy). |
 | pragma | `#pragma implementation` | 1 | 1 | the Gprim weak tail from C (user-approved pragma mechanism) |
 | pragma | `#pragma interface` | 1 | 1 | the inline functions and vtables only in Gprim.o, as in the originals |

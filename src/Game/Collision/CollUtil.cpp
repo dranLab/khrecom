@@ -546,6 +546,7 @@ static inline INT _dotN(FVECTOR& v) {
                  "sll %0, %0, 0" : "=r"(ret) : "r"(&v));
     return ret;
 }
+/* MATCH: read by the parked detectMCInit draft only (the ref has iTmp and ret and no parameter) */
 static inline FLOAT _vf4x() {
     INT iTmp;
     FLOAT ret;

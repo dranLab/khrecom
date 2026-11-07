@@ -35,32 +35,9 @@ class CRsrcData;
 
 
 
-template <class T> struct CPointT {
-    T m_x;
-    T m_y;
-    CPointT(T x, T y) { m_x = x; m_y = y; }
-};
-template <class T> struct CSizeT {
-    T m_w;
-    T m_h;
-    CSizeT(T w, T h) { m_w = w; m_h = h; }
-    void setSize(T w, T h) { m_w = w; m_h = h; }
-};
+#include "System/Wnd.h"
 typedef CPointT<int> CPointI;
 typedef CSizeT<int> CSizeI;
-
-class CTextWnd { /* PARTIAL: stand-in for System/Wnd CTextWnd: the assembler step crashes with Wnd.h here (cause unknown) */
-public:
-    CTextWnd(CTask& parent, INT nID);
-    void createWindow(CPointI& pos, CSizeI& size, UINT nAttr, const char* pszText, UINT nCol, UINT nFontSize,
-                      UINT nFontStyle, CPointI& cpos, UINT n0, UINT n1);
-    void setFontSpace(CSizeI size);
-    void open();
-    void closeDestroy();
-    void setWndStyle(UINT nStyle);
-private:
-    char _pad[0x140];
-};
 
 static UINT s_nMovieScriptRsrcID;
 
