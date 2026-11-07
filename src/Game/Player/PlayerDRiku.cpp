@@ -85,9 +85,7 @@ template <class T> static inline T& _ref(T& v) {
     return v;
 }
 static inline UINT _upKind(INT inType0, INT inType1) {
-    UINT up = inType0 > 0 ? 1 << (inType0 - 1) : 0;
-    if (inType1 > 0) up |= 1 << (inType1 - 1);
-    return up;
+    return (inType0 > 0 ? 1 << (inType0 - 1) : 0) | (inType1 > 0 ? 1 << (inType1 - 1) : 0);
 }
 
 static inline FLOAT _limitPI(FLOAT r) {
@@ -596,8 +594,6 @@ void CPlayerDRiku::exeSpeedStep() {
         initIdle(-1, 1);
     }
 }
-/* Parked: 7 lines off, registers only: in the card branch the original keeps %hi(g_pBattleCardList) in t0 and the shared constant 1 (m_iAttackNo == 1, _upKind's shift) in a2, ours t1 and t0. Worked: CPlayer::setAttack's form, the player-flag 0x80000 arm first, `pre == 7 || isAir()` for the last hit, case 7 with its own body. Tried: _ref forms of the m_AtkKind/m_AtkAttr stores, up declared early or inline, an unsigned compare; permuter 15 min (7238 candidates, stays 8). 2026-11-07: a pinned list pointer folds back to the symbol unless an operand keeps it, and that operand moves other registers (16). */
-#if 0
 void CPlayerDRiku::setAttack() {
     CEntity* pTarget;
     FLOAT distY;
@@ -726,22 +722,6 @@ void CPlayerDRiku::setAttack() {
     m_tqAttackTimer = m_pAnim->getTotalTqCrd() * 100 / (INT)rate + 1000;
     m_iAttackNo++;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerDRiku", setAttack__Q22PL12CPlayerDRiku);
-// setAttack__Q22PL12CPlayerDRiku: its .rodata, for its INCLUDE_ASM; remove with it.
-asm(".section .rodata\n"
-    ".align 4\n"
-    "jtbl_004A1CE0:\n"
-    ".word .L0027E098\n"
-    ".word .L0027E098\n"
-    ".word .L0027E0C8\n"
-    ".word .L0027E0EC\n"
-    ".word .L0027E0C8\n"
-    ".word .L0027E098\n"
-    ".word .L0027E0E4\n"
-    ".word 0\n"
-    ".section .text");
-#endif
 void CPlayerDRiku::initJump2nd() {
     if (isBattleFlag(0x200000)) return;
     setPlayerState(JUMP_2ND);
