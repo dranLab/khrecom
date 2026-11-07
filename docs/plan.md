@@ -41,10 +41,10 @@ every change that is merged without regenerating. Regenerating all four takes ab
 
 ## Where things stand (2026-11-07)
 
-- **Progress:** 12044 of 12311 functions matched: game 11261 of 11323, libraries 783 of 988 (plus 151 hand-written).
+- **Progress:** 12047 of 12311 functions matched: game 11264 of 11323, libraries 783 of 988 (plus 151 hand-written).
   `tools/check.sh` counts the 151 hand-written units as done too: its total is these matched functions plus 151
   (fixed 2026-11-07: it used to count a parked `#if 0 ... #else INCLUDE_ASM #endif` as done).
-- **Game:** 62 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note).
+- **Game:** 59 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note).
   5 units take a data section from assembly.
 - **Libraries:** 18 parked, 1 not attempted, 27 hand-written (stay assembly), no unit with data from assembly
   (the last two, __assert and __umoddi3, needed the split / link-alignment fixes of 2026-11-07);
@@ -114,8 +114,8 @@ Numbers change with every merge: `tools/check.sh` (totals), `tools/leftovers.py 
 ## Remaining work, in this order
 
 1. **Parked game drafts**: retry them closest first, line markers first, then the levers index and both permuters.
-   List them with their notes: `tools/leftovers.py game` ("Parked functions"). Leads already known: HumanBoss `getAttackCardNum`/`setupCardRevolver` (the ref's getEnemyParam() is non-const;
-   reading the private member matched but is not the original: reverted 2026-11-07).
+   List them with their notes: `tools/leftovers.py game` ("Parked functions"). A private member a match needs: a `friend` on an existing line of its class (user decision 2026-11-07:
+   CardRevolver main, HumanBoss getAttackCardNum/setupCardRevolver), never a changed access specifier.
    The hand-kept table at the top of
    `docs/asm-leftovers.md` lists the blockers that need more than a source change.
 2. **Data from source**: CollUtil, CollUtilO and Ride (.rodata). The split fix of 2026-11-07 (a code address is no
@@ -235,8 +235,9 @@ units' `.rodata`, so keep the header's line layout (add members in place, `#line
   lever, with a comment. MIPS arithmetic stays in C (user's rule).
 - Only the unit's `src/U.cpp`/`.h` and the headers its classes need. Never add a `// PARTIAL` marker, a stand-in or
   anything against the ref to another unit's header (the header cleanup below removes them); a missing
-  declaration goes in exactly as the ref has it. A match that needs more (e.g. a member private in the ref) is
-  not the original's source: park it (user, 2026-11-07; hook edits A1/A2 may touch other files).
+  declaration goes in exactly as the ref has it. A member private in the ref: a `friend class X;` on an existing
+  line of its class with a MATCH reason (the ref can't show friends), never a changed access specifier; anything more
+  is not the original's source: park it (user, 2026-11-07; hook edits A1/A2 may touch other files).
 
 **V5: the gate.** `tools/check.sh` exits 0 before every merge into `main`, again on `main` after it, and at the
 end of every session.
