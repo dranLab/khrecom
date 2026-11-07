@@ -87,9 +87,6 @@ int DisableDmac(int cause);
 static int _ch3dmaCSC(int ch, void *arg, void *addr);
 static int _ch4dma(int ch, void *arg, void *addr);
 
-/* Parked: _doCSC2 3 lines (6 before the do-while(0) around the DMA kick) - registers; _sceMpegCscStoreRefImage
-   in s1/s2 for the inlined CSC block's rgb/qwc. */
-#if 0
 static void _doCSC2(MpegSys *sys, void *rgb, int mbnum)
 {
     sceMpegCbData cb;
@@ -104,9 +101,8 @@ static void _doCSC2(MpegSys *sys, void *rgb, int mbnum)
     data.count = 0;
     IPU_WAIT();
     hid = AddDmacHandler2(3, _ch3dmaCSC, 0, &data);
-    *D_STAT = 8;
-    do { /* MATCH: a loop note around the DMA kick (a macro body?) fixes its registers (decomp-permuter) */
-        EnableDmac(3);
+    *D_STAT = 8; EnableDmac(3); /* MATCH: one line: the assembler moves the store into the jal slot */
+    do { /* MATCH: the interrupt-disabled DMA kick in a do-while(0) (a macro body?): its registers */
         oldei = DIntr();
         *D3_MADR = (unsigned int)rgb & 0x0fffffff;
         *D3_QWC = MB_CHUNK * 0x40;
@@ -114,10 +110,10 @@ static void _doCSC2(MpegSys *sys, void *rgb, int mbnum)
         if (oldei) {
             EIntr();
         }
-        *IPU_CMD = 0x70000000 | MB_CHUNK; /* CSC */
-        cb.type = 4;
-        _sceMpegDispatchMpegCallback(sys->mp, &cb);
     } while (0);
+    *IPU_CMD = 0x70000000 | MB_CHUNK; /* CSC */
+    cb.type = 4;
+    _sceMpegDispatchMpegCallback(sys->mp, &cb);
     while (data.count < data.nchunk) {
     }
     if (data.error) {
@@ -128,6 +124,8 @@ static void _doCSC2(MpegSys *sys, void *rgb, int mbnum)
     RemoveDmacHandler(3, hid);
 }
 
+/* Parked: _sceMpegCscStoreRefImage in s1/s2 for the inlined CSC block's rgb/qwc. */
+#if 0
 static inline void _sceMpegIpuCmd(MpegSys *sys, unsigned int cmd)
 {
     *IPU_CMD = cmd;
@@ -223,16 +221,9 @@ void _sceMpegCscStoreRefImage(MpegSys *sys, MpegRefImage *ref)
     _sceMpegDispatchMpegCallback(sys->mp, &cb);
 }
 
-#endif
-void _doCSC2(MpegSys *sys, void *rgb, int mbnum);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/csc", _doCSC2);
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/csc", _sceMpegCscStoreRefImage);
-
-/* Keeps _doCSC2's string in .rodata while it is assembly (never emitted). */
-static inline void _doCSC2_strings(MpegSys *sys)
-{
-    _sceMpegError(sys, "CSC handler error\n");
-}
+#endif
 
 static int _ch3dmaCSC(int ch, void *arg, void *addr)
 {
