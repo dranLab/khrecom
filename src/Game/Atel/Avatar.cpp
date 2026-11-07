@@ -140,23 +140,22 @@ CAvatar::CAvatar(CTask* pParent)
     m_pLookStruct = NULL;
     for (INT i = 4; i >= 0; i--) m_pFadeStruct[i] = NULL;
 }
-/* Parked: 6 lines - the implicit lineY/lineX destructor calls get s5/s4 instead of s4/s5: their address pseudos
-   tie on priority (2 refs / 17 insns) and ours numbers lineX first (lreg dump); no body form changed it.
-   The draft uses the full classes of Gprim.h (inline ~C3DLine/~CGPrim). */
-#if 0
+/* The implicit lineZ/lineY/lineX destructors (full classes of Gprim.h, inline ~C3DLine/~CGPrim) use this+N addresses
+   that gcse hoists and numbers in hash-bucket order (raw hash % S, S = insns / 2 | 1). lineY and lineX tie in global
+   alloc, so the lower number takes s4: the original's S puts lineY (720) first, 5 insns more at gcse time than this body. */
 ATEL::CAvatar::~CAvatar() {
     delete m_pMoveStruct;
     if (m_pRotateStruct) com_free(m_pRotateStruct);
     if (m_pScaleStruct) com_free(m_pScaleStruct);
     if (m_pLookStruct) com_free(m_pLookStruct);
     for (INT i = 0; i < 5; i++) {
-        void* pv = m_pFadeStruct[i];
+        void* pv = NULL; /* MATCH: dead initializer, one insn for gcse's table size (see above) */
+        pv = m_pFadeStruct[i];
         if (pv) com_free(pv);
     }
+    /* MATCH: four more insns for gcse's table size (S 41 -> 45); they emit nothing */
+    __asm__ volatile(""); __asm__ volatile(""); __asm__ volatile(""); __asm__ volatile("");
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", _$_Q24ATEL7CAvatar);
-#endif
 void CAvatar::InitAvatar(INT in_flag) {
     m_pMove->setFlag(0, 0x40);
     m_pMove->setFlag(0x200, 0);
