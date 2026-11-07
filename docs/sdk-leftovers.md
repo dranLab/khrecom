@@ -40,6 +40,10 @@ shows a draft's diff after you switch its `#if 0` to `#if 1` (the permuters swit
   source first, also with INCLUDE_ASM functions left: C literals for C-owned labels, `asm(".rdata\n.align 3\n...")`
   blocks of ROM words (a jump table as symbolic `.word .Lxxx`) right after each asm owner's INCLUDE_ASM; delete a
   block with its INCLUDE_ASM (memory note source-data-owner-blocks; kprintf2 2026-11-07, filestub).
+  A segment that starts with another object's bytes or ends in section padding was a split/link problem, fixed
+  2026-11-07: configure.py aligns each data section's start label to 128 (`_gp` follows cod_SDATA_START;
+  libgcc2___umoddi3), and split_objects.py gives data-only objects without debug info their .rodata (impure.o's
+  "C" before __assert).
 
 ## Levers that worked in lib/
 
@@ -88,8 +92,9 @@ shows a draft's diff after you switch its `#if 0` to `#if 1` (the permuters swit
 - **csc** (matched 2026-11-07, data from source): both "register swaps" were source shape: `*D_STAT = 8;
   EnableDmac(3);` on one line (as moves the volatile store into the jal slot), the `do { } while (0)` around exactly
   the `DIntr() ... if (oldei) EIntr();` critical section, and qwc (`mbnum * 0x40`) in its own local next to rgb.
-- **libpad2** (`scePad2GetButtonInfo`, 5 lines): needs `if (valid) { switch ... }`; keeps the button type in a1
-  instead of a3. Lever here: the shared `return state` with the fail block inside the else branch (goto into it).
+- **libpad2** (matched 2026-11-07): `if (valid) { switch ... }` with every case returning; the v0/v1 and a0/a1
+  swaps in case 8 came from case 1 written as a ternary into a shared `ret` (it gave the bit an a0 preference):
+  `if (!x) return type; return 0;` there, and case 8's shift in a plain block-local `v`.
 - **hncAt3dec** (`hncAt3dec_Idle`): structure matches (per-channel `final_dout` loops counting down); only the
   register assignment differs. Init matched once each switch case sets all three values itself.
 - **eecdvd_sceCdCallback**: `_sceCd_cbLoop` matches by funcdiff with the exit block on one line and
@@ -98,13 +103,8 @@ shows a draft's diff after you switch its `#if 0` to `#if 1` (the permuters swit
 - **timer** (`TimerBusClock2Freq`, `TimerFreq2BusClock`, matched 2026-11-07 with the Sony group on 991111-01): both match as they stand under ee-gcc2.9-991111-01 (its `div.s`
   erratum padding keeps it out of the call's delay slot), and no function of the unit differs there. Needs an override.
 - **lib/init**: a `j $31` left unfilled where the original filled it: the last statement and `}` on one line.
-- **nodebug/__assert** (.rodata, needs a split change): the segment at 0x3FE5A0 starts with impure.o's 8-byte
-  `.rodata` ("C", `_current_locale` of `_REENT_INIT`, pointed at by impure_data); from source only those 8 bytes
-  differ. Needs a `[0x3FE5A0, rodata, lib/nodebug/impure_data]` segment linked before __assert (split_objects.py).
-- **libgcc2___umoddi3** (.rodata, needs a link change): the table matches from source, but the segment also holds
-  0x28 zero bytes up to .sdata at 0x3FF680, the original link's 128-byte section alignment (.sndata, .rodata,
-  .sbss start 128-aligned too). Needs `. = ALIGN(0x80)` before `.sdata` in the linker script (configure.py) or a
-  padding segment.
+- **nodebug/__assert**, **libgcc2___umoddi3** (.rodata from source 2026-11-07): needed a split and a link change,
+  see "Data:" above (impure.o's .rodata segment; the 128-byte section start alignment).
 
 ## Inventory
 
@@ -125,7 +125,7 @@ Their code or data comes entirely from the original assembly.
 | `lib/nodebug/blanks.12` | - | .rodata |
 | `lib/nodebug/errno` | - | .bss |
 | `lib/nodebug/huge` | - | .rodata |
-| `lib/nodebug/impure_data` | - | .data |
+| `lib/nodebug/impure_data` | - | .data .rodata |
 | `lib/nodebug/lconv` | - | .rodata |
 | `lib/nodebug/sn___infinity` | - | .rodata |
 | `lib/src/newlib/libm/common/s_lib_ver` | - | .rodata |
@@ -140,7 +140,6 @@ Sorted by unit, then size. `instr`: instructions in the original.
 |---|---|---:|---|---|
 | `lib/nodebug/snDebugInit` | `snTeq` | 26 | hand-written | trap handler |
 | `lib/graphdev_checkModelVersion` | `sceGsSetDefDispEnv` | 221 | parked | matches except register order in the DISPLAY computation (orig: DY and off[0] + 636 first). |
-| `lib/libpad2` | `scePad2GetButtonInfo` | 56 | parked | 3 lines (2026-11-07, through a pointer to bi, decomp-permuter): case 8's address in v0 and the byte in v1, swapped. |
 | `lib/mpc` | `_getRef0` | 290 | parked | same structure and size as the original; register allocation differs (the original keeps y in s1, n in t9 and spills avg << 2) |
 | `lib/mpc` | `_rix_111` | 72 | hand-written | MMI reference-copy routines (_rix_*: luminance, _ri0_*: chrominance) |
 | `lib/mpc` | `_ri0_111` | 69 | hand-written | MMI reference-copy routines (_rix_*: luminance, _ri0_*: chrominance) |
@@ -193,10 +192,8 @@ Not listed in the unit's `// SOURCE DATA:` line.
 
 | unit | sections |
 |---|---|
-| `lib/nodebug/__assert` | .rodata |
-| `lib/src/gcc/libgcc2___umoddi3` | .rodata |
 
-Totals: 16 units without a source file (1 with code); 15 units with INCLUDE_ASM functions: 20 parked, 1 not attempted, 27 hand-written; 2 units take a data section from assembly.
+Totals: 16 units without a source file (1 with code); 14 units with INCLUDE_ASM functions: 19 parked, 1 not attempted, 27 hand-written; 0 units take a data section from assembly.
 
 Generated by `tools/leftovers.py lib`.
 <!-- leftovers:lib:end -->

@@ -11,7 +11,6 @@
 #include "System/Graphic/StrPrim.h"
 #include "System/Sound/SoundMan.h"
 #include <string.h>
-#include "include_asm.h"
 
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
@@ -1145,15 +1144,13 @@ void CImageWnd::createWindow(CPointI& pos0, CSizeI& size0, CPointI& pos1, CSizeI
     init(pos0, size0, pos1, size1, pTexName, fRate, color0, color1, fgFlip);
 }
 
-/* Parked: 5 of 240 lines (2026-11-07; was 14) - the flip block (w2 = w; w = 0 under fgFlip bits, 4 USHORTs) gets other registers
- * (original w a1, h a2, w2 a3, h2 t0; ours w v1, h a1, h2 a2) and the T0..T3 stores another order. Tried (2026-11-05:
- * decl/assignment forms of w, h, w2, h2, INT locals): declaration orders (ref's w, h, w2,
- * h2), one pTexInfo for both getTPage calls, pos0.m_x in a local, hill.py (2026-10-19), permuter 10 min (21 -> 21). 
-   2026-11-07: all 48 orders of the four m_T*.set() calls around setLayerFG: the current one is the best. */
-#if 0
 #line 1900
 void CImageWnd::init(CPointI& pos0, CSizeI& size0, CPointI& pos1, CSizeI& size1, const CHAR* pTexName, FLOAT fRate,
                      G_RGBA color0, G_RGBA color1, INT fgFlip) {
+    USHORT w; // MATCH: w and h also hold the second getTPage() sizes (the ref has no other locals): one pseudo each
+    USHORT h;
+    USHORT w2;
+    USHORT h2;
     if (!m_pPolyGT4) {
 #line 2015
         CPolyGT4* pPoly = new (__FILE__ "(2015)") CPolyGT4;
@@ -1164,10 +1161,10 @@ void CImageWnd::init(CPointI& pos0, CSizeI& size0, CPointI& pos1, CSizeI& size1,
             delete pPoly;
             return;
         }
-        USHORT w = pTexInfo->_TexInfo._nDistW - 1;
-        USHORT h = pTexInfo->_TexInfo._nDistH - 1;
-        USHORT h2 = 0;
-        USHORT w2 = 0;
+        w = pTexInfo->_TexInfo._nDistW - 1;
+        h = pTexInfo->_TexInfo._nDistH - 1;
+        h2 = 0;
+        w2 = 0;
         if (fgFlip & 1) {
             w2 = w;
             w = 0;
@@ -1176,19 +1173,19 @@ void CImageWnd::init(CPointI& pos0, CSizeI& size0, CPointI& pos1, CSizeI& size1,
             h2 = h;
             h = 0;
         }
-        pPoly->m_T3.set(w2, h);
         pPoly->m_T0.set(w, h2);
-        pPoly->m_T2.set(w2, h2);
-        INT& layerFG = m_nLayerFG;
-        pPoly->setLayerFG(layerFG);
         pPoly->m_T1.set(w, h);
+        pPoly->m_T2.set(w2, h2);
+        pPoly->m_T3.set(w2, h);
+        INT& layerFG = m_nLayerFG; // MATCH: read through a reference: the load stays after the m_T* stores
+        pPoly->setLayerFG(layerFG);
         pPoly->setSemiTrans((ALPHA)1);
         m_pPolyGT4 = pPoly;
     }
     TexInfo* pTexInfo = m_pPolyGT4->getTPage();
     if (!pTexInfo) return;
-    USHORT tw = pTexInfo->_TexInfo._nDistW;
-    USHORT th = pTexInfo->_TexInfo._nDistH;
+    w = pTexInfo->_TexInfo._nDistW;
+    h = pTexInfo->_TexInfo._nDistH;
     if ((UINT)pos0.m_x != 0x80000000) { // MATCH: unsigned test: the lw of pos0.m_x is scheduled first, so reorg fills
                                         // the `return`'s delay slot from the epilogue
         m_initPos.x = pos0.m_x - 256;
@@ -1200,8 +1197,8 @@ void CImageWnd::init(CPointI& pos0, CSizeI& size0, CPointI& pos1, CSizeI& size1,
         m_initPos.z = size0.m_w;
         m_initPos.w = size0.m_h;
     } else {
-        m_initPos.z = th;
-        m_initPos.w = tw;
+        m_initPos.z = h;
+        m_initPos.w = w;
     }
     if (pos1.m_x != (INT)0x80000000) {
         m_targetPos.x = pos1.m_x - 256;
@@ -1213,8 +1210,8 @@ void CImageWnd::init(CPointI& pos0, CSizeI& size0, CPointI& pos1, CSizeI& size1,
         m_targetPos.z = size1.m_w;
         m_targetPos.w = size1.m_h;
     } else {
-        m_targetPos.z = th;
-        m_targetPos.w = tw;
+        m_targetPos.z = h;
+        m_targetPos.w = w;
     }
     m_step = 1;
     m_currentPos = m_initPos;
@@ -1224,13 +1221,6 @@ void CImageWnd::init(CPointI& pos0, CSizeI& size0, CPointI& pos1, CSizeI& size1,
     m_fCurrentRate = 0.0f;
     m_fRate = 1.0f / fRate;
 }
-#else
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) void _CImageWnd_init_strings(INT n) {
-    TRACE(__FILE__ "(2015)");
-}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Wnd", init__9CImageWndRt7CPointT1ZiRt6CSizeT1ZiT1T2PCcfG6G_RGBAT7i);
-#endif
 #line 2082
 void CImageWnd::mainImpl() {
     if (!m_pPolyGT4) return;

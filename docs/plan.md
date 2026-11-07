@@ -46,8 +46,8 @@ every change that is merged without regenerating. Regenerating all four takes ab
   (fixed 2026-11-07: it used to count a parked `#if 0 ... #else INCLUDE_ASM #endif` as done).
 - **Game:** 82 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note).
   5 units take a data section from assembly.
-- **Libraries:** 22 parked, 1 not attempted, 27 hand-written (stay assembly), 2 units with data from assembly
-  (__assert, __umoddi3: need a split / link-alignment change);
+- **Libraries:** 19 parked, 1 not attempted, 27 hand-written (stay assembly), no unit with data from assembly
+  (the last two, __assert and __umoddi3, needed the split / link-alignment fixes of 2026-11-07);
   details in `docs/sdk-leftovers.md`.
 - **Header cleanup:** PARTIAL 190 (156 in 44 headers, 34 in 20 .cpp), 14 foreign stand-ins in 9 files, 0
   duplicate classes, 0 untagged mechanisms; classes complete 873, superset 12, gated 3, missing 8.
@@ -393,6 +393,7 @@ header split the original didn't have, or make a class a template to hide its st
 | reload/spill register one off after inline asms | asm-inout-earlyclobber-reload |
 | a giv step at the loop end in the original, mid-loop in ours | separate-biv-for-increment |
 | peeled first test + rotated loop with `bnezl` | goto-layout-reorg-prediction (dlmalloc: goto body after the return) |
+| a pointer kept in a register copy through a loop, the count reloaded differently | direct-member-vs-inline-getter (no inlined `this` in the ref locals) |
 | stores in another order | sched-store-order-reg-weight, volatile-delay-slots-store-permutation, small-union-ctor-stores, fixed-scalar-varying-struct-alias, join-store-per-arm |
 | the original reloads a global/member, ours keeps it (or the reverse) | global-reload-ref-helper, fixed-scalar-varying-struct-alias, const-global-reorg-redundant-load, mapenemy-unit-lessons |
 | tails merged or not merged, branch layout | gcc-crossjump-alias-rules, crossjump-dup-arm-stores, crossjump-case-label-chain, state-machine-break-vs-return, guard-plus-while-and-static-members, first-return-stub-ternary, bool-tail-shared-false |

@@ -79,10 +79,6 @@ typedef USItype UWtype;
         (count) = W_TYPE_SIZE - (__clz_tab[__xr >> __a] + __a);                                  \
     } while (0)
 
-#ifdef CLZ_TAB_EXTERN
-extern const UQItype CLZ_TAB_EXTERN[];
-#define __clz_tab CLZ_TAB_EXTERN
-#else
 static const UQItype __clz_tab[] = {
     0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
     6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
@@ -93,7 +89,6 @@ static const UQItype __clz_tab[] = {
     8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
     8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
 };
-#endif
 
 #if defined(L_divdi3) || defined(L_moddi3)
 static inline DItype __negdi2(DItype u)
