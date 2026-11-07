@@ -153,6 +153,11 @@ static void _cpr8(_sceMpegDecoder *d, _sceMpegPicture *pict)
         dst0 += d->stride * 0xC0;
     }
 }
+static inline int _ptsDelta(long step, int n)
+{
+    return (step * n) >> 1;
+}
+
 /* MATCH: the union store has alias set 0, so it conflicts with every field: d->tags, ptsStep and ptsField reload after
    it (strict aliasing folds them after a plain long store). The flag word's three locals keep their pairs, which one
    expression does not: gcc 2.9 re-pairs the terms. */
@@ -175,8 +180,8 @@ static void _dispRefImage(_sceMpegDecoder *d, _sceMpegPicture *pict, int n)
         long adj = odd & (d->ptsField & 1);
         { long sb = (step = d->ptsStep) & 1; adj &= sb; }
         ia = adj;
-        q = (step * n) >> 1;
-        asm volatile("" : : : "memory"); /* MATCH: lastPts reloads after __muldi3 (a const libcall), behind the shift */
+        q = _ptsDelta(step, n);
+        asm volatile(""); /* MATCH: the shift before the lastPts load: the union store below gives that load one more dependent, and it would win the tie */
         r = q + ia;
         ((union { long l; int i; } *)&tags[2])->l = d->lastPts + r;
         odd &= d->ptsStep; tags = d->tags; if (odd) d->ptsField++; } else {
@@ -228,11 +233,6 @@ static void _dispRefImage(_sceMpegDecoder *d, _sceMpegPicture *pict, int n)
         d->outputReady = 1;
     }
 }
-/* Parked: 13 of 272 lines, same size, _dispRefImage's body twice with showCount known to be 1 (the second __muldi3 folds).
-   Left: in the second body the value is in a1 for v1, step in v1 for a0, sb in a0 for a1 (a local for the value only
-   adds a truncation; six shapes of that body, 13-16); `lw t1` (hasPts, a PRE copy) is issued before the addiu: it is
-   the only insn ready that cycle, and nothing natural delays it. */
-#if 0
 static void _dispRefImageField(_sceMpegDecoder *d, _sceMpegPicture *top, _sceMpegPicture *bottom, int n)
 {
     char buf[256];
@@ -270,11 +270,11 @@ static void _dispRefImageField(_sceMpegDecoder *d, _sceMpegPicture *top, _sceMpe
         long adj = odd & (d->ptsField & 1);
         { long sb = (step = d->ptsStep) & 1; adj &= sb; }
         ia = adj;
-        q = (step * n) >> 1;
-        asm volatile("" : : : "memory"); /* MATCH: as in _dispRefImage */
+        q = _ptsDelta(step, n);
+        asm volatile(""); /* MATCH: the shift before the lastPts load: the union store below gives that load one more dependent, and it would win the tie */
         r = q + ia;
         ((union { long l; int i; } *)&tags[2])->l = d->lastPts + r;
-        odd &= d->ptsStep; tags = d->tags; if (odd) d->ptsField++; } else {
+        odd &= d->ptsStep; tags = d->tags; if (odd) { int f = d->ptsField; asm volatile(""); /* MATCH: hasPts' PRE load (t1) after the addiu; it is the only insn ready a cycle earlier */ d->ptsField = f + 1; } } else {
         *pPts = first->pts;
     }
     if (d->outputMode == 2 && d->nextPts >= 0) {
@@ -304,7 +304,7 @@ static void _dispRefImageField(_sceMpegDecoder *d, _sceMpegPicture *top, _sceMpe
         long adj = odd & (d->ptsField & 1);
         { long sb = (step = d->ptsStep) & 1; adj &= sb; }
         ia = adj;
-        q = (step * n) >> 1;
+        q = _ptsDelta(step, n);
         r = q + ia;
         ((union { long l; int i; } *)&tags[5])->l = d->lastPts + r;
         odd &= d->ptsStep; tags = d->tags; if (odd) d->ptsField++; } else {
@@ -358,11 +358,6 @@ static void _dispRefImageField(_sceMpegDecoder *d, _sceMpegPicture *top, _sceMpe
         d->outputReady = 1;
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/output", _dispRefImageField);
-#endif
-/* gcc still thinks it is in .rdata (the next string follows without a section change) */
-__asm__(".rdata");
 
 int _sceMpegFlush(sceMpeg *mp)
 {
