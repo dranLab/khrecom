@@ -546,41 +546,9 @@ static inline INT _dotN(FVECTOR& v) {
                  "sll %0, %0, 0" : "=r"(ret) : "r"(&v));
     return ret;
 }
-#define _dotNf(v)                                               \
-    ({                                                          \
-        INT iTmp;                                               \
-        FLOAT ret;                                              \
-        asm volatile("lqc2 $vf4, 0x0(%1)\n"                     \
-                     "vmulax.x $ACC, $vf21, $vf4x\n"            \
-                     "vmadday.x $ACC, $vf22, $vf4y\n"           \
-                     "vmaddz.x $vf4, $vf23, $vf4z\n"            \
-                     "qmfc2.ni %0, $vf4" : "=r"(iTmp) : "r"(&v)); \
-        asm volatile("mtc1 %1, %0\n"                            \
-                     "nop\n" : "=f"(ret) : "r"(iTmp));           \
-        ret;                                                    \
-    })
-/* Parked: 14 of 185 lines, same size - the helpers and the i/iPrimIdx loop follow the ref's locals; _dotNf is qmfc2 + mtc1/nop
-   with iTmp and ret as in DispList. Left: t8/t9 for the two qmfc2 (ours v0). A t-reg that high means iTmp is allocated after
-   the globals, so it is live across blocks in the original: read before written, but "+r" as in EffectMan's _lengthVf4
-   then outranks the pChip/&vCk copies (28 lines). With them d0 in f2 and the results in f1/f0; both orders of the setup
-   loads (t3/t4 addiu, lw 56/400) and two sw pairs. */
-#if 0
-void CCollUtil::detectMCInit(MC_CHIP* pChip, INT iArea) {
-    FVECTOR vCk0;
-    FVECTOR vCk1;
-    FVECTOR vCkM;
-    FVECTOR vCkVec;
-    MC_DATA* pMCData;
-    INT iIdx;
-    INT iCnt;
-    MC_PRIM* pPrim;
-    USHORT* pPrimIdx;
-    PRIM_INFO2 primInfo2;
-    PRIM_INFO primInfo;
-    INT entryCnt;
-    PRIM_INFO2* pPrimInfo2;
-    FVECTOR& _vCkS0 = m_vCkS0;
-    FVECTOR& _vCkE = m_vCkE;
+/* The ref lists _vCkS0/_vCkE as detectMCInit locals: this inline's parameters. Their order sets the order of the address
+   setup (sched2 breaks the priority tie by insn order): vCkVec, vCk1, then the two member addresses. */
+static inline void _calcCk(FVECTOR& vCk0, FVECTOR& vCkVec, FVECTOR& vCk1, FVECTOR& _vCkS0, FVECTOR& _vCkE) {
     asm volatile("lqc2 $vf4, 0x0(%0)\n"
                  "lqc2 $vf5, 0x0(%1)\n"
                  "vmulax.xyzw $ACC, $vf8, $vf4x\n"
@@ -594,8 +562,37 @@ void CCollUtil::detectMCInit(MC_CHIP* pChip, INT iArea) {
                  "vmaddaw.xyzw $ACC, $vf11, $vf5w\n"
                  "vmsubw.xyzw $vf5, $vf4, $vf0w\n"
                  "sqc2 $vf4, 0x0(%2)\n"
-                 "sqc2 $vf6, 0x0(%3)\n"
-                 "sqc2 $vf5, 0x0(%4)" : : "r"(&_vCkS0), "r"(&_vCkE), "r"(&vCk0), "r"(&vCk1), "r"(&vCkVec) : "memory");
+                 "sqc2 $vf6, 0x0(%4)\n"
+                 "sqc2 $vf5, 0x0(%3)" : : "r"(&_vCkS0), "r"(&_vCkE), "r"(&vCk0), "r"(&vCkVec), "r"(&vCk1) : "memory");
+}
+static inline FLOAT _dotNf(FVECTOR& v) {
+    INT iTmp;
+    FLOAT ret;
+    asm volatile("lqc2 $vf4, 0x0(%2)\n"
+                 "vmulax.x $ACC, $vf21, $vf4x\n"
+                 "vmadday.x $ACC, $vf22, $vf4y\n"
+                 "vmaddz.x $vf4, $vf23, $vf4z\n"
+                 "qmfc2.ni %1, $vf4\n"
+                 "mtc1 %1, %0\n"
+                 "nop\n" : "=f"(ret) : "r"(iTmp), "r"(&v)); /* MATCH: iTmp passed in unset (read before written):
+                                                              global-alloc puts the two copies in t8/t9 as the original */
+    return ret;
+}
+void CCollUtil::detectMCInit(MC_CHIP* pChip, INT iArea) {
+    FVECTOR vCk0;
+    FVECTOR vCk1;
+    FVECTOR vCkM;
+    FVECTOR vCkVec;
+    MC_DATA* pMCData;
+    INT iIdx;
+    USHORT* pPrimIdx;
+    INT iCnt;
+    MC_PRIM* pPrim;
+    PRIM_INFO primInfo;
+    PRIM_INFO2 primInfo2;
+    INT entryCnt;
+    PRIM_INFO2* pPrimInfo2;
+    _calcCk(vCk0, vCkVec, vCk1, m_vCkS0, m_vCkE);
     pMCData = (MC_DATA*)pChip->data;
     entryCnt = 0;
     iIdx = pMCData->tbl[iArea][0];
@@ -628,12 +625,12 @@ void CCollUtil::detectMCInit(MC_CHIP* pChip, INT iArea) {
         d0 = -pN0->w;
         if (d0 < _dotNf(v1)) continue;
         if (_dotNf(vCk0) < d0) continue;
-        entryCnt++;
         PRIM_INFO* pPrimInfo = &m_pPrimInfo[m_PrimInfoIdx];
+        pPrimInfo->fgLine = 0;
         pPrimInfo->pPrim = pPrim;
         pPrimInfo->pInfo2 = pPrimInfo2;
-        pPrimInfo->fgLine = 0;
         m_PrimInfoIdx++;
+        entryCnt++;
     }
     if (entryCnt) {
         m_PrimInfoIdx2++;
@@ -642,8 +639,8 @@ void CCollUtil::detectMCInit(MC_CHIP* pChip, INT iArea) {
         pPrimInfo2->vLE = vCk1;
         pPrimInfo2->vLVec = vCkVec;
         pPrimInfo2->pNorm = pMCData->norm;
-        pPrimInfo2->pMcChip = pChip;
         pPrimInfo2->pVert = pMCData->vert;
+        pPrimInfo2->pMcChip = pChip;
     }
     if (!(m_PrimInfoIdx < 0x240)) {
         TRACE(D_004892F8);
@@ -651,9 +648,6 @@ void CCollUtil::detectMCInit(MC_CHIP* pChip, INT iArea) {
     }
     if (!(m_PrimInfoIdx2 < 0x40)) AssertApp(D_00489310, 819, D_00489360, 0);
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", detectMCInit__9CCollUtilP7MC_CHIPi);
-#endif
 extern char D_00489380[]; /* "m_pPrimInfo" */
 extern char D_00489390[]; /* "m_pPrimInfo2" */
 
