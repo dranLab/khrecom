@@ -137,6 +137,9 @@ static inline int SetGP(int gp)
 void _request_end(RpcRendPkt *rend, struct rpc_data *rd);
 void _request_bind(RpcBindPkt *bind, struct rpc_data *rd);
 void _request_call(RpcCallPkt *call, struct rpc_data *rd);
+/* MATCH: a store of alias set 0: every later read reloads and stays behind it, which is the pair-by-pair copy order */
+#define _PKT_STORE(lv, m) (((union { void *p; int i; } *)&(lv))->m)
+
 void _request_rdata(RpcOtherDataPkt *rdata, struct rpc_data *rd);
 
 /* Parked: 62 lines differ (permuter score) */
@@ -302,7 +305,7 @@ static void _request_rdata(RpcOtherDataPkt *rdata, struct rpc_data *rd)
     } else {
         rend = _sceRpcGetFPacket(rd);
     }
-#define _COPY(f, g) (((union { int i; } *)&rend->f)->i = (int)rdata->g)
+#define _COPY(f, g) (_PKT_STORE(rend->f, i) = (int)rdata->g)
     rend->rpc.pkt_addr = rdata->rpc.pkt_addr;
     _COPY(receive, receive);
     rend->cid = SIF_CMD_RPC_RDATA;
@@ -380,7 +383,8 @@ static unsigned long _alarm_bind(int id, unsigned long schedule, unsigned long a
     return 0x800;
 }
 
-/* Parked: the original copies the packet fields in strict load/store order, ours lets the scheduler hoist loads */
+/* Parked: 4 of 59 lines, same size (2026-11-07, was 17): !sd arm first, both loads ahead of a barrier, server's store of alias
+   set 0 (sd stays in v0). Left: `ori` and `move a1` against the stores of the same block; all six store orders tried. */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/sifrpc", _request_bind);
 #if 0
 static void _request_bind(RpcBindPkt *bind, struct rpc_data *rd)
@@ -389,16 +393,21 @@ static void _request_bind(RpcBindPkt *bind, struct rpc_data *rd)
     sceSifServeData *sd;
 
     rend = _sceRpcGetFPacket(rd);
-    rend->client = bind->client;
-    rend->rpc.pkt_addr = bind->rpc.pkt_addr;
+    {
+        void *c = bind->client;
+        void *p = bind->rpc.pkt_addr;
+        asm volatile("");
+        rend->rpc.pkt_addr = p;
+        rend->client = c;
+    }
     rend->cid = SIF_CMD_RPC_BIND;
     sd = _search_svdata(bind->sid, rd);
-    if (sd) {
-        rend->server = sd;
-        rend->buff = sd->buff;
-    } else {
+    if (!sd) {
         rend->server = 0;
         rend->buff = 0;
+    } else {
+        _PKT_STORE(rend->server, p) = sd;
+        rend->buff = sd->buff;
     }
     if (!isceSifSendCmd(SIF_CMD_RPC_END, rend, 0x40, 0, 0, 0)) {
         iSetTimerAlarm(0x800, _alarm_bind, rend);
@@ -479,9 +488,6 @@ static void _request_call(RpcCallPkt *call, struct rpc_data *rd)
     }
 }
 #endif
-
-/* MATCH: a store of alias set 0: every later read reloads and stays behind it, which is the pair-by-pair copy order */
-#define _PKT_STORE(lv, m) (((union { void *p; int i; } *)&(lv))->m)
 
 int sceSifCallRpc(sceSifClientData *cd, unsigned int fno, unsigned int mode, void *send, int ssize, void *receive,
                   int rsize, sceSifEndFunc end_func, void *end_para)
