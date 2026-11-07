@@ -49,7 +49,7 @@ every change that is merged without regenerating. Regenerating all four takes ab
 - **Libraries:** 18 parked, 1 not attempted, 27 hand-written (stay assembly), no unit with data from assembly
   (the last two, __assert and __umoddi3, needed the split / link-alignment fixes of 2026-11-07);
   details in `docs/sdk-leftovers.md`.
-- **Header cleanup:** PARTIAL 190 (156 in 44 headers, 34 in 20 .cpp), 14 foreign stand-ins in 9 files, 0
+- **Header cleanup:** PARTIAL 188 (156 in 44 headers, 32 in 18 .cpp), 11 foreign stand-ins in 6 files, 0
   duplicate classes, 0 untagged mechanisms; classes complete 873, superset 12, gated 3, missing 8.
   `tools/partials.py --queue` has the ready items.
 - **Method that paid off (2026-11-06):** read `tools/helpers/asmlines.py` before permuting. Most long-parked drafts had a
@@ -447,7 +447,10 @@ Keep output small: one function's assembly at a time; `funcdiff` without `--full
   owner; string evidence that contradicts the ref; a new kind of mechanism; completion that needs changes to
   matched C beyond ref type corrections; unifying `Gprim.h` and `GprimFull.h`; a new opt-out macro more than
   about 5 units need; no net decrease of stand-ins plus PARTIAL markers after 3 consecutive units.
-- **Waiting on a decision now:** the global operators (new/delete/placement new) back into System/HeapMan.h with
+- **Waiting on a decision now:** the original's .mdebug type order (build/progress/cleanup-Gprim.h.md) puts G_XY,
+  G_XYZ, G_RGBA, G_UV, G_ST and F_UL with the vector/coord headers (in all 274 originals with FVECTOR; Gprim.h's own
+  G_LAYER/CDrawable/FVERTEX in 234) and the C++ QWdata in a base-types header after the khtypes typedefs, against the
+  ref's placement and ~230 includers. And the global operators (new/delete/placement new) back into System/HeapMan.h with
   `new (__FILE__ "(N)") T` sites (see "Queue state"; ~170 includers, matched C changes). And the `D2MAN_H_PATH` (2DMan.h, `D2::C2DMan`) and `RSRCDATA_H_FULL`
   (`CRsrcData`/`RsrcInfo`/`CRsrcANN`) gates, 10 files: the string evidence for 2DMan.h is ambiguous (the 2D
   container message is in 166 originals, the 2DMan.h path in only about 119).

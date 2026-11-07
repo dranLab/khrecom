@@ -708,7 +708,7 @@ class Project:
         self.methods_in = defaultdict(Counter)  # class -> {ref .cpp unit: methods defined there}
         if self.ref_root.exists():
             for path in sorted(self.ref_root.rglob("*")):
-                if path.suffix not in (".h", ".cpp"):
+                if path.suffix not in (".h", ".cpp", ".c"):  # .c: the libppp C units own their types too
                     continue
                 rel = path.relative_to(self.ref_root).as_posix()
                 src = Source(path, rel, ref=True)
