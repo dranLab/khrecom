@@ -41,10 +41,9 @@ every change that is merged without regenerating. Regenerating all four takes ab
 
 ## Where things stand (2026-11-07)
 
-- **Progress:** 11964 of 12311 functions matched: game 11199 of 11323, libraries 765 of 988 (plus 151 hand-written).
+- **Progress:** 11965 of 12311 functions matched: game 11200 of 11323, libraries 765 of 988 (plus 151 hand-written).
   `tools/check.sh` is the current count.
-- **Game:** 119 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note); the
-  Movement constructor has a draft but is listed as "not attempted" (leftovers.py misses constructors in drafts).
+- **Game:** 118 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note).
   5 units take a data section from assembly.
 - **Libraries:** 38 parked, 5 not attempted, 27 hand-written (stay assembly), 5 units with data from assembly;
   details in `docs/sdk-leftovers.md`.
@@ -80,6 +79,9 @@ every change that is merged without regenerating. Regenerating all four takes ab
   (crossjump-block-end-call), an empty asm in one arm to stop one,
   and only then issue-order groups with empty barriers and register locals (issue-order-pins). Guarded order searches found
   nothing more on the five reverted drafts: their honest scores stand at 30, 27, 9, 5, 31 (setStockInfo then matched by reading the cross-jump).
+- **Constructor with pool constants (2026-11-07):** CMovement went 53 -> 26 -> 0 once the two constants sat in `u_long128`
+  locals (`vZero._q`, TImode pseudos): both lq first, registers and the vtable store right at once (16 lines). The rest was
+  store order, so write chains and `init()` out as single stores and run the guarded search. See memory timode-local-pool-constants.
 - **Order searches (2026-11-07):** `build/hillqueue.py <min> <unit:name>...` climbs runs of simple statements; `build/hillstmt.py`
   one chosen run. Real gains: Movement ctor 53 -> 26, CImageWnd::init 14 -> 5, calcWorldBBox 45 -> 28, finalize 17 -> 11,
   setupTexInfo 10 -> 6. **A lower line count proves nothing about behaviour; only a match does.** Five moves were wrong and
@@ -96,27 +98,18 @@ Numbers change with every merge: `tools/check.sh` (totals), `tools/leftovers.py 
 
 ## Remaining work, in this order
 
-1. **The Movement constructor** (the only draft not counted as parked):
-
-   | # | unit | functions left (parked) | note | read first (memory) |
-   |---|---|---:|---|---|
-   | 1 | `Game/Movement` | 1 (draft) | constructor 53/143 lines: unnamed constant-pool vectors. Line markers: the `:178` stores are a member-initializer list (13 members = lines 179-191), lines 192-198 one vector each; that form gave 60+ lines so far | movement-unit-lessons |
-
-   (`tools/partials.py` reads this table: a listed unit with functions neither matched nor parked counts as in
-   progress for the cleanup queue. Keep the `| # | \`unit\` |` row form.)
-
-2. **Parked game drafts**: retry them closest first, line markers first, then the levers index and both permuters.
+1. **Parked game drafts**: retry them closest first, line markers first, then the levers index and both permuters.
    List them with their notes: `tools/leftovers.py game` ("Parked functions"). Leads already known: sddrv_ee
    `TsSdSepPlayDBG` (decomp-permuter 20 -> 8 lines, not yet checked in the source), Avatar `onMove` (registers
-   only: a 14-vs-15-refs priority tie), PathData `getNearPath` (9 lines), 2DSprObj `initForSeq` (20/342),
-   HumanBoss `initalize` (4/71). The hand-kept table at the top of
+   only: a 14-vs-15-refs priority tie), PathData `getNearPath` (9 lines), 2DSprObj `initForSeq` (20/342).
+   The hand-kept table at the top of
    `docs/asm-leftovers.md` lists the blockers that need more than a source change.
-3. **Data from source** for the units that still take a section from asm: `pppEiDrawShipoly` (.bss .data .rodata) and
+2. **Data from source** for the units that still take a section from asm: `pppEiDrawShipoly` (.bss .data .rodata) and
    `CollUtil` (.rodata). `Ride` and `CollUtilO` can't (`.rodata` at 4 mod 8), `sddrv_ee`'s `.bss` is blocked (see the
    table at the top of `docs/asm-leftovers.md`).
-4. **Library leftovers**: the parked and not attempted functions of `docs/sdk-leftovers.md`, with its "Working on
+3. **Library leftovers**: the parked and not attempted functions of `docs/sdk-leftovers.md`, with its "Working on
    a library unit" section.
-5. **Header cleanup**, interleaved: one `tools/partials.py --queue` item between two work items (see "Header
+4. **Header cleanup**, interleaved: one `tools/partials.py --queue` item between two work items (see "Header
    cleanup"). The items waiting on a user decision are listed under "When to stop and ask".
 
 Work on one unit at a time, one function at a time. A unit is done when every function is matched or parked and
@@ -355,6 +348,7 @@ header split the original didn't have, or make a class a template to hide its st
 | argument loads rotated before a call near a block end | call-arg-order-dependents |
 | member store issued before/after a global load's `lui` | fixed-scalar-varying-struct-alias |
 | same insns, issue order or v0/v1 wrong, no source order fixes it | issue-order-pins |
+| 16-byte constants loaded by lq before all stores | timode-local-pool-constants |
 | ours repeats `...; jal x`, the original branches into the other copy (or the reverse) | crossjump-block-end-call |
 | one-line `por/sq` + `swc1 w`, wrong store order around an FVECTOR | fvector-brace-init-aligned |
 | delay slot of a call and the v0/v1 pair after it | void-callee-v0 |

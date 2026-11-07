@@ -1107,7 +1107,8 @@ static void _initFramePacketForMovie(INT nAlpha) {
     sceVif1PkTerminate(pPkt);
     if (intr) EIntr();
 }
-/* Parked: 2 lines - case 2's two XYZ2 ORs: the original has the X register first (or v0,s2,v0 / or v0,t7,v0), ours puts the shifted Y first; x | y and y | x source order, a shared macro for the three cases, case 3's h/nh form with constant 12 and a 15 min permuter run (21k candidates) all stay at 2. */
+/* Parked: 2 lines - case 2's two XYZ2 ORs: the original has the X register first (or v0,s2,v0 / or v0,t7,v0), ours puts the shifted Y first; x | y and y | x source order, a shared macro for the three cases, case 3's h/nh form with constant 12 and a 15 min permuter run (21k candidates) all stay at 2. 2026-11-07: x0/x1 before the loop moves the hoisted li (15 lines); INT or UINT x0 gives 4; a local for the shifted value and
+   ULONGLONG x0 change nothing: the constant ends up second in every form tried. */
 #if 0
 static void _initFrameEffPacket(INT transKind, INT in_Xofs, INT in_Yofs, INT in_Alpha) {
     pacVif1Packet* pPkt = &s_pktVif1FrameEff;

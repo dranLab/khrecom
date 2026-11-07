@@ -181,32 +181,16 @@ void Movement::CalcPlaneMatrix(FMATRIX& outMat, const FVECTOR& inNormal, const F
     outMat.v[3] = inPos;
 }
 
-/* The constants and the constructor's strings below are emitted here. */
-__asm__(".rdata\n"
-        ".align 4\n"
-        ".word 0x00000000, 0x00000000, 0x00000000, 0x3f800000\n"
-        ".word 0x3f800000, 0x3f800000, 0x3f800000, 0x3f800000\n"
-        ".text\n");
-inline void _ctorStrings(void* p) {
-    TRACE(__FILE__ "(211)");
-    if (!p) AssertApp(__FILE__, 212, "m_pMapCollision", 0);
-}
-/* Parked: 26/128 lines differ with the draft below (53 before a statement-order hill-climb, build/hillstmt.py, which then stays at 26; member-init lists 46-63; a split chain 46-50; size 420 = original). The two vectors are unnamed gcc
- * constant-pool entries (D_004824A0/B0): a BLKmode compound literal read without a target goes to the pool
- * (output_constant_def), which the draft's _V1 member reads reproduce (two 16-byte entries, lq each). Left: the
- * original loads both before all stores and stores the vtable after the four init() zero stores; ours stores the
- * vtable first. When this matches, drop the .rdata block above (the pool entries then come from C, before the
- * "(211)" string). Tried: static/local/const locals (pieces, or named statics), a 32-byte {zero, one} struct (one
- * entry, one base), TImode integer constants (pcpyld synthesis), &compound literal (rejected), permuter 10 min
- * (56 -> 54, cosmetic only). */
-#if 0
 CMovement::CMovement(CEntity* inOwner) {
     struct _V1 { FVECTOR v[1]; };
 #define vZero (((const _V1){{{{0.0f, 0.0f, 0.0f, 1.0f}}}}).v[0])
 #define vOne (((const _V1){{{{1.0f, 1.0f, 1.0f, 1.0f}}}}).v[0])
+    /* MATCH: the two constants sit in TImode locals: both lq come first and the vtable store stays where the original has it;
+       the stores are written out (not init(), no chains) in the order that gives the original's issue order; ro keeps o in memory */
     FVECTOR o;
-    m_vOldPos = m_vPos = m_vOldRot = m_vRot = m_vVel = m_vAcc = vZero;
-    m_vWallNormal.init();
+    FVECTOR& ro = o;
+    u_long128 qZero = vZero._q;
+    u_long128 qOne = vOne._q;
     m_uiFlag = 0;
     m_uiCollisionFlag = 0;
     m_fMass = 1.0f;
@@ -216,15 +200,27 @@ CMovement::CMovement(CEntity* inOwner) {
     m_bExceptNowRide = FALSE;
     m_iCounter = 0;
     m_fPower = 1.0f;
-    m_vLastHitPos.init();
-    m_vHitBackVel.init();
-    m_qQuat.init();
     m_fForce = 1.0f;
+    m_vOldPos._q = qZero;
+    m_vPos._q = qZero;
+    m_vOldRot._q = qZero;
+    m_vRot._q = qZero;
+    m_vVel._q = qZero;
+    ro._q = qOne;
+    m_vLastHitPos._q = 0;
+    m_vHitBackVel._q = 0;
+    m_qQuat._q = 0;
+    m_vLastHitPos.w = 1.0f;
+    m_vHitBackVel.w = 1.0f;
+    m_qQuat.w = 1.0f;
+    m_vWallNormal._q = 0;
     m_fLimitSpeedY = -0.5f;
+    m_vAcc._q = qZero;
     m_tqWaterSurfaceTimer = 0;
     m_pOwner = inOwner;
     m_JumpCollInfo.info = 0;
-    m_vScl = o = vOne;
+    m_vScl._q = qOne;
+    m_vWallNormal.w = 1.0f;
     m_CollInfo.info = 0;
 #line 211
     m_pMapCollision = new (__FILE__ "(211)") CCollMap;
@@ -247,9 +243,6 @@ CMovement::CMovement(CEntity* inOwner) {
 #undef vZero
 #undef vOne
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Movement", __9CMovementP7CEntity);
-#endif
 
 CMovement::~CMovement() {
     if (m_pMapCollision) delete m_pMapCollision;
