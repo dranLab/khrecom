@@ -59,7 +59,7 @@ void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT s);
 void Normalize(FVECTOR& v0, const FVECTOR& v1);
 
 namespace PL {
-extern BULLET_EFFECT_INFO g_EffTbl_Skill[67][4];
+extern const BULLET_EFFECT_INFO g_EffTbl_Skill[67][4]; /* Game/Player/PlayerAttack.h (.rodata) */
 extern FVECTOR g_RotTbl_Magic[8];
 }
 
@@ -400,29 +400,6 @@ void CFriend::getWeaponTopPos(FVECTOR& inPos) {
     inPos.w = 1.0f;
 }
 
-/* setMagic's jump table (the function is still assembly). */
-asm(".rdata\n.align 4\njtbl_00494750:\n"
-    ".word .L00254A80\n.word .L00254C3C\n.word .L002555AC\n.word .L002557DC\n.word .L0025581C\n.word .L00255D88\n"
-    ".word .L00255D88\n.word .L00254A80\n.word .L00254A80\n.word .L00254C3C\n.word .L00254C3C\n.word .L00255D88\n"
-    ".word .L002555AC\n.word .L002555AC\n.word .L00255D88\n.word .L00255D88\n.word .L00255D88\n.word .L00255D88\n"
-    ".word .L00255D88\n.word .L00255D88\n.word .L002557DC\n.word .L002557DC\n.word .L0025581C\n.word .L0025581C\n"
-    ".word .L00255D88\n.word .L00255D88\n.word .L00255D88\n.word .L00255D88\n.word .L00255D88\n.word .L00255D88\n"
-    ".word .L00255D88\n.word .L00255D88\n.word .L00255D88\n.word .L00255D88\n.word .L00255D88\n.word .L00255D88\n"
-    ".word .L00255D88\n.word .L00255D88\n.word .L00255D88\n.word .L00255D88\n.word .L00255D88\n.word .L00255D88\n"
-    ".word .L00255D88\n.word .L00255D88\n.word .L00255D88\n.word .L00255D88\n.word .L00255D88\n.word .L00255D88\n"
-    ".word .L00255D88\n.word .L00255D88\n.word .L00255D88\n.word .L00255D88\n.word .L00255D88\n.word .L00255D88\n"
-    ".word .L00255D88\n.word .L00255D88\n.word .L00255D88\n.word .L00255D88\n.word .L00255AB0\n.word .L00255D88\n"
-    ".word .L00255D88\n.word .L00255D88\n.word .L00255D88\n.word .L00255D88\n.word .L00255D88\n.word .L00255D88\n"
-    ".word .L00255D88\n.word .L00255D88\n.word .L00255D88\n.word .L00255D88\n.word .L00255D88\n.word .L00255D88\n"
-    ".word .L00255D88\n.word .L00255D88\n.word .L00255D88\n.word .L00255D88\n.word .L00255D88\n.word .L00255D88\n"
-    ".word .L00255D88\n.word .L00255D88\n.word .L00255D88\n.word .L00255D88\n.word .L00255AB0\n.word .L00255AB0\n"
-    ".word .L00255B6C\n.word .L00255B6C\n"
-    ".text");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Friend", setMagic__Q26Friend7CFriendi);
-
-/* Not matching (7 lines): in case 36/46/47 (thunder), sched2 issues the copy of getRot() (lq) before the load of
- * pAtkData->EFFECT (lbu) for setEffect's arguments; the original loads EFFECT first. Everything else matches. */
-#if 0
 static inline FLOAT _limitPI(FLOAT r) {
     return r < -3.1415927f ? r + 6.2831855f : (r > 3.1415927f ? r - 6.2831855f : r);
 }
@@ -476,7 +453,7 @@ void CFriend::setMagic(INT inID) {
         param.vPos = pos;
         param.vRot = getRot();
         param.fCollRadius = pAtkData->COLL_START_FRAME * 0.01f;
-        param.pEffectTbl = PL::g_EffTbl_Skill[pAtkData->EFFECT];
+        param.pEffectTbl = (BULLET_EFFECT_INFO*)PL::g_EffTbl_Skill[pAtkData->EFFECT];
         bullet = (CBullet*)CEntityFactory::getInstance()->createBullet(param, this);
         if (bullet) bullet->setBodyRadius(0.1f, 0.0f, 0, (COLL_KIND)-1);
         break;
@@ -497,7 +474,7 @@ void CFriend::setMagic(INT inID) {
         param.vPos = pos;
         param.fSpeed = pAtkData->MAX_SPEED * 0.01f;
         param.fMaxDist = pAtkData->WORK0;
-        param.pEffectTbl = PL::g_EffTbl_Skill[pAtkData->EFFECT];
+        param.pEffectTbl = (BULLET_EFFECT_INFO*)PL::g_EffTbl_Skill[pAtkData->EFFECT];
         param.fCollRadius = pAtkData->COLL_START_FRAME * 0.01f;
         param.vRot = rot;
         param.tqExplodeTime = pAtkData->WORK2 * 100;
@@ -505,14 +482,14 @@ void CFriend::setMagic(INT inID) {
         CEntityFactory::getInstance()->createBullet(param, this);
         switch (m_uiLevel) {
         case 0:
-            param.pEffectTbl = PL::g_EffTbl_Skill[pAtkData->EFFECT + 1];
+            param.pEffectTbl = (BULLET_EFFECT_INFO*)PL::g_EffTbl_Skill[pAtkData->EFFECT + 1];
             param.vRot.y = _limitPI(rot.y - 0.15707964f);
             CEntityFactory::getInstance()->createBullet(param, this);
             param.vRot.y = _limitPI(rot.y + 0.15707964f);
             CEntityFactory::getInstance()->createBullet(param, this);
             break;
         case 1:
-            param.pEffectTbl = PL::g_EffTbl_Skill[pAtkData->EFFECT + 1];
+            param.pEffectTbl = (BULLET_EFFECT_INFO*)PL::g_EffTbl_Skill[pAtkData->EFFECT + 1];
             param.vRot.y = _limitPI(rot.y - 0.18849556f);
             CEntityFactory::getInstance()->createBullet(param, this);
             param.vRot.y = _limitPI(rot.y + 0.18849556f);
@@ -524,7 +501,7 @@ void CFriend::setMagic(INT inID) {
             CEntityFactory::getInstance()->createBullet(param, this);
             break;
         case 2:
-            param.pEffectTbl = PL::g_EffTbl_Skill[pAtkData->EFFECT + 1];
+            param.pEffectTbl = (BULLET_EFFECT_INFO*)PL::g_EffTbl_Skill[pAtkData->EFFECT + 1];
             param.vRot.y = _limitPI(rot.y - 0.15707964f);
             CEntityFactory::getInstance()->createBullet(param, this);
             param.vRot.y = _limitPI(rot.y + 0.15707964f);
@@ -568,7 +545,7 @@ void CFriend::setMagic(INT inID) {
         param.tqHomingTime = 800;
         param.vPos = pos;
         param.vRot = rot;
-        param.pEffectTbl = PL::g_EffTbl_Skill[pAtkData->EFFECT];
+        param.pEffectTbl = (BULLET_EFFECT_INFO*)PL::g_EffTbl_Skill[pAtkData->EFFECT];
         param.fCollRadius = pAtkData->COLL_START_FRAME * 0.1f;
         bullet = (CBullet*)CEntityFactory::getInstance()->createBullet(param, this);
         if (bullet) bullet->setBodyRadius(0.1f, 0.0f, 0, (COLL_KIND)-1);
@@ -608,7 +585,7 @@ void CFriend::setMagic(INT inID) {
         rot.x = 1.5707964f;
         param.vPos = pos;
         param.fMaxDist = pAtkData->WORK0;
-        param.pEffectTbl = PL::g_EffTbl_Skill[pAtkData->EFFECT];
+        param.pEffectTbl = (BULLET_EFFECT_INFO*)PL::g_EffTbl_Skill[pAtkData->EFFECT];
         param.tqHomingTime = pAtkData->WORK2 * 100;
         param.vRot = rot;
         param.fCollRadius = pAtkData->COLL_START_FRAME * 0.01f;
@@ -630,7 +607,7 @@ void CFriend::setMagic(INT inID) {
         param.fSpeed = 0.0f;
         param.vPos = getPos();
         param.vRot = getRot();
-        param.pEffectTbl = PL::g_EffTbl_Skill[51];
+        param.pEffectTbl = (BULLET_EFFECT_INFO*)PL::g_EffTbl_Skill[51];
         param.fCollRadius = 50.0f;
         CEntityFactory::getInstance()->createBullet(param, this);
         break;
@@ -654,7 +631,7 @@ void CFriend::setMagic(INT inID) {
         param.vRot = getRot();
         param.vRot.y = _limitPI(g_pPlayer->calcDirection(pos) + 3.1415927f);
         param.fCollRadius = pAtkData->COLL_START_FRAME * 0.01f;
-        param.pEffectTbl = PL::g_EffTbl_Skill[pAtkData->EFFECT];
+        param.pEffectTbl = (BULLET_EFFECT_INFO*)PL::g_EffTbl_Skill[pAtkData->EFFECT];
         bullet = (CBullet*)CEntityFactory::getInstance()->createBullet(param, this);
         if (bullet) {
             bullet->setBodyRadius(0.1f, 0.0f, 0, (COLL_KIND)-1);
@@ -667,7 +644,6 @@ void CFriend::setMagic(INT inID) {
         break;
     }
 }
-#endif
 
 void CFriend::calcCirclePos(FVECTOR& outPos, FLOAT inRadius, FLOAT inDir) {
     FVECTOR ofs;
