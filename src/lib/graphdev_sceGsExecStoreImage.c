@@ -251,3 +251,24 @@ int sceGsExecStoreImage(sceGsStoreImage *sp, u_long128 *dstaddr)
 }
 #endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/graphdev_sceGsExecStoreImage", sceGsExecStoreImage);
+/* sceGsExecStoreImage's static, strings and jump table (the function is still assembly). */
+asm(".data\n.align 4\ninit_mp3.12:\n.word 0x06000000\n.word 0\n.word 0\n.word 0\n"
+    ".rdata\n.align 3\nD_004FB3E0:\n.asciz \"sceGsExecStoreImage: DMA Ch.1 does not terminate\\r\\n\"\n"
+    ".align 3\nD_004FB418:\n.asciz \"sceGsExecStoreImage: GS does not terminate\\r\\n\"\n"
+    ".align 3\nD_004FB448:\n.asciz \"sceGsExecStoreImage: DMA Ch.1 (GS->MEM) does not terminate\\r\\n\"\n"
+    ".align 3\nD_004FB488:\n.asciz \"sceGsExecStoreImage: Enough data does not reach VIF1\\n\"\n"
+    ".align 3\njtbl_004FB4C0:\n"
+    ".word .L00362A0C\n.word .L00362A44\n.word .L00362A94\n.word .L00362B4C\n.word .L00362B4C\n"
+    ".word .L00362B4C\n.word .L00362B4C\n.word .L00362B4C\n.word .L00362B4C\n.word .L00362B4C\n"
+    ".word .L00362A94\n.word .L00362B4C\n.word .L00362B4C\n.word .L00362B4C\n.word .L00362B4C\n"
+    ".word .L00362B4C\n.word .L00362B4C\n.word .L00362B4C\n.word .L00362B4C\n.word .L00362ACC\n"
+    ".word .L00362B00\n.word .L00362B4C\n.word .L00362B4C\n.word .L00362B4C\n.word .L00362B4C\n"
+    ".word .L00362B4C\n.word .L00362B4C\n.word .L00362ACC\n.word .L00362B4C\n.word .L00362B4C\n"
+    ".word .L00362B4C\n.word .L00362B4C\n.word .L00362B4C\n.word .L00362B4C\n.word .L00362B4C\n"
+    ".word .L00362B4C\n.word .L00362B00\n.word .L00362B4C\n.word .L00362B4C\n.word .L00362B4C\n"
+    ".word .L00362B4C\n.word .L00362B4C\n.word .L00362B4C\n.word .L00362B4C\n.word .L00362B00\n"
+    ".word .L00362B4C\n.word .L00362B4C\n.word .L00362B4C\n.word .L00362A0C\n.word .L00362A44\n"
+    ".word .L00362A94\n.word .L00362B4C\n.word .L00362B4C\n.word .L00362B4C\n.word .L00362B4C\n"
+    ".word .L00362B4C\n.word .L00362B4C\n.word .L00362B4C\n.word .L00362A94\n"
+    ".text\n");
+// SOURCE DATA: .data .rodata
