@@ -705,22 +705,14 @@ unsigned long TimerUSec2BusClock(unsigned int sec, unsigned int usec)
     return (unsigned long)sec * BUSCLK + (unsigned long)usec * BUSCLK / 1000000;
 }
 
-/* Parked: matches as it stands under ee-gcc2.9-991111-01 (2026-11-07, compare_compilers with the draft live: both functions
-   and the whole unit match; 991111 lacks the div.s erratum padding). Needs an override for lib/timer: the user's decision. */
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/timer", TimerBusClock2Freq);
-#if 0
+/* the nops before div.s are 991111-01's EE erratum padding (build.yaml) */
 float TimerBusClock2Freq(unsigned long clock)
 {
     return 147456000.0f / clock;
 }
-#endif
 
-/* Parked: as TimerBusClock2Freq */
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/timer", TimerFreq2BusClock);
-#if 0
 unsigned long TimerFreq2BusClock(float freq)
 {
     return 147456000.0f / freq;
 }
-#endif
 // SOURCE DATA: .data .bss

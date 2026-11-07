@@ -41,7 +41,7 @@ every change that is merged without regenerating. Regenerating all four takes ab
 
 ## Where things stand (2026-11-07)
 
-- **Progress:** 12002 of 12311 functions matched: game 11229 of 11323, libraries 773 of 988 (plus 151 hand-written).
+- **Progress:** 12004 of 12311 functions matched: game 11229 of 11323, libraries 775 of 988 (plus 151 hand-written).
   `tools/check.sh` proves the image, but its function totals are too high: it strips `#if 0.*?#endif` before it counts
   `INCLUDE_ASM`, so a parked `#if 0 ... #else INCLUDE_ASM #endif` counts as done (about 12 functions on 2026-11-07). Count
   game functions with `grep -rhE '^INCLUDE_ASM' src --include=*.cpp --include=*.c --exclude-dir=lib | wc -l`. Fixing the regex is a
@@ -427,7 +427,5 @@ Keep output small: one function's assembly at a time; `funcdiff` without `--full
 - **Waiting on a decision now:** the `D2MAN_H_PATH` (2DMan.h, `D2::C2DMan`) and `RSRCDATA_H_FULL`
   (`CRsrcData`/`RsrcInfo`/`CRsrcANN`) gates, 10 files: the string evidence for 2DMan.h is ambiguous (the 2D
   container message is in 166 originals, the 2DMan.h path in only about 119).
-- **Waiting on a decision now:** a `lib/timer` override to `ee-gcc2.9-991111-01` would match `TimerBusClock2Freq` and
-  `TimerFreq2BusClock` with no source change (both drafts match with it, no other function of the unit differs).
 - When the user runs a /loop unattended, decide these cases yourself, log the decision and continue
   (unattended-decide-stop-cases).
