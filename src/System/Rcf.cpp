@@ -348,8 +348,8 @@ void CRcf::finalize() {
     while (!_isReadThreadSleeping() && _isReadThreadRunning()) {
         Thread::delayThread_1Frame();
     }
-    DeleteThread(s_nReadThreadID);
     TerminateThread(s_nReadThreadID);
+    DeleteThread(s_nReadThreadID);
     s_nReadThreadID = -1;
     _disposeRCF();
     _clearAliasList();
@@ -867,8 +867,8 @@ INT _parseRCF_EntryFile(ULONG nGroup, INT nType) {
         info._nGroupID = s_nReadGroup;
         info._nRefGroupID = s_nLinkOwnerGroup;
         info._bSceneManaged = s_bSceneManagedMode;
-        CRsrcDB::addRsrc(info, buf, __null);
         info._nRsrcType = 0x27;
+        CRsrcDB::addRsrc(info, buf, __null);
         _skipLine();
         return 0;
     }

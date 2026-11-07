@@ -72,6 +72,11 @@ every change that is merged without regenerating. Regenerating all four takes ab
   `build/permlines.py` sweeps the order of adjacent statements (no gain on initAttackField, setupFontTex). Check the helpers
   first: `asm volatile` against plain `asm`, and `=&r` where the original keeps inputs and output apart. See memory
   ref-locals-reveal-shape, ti-di-conversion-is-por.
+- **Order searches (2026-11-07):** `build/hillqueue.py <min> <unit:name>...` climbs runs of simple statements; `build/hillstmt.py`
+  one chosen run. Real gains: Movement ctor 53 -> 26, CImageWnd::init 14 -> 5, calcWorldBBox 45 -> 28, finalize 17 -> 11,
+  setupTexInfo 10 -> 6. **A lower line count proves nothing about behaviour; only a match does.** Five moves were wrong and
+  were reverted (procFieldNormal, setStockInfo, drawCrossFadeImage, getAttribute, _parseRCF): read every move in context before
+  committing it. The queue now refuses moves its dependency guard flags (`conflict`). See memory hillclimb-breaks-semantics.
 - **Permuters are exhausted for now (2026-11-06):** three 10-minute queues covered every parked game draft 4-45 lines off
   (about 73 drafts, 12 hours). Only endFieldSub and getNearPath gained, and only their statement changes counted. Do not
   rerun them on a draft whose source did not change; read its line markers instead. tools/permuter.py can't enable some

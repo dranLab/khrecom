@@ -2793,8 +2793,8 @@ void CCardRevolver::setStockInfo() {
         m_pSeqCtrlStock_Num10->enableDisp(0, TRUE);
         if (m_uiUser == 1) {
             pos.x = pLayout->x + 0x1A;
-            m_pSeqCtrlStock_Num10->setPos(pos);
             pos.y = pLayout->y - 0xB + ofsY;
+            m_pSeqCtrlStock_Num10->setPos(pos);
         } else {
             pos.x = pLayout->x - 0x2B;
             pos.y = pLayout->y - 0xC;
