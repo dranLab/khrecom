@@ -631,15 +631,10 @@ INT checkBSphere(CCoord& crd, const BBOX* bbox) {
     r = _sqrtf(r) * 0.5f;
     return checkBSphere(crd, ctr, r);
 }
-/* Parked: 12 lines, same size (the tail as resultCheckBBox) - registers only: the original has ret v0, the scratchpad
-   pointer v1, clip a0, as if the three overlapped in priority order. Ours keeps the pointer local to the first block,
-   so it takes v0 and clip v1. With "r"(v) in the join barrier v goes global but loses to clip (a2); winning needs
-   about six more refs. The ref's locals (two inline v, m, ret, no clip) point to a different shape. */
-#if 0
 INT checkBBox(const FMATRIX& mWorldMatrix, const BBOX* bbox) {
     INT ret;
-    INT clip;
-    FVECTOR* v;
+    register INT clip asm("$4"); /* MATCH: clip in a0, the scratchpad pointer in v1, as in the original */
+    register FVECTOR* v asm("$3");
     if (!(bbox->x[1] < bbox->x[0])) {
         v = (FVECTOR*)0x70000000;
     v[0].x = bbox->x[0];
@@ -668,9 +663,6 @@ INT checkBBox(const FMATRIX& mWorldMatrix, const BBOX* bbox) {
     }
     return 0xC0000000;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", checkBBox__FRC7FMATRIXPC4BBOX);
-#endif
 void resultCheckBBox(FVECTOR& min, FVECTOR& max) {
     asm volatile("qmfc2.i $0, $vf0");
     asm volatile("sqc2 $vf2, 0(%0)" : : "r"(&min) : "memory");
