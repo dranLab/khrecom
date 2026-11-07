@@ -301,7 +301,10 @@ def split_data(section, lo, hi, order, files, owner, refs, elf_named, sizes=None
                 end += 4
             # The leading data are string literals; anything else before the first one (e.g. the vtable of a
             # template class, which has no symbol) is the previous object's trailing data.
-            first = next((p for p in range((end + 3) & ~3, cuts[k][0], 4) if starts_text(p, cuts[k][0], read)), None)
+            # A code address is no string, even when its bytes read as one (0x00226538 = "8e\"": a vtable entry).
+            is_code = lambda p: text_range[0] <= int.from_bytes(read(p, 4), "little") < text_range[1]
+            first = next((p for p in range((end + 3) & ~3, cuts[k][0], 4)
+                          if not is_code(p) and starts_text(p, cuts[k][0], read)), None)
             if first is not None:
                 cuts[k] = (first, cuts[k][1], cuts[k][2])
                 stats["leading data moved to the next object"] += 1
