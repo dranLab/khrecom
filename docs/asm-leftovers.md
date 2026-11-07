@@ -54,7 +54,6 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `System/Graphic/Glare` | 1 | 446 | 1 |  |
 | `Game/Player/NaviMap` | 1 | 425 | 1 |  |
 | `System/Sound/driver/sddrv_ee` | 2 | 403 | 2 | .bss |
-| `System/RcfCD` | 3 | 390 | 3 |  |
 | `Game/Collision/CollMap` | 2 | 365 | 2 |  |
 | `Game/Player/PlayerCamera` | 1 | 332 | 1 |  |
 | `Game/SceneInfo` | 2 | 314 | 2 |  |
@@ -75,6 +74,7 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `Form/Menu/JiminyMemo` | 1 | 122 | 1 |  |
 | `Game/Collision/CollUtilO` | 1 | 121 | 1 | .rodata |
 | `Game/Card` | 1 | 95 | 1 |  |
+| `System/RcfCD` | 1 | 41 | 1 |  |
 | `System/dlmalloc` | 1 | 14 | 1 |  |
 
 Units with all functions in C but data from asm: `Game/Collision/Ride` (.rodata).
@@ -133,8 +133,6 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `System/Rcf` | `_atolen__FPCc` | 73 | _atolen: 14 of 81 lines, 4 bytes short - _atoi's shape (one return, goto exits, '$' test first with the 0x case inside `if (*p != '$')`); left: the same isupper branch-vs-movz in _hexValue as _atoi, and the original's block order (0x case jumps over the '$' block to `nRet = 2`, p = lpszInStr + 2 … |
 | `System/Rcf` | `loadNextCategoryInfo__4CRcfiPciPi` | 174 | (comment) Near-match: register allocation |
 | `System/RcfCD` | `_startCdRead__Fii` | 41 | 4-8 lines, varying between identical builds (the draft above is the C) - the hoisted lui's of the s_n*_R statics get s5/s6 in an order that changes per compiler run (gcse PRE hash order, memory gcse-pre-hash-order); store orders tried (all worse). Kept asm because the result is not reproducible. |
-| `System/RcfCD` | `_analyzeCdMemberHeader__FRPUc` | 190 | 31 lines (draft above) - the member-header walk's pointer advance is if-converted (movn s2,s4,s4) here and branchy in the original, and the alloc/assert blocks are laid out differently; not iterated further. |
-| `System/RcfCD` | `_addRsrcFileToDB__FUiiRPUc` | 159 | 4 lines (draft above) - `addiu s0,sp,32` (&info) and the _nLinkID load are scheduled before the group test in the original, after it here. tried: permuter 10 min, 33k candidates: no gain. 2026-11-07: ours has the addiu in the beq slot, the original fills that slot with move a0,s3 from the arm. One … |
 | `System/TaskMan` | `update__8CTaskManiii` | 135 | 4 lines - the barrier settles nTQ/bPause (s5/s6). Left: the TaskMainParam stores: the original issues the nTQ store early and _SecondaryArray's after _nSysLag's; a scheduling tie across the clear() block. |
 | `Game/Card` | `getAttribute__5CCardG4CARDPPCcN32` | 95 | 30 of 124 lines, registers only: buf's address (3 uses / 38 insns) outranks the CCtdMan::m_pInstance address (4 / 110) in global-alloc priority, the original has them the other way round (s6/s5) and keeps card.m_nKind in a0. Worked: `pLF = buf; *pOutStrAttack = pLF;` (parameter registers, 53 -> … |
 | `Game/CardRevolver` | `main__Q210CardBattle13CCardRevolver` | 321 | 27 lines off, only the TRACE argument loads in the three card dumps: the original loads uiFlag into v1 and uiOwner last into v0 (the card pointer's register), ours the other way round. Worked: state switch with explicit returns, m_pCards[i] indexed directly (pBC temp moved the pointer to t4), … |
@@ -142,7 +140,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Game/CardRevolver` | `initAction__Q210CardBattle13CCardRevolver` | 265 | ~165 lines off, mostly register allocation: ours keeps one more value live across calls (the getStock() == -1 value is CSE'd into an s-register for the later getHand() test), so two flags spill instead of one (bReloadOC) and every flag moves one register. Structure found: decEnchantTime inside … |
 | `Game/Map` | `init__4CMapii` | 1046 | 87 of 1193 lines, same size - the bbox loop's &b (ApplyMatrix output) is hoisted into s2 here, the original recomputes it per iteration, which shifts the saved registers of xmin/xmax/zmin/zmax and the division block; for/do/ while/goto loop shapes, by-value apply inline and a 10 min permuter run … |
 | `Game/Map` | `disp__4CMap` | 906 | 709 of 1308 lines, 44 bytes short - structure as the original (debug clamp, shader modes, group selection by player position, pipelined kick/resultCheckBBox display via group table or grid, sky polygons). The 44 bytes: the original keeps two copies of the "flush the last model" block (group and … |
-| `Game/SceneInfo` | `clear__10CSceneInfo` | 139 | ~110 lines - the first run of stores: the original reloads m_pMCWork before each store (the *(T*)& scalar stores give that) but keeps two -1 registers and seven s-registers for the %hi parts; statement orders (incl. the lui order) and 7 min of permuter (10k candidates, 104 -> 98) did not get closer. |
+| `Game/SceneInfo` | `clear__10CSceneInfo` | 139 | 113 lines, 4 bytes long, frame 144 for 128 - the first run of stores: the original reloads m_pMCWork before each store (the *(T*)& scalar stores give that) but keeps two -1 registers and seven s-registers for the %hi parts; statement orders (incl. the lui order) and 7 min of permuter (10k … |
 | `Game/SceneInfo` | `rollbackEventDoorState__10CSceneInfoi` | 175 | ~35 lines - the outer room loop: the original re-materializes the s_CurrentFloor address for the room (mtlo/madd) and for the count each iteration; ours shares one base. Door/state/norma logic matches; room addressing forms and 5 min of permuter (42 -> 38) did not get it. |
 | `Game/Collision/CollDisp` | `setAttackLines__9CCollDispP14CCollisionList` | 167 | 62 of 178 lines - logic and jump table match; `this`, the collision and the end position take other registers. Tried (2026-11-02): pColl/type declaration order (62), inline getCollision()/getType() calls without locals as the ref's locals suggest (104). |
 | `Game/Collision/CollDisp` | `setBodyLines__9CCollDispP14CCollisionList` | 95 | 38 of 105 lines, same size - structure matches (case 4/5 column first, `case 2: default:` sphere); left: the s-registers are rotated (original this s1, collision s0, type s2, fg s3, &m_inWE s4) and the sphere arm recomputes &m_inWE where ours reuses it. Tried: this vs a pThis copy, decl orders, … |
@@ -182,7 +180,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Form/Menu/JiminyMemo` | `ScrollBarChange__11CJiminyMemoPPQ22D210C2DSeqCtrlffiii` | 122 | 2 lines (2026-11-07, the 2.0f pinned in case 2): li s5,1 is issued before addiu s3,sp,16 (&vec) in the preheader, the original has them the other way round. An if chain gives that hoist order but loses the switch's dispatch; a pVec local or a pinned pointer before the loop move the registers … |
 | `Form/Menu/RoomCreation` | `menuMain__13CRoomCreation` | 1995 | (comment) menuMain: 78 of 2211 lines, 8 bytes short (92 and 0x50 short before _NORMA_PIECES, 2026-11-07): the by-value NormaSrc arguments are written out now; left: case 0's registers (v1 + s7 where the original keeps a0, s4/s6/s8 from there). To enable this draft, also drop the data block after … |
 
-Totals: 93 functions (37811 instructions) in 51 units, 93 of them parked; 5 units take a data section from assembly.
+Totals: 91 functions (37462 instructions) in 51 units, 91 of them parked; 5 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->
