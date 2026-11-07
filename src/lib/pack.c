@@ -1,5 +1,4 @@
 /* libmpeg pack.c (Sony EE SDK): MPEG-2 program stream demultiplexing (pack, system and PES headers) */
-#include "include_asm.h"
 #include "mpegdec.h"
 
 /* bit reader over a ring buffer: buf holds the next bits MSB first, count of them valid */
@@ -389,6 +388,15 @@ static inline unsigned char *_bsAddr(_sceMpegBs *bs, int bits)
     return p;
 }
 
+/* sets $gp, returns its old value. MATCH: each use has its own output, so the restore needs no output reload
+   (one variable as input and earlyclobber output shifted reload's round-robin: the allGp reload went to v1) */
+#define _setGp(gp_)                                                                             \
+    ({                                                                                          \
+        int __o;                                                                                \
+        __asm__ volatile("move %0, $gp\n\tmove $gp, %1" : "=&r"(__o) : "r"(gp_));               \
+        __o;                                                                                    \
+    })
+
 /* calls a stream callback with its own $gp */
 #define _callStrCallback(r_, mp, bs, h, cbs, func_, data_, gp_)                                 \
     ({                                                                                          \
@@ -405,14 +413,11 @@ static inline unsigned char *_bsAddr(_sceMpegBs *bs, int bits)
         (cbs)->len = (h)->pes.len;                                                              \
         (cbs)->pts = (h)->pes.pts;                                                              \
         (cbs)->dts = (h)->pes.dts;                                                              \
-        __asm__ volatile("move %0, $gp\n\tmove $gp, %1" : "=&r"(__old) : "r"(gp_));             \
+        __old = _setGp(gp_);                                                                    \
         r_ = (func_)(mp, (sceMpegCbData *)(cbs), (void *)(data_));                             \
-        __asm__ volatile("move %0, $gp\n\tmove $gp, %1" : "=&r"(__old) : "r"(__old));           \
+        _setGp(__old);                                                                          \
     })
 
-/* Parked: 2 lines off (2026-11-07, was 4: allFunc set between ret and allGp, decomp-permuter): allGp reloads into v1 where
-   the original has v0. Reload hands out spill registers round-robin, so the choice hangs on the reloads before it. */
-#if 0
 int sceMpegDemuxPssRing(sceMpeg *mp, unsigned char *pss, int size, unsigned char *ring, int ringsize)
 {
     _sceMpegBs bsBody;
@@ -476,9 +481,6 @@ int sceMpegDemuxPssRing(sceMpeg *mp, unsigned char *pss, int size, unsigned char
     }
     return ret;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/pack", sceMpegDemuxPssRing);
-#endif
 
 int sceMpegDemuxPss(sceMpeg *mp, unsigned char *pss, int size)
 {
