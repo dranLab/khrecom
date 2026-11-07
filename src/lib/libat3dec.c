@@ -162,14 +162,16 @@ static void channel_conv_joint(At3Work *w)
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/libat3dec", channel_conv_joint);
 #endif
 
-/* Parked: first draft (2026-11-07), 335 of 457 lines: the frame is 16 bytes larger (one more spill); the
+/* Parked: first draft (2026-11-07), 334 of 457 lines, 80 bytes short; the butterfly stage has its structure (registers renamed: w, half, step); the window loop
+   keeps fewer values on the stack than the original (5 spills at 0x18-0x2C) and the band copy's tail is not interleaved with its setup;
+   decomp-permuter 2 x 20 min: d >> shift in a local (-23), the rest loop-note hacks: the frame is 16 bytes larger (one more spill); the
    prologue through the shift search follows the original (movn abs, the shift loop from 12) apart from registers */
 #if 0
 typedef struct {
     int v[4];
 } At3Tbl4;
 extern const At3Tbl4 D_004FCEF0;
-extern short cc[];
+extern unsigned short cc[];
 extern short ca[];
 extern int mx[];
 extern int coefpost[];
@@ -269,7 +271,7 @@ int imdct(char *ch, int band, int gain)
     {
         int sh = gain + shift;
         int sh1 = sh - 1;
-        short *c = &cc[127];
+        unsigned short *c = &cc[127];
         int *m = &mx[127];
         int *v = w + 254;
         for (i = 127; i >= 0; i--) {
