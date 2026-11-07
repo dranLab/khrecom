@@ -18,8 +18,12 @@ Everything runs in Linux (WSL), from the repo root, with the project's venv: `.v
   symbol); `check.sh` runs it when the checksum fails. funcdiff ignores data: wrong data from source shows here.
 - `.venv/bin/python tools/asm.py <unit> [<function>...]` - the original's functions (size, weak/global) or their
   assembly, compact (a third of the raw `.s`); `--data` for the unit's data.
+- `.venv/bin/python tools/drafts.py [--part game|lib] [--unit <unit>] [--failed] [-j N]` - every parked draft built in a copy
+  and measured (funcdiff's line count, closest first), wherever it sits relative to its INCLUDE_ASM; a draft that does not
+  build gives its first error. The re-measure step: notes go stale when headers change.
 - `.venv/bin/python tools/permuter.py <unit> <function> [--minutes N] [-j N]` - random source mutations of one nearly
   matching function (statement/declaration order, operand order, temporaries, ...), compiled in parallel and scored
+  (C and C++: the function is its symbol or a source name unique in the unit)
   against the original; the best variant goes to `build/permuter/<function>/best.c` (+ `best.diff`). Parked drafts
   under `#if 0` are switched on in its copies; the real source is never touched. Check a result's semantics.
 - `.venv/bin/python tools/decomp_permuter.py <unit> <function> [--minutes N] [-j N]` - for `.c` units only: runs

@@ -42,10 +42,8 @@ every change that is merged without regenerating. Regenerating all four takes ab
 ## Where things stand (2026-11-07)
 
 - **Progress:** 12004 of 12311 functions matched: game 11229 of 11323, libraries 775 of 988 (plus 151 hand-written).
-  `tools/check.sh` proves the image, but its function totals are too high: it strips `#if 0.*?#endif` before it counts
-  `INCLUDE_ASM`, so a parked `#if 0 ... #else INCLUDE_ASM #endif` counts as done (about 12 functions on 2026-11-07). Count
-  game functions with `grep -rhE '^INCLUDE_ASM' src --include=*.cpp --include=*.c --exclude-dir=lib | wc -l`. Fixing the regex is a
-  change to `tools/`: ask first.
+  `tools/check.sh` counts the 151 hand-written units as done too: its total is these matched functions plus 151
+  (fixed 2026-11-07: it used to count a parked `#if 0 ... #else INCLUDE_ASM #endif` as done).
 - **Game:** 89 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note).
   5 units take a data section from assembly.
 - **Libraries:** 38 parked, 5 not attempted, 27 hand-written (stay assembly), 5 units with data from assembly;
@@ -85,8 +83,10 @@ every change that is merged without regenerating. Regenerating all four takes ab
   (crossjump-block-end-call), an empty asm in one arm to stop one,
   and only then issue-order groups with empty barriers and register locals (issue-order-pins). Guarded order searches found
   nothing more on the five reverted drafts: their honest scores stand at 30, 27, 9, 5, 31 (setStockInfo then matched by reading the cross-jump).
-- **Re-measure before choosing (2026-11-07):** `build/remeasure.py Game`, `System`, `Form` score every parked draft (about 20
-  minutes, background) and `build/jm/rmsort.py` sorts them; notes go stale after header fixes (chkDamage's note listed four open
+- **Re-measure before choosing (2026-11-07):** `tools/drafts.py` scores every parked draft, closest first (about 10 minutes
+  with -j 12), whatever its layout, and gives the first error of a draft that does not build (`--failed`); notes go stale.
+  Its numbers are funcdiff's, except for the functions whose gcse order varies per compiler run (CRcf::finalize,
+  _parseRCF_EntryFile: gcse-pre-hash-order). Before it, `build/remeasure.py` and `build/jm/rmsort.py`; notes go stale after header fixes (chkDamage's note listed four open
   spots, two were gone). 15 drafts report build-failed because a stopgap data block or an extern declaration clashes when they are
   enabled: `build/jm/en.py` takes a variant that drops it. Those are unmeasured, not far: the three CollAttack checks were each 2 lines.
 - **Constructor with pool constants (2026-11-07):** CMovement went 53 -> 26 -> 0 once the two constants sat in `u_long128`
