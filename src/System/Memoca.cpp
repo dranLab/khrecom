@@ -1242,13 +1242,6 @@ static void _getMcFilePath(CHAR* pszOutPath, const CHAR* pszFolder, const CHAR* 
     sprintf(pszOutPath, "/%s/%s", pszFolder, pszFile ? pszFile : pszFolder);
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Memoca", _McWriteIcons__FPCc);
-/* placeholder for _McWriteIcons (INCLUDE_ASM): its string */
-__attribute__((section(".sdata"))) void _McWriteIcons_placeholder() {
-    TRACE("\x83\x81\x83\x82\x83J\x83" "A\x83" "C\x83R\x83\x93\x81" "E\x83\x8a\x83\\\x81[\x83X\x82\xaa\x8c\xa9\x82\xc2\x82\xa9\x82\xe8\x82\xdc\x82\xb9\x82\xf1\n");
-}
-/* Parked: near match: both resource null tests are merged into one (the original keeps two) */
-#if 0
 INT _McWriteIcons(const CHAR* pszName) {
     INT r = -9999;
     INT nRes;
@@ -1269,7 +1262,7 @@ INT _McWriteIcons(const CHAR* pszName) {
             break;
         }
         s_pIconRsrc = CRsrcDB::getRsrc(1, pszFile, (NAME_CASE)0);
-        if (!s_pIconRsrc || !s_pIconRsrc->getData()) {
+        if (!s_pIconRsrc || !s_pIconRsrc->getRsrcData()) {
             TRACE("\x83\x81\x83\x82\x83J\x83" "A\x83" "C\x83R\x83\x93\x81" "E\x83\x8a\x83\\\x81[\x83X\x82\xaa\x8c\xa9\x82\xc2\x82\xa9\x82\xe8\x82\xdc\x82\xb9\x82\xf1\n");
             break;
         }
@@ -1302,7 +1295,8 @@ INT _McWriteIcons(const CHAR* pszName) {
     case 2:
         {
             CRsrcData* p = s_pIconRsrc;
-            nRes = _McWrite(s_nMcHandle, p->getData(), p->getSize());
+            /* MATCH: the empty asm keeps the two m_pDataSrc tests apart: threaded, the first skips the second */
+            nRes = _McWrite(s_nMcHandle, p->getRsrcData(), ({ asm volatile(""); p->getDataSize(); }));
         }
         if (nRes == 0) {
             s_nIconStep = 3;
@@ -1331,7 +1325,6 @@ INT _McWriteIcons(const CHAR* pszName) {
     }
     return r;
 }
-#endif
 
 static INT _McDataWrite() {
     INT r = -9999;
