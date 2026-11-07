@@ -675,15 +675,12 @@ sceSifServeData *sceSifGetNextRequest(sceSifQueueData *qd)
     return sd;
 }
 
-/* Parked: the original copies the packet fields in strict load/store order, ours lets the scheduler hoist loads */
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/sifrpc", sceSifExecRequest);
-#if 0
 void sceSifExecRequest(sceSifServeData *sd)
 {
     sceSifDmaData dma[2];
     RpcRendPkt *rend;
     void *rec;
-    int size = 0, n, i;
+    int size = 0, n, i, r;
 
     rec = sd->func(sd->fno, sd->buff, sd->size);
     if (rec) {
@@ -724,13 +721,15 @@ void sceSifExecRequest(sceSifServeData *sd)
     dma[n].size = 0x40;
     dma[n].mode = 0;
     n++;
-    while (!sceSifSetDma(dma, n)) {
-        i = 0x100000;
-        while (i--) {
+    do {
+        r = sceSifSetDma(dma, n);
+        if (!r) {
+            i = 0x100000;
+            while (i--) {
+            }
         }
-    }
+    } while (!r);
 }
-#endif
 
 void sceSifRpcLoop(sceSifQueueData *qd)
 {
