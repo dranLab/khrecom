@@ -588,10 +588,13 @@ void CCardRevolver::exeWait() {
         m_iState = 1;
     }
 }
-/* Parked: 27 lines off, only the TRACE argument loads in the three card dumps: the original loads uiFlag
-   into v1 and uiOwner last into v0 (the card pointer's register), ours the other way round. Worked: state
-   switch with explicit returns, m_pCards[i] indexed directly (pBC temp moved the pointer to t4), debug guards in
-   this order. Tried: kind/owner accessor forms; permuter 4 min (no gain). */
+/* Parked: 27 of 426 lines (2026-11-07): the TRACE argument loads of the first two card dumps: the original loads
+   uiFlag into v1 and uiOwner last into v0, ours the reverse, and the kind load comes after iHandMax. Cause found: with
+   stack arguments, calls.c precomputes every argument that contains a call (all inline getters) in argument order;
+   the original evaluated kind and number after them, i.e. without a call: `pBC->m_cardData.m_nKind` and
+   `pBC->m_cardData.m_nNumber` in all three dumps match exactly, but m_cardData is private in the ref (a friend
+   declaration in BattleCard.h would be needed; not done, user rule). Draft has the ref locals (pBC, block-local
+   i/pBC in dumps 2 and 3). Tried: getCardData()->m_nKind, kind/owner accessor forms; permuter 4 min (no gain). */
 #if 0
 void CCardRevolver::main() {
     INT i;
@@ -605,10 +608,11 @@ void CCardRevolver::main() {
         TRACE("Rev: bActive = %d, tqTimer = %d, uiFlag = %08x,\n", m_bActive, m_tqTimer, m_uiFlag);
         TRACE("PLCR: Cards--------------------------------\n");
         for (i = 0; i < m_nLimit; i++) {
-            if (&m_pCards[i]) {
-                TRACE("%3d: [Card%03d:%d(%d)] iStock=%d, iHand=%d/%d, uiFlag=%08x, uiOwner=%d,\n", i, m_pCards[i].getCardKind(),
-                      m_pCards[i].getCardData()->m_nNumber, m_pCards[i].getBaseCardNumber(), m_pCards[i].getStock(), m_pCards[i].getHand(),
-                      m_pCards[i].getHandMax(), m_pCards[i].getFlag(), m_pCards[i].getCardOwner());
+            pBC = &m_pCards[i];
+            if (pBC) {
+                TRACE("%3d: [Card%03d:%d(%d)] iStock=%d, iHand=%d/%d, uiFlag=%08x, uiOwner=%d,\n", i, pBC->getCardKind(),
+                      pBC->getCardData()->m_nNumber, pBC->getBaseCardNumber(), pBC->getStock(), pBC->getHand(),
+                      pBC->getHandMax(), pBC->getFlag(), pBC->getCardOwner());
             } else {
                 TRACE("%3d: NULL,\n", i);
             }
@@ -652,6 +656,8 @@ void CCardRevolver::main() {
     exeStock();
     if (dbgCheckUser(USR_PROG) && dbgButtonTrg(USR_SYSTEM, 2, 1)) {
         if (dbgButtonDown(USR_SYSTEM, 4, 1) && m_uiUser == 1) {
+            INT i;
+            CBattleCard* pBC;
             TRACE("PLCR: ========================================\n");
             TRACE("Rev: Mode = MODE_NORMAL\n");
             TRACE("Rev: nTotal = %d, nRemain = %d, nActive = %d,\n", m_nTotal[0], m_nRemain[0], m_nActive[0]);
@@ -659,10 +665,11 @@ void CCardRevolver::main() {
             TRACE("Rev: bActive = %d, tqTimer = %d, uiFlag = %08x,\n", m_bActive, m_tqTimer, m_uiFlag);
             TRACE("PLCR: Cards--------------------------------\n");
             for (i = 0; i < m_nLimit; i++) {
-                if (&m_pCards[i]) {
-                    TRACE("%3d: [Card%03d:%d(%d)] iStock=%d, iHand=%d/%d, uiFlag=%08x, uiOwner=%d,\n", i, m_pCards[i].getCardKind(),
-                          m_pCards[i].getCardData()->m_nNumber, m_pCards[i].getBaseCardNumber(), m_pCards[i].getStock(), m_pCards[i].getHand(),
-                          m_pCards[i].getHandMax(), m_pCards[i].getFlag(), m_pCards[i].getCardOwner());
+                pBC = &m_pCards[i];
+                if (pBC) {
+                    TRACE("%3d: [Card%03d:%d(%d)] iStock=%d, iHand=%d/%d, uiFlag=%08x, uiOwner=%d,\n", i, pBC->getCardKind(),
+                          pBC->getCardData()->m_nNumber, pBC->getBaseCardNumber(), pBC->getStock(), pBC->getHand(),
+                          pBC->getHandMax(), pBC->getFlag(), pBC->getCardOwner());
                 } else {
                     TRACE("%3d: NULL,\n", i);
                 }
@@ -670,16 +677,19 @@ void CCardRevolver::main() {
             TRACE("PLCR: ========================================\n");
         }
         if (dbgButtonDown(USR_SYSTEM, 1, 1) && m_uiUser == 2) {
+            INT i;
+            CBattleCard* pBC;
             TRACE("ENCR: ========================================\n");
             TRACE("Rev: nTotal = %d, nRemain = %d, nActive = %d,\n", m_nTotal[0], m_nRemain[0], m_nActive[0]);
             TRACE("Rev: nLimit = %d, nExtra = %d, iMax = %d\n", m_nLimit, m_nExtra, m_iMax);
             TRACE("Rev: bActive = %d, tqTimer = %d, uiFlag = %08x,\n", m_bActive, m_tqTimer, m_uiFlag);
             TRACE("ENCR: Cards--------------------------------\n");
             for (i = 0; i < m_nLimit; i++) {
-                if (&m_pCards[i]) {
-                    TRACE("%3d: [Card%03d:%d] iStock=%d, iHand=%d/%d, uiFlag=%08x, uiOwner=%d,\n", i, m_pCards[i].getCardKind(),
-                          m_pCards[i].getCardData()->m_nNumber, m_pCards[i].getStock(), m_pCards[i].getHand(), m_pCards[i].getHandMax(),
-                          m_pCards[i].getFlag(), m_pCards[i].getCardOwner());
+                pBC = &m_pCards[i];
+                if (pBC) {
+                    TRACE("%3d: [Card%03d:%d] iStock=%d, iHand=%d/%d, uiFlag=%08x, uiOwner=%d,\n", i, pBC->getCardKind(),
+                          pBC->getCardData()->m_nNumber, pBC->getStock(), pBC->getHand(), pBC->getHandMax(),
+                          pBC->getFlag(), pBC->getCardOwner());
                 } else {
                     TRACE("%3d: NULL,\n", i);
                 }
@@ -1234,17 +1244,6 @@ void CCardRevolver::initReload(INT inMode) {
     if (inMode != 2) CCardBattle::decEnchantTime(m_uiUser, 0x29, 0);
     m_uiFlag &= ~0x20000;
 }
-/* Parked: 14 lines off: register allocation and latch order of the first loop - the original keeps i in t0 and
-   the card offset in a2 (decremented first in the latch, in the continue paths' delay slots), ours the reverse;
-   the second loop's i likewise. Worked (from 48 bytes over to same size): separate `m_uiFlag & 8` / `& 0x20000`
-   ifs, switch with `case 8: break;` first and case 4 falling into default, `card = NULL` in the for-increment,
-   the m_uiFlag &= ~0x20000 block placed after the first return (goto notyet out of the second loop), indexed
-   second loop. Tried: all 6 increment orders, pointer second loop; permuter 5 min (5990 candidates, no gain). */
-/* Parked: 14 of 138 lines (2026-11-07): the reload loop: i and the card offset have each other's registers (t0/a2) and the
-   offset steps first; all six orders of the for increments: 14 or 19. */
-#if 0
-extern "C" char D_0047AE98[]; /* "CCardRevolver::exeReload(); RELOAD end.\n" */
-extern "C" char D_0047AEC8[]; /* "CCardRevolver::exeReload(); RELOAD complete!\n" */
 void CCardRevolver::exeReload() {
     CBattleCard* card;
     INT n;
@@ -1252,60 +1251,60 @@ void CCardRevolver::exeReload() {
     INT category;
     m_tqTimer -= getFrameRate();
     if (m_tqTimer > 0) return;
-    if (m_uiFlag & 8) {
-        if (m_uiFlag & 0x20000) {
-            rollDeck(0, 1, 300);
-            m_tqTimer = 0;
-            m_iState = 1;
-            CGameWork::setFlag(1, 0x13, 1);
-            TRACE(D_0047AE98);
-            return;
-        }
-    }
-    if (0) {
-    notyet:
-        m_uiFlag &= ~0x20000;
-        goto check;
+    if (m_uiFlag & 8) if (m_uiFlag & 0x20000) {
+        rollDeck(0, 1, 300);
+        m_iState = 1;
+        m_tqTimer = 0;
+        CGameWork::setFlag(1, 0x13, 1);
+        TRACE("CCardRevolver::exeReload(); RELOAD end.\n");
+        return;
     }
     m_tqTimer = 200;
     card = NULL;
     n = m_nLimit - 1;
-    for (i = 0; i < m_nLimit; i++, n--, card = NULL) {
+    for (i = 0; i < m_nLimit; i++, card = NULL) {
         card = &m_pCards[n];
-        if (!card) continue;
-        if (!card->isReloadSet()) continue;
-        card->resetReloadSet();
-        category = card->getCardData()->m_nCategory1;
-        switch (category) {
-        case 8:
-            break;
-        case 4:
-            if (m_uiFlag & 0x100) continue;
-        default:
-            m_nRemain[0]++;
-            break;
+        if (card) {
+            if (card->isReloadSet()) {
+                card->resetReloadSet();
+                category = card->getCardData()->m_nCategory1;
+                switch (category) {
+                case 8:
+                    break;
+                case 4:
+                    if (m_uiFlag & 0x100) {
+                        n--; /* MATCH: n-- is a body statement (the original's line markers), so the continue needs its own */
+                        continue;
+                    }
+                default:
+                    m_nRemain[0]++;
+                    break;
+                }
+                m_nActive[0] = n;
+                m_nReloadCount++;
+                break;
+            }
         }
-        m_nActive[0] = n;
-        m_nReloadCount++;
-        break;
+        n--;
     }
     if (card) card->resetHand(m_iMax - m_nReloadCount, m_iMax);
     m_uiFlag |= 0x20000;
     for (i = 0; i < m_nLimit; i++) {
         card = &m_pCards[i];
-        if (card && card->isReloadSet()) goto notyet;
+        if (card) {
+            if (card->isReloadSet()) {
+                m_uiFlag &= ~0x20000;
+                goto check; /* MATCH: not break: a jump to the loop's end label makes expand_end_loop rotate this block to the bottom with the exit test; loop.c moves it out as in the original */
+            }
+        }
     }
 check:
     if (m_uiFlag & 0x20000) {
         m_tqTimer = 400;
-        TRACE(D_0047AEC8);
+        TRACE("CCardRevolver::exeReload(); RELOAD complete!\n");
     }
     m_uiFlag |= 8;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", exeReload__Q210CardBattle13CCardRevolver);
-#endif
-__asm__(".rdata\n.align 3\n.word 0x72614343\n.word 0x76655264\n.word 0x65766C6F\n.word 0x653A3A72\n.word 0x65526578\n.word 0x64616F6C\n.word 0x203B2928\n.word 0x4F4C4552\n.word 0x65204441\n.word 0x0A2E646E\n.word 0x00000000\n.word 0x00000000\n.word 0x72614343\n.word 0x76655264\n.word 0x65766C6F\n.word 0x653A3A72\n.word 0x65526578\n.word 0x64616F6C\n.word 0x203B2928\n.word 0x4F4C4552\n.word 0x63204441\n.word 0x6C706D6F\n.word 0x21657465\n.word 0x0000000A\n.word 0x00000000\n.word 0x00000000\n.text\n");
 INT CCardRevolver::getRemain(INT inMode, INT inKind, INT inCategory) {
     if (inMode < 0) return m_nRemain[m_iMode];
     if (inKind == 0 && inCategory == 0) return m_nRemain[inMode];
@@ -2073,24 +2072,27 @@ void CCardRevolver::setAction(INT inID, INT inNum) {
     }
     if (m_iAction > 0) initAction();
 }
-/* Parked: ~165 lines off, mostly register allocation: ours keeps one more value live across calls (the
-   getStock() == -1 value is CSE'd into an s-register for the later getHand() test), so two flags spill instead of
-   one (bReloadOC) and every flag moves one register. Structure found: decEnchantTime inside every case (cross-
-   jumped), cases 0x50 then 0x38 last, default return, the category jump table with case 4 falling into default.
-   Tried: separate flag initialisation, a boolean helper for the stock test (153 lines); retry at the unit's end. */
-#if 0
 void CCardRevolver::initAction() {
-    BOOL bReloadAC = FALSE;
-    BOOL bReloadAllAC = FALSE;
-    BOOL bReloadReset = FALSE;
-    BOOL bReloadMC = FALSE;
-    BOOL bReloadAllMC = FALSE;
-    BOOL bReloadOC = FALSE;
+    BOOL bReloadAC;
+    BOOL bReloadAllAC;
+    BOOL bReloadReset;
+    BOOL bReloadMC;
+    BOOL bReloadAllMC;
+    BOOL bReloadOC;
     INT i;
     CBattleCard* card;
+    INT category;
+    INT n;
+    CBattleCard* pCards;
     TRACE("CCardRevolver::initAction() %d,\n", m_iAction);
     m_iState = 3;
     m_bActive = FALSE;
+    bReloadAC = FALSE;
+    bReloadAllAC = FALSE;
+    bReloadReset = FALSE;
+    bReloadMC = FALSE;
+    bReloadAllMC = FALSE;
+    bReloadOC = FALSE;
     switch (m_iAction) {
     case 0x2A:
         bReloadAC = TRUE;
@@ -2133,14 +2135,14 @@ void CCardRevolver::initAction() {
         CCardBattle::decEnchantTime(m_uiUser, 0x29, 0);
         break;
     case 0x50:
-        bReloadMC = TRUE;
         bReloadAC = TRUE;
+        bReloadMC = TRUE;
         bReloadOC = TRUE;
         CCardBattle::decEnchantTime(m_uiUser, 0x29, 0);
         break;
     case 0x38:
-        bReloadMC = TRUE;
         bReloadAC = TRUE;
+        bReloadMC = TRUE;
         bReloadOC = TRUE;
         CCardBattle::decEnchantTime(m_uiUser, 0x29, 0);
         break;
@@ -2148,74 +2150,84 @@ void CCardRevolver::initAction() {
         return;
     }
     if (m_iMode == 1) {
+        pCards = m_pCardsE;
         for (i = 0; i < m_nTotal[1]; i++) {
-            card = &m_pCardsE[i];
-            if (card->getHand() != -1) card->hideHand();
+            if (pCards[i].getHand() != -1) pCards[i].hideHand();
         }
         if (m_pEmpty) m_pEmpty->enableDisp(0);
         m_iMode = 0;
     }
     m_nRemain[0] = 0;
-    INT n = m_nLimit - 1;
-    for (i = 0; i < m_nLimit; i++, n--) {
+    for (i = 0, n = m_nLimit - 1; i < m_nLimit; i++) {
         card = &m_pCards[n];
-        if (!card) continue;
-        if (card->isNowPlaying()) continue;
-        if (card->getStock() != -1) continue;
-        if (card->getCardOwner() != m_uiUser && m_uiUser == 1) continue;
-        card->hideHand();
-        INT category = card->getCardData()->m_nCategory1;
-        if (card->getHand() != -1) {
-            m_nActive[0] = n;
-            if (category == 8) {
-                if (bReloadReset) {
-                    m_iCharge = 0;
-                    m_tqCharge = 0;
-                    m_iChargeCount = 1;
-                    card->updateReload(0);
-                }
-            } else if (category != 4 || !(m_uiFlag & 0x100)) {
-                m_nRemain[0]++;
+        if (card) {
+            if (card->isNowPlaying() || card->getStock() != -1 || (card->getCardOwner() != m_uiUser && m_uiUser == 1)) {
+                n--;
+                continue;
             }
-            card->resetHand(m_nActive[0], m_nTotal[0]);
-            continue;
+            card->hideHand();
+            category = card->getCardData()->m_nCategory1;
+            if (card->getHand() != -1) {
+                m_nActive[0] = n;
+                if (category != 8) {
+                    if (category != 4 || !(m_uiFlag & 0x100)) {
+                        m_nRemain[0]++;
+                    }
+                } else {
+                    if (bReloadReset) {
+                        m_iChargeCount = 1;
+                        m_iCharge = 0;
+                        m_tqCharge = 0;
+                        card->updateReload(0);
+                    }
+                }
+                card->resetHand(m_nActive[0], m_nTotal[0]);
+            } else {
+                switch (category) {
+                case 1:
+                    if (bReloadAC) {
+                        if (bReloadAllAC) card->resetReloadNG();
+                        if (!card->isReloadNG()) {
+                            m_nActive[0] = n;
+                            m_nRemain[0]++;
+                            card->resetHand(m_nActive[0], m_nTotal[0]);
+                        }
+                    }
+                    break;
+                case 2:
+                case 3:
+                    if (bReloadMC) {
+                        if (bReloadAllMC) card->resetReloadNG();
+                        if (!card->isReloadNG()) {
+                            m_nActive[0] = n;
+                            m_nRemain[0]++;
+                            card->resetHand(m_nActive[0], m_nTotal[0]);
+                        }
+                    }
+                    break;
+                case 8:
+                    TRACE("**** CAUTION!! **** initAction()\n");
+                    break;
+                case 4:
+                    if (m_uiFlag & 0x100) break;
+                default:
+                    if (bReloadOC) {
+                        if (!card->isReloadNG()) {
+                            m_nActive[0] = n;
+                            m_nRemain[0]++;
+                            card->resetHand(m_nActive[0], m_nTotal[0]);
+                        }
+                    }
+                    break;
+                }
+            }
         }
-        switch (category) {
-        case 1:
-            if (!bReloadAC) continue;
-            if (bReloadAllAC) card->resetReloadNG();
-            break;
-        case 2:
-        case 3:
-            if (!bReloadMC) continue;
-            if (bReloadAllMC) card->resetReloadNG();
-            break;
-        case 8:
-            TRACE("**** CAUTION!! **** initAction()\n");
-            continue;
-        case 4:
-            if (m_uiFlag & 0x100) continue;
-        default:
-            if (!bReloadOC) continue;
-            if (card->isReloadNG()) continue;
-            m_nActive[0] = n;
-            m_nRemain[0]++;
-            card->resetHand(n, m_nTotal[0]);
-            continue;
-        }
-        if (card->isReloadNG()) continue;
-        m_nActive[0] = n;
-        m_nRemain[0]++;
-        card->resetHand(n, m_nTotal[0]);
+        n--;
     }
     m_uiFlag = (INT)m_uiFlag & ~8;
     m_tqTimer = 400;
     m_iMax = m_nRemain[0] + m_nReloadCard;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", initAction__Q210CardBattle13CCardRevolver);
-#endif
-__asm__(".rdata\n.align 3\n.word 0x72614343\n.word 0x76655264\n.word 0x65766C6F\n.word 0x693A3A72\n.word 0x4174696E\n.word 0x6F697463\n.word 0x2029286E\n.word 0x0A2C6425\n.word 0x00000000\n.word 0x00000000\n.word 0x2A2A2A2A\n.word 0x55414320\n.word 0x4E4F4954\n.word 0x2A202121\n.word 0x202A2A2A\n.word 0x74696E69\n.word 0x69746341\n.word 0x29286E6F\n.word 0x0000000A\n.word 0x00000000\n.word 0x00000000\n.word 0x00000000\n.word 0x001E68A8\n.word 0x001E68B4\n.word 0x001E68C4\n.word 0x001E68D8\n.word 0x001E68E4\n.word 0x001E68F8\n.word 0x001E6910\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6950\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E692C\n.word 0x00000000\n.word 0x001E6AF0\n.word 0x001E6B08\n.word 0x001E6B08\n.word 0x001E6B74\n.word 0x001E6B84\n.word 0x001E6B84\n.word 0x001E6B84\n.word 0x001E6B60\n.text\n");
 void CCardRevolver::exeAction() {
     m_tqTimer -= getFrameRate();
     if (m_tqTimer > 0) return;

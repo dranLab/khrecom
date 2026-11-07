@@ -4,7 +4,7 @@ t=open(f,errors='replace').read()
 a=t.index(';; Function '+fn); b=t.find('\n;; Function ',a+10); s=t[a:b]
 # rtl
 rtl={}
-for m in re.finditer(r'\n\((insn|call_insn|jump_insn) (\d+) \d+ \d+ (.*?)\n\n', s, re.S):
+for m in re.finditer(r'\n\((insn|call_insn|jump_insn)[^ ]* (\d+) \d+ \d+ (.*?)\n\n', s, re.S):
     rtl[m.group(2)]=re.sub(r'\s+',' ',m.group(3))[:120]
 keyn=[k for k,v in rtl.items() if key in v]
 print('key insns',keyn)
@@ -18,4 +18,5 @@ for i,st in enumerate(bbs):
             g=re.match(r';;\s+(\d+)\s+(-?\d+)\s+0\s+(\d+)\s+(\d+)\s+(\d+)\s+.*?:(.*)',l)
             if g: print(g[1],'p'+g[4],'c'+g[5],'->',g[6].strip(),'|',rtl.get(g[1],'')[:90])
             elif 'Ready list (t' in l or '--> scheduling' in l: print(re.sub(r'^;;\s+','  ',l)[:70])
-        break
+        if not __import__('os').environ.get('SCHEDSHOW_ALL'):  # SCHEDSHOW_ALL=1: every block with the key, not the first
+            break

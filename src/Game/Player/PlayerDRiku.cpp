@@ -85,15 +85,11 @@ template <class T> static inline T& _ref(T& v) {
     return v;
 }
 static inline UINT _upKind(INT inType0, INT inType1) {
-    UINT up = inType0 > 0 ? 1 << (inType0 - 1) : 0;
-    if (inType1 > 0) up |= 1 << (inType1 - 1);
-    return up;
+    return (inType0 > 0 ? 1 << (inType0 - 1) : 0) | (inType1 > 0 ? 1 << (inType1 - 1) : 0);
 }
 
 static inline FLOAT _limitPI(FLOAT r) {
-    if (r < -3.1415927f) r += 6.2831855f;
-    else if (r > 3.1415927f) r -= 6.2831855f;
-    return r;
+    return (r < -3.1415927f) ? r + 6.2831855f : (r > 3.1415927f) ? r - 6.2831855f : r;
 }
 
 static inline FLOAT _abs(FLOAT inValue) {
@@ -132,6 +128,18 @@ extern "C" float cosf(float);
 void ApplyMatrixXYZ(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 namespace Math3D {
 FLOAT LimitPI(FLOAT pai);
+}
+
+/* Coord.h's matrix wrappers (setMagic): called directly, cse keeps the matrix address in a saved register
+ * across the calls; the original recomputes it for each call. */
+static inline void _unitMatrix(FMATRIX& m) {
+    sceVu0UnitMatrix(m);
+}
+static inline void _rotMatrixX(FMATRIX& m, FLOAT r) {
+    sceVu0RotMatrixX(m, m, r);
+}
+static inline void _rotMatrixY(FMATRIX& m, FLOAT r) {
+    sceVu0RotMatrixY(m, m, r);
 }
 
 static inline void _unitMatrixVu0(FMATRIX& m) {
@@ -596,8 +604,6 @@ void CPlayerDRiku::exeSpeedStep() {
         initIdle(-1, 1);
     }
 }
-/* Parked: 7 lines off, registers only: in the card branch the original keeps %hi(g_pBattleCardList) in t0 and the shared constant 1 (m_iAttackNo == 1, _upKind's shift) in a2, ours t1 and t0. Worked: CPlayer::setAttack's form, the player-flag 0x80000 arm first, `pre == 7 || isAir()` for the last hit, case 7 with its own body. Tried: _ref forms of the m_AtkKind/m_AtkAttr stores, up declared early or inline, an unsigned compare; permuter 15 min (7238 candidates, stays 8). 2026-11-07: a pinned list pointer folds back to the symbol unless an operand keeps it, and that operand moves other registers (16). */
-#if 0
 void CPlayerDRiku::setAttack() {
     CEntity* pTarget;
     FLOAT distY;
@@ -726,22 +732,6 @@ void CPlayerDRiku::setAttack() {
     m_tqAttackTimer = m_pAnim->getTotalTqCrd() * 100 / (INT)rate + 1000;
     m_iAttackNo++;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerDRiku", setAttack__Q22PL12CPlayerDRiku);
-// setAttack__Q22PL12CPlayerDRiku: its .rodata, for its INCLUDE_ASM; remove with it.
-asm(".section .rodata\n"
-    ".align 4\n"
-    "jtbl_004A1CE0:\n"
-    ".word .L0027E098\n"
-    ".word .L0027E098\n"
-    ".word .L0027E0C8\n"
-    ".word .L0027E0EC\n"
-    ".word .L0027E0C8\n"
-    ".word .L0027E098\n"
-    ".word .L0027E0E4\n"
-    ".word 0\n"
-    ".section .text");
-#endif
 void CPlayerDRiku::initJump2nd() {
     if (isBattleFlag(0x200000)) return;
     setPlayerState(JUMP_2ND);
@@ -1018,7 +1008,7 @@ void CPlayerDRiku::initStockSkill(INT inNo) {
     setTrgFlag(0, 0x40000);
     m_hMagicCore = 0;
 }
-/* Parked: structurally complete (35 cases in the original order, Riku's 0x6cc-0x6f9 group renumbered to 0x712-0x73f), same frame, 8 bytes long, 173 of 3903 lines off: case 1's attack-ID switch keeps a compare for the empty case 0x690 in the original; cross-jumped tails differ (0x67c's flag-and-return tail, 0x683); pTarget gets s2 instead of s0 in 0x69c; f0/f1 choices in 0x69c and 0x4a8; the original keeps 50 in s2 for the whole function; 0x4a8 has a dead (m_fAnalogViewDir - m_fDir) < -PI compare. Worked: two block-local FVECTORs in 0x4a8 (frame size), 0x69b's arrive/else arm order, 0x73c's offWeapon tail, 0x73d's setMagic(0xb9) loop with onWeapon(1). Tried: switch forms for case 1. Same family as the parked CPlayerRiku/CPlayerSora exeStockSkill drafts. */
+/* Parked: 108 of 3890 lines (2026-11-07), same size: cross-jumped tails differ (ours merges the 0x683 setAnimSkillEx+setPlayerFlag(0x100000) tail into 0x6xx's copy, the original keeps 0x683's whole and merges the later copy into the setAnimRsrcEx tail at 2525); the sched2 order around global float loads in 0x67c/0x67d (the original loads m_pMove before lbu WORK1 and g_fAntiGravity/g_fGravity, its m_pMove load must have a higher priority than ours' 11); pTarget gets s2 instead of s0 in 0x69c; f0/f1 choices in 0x69c and 0x4a8 (pos.y = m_vMarkPos.y + 5/7 arms); store order of the zero stores at 840/844 and 1188/972 in two later cases; 0x4a8 has a dead (m_fAnalogViewDir - m_fDir) < -PI compare. Worked: case 1's switch needs a third empty case above 0x690 (any value; 0x6ae here: the tree's root is then 0x690), m_pWeapon->isOnAttack() for the two onAttack tests (ref: two CPlayerWeapon inlines), 0xaa/0xab set the attack without m_AtkAttr (_setAttackNoAttr), _upKind/_limitPI as one expression, two block-local FVECTORs in 0x4a8, 0x69b's arrive/else arm order, 0x73c's offWeapon tail, 0x73d's setMagic(0xb9) loop with onWeapon(1). The ref writes the attack set out with CPlayer inlines (95 CPlayer* this scopes, 5 INT inState = Player.h:465's setter). Tried: switch forms for case 1. Same family as the parked CPlayerRiku/CPlayerSora exeStockSkill drafts. */
 #if 0
 static inline void _setAttack(CPlayerDRiku* p, UINT inID) {
     p->m_uiAttackID = inID;
@@ -1026,6 +1016,15 @@ static inline void _setAttack(CPlayerDRiku* p, UINT inID) {
     p->m_iAttackPower = p->m_iAP * CardBattle::g_pStockSkillList[p->m_iStockSkill].POWER[p->m_pAtkData->POWER] / 100;
     _ref(p->m_AtkKind) = (ATK_KIND)p->m_pAtkData->DAMAGE;
     _ref(p->m_AtkAttr) = (ATK_ATTR)CardBattle::g_pStockSkillList[p->m_iStockSkill].ATTR;
+    UINT up = _upKind(CardBattle::g_pStockSkillList[p->m_iStockSkill].UP_TYPE0,
+                      CardBattle::g_pStockSkillList[p->m_iStockSkill].UP_TYPE1);
+    p->calcEnchant_AttackPoint(p->m_iAttackPower, p->m_AtkKind, p->m_AtkAttr, up);
+}
+static inline void _setAttackNoAttr(CPlayerDRiku* p, UINT inID) {
+    p->m_uiAttackID = inID;
+    p->m_pAtkData = &g_AttackDataList[inID];
+    p->m_iAttackPower = p->m_iAP * CardBattle::g_pStockSkillList[p->m_iStockSkill].POWER[p->m_pAtkData->POWER] / 100;
+    _ref(p->m_AtkKind) = (ATK_KIND)p->m_pAtkData->DAMAGE;
     UINT up = _upKind(CardBattle::g_pStockSkillList[p->m_iStockSkill].UP_TYPE0,
                       CardBattle::g_pStockSkillList[p->m_iStockSkill].UP_TYPE1);
     p->calcEnchant_AttackPoint(p->m_iAttackPower, p->m_AtkKind, p->m_AtkAttr, up);
@@ -1082,6 +1081,7 @@ void CPlayerDRiku::exeStockSkill() {
         if (m_pAtkData->FLAG & 0x20) {
             switch (m_uiAttackID * 10) {
             case 0x690:
+            case 0x6ae:
                 break;
             case 0x67c:
                 setCastEffect(g_szDpxEX1580, 0x13, &Crd(m_iBoneCenter), NULL);
@@ -1264,7 +1264,7 @@ void CPlayerDRiku::exeStockSkill() {
         rot = getRot();
         m_pMove->homingMove(m_vWarpPos[1], 1.0f, m_pAtkData->MAX_SPEED * 0.01f);
         setRot(rot);
-        if (!m_pWeapon->getCollAttackID()) onAttack();
+        if (!m_pWeapon->isOnAttack()) onAttack();
         if (arriveTarget(m_vWarpPos[1], m_pAtkData->RADIUS * 0.1f) || getTimer() <= 0) {
             offAttack();
             clearSpeed();
@@ -1293,7 +1293,7 @@ void CPlayerDRiku::exeStockSkill() {
             pos.z = m_vStartPos.z;
             setOldPos(pos);
             m_iSubState = 0x69d;
-            _setAttack(this, 0xaa);
+            _setAttackNoAttr(this, 0xaa);
             m_pCam->changeNowPlayer(getHandle(), getHandle());
             m_pCam->changeCamMode(4, 0);
             m_bNextTrg = FALSE;
@@ -1330,7 +1330,7 @@ void CPlayerDRiku::exeStockSkill() {
         return;
     case 0x69d:
         setPlayerFlag(0x400000, 0);
-        if (frame >= m_pAtkData->COLL_START_FRAME && !m_pWeapon->getCollAttackID()) onAttack();
+        if (frame >= m_pAtkData->COLL_START_FRAME && !m_pWeapon->isOnAttack()) onAttack();
         if (frame >= m_pAtkData->WORK1 && !m_bNextTrg) {
             m_bNextTrg = TRUE;
             setMagic(0xab, -1, m_iStockSkill);
@@ -1353,7 +1353,7 @@ void CPlayerDRiku::exeStockSkill() {
             return;
         }
         if (m_nAttackCount == 1) {
-            _setAttack(this, 0xab);
+            _setAttackNoAttr(this, 0xab);
         }
         setMagic(0xab, 0, m_iStockSkill);
         setTimer(m_pAtkData->WORK0 * 50);
@@ -1872,8 +1872,6 @@ asm(".section .rodata\n"
     ".asciz \"exeStockSkill:  DARKBREAK  Entry NG...\\n\"\n"
     ".align 2\n"
     ".section .text");
-/* Parked: same structure and size within 8 bytes, 310 of 1363 lines off: the BULLET_PARAM field stores and the member loads feeding them are scheduled differently in every case (the original loads m_AtkKind, m_AtkAttr, m_iAttackPower in that order and stores them together), plus registers in the stock-skill branch of 0xab; the same family as CPlayerRiku::setMagic. Cases 0x77/0xb5/0xb7 follow Riku's 0x162/0x20a/0x210. Tried: hill-climb of case 0xa8's field order (310 -> 291, no clean block); permuter 20 min (14978 candidates, stays 301). */
-#if 0
 void CPlayerDRiku::setMagic(INT inState, INT inCardID, INT inSkillID) {
     FVECTOR pos;
     FVECTOR rot;
@@ -1884,14 +1882,14 @@ void CPlayerDRiku::setMagic(INT inState, INT inCardID, INT inSkillID) {
     case 0xa8:
         param.init(2, 3);
         param.uiFlag = 0x1009100;
+        param.CollKind = COLL_KIND_PSHOT;
         param.AtkKind = m_AtkKind;
         param.AtkAttr = m_AtkAttr;
         param.iAttackPoint = m_iAttackPower;
-        param.CollKind = COLL_KIND_PSHOT;
         param.fSpeed = m_pAtkData->MAX_SPEED * 0.01f;
-        param.hHomingTarget = m_hTarget;
-        param.tqHomingTime = 9000;
         param.fMaxDist = m_pAtkData->WORK0;
+        param.tqHomingTime = 9000;
+        param.hHomingTarget = m_hTarget;
         param.fHomingRadius = m_pAtkData->RADIUS;
         param.fHomingRate = m_pAtkData->WORK1;
         param.vPos = *(FVECTOR*)((UBYTE*)&Crd(m_iBoneLHand) + 0xc0); /* CCoord::m_World.v[3] */
@@ -1934,9 +1932,9 @@ void CPlayerDRiku::setMagic(INT inState, INT inCardID, INT inSkillID) {
             }
             param.vRot = getRot();
         } else if (inCardID == -1) {
+            PATK_DATA* pAtkData = &g_AttackDataList[0xab];
             UINT up = _upKind(CardBattle::g_pStockSkillList[m_iStockSkill].UP_TYPE0,
                               CardBattle::g_pStockSkillList[m_iStockSkill].UP_TYPE1);
-            PATK_DATA* pAtkData = &g_AttackDataList[0xab];
             param.init(1, 3);
             param.CollKind = COLL_KIND_PSHOT;
             param.AtkAttr = m_AtkAttr;
@@ -1944,7 +1942,8 @@ void CPlayerDRiku::setMagic(INT inState, INT inCardID, INT inSkillID) {
             param.AtkKind = pAtkData->DAMAGE;
             calcEnchant_AttackPoint(param.iAttackPoint, *(ATK_KIND*)&param.AtkKind, (ATK_ATTR)param.AtkAttr, up);
             param.fSpeed = 0.0f;
-            param.fCollRadius = param.fShiftY = pAtkData->RADIUS * 0.01f;
+            param.fCollRadius = pAtkData->RADIUS * 0.01f;
+            param.fShiftY = param.fCollRadius;
             param.vPos = getPos();
             m_pCollMap->setType(COLL_TYPE_SPHERE);
             m_pCollMap->enableSliding(0);
@@ -1958,20 +1957,21 @@ void CPlayerDRiku::setMagic(INT inState, INT inCardID, INT inSkillID) {
                 param.vPos.y += 4.0f;
             }
             param.vRot = getRot();
-            param.fScale = pAtkData->MAX_SPEED * 0.1f;
             param.tqCollAtkTime = pAtkData->COLL_END_FRAME * 100;
             param.pEffectTbl = g_EffTbl_Skill[pAtkData->EFFECT];
+            param.fScale = pAtkData->MAX_SPEED * 0.1f;
             param.uiFlag = 0x20002;
         } else {
             FLOAT r;
             FLOAT theta;
             param.init(1, 3);
-            param.AtkAttr = m_AtkAttr;
             param.CollKind = COLL_KIND_PSHOT;
             param.AtkKind = m_AtkKind;
-            param.fSpeed = 0.0f;
+            param.AtkAttr = m_AtkAttr;
             param.iAttackPoint = m_iAttackPower;
-            param.fCollRadius = param.fShiftY = m_pAtkData->RADIUS * 0.01f;
+            param.fSpeed = 0.0f;
+            param.fCollRadius = m_pAtkData->RADIUS * 0.01f;
+            param.fShiftY = param.fCollRadius;
             r = RND::genrand_real1() * (m_pAtkData->COLL_START_FRAME * 0.1f);
             theta = Math3D::LimitPI(RND::genrand_real1() * 360.0f * 0.017453292f);
             param.vPos = getPos();
@@ -1986,8 +1986,8 @@ void CPlayerDRiku::setMagic(INT inState, INT inCardID, INT inSkillID) {
             param.vRot = getRot();
             param.pEffectTbl = g_EffTbl_Skill[m_pAtkData->EFFECT];
             param.tqCollAtkTime = m_pAtkData->COLL_END_FRAME * 100;
-            param.uiFlag = 0x20002;
             param.fScale = m_pAtkData->MAX_SPEED * 0.1f;
+            param.uiFlag = 0x20002;
         }
         CEntityFactory::getInstance()->createBullet(param, this);
         break;
@@ -1999,8 +1999,8 @@ void CPlayerDRiku::setMagic(INT inState, INT inCardID, INT inSkillID) {
             param.AtkAttr = m_AtkAttr;
             param.iAttackPoint = m_iAttackPower;
             param.fSpeed = 0.4f;
-            param.fShiftY = 2.0f;
             param.fCollRadius = 2.0f;
+            param.fShiftY = 2.0f;
             param.vPos = m_vMarkPos;
             m_pCollMap->setType(COLL_TYPE_SPHERE);
             m_pCollMap->enableSliding(0);
@@ -2014,38 +2014,38 @@ void CPlayerDRiku::setMagic(INT inState, INT inCardID, INT inSkillID) {
                 param.vPos.y += 8.0f;
             }
             m_vJumpStartPos = param.vPos;
-            m_hEffCast = setEffect(g_szDpxImpals, 6, &m_vJumpStartPos, NULL, 0.0f);
+            m_hEffCast = setEffect(_ref(g_szDpxImpals), 6, &m_vJumpStartPos, NULL, 0.0f);
             param.vRot = getRot();
             param.vRot.x = -1.5707964f;
-            param.uiFlag = 0x20003;
             param.pEffectTbl = g_EffTbl_Skill[54];
-            param.tqFadeTime = 600;
-            param.fScale = 1.0f;
             param.tqCollAtkTime = 600;
             param.tqHomingTime = 600;
+            param.tqFadeTime = 600;
+            param.fScale = 1.0f;
+            param.uiFlag = 0x20003;
             CEntityFactory::getInstance()->createBullet(param, this);
         } else {
             setQuake(10.0f, 0.25f, 50);
-            m_uiAttackID = 0xb6;
-            m_pAtkData = &g_AttackDataList[0xb6];
-            m_iAttackPower = m_iAP * CardBattle::g_pStockSkillList[m_iStockSkill].POWER[3] / 100;
+            _ref(m_uiAttackID) = 0xb6;
+            _ref(m_pAtkData) = &g_AttackDataList[m_uiAttackID];
+            _ref(m_iAttackPower) = getAP() * CardBattle::g_pStockSkillList[m_iStockSkill].POWER[3] / 100;
             _ref(m_AtkKind) = (ATK_KIND)3;
             _ref(m_AtkAttr) = (ATK_ATTR)CardBattle::g_pStockSkillList[m_iStockSkill].ATTR;
             UINT up = _upKind(CardBattle::g_pStockSkillList[m_iStockSkill].UP_TYPE0,
                               CardBattle::g_pStockSkillList[m_iStockSkill].UP_TYPE1);
             calcEnchant_AttackPoint(m_iAttackPower, m_AtkKind, m_AtkAttr, up);
             param.init(1, 3);
+            param.CollKind = COLL_KIND_PSHOT;
             param.AtkKind = m_AtkKind;
             param.AtkAttr = m_AtkAttr;
-            param.CollKind = COLL_KIND_PSHOT;
-            param.pEffectTbl = g_EffTbl_Skill[55];
             param.iAttackPoint = m_iAttackPower;
+            param.fSpeed = 0.0f;
+            param.pEffectTbl = g_EffTbl_Skill[55];
             param.uiFlag = 0x30002;
             param.CollType = COLL_TYPE_CIRCLE;
             param.tqCollAtkTime = 3000;
             param.fChangeRadius = 0.15f;
             param.fCollOffsetY = 0.4f;
-            param.fSpeed = 0.0f;
             param.fCollRadius = 0.0f;
             getWeaponTopPos(param.vPos);
             m_pCollMap->setType(COLL_TYPE_SPHERE);
@@ -2066,35 +2066,33 @@ void CPlayerDRiku::setMagic(INT inState, INT inCardID, INT inSkillID) {
         break;
     case 0xb9:
         if (inCardID > 0) {
-            FVECTOR ofs;
-            FMATRIX m;
-            FLOAT r;
             param.init(1, 3);
-            param.AtkKind = m_AtkKind;
-            param.iAttackPoint = m_iAttackPower;
             param.CollKind = COLL_KIND_PSHOT;
+            param.AtkKind = m_AtkKind;
             param.AtkAttr = m_AtkAttr;
-            r = _limitPI(inCardID * -6.2831855f / 7.0f);
+            param.iAttackPoint = m_iAttackPower;
             param.fSpeed = m_pAtkData->MAX_SPEED * 0.01f;
+            param.fCollRadius = m_pAtkData->RADIUS * 0.01f;
+            param.fShiftY = 0.0f;
             param.fMaxDist = 10.0f;
             param.tqHomingTime = 3000;
+            param.pEffectTbl = g_EffTbl_Skill[60];
             param.pOffsetTbl = &g_OffsetTbl_StockSkill[4];
             param.pRotTbl = &g_RotTbl_Magic[4];
+            param.fScale = 1.0f;
             param.iExtraEffectNum = 1;
             param.pExtraEffectTbl = g_EffTbl_Skill[61];
             param.tqFadeTime = 300;
-            param.fCollRadius = m_pAtkData->RADIUS * 0.01f;
             param.uiFlag = 0x19000144;
-            param.fShiftY = 0.0f;
-            param.pEffectTbl = g_EffTbl_Skill[60];
-            param.fScale = 1.0f;
-            ofs.set(0.0f, 0.0f, 1.2f, 1.0f);
-            sceVu0UnitMatrix(m);
-            sceVu0RotMatrixY(m, m, r);
-            sceVu0RotMatrixX(m, m, -0.7853982f);
+            FVECTOR ofs = {{0.0f, 0.0f, 1.2f, 1.0f}};
+            FMATRIX m;
+            FLOAT r = _limitPI(inCardID * -6.2831855f / 7.0f);
+            _unitMatrix(m);
+            _rotMatrixY(m, r);
+            _rotMatrixX(m, -0.7853982f);
             ApplyMatrixXYZ(ofs, m, ofs);
-            sceVu0UnitMatrix(m);
-            sceVu0RotMatrixY(m, m, m_fDir);
+            _unitMatrix(m);
+            _rotMatrixY(m, m_fDir);
             ApplyMatrixXYZ(ofs, m, ofs);
             AddVectorXYZ(param.vPos, m_vWarpPos[0], ofs);
             calcDirection(param.vRot, m_vAppearPos);
@@ -2107,9 +2105,9 @@ void CPlayerDRiku::setMagic(INT inState, INT inCardID, INT inSkillID) {
         param.AtkKind = m_AtkKind;
         param.AtkAttr = m_AtkAttr;
         param.iAttackPoint = m_iAttackPower;
-        param.fShiftY = 3.0f;
         param.fSpeed = 0.0f;
         param.fCollRadius = 3.0f;
+        param.fShiftY = 3.0f;
         param.vPos = m_vAppearPos;
         m_pCollMap->setType(COLL_TYPE_SPHERE);
         m_pCollMap->enableSliding(0);
@@ -2123,10 +2121,10 @@ void CPlayerDRiku::setMagic(INT inState, INT inCardID, INT inSkillID) {
             param.vPos.y += 4.0f;
         }
         param.vRot = getRot();
-        param.tqCollAtkTime = 1000;
-        param.uiFlag = 0x20002;
         param.pEffectTbl = g_EffTbl_Skill[62];
+        param.tqCollAtkTime = 1000;
         param.fScale = 1.5f;
+        param.uiFlag = 0x20002;
         pBullet = (CBullet*)CEntityFactory::getInstance()->createBullet(param, this);
         if (pBullet) pBullet->setAttackID(m_pWeapon->getCollAttackID());
         setEffect(g_szDpxMaelstrom, 7, &param.vPos, NULL, 0.0f);
@@ -2135,17 +2133,17 @@ void CPlayerDRiku::setMagic(INT inState, INT inCardID, INT inSkillID) {
         getWeaponTopPos(pos);
         param.init(2, 3);
         param.CollKind = COLL_KIND_PSHOT;
-        param.iAttackPoint = m_iAttackPower;
+        param.uiFlag = 0x21008140;
         param.AtkKind = m_AtkKind;
         param.AtkAttr = m_AtkAttr;
-        param.uiFlag = 0x21008140;
+        param.iAttackPoint = m_iAttackPower;
         param.fSpeed = m_pAtkData->MAX_SPEED * 0.01f;
-        param.tqHomingTime = 9000;
         param.fMaxDist = m_pAtkData->WORK0;
+        param.tqHomingTime = 9000;
         param.fHomingRadius = m_pAtkData->RADIUS;
-        param.vPos = pos;
         param.fHomingRate = m_pAtkData->WORK1;
         param.tqFadeTime = 1000;
+        param.vPos = pos;
         param.vRot = getRot();
         param.vRot.y = _limitPI(calcDirection(pos));
         param.pEffectTbl = g_EffTbl_Skill[m_pAtkData->EFFECT];
@@ -2162,9 +2160,6 @@ void CPlayerDRiku::setMagic(INT inState, INT inCardID, INT inSkillID) {
         break;
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerDRiku", setMagic__Q22PL12CPlayerDRikuiii);
-#endif
 void CPlayerDRiku::searchWarpPos(FLOAT inDir) {
     static FVECTOR g_vDir[2] = {
         { { 0.0f, 0.0f, -15.0f, 1.0f } },
