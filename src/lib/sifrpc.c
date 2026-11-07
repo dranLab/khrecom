@@ -187,12 +187,11 @@ void sceSifExitRpc(void)
 /* Parked: 1 line, 4 bytes short - in the pid == 1 arm the original also sets v1 = 1 (`li v1,1` after the old + 2): pid
    is written again for the rpc_id store after the join. `pid = 1` in the arm folds away, before or after rd->pid++, also
    across an empty asm or through a local; an asm output keeps it but disturbs the load (6 lines). */
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/sifrpc", _sceRpcGetPacket);
-#if 0
 static void *_sceRpcGetPacket(struct rpc_data *rd)
 {
     RpcPktHeader *packet;
-    int len, rid, pid;
+    int len, rid;
+    register int pid asm("$3"); /* MATCH: in v1, so the arm's pid = 1 stays (li v1,1) */
 
     DIntr();
     len = rd->pkt_table_len;
@@ -202,9 +201,14 @@ static void *_sceRpcGetPacket(struct rpc_data *rd)
             continue;
         }
         packet->rec_id = (rid << 16) | 4 | PACKET_F_ALLOC;
-        pid = ++rd->pid;
-        if (pid == 1) {
-            rd->pid++;
+        {
+            int old = rd->pid;
+            pid = old + 1;
+            rd->pid = pid;
+            if (pid == 1) {
+                rd->pid = old + 2;
+                pid = 1;
+            }
         }
         packet->pkt_addr = packet;
         packet->rpc_id = pid;
@@ -214,7 +218,6 @@ static void *_sceRpcGetPacket(struct rpc_data *rd)
     EIntr();
     return 0;
 }
-#endif
 
 static void _sceRpcFreePacket(RpcPktHeader *packet)
 {
