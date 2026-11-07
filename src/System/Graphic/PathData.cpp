@@ -299,17 +299,7 @@ void CPathVector::getPathParam(PATH_PARAM& sParam) const {
         }
     }
 }
-/* placeholder: CVector<G_STRIP>'s assert strings come here (getNearPath, INCLUDE_ASM, uses operator[]) */
-inline void _pathDataVectorStrings(G_STRIP_VECTOR& v) { v.back(); }
 
-/* Parked: 4 lines (2026-11-06, was 9: fNearT = 0.0f right after iNearStep, statement changes from tools/permuter.py; its declaration shuffle was noise); left: the hoisted 0.0f compare constant is a copy of fNearT here, mtc1 zero in the original, and one mov.s $f27,$f3 sits in another arm. 2026-11-07: an opaque asm on fNearT after its init stops the copy but moves the FP registers (12-24). Earlier: 9 lines - fNearDis/fNearT get f27/f26 instead of f26/f27, and the hoisted 0.0f compare constant is a copy of
-   fNearT's register (cse2 equivalence) instead of its own `mtc1 zero,$f24`; the copy adds a ref to fNearT, which then
-   wins the allocation. A clobber-free sqc2 asm for vNearNv (cse flush) fixes both but moves 6 spill slots (29 lines).
-   tried: init orders, chained/decl initializers, fNearT = t/fBottom = 0, fNearDis arm forms (13), decl order of
-   fNearDis/fNearT, asm position at each init line (29-66); permuter (method wrapper) 15 min, 15.7k: no gain.
-   Levers that got it here: fBottom test inverted with k = i + (j - 1), !(fBottom > -0.001f && ...) form,
-   step[j] - (path_max - 1), dir declared before flg (spill slots). */
-#if 0
 void CPathVector::getNearPath(FVECTOR& outvN, float* outfDis, float* outfT, int* outiStep, const FVECTOR& vTarget,
                               const FVECTOR* pathv, int path_max, float hashi) {
     FLOAT fNearDis;
@@ -339,6 +329,9 @@ void CPathVector::getNearPath(FVECTOR& outvN, float* outfDis, float* outfT, int*
     fNearDis = 1.7014118e+38f;
     fChkNearDis = 1.7014118e+38f;
     _zeroVectorVu0(vNearNv);
+    /* MATCH: an asm with an operand and no clobber ends cse's equivalences (fNearT = 0.0f), so the hoisted 0.0f
+       compare constant gets its own mtc1 zero instead of a copy of fNearT */
+    __asm__ volatile("" : : "i"(0));
     dir = 0;
     for (i = -1; i <= path_max - 1; i++) {
         step[0] = i - 1;
@@ -357,10 +350,10 @@ void CPathVector::getNearPath(FVECTOR& outvN, float* outfDis, float* outfT, int*
                 ScaleVector(fvTmp, fvTmp, hashi * (FLOAT)(step[j] - (path_max - 1)));
                 AddVector(pv[j], pathv[path_max - 1], fvTmp);
             } else {
-                __typeof__(step[j]) pt776 = step[j]; pv[j] = pathv[pt776];
+                pv[j] = pathv[step[j]];
             }
         }
-        { fDis = Math3D::GetDistance2OfLineAndPoint(pv[1], pv[2], vTarget); }
+        fDis = Math3D::GetDistance2OfLineAndPoint(pv[1], pv[2], vTarget);
         if (fDis < fChkNearDis) {
             pv[3].y = pv[2].y = pv[1].y = pv[0].y = vTarget.y;
             flg = 0;
@@ -375,7 +368,7 @@ void CPathVector::getNearPath(FVECTOR& outvN, float* outfDis, float* outfT, int*
             if (InnerProduct(pnv, pvec) >= 0.0f) flg = 1;
             for (j = 1; j < 4; j++) {
                 SubVector(v0[j], pv[j], pv[j - 1]);
-                { Normalize(v0[j], v0[j]); }
+                Normalize(v0[j], v0[j]);
                 OuterProduct(v0[j], v0[j], fvTmp);
                 ScaleVector(v0[j], v0[j], fChkDis);
                 if (flg) AddVector(v0[j], pv[j], v0[j]);
@@ -394,8 +387,8 @@ void CPathVector::getNearPath(FVECTOR& outvN, float* outfDis, float* outfT, int*
                 } else {
                     t = 0.0f;
                 }
-                __typeof__((pv[j].x - pv[j - 1].x)) pt306 = (pv[j].x - pv[j - 1].x); v1[j - 1].x = pt306 * t + v0[j].x;
-                __typeof__(pv[j].y) pt622 = pv[j].y; v1[j - 1].y = pt622;
+                v1[j - 1].x = (pv[j].x - pv[j - 1].x) * t + v0[j].x;
+                v1[j - 1].y = pv[j].y;
                 v1[j - 1].z = (pv[j].z - pv[j - 1].z) * t + v0[j].z;
             }
             SubVector(v0[0], pv[1], pv[2]);
@@ -425,10 +418,10 @@ void CPathVector::getNearPath(FVECTOR& outvN, float* outfDis, float* outfT, int*
                     if (i < path_max - 1 || !dir) {
                         if (0 <= i) dir++;
                         vNearNv = pnv;
-                        fNearT = t;
                         if (!flg) fChkDis = -fChkDis;
-                        iNearStep = i;
                         fNearDis = fChkDis;
+                        fNearT = t;
+                        iNearStep = i;
                         fChkNearDis = fDis;
                     }
                 }
@@ -440,10 +433,6 @@ void CPathVector::getNearPath(FVECTOR& outvN, float* outfDis, float* outfT, int*
     *outfT = fNearT;
     *outiStep = iNearStep;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PathData", getNearPath__11CPathVectorR7FVECTORPfT2PiRC7FVECTORPC7FVECTORif);
-__asm__(".rdata\n.word 0x7F000000\n.text\n");
-#endif
 float CPathVector::getTargetDistanceToPathStep(const FVECTOR& tpos, float distance) {
     int path_max = m_iVecMax;
     FVECTOR* pathv = m_pVec;
@@ -735,7 +724,13 @@ static inline void _setFlag(CCoord& c) { c.m_Flag = 1; }
    `addiu s3,sp,608` (&Line.P), ours before it (scheduler tie); everything else matches. tried: t init/step forms (for
    header, t = t + 0.125f, block scope, init before SubVectorXYZ), ib/k forms of the pPath loop; permuter (method
    wrapper) 15 min, 15.8k candidates: no gain. Levers that got it here: _setTrans/_setFlag CCoord& inlines, ib = i - 1
-   before the i == 0 test, ib >= m_iVecMax before the in-range arm, block-local k = i - 1 + j (j counts down). */
+   before the i == 0 test, ib >= m_iVecMax before the in-range arm, block-local k = i - 1 + j (j counts down).
+   2026-11-07: sched dump (-dS -dR -fsched-verbose-9): the preheader holds the loop.c movables 1964 (&Line.P, depends
+   on the call through $at) and 1969 (step, a cse2 copy of t's 0.125f); both ready at t=6 in sched1, which issues 1969
+   first, sched2 keeps that stream order. tried: empty asm and "i"(0) cse-flush asm after every statement (2-186), opaque
+   asm on t, register pins (t f20, step f21, pP s3), pP local with operand barrier (2 in the loop, 122-180 before it),
+   step/one locals, while/do-while/j <= 7, Line.P.w first, i..iLoopNum scoped in the if block (as the ref); permuter
+   (#define wrapper so it finds the method) 15 min, 13.7k: no gain. */
 #if 0
 void CPathVector::dispDebugLine(INT iFlg) {
     INT i;
