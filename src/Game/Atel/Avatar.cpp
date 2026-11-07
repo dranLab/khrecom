@@ -401,10 +401,14 @@ INT CAvatar::onSetPosPathTop(INT nCmd, void* pParam, INT nID) {
     setAvatarTargetPos(*pV);
     return -1;
 }
-/* Parked: 53 lines, registers only - with the ref's USHORT nType/nFlag (one lhu) and the final switch the
-   code is the original's, but p (14 refs over 187 insns) loses the global-alloc priority tie against case 1's
-   pV (3 over 13) and takes s2, pushing CEntity* to s1 (the original: p s1, CEntity* s4, one more s-register).
-   An INT nType read with lw gives p a 15th ref and the original registers (6 lines, one extra lw). */
+/* Parked: 1 line (was 53) - the final test: the original has `slti 3`, then `bne s6, 0` twice; the switch's range node
+   gives bltz for the first. The empty asm in case 0 settled the registers: pV 3 refs / 13 insns outranked p 14 / 187
+   by a hair. An INT local keeps slti but the second zero test folds (even across an empty asm, in a nested switch);
+   if on the USHORT gives sltiu. 2026-11-07: `INT nTest = nType; if (nTest < 3) if (nType == 0) { asm volatile("" : "+r"(nType));
+   if (nType == 0) ...` gives the exact tail but 2 more refs put nType (8 refs / 200, pri 1200) above pV (750): it needs 7 refs.
+   "=r" alone splits the pseudo (frame +16), asm on nTest copies through v0, a register local on s6 reserves s6 for the whole
+   function, a case 0 / case 1,2 tree changes the structure. A join between the tests (do/while(0) + break, goto join) gets rid of the asm's
+   refs but jump merges the two tests; goto end out of a do/while keeps both but as bnez + 2 lines of layout (5). */
 #if 0
 INT CAvatar::onMove(INT nCmd, void* pParam, INT nID) {
     AvatarMoveParam* p = (AvatarMoveParam*)pParam;
@@ -437,6 +441,7 @@ INT CAvatar::onMove(INT nCmd, void* pParam, INT nID) {
         if (nFlag & 0x80) {
             FVECTOR* pV = getPathStartPos(p->_pszPathFile);
             if (!pV) return -1;
+            __asm__ volatile(""); /* MATCH: one more insn of life for pV: p outranks it and keeps s1 */
             setAvatarTargetPos(*pV);
         } else {
             setAvatarTargetPos(p->_vTarget);
@@ -454,6 +459,9 @@ INT CAvatar::onMove(INT nCmd, void* pParam, INT nID) {
         return -1;
     }
     calcAvatarMoveSpeed(vVel);
+    /* 1 line left (2026-11-07): the original tests nType != 0 twice after the < 3 range check (ours: < 0, then != 0). Case 0
+       on its own (with or without the inner if), cases 1/2 as breaks or separate labels: 6 (the range check folds); an
+       (INT) if pair: 3. nType is USHORT in the ref. */
     switch (nType) { // MATCH: a switch compares the promoted int (slti), an if on the USHORT would be unsigned
     case 0: case 1: case 2:
         if (nType == 0) m_pMove->setVel(vVel);
@@ -695,7 +703,9 @@ void roundPI(FVECTOR& vInOut, INT nInClip);
 /* Parked: 8 lines - the first isOverAvatarRotTimeLimit() comes out as xori; the original builds bRes with
    li 1 + movz (its weak copy is xori too). Inline/caller forms and 8 min of permuter (9k candidates) did not
    change it. The VU0 add/clip block (FVECTOR::addRot in the ref) is written out here: through an inline
-   parameter the vRotSpeed address lands in v1 instead of sp. */
+   parameter the vRotSpeed address lands in v1 instead of sp. 2026-11-07: seven more forms of the inline's return and a plain
+   variable holding 1 change nothing; the inline written out with `register BOOL one asm("$4")` (the testPlayingCard lever) takes
+   one more s register and 16 more bytes of frame (46 lines). */
 #if 0
 BOOL CAvatar::RotateAvatarMain() {
     BOOL bRes;

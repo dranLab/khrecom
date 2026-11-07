@@ -154,7 +154,7 @@ public:
     void setExec() { m_nStep = 1; }
     void setEnd() { m_nStep = 2; }
     void setCancel() { m_nStep = 3; }
-    BOOL isCANCEL() { return m_nStep == 3; }
+    BOOL isCANCEL() { return *(INT*)&m_nStep == 3; } /* MATCH: not volatile here: reorg steals the load for the loop's bnel slot */
 };
 
 /* PARTIAL: CRCFAliasData lacks the ref's init, linkTail, setSrc, setDst, setID (parameters unknown, no users here) */
@@ -450,10 +450,6 @@ inline void CRCFQueueData::init(INT nGroupID, INT nMemeberID, INT nType, BYTE* p
     p->m_pBuff = pBuff;
     p->m_nType = nType;
 }
-/* Parked: 3 lines - the inner loop's top label is not aligned in the original (offset 0xf4, no .p2align nop), ours
- * gets the LOOP_BEG alignment nop and so a plain bne instead of the bnel into the loop top; getType() through a cast
- * fixed the type reloads (21 -> 3). Tried: for(;;) with breaks, a goto loop (jump threading drops the pre-test). */
-#if 0
 void CRcf::_threadReadProc(void* p) {
     volatile ULONG nReadID;
     CRCFQueueData* pReadEntry;
@@ -486,13 +482,6 @@ void CRcf::_threadReadProc(void* p) {
         SleepThread();
     }
 }
-#else
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) void _threadReadProc_strings(INT n) {
-    if (!n) AssertApp(__FILE__, 0, "pReadEntry", 0);
-}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", _threadReadProc__4CRcfPv);
-#endif
 BOOL CRcf::_launchReadThread(ULONG nData, INT nType) {
     INT ra;
     ThreadParam tp;
@@ -877,8 +866,8 @@ INT _parseRCF_EntryFile(ULONG nGroup, INT nType) {
         info._pszName = szFilePath;
         info._nGroupID = s_nReadGroup;
         info._nRefGroupID = s_nLinkOwnerGroup;
-        info._nRsrcType = 0x27;
         info._bSceneManaged = s_bSceneManagedMode;
+        info._nRsrcType = 0x27;
         CRsrcDB::addRsrc(info, buf, __null);
         _skipLine();
         return 0;
@@ -1064,10 +1053,13 @@ SHORT CRcf::getBattleScene(SHORT nArea, SHORT nScene) {
     return 0;
 }
 static inline INT _tolower(INT c) {
+    INT l = c + 0x20;
     if (isupper(c)) {
-        return c + 0x20;
+    } else {
+        __asm__ volatile(""); /* MATCH: keeps the branch: jump.c would make this a movz */
+        l = c;
     }
-    return c;
+    return l;
 }
 
 static inline INT _hexValue(INT c) {
@@ -1083,10 +1075,6 @@ static inline INT _hexValue(INT c) {
     return n;
 }
 
-/* Parked: _atoi: 11 of 77 lines, 8 bytes short - hex/decimal paths as the original; left: the original keeps a
- * branch for the isupper() lowercase step where ours makes movz (ternary, if/else, inline and !isupper forms
- * all give movz), and the decimal loop's p++/return tail scheduling. Permuter 6 min: no gain. */
-#if 0
 INT _atoi(const CHAR* lpszInStr) {
     INT nRet = 0;
     const CHAR* p = lpszInStr;
@@ -1101,6 +1089,7 @@ INT _atoi(const CHAR* lpszInStr) {
         } else {
             goto dec;
         }
+        if (!*p) goto end;
         while (*p) {
             n = _hexValue(*p);
             if (n < 0) {
@@ -1113,20 +1102,25 @@ INT _atoi(const CHAR* lpszInStr) {
     dec:
         p = lpszInStr + 1;
         if (*lpszInStr != '#') p = lpszInStr;
-        for (;;) {
-            c = *p;
-            if (!c) goto end;
-            if (!isdigit(c)) goto end;
-            nRet = nRet * 10 + c - '0';
-            p++;
-        }
+        /* MATCH: both set up before a goto loop: a real loop hoists them too, but its top gets the align nop */
+        INT ct = (INT)_ctype_ + 1;
+        INT ten = 10;
+    top:
+        c = *p;
+        if (!c) goto end;
+        if (!(*(const unsigned char*)(c + ct) & 4)) goto end;
+        nRet = nRet * ten + c - '0';
+        asm volatile(""); /* MATCH: p++ last, for the b's slot */
+        p++;
+        goto top;
     }
 end:
-    return nRet;
+    {
+        register INT r asm("$2") = nRet;
+        asm volatile("" : : "r"(r)); /* MATCH: the move stays above the jr: its slot is a nop */
+        return r;
+    }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", _atoi__FPCc);
-#endif
 void CRcf::setLocale(INT nID) {
     s_nLocale = nID;
 }
@@ -1181,9 +1175,9 @@ void _makeLocalizePath(CHAR* pszOut, const CHAR* pszSrc, INT nLocale) {
         strcpy(pszOut, pszSrc);
     }
 }
-/* Parked: _atolen: 14 of 81 lines, 4 bytes short - _atoi's shape (one return, goto exits, '$' test first with
- * the 0x case inside `if (*p != '$')`); left: the same isupper branch-vs-movz in _hexValue as _atoi, and the
- * original's block order (0x case jumps over the '$' block to `nRet = 2`, p = lpszInStr + 2 from a0). */
+/* Parked: _atolen: 5 of 79 lines, same size - _atoi's guard + while and return as there. Left: block order: the 0x case jumps
+ * over the '$' block to a `nRet = 2` behind it, ours falls into its own. Gotos, an else with a goto, do/while(0) + break
+ * all come out with the '$' block first (10 lines). The extra nop is the loop's alignment and moves with that. */
 #if 0
 INT _atolen(const CHAR* lpszInStr) {
     INT nRet = 0;
@@ -1201,6 +1195,7 @@ INT _atolen(const CHAR* lpszInStr) {
             p++;
             nRet = 1;
         }
+        if (!*p) goto end;
         while (*p) {
             if (_hexValue(*p) < 0) {
                 goto end;
@@ -1220,7 +1215,11 @@ INT _atolen(const CHAR* lpszInStr) {
         }
     }
 end:
-    return nRet;
+    {
+        register INT r asm("$2") = nRet;
+        asm volatile("" : : "r"(r));
+        return r;
+    }
 }
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", _atolen__FPCc);
@@ -1237,8 +1236,6 @@ void _skipDbgLine() {
 void CRcf::prepareLoadCategoryInfo() {
     s_nDbgReadStep = 0;
 }
-/* Near-match: register allocation */
-#if 0
 INT CRcf::loadNextCategoryInfo(INT nCategory, CHAR* pOutLabel, INT nLabelMax, INT* pOutMemberID) {
     switch (s_nDbgReadStep) {
     case 0: {
@@ -1250,7 +1247,9 @@ INT CRcf::loadNextCategoryInfo(INT nCategory, CHAR* pOutLabel, INT nLabelMax, IN
         ASSERT(s_pDbgFileBuf);
         sprintf(szFileName, "cdrom0:\\rcf\\g%03d.rcf", nCategory);
         if (CFileIO::loadFile(szFileName, *s_pDbgFileBuf, 0) < 0) {
-            goto dispose;
+            if (s_pDbgFileBuf) delete s_pDbgFileBuf;
+            s_pDbgFileBuf = __null;
+            return 2;
         }
         s_nDbgFilePtr = 0;
         s_nDbgReadStep++;
@@ -1265,7 +1264,7 @@ INT CRcf::loadNextCategoryInfo(INT nCategory, CHAR* pOutLabel, INT nLabelMax, IN
             char szTmp[1024];
             p += 2;
             s_nDbgFilePtr += 2;
-            for (i = 0; *p && *p != '$' && i < 255 && !_isStr_CR(p); i++, p++) {
+            for (i = 0; *p && *p != '$' && i < 255 && !_isStr_CR(p); p++, i++) {
                 szDataName[i] = *p;
             }
             szDataName[i] = 0;
@@ -1294,21 +1293,10 @@ INT CRcf::loadNextCategoryInfo(INT nCategory, CHAR* pOutLabel, INT nLabelMax, IN
         return 0;
     }
     s_nDbgReadStep = 0;
-dispose:
     if (s_pDbgFileBuf) delete s_pDbgFileBuf;
     s_pDbgFileBuf = __null;
     return 2;
 }
-#else
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) void _loadNextCategoryInfo_strings(INT n) {
-    TRACE(__FILE__ "(2113)");
-    if (!n) AssertApp(__FILE__, 0, "s_pDbgFileBuf", 0);
-    TRACE("cdrom0:\\rcf\\g%03d.rcf");
-    TRACE("%04d %s");
-}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", loadNextCategoryInfo__4CRcfiPciPi);
-#endif
 BOOL isTokenSCENE(const CHAR* p) {
     return strncmp("$SCENE", p, 6) == 0;
 }

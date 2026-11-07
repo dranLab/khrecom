@@ -50,7 +50,7 @@ struct CARD_INFO {
     char _fgNew[1015];             /* 0x9ac */
 };
 
-class CCard {
+class CCard { friend class CCamp; /* MATCH: Form/Menu/Camp reads m_pCardInfo as volatile in initCardKind's draft */
 private:
     static CCard* m_pInstance;
     static CARD m_deckCurrent[99];

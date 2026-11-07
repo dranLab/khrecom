@@ -178,7 +178,9 @@ ISLCManagerT<CTask>& CTaskMan::getSLCManager() {
     return *_pSLCManager;
 }
 
-/* Matches except that nTQ and bPause swap registers (s5/s6). */
+/* Parked: 4 lines - the barrier settles nTQ/bPause (s5/s6). Left: the TaskMainParam stores: the original issues the nTQ
+   store early and _SecondaryArray's after _nSysLag's; a scheduling tie across the clear() block. 2026-11-07: the ref
+   lists no ctor for TaskMainParam, but brace init with these values builds a temporary (80 lines): the ctor stays. */
 #if 0
 #line 223
 void CTaskMan::update(TIMEQ nTQ, TIMEQ nDispTQ, BOOL bPause) {
@@ -186,6 +188,7 @@ void CTaskMan::update(TIMEQ nTQ, TIMEQ nDispTQ, BOOL bPause) {
     TIMEQ nSysLag = CPlaySpeedCtrl::getSysProgressTime(nDispTQ);
     TIMEQ nLag = CPlaySpeedCtrl::getProgressTime(nSysLag);
     INT nFlag = bPause ? (SHORT)(_nTaskFlag | 1) : (SHORT)(_nTaskFlag & ~1);
+    __asm__ volatile("" : : "r"(nTQ)); /* MATCH: a third ref for nTQ: it outranks bPause and takes s5 */
     _pSecondaryTaskArray->clear();
     TaskMainParam param(*_ref(_pSecondaryTaskArray), nTQ, nSysLag, nLag, _nRnd, nFlag);
     if (_nPauseReq) {
@@ -225,12 +228,9 @@ void CTaskMan::_invokePrimary(TaskMainParam& param) {
     CCoordMan::update(param._nSysTickCount, CCoords::_PP_PRIMARY);
 }
 
-/* 3 lines (2026-11-05, was 4): the original's dsrl for isSecondaryObj is a 64-bit test: (m_nInfo & 2UL) != 0 returned
-   as u_long (a BOOL return gives srl). Left: the delay slot of `if (!task.isInactive()) goto children;` (ours beqzl
-   stealing the loop's first lw, the original beqz with the fall-through lhu; do { } while (0) around it: no change). */
-#if 0
 static inline u_long _isSecondaryObj64(const CTask& t) { return (t.m_nInfo & 2UL) != 0; }
 void CTaskMan::_invokePrimary_Main(TaskMainParam& param, CTask& task) {
+    USHORT nInfo = task.getInfo();
     if (!task.isInactive()) {
         if (_isSecondaryObj64(task)) {
 
@@ -240,12 +240,13 @@ void CTaskMan::_invokePrimary_Main(TaskMainParam& param, CTask& task) {
             goto children;
         }
         task.invokeMain(param);
+        nInfo = task.getInfo();
         if (!task.isInactive()) {
             goto children;
         }
     }
-    if (task.isInactiveTrg()) {
-        task.clearInactiveTrg();
+    if ((nInfo >> 5) & 1) {
+        task.m_nInfo = nInfo & ~TASK_INFO_INACTIVETRG;
         _clearTimeLagTo(task);
     }
     return;
@@ -257,16 +258,6 @@ children:
         }
     }
 }
-#else
-/* placeholder for _invokePrimary_Main's string and its use of CVector<int>::push_back */
-__asm__(".section .sdata\n");
-static void __attribute__((section(".sdata"))) _invokePrimaryMainData(TaskMainParam& param, CTask& task) {
-    if (!param._SecondaryArray.push_back(task.getHandle())) {
-        TRACE("<error> CTaskMan : SecondaryArray.push_back\n");
-    }
-}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/TaskMan", _invokePrimary_Main__8CTaskManR13TaskMainParamR5CTask);
-#endif
 
 void CTaskMan::_clearTimeLagTo(CTask& task) {
     task.clearTimeLag();

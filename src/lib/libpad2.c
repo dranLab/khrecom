@@ -233,25 +233,26 @@ int scePad2GetState(int socket)
     return state;
 }
 
-/* Parked: 5 lines - button type kept in a1 (orig a3), movz instead of movn for the digital case. */
+/* Parked: 3 lines (2026-11-07, through a pointer to bi, decomp-permuter): case 8's address in v0 and the byte in v1, swapped. */
 #if 0
 int scePad2GetButtonInfo(int socket, unsigned char *data, int button)
 {
     Pad2ButtonInfo bi = pad2_info[socket].binfo[button];
     int ret;
     unsigned char v;
+    Pad2ButtonInfo *p = &bi;
 
-    if (bi.valid) {
-    switch (bi.type) {
+    if (p->valid) {
+    switch (p->type) {
     case 1:
-        ret = ((data[bi.byte] >> bi.bit) & 1) ? 0 : bi.type;
+        ret = ((data[p->byte] >> p->bit) & 1) ? 0 : p->type;
         break;
     case 8:
-        ret = data[bi.byte] >> bi.bit; /* ret as the first temporary (decomp-permuter): 12 -> 5 lines */
+        ret = data[p->byte] >> p->bit; /* ret as the first temporary (decomp-permuter): 12 -> 5 lines */
         v = ret;
-        if (bi.bit) {
-            bi.byte++;
-            v |= data[bi.byte] << (bi.type - bi.bit);
+        if (p->bit) {
+            p->byte++;
+            v |= data[p->byte] << (p->type - p->bit);
         }
         ret = v;
         break;

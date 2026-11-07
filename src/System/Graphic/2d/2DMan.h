@@ -1,4 +1,4 @@
-// PARTIAL: added for Game/Gimmick/GimmickBreakable
+
 #ifndef SYSTEM_GRAPHIC_2D_2DMAN_H
 #define SYSTEM_GRAPHIC_2D_2DMAN_H
 

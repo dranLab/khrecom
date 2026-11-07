@@ -392,25 +392,7 @@ static void _convertMcTitle(CHAR* pszOut, const CHAR* pszSrc) {
     }
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Memoca", _setupIconSys__FPCc);
-__asm__(".section .sdata\n");
-/* placeholder for _setupIconSys (INCLUDE_ASM): its strings, and the icon tables it copies */
-__attribute__((section(".sdata"))) void _setupIconSys_placeholder(char* p, int n) {
-    TRACE("\x82j\x82g\x81@\x82q\x82" "d\x81" "F\x81@\x82" "b\x82\x8f\x82l\x82r\x82\x99\x82\x93\x82\x94\x82\x85\x82\x8d\x81@\x82" "c\x82\x81\x82\x94\x82\x81");
-    TRACE("frec_sys.ico");
-    if (!p) AssertApp(__FILE__, 0, "pszTitle", 0);
-    sprintf(p, "\x82j\x82g\x81@\x82q\x82" "d\x81" "F\x81@\x82" "b\x82\x8f\x82l\x81@[%02d]%s", n, p);
-    TRACE("frec_dat.ico");
-    TRACE("\x81uKHCOM\x81v\x83" "f\x83o\x83" "b\x83O\x8a\xc2\x8b\xab");
-    TRACE("slime1.ico");
-    TRACE("PS2D");
-    memcpy(p, _ivBgColor, sizeof(_ivBgColor));
-    memcpy(p, _vLightDir, sizeof(_vLightDir));
-    memcpy(p, _vLightCol, sizeof(_vLightCol));
-    memcpy(p, _vAmbient, sizeof(_vAmbient));
-}
-#if 0 /* near match: the "PS2D" copy loads its last byte with lb (the original: lbu) */
-static void _setupIconSys(const CHAR* pszName) {
+void _setupIconSys(const CHAR* pszName) {
     CHAR* pszTitle = s_pszTitle;
     USHORT nLF = s_nOffsLF;
     char szTmp[80];
@@ -460,7 +442,6 @@ static void _setupIconSys(const CHAR* pszName) {
     memcpy(s_Icon.LightColor, _vLightCol, sizeof(_vLightCol));
     memcpy(s_Icon.Ambient, _vAmbient, sizeof(_vAmbient));
 }
-#endif
 
 static INT _checkCard(INT nPort) {
     INT r = -9999;
@@ -1214,14 +1195,7 @@ static INT _McWriteIconSys(const CHAR* pszName) {
     return r;
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Memoca", _McCheckDataFileExist__FiPCc);
-/* placeholder for _McCheckDataFileExist (INCLUDE_ASM): its strings */
-__attribute__((section(".sdata"))) void _McCheckDataFileExist_placeholder(char* p) {
-    sprintf(p, "/%s/*", p);
-    TRACE("icon.sys");
-}
-#if 0 /* near match: the loop entry test compares the directory count with 0 (the original: with the copy of nRes) */
-static INT _McCheckDataFileExist(INT nMode, const CHAR* pszName) {
+INT _McCheckDataFileExist(INT nMode, const CHAR* pszName) {
     INT nRes;
     char szTmp[256];
     INT r = -9999;
@@ -1230,14 +1204,11 @@ static INT _McCheckDataFileExist(INT nMode, const CHAR* pszName) {
 
     sprintf(szTmp, "/%s/*", pszName);
     nRes = _McGetDirFileEntries(szTmp);
-    if (nRes == -9999) {
-        return -9999;
-    }
-    if (nRes != 0) {
-        r = nRes;
-    } else {
+    if (nRes != r) {
+    if (nRes == 0) {
+        asm volatile("" : : : "$16"); /* MATCH: s0 is dead here, for reorg: the bnez slot takes r = nRes unannulled */
         s_nStatus = 0;
-        for (i = 0, pInfo = s_DirInfo; i < s_nDirentCount; i++, pInfo++) {
+        for (i = nRes, pInfo = s_DirInfo; i < s_nDirentCount; i++, pInfo++) {
             if (pInfo->EntryName[0] == '.') {
                 continue;
             }
@@ -1255,10 +1226,13 @@ static INT _McCheckDataFileExist(INT nMode, const CHAR* pszName) {
         } else {
             r = nMode == 1 ? -8 : -12;
         }
+    } else {
+        r = nRes;
     }
     return r;
+    }
+    return -9999;
 }
-#endif
 
 static void _getMcDirPath(CHAR* pszOutPath, const CHAR* pszDir) {
     sprintf(pszOutPath, "/%s", pszDir);
@@ -1268,13 +1242,7 @@ static void _getMcFilePath(CHAR* pszOutPath, const CHAR* pszFolder, const CHAR* 
     sprintf(pszOutPath, "/%s/%s", pszFolder, pszFile ? pszFile : pszFolder);
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Memoca", _McWriteIcons__FPCc);
-/* placeholder for _McWriteIcons (INCLUDE_ASM): its string */
-__attribute__((section(".sdata"))) void _McWriteIcons_placeholder() {
-    TRACE("\x83\x81\x83\x82\x83J\x83" "A\x83" "C\x83R\x83\x93\x81" "E\x83\x8a\x83\\\x81[\x83X\x82\xaa\x8c\xa9\x82\xc2\x82\xa9\x82\xe8\x82\xdc\x82\xb9\x82\xf1\n");
-}
-#if 0 /* near match: both resource null tests are merged into one (the original keeps two) */
-static INT _McWriteIcons(const CHAR* pszName) {
+INT _McWriteIcons(const CHAR* pszName) {
     INT r = -9999;
     INT nRes;
     char szTmp[256];
@@ -1294,7 +1262,7 @@ static INT _McWriteIcons(const CHAR* pszName) {
             break;
         }
         s_pIconRsrc = CRsrcDB::getRsrc(1, pszFile, (NAME_CASE)0);
-        if (!s_pIconRsrc || !s_pIconRsrc->getData()) {
+        if (!s_pIconRsrc || !s_pIconRsrc->getRsrcData()) {
             TRACE("\x83\x81\x83\x82\x83J\x83" "A\x83" "C\x83R\x83\x93\x81" "E\x83\x8a\x83\\\x81[\x83X\x82\xaa\x8c\xa9\x82\xc2\x82\xa9\x82\xe8\x82\xdc\x82\xb9\x82\xf1\n");
             break;
         }
@@ -1327,7 +1295,8 @@ static INT _McWriteIcons(const CHAR* pszName) {
     case 2:
         {
             CRsrcData* p = s_pIconRsrc;
-            nRes = _McWrite(s_nMcHandle, p->getData(), p->getSize());
+            /* MATCH: the empty asm keeps the two m_pDataSrc tests apart: threaded, the first skips the second */
+            nRes = _McWrite(s_nMcHandle, p->getRsrcData(), ({ asm volatile(""); p->getDataSize(); }));
         }
         if (nRes == 0) {
             s_nIconStep = 3;
@@ -1356,7 +1325,6 @@ static INT _McWriteIcons(const CHAR* pszName) {
     }
     return r;
 }
-#endif
 
 static INT _McDataWrite() {
     INT r = -9999;

@@ -98,10 +98,10 @@ static inline UINT RET_ADDR() {
 
 
 
-class CHeapMan {
-public:
-    static float getUsedHeapRatio();
-};
+
+
+
+
 
 #include "Game/Atel/VSME.h"
 

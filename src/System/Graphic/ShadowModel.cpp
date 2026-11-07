@@ -219,9 +219,6 @@ void CShadowModelMan::updateShadowMatrix(const FVECTOR& vMax, const FVECTOR& vMi
     CModel::resetWorldScreenMatrix();
 }
 
-/* Parked: 2 instructions - the original updates the i * 64 + 63 induction register at the end of the loop body,
- * not after i++. tried: i++ positions; permuter (method wrapper) 15 min, 30k candidates: no gain (score 2). */
-#if 0
 void CShadowModelMan::drawBefore() {
     QWdata* qp;
     u_long128 tag;
@@ -249,13 +246,15 @@ void CShadowModelMan::drawBefore() {
         _setADConst(&qp[1], 0x60000080, 1);
     }
     qp += 2;
+    INT j = 0; /* MATCH: a second biv only for j * 64 + 63: its giv steps at the end of the body, i early */
     for (INT i = 0; i < sdw_SCREEN_WIDTH / 64;) {
-        u_long d = (u_long)(i * 64) | ((u_long)(i * 64 + 63) << 16) | ((u_long)(sdw_SCREEN_HEIGHT - 1) << 48);
+        u_long d = (u_long)(i * 64) | ((u_long)(j * 64 + 63) << 16) | ((u_long)(sdw_SCREEN_HEIGHT - 1) << 48);
         i++;
         _setAD(&qp[0], d, 0x40);
         _setAD(&qp[1], (u_long)(0x8000 - ((sdw_SCREEN_WIDTH / 2) << 4)) | ((u_long)(0x8000 - ((sdw_SCREEN_HEIGHT / 2) << 4)) << 16), 5);
         _setAD(&qp[2], (u_long)(0x8000 + ((sdw_SCREEN_WIDTH / 2) << 4)) | ((u_long)(0x8000 + ((sdw_SCREEN_HEIGHT / 2) << 4)) << 16), 5);
         qp += 3;
+        j++;
     }
     ((u_long*)qp)[0] = 0x3000D;
     ((u_long*)qp)[1] = 0x47;
@@ -268,9 +267,6 @@ void CShadowModelMan::drawBefore() {
     qp++;
     CPackMan::pkCloseGifTag(qp);
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/ShadowModel", drawBefore__15CShadowModelMan);
-#endif
 static QWdata* setSdwTSprite32(QWdata* qp, FIX4 plsx, FIX4 plsy, UINT z, FLOAT fScale) {
     PRIMIVECTOR pv[2];
     PRIMIVECTOR uv[2];

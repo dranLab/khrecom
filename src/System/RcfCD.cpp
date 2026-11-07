@@ -255,7 +255,7 @@ INT s_nReadResult;
 ULONG s_nStartSector_R;
 INT s_nSectCnt_R;
 INT s_nReadStep;
-INT s_nCurrentGrp;
+volatile INT s_nCurrentGrp; /* MATCH: the ref has plain INT, but _analyzeCdMemberHeader and _addRsrcFileToDB need its reads kept in place */
 INT s_nNoCompression;
 SHORT s_nModeFlag;
 USHORT s_nAllocCounter;
@@ -506,8 +506,7 @@ static void _allocBuf(CD_MEMBER_DATA& info, INT nAlignSize, BYTE*& pExtBuff) {
 
 static void _addStreamInfoToDB(const CD_MEMBER_HED& hed, UINT nSectOffset);
 
-/* Placeholder: the C of _analyzeCdMemberHeader__FRPUc (not matching yet); its strings and vtable uses keep the data in order. */
-__attribute__((section(".sdata"))) static INT _analyzeCdMemberHeader_c(BYTE*& pExtBuff) {
+INT _analyzeCdMemberHeader(BYTE*& pExtBuff) {
     CD_MEMBER_HED* pCdHed = (CD_MEMBER_HED*)s_pCdBuff;
     CD_MEMBER_HED* pCdHedNext;
     INT nDataCount = 0;
@@ -546,12 +545,13 @@ __attribute__((section(".sdata"))) static INT _analyzeCdMemberHeader_c(BYTE*& pE
         }
         if (bStreamSkip) {
             _addStreamInfoToDB(*pCdHed, s_pCurrentGrp->_nStart);
+            asm volatile(""); /* MATCH: the increment stays behind the call, for the b's slot */
             pCdHed++;
         } else {
             CRsrcData* pData = CRsrcDB::getRsrc(pCdHed->_nType, pCdHed->_szDataName, NAME_CASE_SENSITIVE);
             if (pData) {
                 INT nGroupID = pCdHed->_nGroupID;
-                if (pCdHed->_nLinkID) nGroupID = _ref(s_nCurrentGrp);
+                if (pCdHed->_nLinkID) nGroupID = s_nCurrentGrp;
                 pCdHed++;
                 CRsrcDB::addRsrcTag(*pData, nGroupID, CRcf::isSceneManagedMode());
             } else {
@@ -566,79 +566,14 @@ __attribute__((section(".sdata"))) static INT _analyzeCdMemberHeader_c(BYTE*& pE
                 pCdHed++;
             }
         }
-        if (pCdHedNext) pCdHed = pCdHedNext;
+        if (pCdHedNext) {
+            pCdHed = pCdHedNext;
+        } else {
+            asm volatile(""); /* MATCH: stops the if-conversion to movn */
+        }
     }
     return nDataCount;
 }
-/* Parked: 31 lines (draft above) - the member-header walk's pointer advance is if-converted (movn s2,s4,s4) here and
- * branchy in the original, and the alloc/assert blocks are laid out differently; not iterated further. */
-#if 0
-static INT _analyzeCdMemberHeader(BYTE*& pExtBuff) {
-    CD_MEMBER_HED* pCdHed = (CD_MEMBER_HED*)s_pCdBuff;
-    CD_MEMBER_HED* pCdHedNext;
-    INT nDataCount = 0;
-    INT nAlignSize;
-    BOOL bStreamSkip;
-    INT nLocale;
-
-    while (pCdHed->_szDataName[0]) {
-        nAlignSize = CRsrcDB::getRsrcAlignmentSize(pCdHed->_nType);
-        bStreamSkip = FALSE;
-        if (pCdHed->_nType == 0x35 || pCdHed->_nType == 0x3D) bStreamSkip = TRUE;
-        nLocale = CRcf::getLocale();
-        if (nLocale == 0) {
-            pCdHedNext = NULL;
-        } else if (nLocale != pCdHed->_nLocale) {
-            CD_MEMBER_HED* pCdHedBase = NULL;
-            CD_MEMBER_HED* pCdHedOK;
-            if (pCdHed->_nLocale == 0 || (CMainApp::isPAL() && pCdHed->_nLocale == 2)) pCdHedBase = pCdHed;
-            pCdHedOK = NULL;
-            while (!strncasecmp(pCdHed[1]._szDataName, pCdHed->_szDataName, 23)) {
-                pCdHed++;
-                if (nLocale == pCdHed->_nLocale) pCdHedOK = pCdHed;
-            }
-            pCdHedNext = pCdHed + 1;
-            if (pCdHedOK) {
-                pCdHed = pCdHedOK;
-            } else if (pCdHedBase) {
-                pCdHed = pCdHedBase;
-            } else {
-                pCdHed = pCdHedNext;
-                continue;
-            }
-        } else {
-            pCdHedNext = pCdHed + 1;
-            while (!strncasecmp(pCdHedNext->_szDataName, pCdHed->_szDataName, 23)) pCdHedNext++;
-        }
-        if (bStreamSkip) {
-            _addStreamInfoToDB(*pCdHed, s_pCurrentGrp->_nStart);
-            pCdHed++;
-        } else {
-            CRsrcData* pData = CRsrcDB::getRsrc(pCdHed->_nType, pCdHed->_szDataName, NAME_CASE_SENSITIVE);
-            if (pData) {
-                INT nGroupID = pCdHed->_nGroupID;
-                if (pCdHed->_nLinkID) nGroupID = _ref(s_nCurrentGrp);
-                pCdHed++;
-                CRsrcDB::addRsrcTag(*pData, nGroupID, CRcf::isSceneManagedMode());
-            } else {
-#line 794
-                CD_MEMBER_DATA* pInfo = new (com_malloc_d(sizeof(CD_MEMBER_DATA), __FILE__ "(794)", RET_ADDR())) CD_MEMBER_DATA;
-                ASSERT(pInfo);
-                pInfo->setData(*pCdHed, s_pCurrentGrp->_nStart);
-                if (!pInfo->_nGroupID) pInfo->_nGroupID = s_nCurrentGrp;
-                _allocBuf(*pInfo, nAlignSize, pExtBuff);
-                s_pCdMemberDataList->pushBack(*pInfo);
-                nDataCount++;
-                pCdHed++;
-            }
-        }
-        if (pCdHedNext) pCdHed = pCdHedNext;
-    }
-    return nDataCount;
-}
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/RcfCD", _analyzeCdMemberHeader__FRPUc);
-#endif
 
 static void _startLoadMemberData() {
     INT nSect;
@@ -756,8 +691,7 @@ INT CRcfCD::cancelReadThread() {
     return nResult;
 }
 
-/* Placeholder: the C of _addRsrcFileToDB__FUiiRPUc (not matching yet); its strings and vtable uses keep the data in order. */
-__attribute__((section(".sdata"))) static void _addRsrcFileToDB_c(UINT nGroup, INT nType, BYTE*& pExtBuff) {
+void _addRsrcFileToDB(UINT nGroup, INT nType, BYTE*& pExtBuff) {
     BOOL bDeletable = pExtBuff == NULL;
     CBuf buf;
     char szName[16];
@@ -793,48 +727,6 @@ __attribute__((section(".sdata"))) static void _addRsrcFileToDB_c(UINT nGroup, I
     }
     s_pCdMemberDataList->resetParam();
 }
-/* Parked: 4 lines (draft above) - `addiu s0,sp,32` (&info) and the _nLinkID load are scheduled before the group
- * test in the original, after it here. tried: permuter 10 min, 33k candidates: no gain. */
-#if 0
-static void _addRsrcFileToDB(UINT nGroup, INT nType, BYTE*& pExtBuff) {
-    BOOL bDeletable = pExtBuff == NULL;
-    CBuf buf;
-    char szName[16];
-
-    SJ_FOREACH(CD_MEMBER_DATA, pInfo, *s_pCdMemberDataList) {
-        if (pInfo->_nGroupID != s_nCurrentGrp) {
-            sprintf(szName, "%07d%07d", pInfo->_nLinkID, pInfo->_nGroupID);
-            RsrcInfo info;
-            info._pszName = szName;
-            info._nGroupID = pInfo->_nGroupID;
-            info._nRefGroupID = s_nCurrentGrp;
-            info._nRsrcType = 0x27;
-            info._bSceneManaged = CRcf::isSceneManagedMode();
-            CRsrcDB::addRsrc(info, buf, NULL);
-        }
-        if (s_nModeFlag == 1 && CMainApp::isPAL() && pInfo->_nType == 0xF) pInfo->_nType = 0xC;
-        RsrcInfo info;
-        info._pszName = pInfo->_szDataName;
-        info._nGroupID = pInfo->_nGroupID;
-        info._nRefGroupID = s_nCurrentGrp;
-        info._nRsrcType = pInfo->_nType;
-        info._bSceneManaged = CRcf::isSceneManagedMode();
-        INT nResult = CRsrcDB::addRsrc_NoCheck(info, *pInfo->_pBuff, NULL);
-        if (nResult >= 0) {
-            if (nResult & 2) CVramMan::waitTransTexDone(GetThreadId());
-            if ((nResult & 4) && bDeletable) pInfo->_pBuff->releaseBuf(FALSE);
-        }
-        delete pInfo->_pBuff;
-        pInfo->_pBuff = NULL;
-    }
-    SJ_FOREACH(CD_MEMBER_DATA, __p, *s_pCdMemberDataList) {
-        delete __p;
-    }
-    s_pCdMemberDataList->resetParam();
-}
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/RcfCD", _addRsrcFileToDB__FUiiRPUc);
-#endif
 
 static void _addStreamInfoToDB(const CD_MEMBER_HED& hed, UINT nSectOffset) {
     CRsrcDB::addStreamInfo(hed._szDataName, hed._nGroupID, hed._nPosition + nSectOffset, hed._nSize, hed._nType);

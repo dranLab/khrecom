@@ -146,19 +146,21 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-03 | cleanup/player-inlines (CPlayer unit-gate pairs unified) | 222 | 22 | 0 | 691 (0) | 882 |
 | 2026-11-05 | catch-up: the unit merges since 2026-11-03 (placeholders and unit-gate sites dropped as their functions got matched; MATCH comments of the new matches) | 205 | 22 | 0 | 680 (0) | 930 |
 | 2026-11-06 | cleanup: JiminyMemo finish, CPause and CShadowModelMan stand-ins replaced by the owner headers (friends with MATCH) | 202 | 20 | 0 | 676 (0) | 930 |
+| 2026-11-07 | cleanup: MovieScript uses the real CTextWnd, CPointT, CSizeT (the old assembler crash is gone); _vf4x tagged | 201 | 19 | 0 | 677 (0) | 948 |
+| 2026-11-07 | cleanup: CHeapMan moved to HeapMan.h (6 local copies gone), Model uses VramMan.h | 199 | 14 | 0 | 677 (0) | 948 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 202 (165 in 48 headers, 37 in 22 .cpp); MATCH: 931
-  by category: method 46, data member 10, type 14, fwd decl 2, #include 14, changed in place 45, padding 2, path override 1, gate 5, guessed 9, header-level 33, stand-in 16, other 5
-stand-ins: 20 foreign in 15 files (14 names), 198 unattributed, 155 own
+PARTIAL: 190 (156 in 44 headers, 34 in 20 .cpp); MATCH: 988
+  by category: method 46, data member 10, type 14, fwd decl 2, #include 14, changed in place 45, padding 2, path override 1, gate 5, guessed 9, header-level 24, stand-in 13, other 5
+stand-ins: 14 foreign in 9 files (12 names), 198 unattributed, 154 own
 duplicate class names across headers: 0
 padding: 2 arrays, 0 accessors
-mechanisms: 676 sites (0 untagged); #line: 1245
+mechanisms: 675 sites (0 untagged); #line: 1239
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 873, superset 12, partial 0, gated 3, missing 8, unattributed 309
+classes: complete 874, superset 12, partial 0, gated 3, missing 7, unattributed 309
 ```
 
 ## Queue (top 20)
@@ -174,7 +176,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 2.0 | `Game/Enemy/MapEnemy.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
 | R1 | 2.0 | `Game/SceneInfo.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
 | R1 | 2.0 | `System/Graphic/TexInfo.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
-| R1 | 2.0 | `System/Wnd.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CTextWnd (1 complete) | inline bodies or virtuals |
 | R1 | 1.0 | `Game/Collision/CollUtil.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R1 | 1.0 | `Game/Collision/CollUtilA.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R1 | 1.0 | `System/Coord.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
@@ -188,7 +189,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 
 | class | readiness | home | stand-in files | also defined in | gaps vs ref |
 |---|---|---|---:|---|---|
-| `CHeapMan` | missing | System/HeapMan.h | 5 |  |  |
 | `sceDmaChan` | missing | System/Graphic/Effect/libppp/draw/draw_w.h | 2 |  |  |
 | `tD_CHCR` | missing | System/Graphic/Effect/libppp/draw/draw_w.h | 2 |  |  |
 | `CCMCSemiModelList` | missing | Game/Collision/CollMapCamera.h | 1 |  |  |
@@ -197,7 +197,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CMCSemiModel` | missing | Game/Collision/CollMapCamera.h | 1 |  |  |
 | `COLL_KIND` | complete | Game/Collision/CollObj.h | 1 |  |  |
 | `COLL_TYPE` | complete | Game/Collision/CollObj.h | 1 |  |  |
-| `CTextWnd` | complete | System/Wnd.h | 1 |  |  |
 | `ChatWndCreateCTDParam` | missing | Game/Atel/VSME.h | 1 |  |  |
 | `G_RGBA` | complete | System/Graphic/Gprim.h | 1 |  |  |
 | `PRIZE_DATA` | missing | Game/Enemy/BattleEnemy.h | 1 |  |  |
@@ -213,12 +212,11 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Form/Menu/SaveLoadUtil.h` | 0 | 3/1/0/0 | 4 |
 | `Game/Atel/CommandAccepter.h` | 1 | 1/0/0/0 | 15 |
 | `Game/Atel/EventTrap.h` | 0 | 4/1/0/0 | 3 |
-| `Game/AttachMotion.h` | 1 | 1/0/0/0 | 155 |
 | `Game/AttackMotion.h` | 1 | 3/0/0/0 | 154 |
 | `Game/CardBattle.h` | 1 | 6/0/0/0 | 146 |
 | `Game/CardKindEnum.h` | 1 | 1/0/0/0 | 100 |
 | `Game/Collision/CollInfo.h` | 1 | 1/0/0/0 | 177 |
-| `Game/Collision/CollObj.h` | 3 | 13/0/0/0 | 174 |
+| `Game/Collision/CollObj.h` | 2 | 13/0/0/0 | 174 |
 | `Game/Collision/CollUtilA.h` | 1 | 11/0/0/0 | 26 |
 | `Game/Debug/DWTBGM.h` | 1 | 0/0/0/0 | 1 |
 | `Game/Enemy/BattleEnemy.h` | 23 | 0/1/0/0 | 58 |
@@ -226,36 +224,33 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Entity.h` | 2 | 2/0/0/0 | 150 |
 | `Game/EntityFactory.h` | 1 | 2/0/0/0 | 49 |
 | `Game/Map.h` | 4 | 11/1/0/0 | 9 |
-| `Game/Movement.h` | 5 | 1/0/0/0 | 105 |
+| `Game/Movement.h` | 4 | 1/0/0/0 | 105 |
 | `Game/OsdDef.h` | 1 | 5/1/0/0 | 7 |
 | `Game/Player/DWTPlayer.h` | 2 | 0/0/0/0 | 5 |
 | `Game/Player/Player.h` | 32 | 2/1/0/0 | 72 |
 | `Game/Player/PlayerAnim.h` | 1 | 1/0/0/0 | 1 |
-| `Game/Player/PlayerAttack.h` | 2 | 1/0/0/0 | 26 |
+| `Game/Player/PlayerAttack.h` | 1 | 1/0/0/0 | 26 |
 | `Game/Player/PlayerGauge.h` | 3 | 6/1/0/0 | 15 |
 | `Game/PoolList.h` | 1 | 0/0/0/0 | 53 |
 | `Game/SceneEnv.h` | 1 | 1/0/0/0 | 38 |
 | `Game/SceneInfo.h` | 1 | 30/0/0/0 | 86 |
-| `System/Buf.h` | 1 | 1/0/0/0 | 38 |
 | `System/Com.h` | 1 | 0/0/0/0 | 8 |
-| `System/Coord.h` | 1 | 1/0/0/0 | 27 |
-| `System/Graphic/2d/2DMan.h` | 1 | 3/0/0/0 | 166 |
 | `System/Graphic/Camera.h` | 5 | 6/1/0/0 | 109 |
 | `System/Graphic/Effect/EffectMan.h` | 1 | 2/0/0/0 | 173 |
-| `System/Graphic/Effect/ObjType.h` | 1 | 1/0/0/0 | 176 |
+| `System/Graphic/Effect/ObjType.h` | 1 | 1/0/0/0 | 177 |
 | `System/Graphic/Effect/effect.h` | 3 | 5/1/0/0 | 77 |
 | `System/Graphic/Effect/libppp/draw/draw_w.h` | 2 | 3/0/0/0 | 15 |
 | `System/Graphic/Effect/libppp/draw/global_w.h` | 1 | 0/0/0/0 | 9 |
 | `System/Graphic/Effect/libppp/draw/md.h` | 2 | 0/0/0/0 | 41 |
 | `System/Graphic/Effect/libppp/pppPart.h` | 25 | 24/0/0/0 | 215 |
-| `System/Graphic/Gprim.h` | 3 | 15/0/0/0 | 231 |
-| `System/Graphic/Model.h` | 3 | 8/0/0/0 | 70 |
+| `System/Graphic/Gprim.h` | 2 | 15/0/0/0 | 231 |
+| `System/Graphic/Model.h` | 2 | 8/0/0/0 | 70 |
 | `System/Graphic/Str.h` | 1 | 0/0/0/0 | 140 |
 | `System/Graphic/TexInfo.h` | 1 | 2/0/0/0 | 234 |
 | `System/Graphic/modeldata.h` | 2 | 3/0/0/1 | 82 |
 | `System/MainApp.h` | 2 | 1/0/0/1 | 270 |
 | `System/RsrcData.h` | 1 | 33/0/0/0 | 29 |
-| `System/SLContainer.h` | 4 | 0/0/0/0 | 251 |
+| `System/SLContainer.h` | 4 | 0/0/0/0 | 252 |
 | `System/Vector.h` | 8 | 1/2/0/0 | 266 |
 
 ## Mechanisms
@@ -377,7 +372,7 @@ or `untagged`.
 | placeholder | `_modelCreate*` | 1 | 1 | placeholder: an inline function's strings, in the original .rodata order |
 | placeholder | `_monstroEventBattleEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
 | placeholder | `_premiumPrizeMessage*` | 12 | 12 | Placeholders for an unknown header's inline functions (prize messages) that come next in .rodata. |
-| placeholder | `_roPh*` | 3 | 3 | placeholder: an inline function's strings, in the original .rodata order |
+| placeholder | `_roPh*` | 2 | 2 | placeholder: an inline function's strings, in the original .rodata order |
 | placeholder | `_roPh0a*` | 1 | 1 | placeholder: an inline function's strings, in the original .rodata order |
 | placeholder | `_roulettePrizeMessage*` | 12 | 12 | placeholder: an inline function's strings, in the original .rodata order |
 | placeholder | `_sampleEnemyEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |

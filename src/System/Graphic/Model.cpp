@@ -57,11 +57,11 @@ extern const FMATRIX ONE_MATRIX;
 extern const FVECTOR ONE_VECTOR;
 INT checkBBox(const FMATRIX& mWorldMatrix, const BBOX* bbox);
 SHADERDESC* searchShaderDesc(USHORT mode);
-void getApplyMatrixBBox(FVECTOR& vOutMax, FVECTOR& vOutMin, const FMATRIX& Mat, const FVECTOR& vInMax, const FVECTOR& vInMin); /* static in the original (parked, asm glabel) */
-namespace VRAM { /* PARTIAL: stand-in for System/VramMan VRAM: owner not written */
-extern INT _TEX_TMP1_START;
-extern INT _CLUT_TMP1_START;
-}
+static void getApplyMatrixBBox(FVECTOR& vOutMax, FVECTOR& vOutMin, const FMATRIX& Mat, const FVECTOR& vInMax, const FVECTOR& vInMin);
+#include "System/VramMan.h"
+
+
+
 inline void* operator new[](size_t, void* p) throw() { return p; }
 extern "C" int strncmp(const char*, const char*, unsigned int);
 class CShadowMapModel : public CFadeModel { /* PARTIAL: stand-in for CShadowMapModel: owner not written */
@@ -311,8 +311,6 @@ INT CModel::link(CTask* p) {
     m_pTask = p;
     return link(*pCrds);
 }
-/* Parked: 25 lines off, registers only: the original gives the loop counter i s2 and nIdx s1 (ours i s1); the extra loop-head nop differs too. Worked: one getCoordNum() load in a local for the byte store and the compare, BONELABEL[i].m_ParentIndex, four Crd(i) inlines (four strength-reduced i*0xd0 pointers). Tried: UINT i, SHORT nIdx, nIdx declaration scope, m_pParent store; permuter 10 min (29465 candidates, stays 25). */
-#if 0
 INT CModel::link(CCoords& crds) {
     BOOL add;
     INT nBoneNum;
@@ -345,16 +343,13 @@ INT CModel::link(CCoords& crds) {
     }
     m_TransTexCount = m_pData->m_nTexNum;
     if (!(!(m_TransTexCount > 16))) AssertApp(__FILE__, 707, "! (m_TransTexCount > TEXMAX)", 0);
-    for (i = 0; i < m_TransTexCount; i++) {
+    for (INT i = 0; i < m_TransTexCount; i++) {
         *(u_long*)&m_TexInfo[i] = *(u_long*)((BYTE*)m_pData->m_pTexParam + i * 0x20 + 0x10);
     }
     setupUVScroll(0);
     linksub();
     return 1;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", link__6CModelR7CCoords);
-#endif
 CCoord& CModel::getCrd(INT idx) {
     if (m_BoneIdx != -1) idx = 0;
     return m_pCrds->Crd(m_BoneStart + idx);
@@ -478,12 +473,11 @@ void CModel::getWorldBBoxScr(IVECTOR& vScr, const FMATRIX* pMWS) {
                  "vftoi4.xyz $vf8, $vf8");
     asm volatile("sqc2 $vf8, 0(%0)" : : "r"(&vScr) : "memory");
 }
-/* Parked: 3 lines off: the original stores vMN[1].z/.y through the &vMN[1] operand register (t1), ours through sp. Worked: vMN[i].set(MIN/MAX, ...) (default w = 1.0f), one asm statement with all operands, D_ labels for the +-1.7e38 constants. Tried: field stores, chained assignment, pointer local; permuter 10 min (32256 candidates, stays 3). */
-#if 0
 static void getApplyMatrixBBox(FVECTOR& vOutMax, FVECTOR& vOutMin, const FMATRIX& Mat, const FVECTOR& vInMax, const FVECTOR& vInMin) {
     FVECTOR vMN[2];
+    register FVECTOR* pMax asm("$9") = &vMN[1]; /* MATCH: the original keeps this operand's address in t1 for the two stores too */
     vMN[0].set(-1.70141183e+38f, -1.70141183e+38f, -1.70141183e+38f, 1.0f);
-    vMN[1].set(1.70141183e+38f, 1.70141183e+38f, 1.70141183e+38f, 1.0f);
+    pMax->set(1.70141183e+38f, 1.70141183e+38f, 1.70141183e+38f, 1.0f);
     asm volatile("lqc2 $vf4, 0x0(%0)\n"
                  "lqc2 $vf5, 0x10(%0)\n"
                  "lqc2 $vf6, 0x20(%0)\n"
@@ -554,14 +548,8 @@ static void getApplyMatrixBBox(FVECTOR& vOutMax, FVECTOR& vOutMin, const FMATRIX
                  "vmini.xyz $vf9, $vf9, $vf17\n"
                  "sqc2 $vf8, 0x0(%5)\n"
                  "sqc2 $vf9, 0x0(%6)"
-                 : : "r"(&Mat), "r"(&vMN[0]), "r"(&vMN[1]), "r"(&vInMax), "r"(&vInMin), "r"(&vOutMax), "r"(&vOutMin) : "memory");
+                 : : "r"(&Mat), "r"(&vMN[0]), "r"(pMax), "r"(&vInMax), "r"(&vInMin), "r"(&vOutMax), "r"(&vOutMin) : "memory");
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getApplyMatrixBBox__FR7FVECTORT0RC7FMATRIXRC7FVECTORT3);
-#endif
-/* MATCH: stripped placeholder (.sdata): the parked getApplyMatrixBBox's float constants at their .rodata position */
-__asm__(".section .sdata\n");
-BOOL __attribute__((section(".sdata"))) _getApplyMatrixBBox_rodata(FLOAT a, FLOAT b) { return a < -1.70141183e+38f && b > 1.70141183e+38f; }
 /* Parked: 38 lines off: the original keeps &pCrd->m_World as the strength-reduced loop pointer (s3 += 0xd0, counter counted down), &vMax/&vMin in s8/s7 for the init stores and the VU0 block, and loads the final bbox into f4/f5/f0..f3 in max-then-min order. Tried: pCrd[i] indexing (keeps the counter, 41 lines), _x/_y/_z temporaries, set helpers. */
 #if 0
 void CModel::calcWorldBBox(BOOL bCalc) {
@@ -572,9 +560,9 @@ void CModel::calcWorldBBox(BOOL bCalc) {
     CCoord* pCrd;
     INT iBoneNum;
     if ((m_nFlag & 0x200) && !bCalc) return;
+    iBoneNum = m_pData->m_nBoneNum;
     if (!(m_pData)) AssertApp(__FILE__, 1067, "m_pData", 0);
     pCrd = &getCrd(0);
-    iBoneNum = m_pData->m_nBoneNum;
     vMax.set(-1.70141183e+38f, -1.70141183e+38f, -1.70141183e+38f, 1.0f);
     vMin.set(1.70141183e+38f, 1.70141183e+38f, 1.70141183e+38f, 1.0f);
     for (i = 0; i < iBoneNum; i++, pCrd++) {
@@ -598,13 +586,13 @@ void CModel::calcWorldBBox(BOOL bCalc) {
         vMin.y = _y - CShadowModelMan::getDownLen();
         vMax.y = _y + (vMax.y - _y) * CShadowModelMan::getUpPer();
     }
-    m_nFlag |= 0x200;
     m_BBox.x[1] = vMax.x;
     m_BBox.y[1] = vMax.y;
     m_BBox.z[1] = vMax.z;
     m_BBox.x[0] = vMin.x;
     m_BBox.y[0] = vMin.y;
     m_BBox.z[0] = vMin.z;
+    m_nFlag |= 0x200;
 }
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", calcWorldBBox__6CModeli);
@@ -643,12 +631,10 @@ INT checkBSphere(CCoord& crd, const BBOX* bbox) {
     r = _sqrtf(r) * 0.5f;
     return checkBSphere(crd, ctr, r);
 }
-/* Parked: 12 lines off, registers only: the original keeps the scratchpad pointer in v1 and the clip result in a0 (or a0,v0,a0; move v0,a0), ours v0/v1. Worked: the 0xC0000000 return last (if (!(x[1] < x[0])) {...}), v assigned inside the if, asm "nop" opening the if (ret) block (the original's extra nop after the beqz slot; same tail as the parked resultCheckBBox(CCoord&)). Tried: one/two-output cfc2 asm, 'm' operand lqc2 helpers, result local, decl order; permuter 15 min (45593 candidates, stays 16). */
-#if 0
 INT checkBBox(const FMATRIX& mWorldMatrix, const BBOX* bbox) {
     INT ret;
-    INT clip;
-    FVECTOR* v;
+    register INT clip asm("$4"); /* MATCH: clip in a0, the scratchpad pointer in v1, as in the original */
+    register FVECTOR* v asm("$3");
     if (!(bbox->x[1] < bbox->x[0])) {
         v = (FVECTOR*)0x70000000;
     v[0].x = bbox->x[0];
@@ -670,21 +656,18 @@ INT checkBBox(const FMATRIX& mWorldMatrix, const BBOX* bbox) {
             asm volatile("nop");
             ret = (ret | 0x8000) << 16;
         }
-        clip |= ret;
+        asm volatile(""); /* MATCH: reorg cannot take the or for the beqz slot */
+        { INT t = ret | clip; clip = t; }
+        asm volatile("" : : "r"(clip)); /* MATCH: a second use keeps combine from moving the or into the return value */
         return clip;
     }
     return 0xC0000000;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", checkBBox__FRC7FMATRIXPC4BBOX);
-#endif
 void resultCheckBBox(FVECTOR& min, FVECTOR& max) {
     asm volatile("qmfc2.i $0, $vf0");
     asm volatile("sqc2 $vf2, 0(%0)" : : "r"(&min) : "memory");
     asm volatile("sqc2 $vf3, 0(%0)" : : "r"(&max) : "memory");
 }
-/* Parked: only the beqz target: the original's ret == 0 path branches to the OR (one OR for both paths, then jr ra; move v0,v1), ours to the jr ra (cse knows ret == 0 there and drops the else-arm OR); without the else the OR goes straight into v0 (combine). The OR's operand order (or v1,v0,v1) is right with `{ INT t = ret | clip; clip = t; }` in the then-arm (2026-11-04; ret | clip, clip | ret, inline shift and swapped declarations gave or v1,v1,v0; also tried: goto into the OR, do{}while(0) after it, INT res join, ret = clip copies). Before that: `clip |= ret` in both arms of `if (ret)` gave the copy (2 -> 1, build/joinsweep.py). Before: the original ORs into clip's register and copies it (or v1,v0,v1; jr ra; move v0,v1), ours ORs straight into v0. Worked: !(x[0] > x[1]) (load order), clip |= ret in the if-block with the 0xC0000000 return last, asm "nop" opening the if (ret) block. An `asm("or %0, %1, %0" : "+r"(clip) : "r"(ret))` for the OR matches the whole function, kept out (MIPS arithmetic stays C). The ref has only `INT ret` (no clip local). Tried: ternary + inline helper, if/else result, block-local clip, register asm v0/v1 locals, empty "+r" barrier. */
-#if 0
 INT resultCheckBBox(CCoord& crd, const BBOX* bbox) {
     INT ret;
     INT clip;
@@ -694,17 +677,14 @@ INT resultCheckBBox(CCoord& crd, const BBOX* bbox) {
         if (ret) {
             asm volatile("nop");
             ret = (ret | 0x8000) << 16;
-            { INT t = ret | clip; clip = t; }
-        } else {
-            clip |= ret;
         }
+        asm volatile(""); /* MATCH: reorg cannot take the or for the beqz slot */
+        { INT t = ret | clip; clip = t; }
+        asm volatile("" : : "r"(clip)); /* MATCH: a second use keeps combine from moving the or into the return value */
         return clip;
     }
     return 0xC0000000;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", resultCheckBBox__FR6CCoordPC4BBOX);
-#endif
 INT CModel::checkBBox() {
     INT ret;
     if (m_pCrds->getCoordNum() <= 0) return -1;

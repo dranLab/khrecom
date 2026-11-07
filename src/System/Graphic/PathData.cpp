@@ -302,7 +302,7 @@ void CPathVector::getPathParam(PATH_PARAM& sParam) const {
 /* placeholder: CVector<G_STRIP>'s assert strings come here (getNearPath, INCLUDE_ASM, uses operator[]) */
 inline void _pathDataVectorStrings(G_STRIP_VECTOR& v) { v.back(); }
 
-/* Parked: 4 lines (2026-11-06, was 9: fNearT = 0.0f right after iNearStep, statement changes from tools/permuter.py; its declaration shuffle was noise); left: the hoisted 0.0f compare constant is a copy of fNearT here, mtc1 zero in the original, and one mov.s $f27,$f3 sits in another arm. Earlier: 9 lines - fNearDis/fNearT get f27/f26 instead of f26/f27, and the hoisted 0.0f compare constant is a copy of
+/* Parked: 4 lines (2026-11-06, was 9: fNearT = 0.0f right after iNearStep, statement changes from tools/permuter.py; its declaration shuffle was noise); left: the hoisted 0.0f compare constant is a copy of fNearT here, mtc1 zero in the original, and one mov.s $f27,$f3 sits in another arm. 2026-11-07: an opaque asm on fNearT after its init stops the copy but moves the FP registers (12-24). Earlier: 9 lines - fNearDis/fNearT get f27/f26 instead of f26/f27, and the hoisted 0.0f compare constant is a copy of
    fNearT's register (cse2 equivalence) instead of its own `mtc1 zero,$f24`; the copy adds a ref to fNearT, which then
    wins the allocation. A clobber-free sqc2 asm for vNearNv (cse flush) fixes both but moves 6 spill slots (29 lines).
    tried: init orders, chained/decl initializers, fNearT = t/fBottom = 0, fNearDis arm forms (13), decl order of

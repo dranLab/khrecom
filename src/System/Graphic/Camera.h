@@ -109,7 +109,7 @@ public:
         }
     }
     INT getCameraPriority() const { return m_nCameraPriority; }
-    void setProjectionDist(FLOAT fDist) { m_fProjectionDist = fDist; }
+    void setProjectionDist(FLOAT fDist) { *(FLOAT*)&m_fProjectionDist = fDist; } /* MATCH: cast store keeps the dependence on a following global load */
     FLOAT getProjectionDist() const { return m_fProjectionDist; }
     void setGakaku(FLOAT fGakaku);
     void setOffsetX(FLOAT fX) { m_vOffset.x = fX; }

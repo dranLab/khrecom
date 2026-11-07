@@ -857,11 +857,6 @@ void CCardRevolver::setDeck(CARD* pDeck, INT inShortCut) {
         m_pCardsE->hideHand();
     }
 }
-/* Parked: 5 lines off, the direction `a`: the original computes it as li t3,1 / slt v0,v1,a1 / movz t3,v1,v0
-   with v1 = -1 set in both predecessors of the join, then negates num with bltzl; ours branches (bgez). Worked:
-   one `i` for all three loops (s0), !m_iMode-first rc/pCards select, hand++ after setHand, if/else direction.
-   Tried: 11 forms of a/abs (ternaries, -1 < num, a = -1 before the rc block); permuter 5 min (5534, no gain). */
-#if 0
 void CCardRevolver::rollDeck(INT inNum, INT inFlag, TIMEQ inTime) {
     INT iRemain;
     INT i;
@@ -936,12 +931,10 @@ void CCardRevolver::rollDeck(INT inNum, INT inFlag, TIMEQ inTime) {
         num = 0;
         if (!m_iMode) target = m_nReloadID;
     }
-    if (num < 0) {
-        a = -1;
-        num = -num;
-    } else {
-        a = 1;
-    }
+    a = 1;
+    if (num < 0) a = -1;
+    __asm__ volatile(""); /* MATCH: keeps the movz out of the bltzl slot */
+    num = num < 0 ? -num : num;
     loop = 0;
     while (num > 0) {
         for (i = 0; i < nLimit; i++) {
@@ -969,15 +962,6 @@ void CCardRevolver::rollDeck(INT inNum, INT inFlag, TIMEQ inTime) {
         hand++;
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", rollDeck__Q210CardBattle13CCardRevolveriii);
-#endif
-/* Parked: 12 lines off, all in `limit`: the original loads m_nTotal[m_iMode] (lhu + sll 16) above the m_iMode
-   branch and sign-extends (sra 16) only in that arm (interblock-scheduled split extension); ours branches first
-   and uses lh. Worked: `if (inMode == -1) ^= 1; else =`, `!old_mode ? m_pCards : m_pCardsE`, indexed
-   pCards[i] loop (copy into the loop register). Tried for limit: ternary both ways, if/else, assignment +
-   override, SHORT temporary (4 forms), (SHORT) cast. */
-#if 0
 void CCardRevolver::changeMode(INT inMode, INT inFlag) {
     INT old_mode;
     INT limit;
@@ -990,7 +974,7 @@ void CCardRevolver::changeMode(INT inMode, INT inFlag) {
         if (old_mode == inMode) return;
         if (!m_bActive) return;
     }
-    limit = m_iMode ? m_nTotal[m_iMode] : m_nLimit;
+    { INT t = (USHORT)m_nTotal[m_iMode] << 16; limit = m_iMode == 0 ? m_nLimit : t >> 16; }
     pCards = !old_mode ? m_pCards : m_pCardsE;
     for (i = 0; i < limit; i++) {
         if (&pCards[i] && pCards[i].getHand() != -1) pCards[i].hideHand();
@@ -1003,9 +987,6 @@ void CCardRevolver::changeMode(INT inMode, INT inFlag) {
     else m_pEmpty->enableDisp(0);
     if (m_iMode == 0) CGameWork::setFlag(1, 0x12, 1);
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", changeMode__Q210CardBattle13CCardRevolverii);
-#endif
 void CCardRevolver::rollShortCut(INT inMode) {
     if (m_iMode != 0) return;
     if (CGameWork::getFlag(1, 9)) return;
@@ -1259,6 +1240,8 @@ void CCardRevolver::initReload(INT inMode) {
    ifs, switch with `case 8: break;` first and case 4 falling into default, `card = NULL` in the for-increment,
    the m_uiFlag &= ~0x20000 block placed after the first return (goto notyet out of the second loop), indexed
    second loop. Tried: all 6 increment orders, pointer second loop; permuter 5 min (5990 candidates, no gain). */
+/* Parked: 14 of 138 lines (2026-11-07): the reload loop: i and the card offset have each other's registers (t0/a2) and the
+   offset steps first; all six orders of the for increments: 14 or 19. */
 #if 0
 extern "C" char D_0047AE98[]; /* "CCardRevolver::exeReload(); RELOAD end.\n" */
 extern "C" char D_0047AEC8[]; /* "CCardRevolver::exeReload(); RELOAD complete!\n" */
@@ -2739,17 +2722,10 @@ void CCardRevolver::deleteStock() {
     delete m_pSeqCtrlStock_Num10;
     m_pSeqCtrlStock_Num10 = NULL;
 }
-/* Parked: 5 lines off (brace-initialized pos, 2026-11-06; 22 before): the first m_uiUser == 1 arm's `sw y; jal setPos` should cross-jump into the else arm's, but sched1 puts (use (const_int 0)) after the else arm's call (it ends a block), so jump2's find_cross_jump compares USE with the arm's jump and stops. y forms in that arm change nothing, two places: the first block has CStockFolder::setStockInfo's open issue (the original issues
-   the div before the pos.init() zero stores and the changeTexture zero arguments, ours after); the num > 0 arms
-   load a0/a1 for setPos at the top of each arm with one shared jal in the original. A setPos per arm gives that
-   setup but no cross-jump (sched1 puts a (use (const_int 0)) after a block-ending call, jump2 then stops), and
-   pos.x += 15 duplicated into both arms cross-jumps but moves the add into the arm. Worked: setText before
-   ofsY = 0, m_uiStockState before m_uiStockCategory in default. Tried: 5 pos.init placements; permuter 5 min
-   (4399 candidates, 41 -> 37, applied). */
-#if 0
 void CCardRevolver::setStockInfo() {
     CB_LAYOUT* pLayout;
     FLOAT ofsY;
+    register FLOAT fX asm("$f0"); /* MATCH: pos.x read in each arm below */
     INT num;
     INT category;
     if (m_uiUser == 2) {
@@ -2795,13 +2771,18 @@ void CCardRevolver::setStockInfo() {
             pos.x = pLayout->x + 0x1A;
             pos.y = pLayout->y - 0xB + ofsY;
             m_pSeqCtrlStock_Num10->setPos(pos);
+            fX = pos.x;
         } else {
             pos.x = pLayout->x - 0x2B;
             pos.y = pLayout->y - 0xC;
             m_pSeqCtrlStock_Num10->setPos(pos);
+            fX = pos.x;
         }
-        pos.x += 15.0f;
-        m_pSeqCtrlStock_Num01->setPos(pos);
+        /* MATCH: the load after each call keeps the call off the block end, so the arms cross-jump; a1 before the add */
+        register FVECTOR* pPos asm("$5") = &pos;
+        __asm__ volatile("" : : "r"(pPos));
+        pos.x = fX + 15.0f;
+        m_pSeqCtrlStock_Num01->setPos(*pPos);
     } else {
         if (m_uiUser == 1) {
             pos.x = pLayout->x + 0x1A;
@@ -2848,10 +2829,6 @@ void CCardRevolver::setStockInfo() {
     m_pSeqCtrlStock->enableDisp(TRUE);
     m_uiStockState = 1;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", setStockInfo__Q210CardBattle13CCardRevolver);
-#endif
-__asm__(".rdata\n.align 4\n.word 0x001E8AF4\n.word 0x001E8B00\n.word 0x001E8B0C\n.word 0x001E8B24\n.word 0x001E8B0C\n.word 0x001E8B24\n.word 0x001E8B18\n.word 0x00000000\n.text\n");
 void CCardRevolver::changeDarkMode(HANDLE inHandle, INT inFlag) {
     changeOwner(inHandle);
     if (inFlag) m_uiFlag |= 0x100;

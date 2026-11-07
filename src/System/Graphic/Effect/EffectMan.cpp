@@ -630,7 +630,7 @@ static inline FLOAT _lengthVf4(const FVECTOR& v0) {
                  "vmadday.x $ACC, $vf6, $vf4y\n"
                  "vmaddz.x $vf5, $vf7, $vf4z\n"
                  "qmfc2.ni %0, $vf5\n"
-                 : "=r"(iTmp)
+                 : "+r"(iTmp) /* MATCH: read before written: live from entry, so it crosses calls (s3 in _updateCoord) */
                  : "r"(&v0));
     asm volatile("mtc1 %1, %0\n"
                  "nop\n"
@@ -727,10 +727,6 @@ INT CEffectMan::_sortEffect(EFFMAN_ZSORT_BUF* elist, const FMATRIX& mWS, INT nEf
     if (i >= 2) qsort(elist, i, sizeof(EFFMAN_ZSORT_BUF), EffMan_QSortComp);
     return i;
 }
-/* Parked: 7 lines - _lengthVf4's iTmp is s3 in the original (ours v0; a register asm local reshuffles the whole
-   function) and the hoisted %hi(s_vEffKhComScale) (lui s4) is scheduled before the mMat copy instead of into the
-   `b`'s delay slot. */
-#if 0
 BOOL CEffectMan::_updateCoord(CEffect* effect) {
     CCoord* pCrd;
     CCoord* pParent;
@@ -766,6 +762,7 @@ BOOL CEffectMan::_updateCoord(CEffect* effect) {
             FMATRIX mMat = *pMat;
             float fDist[3];
             INT i = 0; // MATCH: the ref's second, block-local i (the first loop's i gets another register)
+            __asm__ volatile(""); // MATCH: keeps the hoisted lui after the mMat copy (it fills the `b` slot)
             goto test;
             do {} while (0); // MATCH: the loop note aligns the next label (the original's nop after the `b`)
         inc:
@@ -798,15 +795,6 @@ BOOL CEffectMan::_updateCoord(CEffect* effect) {
     effect->Crd(0).m_Flag = 1;
     return TRUE;
 }
-#else
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) void _updateCoord_strings(FVECTOR& v) {
-    TRACE("\x83G\x83t\x83" "F\x83N\x83g\x96\xbc\x95s\x96\xbe");
-    TRACE("CEffectMan::_updateCoord \x83" "A\x83^\x83" "b\x83`\x90\xe6\x82\xaa\x82\xa2\x82\xc8\x82\xad\x82\xc8\x82\xc1\x82\xc4\x82\xa2\x82\xdc\x82\xb7\x81" "B\x8e\xa9\x8e" "E\x82\xb5\x82\xdc\x82\xb7 eff:%08x crd:%08x (%s:%d)\n");
-    MulVector(v, v, s_vEffKhComScale);
-}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/EffectMan", _updateCoord__10CEffectManP7CEffect);
-#endif
 void CEffectMan::_updateColor(CEffect* effect) {
     FVECTOR* pSceneColor = CSceneEnv::getTypeColor(effect->getType());
 

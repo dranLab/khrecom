@@ -39,16 +39,18 @@ every change that is merged without regenerating. Regenerating all four takes ab
   | `docs/partials.md` trend table | one row per cleanup merge (`partials.py --summary` before and after) |
   | `CLAUDE.md` | a tool, rule or toolchain fact changes |
 
-## Where things stand (2026-11-06)
+## Where things stand (2026-11-07)
 
-- **Progress:** 11931 of 12311 functions matched: game 11166 of 11323, libraries 765 of 988 (plus 151 hand-written).
-  `tools/check.sh` is the current count.
-- **Game:** 152 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note); the
-  Movement constructor has a draft but is listed as "not attempted" (leftovers.py misses constructors in drafts).
+- **Progress:** 12002 of 12311 functions matched: game 11229 of 11323, libraries 773 of 988 (plus 151 hand-written).
+  `tools/check.sh` proves the image, but its function totals are too high: it strips `#if 0.*?#endif` before it counts
+  `INCLUDE_ASM`, so a parked `#if 0 ... #else INCLUDE_ASM #endif` counts as done (about 12 functions on 2026-11-07). Count
+  game functions with `grep -rhE '^INCLUDE_ASM' src --include=*.cpp --include=*.c --exclude-dir=lib | wc -l`. Fixing the regex is a
+  change to `tools/`: ask first.
+- **Game:** 89 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note).
   5 units take a data section from assembly.
 - **Libraries:** 38 parked, 5 not attempted, 27 hand-written (stay assembly), 5 units with data from assembly;
   details in `docs/sdk-leftovers.md`.
-- **Header cleanup:** PARTIAL 202 (165 in 48 headers, 37 in 22 .cpp), 20 foreign stand-ins in 15 files, 0
+- **Header cleanup:** PARTIAL 190 (156 in 44 headers, 34 in 20 .cpp), 14 foreign stand-ins in 9 files, 0
   duplicate classes, 0 untagged mechanisms; classes complete 873, superset 12, gated 3, missing 8.
   `tools/partials.py --queue` has the ready items.
 - **Method that paid off (2026-11-06):** read `build/asmlines.py` before permuting. Most long-parked drafts had a
@@ -58,32 +60,70 @@ every change that is merged without regenerating. Regenerating all four takes ab
   `build/lregpri.py` ranks pseudos by global-alloc priority, `build/secsize.py` compares section sizes with the
   split, `build/bracetry2.py`/`bracetmp.py` sweep drafts for brace-init forms.
 
+- **Next method: compare drafts with the ref's locals (2026-11-06).** It matched 23 functions in one sitting (Gprim 12,
+  Model 2, CollUtil, CollBody, ShadowModel, EffectMan, BattleEnemyManager, Rcf, BattleCard, ModelMan, AttackMotion 1 each; onMove 53 -> 1, detectMCInit 48 -> 18 lines) after three permuter queues had matched two. The ref lists every local and
+  inline scope in order, so a missing or extra local means a wrong source shape: invented `flag`/`bTop` variables, a
+  counted-down loop where the ref has `i`, asm helpers for what gcc emits itself (a `por` after `pcpyud` is a DI -> TI
+  conversion, `*(UINT*)&f` gives the `mfc1`). `build/reflocals.py > build/jm/reflocals.log`, then `build/refjoin.py 60`,
+  ranks near misses; `build/remeasure.log` was refreshed 2026-11-06 evening (tried without gain: createBootInfoMsg,
+  setStockInfo, _invokePrimary_Main, dispDebugLine, setCharge, setDeckInfo, pppSetMatrix, HumanBoss initalize, effect Setup,
+  checkBBox, setAttack (power forms), initEnemyParam (block order), sceVif1PkCloseUpkCode (the ref's locals: 25 -> 43-50), setScreenFader, 2DSprObj move). `build/refextra.py 40` lists drafts with invented locals, the better lead. Parked notes go stale: read the current diff first (stateDestroy and setupDrawMode were one statement swap).
+  A permuter queue over the eight drafts changed on 2026-11-06 gained on two (the last fan 3 -> 2, detectMCInit 18 -> 14);
+  onMove, acWaitReq, update, _atoi, _atolen and checkBBox held. `build/regswap.py 60` separates pure register permutations (solve with the priority formula), `build/refcount.py` lists
+  locals declared fewer times than in the ref (one variable per loop: Model::link), `build/banddiff.py lo hi` prints current diffs,
+  `build/permlines.py` sweeps the order of adjacent statements (no gain on initAttackField, setupFontTex). Check the helpers
+  first: `asm volatile` against plain `asm`, and `=&r` where the original keeps inputs and output apart. See memory
+  ref-locals-reveal-shape, ti-di-conversion-is-por.
+- **Read the scheduler and reorg, then pin (2026-11-07).** 35 functions in one sitting, most long parked as "scheduling tie"
+  (setCharge, initAttackField, setConfuse, CHumanBoss::initalize, CNakCamera::main, beginStateHitAttack, acWaitReq,
+  createBootInfoMsg, setStockInfo, CBattleCard::destroy, the Movement constructor, testPlayingCard, rollDeck,
+  getApplyMatrixBBox, checkBBox, pppSetMatrix, _invokePrimary_Main, the last fan, _sceRpcGetPacket, changeMode, replaceNorma,
+  itemCardProc, initRecover, chkDamage, _hokanRot, the three CollAttack checks, setStatusWin1, setupFlick,
+  exeMessageDlg, getRandomTargetPos, _sceCd_cbLoop, EFFECT_DATA::Setup, normalActProc). Dump `-dS -dR -fsched-verbose-9`, `build/jm/schedshow.py <.sched2> <fn signature> <rtl key>` prints the
+  successors, priorities and issue order for the block. Ask what the original's order implies, in this order: a tail written out
+  (call-arg-order-dependents), a cast store (fixed-scalar-varying-struct-alias), a clobber that marks a register dead for reorg, a load inside both arms for a cross-jump
+  (crossjump-block-end-call), an empty asm in one arm to stop one,
+  and only then issue-order groups with empty barriers and register locals (issue-order-pins). Guarded order searches found
+  nothing more on the five reverted drafts: their honest scores stand at 30, 27, 9, 5, 31 (setStockInfo then matched by reading the cross-jump).
+- **Re-measure before choosing (2026-11-07):** `build/remeasure.py Game`, `System`, `Form` score every parked draft (about 20
+  minutes, background) and `build/jm/rmsort.py` sorts them; notes go stale after header fixes (chkDamage's note listed four open
+  spots, two were gone). 15 drafts report build-failed because a stopgap data block or an extern declaration clashes when they are
+  enabled: `build/jm/en.py` takes a variant that drops it. Those are unmeasured, not far: the three CollAttack checks were each 2 lines.
+- **Constructor with pool constants (2026-11-07):** CMovement went 53 -> 26 -> 0 once the two constants sat in `u_long128`
+  locals (`vZero._q`, TImode pseudos): both lq first, registers and the vtable store right at once (16 lines). The rest was
+  store order, so write chains and `init()` out as single stores and run the guarded search. See memory timode-local-pool-constants.
+- **Guarded order search over 25 drafts (2026-11-07, 2-37 lines):** nothing gained. finalize's reported 17 -> 16 is noise: the same source gives 17, 17 and 11 on identical builds (gcse hash order, as
+  _startCdRead), so its score means little. What is left there is
+  register allocation or scheduling, not statement order: do not rerun it on these drafts unless their source changes.
+- **Order searches (2026-11-07):** `build/hillqueue.py <min> <unit:name>...` climbs runs of simple statements; `build/hillstmt.py`
+  one chosen run. Real gains: Movement ctor 53 -> 26, CImageWnd::init 14 -> 5, calcWorldBBox 45 -> 28, finalize 17 -> 11,
+  setupTexInfo 10 -> 6. **A lower line count proves nothing about behaviour; only a match does.** Five moves were wrong and
+  were reverted (procFieldNormal, setStockInfo, drawCrossFadeImage, getAttribute, _parseRCF): read every move in context before
+  committing it. The queue now refuses moves its dependency guard flags (`conflict`). See memory hillclimb-breaks-semantics.
+- **Permuters are exhausted for now (2026-11-06):** three 10-minute queues covered every parked game draft 4-45 lines off
+  (about 73 drafts, 12 hours). Only endFieldSub and getNearPath gained, and only their statement changes counted. Do not
+  rerun them on a draft whose source did not change; read its line markers instead. tools/permuter.py can't enable some
+  drafts and then reports an instant MATCH on the asm (Setup, AttackMotion initialize, CZFill::makePkt, the fans): check
+  with `build/showdraft.py`, not with its score.
+
 Numbers change with every merge: `tools/check.sh` (totals), `tools/leftovers.py game|lib` (what is left) and
 `tools/partials.py --summary` (cleanup) give the current state.
 
 ## Remaining work, in this order
 
-1. **The Movement constructor** (the only draft not counted as parked):
-
-   | # | unit | functions left (parked) | note | read first (memory) |
-   |---|---|---:|---|---|
-   | 1 | `Game/Movement` | 1 (draft) | constructor 53/143 lines: unnamed constant-pool vectors. Line markers: the `:178` stores are a member-initializer list (13 members = lines 179-191), lines 192-198 one vector each; that form gave 60+ lines so far | movement-unit-lessons |
-
-   (`tools/partials.py` reads this table: a listed unit with functions neither matched nor parked counts as in
-   progress for the cleanup queue. Keep the `| # | \`unit\` |` row form.)
-
-2. **Parked game drafts**: retry them closest first, line markers first, then the levers index and both permuters.
+1. **Parked game drafts**: retry them closest first, line markers first, then the levers index and both permuters.
    List them with their notes: `tools/leftovers.py game` ("Parked functions"). Leads already known: sddrv_ee
    `TsSdSepPlayDBG` (decomp-permuter 20 -> 8 lines, not yet checked in the source), Avatar `onMove` (registers
-   only: a 14-vs-15-refs priority tie), PathData `getNearPath` (9 lines), 2DSprObj `initForSeq` (20/342),
-   HumanBoss `initalize` (4/71). The hand-kept table at the top of
+   only: a 14-vs-15-refs priority tie), PathData `getNearPath` (9 lines), 2DSprObj `initForSeq` (20/342).
+   The hand-kept table at the top of
    `docs/asm-leftovers.md` lists the blockers that need more than a source change.
-3. **Data from source** for the units that still take a section from asm: `pppEiDrawShipoly` (.bss .data .rodata) and
+2. **Data from source** (2026-11-07: CollUtil's `.rodata` is 0x20 of 0x304 while its three functions are assembly: it needs them first)
+   for the units that still take a section from asm: `pppEiDrawShipoly` (.bss .data .rodata) and
    `CollUtil` (.rodata). `Ride` and `CollUtilO` can't (`.rodata` at 4 mod 8), `sddrv_ee`'s `.bss` is blocked (see the
    table at the top of `docs/asm-leftovers.md`).
-4. **Library leftovers**: the parked and not attempted functions of `docs/sdk-leftovers.md`, with its "Working on
+3. **Library leftovers**: the parked and not attempted functions of `docs/sdk-leftovers.md`, with its "Working on
    a library unit" section.
-5. **Header cleanup**, interleaved: one `tools/partials.py --queue` item between two work items (see "Header
+4. **Header cleanup**, interleaved: one `tools/partials.py --queue` item between two work items (see "Header
    cleanup"). The items waiting on a user decision are listed under "When to stop and ask".
 
 Work on one unit at a time, one function at a time. A unit is done when every function is matched or parked and
@@ -279,6 +319,12 @@ group of about 10 .cpp files, V3 each.
 log in `build/progress/cleanup-<name>.md`; merge with the `--summary` deltas; add a row to the trend table of
 `docs/partials.md`, then the docs block. Items over about 30 files are split by top directory.
 
+**Queue state (2026-11-07):** the R1 "gate" items are feature macros a unit defines before the include. Dropping each
+one's `#define`s and rebuilding: ENTITY_H_SETFLAG_DIRECT, MODELDATA_H_TEXINFO_CTOR, GAME_COLLISION_COLLOBJ_H (CollUtil)
+and VECTOR_H_SET_CALL all change the image, so they stay. KH_PLACEMENT_NEW_DEFINED (LinkedBuf.h) guards one of about 40
+identical placement-new definitions in .cpp files (some without `throw()`): one shared definition is a wide, codegen-free
+change for its own branch. MapEnemy.h, SceneInfo.h, CollUtilA.h and Coord.h list gate users without a feature macro.
+
 **A4. The ladder**, when completing a header would break another unit's `.rodata` (stop at the first step that
 works): forward declarations instead of includes; move the type to the header the original used (string
 evidence + ref owner); move types only the owner uses into its .cpp; for a weak function now emitted in a
@@ -319,6 +365,18 @@ header split the original didn't have, or make a class a template to hide its st
 
 | symptom in the diff | read |
 |---|---|
+| argument loads rotated before a call near a block end | call-arg-order-dependents |
+| member store issued before/after a global load's `lui` | fixed-scalar-varying-struct-alias |
+| same insns, issue order or v0/v1 wrong, no source order fixes it | issue-order-pins |
+| ours has an extra `move a0,..` before a call the original makes with a0 unset | the callee is `static`: read its body (getPlayerState) |
+| ours keeps a constant in a saved register, the original reloads it per call | pin it to the argument register in each call (setupFlick) |
+| ours if-converts one inline test, the original branches | empty asm in the arm (getRandomTargetPos) |
+| `lhu`, `sll 16`, `sra 16` split around a branch | sign-extension-by-hand |
+| struct argument built from four `lhu` + dsll/or | `_NORMA_PIECES` in `System/Graphic/2d/2DCard.h` |
+| a register dies, then seems to hold the same value again | ref-locals-reveal-shape (local assigned twice, or read into a local before a branch) |
+| `li 1` + `movn`/`movz` where ours branches or uses xori | cmov-operand-order |
+| 16-byte constants loaded by lq before all stores | timode-local-pool-constants |
+| ours repeats `...; jal x`, the original branches into the other copy (or the reverse) | crossjump-block-end-call |
 | one-line `por/sq` + `swc1 w`, wrong store order around an FVECTOR | fvector-brace-init-aligned |
 | delay slot of a call and the v0/v1 pair after it | void-callee-v0 |
 | spill slots / regs of hoisted `this+off` addresses | gcse-bucket-count-lever, gcse-pre-hash-order |
@@ -334,6 +392,13 @@ header split the original didn't have, or make a class a template to hide its st
 | strings, rodata order | include-asm-with-source-data, template-strings-not-merged, static-table-strings-position, placeholder-file-literal-and-vtable-decl-order, misaligned-unit-rodata |
 | return type / getter form changes code | ref-return-types-matter, entity-unit-lessons |
 | VU0 / GS packets / u128 | vu0-asm-function-conversion, ppp-keshptail-patterns, gs-packet-u128-patterns, sp-address-inline-wrappers, volatile-asm-cse-flush |
+| Draft lacks a ref local, or "registers only" around asm helpers | `ref-locals-reveal-shape`, `ti-di-conversion-is-por` |
+| Near-tie in global-alloc, or combine/reorg folds an insn | `empty-asm-live-length` (empty asm: +1 live length, blocks stealing; with an operand, a second use) |
+| Temp in s3/t8, giv stepping far from its biv | `asm-temp-odd-register` |
+| `bne; nop` where the original has `bnel` into the loop | a volatile load at the target: reorg never steals it (`_threadReadProc`) |
+| several fields "look volatile", reloads after one store (Sony libs) | union-store-alias-zero |
+| registers rotated by one in a block, hand shapes do not help | union-store-alias-zero (an inline's argument pseudos; decomp-permuter) |
+| a draft says "near match" with no measured diff | remeasure-stale-drafts (its layout may hide it; it can match as it stands) |
 | C units (lib/, libppp, sddrv) | `docs/sdk-leftovers.md` "Levers that worked in lib/", decomp-permuter-c-units |
 | signal 11 in the cc step | cc1plus-silent-segfault, CLAUDE.md pitfalls (Ps2EeAs) |
 
@@ -362,5 +427,7 @@ Keep output small: one function's assembly at a time; `funcdiff` without `--full
 - **Waiting on a decision now:** the `D2MAN_H_PATH` (2DMan.h, `D2::C2DMan`) and `RSRCDATA_H_FULL`
   (`CRsrcData`/`RsrcInfo`/`CRsrcANN`) gates, 10 files: the string evidence for 2DMan.h is ambiguous (the 2D
   container message is in 166 originals, the 2DMan.h path in only about 119).
+- **Waiting on a decision now:** a `lib/timer` override to `ee-gcc2.9-991111-01` would match `TimerBusClock2Freq` and
+  `TimerFreq2BusClock` with no source change (both drafts match with it, no other function of the unit differs).
 - When the user runs a /loop unattended, decide these cases yourself, log the decision and continue
   (unattended-decide-stop-cases).

@@ -37,7 +37,7 @@ inline void* operator new[](size_t size, char* msg) throw() { return com_malloc_
     for (T *pEntry = (list).getHead(), *__pn = pEntry ? pEntry->getNext() : NULL; pEntry; \
          pEntry = __pn, __pn = __pn ? __pn->getNext() : NULL)
 
-class CMCSemiModel : public CSJointT<CMCSemiModel> { /* PARTIAL: stand-in for Game/Collision/CollMapCamera CMCSemiModel: owner not written (defined in CollMapCamera.cpp; ref: lost+found) */
+class CMCSemiModel : public CSJointT<CMCSemiModel> { /* PARTIAL: stand-in for Game/Collision/CollMapCamera CMCSemiModel: the class sits in CollMapCamera.cpp; in the header CCMCSemiModelList's inline dtor is emitted in another unit (2026-11-07) (defined in CollMapCamera.cpp; ref: lost+found) */
 public:
     FVECTOR center;
     FLOAT transparency;

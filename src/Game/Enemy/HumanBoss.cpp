@@ -337,8 +337,6 @@ CHumanBoss::~CHumanBoss() {
     m_pStockData = __null;
 }
 
-/* near match: the store of the entity flag is scheduled before the load of m_iParam */
-#if 0
 BOOL CHumanBoss::initalize(INT inGroupID, INT inRsrcID, UINT iFlag) {
     INT rate;
 
@@ -350,16 +348,16 @@ BOOL CHumanBoss::initalize(INT inGroupID, INT inRsrcID, UINT iFlag) {
     setTexAnmSeq(0, HumanBoss::NormalEyeSeqName);
     setTexAnmSeq(1, HumanBoss::NormalLipSeqName);
     setEntityFlag(0, 0x10000);
-    m_iDeadSeIdentifyNo = getParam() + 1;
+    /* MATCH: cast store = no struct-field alias with the global load below (it stays before that load) */
+    *(INT*)&m_iDeadSeIdentifyNo = getParam() + 1;
     rate = getExtraParam(HumanBoss::UseItemCardParamName);
     m_iNoReloadNum = getAttackCardNum(3) * rate / 100;
     return TRUE;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/HumanBoss", initalize__10CHumanBossiiUi);
-#endif
 
-/* near match, 20 lines (2026-11-05, was 27): the goto-built outer loop reloads iCardCount/pCards like the original (a for loop hoists them); left: the original hoists the m_pEnemyParam load once (t2), ours reloads it too. The ref lists card/j at function level and no getEnemyParam inline */
+/* near match, 20 lines (2026-11-05, was 27): the goto-built outer loop reloads iCardCount/pCards like the original (a for loop hoists them); left: the original hoists the m_pEnemyParam load once (t2), ours reloads it too. The ref lists card/j at function level and no getEnemyParam inline
+   2026-11-07: a local for getEnemyParam() before the goto loop: 23 (the m_pEnemyParam reload goes, but iCardCount's load
+   moves to the top of the body); for/do-while forms with or without it: 27. */
 #if 0
 INT CHumanBoss::getAttackCardNum(UINT inFlag) const {
     INT cardNum;
@@ -975,14 +973,6 @@ BOOL CHumanBoss::enemyCardProc(const CARD* inActiveCard) {
     return TRUE;
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/HumanBoss", itemCardProc__10CHumanBossPC4CARD);
-asm(".rdata\n.align 4\njtbl_004C3C80:\n"
-    ".word .L002CCED0\n.word .L002CCED8\n.word .L002CCEE0\n.word .L002CCEE8\n.word .L002CCEF0\n.word .L002CCEF8\n"
-    ".align 4\njtbl_004C3CA0:\n"
-    ".word .L002CD008\n.word .L002CD008\n.word .L002CD008\n.word .L002CD044\n.word .L002CD044\n.word .L002CD080\n"
-    ".text\n");
-/* near match: one rollDeck tail is cross-jumped (the original keeps both copies) */
-#if 0
 BOOL CHumanBoss::itemCardProc(const CARD* inActiveCard) {
     INT noReloadNum;
     INT cardNum;
@@ -1074,15 +1064,20 @@ BOOL CHumanBoss::itemCardProc(const CARD* inActiveCard) {
     }
     if (isEndRollDeck()) {
     use:
+        __asm__ volatile(""); /* MATCH: reorg cannot take the move a0,s1 for the branches into here */
         if (setPlayCard(10)) {
             m_iUseItem = inActiveCard->m_nKind;
         }
         return TRUE;
     }
-    if ((noReloadNum > 0 && cardNum - haveCardNum < noReloadNum) || remainCard * 100 / cardNum >= 26) {
+    if (noReloadNum > 0 && cardNum - haveCardNum < noReloadNum) {
+        __asm__ volatile("" : : : "$2"); /* MATCH: v0 is dead here: reorg fills the test's slot from the li v0,100 behind it */
+    roll:
         m_pCardRevolver->rollDeck(1, 0, 300);
+        __asm__ volatile(""); /* MATCH: keeps this tail: jump2 would cross-jump it into the last one */
         return TRUE;
     }
+    if (remainCard * 100 / cardNum >= 26) goto roll;
     remainCard >>= 1;
     if (remainCard <= 0) {
         remainCard = 1;
@@ -1090,10 +1085,13 @@ BOOL CHumanBoss::itemCardProc(const CARD* inActiveCard) {
     if (RND::genrand_int31() % remainCard == 0) {
         goto use;
     }
-    m_pCardRevolver->rollDeck(1, 0, 300);
+    {
+        register INT nCount asm("$5") = 1; /* MATCH: li a1 before the member load, for the mfhi test's slot */
+        __asm__ volatile("" : : "r"(nCount));
+        m_pCardRevolver->rollDeck(nCount, 0, 300);
+    }
     return TRUE;
 }
-#endif
 
 /* placeholder for stockActProc (INCLUDE_ASM): its strings */
 __attribute__((section(".sdata"))) void _stockActProc_placeholder(INT n) {
@@ -1210,8 +1208,6 @@ BOOL CHumanBoss::stockActProc(const CARD* inActiveCard) {
     return FALSE;
 }
 
-/* near match, 7 lines: both setDoBattleAct/useCard tails kept (goto ret from the first, 2026-11-05; was 20); left: s5/s6 swap of the -1 constant and &tmp[count] (global-alloc tie), one move a0,s0 after the div */
-#if 0
 BOOL CHumanBoss::normalActProc(const CARD* inActiveCard) {
     ACT_DATA* tmp[8];
     INT count = 0;
@@ -1219,17 +1215,18 @@ BOOL CHumanBoss::normalActProc(const CARD* inActiveCard) {
     INT i;
     INT j;
     INT card;
+    register INT nNone asm("$22"); /* MATCH: the -1 in s6, &tmp[count] in s5 */
 
     for (i = 0; i < m_iNormalActNum; i++) {
         if (!m_pNormalActs[i].bEnable) {
             continue;
         }
-        for (j = 0; j < 2; j++) {
+        for (j = 0, nNone = -1; j < 2; j++) {
             card = m_pNormalActs[i].pAct->iCard[j];
-            if (card == -1) {
+            if (card == nNone) {
                 continue;
             }
-            if (m_pNormalActs[i].pAct->iCard[0] != -1 && m_pNormalActs[i].pAct->iCard[1] != -1) {
+            if (m_pNormalActs[i].pAct->iCard[0] != nNone && m_pNormalActs[i].pAct->iCard[1] != nNone) {
                 if (RND::genrand_int31() & 1) {
                     continue;
                 }
@@ -1261,9 +1258,6 @@ BOOL CHumanBoss::normalActProc(const CARD* inActiveCard) {
 ret:
     return TRUE;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/HumanBoss", normalActProc__10CHumanBossPC4CARD);
-#endif
 
 void CHumanBoss::setDoBattleAct(const ACT_DATA* inAct) {
 #line 1634
@@ -1376,7 +1370,8 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/HumanBoss", setStockCard__1
 __attribute__((section(".sdata"))) void _setStockCard_placeholder() {
     TRACE_USER((USER)5, "getStock() = %d, TotalNumber = %d, CurrentNumber = %d, min = %d, max = %d\n");
 }
-/* near match: delay slots and one cross-jumped return differ */
+/* near match, 3 lines (2026-11-07): the first beqz of the || takes the subu from the fall-through in the original, sw zero from the
+ * target in ours (v0 looks live there; a clobber after the store does not change it) */
 #if 0
 BOOL CHumanBoss::setStockCard(const CARD* inActiveCard) {
     SHORT totalNumber = m_iStockTotalNumber + inActiveCard->m_nNumber;
@@ -1392,6 +1387,7 @@ BOOL CHumanBoss::setStockCard(const CARD* inActiveCard) {
             }
             if (m_iStockRollCount >= 5) {
                 setHumanBossFlag(0x80, 0);
+                __asm__ volatile(""); /* MATCH: keeps this return's own tail */
             }
             return FALSE;
         }

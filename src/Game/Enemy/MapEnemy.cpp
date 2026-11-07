@@ -532,8 +532,6 @@ BOOL CMapEnemy::canPlayerChase(FLOAT inHeight, BOOL inGround) {
     setMapEnemyFlag(4, 0);
     return TRUE;
 }
-/* near-match (one getOutPos() is if-converted; s3/s4 swapped): kept as INCLUDE_ASM */
-#if 0
 void CMapEnemy::getRandomTargetPos(FVECTOR& outTarget, FLOAT inDistance, BOOL inGround) {
     CCollMap* coll = m_pMove->getMapCollision();
 #line 953
@@ -561,7 +559,14 @@ void CMapEnemy::getRandomTargetPos(FVECTOR& outTarget, FLOAT inDistance, BOOL in
         coll->setEndPos(target);
         if (coll->collideMap()) {
             if (coll->getDetectNormal()->y < 0.64278764f) continue;
-            target = *coll->getOutPos();
+            {
+                FVECTOR* pOut = 0;
+                if (coll->getCollision()) {
+                    __asm__ volatile(""); /* MATCH: keeps this test a branch: jump1 would if-convert it */
+                    pOut = coll->getOutPos();
+                }
+                target = *pOut;
+            }
         }
         coll->setStartPos(target);
         target.y -= 1.0f;
@@ -574,7 +579,7 @@ void CMapEnemy::getRandomTargetPos(FVECTOR& outTarget, FLOAT inDistance, BOOL in
         if (inGround) {
             FVECTOR start = pos;
             FVECTOR v;
-            BOOL air = FALSE;
+            register BOOL air asm("$19") = FALSE; /* MATCH: air in s3, &m in s4 */
             ScaleVectorXYZ(v, dir, dist * 0.1f);
             AddVector(start, start, v);
             for (INT i = 0; i < 10; i++) {
@@ -583,7 +588,7 @@ void CMapEnemy::getRandomTargetPos(FVECTOR& outTarget, FLOAT inDistance, BOOL in
                 FVECTOR downVec = start;
                 downVec.y -= 1.25f;
                 coll->setEndPos(downVec);
-                if (!coll->collideMap() || coll->getDetectNormal()->y < 0.64278764f) {
+                if (!coll->collideMap() || !(coll->getDetectNormal()->y >= 0.64278764f)) {
                     air = TRUE;
                     break;
                 }
@@ -597,9 +602,6 @@ void CMapEnemy::getRandomTargetPos(FVECTOR& outTarget, FLOAT inDistance, BOOL in
     }
     outTarget = getPos();
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/MapEnemy", getRandomTargetPos__9CMapEnemyR7FVECTORfi);
-#endif
 
 void CMapEnemy::getWarpPos(FVECTOR& outPos) {
     CCollMap* coll = m_pMove->getMapCollision();

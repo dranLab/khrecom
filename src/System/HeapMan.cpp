@@ -25,18 +25,18 @@ void free(void* buffer);
 extern char _end[];
 
 // Kept here: main.cpp and DebugProcInfo.cpp still declare their own CHeapMan.
-class CHeapMan {
-public:
-    static void createHeap(void* base, size_t capacity);
-    static void resetHeap();
-    static size_t getFreeHeapSize();
-    static size_t getUsedHeapSize();
-    static float getUsedHeapRatio();
-    static size_t getAllHeapSize();
-    static size_t getMaxFreeBlockSize();
-    static void reportMemory();
-    static CHAR* getDebugComment(void* pMem);
-};
+
+
+
+
+
+
+
+
+
+
+
+
 
 struct _HEAPINFO_F {
     UINT _nSize;

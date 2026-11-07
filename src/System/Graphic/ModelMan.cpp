@@ -342,14 +342,12 @@ void CModelMan::setupDrawEnv() {
 #endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/ModelMan", setupDrawEnv__9CModelMan);
 
-/* setupDrawMode: near-match. The two halves of the first GIF tag get swapped registers ($v0/$v1). */
-#if 0
 void CModelMan::setupDrawMode(INT nInAlphaMode) {
     QWdata giftag;
     CPackMan::pkAddCode(0x10000000);
     CPackMan::pkOpenUpkCode(0xd, 0x6c, 4, 4);
-    giftag.u64[1] = 0xeee6;
     giftag.u64[0] = 0x4000000000008001;
+    giftag.u64[1] = 0xeee6;
     CPackMan::pkAddUpkData128(giftag.u128);
     giftag.u64[0] = 0x1000000000000000;
     giftag.u64[1] = 0xe;
@@ -363,8 +361,6 @@ void CModelMan::setupDrawMode(INT nInAlphaMode) {
     CPackMan::pkAddUpkData64(0x412412412);
     CPackMan::pkCloseUpkCode();
 }
-#endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/ModelMan", setupDrawMode__9CModelMani);
 
 void CModelMan::clearDispList() {
     for (INT i = 0; i < 9; i++) {

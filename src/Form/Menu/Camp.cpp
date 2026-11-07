@@ -733,7 +733,7 @@ void CCamp::removeRsrc() {
     }
 }
 
-/* Parked: 26 of 342 lines differ: loop.c hoists the CCard::m_pCardInfo load of the 3-deck copy out of the outer
+/* Parked: 9 of 337 lines (2026-11-07, volatile read of m_pCardInfo): li t1,396 vs lui t3 in the preheader, and the next loop's i in a0 for v1 (a register local on it wrecks the function: 77). Earlier: 26 of 342 lines differ: loop.c hoists the CCard::m_pCardInfo load of the 3-deck copy out of the outer
    loop (the original reloads it each iteration: the stack-array stores must alias it there). tried: destination
    pointer, direct m_pCardInfo->_deck[i] without _ref, pointer post-increment, _ref on the store; permuter 6 min (3640
    candidates, no gain). */
@@ -776,7 +776,7 @@ void CCamp::initCardKind(INT nInDeck, INT nInCategory, BOOL bCardDelete) {
         }
         for (INT i = 0; i < 3; i++) {
             CARD* pDst = cardTmp[i];
-            pCardTmp = CCard::getDeck(i);
+            pCardTmp = (*(CARD_INFO* volatile*)&CCard::m_pCardInfo)->_deck[(USHORT)i]; /* MATCH: reloaded per iteration, getDeck's load hoists */
             for (INT j = 0; j < 99; j++) {
                 pDst[j] = pCardTmp[j];
             }
@@ -5900,10 +5900,9 @@ INT CCamp::setWorldmap(INT nSetCmd) {
     }
     return ret;
 }
-/* Parked: 62 of 941 lines differ. The RCNORMA::NormaSrc argument of createNorma is built from four lhu of its
-   stack copy in the original (extract_bit_field pieces), one ld in ours - the open issue of
-   RoomCreation::menuMain and C2DCard::replaceNorma; the s3/s4 and spill-slot (0x64/0x68) swaps around it follow
-   from that. tried: while/do/for shapes of the 0x40 block (`while (isButtonTrg(0x40)) { if (m_bPooWorld) break;
+/* Parked: 35 of 939 lines differ (62 before _NORMA_PIECES, 2026-11-07). Left: pDoorInfo and nNorma have s4/s3 for s3/s4; an
+   operand barrier on pDoorInfo does not flip them. To enable this draft, drop the data block after its INCLUDE_ASM: it
+   defines pSeqName.4483 too (Ps2EeAs then crashes). tried: while/do/for shapes of the 0x40 block (`while (isButtonTrg(0x40)) { if (m_bPooWorld) break;
    ... break; }` gives the original's block order), nested `if (< 4) if (>= 0)` against the sltiu fold, ref locals
    (id, block-scoped i), set(1,1,1,1) instead of setAll, setLayer before the vec.set. */
 #if 0
@@ -6078,7 +6077,10 @@ void CCamp::setWorldmapCursor() {
                             normaSrc._nColor = pDoorInfo->getNormaColor(n);
                             normaSrc._nNumber = pDoorInfo->getNormaNumber(n);
                             normaSrc._nOp = pDoorInfo->getNormaOperation(n);
-                            p2DCard->createNorma(normaSrc, 0);
+                            {
+                                RCNORMA::NormaSrc t = normaSrc;
+                                _createNormaRaw(p2DCard, _NORMA_PIECES(t), 0);
+                            }
                         }
                     }
                 }
@@ -6138,7 +6140,7 @@ asm(".section .rodata\n"
     " pStrButton.4484:\n"
     ".byte 0x48,0x40,0x4E,0x00,0xF8,0x43,0x4E,0x00\n"
     ".section .text");
-/* Parked: 40 of 285 lines differ (was 81, 53 before 2026-11-05: _ref(m_pMainCmdFnt)[i] in the font-replacing loop keeps its own address computation): with the ref's function-level `INT i` plus a block `INT i` in the else
+/* Parked: 17 of 276 lines, 8 bytes short (40 before each loop got its own i, as in the ref; was 81, 53 before 2026-11-05: _ref(m_pMainCmdFnt)[i] in the font-replacing loop keeps its own address computation): with the ref's function-level `INT i` plus a block `INT i` in the else
    branch `this` is in s0 as in the original; left: in the font-replacing loop the original recomputes
    &m_pMainCmdFnt[i] from i each iteration (only m_pMainCmdCtrl[i] strength-reduced), ours folds both into one giv;
    the create loop's first test uses a1 (nSetCmd == 0) in the original. tried: SAFE_DELETE / template inline /
@@ -6149,7 +6151,6 @@ INT CCamp::setMainCmd(INT nSetCmd, INT nMode) {
     FVECTOR vec2;
     C2DSeqCtrl* p2DSeqCtrl;
     G_RGBA rgba;
-    INT i;
 
     if (nSetCmd == 0) {
         rgba.col = 0x80404040;
@@ -6158,7 +6159,7 @@ INT CCamp::setMainCmd(INT nSetCmd, INT nMode) {
             vec.y = 88.0f;
             vec.w = 1.0f;
             vec.z = 0.0f;
-            for (i = 0; i < m_nCurrentCmdMax; i++) {
+            for (INT i = 0; i < m_nCurrentCmdMax; i++) {
                 p2DSeqCtrl = m_pMainCmdCtrl[i] = NEW(7430, C2DSeqCtrl);
                 p2DSeqCtrl->setLayer(0xC);
                 p2DSeqCtrl->enableColorCtrl(TRUE);
@@ -6169,10 +6170,9 @@ INT CCamp::setMainCmd(INT nSetCmd, INT nMode) {
                 vec.y += 26.0f;
             }
         } else {
-            INT i;
             if (nMode != m_nMainMode) {
                 m_nCurrentCmdMax = nMode ? (!m_bPlayerKind ? 6 : 2) : 7;
-                for (i = 0; i < m_nCurrentCmdMax; i++) {
+                for (INT i = 0; i < m_nCurrentCmdMax; i++) {
                     p2DSeqCtrl = m_pMainCmdCtrl[i];
                     delete _ref(m_pMainCmdFnt)[i];
                     _ref(m_pMainCmdFnt)[i] = NULL;
@@ -6181,16 +6181,16 @@ INT CCamp::setMainCmd(INT nSetCmd, INT nMode) {
                 }
                 m_nMainMode = nMode;
             }
-            for (i = 0; i < m_nCurrentCmdMax; i++) {
+            for (INT i = 0; i < m_nCurrentCmdMax; i++) {
                 m_pMainCmdCtrl[i]->replaceSeq(0, m_pSeqName, 4);
             }
         }
     } else if (nSetCmd == 1) {
-        for (i = 0; i < m_nCurrentCmdMax; i++) {
+        for (INT i = 0; i < m_nCurrentCmdMax; i++) {
             m_pMainCmdCtrl[i]->replaceSeq(0, m_pSeqName, 5);
         }
     } else if (nSetCmd == 2) {
-        for (i = 0; i < m_nCurrentCmdMax; i++) {
+        for (INT i = 0; i < m_nCurrentCmdMax; i++) {
             m_pMainCmdCtrl[i]->replaceSeq(0, m_pSeqName, 6);
         }
     }
@@ -6344,11 +6344,6 @@ INT CCamp::setStatusWin0(INT nSetCmd) {
     return 1;
 }
 
-/* Parked: 13 of 487 lines differ (was 23): vec.set() (the ref's inlined `FVECTOR *this`) and a precomputed
-   `m_bPlayerKind + 0xF` (permuter) fixed the rest; left: the original keeps &vec in v0 (y/w/z stores and the later
-   fShift = vec.z load through it), so pPlayerManager is reloaded from its spill slot for the test; ours keeps it in
-   v0 and uses v1/sp. tried: getPLM() before vec.set, _ref(m_pInstance), set() without w; permuter 6 min (32 -> 26). */
-#if 0
 INT CCamp::setStatusWin1(INT nSetCmd) {
     static LPCTSTR pStrFriend = "FRIENDS";
     static USHORT baseSeqTbl[2][3] = { { 13, 14, 15 }, { 349, 350, 351 } };
@@ -6372,11 +6367,16 @@ INT CCamp::setStatusWin1(INT nSetCmd) {
             rgba.col = 0x807C7C7C;
             m_pWindow1Fnt = NEW(7706, C2DFnt)(0, 0, &rgba, 0xF, pStrFriend, 0x40);
             m_pWindow1Ctrl->addFntShift(m_pSeqName, m_pWindow1Fnt, !m_bPlayerKind ? -83.0f : -32.0f, -44.0f);
-            vec.set(!m_bPlayerKind ? -72.0f : 2.0f, 26.0f, 0.0f, 1.0f);
+            vec.x = !m_bPlayerKind ? -72.0f : 2.0f;
+            register FLOAT fY asm("$f0") = 26.0f; /* MATCH: 26 in f0, 1 in f1 */
             pPlayerManager = PLM::CPlayerManager::getPLM();
+            FVECTOR* pVec = &vec;
+            pVec->y = fY;
+            pVec->w = 1.0f;
+            pVec->z = 0.0f;
             INT idx = 0;
             if (pPlayerManager) {
-                FLOAT fShift = vec.z;
+                FLOAT fShift = pVec->z;
                 for (INT i = 0; i < 3; i++) {
                     INT kind = pPlayerManager->getAppearFriendCard(i, 1);
                     if (kind) {
@@ -6443,44 +6443,6 @@ INT CCamp::setStatusWin1(INT nSetCmd) {
     }
     return 1;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", setStatusWin1__5CCampi);
-#endif
-// setStatusWin1__5CCampi: its .rodata/.data, for its INCLUDE_ASM; remove with it.
-asm(".section .rodata\n"
-    ".align 4\n"
-    ".byte 0x46,0x52,0x49,0x45,0x4E,0x44,0x53,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x37,0x36,0x39,0x38,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x37,0x37,0x30,0x36,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x37,0x37,0x32,0x31,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x37,0x37,0x33,0x31,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x37,0x37,0x34,0x35,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".section .data\n"
-    ".align 3\n"
-    " pStrFriend.4498:\n"
-    ".byte 0x10,0x47,0x4E,0x00\n"
-    ".byte 0x00,0x00,0x00,0x00\n"
-    " baseSeqTbl.4499:\n"
-    ".byte 0x0D,0x00,0x0E,0x00,0x0F,0x00,0x5D,0x01,0x5E,0x01,0x5F,0x01\n"
-    ".byte 0x00,0x00,0x00,0x00\n"
-    " nameSeqTbl.4500:\n"
-    ".byte 0x37,0x01,0x38,0x01,0x39,0x01\n"
-    ".byte 0x00,0x00\n"
-    " deckNameSeqTbl.4501:\n"
-    ".byte 0x34,0x01,0x35,0x01,0x36,0x01\n"
-    ".byte 0x00,0x00\n"
-    ".section .text");
-
 void CCamp::setCursor(INT nSelect, INT nMode) {
     FVECTOR vec;
 

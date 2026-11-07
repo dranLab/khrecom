@@ -8,6 +8,7 @@
 #include "Game/CardBattle.h"
 #include "System/Graphic/Str.h"
 #include "Game/Collision/CollUtil.h"
+#include "Game/Collision/CollBody.h"
 
 /* MATCH: Placeholders: three empty strings, then System/TaskMan.h's container overflow message, follow
  * CollUtil.h's strings in .rodata (as in GimmickWarpPoint); which headers they come from is not known. */
@@ -120,17 +121,6 @@ void CGimmickPlantParent::stateMain() {
 
 void CGimmickPlantParent::endStateMain() {}
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Gimmick/GimmickPlantParent", beginStateHitAttack__19CGimmickPlantParent);
-#if 0
-/* Only the scheduling before saveStat differs: ours puts "sb m_Stat" before "li a1,1" (delay slot gets li a1).
- * Both issue in the same cycle (sched2 log); the emission order is sched1's, where the store with its dying
- * source goes first. Tried (2026-10-20): saveStat(m_Stat = 1), an INT/BYTE local for both, saveStat(m_Stat),
- * a comma expression, a volatile store, _ref(m_Stat) = 1 - none moves the store after li a1.
- * Second round (sched dumps): the store and li a1 both depend only on the call (store: anti, cost 0), so they
- * tie on priority and sched1's register-weight rule picks the store (its source dies) first; sched2 keeps
- * that order. 58 spellings of the two statements (this->, _ref, TRUE, (BYTE), saveStat(m_Stat), reversed
- * order), a register-asm a1, an asm "m"(m_Stat) after the call: no change. Needs a form where the store is
- * not ready together with li a1, or the arg move precedes the store in RTL. ~20 min in total. */
 void CGimmickPlantParent::beginStateHitAttack() {
     CGimmickManager* pGM;
     RoomInfo* pRoom;
@@ -158,8 +148,18 @@ void CGimmickPlantParent::beginStateHitAttack() {
                 }
             }
         }
-        m_Stat = 1;
-        saveStat(1);
+        /* MATCH: holds the original's order (store source, this, argument, then the store in the jal slot): a plain
+           m_Stat = 1; saveStat(1); schedules the store first (sched1's register weight). */
+        register INT iStat asm("$5");
+        register CGimmickPlantParent* pThis asm("$4");
+        register INT iByte asm("$2") = 1;
+        __asm__ volatile("" : : "r"(iByte));
+        pThis = this;
+        __asm__ volatile("" : : "r"(pThis));
+        iStat = 1;
+        __asm__ volatile("" : : "r"(iStat));
+        m_Stat = iByte;
+        pThis->saveStat(iStat);
         } else {
             goto other;
         }
@@ -169,7 +169,6 @@ void CGimmickPlantParent::beginStateHitAttack() {
 other:
     changeMotion(3, 0, FALSE, -1, 0, 0);
 }
-#endif
 
 void CGimmickPlantParent::stateHitAttack() {
     changeGimmickState(0);

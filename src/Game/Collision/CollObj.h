@@ -1,4 +1,4 @@
-// PARTIAL: added for Game/Player/SummonSinba
+
 /* PARTIAL: with COLLOBJ_H_ENUMS_ONLY defined, only the enums (Game/Enemy/HumanBoss: its includers get the
  * collision classes later, after their own classes, for the order of the vtables) */
 #ifndef GAME_COLLISION_COLLOBJ_H_ENUMS

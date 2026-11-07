@@ -208,11 +208,6 @@ FVECTOR* CCollAttack::getBasePos() {
     return NULL;
 }
 
-/* not matching: the original's last angle wrap branch has an empty delay slot (ours: bc1fl with the abs.s) */
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollAttack", chkGuardSuccess__11CCollAttackP9CCollBody);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollAttack", chkMutekiSuccess__11CCollAttackP9CCollBody);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollAttack", chkBackAttack__11CCollAttackP9CCollBody);
-#if 0
 BOOL CCollAttack::chkGuardSuccess(CCollBody* pBody) {
     if (!pBody->isGuard()) return FALSE;
     if (!(pBody->getGuardAttrFlag() & (1 << m_AttackAttr))) return FALSE;
@@ -224,6 +219,7 @@ BOOL CCollAttack::chkGuardSuccess(CCollBody* pBody) {
     SubVectorXYZ(vDir, vEnemy, vPos);
     FLOAT fDir = _limitPI(atan2f(vDir.x, vDir.z));
     FLOAT fDiff = _limitPI(fDir - pObj->getRot().y);
+    __asm__ volatile(""); /* MATCH: reorg cannot take the abs.s for the wrap's bc1f slot */
     if (fabsf(fDiff) > pBody->getGuardDir()) return FALSE;
     return TRUE;
 }
@@ -239,6 +235,7 @@ BOOL CCollAttack::chkMutekiSuccess(CCollBody* pBody) {
     SubVectorXYZ(vDir, vEnemy, vPos);
     FLOAT fDir = _limitPI(atan2f(vDir.x, vDir.z));
     FLOAT fDiff = _limitPI(fDir - pObj->getRot().y);
+    __asm__ volatile(""); /* MATCH: reorg cannot take the abs.s for the wrap's bc1f slot */
     if (fabsf(fDiff) > pBody->getMutekiDir()) return FALSE;
     return TRUE;
 }
@@ -254,12 +251,12 @@ INT CCollAttack::chkBackAttack(CCollBody* pBody) {
     SubVectorXYZ(vDir, vEnemy, vPos);
     FLOAT fDir = _limitPI(atan2f(vDir.x, vDir.z));
     FLOAT fDiff = _limitPI(fDir - pObj->getRot().y);
+    __asm__ volatile(""); /* MATCH: reorg cannot take the abs.s for the wrap's bc1f slot */
     if (fabsf(fDiff) <= 1.5707964f) return 0;
     m_BackAttack = m_Attack;
     return 1;
 }
 
-#endif
 
 void CCollAttack::updateAttackID() {
     if (++m_uiID == 0) m_uiID = 1;

@@ -368,18 +368,11 @@ void C2DCard::createEmpty() {
     addSeq(m_pSeqName, 1);
 }
 
-/* Not matching: the original passes inNorma to createNorma as four lhu from the parameter's stack slot combined
- * with dsll/or into a1 (extract_bit_field in 16-bit pieces); ours copies the struct to an 8-aligned temporary
- * and loads it with one ld. No struct shape tried (bitfields, arrays, nested, packed, union, ctor/dtor/copy
- * ctor - these drop the temporary but give ldl/ldr) and no installed compiler gives the halfword form. */
-#if 0
 void C2DCard::replaceNorma(RCNORMA::NormaSrc inNorma, INT inStatus) {
     destroy();
-    createNorma(inNorma, inStatus);
+    RCNORMA::NormaSrc t = inNorma;
+    _createNormaRaw(this, _NORMA_PIECES(t), inStatus);
 }
-#endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/2d/2DCard", replaceNorma__7C2DCardGQ27RCNORMA8NormaSrci);
-
 void C2DCard::createNorma(RCNORMA::NormaSrc inNorma, INT inStatus) {
     static BYTE wakuTbl[4] = { 0x20, 0x22, 0x21, 0x1F };
     static BYTE rgbUpperTbl[4] = { 0x00, 0x07, 0x05, 0x03 };

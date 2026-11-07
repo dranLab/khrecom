@@ -219,6 +219,8 @@ void CCollDisp::setAttackLines(CCollisionList* pList) {
  * recomputes &m_inWE where ours reuses it. Tried: this vs a pThis copy, decl orders, separate case 2/default
  * sphere bodies (no cross-jump, 44-51 lines), inline getCollision()/getType() calls without locals as the ref's
  * locals suggest (66), permuter 10 min (38 -> 38). */
+/* Parked: 38 of 105 lines (2026-11-07), same size: the s registers come out rotated by one through the loop (this s1 for
+   s2, ...). The ref has no pColl/type locals but dropping either is worse (53-66); swapping their declarations: 38-39. */
 #if 0
 void CCollDisp::setBodyLines(CCollisionList* pList) {
     static unsigned int rgba_tbl[4] = {0x800808FF, 0x80C06060, 0x8000C000, 0x8000C0C0};

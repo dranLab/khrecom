@@ -886,18 +886,22 @@ static inline float _limitPI(float fSa) {
     return fSa;
 }
 
-float _hokanRot(float fData0, float fData1, float fRate);
+static float _hokanRot(float fData0, float fData1, float fRate);
 
-/* Near-match: the angle difference is copied into another FP register before it is limited */
-#if 0
 static float _hokanRot(float fData0, float fData1, float fRate) {
     float fT = 1.0f / fRate;
     float fSa = fData1 - fData0;
-    return fData0 + _limitPI(fSa) * fT;
+    /* MATCH: _limitPI written out: the result stays apart from the difference, the constants in f0 */
+    register float fR asm("$f1") = fSa;
+    if (fSa > 3.1415927f) {
+        register float fK asm("$f0") = 6.2831855f;
+        fR = fSa - fK;
+    } else if (fSa < -3.1415927f) {
+        register float fK asm("$f0") = 6.2831855f;
+        fR = fSa + fK;
+    }
+    return fData0 + fR * fT;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Anim", _hokanRot__Ffff);
-#endif
 void CAnim::_updateLookPosition(FLOAT fR) {
     FVECTOR fvAng;
     FVECTOR fvDir;

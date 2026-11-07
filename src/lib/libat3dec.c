@@ -162,11 +162,150 @@ static void channel_conv_joint(At3Work *w)
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/libat3dec", channel_conv_joint);
 #endif
 
-/* Not attempted: keeps t9 live across the calls into at3core.s with sq/lq caller-saves; parameters go
-   through the stack */
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/libat3dec", imdct);
+/* Parked: first draft (2026-11-07), 334 of 457 lines, 80 bytes short; the butterfly stage has its structure (registers renamed: w, half, step); the window loop
+   keeps fewer values on the stack than the original (5 spills at 0x18-0x2C) and the band copy's tail is not interleaved with its setup;
+   decomp-permuter 2 x 20 min: d >> shift in a local (-23), the rest loop-note hacks: the frame is 16 bytes larger (one more spill); the
+   prologue through the shift search follows the original (movn abs, the shift loop from 12) apart from registers */
+#if 0
+typedef struct {
+    int v[4];
+} At3Tbl4;
+extern const At3Tbl4 D_004FCEF0;
+extern unsigned short cc[];
+extern short ca[];
+extern int mx[];
+extern int coefpost[];
+void imdct_sub(int *a, int *b, int n);
+void imdct_ch(int *a, int *b, int *coef, int *tbl);
+void imdct_ch2(int *a, int *b, int *coef, int *tbl);
 
-/* Parked: 11 lines off (23 before the early `lt` compare, decomp-permuter): the original sets the return value -1 at
+int imdct(char *ch, int band, int gain)
+{
+    At3Tbl4 tbl = D_004FCEF0; /* {0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF}: the unit's .rodata is still asm */
+    int *src;
+    int *w = ((At3Chan *)ch)->spec + band * 256;
+    int i, max, shift, step, half, k, n;
+    int *p;
+    At3Band *b;
+    int *s;
+
+    if (band & 1) {
+        int *q = ((At3Chan *)ch)->spec + band * 256 + 127;
+        int *d;
+        src = w;
+        w = ((At3Chan *)ch)->spec;
+        d = w;
+        for (i = 0; i < 128; i++) {
+            d[0] = q[128] - *src++;
+            d[128] = *q--;
+            d++;
+        }
+    } else {
+        int *q;
+        w = ((At3Chan *)ch)->spec + band * 256;
+        q = ((At3Chan *)ch)->spec + band * 256 + 255;
+        src = w;
+        for (i = 127; i >= 0; i--) {
+            *src = *src - *q--;
+            src++;
+        }
+    }
+    max = 0;
+    for (i = 127, p = w; i >= 0; i--, p++) {
+        int x = p[128];
+        int y = p[0];
+        int d, a;
+        x += (((x >> 15) * 0x6A0A) >> 1) + (((x & 0x7FFF) * 0x6A0A) >> 16);
+        d = y - x;
+        y = y + x;
+        a = d;
+        p[128] = d;
+        if (a < 0) a = -a;
+        p[0] = y;
+        if (max < a) max = a;
+        a = y;
+        if (a < 0) a = -a;
+        if (max < a) max = a;
+    }
+    if (max == 0) return 1;
+    shift = 12;
+    while (shift >= 2 && max >= (1 << (29 - shift))) shift--;
+    for (i = 255, p = w; i >= 0; i--, p++) *p <<= shift;
+    step = 64;
+    do {
+        n = step * 2;
+        half = step / 2;
+        do {
+            k = n;
+            p = w;
+            if (k >= 5) {
+                imdct_sub(p, p + n - 4, k);
+                p += step;
+            } else {
+                int *q = p + k;
+                do {
+                    p[0] = (p[0] - q[-1]) >> 1;
+                    p[1] = (p[1] - q[-2]) >> 1;
+                    k -= 4;
+                    p += 2;
+                } while (k > 0);
+            }
+            if (p == w + 2) {
+                imdct_ch2(w + step, w, &coefpost[0x2FC + half * 4], tbl.v);
+                w = p;
+            } else {
+                do {
+                    imdct_ch(w + step, w, &coefpost[0x2FC + half * 4], tbl.v);
+                    w += 4;
+                } while (w < p);
+            }
+            half += step;
+            w += step;
+        } while (half < 128);
+        step >>= 1;
+        w -= 256;
+    } while (step != 1);
+    b = &((At3Band *)ch)[band];
+    memcpy(b, &b->save, 0xB8);
+    s = b->spec;
+    {
+        int sh = gain + shift;
+        int sh1 = sh - 1;
+        unsigned short *c = &cc[127];
+        int *m = &mx[127];
+        int *v = w + 254;
+        for (i = 127; i >= 0; i--) {
+            int t1 = v[1];
+            int t0 = v[0];
+            int ci = *c--;
+            int mi = *m--;
+            int r, d, e, lo, hi, out, ds;
+            int *ov;
+            r = ci * (t1 >> 16) + ((ci * ((t1 >> 1) & 0x7FFF)) >> 15);
+            v -= 2;
+            d = (t0 - t1) >> 1;
+            e = d - r;
+            d = d + r;
+            lo = (e & 0x7FFF) * ca[mi + 128];
+            hi = (e >> 15) * ca[mi + 128];
+            ov = &s[mi + 256];
+            out = 0;
+            if (sh1 < 20) out = (hi >> (sh - 4)) + (lo >> (sh + 11));
+            ds = d >> shift;
+            s[127 - mi] = ((*ov >> 1) - a_wind[mi] * out) >> 3;
+            if (sh1 < 15) out = (hi << (15 - sh1)) + (lo >> sh1);
+            else out = (hi >> (sh - 16)) + (lo >> sh1);
+            s[mi + 128] = out + ((((short *)ov)[1] * a_wind[mi]) >> 3);
+            *ov = (d << (15 - shift)) + ds * ca[mi];
+        }
+    }
+    return 0;
+}
+#else
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/libat3dec", imdct);
+#endif
+
+/* Parked: 10 lines off (23 before the early `lt` compare, decomp-permuter): the original sets the return value -1 at
    the top of the loop (the conditional returns branch straight to the epilogue) */
 #if 0
 #define GAINC_STEP()                                                    \
@@ -202,7 +341,7 @@ static int gainc_window(char *ch, int band)
             p++;
         } while (p < ((At3Band *)ch)[band].spec + g[0] + 1);
         if (!(p < end)) {
-            return 0;
+            do { return 0; } while (0); /* MATCH: the loop note (decomp-permuter): 11 -> 10 lines */
         }
         g += 2;
         step = g[1] - sh;

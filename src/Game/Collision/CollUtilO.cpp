@@ -526,7 +526,8 @@ INT CCollUtil::distanceSphereO(FVECTOR* pP0) {
 }
 /* Parked: 7 of 125 lines - the original loads columnColl1's radius after columnColl0's (sched1 hoists ours above the
    z subtraction, so c0.z/c1.R swap f3/f4). Tried: radius statement order, r1 split, direct/SubVector differences,
-   permuter 9 min (23k candidates, no gain). */
+   permuter 9 min (23k candidates, no gain); 2026-11-07: an empty barrier gets the load order but moves the v0 stores out
+   of the block (24), c1's radius in a local read first (7-9). */
 #if 0
 INT CCollUtil::_detectColumnColumnEz(CColumnCollision& columnColl0, CColumnCollision& columnColl1) {
     FVECTOR v0;

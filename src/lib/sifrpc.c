@@ -137,6 +137,9 @@ static inline int SetGP(int gp)
 void _request_end(RpcRendPkt *rend, struct rpc_data *rd);
 void _request_bind(RpcBindPkt *bind, struct rpc_data *rd);
 void _request_call(RpcCallPkt *call, struct rpc_data *rd);
+/* MATCH: a store of alias set 0: every later read reloads and stays behind it, which is the pair-by-pair copy order */
+#define _PKT_STORE(lv, m) (((union { void *p; int i; } *)&(lv))->m)
+
 void _request_rdata(RpcOtherDataPkt *rdata, struct rpc_data *rd);
 
 /* Parked: 62 lines differ (permuter score) */
@@ -184,13 +187,14 @@ void sceSifExitRpc(void)
     _sceSifInitCheck = 0;
 }
 
-/* Parked: the original copies the packet fields in strict load/store order, ours lets the scheduler hoist loads */
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/sifrpc", _sceRpcGetPacket);
-#if 0
+/* Parked: 1 line, 4 bytes short - in the pid == 1 arm the original also sets v1 = 1 (`li v1,1` after the old + 2): pid
+   is written again for the rpc_id store after the join. `pid = 1` in the arm folds away, before or after rd->pid++, also
+   across an empty asm or through a local; an asm output keeps it but disturbs the load (6 lines). */
 static void *_sceRpcGetPacket(struct rpc_data *rd)
 {
     RpcPktHeader *packet;
-    int len, rid, pid;
+    int len, rid;
+    register int pid asm("$3"); /* MATCH: in v1, so the arm's pid = 1 stays (li v1,1) */
 
     DIntr();
     len = rd->pkt_table_len;
@@ -200,9 +204,14 @@ static void *_sceRpcGetPacket(struct rpc_data *rd)
             continue;
         }
         packet->rec_id = (rid << 16) | 4 | PACKET_F_ALLOC;
-        pid = ++rd->pid;
-        if (pid == 1) {
-            rd->pid++;
+        {
+            int old = rd->pid;
+            pid = old + 1;
+            rd->pid = pid;
+            if (pid == 1) {
+                rd->pid = old + 2;
+                pid = 1;
+            }
         }
         packet->pkt_addr = packet;
         packet->rpc_id = pid;
@@ -212,7 +221,6 @@ static void *_sceRpcGetPacket(struct rpc_data *rd)
     EIntr();
     return 0;
 }
-#endif
 
 static void _sceRpcFreePacket(RpcPktHeader *packet)
 {
@@ -237,8 +245,10 @@ static void *_sceRpcGetFPacket2(struct rpc_data *rd, int rid)
     return (char *)rd->client_table + rid * 0x40;
 }
 
-/* Parked: 11 lines (47 before the client/buff locals, decomp-permuter) - the original tests 0x8000000A first with a
-   range check (more cases in its switch?), ours 0x80000009 */
+/* Parked: 2 of 53 lines, same size (2026-11-07, was 11): the 0x8000000A-first range check is a third case node (RDATA, only
+   break), the client a local before the tid test (kept in s1 across the call), the bind copy's buff load behind the serve
+   store (empty barrier). Left: buff in v0 for v1: the barrier splits the block; a union store there reloads rend->client
+   (9), the client read before the switch changes the arms (20). */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/sifrpc", _request_end);
 #if 0
 static void _request_end(RpcRendPkt *rend, struct rpc_data *rd)
@@ -255,18 +265,21 @@ static void _request_end(RpcRendPkt *rend, struct rpc_data *rd)
         }
         break;
     case SIF_CMD_RPC_BIND:
-        rend->client->serve = rend->server;
         {
-            void *buff = rend->buff;
-            rend->client->buff = buff;
+            sceSifClientData *c = rend->client;
+            c->serve = rend->server;
+            asm volatile("");
+            c->buff = rend->buff;
         }
         break;
-    }
-    if (rend->client->rpcd.tid >= 0) {
-        iSignalSema(rend->client->rpcd.tid);
+    case 0x8000000C:
+        break;
     }
     {
         sceSifClientData *cd = rend->client;
+        if (cd->rpcd.tid >= 0) {
+            iSignalSema(cd->rpcd.tid);
+        }
         _sceRpcFreePacket(cd->rpcd.paddr);
         cd->rpcd.paddr = 0;
     }
@@ -283,7 +296,11 @@ static unsigned long _alarm_rdata(int id, unsigned long schedule, unsigned long 
     return 0x800;
 }
 
-/* Parked: the original copies the packet fields in strict load/store order, ours lets the scheduler hoist loads */
+/* Parked: 7 of 59 lines (2026-11-07, was 10): the strict load/store order is stores of alias set 0: through a union, every
+   later read reloads, also the call's arguments (int casts on both sides do not: cse keeps those). pkt_addr's store is
+   plain: receive loads ahead of it. Left: v0/v1 alternate the other way through the three last copies, a sched1 tie.
+   decomp-permuter (7 min) reaches 2 lines only with `rdata++; rdata--;` before the size copy: rejected, not source; an empty
+   barrier there instead gives 15. */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/sifrpc", _request_rdata);
 #if 0
 static void _request_rdata(RpcOtherDataPkt *rdata, struct rpc_data *rd)
@@ -295,12 +312,13 @@ static void _request_rdata(RpcOtherDataPkt *rdata, struct rpc_data *rd)
     } else {
         rend = _sceRpcGetFPacket(rd);
     }
+#define _COPY(f, g) (_PKT_STORE(rend->f, i) = (int)rdata->g)
     rend->rpc.pkt_addr = rdata->rpc.pkt_addr;
-    rend->receive = rdata->receive;
+    _COPY(receive, receive);
     rend->cid = SIF_CMD_RPC_RDATA;
-    rend->src = rdata->src;
-    rend->dest = rdata->dest;
-    rend->size = rdata->size;
+    _COPY(src, src);
+    _COPY(dest, dest);
+    _COPY(size, size);
     if (!isceSifSendCmd(SIF_CMD_RPC_END, rend, 0x40, rdata->src, rdata->dest, rdata->size)) {
         iSetTimerAlarm(0x800, _alarm_rdata, rend);
     }
@@ -372,7 +390,8 @@ static unsigned long _alarm_bind(int id, unsigned long schedule, unsigned long a
     return 0x800;
 }
 
-/* Parked: the original copies the packet fields in strict load/store order, ours lets the scheduler hoist loads */
+/* Parked: 4 of 59 lines, same size (2026-11-07, was 17): !sd arm first, both loads ahead of a barrier, server's store of alias
+   set 0 (sd stays in v0). Left: `ori` and `move a1` against the stores of the same block; all six store orders tried. */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/sifrpc", _request_bind);
 #if 0
 static void _request_bind(RpcBindPkt *bind, struct rpc_data *rd)
@@ -381,16 +400,21 @@ static void _request_bind(RpcBindPkt *bind, struct rpc_data *rd)
     sceSifServeData *sd;
 
     rend = _sceRpcGetFPacket(rd);
-    rend->client = bind->client;
-    rend->rpc.pkt_addr = bind->rpc.pkt_addr;
+    {
+        void *c = bind->client;
+        void *p = bind->rpc.pkt_addr;
+        asm volatile("");
+        rend->rpc.pkt_addr = p;
+        rend->client = c;
+    }
     rend->cid = SIF_CMD_RPC_BIND;
     sd = _search_svdata(bind->sid, rd);
-    if (sd) {
-        rend->server = sd;
-        rend->buff = sd->buff;
-    } else {
+    if (!sd) {
         rend->server = 0;
         rend->buff = 0;
+    } else {
+        _PKT_STORE(rend->server, p) = sd;
+        rend->buff = sd->buff;
     }
     if (!isceSifSendCmd(SIF_CMD_RPC_END, rend, 0x40, 0, 0, 0)) {
         iSetTimerAlarm(0x800, _alarm_bind, rend);
@@ -441,8 +465,9 @@ int sceSifBindRpc(sceSifClientData *cd, unsigned int request, unsigned int mode)
 }
 
 /* A call for an EE server: queue it for its thread. */
-/* Parked: 8 lines, 4 bytes short (45 before the do-while(0) around the fno copy, decomp-permuter); the rest of the
-   field copies still let the scheduler hoist loads */
+/* Parked: 3 lines, 4 bytes long (2026-11-07, was 8): !qd->start arm first, qd->end's store of alias set 0 (the copies' loads
+   stay behind it), do/while(0) around the fno copy (without it 26). Left: the rsize load goes ahead of the store at 40 and an
+   extra nop before the jr; a union store on any single field of the copy does not move it. */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/sifrpc", _request_call);
 #if 0
 static void _request_call(RpcCallPkt *call, struct rpc_data *rd)
@@ -450,12 +475,12 @@ static void _request_call(RpcCallPkt *call, struct rpc_data *rd)
     sceSifServeData *sd = call->server;
     sceSifQueueData *qd = sd->base;
 
-    if (qd->start) {
-        qd->end->next = sd;
-    } else {
+    if (!qd->start) {
         qd->start = sd;
+    } else {
+        qd->end->next = sd;
     }
-    qd->end = sd;
+    _PKT_STORE(qd->end, p) = sd;
     sd->paddr = call->rpc.pkt_addr;
     sd->client = call->client;
     do {
@@ -472,9 +497,6 @@ static void _request_call(RpcCallPkt *call, struct rpc_data *rd)
 }
 #endif
 
-/* Parked: the original copies the packet fields in strict load/store order, ours lets the scheduler hoist loads */
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/sifrpc", sceSifCallRpc);
-#if 0
 int sceSifCallRpc(sceSifClientData *cd, unsigned int fno, unsigned int mode, void *send, int ssize, void *receive,
                   int rsize, sceSifEndFunc end_func, void *end_para)
 {
@@ -490,13 +512,16 @@ int sceSifCallRpc(sceSifClientData *cd, unsigned int fno, unsigned int mode, voi
     cd->rpcd.paddr = call;
     cd->func = end_func;
     cd->gp = (void *)GetGP();
-    call->fno = fno;
-    call->ssize = ssize;
-    call->receive = receive;
-    call->rsize = rsize;
-    call->rpc.pkt_addr = call;
-    call->client = cd;
-    call->server = cd->serve;
+    _PKT_STORE(call->fno, i) = fno;
+    _PKT_STORE(call->ssize, i) = ssize;
+    _PKT_STORE(call->receive, p) = receive;
+    _PKT_STORE(call->rsize, i) = rsize;
+    _PKT_STORE(call->rpc.pkt_addr, p) = call;
+    {
+        void *serve = cd->serve;
+        _PKT_STORE(call->client, p) = cd;
+        call->server = serve;
+    }
     if (!(mode & SIF_RPCM_NOWBDC)) {
         if (send == receive) {
             sceSifWriteBackDCache(send, ssize < rsize ? rsize : ssize);
@@ -530,7 +555,7 @@ int sceSifCallRpc(sceSifClientData *cd, unsigned int fno, unsigned int mode, voi
         _sceRpcFreePacket(&call->rpc);
         return -3;
     }
-    call->rmode = 1;
+    _PKT_STORE(call->rmode, i) = 1;
     if (!sceSifSendCmd(SIF_CMD_RPC_CALL, call, 0x40, send, cd->buff, ssize)) {
         DeleteSema(cd->rpcd.tid);
         _sceRpcFreePacket(&call->rpc);
@@ -540,21 +565,16 @@ int sceSifCallRpc(sceSifClientData *cd, unsigned int fno, unsigned int mode, voi
     DeleteSema(cd->rpcd.tid);
     return 0;
 }
-#endif
 
-/* Parked: the original copies the packet fields in strict load/store order, ours lets the scheduler hoist loads */
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/sifrpc", sceSifCheckStatRpc);
-#if 0
 int sceSifCheckStatRpc(sceSifClientData *cd)
 {
     RpcPktHeader *packet = cd->rpcd.paddr;
 
-    if (packet && cd->rpcd.pid == packet->rpc_id && (packet->rec_id & PACKET_F_ALLOC)) {
-        return 1;
+    if (!packet || cd->rpcd.pid != packet->rpc_id || !(packet->rec_id & PACKET_F_ALLOC)) {
+        return 0;
     }
-    return 0;
+    return 1;
 }
-#endif
 
 void sceSifSetRpcQueue(sceSifQueueData *qd, int key)
 {
@@ -661,15 +681,12 @@ sceSifServeData *sceSifGetNextRequest(sceSifQueueData *qd)
     return sd;
 }
 
-/* Parked: the original copies the packet fields in strict load/store order, ours lets the scheduler hoist loads */
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/sifrpc", sceSifExecRequest);
-#if 0
 void sceSifExecRequest(sceSifServeData *sd)
 {
     sceSifDmaData dma[2];
     RpcRendPkt *rend;
     void *rec;
-    int size = 0, n, i;
+    int size = 0, n, i, r;
 
     rec = sd->func(sd->fno, sd->buff, sd->size);
     if (rec) {
@@ -710,13 +727,15 @@ void sceSifExecRequest(sceSifServeData *sd)
     dma[n].size = 0x40;
     dma[n].mode = 0;
     n++;
-    while (!sceSifSetDma(dma, n)) {
-        i = 0x100000;
-        while (i--) {
+    do {
+        r = sceSifSetDma(dma, n);
+        if (!r) {
+            i = 0x100000;
+            while (i--) {
+            }
         }
-    }
+    } while (!r);
 }
-#endif
 
 void sceSifRpcLoop(sceSifQueueData *qd)
 {
@@ -729,6 +748,4 @@ void sceSifRpcLoop(sceSifQueueData *qd)
         SleepThread();
     }
 }
-/* sceSifCallRpc's semaphore name, while that function is still assembly */
-static const char sifrpc_call_name[] __attribute__((aligned(8))) = "SceSifrpcCall";
 // SOURCE DATA: .data .rodata .bss

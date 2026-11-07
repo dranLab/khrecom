@@ -1107,7 +1107,8 @@ static void _initFramePacketForMovie(INT nAlpha) {
     sceVif1PkTerminate(pPkt);
     if (intr) EIntr();
 }
-/* Parked: 2 lines - case 2's two XYZ2 ORs: the original has the X register first (or v0,s2,v0 / or v0,t7,v0), ours puts the shifted Y first; x | y and y | x source order, a shared macro for the three cases, case 3's h/nh form with constant 12 and a 15 min permuter run (21k candidates) all stay at 2. */
+/* Parked: 2 lines - case 2's two XYZ2 ORs: the original has the X register first (or v0,s2,v0 / or v0,t7,v0), ours puts the shifted Y first; x | y and y | x source order, a shared macro for the three cases, case 3's h/nh form with constant 12 and a 15 min permuter run (21k candidates) all stay at 2. 2026-11-07: x0/x1 before the loop moves the hoisted li (15 lines); INT or UINT x0 gives 4; a local for the shifted value and
+   ULONGLONG x0 change nothing: the constant ends up second in every form tried. */
 #if 0
 static void _initFrameEffPacket(INT transKind, INT in_Xofs, INT in_Yofs, INT in_Alpha) {
     pacVif1Packet* pPkt = &s_pktVif1FrameEff;
@@ -1375,7 +1376,8 @@ void sceVif1PkOpenUpkCode(pacVif1Packet* pPacket, u_short vuaddr, u_int upkcmd, 
     pPacket->iVifCode = (upkcmd << 24) | vuaddr;
     pPacket->pCurrent = pc + 2;
 }
-/* Parked: ~25 lines - register allocation: the original keeps wl (numlen >> 8) in t0 and cl in numlen's register a1, ours swaps them (and the t2/t3 numbering follows); the vn != 3 branch layout, the code copy and the shared divide tail match. cl/wl declaration order, signed locals, ternaries and 5 + 15 min of permuter (9k + 19k candidates, 25 -> 24) did not get it. */
+/* Parked: ~25 lines - register allocation: the original keeps wl (numlen >> 8) in t0 and cl in numlen's register a1, ours swaps them (and the t2/t3 numbering follows); the vn != 3 branch layout, the code copy and the shared divide tail match. cl/wl declaration order, signed locals, ternaries and 5 + 15 min of permuter (9k + 19k candidates, 25 -> 24) did not get it.
+   2026-11-07: cl masked in place / through a numlen local (25-40), cl first, the 256 tests swapped (28-29). */
 #if 0
 void sceVif1PkCloseUpkCode(pacVif1Packet* pPacket) {
     u_int* pEnd = pPacket->pCurrent - 1;

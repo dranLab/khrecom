@@ -57,7 +57,7 @@ shows a draft's diff after you switch its `#if 0` to `#if 1` (the permuters swit
 
 ## Notes per unit
 
-- **sifrpc** (9 parked): the original copies packet fields load/store pair by pair; ours lets the scheduler hoist
+- **sifrpc** (4 parked; the pair-by-pair copies are stores of alias set 0 for some fields, `_PKT_STORE`, see `union-store-alias-zero`; sceSifCallRpc matched with it, sceSifCheckStatRpc and sceSifExecRequest did not need it: their notes did not describe them): the original copies packet fields load/store pair by pair; ours lets the scheduler hoist
   loads above stores of other pointer/int types (alias sets); `-fno-strict-aliasing` and scheduling flags don't
   reproduce it. Locals for the copied pointer/field and a `do { } while (0)` around one copy got `_request_end`
   (47 -> 11) and `_request_call` (45 -> 8) close; try the same on the others. Same family: sifcmd's
@@ -87,8 +87,8 @@ shows a draft's diff after you switch its `#if 0` to `#if 1` (the permuters swit
 - **eecdvd_sceCdCallback**: `_sceCd_cbLoop` matches by funcdiff with the exit block on one line and
   `sceCdCbfunc_num = cb_flag = 0`, but two hoisted luis swap registers (SHA-1 fails, gcse order of the symbols).
 - **mpc** (`_getRef0`): decomp-permuter can't parse it (a statement expression `({ ... })` in a condition).
-- **timer** (`TimerBusClock2Freq`, `TimerFreq2BusClock`): the original keeps `div.s` out of the call's delay
-  slot, which only ee-gcc2.96 does; the unit is built with the Sony toolchain (991111).
+- **timer** (`TimerBusClock2Freq`, `TimerFreq2BusClock`): both match as they stand under ee-gcc2.9-991111-01 (its `div.s`
+  erratum padding keeps it out of the call's delay slot), and no function of the unit differs there. Needs an override.
 - **lib/init**: a `j $31` left unfilled where the original filled it: the last statement and `}` on one line.
 
 ## Inventory
@@ -126,12 +126,10 @@ Sorted by unit, then size. `instr`: instructions in the original.
 | `lib/nodebug/snDebugInit` | `snTeq` | 26 | hand-written | trap handler |
 | `lib/graphdev_checkModelVersion` | `sceGsSetDefDispEnv` | 221 | parked | matches except register order in the DISPLAY computation (orig: DY and off[0] + 636 first). |
 | `lib/graphdev_sceGsExecStoreImage` | `sceGsExecStoreImage` | 419 | parked | close, but register allocation differs (the PSMCT24 tail, trxreg.RRW kept extracted instead of raw). |
-| `lib/libpad2` | `scePad2GetButtonInfo` | 56 | parked | 5 lines - button type kept in a1 (orig a3), movz instead of movn for the digital case. |
-| `lib/output` | `_dispRefImage` | 176 | parked | 24 of 189 lines, 4 bytes long (2026-11-06, first attempt). Worked: ptsStep, lastPts, ptsField and showCount are volatile (reloaded across __muldi3, a full ld before the truncation), one embedded read of ptsStep, the flag word's or tree (96 forms searched). Left: the original reloads tags in the … |
-| `lib/output` | `_dispRefImageField` | 264 | not attempted | 24 of 189 lines, 4 bytes long (2026-11-06, first attempt). Worked: ptsStep, lastPts, ptsField and showCount are volatile (reloaded across __muldi3, a full ld before the truncation), one embedded read of ptsStep, the flag word's or tree (96 forms searched). Left: the original reloads tags in the … |
+| `lib/libpad2` | `scePad2GetButtonInfo` | 56 | parked | 3 lines (2026-11-07, through a pointer to bi, decomp-permuter): case 8's address in v0 and the byte in v1, swapped. |
 | `lib/csc` | `_sceMpegCscStoreRefImage` | 310 | parked | _doCSC2 3 lines (6 before the do-while(0) around the DMA kick) - registers; _sceMpegCscStoreRefImage in s1/s2 for the inlined CSC block's rgb/qwc. |
 | `lib/csc` | `_doCSC2` | 112 | parked | _doCSC2 3 lines (6 before the do-while(0) around the DMA kick) - registers; _sceMpegCscStoreRefImage in s1/s2 for the inlined CSC block's rgb/qwc. |
-| `lib/pack` | `sceMpegDemuxPssRing` | 248 | parked | 6 lines off: the zero store of allData, the delay slot of the first pack header test, the reload register of allGp |
+| `lib/pack` | `sceMpegDemuxPssRing` | 248 | parked | 2 lines off (2026-11-07, was 4: allFunc set between ret and allGp, decomp-permuter): allGp reloads into v1 where the original has v0. Reload hands out spill registers round-robin, so the choice hangs on the reloads before it. |
 | `lib/mpc` | `_getRef0` | 290 | parked | same structure and size as the original; register allocation differs (the original keeps y in s1, n in t9 and spills avg << 2) |
 | `lib/mpc` | `_rix_111` | 72 | hand-written | MMI reference-copy routines (_rix_*: luminance, _ri0_*: chrominance) |
 | `lib/mpc` | `_ri0_111` | 69 | hand-written | MMI reference-copy routines (_rix_*: luminance, _ri0_*: chrominance) |
@@ -152,14 +150,13 @@ Sorted by unit, then size. `instr`: instructions in the original.
 | `lib/mpc` | `_rix_000` | 29 | hand-written | MMI reference-copy routines (_rix_*: luminance, _ri0_*: chrominance) |
 | `lib/eecdvd_sceCdCallback` | `sceCdLayerSearchFile` | 191 | parked | the 2nd/3rd SCE_CD_debug reloads land in v0 in the original, v1 here. |
 | `lib/eecdvd_sceCdCallback` | `sceCdInit` | 186 | parked | t0/t1 swapped for the _scmd_dr_bind/_sceCd_ee_read_mode %hi, and the order of li/lui before the _sceCd_CdInit_ON store. |
-| `lib/eecdvd_sceCdCallback` | `_sceCd_cbLoop` | 52 | parked | the exit block stores _sceCd_c_cb_sem, sceCdCbfunc_num, cb_thid and keeps cb_flag for the delay slot; ours schedules cb_flag earlier. The exit block on one line with `sceCdCbfunc_num = cb_flag = 0` (decomp-permuter) fixes the code, but two hoisted luis (cb_flag's %hi in fp) then swap registers: … |
 | `lib/hncAt3dec` | `hncAt3dec_Idle` | 72 | parked | same structure, but the registers differ (orig: out s1, out2 s0, stereo/count s3, i s2). |
+| `lib/libat3dec` | `imdct` | 389 | parked | first draft (2026-11-07), 334 of 457 lines, 80 bytes short; the butterfly stage has its structure (registers renamed: w, half, step); the window loop keeps fewer values on the stack than the original (5 spills at 0x18-0x2C) and the band copy's tail is not interleaved with its setup; … |
 | `lib/libat3dec` | `unpack_mddata` | 316 | parked | structure right; the gain loops keep &gain[0][0][1] in a register and reload 255 (ours hoists it) |
-| `lib/libat3dec` | `gainc_window` | 161 | parked | 11 lines off (23 before the early `lt` compare, decomp-permuter): the original sets the return value -1 at the top of the loop (the conditional returns branch straight to the epilogue) |
+| `lib/libat3dec` | `gainc_window` | 161 | parked | 10 lines off (23 before the early `lt` compare, decomp-permuter): the original sets the return value -1 at the top of the loop (the conditional returns branch straight to the epilogue) |
 | `lib/libat3dec` | `channel_conv_joint` | 122 | parked | close: loop.c bases the inner loop on the channel 0 samples (the original on channel 1) and strength-reduces the band offset (the original recomputes (3 band) 136 from a counter) |
 | `lib/libat3dec` | `at3dec_proc` | 97 | parked | 11 lines off (20 before the 0xF8 pad byte in a variable, decomp-permuter): the original enters the copy loop with the byte the skip loop loaded (reorg), registers differ |
 | `lib/libat3dec` | `f2t_nodata` | 90 | parked | 5 lines off: the band address of the loop is (x << 4) + x with swapped registers |
-| `lib/libat3dec` | `imdct` | 389 | not attempted | keeps t9 live across the calls into at3core.s with sq/lq caller-saves; parameters go through the stack |
 | `lib/nodebug/__errno` | `memmove` | 63 | parked | memcpy/memmove: only register allocation differs (the original moves dst0 out of a0 into t0, a0 then holds the loop temporaries) |
 | `lib/nodebug/__errno` | `memcpy` | 43 | parked | memcpy/memmove: only register allocation differs (the original moves dst0 out of a0 into t0, a0 then holds the loop temporaries) |
 | `lib/nodebug/__errno` | `strncmp` | 114 | hand-written | MMI string routines (128-bit loads and compares) |
@@ -177,19 +174,15 @@ Sorted by unit, then size. `instr`: instructions in the original.
 | `lib/kprintf2` | `printfloat` | 118 | parked | 16 lines differ - blocked by the unit's asm .rodata: with its literals compiled (decomp-permuter's build) the ftoi result in a temporary before the "0.%d" call matches; the original's D_004FEC90.. labels as externs do not (69 lines: extern doubles are not constants) |
 | `lib/kprintf2` | `ftoi` | 36 | parked | 9 lines differ |
 | `lib/sifcmd` | `_sceSifCmdIntrHdlr` | 82 | parked | the C below has the original's shape and size, but its registers differ (pkt/size in a2/a0 instead of a3/a1, the scaled index kept apart from id) |
-| `lib/sifrpc` | `sceSifCallRpc` | 128 | parked | the original copies the packet fields in strict load/store order, ours lets the scheduler hoist loads |
-| `lib/sifrpc` | `sceSifExecRequest` | 113 | parked | the original copies the packet fields in strict load/store order, ours lets the scheduler hoist loads |
 | `lib/sifrpc` | `sceSifInitRpc` | 103 | parked | 62 lines differ (permuter score) |
-| `lib/sifrpc` | `_request_rdata` | 52 | parked | the original copies the packet fields in strict load/store order, ours lets the scheduler hoist loads |
-| `lib/sifrpc` | `_request_end` | 51 | parked | 11 lines (47 before the client/buff locals, decomp-permuter) - the original tests 0x8000000A first with a range check (more cases in its switch?), ours 0x80000009 |
-| `lib/sifrpc` | `_request_bind` | 51 | parked | the original copies the packet fields in strict load/store order, ours lets the scheduler hoist loads |
-| `lib/sifrpc` | `_sceRpcGetPacket` | 42 | parked | the original copies the packet fields in strict load/store order, ours lets the scheduler hoist loads |
-| `lib/sifrpc` | `_request_call` | 35 | parked | 8 lines, 4 bytes short (45 before the do-while(0) around the fno copy, decomp-permuter); the rest of the field copies still let the scheduler hoist loads |
-| `lib/sifrpc` | `sceSifCheckStatRpc` | 15 | parked | the original copies the packet fields in strict load/store order, ours lets the scheduler hoist loads |
+| `lib/sifrpc` | `_request_rdata` | 52 | parked | 7 of 59 lines (2026-11-07, was 10): the strict load/store order is stores of alias set 0: through a union, every later read reloads, also the call's arguments (int casts on both sides do not: cse keeps those). pkt_addr's store is plain: receive loads ahead of it. Left: v0/v1 alternate the other … |
+| `lib/sifrpc` | `_request_end` | 51 | parked | 2 of 53 lines, same size (2026-11-07, was 11): the 0x8000000A-first range check is a third case node (RDATA, only break), the client a local before the tid test (kept in s1 across the call), the bind copy's buff load behind the serve store (empty barrier). Left: buff in v0 for v1: the barrier … |
+| `lib/sifrpc` | `_request_bind` | 51 | parked | 4 of 59 lines, same size (2026-11-07, was 17): !sd arm first, both loads ahead of a barrier, server's store of alias set 0 (sd stays in v0). Left: `ori` and `move a1` against the stores of the same block; all six store orders tried. |
+| `lib/sifrpc` | `_request_call` | 35 | parked | 3 lines, 4 bytes long (2026-11-07, was 8): !qd->start arm first, qd->end's store of alias set 0 (the copies' loads stay behind it), do/while(0) around the fno copy (without it 26). Left: the rsize load goes ahead of the store at 40 and an extra nop before the jr; a union store on any single field … |
 | `lib/filestub` | `_sceFs_Rcv_Intr` | 237 | parked | 14 lines differ (permuter score) |
 | `lib/timer` | `cbTimerHandler` | 173 | parked | scheduling (32 lines; 45 before the handler's time argument in a local, decomp-permuter) |
 | `lib/timer` | `SetNextComp` | 100 | parked | loop shape (15 lines differ) |
-| `lib/timer` | `TimerBusClock2Freq` | 21 | parked | the original keeps div.s out of the call's delay slot (only ee-gcc2.96 does that) |
+| `lib/timer` | `TimerBusClock2Freq` | 21 | parked | matches as it stands under ee-gcc2.9-991111-01 (2026-11-07, compare_compilers with the draft live: both functions and the whole unit match; 991111 lacks the div.s erratum padding). Needs an override for lib/timer: the user's decision. |
 | `lib/timer` | `TimerFreq2BusClock` | 13 | parked | as TimerBusClock2Freq |
 
 ### Data sections from the original assembly
@@ -204,7 +197,7 @@ Not listed in the unit's `// SOURCE DATA:` line.
 | `lib/kprintf2` | .rodata |
 | `lib/src/gcc/libgcc2___umoddi3` | .rodata |
 
-Totals: 16 units without a source file (1 with code); 19 units with INCLUDE_ASM functions: 38 parked, 3 not attempted, 27 hand-written; 5 units take a data section from assembly.
+Totals: 16 units without a source file (1 with code); 18 units with INCLUDE_ASM functions: 33 parked, 1 not attempted, 27 hand-written; 5 units take a data section from assembly.
 
 Generated by `tools/leftovers.py lib`.
 <!-- leftovers:lib:end -->

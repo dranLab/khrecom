@@ -466,11 +466,7 @@ INT CCollUtil::_detectOCD(CCollision& collision, MCD_INFO* pMCDInfo, OCD_WORK* p
     }
     return iFg;
 }
-#if 0 /* the parked draft below is static, as in the original */
 static INT __detectMCInitInit_Check(MC_DATA* pMCData, FLOAT fMDVal);
-#else
-INT __detectMCInitInit_Check(MC_DATA* pMCData, FLOAT fMDVal); /* MATCH: INCLUDE_ASM'd (parked): global label */
-#endif
 INT CCollUtil::__detectMCInitInit(MC_CHIP* pChip) {
     asm volatile("lqc2 $vf4, 0x30(%0)" : : "r"(this));
     asm volatile("lqc2 $vf8, 0x80(%0)\n"
@@ -485,31 +481,31 @@ INT CCollUtil::__detectMCInitInit(MC_CHIP* pChip) {
 }
 static inline INT _vecX(u_long128 x) {
     INT out32;
-    asm("sll %0, %1, 0" : "=r"(out32) : "r"(x));
+    asm volatile("sll %0, %1, 0" : "=r"(out32) : "r"(x));
     return out32;
 }
 static inline INT _vecY(u_long128 x) {
     INT out32;
-    asm("dsra32 %0, %1, 0" : "=r"(out32) : "r"(x));
+    asm volatile("dsra32 %0, %1, 0" : "=r"(out32) : "r"(x));
     return out32;
+}
+static inline ULONGLONG _vecHi(u_long128 x) {
+    ULONGLONG out64;
+    asm volatile("pcpyud %0, %1, $0" : "=r"(out64) : "r"(x));
+    return out64;
 }
 static inline INT _vecZ(u_long128 x) {
-    ULONGLONG out64;
     INT out32;
-    asm("pcpyud %0, %1, $0" : "=r"(out64) : "r"(x));
-    asm("sll %0, %1, 0" : "=r"(out32) : "r"(out64));
+    asm volatile("sll %0, %1, 0" : "=r"(out32) : "r"(_vecHi(x)));
     return out32;
 }
-/* Parked: 23 lines, registers only - the original keeps the VU0 flag and iRet in a2 and fMDVal/zoneVec in v1, ours
-   v0/a0; iRet-as-flag, if/else and early-return forms and a 5 min permuter run (14.5k candidates) keep it. */
-#if 0
 static INT __detectMCInitInit_Check(MC_DATA* pMCData, FLOAT fMDVal) {
     INT iRet;
     u_long128 zoneVec;
-    INT flag;
     asm volatile("lqc2 $vf5, 0x0(%0)\n"
                  "lqc2 $vf6, 0x10(%0)" : : "r"(pMCData));
-    asm volatile("qmtc2.ni %0, $vf7" : : "r"(fMDVal));
+    /* MATCH: the v0 clobber makes reload take v1 for fMDVal. */
+    asm volatile("qmtc2.ni %0, $vf7" : : "r"(fMDVal) : "$2");
     asm volatile("vmulax.xyzw $ACC, $vf4, $vf7x\n"
                  "vmsubw.xyz $vf4, $vf5, $vf0w\n"
                  "vnop\n"
@@ -522,47 +518,52 @@ static INT __detectMCInitInit_Check(MC_DATA* pMCData, FLOAT fMDVal) {
                  "vnop\n"
                  "vnop\n"
                  "vnop");
-    asm volatile("cfc2.ni %0, $vi16" : "=r"(flag));
-    iRet = -1;
-    if (!(flag & 0xC0)) {
+    asm volatile("cfc2.ni %0, $vi16" : "=r"(iRet));
+    iRet = iRet & 0xC0;
+    if (iRet != 0) {
+        iRet = -1;
+    } else {
         asm volatile("qmfc2.ni %0, $vf4" : "=r"(zoneVec));
-        iRet = (_vecZ(zoneVec) * pMCData->xw + _vecX(zoneVec)) * pMCData->yw + _vecY(zoneVec);
+        iRet = _vecZ(zoneVec) * pMCData->xw;
+        iRet += _vecX(zoneVec);
+        iRet *= pMCData->yw;
+        iRet += _vecY(zoneVec);
         if (pMCData->tbl[iRet][0] == 0xFFFF) iRet = -1;
     }
     return iRet;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", __detectMCInitInit_Check__FP7MC_DATAf);
-#endif
 extern char D_004892F8[]; /* PRIM_INFO overflow message */
 extern char D_00489310[]; /* "c:/KHCOM/MainApp/Game/Collision/CollUtil.cpp" */
 extern char D_00489340[]; /* "m_PrimInfoIdx < PRIM_INFO_MAX" */
 extern char D_00489360[]; /* "m_PrimInfoIdx2 < PRIM_INFO2_MAX" */
 static inline INT _dotN(FVECTOR& v) {
-    u_long128 ret;
-    INT iTmp;
+    INT ret;
     asm volatile("lqc2 $vf4, 0x0(%1)\n"
                  "vmulax.x $ACC, $vf21, $vf4x\n"
                  "vmadday.x $ACC, $vf22, $vf4y\n"
                  "vmaddz.x $vf4, $vf23, $vf4z\n"
-                 "qmfc2.ni %0, $vf4" : "=r"(ret) : "r"(&v));
-    asm("sll %0, %1, 0" : "=r"(iTmp) : "r"(ret));
-    return iTmp;
-}
-static inline FLOAT _dotNf(FVECTOR& v) {
-    INT iTmp;
-    FLOAT ret;
-    asm volatile("lqc2 $vf4, 0x0(%1)\n"
-                 "vmulax.x $ACC, $vf21, $vf4x\n"
-                 "vmadday.x $ACC, $vf22, $vf4y\n"
-                 "vmaddz.x $vf4, $vf23, $vf4z\n"
-                 "qmfc2.ni %0, $vf4" : "=r"(iTmp) : "r"(&v));
-    asm("mtc1 %1, %0" : "=f"(ret) : "r"(iTmp));
+                 "qmfc2.ni %0, $vf4\n"
+                 "sll %0, %0, 0" : "=r"(ret) : "r"(&v));
     return ret;
 }
-/* Parked: 48 of 185 lines, 4 bytes long - structure, frame (unused primInfo/primInfo2/v0 locals) and VU0 blocks as the
-   original; left: the t-register numbering of pMCData/iCnt/entryCnt/pPrimInfo2 (t0/t1/t2/a3 there) and one extra
-   instruction. hill.py over the setup statements and a 5 min permuter run (14.5k candidates) gain 1 line. */
+#define _dotNf(v)                                               \
+    ({                                                          \
+        INT iTmp;                                               \
+        FLOAT ret;                                              \
+        asm volatile("lqc2 $vf4, 0x0(%1)\n"                     \
+                     "vmulax.x $ACC, $vf21, $vf4x\n"            \
+                     "vmadday.x $ACC, $vf22, $vf4y\n"           \
+                     "vmaddz.x $vf4, $vf23, $vf4z\n"            \
+                     "qmfc2.ni %0, $vf4" : "=r"(iTmp) : "r"(&v)); \
+        asm volatile("mtc1 %1, %0\n"                            \
+                     "nop\n" : "=f"(ret) : "r"(iTmp));           \
+        ret;                                                    \
+    })
+/* Parked: 14 of 185 lines, same size - the helpers and the i/iPrimIdx loop follow the ref's locals; _dotNf is qmfc2 + mtc1/nop
+   with iTmp and ret as in DispList. Left: t8/t9 for the two qmfc2 (ours v0). A t-reg that high means iTmp is allocated after
+   the globals, so it is live across blocks in the original: read before written, but "+r" as in EffectMan's _lengthVf4
+   then outranks the pChip/&vCk copies (28 lines). With them d0 in f2 and the results in f1/f0; both orders of the setup
+   loads (t3/t4 addiu, lw 56/400) and two sw pairs. */
 #if 0
 void CCollUtil::detectMCInit(MC_CHIP* pChip, INT iArea) {
     FVECTOR vCk0;
@@ -570,11 +571,12 @@ void CCollUtil::detectMCInit(MC_CHIP* pChip, INT iArea) {
     FVECTOR vCkM;
     FVECTOR vCkVec;
     MC_DATA* pMCData;
-    USHORT* pPrimIdx;
+    INT iIdx;
     INT iCnt;
     MC_PRIM* pPrim;
-    PRIM_INFO primInfo;
+    USHORT* pPrimIdx;
     PRIM_INFO2 primInfo2;
+    PRIM_INFO primInfo;
     INT entryCnt;
     PRIM_INFO2* pPrimInfo2;
     FVECTOR& _vCkS0 = m_vCkS0;
@@ -595,16 +597,18 @@ void CCollUtil::detectMCInit(MC_CHIP* pChip, INT iArea) {
                  "sqc2 $vf6, 0x0(%3)\n"
                  "sqc2 $vf5, 0x0(%4)" : : "r"(&_vCkS0), "r"(&_vCkE), "r"(&vCk0), "r"(&vCk1), "r"(&vCkVec) : "memory");
     pMCData = (MC_DATA*)pChip->data;
-    pPrimInfo2 = &m_pPrimInfo2[m_PrimInfoIdx2];
     entryCnt = 0;
-    pPrimIdx = &pMCData->prim[pMCData->tbl[iArea][0]];
+    iIdx = pMCData->tbl[iArea][0];
+    pPrimIdx = &pMCData->prim[iIdx];
+    pPrimInfo2 = &m_pPrimInfo2[m_PrimInfoIdx2];
     iCnt = pMCData->tbl[iArea][1];
-    for (; iCnt; iCnt--, pPrimIdx++) {
+    for (INT i = 0; i < iCnt; i++) {
+        INT iPrimIdx = pPrimIdx[i];
         FVECTOR v0;
         FVECTOR v1;
         FVECTOR* pN0;
         FLOAT d0;
-        pPrim = &pMCData->prim4[*pPrimIdx];
+        pPrim = &pMCData->prim4[iPrimIdx];
         if (!m_fgCamera && pPrim->info < 0) continue;
         pN0 = &pMCData->norm[pPrim->n0];
         asm volatile("lqc2 $vf21, 0x0(%0)\n"
@@ -617,7 +621,7 @@ void CCollUtil::detectMCInit(MC_CHIP* pChip, INT iArea) {
                          "qmtc2.ni %2, $vf6\n"
                          "vaddax.xyzw $ACC, $vf5, $vf0x\n"
                          "vmsubx.xyzw $vf4, $vf4, $vf6x\n"
-                         "sqc2 $vf4, 0x0(%3)" : : "r"(&vCk1), "r"(pN0), "r"(m_Radius), "r"(&v1) : "memory");
+                         "sqc2 $vf4, 0x0(%3)" : : "r"(&vCk1), "r"(pN0), "r"(*(INT*)&m_Radius), "r"(&v1) : "memory");
         } else {
             v1 = vCk1;
         }
@@ -881,9 +885,9 @@ INT CCollUtil::detectMap(FVECTOR* pWS, FVECTOR* pWE) {
     if (attr == 6) {
         m_vNormal2.set(0.0f, 0.0f, 1.0f, 0.0f);
     }
+    m_vNormalA = m_pPrimInfoCurrent->pInfo2->pNorm[m_pPrimInfoCurrent->pPrim->n0];
     m_pDetectMatA = m_pPrimInfoCurrent->pInfo2->pMatLW;
     m_pDetectChipA = m_pPrimInfoCurrent->pInfo2->pMcChip;
-    m_vNormalA = m_pPrimInfoCurrent->pInfo2->pNorm[m_pPrimInfoCurrent->pPrim->n0];
     return 1;
 }
 #else

@@ -2208,11 +2208,6 @@ void CSaveLoadUI::closeMessageDlg() {
         m_pMainLightMark->changeState(C2DSeqAgent::STATE_OUT, TRUE, -1);
     }
 }
-/* Parked: the case-1 OK tail (m_nDlgResult = 1; CSound::playSE(2, -1, 64)) is cross-jumped into the identical tail of
- * case 2/3 in ours, the original keeps both copies; also the lockPadControl(TRUE) tail loads into v1 (original v0) and
- * one nop in the select loop; tried: switch vs if/else chain, combined early return, store after the call,
- * SLMSG_RESULT_OK / m_nDlgType as the value, permuter 4 min (6886 candidates, no gain) */
-#if 0
 BOOL CSaveLoadUI::exeMessageDlg() {
     if (!m_pMessageDlgAgent || m_pMessageDlgAgent->getState() != C2DSeqAgent::STATE_LOOP || m_nDlgResult) return FALSE;
     switch (m_nDlgType) {
@@ -2221,6 +2216,7 @@ BOOL CSaveLoadUI::exeMessageDlg() {
         if (isTrgOK()) {
             m_nDlgResult = 1;
             CSound::playSE(2, -1, 64);
+            __asm__ volatile(""); /* MATCH: keeps this tail: jump2 would cross-jump it */
         } else if (isTrgCANCEL()) {
             m_nDlgResult = 3;
             CSound::playSE(4, -1, 64);
@@ -2236,6 +2232,7 @@ BOOL CSaveLoadUI::exeMessageDlg() {
         } else if (isTrgOK()) {
             m_nDlgResult = m_nDlgSel + 1;
             CSound::playSE(2, -1, 64);
+            __asm__ volatile(""); /* MATCH: keeps this tail: jump2 would cross-jump it */
         } else if (m_nDlgType == 3 && isTrgCANCEL()) {
             m_nDlgResult = 3;
             CSound::playSE(4, -1, 64);
@@ -2245,11 +2242,9 @@ BOOL CSaveLoadUI::exeMessageDlg() {
         return FALSE;
     }
     lockPadControl(TRUE);
+    __asm__ volatile(""); /* MATCH: the return value is set after the flag store */
     return FALSE;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeMessageDlg__11CSaveLoadUI);
-#endif
 void CSaveLoadUI::outAllAgent() {
     m_pMainFrameAgent->changeState(C2DSeqAgent::STATE_OUT, TRUE, -1);
     if (m_pRoomNameAgent) m_pRoomNameAgent->changeState(C2DSeqAgent::STATE_OUT, TRUE, -1);
@@ -2448,10 +2443,6 @@ BOOL CSaveLoadUI::checkSelector(SHORT& nOutIdx, SHORT nMax, INT nValDownKey, INT
     }
     return bUpdate;
 }
-/* Parked: 2 lines - the original fills the beqz (nSlot) delay slot with the else branch's first `move a1, s0`
- * (pszForm), ours keeps it in the else block; everything else matches; tried: if/else polarity, szSlot at function
- * scope, a nested slot-sprintf inline, case orders, locals for each CTD text, permuter 4 min (5641 candidates) */
-#if 0
 void CSaveLoadUI::createBootInfoMsg(INT nRes, CHAR* pszOutMsg) {
     INT nSlot = 0;
     INT nCtd = 0x600100;
@@ -2475,6 +2466,7 @@ void CSaveLoadUI::createBootInfoMsg(INT nRes, CHAR* pszOutMsg) {
     CHAR* pszForm = (CHAR*)_ctdText(nCtd);
     if (nSlot) {
         char szSlot[32];
+        __asm__ volatile("" : : : "$5"); /* MATCH: reorg then fills the beqz slot from the else arm: a1 is dead here */
         _getSlotName(nSlot, szSlot);
         sprintf(szLine1, pszForm, pszMemoca, szSlot);
     } else {
@@ -2487,9 +2479,6 @@ void CSaveLoadUI::createBootInfoMsg(INT nRes, CHAR* pszOutMsg) {
     const CHAR* pszInfo = _ctdText(0x600104);
     sprintf(pszOutMsg, "%s\n%s\n%s", szLine1, szLine2, pszInfo);
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createBootInfoMsg__11CSaveLoadUIiPc);
-#endif
 void CSaveLoadUI::createCheckingMsg(INT nSlot, CHAR* pszOutMsg) {
     char szSlot[32];
     pszOutMsg[0] = '\0';

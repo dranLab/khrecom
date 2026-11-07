@@ -2003,11 +2003,6 @@ void CEscapeGauge::main() {
         break;
     }
 }
-/* Parked: 3 lines off, the getLayPosition argument loads: the original sets a2 first and a1 (7) last (in the
-   jal delay slot), ours a1 first. Worked: case 2 with its own copy of case 1's body (separate tree nodes 1/0/2/3,
-   cross-jumped later), case 0 falling into it. Tried: _ref(g_szLadCockpit), FALSE vs 0, casts; permuter 3 min
-   (12013 candidates, no gain). */
-#if 0
 void CEscapeGauge::setCharge(FLOAT inRate) {
     FVECTOR pos;
     switch (m_uiState) {
@@ -2017,6 +2012,8 @@ void CEscapeGauge::setCharge(FLOAT inRate) {
         m_pSeqCtrl->addSeq(g_szSeqCockpit, 0x3C);
         D2::C2DMan::getLayPosition(g_szLadCockpit, 7, 0, pos, FALSE);
         m_pSeqCtrl->setPos(pos);
+        m_pSeqCtrl->changeTime(1, (UINT)inRate);
+        break;
     case 1:
         m_pSeqCtrl->changeTime(1, (UINT)inRate);
         break;
@@ -2030,9 +2027,6 @@ void CEscapeGauge::setCharge(FLOAT inRate) {
         break;
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setCharge__Q25Gauge12CEscapeGaugef);
-#endif
 void CEscapeGauge::destroy() {
     switch (m_uiState) {
     case 1:

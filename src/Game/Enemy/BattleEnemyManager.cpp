@@ -574,12 +574,6 @@ OSD_HEADER* CBattleEnemyManager::getOSD_() {
     return NULL;
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemyManager", createBattleEnemies___19CBattleEnemyManager);
-/* Parked: 5 lines - `this`/`group` priorities tie in global-alloc (lreg: this 39 uses / 110 insns = 1.773, group 19/43 = 1.767,
- * so this gets s2, the original's group does); `register ... asm("$18")` for group gives the registers but an extra
- * move a1,v0 / move s2,a1 copy and a nop (35 -> 5). Tried: group decl scopes, if (!group) continue, statement orders
- * around the last group use, m_iAppearGroup forms, per-iteration &pObjInfo[k] (code changes). */
-#if 0
 INT CBattleEnemyManager::createBattleEnemies_() {
     INT count;
     INT index;
@@ -599,7 +593,7 @@ INT CBattleEnemyManager::createBattleEnemies_() {
     index = m_iGroupIndex;
     for (INT i = 0; i < n; i++) {
         for (INT j = index; j < OBJ_GROUP_MAX; j++) {
-            register OBJ_GROUP* group asm("$18") = m_pFormation->getEnemyGroup(j);
+            OBJ_GROUP* group = m_pFormation->getEnemyGroup(j);
             if (group) {
                 OBJ_INFO* info = group->pObjInfo;
                 for (INT k = 0; k < group->iObjCount; k++, info++) {
@@ -619,6 +613,7 @@ INT CBattleEnemyManager::createBattleEnemies_() {
             }
         }
     }
+    __asm__ volatile(""); /* MATCH: one more insn of life for this only: group outranks it (1.757 < 1.767) and gets s2 */
     m_iGroupIndex = index;
     info = CSceneInfo::getCurrentRoomMapEnemyInfo();
     if (info && info->_byHitPlayerAttack) {
@@ -626,7 +621,6 @@ INT CBattleEnemyManager::createBattleEnemies_() {
     }
     return count;
 }
-#endif
 
 INT CBattleEnemyManager::getAppearGroupCount_(INT inGroupNo) {
     INT count = 0;

@@ -209,7 +209,7 @@ extern BOOL g_bIsLastSceneBattle;
 extern "C" char D_00484E38[];
 extern "C" int sprintf(char*, const char*, ...);
 
-/* Parked: ~110 lines - the first run of stores: the original reloads m_pMCWork before each store (the *(T*)& scalar
+/* Parked: 113 lines, 4 bytes long, frame 144 for 128 - the first run of stores: the original reloads m_pMCWork before each store (the *(T*)& scalar
    stores give that) but keeps two -1 registers and seven s-registers for the %hi parts; statement orders
    (incl. the lui order) and 7 min of permuter (10k candidates, 104 -> 98) did not get closer. */
 #if 0
@@ -253,7 +253,7 @@ void CSceneInfo::clear() {
     for (UINT i = 0; i < 4; i++) {
         DoorInfo& d = s_roomExcept._doors[i];
         d._id = (DOOR_ID)i;
-        d._shape = 0;
+        d._shape = DOOR_SHAPE_NORMAL;
         d._type = _DOOR_TYPE_DEBUG;
         d._nDstRoom = 0;
         d._pStorageInfo = NULL;

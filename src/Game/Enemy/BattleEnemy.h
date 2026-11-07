@@ -255,7 +255,7 @@ public:
     HANDLE getNearestChild(FLOAT& outDist, CEntity& inEntity);
     INT getHpMax() const;
     BOOL isCurrentState(INT inState); // PARTIAL: added for Game/Enemy/HumanBoss
-    INT getPlayerState();             // PARTIAL: added for Game/Enemy/HumanBoss
+    static INT getPlayerState();             // PARTIAL: added for Game/Enemy/HumanBoss
     // PARTIAL: added for Game/Enemy/EnemyAirpirate
     INT getAttackRate() const;
 #ifndef GAME_ENEMY_BATTLEENEMY_CPP /* MATCH: GAME_ENEMY_BATTLEENEMY_CPP gate, only for its own unit (tested 2026-11-02) */

@@ -1,4 +1,4 @@
-// PARTIAL: added for Game/EffectMotion (base class of CAttackMotion and CEffectMotion; the original header is not known)
+
 #ifndef GAME_ATTACHMOTION_H
 #define GAME_ATTACHMOTION_H
 

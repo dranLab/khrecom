@@ -1145,10 +1145,11 @@ void CImageWnd::createWindow(CPointI& pos0, CSizeI& size0, CPointI& pos1, CSizeI
     init(pos0, size0, pos1, size1, pTexName, fRate, color0, color1, fgFlip);
 }
 
-/* Parked: 14 of 239 lines - the flip block (w2 = w; w = 0 under fgFlip bits, 4 USHORTs) gets other registers
+/* Parked: 5 of 240 lines (2026-11-07; was 14) - the flip block (w2 = w; w = 0 under fgFlip bits, 4 USHORTs) gets other registers
  * (original w a1, h a2, w2 a3, h2 t0; ours w v1, h a1, h2 a2) and the T0..T3 stores another order. Tried (2026-11-05:
  * decl/assignment forms of w, h, w2, h2, INT locals): declaration orders (ref's w, h, w2,
- * h2), one pTexInfo for both getTPage calls, pos0.m_x in a local, hill.py (2026-10-19), permuter 10 min (21 -> 21). */
+ * h2), one pTexInfo for both getTPage calls, pos0.m_x in a local, hill.py (2026-10-19), permuter 10 min (21 -> 21). 
+   2026-11-07: all 48 orders of the four m_T*.set() calls around setLayerFG: the current one is the best. */
 #if 0
 #line 1900
 void CImageWnd::init(CPointI& pos0, CSizeI& size0, CPointI& pos1, CSizeI& size1, const CHAR* pTexName, FLOAT fRate,
@@ -1175,12 +1176,12 @@ void CImageWnd::init(CPointI& pos0, CSizeI& size0, CPointI& pos1, CSizeI& size1,
             h2 = h;
             h = 0;
         }
-        pPoly->m_T0.set(w, h2);
-        pPoly->m_T1.set(w, h);
-        pPoly->m_T2.set(w2, h2);
         pPoly->m_T3.set(w2, h);
+        pPoly->m_T0.set(w, h2);
+        pPoly->m_T2.set(w2, h2);
         INT& layerFG = m_nLayerFG;
         pPoly->setLayerFG(layerFG);
+        pPoly->m_T1.set(w, h);
         pPoly->setSemiTrans((ALPHA)1);
         m_pPolyGT4 = pPoly;
     }

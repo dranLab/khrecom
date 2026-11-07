@@ -3895,13 +3895,6 @@ void CPlayer::resetAction(INT inMode) {
         break;
     }
 }
-/* Parked: registers match; only the stores after the g_fGravity load are scheduled differently (the original
-   stores m_JumpState right after the load and m_fJumpGravity before the g_CardBreakTime load; ours stores
-   them later). tried: all 24 orders of the JumpState/CardBreakTime/JumpGravity/JumpSpdY block, cast loads
-   (*(FLOAT*)&g_fGravity, *(INT*)&g_CardBreakTime[7]) and cast stores, gravity via a local / *=, moving
-   statements before isAir(), asm barriers; best 6 lines. The *(FLOAT*)& store on m_fMoveSpdXZ and the
-   chained m_fDistXZ = m_fDistY = 0.0f fixed the rest. tools/permuter.py can't run on C++ methods. Retried 2026-10-25: the $LM line order (gravity 6612, JumpState 6613, CardBreakTime 6614, SpdY 6615) breaks the registers (9 lines; v0 li 3 issued before the gravity load, CardBreakTime %hi in a0); all 24 orders with the casts (best 9), *(FLOAT*)&/*(INT*)& and _ref() reads of both globals: no better than this draft's 6. */
-#if 0
 void CPlayer::initAttackField(INT inNo) {
     setPlayerState(PL::ATTACK_FLD);
     m_iAerialAnimShift = 0;
@@ -3915,9 +3908,17 @@ void CPlayer::initAttackField(INT inNo) {
     m_bNextTrg = FALSE;
     m_iNextAttack = 0;
     *(FLOAT*)&m_fMoveSpdXZ = isAir() ? m_fJumpSpdXZ : m_fWalkSpeed;
+    /* MATCH: the empty barriers and pBreak in v1 hold the load, the store and the %hi in the original's issue order;
+       the original's $LM lines have gravity first, then JumpState, CardBreakTime, SpdY. */
+    FLOAT fScale = 0.16f;
+    FLOAT fGravity = PL::g_fGravity;
+    __asm__ volatile("");
     m_JumpState = 3;
-    m_tqCardBreakTime = PL::g_CardBreakTime[7];
-    m_fJumpGravity = PL::g_fGravity * 0.16f;
+    __asm__ volatile("");
+    register TIMEQ* pBreak asm("$3") = PL::g_CardBreakTime;
+    __asm__ volatile("");
+    m_fJumpGravity = fGravity * fScale;
+    m_tqCardBreakTime = pBreak[7];
     m_fJumpSpdY = 0.0f;
     setAttack();
     m_fDistXZ = m_fDistY = 0.0f;
@@ -3929,9 +3930,6 @@ void CPlayer::initAttackField(INT inNo) {
     }
     onWeapon(1);
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initAttackField__7CPlayeri);
-#endif
 void CPlayer::exeAttackField() {
     TIMEQ frameTQ = getMotionCurrentTime();
     TIMEQ frame = frameTQ / 50;
@@ -5091,25 +5089,6 @@ inline void _roPh20() { /* MATCH: placeholder: an inline function's strings, in 
     TRACE("CPlayer::chkDamage(); [REFRECT]  x(Now Card Play)\n");
     TRACE("PL::chkDamage(); kind=%d, \x81\xa6\x96\xa2\x8d\xec\x90\xac\x81i\x82\xc6\x82\xe8\x82\xa0\x82\xa6\x82\xb8\x8f\xac\x83_\x83\x81\x81[\x83W\x88\xb5\x82\xa2\x81j\n");
 }
-__asm__(".rdata\n.align 4\n.word .L0026EEC4\n.word .L0026ED00\n.word .L0026ECD8\n.word .L0026F018\n.word .L0026F018\n.word .L0026ED28\n.word .L0026EEE8\n.word .L0026EF64\n.word .L0026F018\n.word .L0026EEB4\n.word .L0026F018\n.word .L0026EF3C\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026EF94\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026EC40\n.word .L0026F018\n.word .L0026F018\n.word .L0026EF80\n.word .L0026EEC4\n.word .L0026ED00\n.word .L0026ECD8\n.word .L0026ECBC\n.word .L0026EFA8\n.word .L0026EFBC\n.word .L0026EC84\n.word .L0026EC70\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026EC30\n.word .L0026EEAC\n.text\n");
-/* Parked: 8 lines differ (2026-11-06, was 20: both vel brace-initialized, m_fDir store between brace and copy; markers at 9456/9593: por, sq 0x30, swc1 y 0x34, lq 0x30, sq 0x20 all on one line, so a temporary copied straight into vec; (FVECTOR){..} does not compile at the first site, braces at both sites add 16 bytes of frame), same size; structure, all branches, calls, the
-   40-entry jump table, frame and strings match. Left, four scheduling/register spots: (1) old_condition
-   (isConditionFlag(0x881803F)): the original loads the flag word into v1 and the mask into v0, ours the reverse;
-   (2) case 6 (knock-back): the {0, dir0, 0, 0} rotation temp gets v1 in the original (v0 ours, swapping the li 1 /
-   li 3 of m_bDmgInAir/m_JumpState) and its lq is issued after the m_JumpState/m_bDmgInAir stores; (3) case 33
-   (pronounce): the original stores m_fDir before loading the vptr for initPronounce, ours loads the vptr first
-   (equal sched2 priority, tie broken by RTL order; sched1 prefers our store because it frees $f0); (4) the
-   !bIsBackHit Homing block: the original issues lw m_pMove before the vel.y store and the m_fDir store before the
-   lq. Not missing FVECTOR constructors/operator=: types.h lists only the implicit ones, and the original
-   FMATRIX union holds FVECTOR v[4], which forbids user ones (ee-gcc error). Found: statement order from the
-   $LM line tags (build/asmlines.py), dir declared before dpos (frame), def_attr holding the attack attribute
-   first, the playSE id as a ternary of two calls (cross-jumped), bIsBackHit = FALSE after procDropMP, the case-6
-   gravity as *(FLOAT*)&PL::g_fGravity and the store order from a 120-permutation search (23 -> 20). tried: brace
-   init (memset), _rotY() by-value helper, _assign() reference copy, setDir(const FLOAT&), *(FLOAT*)& and
-   *(volatile FLOAT*)& stores of m_fDir, an "+f" asm on the Homing result (21), a memory asm barrier after the
-   case-33 store (18 lines, kept out: still not a match), old_condition as a direct/commuted expression or moved
-   before bIsBackHit (33), and tools/permuter.py through the method wrapper (15 min, 7332 candidates, no better). */
-#if 0
 BOOL CPlayer::chkDamage() {
     INT face;
     FVECTOR dir;
@@ -5177,7 +5156,10 @@ BOOL CPlayer::chkDamage() {
     SubVectorXYZ(dpos, dir, getPos());
     dir0 = atan2f(dpos.x, dpos.z);
     bIsBackHit = _abs(_limitPI(dir0 - m_fDir)) < 1.5707964f ? FALSE : TRUE;
-    old_condition = isConditionFlag(0x881803F);
+    {
+        register UINT uiFlag asm("$3") = m_uiConditionFlag; /* MATCH: isConditionFlag with the word in v1, the mask in v0 */
+        old_condition = uiFlag & 0x881803F;
+    }
     dmg0 = m_collBody.getDamage();
     kind = m_collBody.getDamageKind();
     def_attr = m_collBody.getDamageAttr();
@@ -5430,7 +5412,12 @@ BOOL CPlayer::chkDamage() {
             return TRUE;
         }
         m_fDir = Movement::Homing(m_fDir, dir0, 1.0f, m_fFrameRate);
-        initPronounce(1);
+        __asm__ volatile(""); /* MATCH: the m_fDir store, then a1, then the vptr load */
+        {
+            register INT nPronounce asm("$5") = 1;
+            __asm__ volatile("" : : "r"(nPronounce));
+            initPronounce(nPronounce);
+        }
         return TRUE;
     default:
         TRACE("PL::chkDamage(); kind=%d, \x81\xa6\x96\xa2\x8d\xec\x90\xac\x81i\x82\xc6\x82\xe8\x82\xa0\x82\xa6\x82\xb8\x8f\xac\x83_\x83\x81\x81[\x83W\x88\xb5\x82\xa2\x81j\n", kind);
@@ -5468,9 +5455,6 @@ BOOL CPlayer::chkDamage() {
     }
     return TRUE;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkDamage__7CPlayer);
-#endif
 __asm__(".rdata\n");
 void CPlayer::initFlip(INT inBreak) {
     FLOAT speed;
@@ -6116,12 +6100,6 @@ void CPlayer::exeBadCondition() {
         break;
     }
 }
-/* Parked: in the set arm the original loads ConditionFlag (v1), li 21000 (v0), PadFlag (a2); this order gets
-   the registers right but schedules the PadFlag load first; source order cond/tq/pad gives the load order but
-   swaps v0/a2 (tq/pad). tried: all 6 statement orders x tq forms (ternary, param default, ==0), UINT& pad,
-   (INT) casts, temporaries in both load orders, nested-if structure, asm barriers on tq; best 6 lines.
-   tools/permuter.py can't run on C++ methods. Retried 2026-10-25: $LM line tags put both flag updates before the m_tqConfuse store in both arms (cond/pad/tq: load order right, v0/a2 swapped and the tq/pad stores swapped); a Com.h-style reference flag helper for m_uiPadFlag, the 6 orders again with it (permblk.py, best 6), if/else, default-then-override and in-place inTime forms (13-29); still 6 lines. */
-#if 0
 void CPlayer::setConfuse(INT inFlag, TIMEQ inTime) {
     if (!inFlag) {
         setConditionFlag(0, 8);
@@ -6129,9 +6107,16 @@ void CPlayer::setConfuse(INT inFlag, TIMEQ inTime) {
         m_uiPadFlag = (INT)m_uiPadFlag & ~4;
         fadeEffect(m_hEffBad, 0);
     } else if (m_tqConfuse <= 0) {
-        m_tqConfuse = inTime ? inTime : 21000;
-        m_uiPadFlag |= 4;
-        setConditionFlag(8, 0);
+        /* MATCH: the barriers and the two register locals keep the original's issue order and registers. */
+        register UINT uiCond asm("$3") = m_uiConditionFlag;
+        register TIMEQ tq asm("$2") = 21000;
+        __asm__ volatile("");
+        UINT uiPad = m_uiPadFlag;
+        if (inTime) tq = inTime;
+        __asm__ volatile("");
+        m_tqConfuse = tq;
+        m_uiConditionFlag = uiCond | 8;
+        m_uiPadFlag = uiPad | 4;
         FVECTOR pos;
         pos.set(0.0f, 0.65f, 0.0f);
         m_hEffBad = attachEffect(PL::g_szDpxAbnormal, 2, &Crd(m_iBoneCenter), &pos, NULL, 0.0f);
@@ -6139,9 +6124,6 @@ void CPlayer::setConfuse(INT inFlag, TIMEQ inTime) {
         if (effect) effect->m_iFlag |= 4;
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setConfuse__7CPlayerii);
-#endif
 void CPlayer::exeConfuse() {
     if (m_uiConditionFlag & 8) {
         m_tqConfuse -= m_tqFrameRate;
