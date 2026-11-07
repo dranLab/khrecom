@@ -258,6 +258,8 @@ collideMap__16CSphereCollision_0022DF70 = 0x0022DF70; // type:func size:0x5C
 // Game/Collision/CollUtilO: unnamed copies of CSphereCollision's and CCollision's vtables
 _vt$16CSphereCollision_00489588 = 0x00489588; // size:0x20
 _vt$10CCollision_004895A8 = 0x004895A8; // size:0x18
+// Game/Collision/CollUtilF: an unnamed copy of CCollision's vtable
+_vt$10CCollision_004894E8 = 0x004894E8; // size:0x18
 // Game/GameSubField: CState's inline destructor and an unnamed copy of its vtable
 _$_6CState_001FEF30 = 0x001FEF30; // type:func size:0x30
 _vt$6CState_0047FF60 = 0x0047FF60; // size:0x30
