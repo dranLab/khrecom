@@ -118,10 +118,8 @@ Numbers change with every merge: `tools/check.sh` (totals), `tools/leftovers.py 
    CardRevolver main, HumanBoss getAttackCardNum/setupCardRevolver), never a changed access specifier.
    The hand-kept table at the top of
    `docs/asm-leftovers.md` lists the blockers that need more than a source change.
-2. **Data from source**: CollUtil and CollUtilO (.rodata); Ride's is done (2026-11-07). Both split fixes of 2026-11-07
-   are in (a code address is no string start; header-only CollUtilA/CollUtilF get their own .rodata), so CollUtilO's
-   own starts at 0x489500: recipe tested in build/progress/Game-Collision-CollUtilO.md (needs the symbol_addrs names
-   of its two vtable copies). (`pppEiDrawShipoly`'s data is from source since 2026-11-07.) `sddrv_ee`'s `.bss` is blocked (see the
+2. **Data from source**: the Collision units (CollUtil, CollUtilO, CollUtilA, CollUtilF, Ride) and pppEiDrawShipoly are done
+   (2026-11-07, after two split fixes). `sddrv_ee`'s `.bss` is blocked (see the
    table at the top of `docs/asm-leftovers.md`).
 3. **Library leftovers**: the parked and not attempted functions of `docs/sdk-leftovers.md`, with its "Working on
    a library unit" section.
