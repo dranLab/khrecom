@@ -92,6 +92,13 @@ shows a draft's diff after you switch its `#if 0` to `#if 1` (the permuters swit
 - **timer** (`TimerBusClock2Freq`, `TimerFreq2BusClock`, matched 2026-11-07 with the Sony group on 991111-01): both match as they stand under ee-gcc2.9-991111-01 (its `div.s`
   erratum padding keeps it out of the call's delay slot), and no function of the unit differs there. Needs an override.
 - **lib/init**: a `j $31` left unfilled where the original filled it: the last statement and `}` on one line.
+- **nodebug/__assert** (.rodata, needs a split change): the segment at 0x3FE5A0 starts with impure.o's 8-byte
+  `.rodata` ("C", `_current_locale` of `_REENT_INIT`, pointed at by impure_data); from source only those 8 bytes
+  differ. Needs a `[0x3FE5A0, rodata, lib/nodebug/impure_data]` segment linked before __assert (split_objects.py).
+- **libgcc2___umoddi3** (.rodata, needs a link change): the table matches from source, but the segment also holds
+  0x28 zero bytes up to .sdata at 0x3FF680, the original link's 128-byte section alignment (.sndata, .rodata,
+  .sbss start 128-aligned too). Needs `. = ALIGN(0x80)` before `.sdata` in the linker script (configure.py) or a
+  padding segment.
 
 ## Inventory
 
