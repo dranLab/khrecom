@@ -1,4 +1,6 @@
 #include "Game/Collision/CollUtilA.h"
+#define COLLUTIL_H_PATH "c:/KHCOM/MainApp/Game/Collision/CollUtil.h" /* MATCH: the original's path in CollUtil.h's strings */
+#include "Game/Collision/CollUtil.h"
 
 #include "System/Coord.h"
 
@@ -180,3 +182,4 @@ INT CCollUtil::detect2DLinePoint(const FVECTOR& vP0, const FVECTOR& vP1, const F
     }
     return 2;
 }
+// SOURCE DATA: .rodata
