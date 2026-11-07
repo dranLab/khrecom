@@ -337,8 +337,6 @@ CHumanBoss::~CHumanBoss() {
     m_pStockData = __null;
 }
 
-/* near match: the store of the entity flag is scheduled before the load of m_iParam */
-#if 0
 BOOL CHumanBoss::initalize(INT inGroupID, INT inRsrcID, UINT iFlag) {
     INT rate;
 
@@ -350,14 +348,12 @@ BOOL CHumanBoss::initalize(INT inGroupID, INT inRsrcID, UINT iFlag) {
     setTexAnmSeq(0, HumanBoss::NormalEyeSeqName);
     setTexAnmSeq(1, HumanBoss::NormalLipSeqName);
     setEntityFlag(0, 0x10000);
-    m_iDeadSeIdentifyNo = getParam() + 1;
+    /* MATCH: cast store = no struct-field alias with the global load below (it stays before that load) */
+    *(INT*)&m_iDeadSeIdentifyNo = getParam() + 1;
     rate = getExtraParam(HumanBoss::UseItemCardParamName);
     m_iNoReloadNum = getAttackCardNum(3) * rate / 100;
     return TRUE;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/HumanBoss", initalize__10CHumanBossiiUi);
-#endif
 
 /* near match, 20 lines (2026-11-05, was 27): the goto-built outer loop reloads iCardCount/pCards like the original (a for loop hoists them); left: the original hoists the m_pEnemyParam load once (t2), ours reloads it too. The ref lists card/j at function level and no getEnemyParam inline */
 #if 0
