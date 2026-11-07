@@ -131,6 +131,11 @@ void RyjMegaBirthUserCtrDrawShapeRefPos(int shape_id, pppCVECTOR *color, u_char 
         ah = (OANM_HEADER *)shape->shape;
         seq = &ah->seq[anm_seq];
         sh = (OSHAPE_VU1 *)((char *)ah + seq->sha);
+        /* MATCH: one asm for the VU0/COP2-only run (no GPR instruction inside). One asm per instruction was tried
+           (2026-11-08): 66 lines with the operands in $2/$3/$5/$6/$7 register locals, 52 with shi0 and anm_seq pinned
+           too. Each asm statement adds one insn to the life of every pseudo across the block, and shi0 (24 refs, life
+           114) beats rot (14 refs, life 50) by 0.842 to 0.840 in global-alloc priority: one extra empty asm already
+           swaps their s0/s1 (39 lines) */
         __asm__ __volatile__(
             "lqc2 $vf1, 0x0(%0)\n"
             "lqc2 $vf2, 0x10(%0)\n"
