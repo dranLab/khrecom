@@ -192,12 +192,18 @@ __asm__(
     ".word .L002C7854\n"
     ".text\n");
 
-/* Near-match (3 lines): in case 4 the original loads the vtable pointer for getLockOnPos right after the two
- * TIMEQ stores of setupFade; here the vtable entry loads depend on all six setupFade stores (unknown alias), so
- * the vptr load ranks below them and comes last. Tried (~45 min): setupFade store orders (all 720, plain/
- * reference/|= flag forms, also written out in place), reference stores, local placement, this casts,
- * explicit temporaries, empty-asm fillers and barriers, ENTITY_H_SETFLAG_DIRECT. -fstrict-aliasing moves the
- * load up (so it is an aliasing question) but is not the build's flag. */
+/* Earlier tries (~45 min): setupFade store orders (all 720, plain/reference/|= flag forms, also written out in
+ * place), reference stores, local placement, this casts, explicit temporaries, empty-asm fillers and barriers,
+ * ENTITY_H_SETFLAG_DIRECT. Sched dumps (2026-11-07): the vtable entry loads (lh 88/lw 92 through the loaded
+ * vptr, unknown base) depend on all six setupFade stores, so every store has priority 9 like the vptr load; sched1
+ * then issues the stores first (lower register weight: the load sets a register) and sched2 keeps that order
+ * (luid tie). The original's order (sw 284, sw 280, move a1, lw vptr, swc1 268, sw 288, sw 228, sw 272) is what
+ * you get when only the two TIMEQ stores conflict with the vtable loads: -fstrict-aliasing plus TIMEQ stores
+ * through a union gives exactly that except sw 228, but strict aliasing is not the build's flag and changes the
+ * rest of the function. Without it every member store conflicts (alias set 0; `this`-based addresses vary, so the
+ * fixed-scalar rule never applies; FLOAT* or INT* pointer stores and CEntity&/CEntity* or qualified calls
+ * change nothing). */
+/* Parked: 3 of 211 lines (2026-11-07): case 4, the vptr load for getLockOnPos comes after all six setupFade stores, the original has it right after the two TIMEQ stores (sw 284/280) and before swc1 268, sw 288, sw 228, sw 272; tried: all store orders, flag forms, barriers, temporaries, call forms, pointer stores, sched-dump analysis (above), permuter 15 min (1030 candidates, no gain) */
 #if 0
 void CEnemyWhitemushroom::damage_() {
     static CHAR* MemoIDParamName = "MemoID";
