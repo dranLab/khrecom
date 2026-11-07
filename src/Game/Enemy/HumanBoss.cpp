@@ -620,7 +620,7 @@ __attribute__((section(".sdata"))) void _setupAct_placeholder(void* p, void* q, 
     com_malloc_d(4, __FILE__ "(684)", (UINT)-1);
     if (!r) AssertApp(__FILE__, 0, "m_pStockData", 0);
 }
-/* near match, 18 lines (2026-11-05, was 22: stock arm's chain sMax = sMin): the -1 of the normal acts shares the register of the compares (the original loads it separately); (SHORT)/0xFFFF/local forms tried */
+/* Parked: 18 of 205 lines (2026-11-07): the normal arm's -1 (sMin/sMax) is its own hoisted register in the original (li s4,-1 after li s5,1), ours shares the compares' -1 (s2): loop.c (-dL) combines the arm's HImode -1 movable with the SImode compare constant ("matches 84"); the rest follows (14/12 store order, the assert's __FILE__ lui hoisted too in ours, a loop-align nop); tried: chain orders, separate stores, read-back, (SHORT)/0xFFFF/-1L, INT/SHORT/long locals, m_pEnemyParam direct (all 18), duplicated normal arm per branch (18, the arms' -1 become subregs), inverted/nested/else-if condition shapes (18-88); permuter 15 min: no gain */
 #if 0
 void CHumanBoss::setupAct() {
     ACT_DATA tmp[8];
@@ -628,11 +628,11 @@ void CHumanBoss::setupAct() {
     ENEMY_ACT* act;
     INT i;
 
-    if (!getEnemyParam()) {
+    if (!m_pEnemyParam) {
         return;
     }
-    act = getEnemyParam()->pActs;
-    for (i = 0; i < getEnemyParam()->iActCount; i++, act++) {
+    act = m_pEnemyParam->pActs;
+    for (i = 0; i < m_pEnemyParam->iActCount; i++, act++) {
         if (act->iCard[0] == -1 && act->iCard[1] == -1 && act->iCard[2] == -1) {
             continue;
         }
