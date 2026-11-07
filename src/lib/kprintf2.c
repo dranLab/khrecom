@@ -118,6 +118,13 @@ int printfloat(PutcFunc func, void *ctx, unsigned int *size, double d)
 #endif
 int printfloat(PutcFunc func, void *ctx, unsigned int *size, double d);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/kprintf2", printfloat);
+/* printfloat's strings and constants (the function is still assembly). */
+asm(".rdata\n.align 3\nD_004FEC90:\n.asciz \"0.%d\"\n.align 3\nD_004FEC98:\n.asciz \"e+%d\"\n"
+    ".align 3\nD_004FECA0:\n.asciz \"e%d\"\n"
+    ".align 3\nD_004FECA8:\n.word 0x9999999A\n.word 0x3FB99999\n"
+    "D_004FECB0:\n.word 0x9999999A\n.word 0x3FB99999\n"
+    "D_004FECB8:\n.word 0\n.word 0x412E8480\n"
+    ".text\n");
 
 #define F_MINUS 0x1
 #define F_PLUS 0x2
@@ -490,6 +497,29 @@ int _sceSnprintf(PutcFunc func, void *ctx, unsigned int size, const char *fmt, v
 #endif
 int _sceSnprintf(PutcFunc func, void *ctx, unsigned int size, const char *fmt, va_list ap);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/kprintf2", _sceSnprintf);
+/* _sceSnprintf's strings and jump table (the function is still assembly). */
+asm(".rdata\n.align 3\nD_004FECC0:\n.asciz \"0123456789abcdef\"\n"
+    ".align 3\nD_004FECD8:\n.asciz \"0123456789ABCDEF\"\n"
+    ".align 3\njtbl_004FECF0:\n"
+    ".word .L00385C34\n.word .L0038625C\n.word .L0038625C\n.word .L00385C3C\n.word .L0038625C\n"
+    ".word .L0038625C\n.word .L0038625C\n.word .L0038625C\n.word .L0038625C\n.word .L0038625C\n"
+    ".word .L0038625C\n.word .L00385B54\n.word .L0038625C\n.word .L00385B4C\n.word .L00385BAC\n"
+    ".word .L0038625C\n.word .L00385B5C\n.word .L00385B64\n.word .L00385B64\n.word .L00385B64\n"
+    ".word .L00385B64\n.word .L00385B64\n.word .L00385B64\n.word .L00385B64\n.word .L00385B64\n"
+    ".word .L00385B64\n.word .L0038625C\n.word .L0038625C\n.word .L0038625C\n.word .L0038625C\n"
+    ".word .L0038625C\n.word .L0038625C\n.word .L0038625C\n.word .L0038625C\n.word .L0038625C\n"
+    ".word .L0038625C\n.word .L0038625C\n.word .L0038625C\n.word .L0038625C\n.word .L0038625C\n"
+    ".word .L0038625C\n.word .L0038625C\n.word .L0038625C\n.word .L0038625C\n.word .L0038625C\n"
+    ".word .L0038625C\n.word .L0038625C\n.word .L0038625C\n.word .L0038625C\n.word .L0038625C\n"
+    ".word .L0038625C\n.word .L0038625C\n.word .L0038625C\n.word .L0038625C\n.word .L0038625C\n"
+    ".word .L0038625C\n.word .L00385D34\n.word .L0038625C\n.word .L0038625C\n.word .L0038625C\n"
+    ".word .L0038625C\n.word .L0038625C\n.word .L0038625C\n.word .L0038625C\n.word .L0038625C\n"
+    ".word .L0038625C\n.word .L0038625C\n.word .L00386178\n.word .L00385DF4\n.word .L00385FD0\n"
+    ".word .L00385FD0\n.word .L0038625C\n.word .L00385C4C\n.word .L00385DF4\n.word .L0038625C\n"
+    ".word .L0038625C\n.word .L00385C44\n.word .L0038625C\n.word .L0038625C\n.word .L00385C54\n"
+    ".word .L003861B0\n.word .L0038625C\n.word .L0038625C\n.word .L00386034\n.word .L0038625C\n"
+    ".word .L00385F0C\n.word .L0038625C\n.word .L0038625C\n.word .L00385D08\n"
+    ".text\n");
 
 /* Into a buffer: ctx is the write pointer; the last byte of the buffer gets the terminating 0. */
 static int snprintf_char(char **pbuf, unsigned int *size, int c)
@@ -588,4 +618,4 @@ void kprintf(const char *fmt, ...)
         EIntr();
     }
 }
-// SOURCE DATA: .data .bss
+// SOURCE DATA: .data .rodata .bss
