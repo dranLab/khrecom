@@ -41,10 +41,10 @@ every change that is merged without regenerating. Regenerating all four takes ab
 
 ## Where things stand (2026-11-07)
 
-- **Progress:** 12035 of 12311 functions matched: game 11252 of 11323, libraries 783 of 988 (plus 151 hand-written).
+- **Progress:** 12037 of 12311 functions matched: game 11254 of 11323, libraries 783 of 988 (plus 151 hand-written).
   `tools/check.sh` counts the 151 hand-written units as done too: its total is these matched functions plus 151
   (fixed 2026-11-07: it used to count a parked `#if 0 ... #else INCLUDE_ASM #endif` as done).
-- **Game:** 71 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note).
+- **Game:** 69 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note).
   5 units take a data section from assembly.
 - **Libraries:** 18 parked, 1 not attempted, 27 hand-written (stay assembly), no unit with data from assembly
   (the last two, __assert and __umoddi3, needed the split / link-alignment fixes of 2026-11-07);
@@ -67,7 +67,7 @@ every change that is merged without regenerating. Regenerating all four takes ab
   regswap, banddiff read `build/drafts.log`: `tools/drafts.py -j 12 > build/drafts.log` first),
   ranks near misses; `build/remeasure.log` was refreshed 2026-11-06 evening (tried without gain: createBootInfoMsg,
   setStockInfo, _invokePrimary_Main, dispDebugLine, setCharge, setDeckInfo, pppSetMatrix, HumanBoss initalize, effect Setup,
-  checkBBox, setAttack (power forms), initEnemyParam (block order), sceVif1PkCloseUpkCode (the ref's locals: 25 -> 43-50), setScreenFader, 2DSprObj move). `tools/helpers/refextra.py 40` lists drafts with invented locals, the better lead. Parked notes go stale: read the current diff first (stateDestroy and setupDrawMode were one statement swap).
+  checkBBox, setAttack (power forms), initEnemyParam (block order), sceVif1PkCloseUpkCode (the ref's locals: 25 -> 43-50), setScreenFader; 2DSprObj move matched 2026-11-07). `tools/helpers/refextra.py 40` lists drafts with invented locals, the better lead. Parked notes go stale: read the current diff first (stateDestroy and setupDrawMode were one statement swap).
   A permuter queue over the eight drafts changed on 2026-11-06 gained on two (the last fan 3 -> 2, detectMCInit 18 -> 14);
   onMove, acWaitReq, update, _atoi, _atolen and checkBBox held. `tools/helpers/regswap.py 60` separates pure register permutations (solve with the priority formula), `tools/helpers/refcount.py` lists
   locals declared fewer times than in the ref (one variable per loop: Model::link), `tools/helpers/banddiff.py lo hi` prints current diffs,
@@ -114,8 +114,7 @@ Numbers change with every merge: `tools/check.sh` (totals), `tools/leftovers.py 
 ## Remaining work, in this order
 
 1. **Parked game drafts**: retry them closest first, line markers first, then the levers index and both permuters.
-   List them with their notes: `tools/leftovers.py game` ("Parked functions"). Leads already known: 2DSprObj
-   `initForSeq` (20/342); HumanBoss `getAttackCardNum`/`setupCardRevolver` (the ref's getEnemyParam() is non-const;
+   List them with their notes: `tools/leftovers.py game` ("Parked functions"). Leads already known: HumanBoss `getAttackCardNum`/`setupCardRevolver` (the ref's getEnemyParam() is non-const;
    reading the private member matched but is not the original: reverted 2026-11-07).
    The hand-kept table at the top of
    `docs/asm-leftovers.md` lists the blockers that need more than a source change.
