@@ -148,19 +148,21 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-06 | cleanup: JiminyMemo finish, CPause and CShadowModelMan stand-ins replaced by the owner headers (friends with MATCH) | 202 | 20 | 0 | 676 (0) | 930 |
 | 2026-11-07 | cleanup: MovieScript uses the real CTextWnd, CPointT, CSizeT (the old assembler crash is gone); _vf4x tagged | 201 | 19 | 0 | 677 (0) | 948 |
 | 2026-11-07 | cleanup: CHeapMan moved to HeapMan.h (6 local copies gone), Model uses VramMan.h | 199 | 14 | 0 | 677 (0) | 948 |
+| 2026-11-07 | cleanup/System-Graphic-Gprim.h: effect's G_RGBA copy dropped (forward declaration), pppEiDrawShipoly's QWdata is its own | 188 | 13 | 0 | 673 (0) | 1002 |
+| 2026-11-07 | tools/partials.py reads the ref's .c files (measure only: the libppp C units' own types no longer count as foreign copies) | 188 | 11 | 0 | 673 (0) | 1002 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 190 (156 in 44 headers, 34 in 20 .cpp); MATCH: 1002
-  by category: method 46, data member 10, type 14, fwd decl 2, #include 14, changed in place 45, padding 2, path override 1, gate 5, guessed 9, header-level 24, stand-in 13, other 5
-stand-ins: 14 foreign in 9 files (12 names), 198 unattributed, 154 own
+PARTIAL: 188 (156 in 44 headers, 32 in 18 .cpp); MATCH: 1004
+  by category: method 46, data member 10, type 14, fwd decl 2, #include 14, changed in place 45, padding 2, path override 1, gate 5, guessed 9, header-level 24, stand-in 11, other 5
+stand-ins: 11 foreign in 6 files (9 names), 170 unattributed, 184 own
 duplicate class names across headers: 0
 padding: 2 arrays, 0 accessors
 mechanisms: 673 sites (0 untagged); #line: 1239
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 874, superset 12, partial 0, gated 3, missing 7, unattributed 309
+classes: complete 1169, superset 17, partial 1, gated 3, missing 6, unattributed 8
 ```
 
 ## Queue (top 20)
@@ -178,11 +180,11 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 2.0 | `System/Graphic/TexInfo.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
 | R1 | 1.0 | `Game/Collision/CollUtil.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R1 | 1.0 | `Game/Collision/CollUtilA.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
+| R1 | 1.0 | `Game/Enemy/BattleEnemy.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R1 | 1.0 | `System/Coord.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R1 | 1.0 | `System/Vector.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R2 | 6.0 | `System/Graphic/Anim.h` | ready | 0 stand-in files, 0 dup headers, 6 gate users |  () | gated strings: ANIM_H_GETFLAG_DECL_ONLY |
 | R2 | 6.0 | `System/Graphic/modeldata.h` | ready | 0 stand-in files, 0 dup headers, 6 gate users |  () | gated strings: MODELDATA_H_TEXINFO |
-| R2 | 4.0 | `System/Graphic/Gprim.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | G_RGBA, QWdata (2 complete) | adds strings: System/Graphic/Effect/effect (4), System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly (4) |
 | R2 | 3.0 | `Game/Collision/CollObj.h` | ready | 1 stand-in files, 0 dup headers, 1 gate users | CCollision, COLL_KIND, COLL_TYPE (3 complete) | weak hint: CSJointListT<CCollObj> not in Game/Collision/CollUtilF, CSJointT<CCollObj> not in Game/Collision/CollUtilF |
 
 ## Classes with foreign copies
@@ -198,9 +200,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `COLL_KIND` | complete | Game/Collision/CollObj.h | 1 |  |  |
 | `COLL_TYPE` | complete | Game/Collision/CollObj.h | 1 |  |  |
 | `ChatWndCreateCTDParam` | missing | Game/Atel/VSME.h | 1 |  |  |
-| `G_RGBA` | complete | System/Graphic/Gprim.h | 1 |  |  |
-| `PRIZE_DATA` | missing | Game/Enemy/BattleEnemy.h | 1 |  |  |
-| `QWdata` | complete | System/Graphic/Gprim.h | 1 |  |  |
 
 ## Headers
 
@@ -242,6 +241,12 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/Effect/libppp/draw/draw_w.h` | 2 | 3/0/0/0 | 15 |
 | `System/Graphic/Effect/libppp/draw/global_w.h` | 1 | 0/0/0/0 | 9 |
 | `System/Graphic/Effect/libppp/draw/md.h` | 2 | 0/0/0/0 | 41 |
+| `System/Graphic/Effect/libppp/eiProg/pppChrSclXYZMatrix.h` | 0 | 1/1/0/0 | 1 |
+| `System/Graphic/Effect/libppp/eiProg/pppChrSclXZMatrix.h` | 0 | 1/1/0/0 | 1 |
+| `System/Graphic/Effect/libppp/eiProg/pppChrSclYMatrix.h` | 0 | 1/1/0/0 | 1 |
+| `System/Graphic/Effect/libppp/eiProg/pppChrXSclXYZMatrix.h` | 0 | 1/1/0/0 | 1 |
+| `System/Graphic/Effect/libppp/eiProg/pppChrYSclXYZMatrix.h` | 0 | 1/1/0/0 | 1 |
+| `System/Graphic/Effect/libppp/keProg/pppKeTh.h` | 0 | 6/0/1/0 | 1 |
 | `System/Graphic/Effect/libppp/pppPart.h` | 25 | 24/0/0/0 | 215 |
 | `System/Graphic/Gprim.h` | 2 | 15/0/0/0 | 231 |
 | `System/Graphic/Model.h` | 2 | 8/0/0/0 | 70 |

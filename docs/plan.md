@@ -41,15 +41,15 @@ every change that is merged without regenerating. Regenerating all four takes ab
 
 ## Where things stand (2026-11-07)
 
-- **Progress:** 12035 of 12311 functions matched: game 11252 of 11323, libraries 783 of 988 (plus 151 hand-written).
+- **Progress:** 12037 of 12311 functions matched: game 11254 of 11323, libraries 783 of 988 (plus 151 hand-written).
   `tools/check.sh` counts the 151 hand-written units as done too: its total is these matched functions plus 151
   (fixed 2026-11-07: it used to count a parked `#if 0 ... #else INCLUDE_ASM #endif` as done).
-- **Game:** 71 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note).
+- **Game:** 69 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note).
   5 units take a data section from assembly.
 - **Libraries:** 18 parked, 1 not attempted, 27 hand-written (stay assembly), no unit with data from assembly
   (the last two, __assert and __umoddi3, needed the split / link-alignment fixes of 2026-11-07);
   details in `docs/sdk-leftovers.md`.
-- **Header cleanup:** PARTIAL 190 (156 in 44 headers, 34 in 20 .cpp), 14 foreign stand-ins in 9 files, 0
+- **Header cleanup:** PARTIAL 188 (156 in 44 headers, 32 in 18 .cpp), 11 foreign stand-ins in 6 files, 0
   duplicate classes, 0 untagged mechanisms; classes complete 873, superset 12, gated 3, missing 8.
   `tools/partials.py --queue` has the ready items.
 - **Method that paid off (2026-11-06):** read `tools/helpers/asmlines.py` before permuting. Most long-parked drafts had a
@@ -67,7 +67,7 @@ every change that is merged without regenerating. Regenerating all four takes ab
   regswap, banddiff read `build/drafts.log`: `tools/drafts.py -j 12 > build/drafts.log` first),
   ranks near misses; `build/remeasure.log` was refreshed 2026-11-06 evening (tried without gain: createBootInfoMsg,
   setStockInfo, _invokePrimary_Main, dispDebugLine, setCharge, setDeckInfo, pppSetMatrix, HumanBoss initalize, effect Setup,
-  checkBBox, setAttack (power forms), initEnemyParam (block order), sceVif1PkCloseUpkCode (the ref's locals: 25 -> 43-50), setScreenFader, 2DSprObj move). `tools/helpers/refextra.py 40` lists drafts with invented locals, the better lead. Parked notes go stale: read the current diff first (stateDestroy and setupDrawMode were one statement swap).
+  checkBBox, setAttack (power forms), initEnemyParam (block order), sceVif1PkCloseUpkCode (the ref's locals: 25 -> 43-50), setScreenFader; 2DSprObj move matched 2026-11-07). `tools/helpers/refextra.py 40` lists drafts with invented locals, the better lead. Parked notes go stale: read the current diff first (stateDestroy and setupDrawMode were one statement swap).
   A permuter queue over the eight drafts changed on 2026-11-06 gained on two (the last fan 3 -> 2, detectMCInit 18 -> 14);
   onMove, acWaitReq, update, _atoi, _atolen and checkBBox held. `tools/helpers/regswap.py 60` separates pure register permutations (solve with the priority formula), `tools/helpers/refcount.py` lists
   locals declared fewer times than in the ref (one variable per loop: Model::link), `tools/helpers/banddiff.py lo hi` prints current diffs,
@@ -114,8 +114,7 @@ Numbers change with every merge: `tools/check.sh` (totals), `tools/leftovers.py 
 ## Remaining work, in this order
 
 1. **Parked game drafts**: retry them closest first, line markers first, then the levers index and both permuters.
-   List them with their notes: `tools/leftovers.py game` ("Parked functions"). Leads already known: 2DSprObj
-   `initForSeq` (20/342); HumanBoss `getAttackCardNum`/`setupCardRevolver` (the ref's getEnemyParam() is non-const;
+   List them with their notes: `tools/leftovers.py game` ("Parked functions"). Leads already known: HumanBoss `getAttackCardNum`/`setupCardRevolver` (the ref's getEnemyParam() is non-const;
    reading the private member matched but is not the original: reverted 2026-11-07).
    The hand-kept table at the top of
    `docs/asm-leftovers.md` lists the blockers that need more than a source change.
@@ -447,7 +446,10 @@ Keep output small: one function's assembly at a time; `funcdiff` without `--full
   owner; string evidence that contradicts the ref; a new kind of mechanism; completion that needs changes to
   matched C beyond ref type corrections; unifying `Gprim.h` and `GprimFull.h`; a new opt-out macro more than
   about 5 units need; no net decrease of stand-ins plus PARTIAL markers after 3 consecutive units.
-- **Waiting on a decision now:** the global operators (new/delete/placement new) back into System/HeapMan.h with
+- **Waiting on a decision now:** the original's .mdebug type order (build/progress/cleanup-Gprim.h.md) puts G_XY,
+  G_XYZ, G_RGBA, G_UV, G_ST and F_UL with the vector/coord headers (in all 274 originals with FVECTOR; Gprim.h's own
+  G_LAYER/CDrawable/FVERTEX in 234) and the C++ QWdata in a base-types header after the khtypes typedefs, against the
+  ref's placement and ~230 includers. And the global operators (new/delete/placement new) back into System/HeapMan.h with
   `new (__FILE__ "(N)") T` sites (see "Queue state"; ~170 includers, matched C changes). And the `D2MAN_H_PATH` (2DMan.h, `D2::C2DMan`) and `RSRCDATA_H_FULL`
   (`CRsrcData`/`RsrcInfo`/`CRsrcANN`) gates, 10 files: the string evidence for 2DMan.h is ambiguous (the 2D
   container message is in 166 originals, the 2DMan.h path in only about 119).
