@@ -31,10 +31,10 @@ typedef struct {
     int state; /* 0x08 */
     char _pad0C[0x8C - 0xC];
     int hasPts; /* 0x8C */
-    volatile long ptsStep; /* 0x90 */
-    volatile int lastPts; /* 0x98 */
-    volatile int ptsField; /* 0x9C */
-    volatile long showCount; /* 0xA0 */
+    long ptsStep; /* 0x90 */
+    int lastPts; /* 0x98 */
+    int ptsField; /* 0x9C */
+    long showCount; /* 0xA0 */
     char _padA8[0xC0 - 0xA8];
     int outputBase; /* 0xC0 */
     int useCsc; /* 0xC4 */
@@ -153,9 +153,9 @@ static void _cpr8(_sceMpegDecoder *d, _sceMpegPicture *pict)
         dst0 += d->stride * 0xC0;
     }
 }
-/* MATCH: the volatile fields and the two non-volatile casts set scheduler ties: a volatile load depends on every later
-   volatile access, so it wins a tie on dependents; the ptsStep and lastPts reads here must lose theirs. The flag word's
-   three locals keep their pairs, which one expression does not (gcc 2.9 re-pairs the terms). */
+/* MATCH: the union store has alias set 0, so it conflicts with every field: d->tags, ptsStep and ptsField reload after
+   it (strict aliasing folds them after a plain long store). The flag word's three locals keep their pairs, which one
+   expression does not: gcc 2.9 re-pairs the terms. */
 static void _dispRefImage(_sceMpegDecoder *d, _sceMpegPicture *pict, int n)
 {
     char buf[256];
@@ -171,15 +171,18 @@ static void _dispRefImage(_sceMpegDecoder *d, _sceMpegPicture *pict, int n)
         long step;
         int r;
         int ia;
+        int q;
         long adj = odd & (d->ptsField & 1);
-        { long sb = (step = *(long *)&d->ptsStep) & 1; adj &= sb; }
+        { long sb = (step = d->ptsStep) & 1; adj &= sb; }
         ia = adj;
-        r = (int)((step * n) >> 1) + ia;
-        tags[2] = *(int *)&d->lastPts + r;
-        odd &= d->ptsStep; asm volatile(""); /* MATCH: the reload lands after the `and`, for as to take into the beqz slot */ tags = *(long * volatile *)&d->tags; if (odd) d->ptsField++; } else {
+        q = (step * n) >> 1;
+        asm volatile("" : : : "memory"); /* MATCH: lastPts reloads after __muldi3 (a const libcall), behind the shift */
+        r = q + ia;
+        ((union { long l; int i; } *)&tags[2])->l = d->lastPts + r;
+        odd &= d->ptsStep; tags = d->tags; if (odd) d->ptsField++; } else {
         *pPts = pict->pts;
     }
-    if (*(volatile int *)&d->outputMode == 2 && d->nextPts >= 0) {
+    if (d->outputMode == 2 && d->nextPts >= 0) {
         *pPts = d->nextPts;
         d->outputMode = 0;
         d->nextPts = -1;
