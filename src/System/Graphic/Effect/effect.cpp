@@ -150,12 +150,6 @@ int EFFECT_DATA::get_num() const {
 }
 
 #line 124
-/* Parked: 4 of 133 lines, same size - with i reused for the DPD loop and the ParNum TRACE before `p += 16` (draft
- * below) the loop registers match; left: the two TRACE header reads go through data (s3) in the original, ours
- * through p (s1), and `p += 16` sits before the ParNum TRACE there. The placeholder's form (own j, p += first) is
- * also 4 lines (i in a0, not s2). Tried: dpx_header/data/p reads, declaration orders, late p init, j counting
- * down, permuter 10 min (12 -> 12). */
-#if 0
 void EFFECT_DATA::Setup(u_long128* data, BOOL bDownVer) {
     u_char* p = (u_char*)data;
     _DPX_HEADER* dpx_header = (_DPX_HEADER*)p;
@@ -163,9 +157,10 @@ void EFFECT_DATA::Setup(u_long128* data, BOOL bDownVer) {
     int i;
 #line 127
     ASSERT(0 == (int)data % 16);
+    __asm__ volatile("" : "=r"(p) : "0"(p)); /* MATCH: p stops being a known copy of data: the two header reads go through data */
     TRACE_USER((USER)6, "EFFECT_DATA::Setup() -> DpxVer:%d\n", ((_DPX_HEADER*)data)->DpxVer);
-    TRACE_USER((USER)6, "EFFECT_DATA::Setup() -> ParNum:%d\n", ((_DPX_HEADER*)data)->ParNum);
     p += sizeof(_DPX_HEADER);
+    TRACE_USER((USER)6, "EFFECT_DATA::Setup() -> ParNum:%d\n", ((_DPX_HEADER*)data)->ParNum);
 #line 133
     ASSERT(dpx_header->DpxVer >= 130);
     ((_DPX_HEADER*)data)->Head = 0x5844;
@@ -186,41 +181,6 @@ void EFFECT_DATA::Setup(u_long128* data, BOOL bDownVer) {
         TRACE_USER((USER)6, "EFFECT_DATA::Setup() -> pppInitDpd() -> DpdVer:%08x\n", *(int*)dpd);
     }
 }
-#else
-__asm__(".section .sdata\n");
-/* Placeholder for the INCLUDE_ASM'd Setup below (emits its strings in place). */
-static void __attribute__((section(".sdata"))) _Setup(u_long128* data, BOOL bDownVer) {
-    u_char* p = (u_char*)data;
-    _DPX_HEADER* dpx_header = (_DPX_HEADER*)p;
-    int dpd_num;
-    int i;
-#line 127
-    ASSERT(0 == (int)data % 16);
-    TRACE_USER((USER)6, "EFFECT_DATA::Setup() -> DpxVer:%d\n", ((_DPX_HEADER*)data)->DpxVer);
-    p += sizeof(_DPX_HEADER);
-    TRACE_USER((USER)6, "EFFECT_DATA::Setup() -> ParNum:%d\n", ((_DPX_HEADER*)data)->ParNum);
-#line 133
-    ASSERT(dpx_header->DpxVer >= 130);
-    ((_DPX_HEADER*)data)->Head = 0x5844;
-    for (i = 0; i < dpx_header->ParNum; i++, p += sizeof(_DPX_PAR)) {
-        if (((_DPX_PAR*)p)->Dpd) ((_DPX_PAR*)p)->Dpd = (u_long128*)((u_char*)((_DPX_PAR*)p)->Dpd + (int)data);
-    }
-    dpd_num = *(int*)p;
-    p += sizeof(int);
-    TRACE_USER((USER)6, "EFFECT_DATA::Setup() -> DpdNum:%d\n", dpd_num);
-    for (int j = 0; j < dpd_num; j++) {
-        EFFECT_DPD_DATA* dpd = (EFFECT_DPD_DATA*)(*(int*)p + (int)data);
-        pppInitDpd((char*)dpd);
-        if (bDownVer) dpd->sHead.ver = 140;
-        dpd->sHead.mcode = s_nMagicCode;
-        dpd->sHead.head = 0x5044;
-        p += sizeof(int);
-        s_nMagicCode++;
-        TRACE_USER((USER)6, "EFFECT_DATA::Setup() -> pppInitDpd() -> DpdVer:%08x\n", *(int*)dpd);
-    }
-}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/effect", Setup__11EFFECT_DATAPUxi);
-#endif
 
 #line 181
 void EFFECT_DATA::Shift(u_long128* to, u_long128* from) {
