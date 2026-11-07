@@ -228,7 +228,139 @@ static void _dispRefImage(_sceMpegDecoder *d, _sceMpegPicture *pict, int n)
         d->outputReady = 1;
     }
 }
+/* Parked: 13 of 272 lines, same size, _dispRefImage's body twice with showCount known to be 1 (the second __muldi3 folds).
+   Left: in the second body the value is in a1 for v1, step in v1 for a0, sb in a0 for a1 (a local for the value only
+   adds a truncation; six shapes of that body, 13-16); `lw t1` (hasPts, a PRE copy) is issued before the addiu: it is
+   the only insn ready that cycle, and nothing natural delays it. */
+#if 0
+static void _dispRefImageField(_sceMpegDecoder *d, _sceMpegPicture *top, _sceMpegPicture *bottom, int n)
+{
+    char buf[256];
+    int bit = 0;
+    _sceMpegPicture *first;
+    _sceMpegPicture *second;
+    long *tags;
+    long *pPts;
+    long *pDts;
+    long *pFlags;
+    long *pPts2;
+    long *pDts2;
+    long *pFlags2;
+    int ok;
+
+    if (d->pictStruct == 2) {
+        first = top;
+        second = bottom;
+        bit = 0x40;
+    } else {
+        first = bottom;
+        second = top;
+    }
+    tags = d->tags;
+    pPts = &tags[2];
+    pDts = &tags[3];
+    pFlags = &tags[4];
+    if (d->hasPts && first->pts < 0 && d->lastPts >= 0) {
+        int n = d->showCount;
+        long odd = n & 1;
+        long step;
+        int r;
+        int ia;
+        int q;
+        long adj = odd & (d->ptsField & 1);
+        { long sb = (step = d->ptsStep) & 1; adj &= sb; }
+        ia = adj;
+        q = (step * n) >> 1;
+        asm volatile("" : : : "memory"); /* MATCH: as in _dispRefImage */
+        r = q + ia;
+        ((union { long l; int i; } *)&tags[2])->l = d->lastPts + r;
+        odd &= d->ptsStep; tags = d->tags; if (odd) d->ptsField++; } else {
+        *pPts = first->pts;
+    }
+    if (d->outputMode == 2 && d->nextPts >= 0) {
+        *pPts = d->nextPts;
+        d->outputMode = 0;
+        d->nextPts = -1;
+    }
+    pPts2 = &tags[5];
+    pDts2 = &tags[6];
+    pFlags2 = &tags[7];
+    *pDts = first->dts;
+    {
+        long a = ((long)first->flag40 << 5) | ((long)first->flag3C << 6);
+        long b = ((long)first->flag34 << 8) | (long)first->flag2C;
+        long c = ((long)first->flag38 << 7) | ((long)first->flag30 << 3);
+        *pFlags = (b | a) | c;
+    }
+    d->lastPts = tags[2];
+    d->showCount = 1;
+    if (d->hasPts && second->pts < 0 && d->lastPts >= 0) {
+        int n = d->showCount;
+        long odd = n & 1;
+        long step;
+        int r;
+        int ia;
+        int q;
+        long adj = odd & (d->ptsField & 1);
+        { long sb = (step = d->ptsStep) & 1; adj &= sb; }
+        ia = adj;
+        q = (step * n) >> 1;
+        r = q + ia;
+        ((union { long l; int i; } *)&tags[5])->l = d->lastPts + r;
+        odd &= d->ptsStep; tags = d->tags; if (odd) d->ptsField++; } else {
+        *pPts2 = second->pts;
+    }
+    if (d->outputMode == 2 && d->nextPts >= 0) {
+        *pPts2 = d->nextPts;
+        d->outputMode = 0;
+        d->nextPts = -1;
+    }
+    *pDts2 = second->dts;
+    {
+        long a = ((long)second->flag40 << 5) | ((long)second->flag3C << 6);
+        long b = ((long)second->flag34 << 8) | (long)second->flag2C;
+        long c = ((long)second->flag38 << 7) | ((long)second->flag30 << 3);
+        *pFlags2 = (b | a) | c;
+    }
+    d->lastPts = tags[5];
+    d->showCount = 1;
+    tags[4] |= bit;
+    tags[7] |= bit;
+    d->vE0 = first->v5C;
+    d->vE4 = first->v60;
+    d->info[0] = first->info[0];
+    d->info[1] = second->info[1];
+    d->info[3] = first->info[3];
+    d->info[4] = second->info[4];
+    if (d->width) {
+        ok = d->bufW >= top->w && d->width >= top->h;
+    } else {
+        ok = d->stride >= top->rows * top->width;
+    }
+    if (!ok) {
+        sceSnprintf(buf, 256, "Too small buffer size for %dx%d picture\n", top->w, top->h);
+        _sceMpegError(d, buf);
+        asm volatile("" : "=r"(ok) : "0"(ok));
+        if (!ok) return;
+    }
+    if (top->pictType == 1 && bottom->pictType == 1) {
+        top->width <<= 1;
+        if (d->useCsc) {
+            _sceMpegCscStoreRefImage(d, top);
+        } else {
+            _cpr8(d, top);
+        }
+        top->width >>= 1;
+        if (d->state != 2) {
+            d->state = 2;
+            d->outputBase = d->frameCount;
+        }
+        d->outputReady = 1;
+    }
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/output", _dispRefImageField);
+#endif
 /* gcc still thinks it is in .rdata (the next string follows without a section change) */
 __asm__(".rdata");
 
