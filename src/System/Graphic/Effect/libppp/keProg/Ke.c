@@ -267,39 +267,34 @@ void KeVu0NormXY(float *d, float *s) {
         : "memory");
 }
 
-/* MATCH: GPR instructions inside the VU0/MMI asm, as in the original's instruction stream; the split form (C + one asm per VU0/MMI instruction) is not attempted yet: build/progress/cleanup-libppp-mips-asm.md */
+/* MATCH: one asm per VU0 instruction, the constant in C. The andi stays asm: its result is dead in the original (void function) and C drops it (`f &= 0xc0;`: 1 line). vmaddaz, vmaddw and vdiv share one line: Ps2EeAs pads a vdiv within two instructions of a line label with nops (on separate lines: 2 nops) */
 void KeVu0RTPersF(float *d, float *m[4], float *s) {
-    __asm__ __volatile__(
-        "lqc2 $vf1, 0x0(%1)\n"
-        "lqc2 $vf2, 0x10(%1)\n"
-        "lqc2 $vf3, 0x20(%1)\n"
-        "lqc2 $vf4, 0x30(%1)\n"
-        "lqc2 $vf5, 0x0(%2)\n"
-        "vmulax.xyzw $ACC, $vf1, $vf5x\n"
-        "vmadday.xyzw $ACC, $vf2, $vf5y\n"
-        "vmaddaz.xyzw $ACC, $vf3, $vf5z\n"
-        "vmaddw.xyzw $vf5, $vf4, $vf5w\n"
-        "vdiv $Q, $vf0w, $vf5w\n"
-        "dli $v0, 0x4580000045800000\n"
-        "qmtc2.ni $v0, $vf29\n"
-        "vwaitq\n"
-        "vmulq.xyz $vf5, $vf5, $Q\n"
-        "vnop\n"
-        "vnop\n"
-        "vnop\n"
-        "ctc2.ni $0, $vi16\n"
-        "vsub.xyw $vf0, $vf5, $vf0\n"
-        "vsub.xy $vf0, $vf29, $vf5\n"
-        "vnop\n"
-        "vnop\n"
-        "vnop\n"
-        "vnop\n"
-        "cfc2.ni $v0, $vi16\n"
-        "andi $v0, $v0, 0xc0\n"
-        "sqc2 $vf5, 0x0(%0)\n"
-        :
-        : "r"(d), "r"(m), "r"(s)
-        : "$2", "memory");
+    int f;
+
+    __asm__ __volatile__("lqc2 $vf1, 0x0(%0)" : : "r"(m) : "memory");
+    __asm__ __volatile__("lqc2 $vf2, 0x10(%0)" : : "r"(m) : "memory");
+    __asm__ __volatile__("lqc2 $vf3, 0x20(%0)" : : "r"(m) : "memory");
+    __asm__ __volatile__("lqc2 $vf4, 0x30(%0)" : : "r"(m) : "memory");
+    __asm__ __volatile__("lqc2 $vf5, 0x0(%0)" : : "r"(s) : "memory");
+    __asm__ __volatile__("vmulax.xyzw $ACC, $vf1, $vf5x");
+    __asm__ __volatile__("vmadday.xyzw $ACC, $vf2, $vf5y");
+    __asm__ __volatile__("vmaddaz.xyzw $ACC, $vf3, $vf5z"); __asm__ __volatile__("vmaddw.xyzw $vf5, $vf4, $vf5w"); __asm__ __volatile__("vdiv $Q, $vf0w, $vf5w");
+    __asm__ __volatile__("qmtc2.ni %0, $vf29" : : "r"((u_long)0x4580000045800000));
+    __asm__ __volatile__("vwaitq");
+    __asm__ __volatile__("vmulq.xyz $vf5, $vf5, $Q");
+    __asm__ __volatile__("vnop");
+    __asm__ __volatile__("vnop");
+    __asm__ __volatile__("vnop");
+    __asm__ __volatile__("ctc2.ni $0, $vi16");
+    __asm__ __volatile__("vsub.xyw $vf0, $vf5, $vf0");
+    __asm__ __volatile__("vsub.xy $vf0, $vf29, $vf5");
+    __asm__ __volatile__("vnop");
+    __asm__ __volatile__("vnop");
+    __asm__ __volatile__("vnop");
+    __asm__ __volatile__("vnop");
+    __asm__ __volatile__("cfc2.ni %0, $vi16" : "=r"(f));
+    __asm__ __volatile__("andi %0, %0, 0xc0" : "+r"(f));
+    __asm__ __volatile__("sqc2 $vf5, 0x0(%0)" : : "r"(d) : "memory");
 }
 
 void KeVu0PacPers(int *dst, float *src) {
