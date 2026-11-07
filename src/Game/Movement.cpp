@@ -191,7 +191,7 @@ inline void _ctorStrings(void* p) {
     TRACE(__FILE__ "(211)");
     if (!p) AssertApp(__FILE__, 212, "m_pMapCollision", 0);
 }
-/* Parked: 53/143 lines differ with the draft below (size 420 = original). The two vectors are unnamed gcc
+/* Parked: 26/128 lines differ with the draft below (53 before a statement-order hill-climb, build/hillstmt.py; size 420 = original). The two vectors are unnamed gcc
  * constant-pool entries (D_004824A0/B0): a BLKmode compound literal read without a target goes to the pool
  * (output_constant_def), which the draft's _V1 member reads reproduce (two 16-byte entries, lq each). Left: the
  * original loads both before all stores and stores the vtable after the four init() zero stores; ours stores the
@@ -206,11 +206,7 @@ CMovement::CMovement(CEntity* inOwner) {
 #define vOne (((const _V1){{{{1.0f, 1.0f, 1.0f, 1.0f}}}}).v[0])
     FVECTOR o;
     m_vOldPos = m_vPos = m_vOldRot = m_vRot = m_vVel = m_vAcc = vZero;
-    m_qQuat.init();
-    m_vScl = o = vOne;
-    m_vHitBackVel.init();
     m_vWallNormal.init();
-    m_vLastHitPos.init();
     m_uiFlag = 0;
     m_uiCollisionFlag = 0;
     m_fMass = 1.0f;
@@ -220,11 +216,15 @@ CMovement::CMovement(CEntity* inOwner) {
     m_bExceptNowRide = FALSE;
     m_iCounter = 0;
     m_fPower = 1.0f;
+    m_vLastHitPos.init();
+    m_vHitBackVel.init();
+    m_qQuat.init();
     m_fForce = 1.0f;
     m_fLimitSpeedY = -0.5f;
     m_tqWaterSurfaceTimer = 0;
     m_pOwner = inOwner;
     m_JumpCollInfo.info = 0;
+    m_vScl = o = vOne;
     m_CollInfo.info = 0;
 #line 211
     m_pMapCollision = new (__FILE__ "(211)") CCollMap;
