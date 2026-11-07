@@ -460,8 +460,9 @@ int sceSifBindRpc(sceSifClientData *cd, unsigned int request, unsigned int mode)
 }
 
 /* A call for an EE server: queue it for its thread. */
-/* Parked: 8 lines, 4 bytes short (45 before the do-while(0) around the fno copy, decomp-permuter); the rest of the
-   field copies still let the scheduler hoist loads */
+/* Parked: 3 lines, 4 bytes long (2026-11-07, was 8): !qd->start arm first, qd->end's store of alias set 0 (the copies' loads
+   stay behind it), do/while(0) around the fno copy (without it 26). Left: the rsize load goes ahead of the store at 40 and an
+   extra nop before the jr; a union store on any single field of the copy does not move it. */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/sifrpc", _request_call);
 #if 0
 static void _request_call(RpcCallPkt *call, struct rpc_data *rd)
@@ -469,12 +470,12 @@ static void _request_call(RpcCallPkt *call, struct rpc_data *rd)
     sceSifServeData *sd = call->server;
     sceSifQueueData *qd = sd->base;
 
-    if (qd->start) {
-        qd->end->next = sd;
-    } else {
+    if (!qd->start) {
         qd->start = sd;
+    } else {
+        qd->end->next = sd;
     }
-    qd->end = sd;
+    _PKT_STORE(qd->end, p) = sd;
     sd->paddr = call->rpc.pkt_addr;
     sd->client = call->client;
     do {
