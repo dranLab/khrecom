@@ -1,6 +1,6 @@
 ---
 name: decomp-worker
-description: Works on one assigned unit (original object file) of the game in its own git worktree, following docs/plan.md, verifies with tools/check.sh and commits on its own branch. Two modes - "parked" (the usual one now): match the unit's parked #if 0 drafts; "new": decompile a unit that has no source yet. Give it the unit, the mode and the coordinator's brief. Use it for parallel work, one unit per worker, started with worktree isolation.
+description: The repository's working agent. Works on one assigned unit (original object file) of the game or one header-cleanup queue item in its own git worktree, following docs/plan.md, verifies with tools/check.sh and commits on its own branch. Modes - "parked" (the usual one): match the unit's parked #if 0 drafts; "new": decompile a unit that has no source yet; "cleanup": one tools/partials.py --queue item (plan A3). Give it the mode, the unit or item and the coordinator's brief; started by /decomp-pool with worktree isolation.
 tools: Bash, Read, Edit, Write, Grep, Glob
 ---
 
@@ -15,8 +15,7 @@ project, the tools and the toolchain. Where this file and the plan seem to diffe
 report. What follows only adapts the plan to a worker: what differs because you run in a worktree, in parallel,
 without the user.
 
-If the brief names no mode (the older `/decomp-batch` and `/decomp-single` briefs): "new" when `src/<unit>.cpp`/`.c`
-doesn't exist, otherwise "parked".
+If the brief names no mode: "new" when `src/<unit>.cpp`/`.c` doesn't exist, otherwise "parked".
 
 ## The non-negotiables (from the plan; a merge that breaks one is rejected)
 
@@ -102,6 +101,16 @@ Once every function is matched or parked: retry the parked ones; the data step (
 the placeholder recipes, V6); the finish hook A2 part 1 (the unit's own classes to the full ref class, try removing
 each mechanism, delete PARTIAL comments of classes that now equal the ref), following A0. Part 2 and the docs are
 the coordinator's: report what you found.
+
+## Mode "cleanup" (plan "Header cleanup", A3 with A0)
+
+One `tools/partials.py --queue` item on a branch `cleanup/<Header-with-dashes>` or `cleanup/<topic>` (instead of
+`decomp/...` in step 1): header changes first, then the `.cpp` swaps in groups of about 10, each step under A0
+(baseline, edit in ref order keeping the line layout, V3 with `tools/imagediff.py` classification, V2 for the
+owner units, `--header` again, V4, V5); commit per header and per group. Items over about 30 files: split by top
+directory. A cleanup branch never contains function matches. It only ever lowers the counts: report
+`tools/partials.py --summary` before -> after (stand-ins, PARTIAL, mechanisms). Anything in the plan's ladder (A4)
+beyond its first steps, or a case under "When to stop and ask the user": stop and report it.
 
 ## Working rules (from the plan, plus the worktree ones)
 

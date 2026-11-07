@@ -1,90 +1,113 @@
 ---
-description: Keep a fixed number of decomp-worker sub-agents running on parked drafts (one unit each); merge each one as it finishes and start the next
+description: Keep a fixed number of decomp-worker sub-agents running on the plan's work items (one unit each), following docs/plan.md; merge each one as it finishes and start the next
 argument-hint: "[number of workers, default 3] [model=<name>] [extra hints, e.g. 'lib only', 'Game/Enemy only', a unit list]"
 ---
 
-You coordinate a continuous pool of decompilation workers. Arguments: $ARGUMENTS
+You coordinate a continuous pool of decomp-worker sub-agents. Arguments: $ARGUMENTS
 
-The work left is mostly parked drafts in existing units, so the pool hands out units with drafts, closest first,
-one unit per worker (mode "parked"). Units without source (mode "new") are only the C/C++ ones `tools/candidates.py`
-still lists; assembly-only units stay assembly. Whenever a worker finishes, merge it and start the next right
-away, so the pool stays at the requested size (default 3).
+**docs/plan.md is the plan you follow.** Read it completely first (its first lines say so), then CLAUDE.md and the
+memory index. This command only adapts the plan to parallel work: the plan's "Working rules" allow parallel work
+only through this pool, one unit per `decomp-worker` in its own worktree, merged one at a time with the gate. You
+are the plan's single sequential worker for everything on `main`: merges, docs, memory, approved config lines. You
+do not decompile yourself while the pool runs. Where this file and the plan differ, the plan wins: tell the user.
 
-## 1. Preconditions (once, at the start)
+## 1. Session start (plan "Session start", once)
 
-- You are in the main checkout (first entry of `git worktree list`), on `main`, with a clean working tree. A
-  background job is forced into a worktree and can't merge `main`: run the pool in an interactive session.
-- `tools/check.sh` passes. If not, stop and report.
-- Workers already running in this session count towards the pool size, and their units are taken.
+- The main checkout (first entry of `git worktree list`), on `main`, `git status` clean. A background job is forced
+  into a worktree and can't merge `main`: run the pool in an interactive session.
+- `tools/check.sh > build/check.log 2>&1; echo $?` prints 0; if not, stop and report.
+- The plan's docs block ("Keeping the docs current"); if anything changed, commit it first
+  (`docs: regenerate leftovers and progress`, files added by name).
+- Workers already running in this session count towards the pool size, and their units are taken. Interrupted
+  workers (a pause for the usage limit) leave a `decomp/<slug>` branch or a worktree with uncommitted work: resume
+  those first (commit the work in the old worktree as `WIP <unit> (interrupted)`, only `src/`; brief the new worker
+  to branch `decomp/<slug>-r` from main and `git merge decomp/<slug>`; afterwards remove both worktrees and delete
+  `decomp/<slug>`, `decomp/<slug>-r` and both `worktree-agent-*` branches).
 
-## 2. The work list
+## 2. The work list (plan "Remaining work, in this order")
 
-At the start: `.venv/bin/python tools/drafts.py -j 12 > build/pool.drafts 2> build/pool.sum` (about 10 minutes;
-every parked draft with funcdiff's line count, closest first, or its first build error). Group the rows by unit.
-Rank units by their closest draft, then by how many drafts are within about 10 lines. A unit whose drafts only fail
-to build is still a candidate (give the worker the error); a function with "no draft" in an otherwise drafted unit
-goes in the same worker's brief. Skip units that have a `decomp/*` branch already or a running worker.
+Measure: `.venv/bin/python tools/drafts.py -j 12 > build/pool.drafts 2> build/pool.sum` (about 10 minutes; every
+parked draft with funcdiff's line count, closest first, or its first build error). Then hand out units in the plan's
+order, each as one worker brief:
 
-Prefer units from different directories than the running workers (they may need the same header). Follow the
-user's hints. After a merge, refresh only that unit: `tools/drafts.py --unit <unit>`.
+1. **Parked game drafts**, closest first: rank units by their closest draft, then by how many drafts are within
+   about 10 lines; the leads the plan names first. A unit whose drafts only fail to build is still a candidate (the
+   error goes in the brief: usually a stopgap block that clashes when the draft is enabled).
+2. **Data from source** for the units the plan lists under item 2 (and the blocker table of
+   `docs/asm-leftovers.md`): only where the plan doesn't record it as blocked.
+3. **Library leftovers** (`docs/sdk-leftovers.md`).
+4. **Header cleanup, interleaved:** after every two merged work items, one `tools/partials.py --queue` item as a
+   worker in mode "cleanup" (plan A3), unless the plan's "Queue state" says the top items stay; never two cleanup
+   workers on overlapping headers.
+5. **New units** (mode "new") only for the C/C++ units `tools/candidates.py` still lists; assembly-only units stay
+   assembly.
 
-Interrupted workers (a pause for the usage limit) leave a `decomp/<slug>` branch with WIP commits or a worktree with
-uncommitted work. Resume those first:
-1. Uncommitted work: commit it in the old worktree as `WIP <unit> (interrupted)` (only `src/`).
-2. The old branch stays checked out in its worktree: tell the new worker to create `decomp/<slug>-r` from main,
-   `git merge decomp/<slug>`, run `tools/drafts.py --unit <unit>` and continue.
-3. After merging `-r`, remove both worktrees and delete `decomp/<slug>`, `decomp/<slug>-r` and both
-   `worktree-agent-*` branches.
+Skip units with a `decomp/*` branch or a running worker; prefer units from other directories than the running
+workers (they may need the same header). Follow the user's hints. After a merge, refresh only that unit
+(`tools/drafts.py --unit <unit>`).
 
 ## 3. Starting a worker
 
-First the **usage gate** each time a slot is free: `python3 .claude/usage_gate.py --running <workers still
-running> --per-worker <estimate>` (the status line `~/.claude/statusline.py` saves the plan's usage to
+First the **usage gate** each time a slot is free: `python3 .claude/usage_gate.py --running <workers still running>
+--per-worker <estimate>` (the status line `~/.claude/statusline.py` saves the plan's usage to
 `~/.claude/usage-latest.json`). On `WAIT`, start nothing: say so in one line and leave the slot empty (section 5).
 The estimate is the 5-hour-window % one worker uses: start with 8; append `<HH:MM> <5h %> <running> <event>` to
 `build/usage.log` at every start and finish, and use the observed average once a few workers have finished.
 
-Then one Agent tool call per unit (several in one message when filling several slots):
-- `subagent_type`: `decomp-worker`, `isolation`: `worktree`, and `model` if the user gave one.
-- `prompt`, for mode "parked":
+Then one Agent tool call per unit (several in one message when filling several slots): `subagent_type`:
+`decomp-worker`, `isolation`: `worktree`, and `model` if the user gave one. The worker reads docs/plan.md itself:
+the brief adds only what the plan can't know.
 
-      Mode: parked. Unit <unit> (<lang>). Its drafts, from tools/drafts.py (funcdiff lines, closest first):
-        <the unit's rows, as tools/drafts.py printed them>
-      Memory notes that fit (read them first, ~/.claude/projects/-home-alex-khrecom/memory/<name>.md): <names>
-      <anything else you know: a related unit that matched with the same lever, a stale note you noticed>
+    Mode: parked. Unit <unit> (<lang>). Its drafts, from tools/drafts.py (funcdiff lines, closest first):
+      <the unit's rows, as tools/drafts.py printed them>
+    Memory notes that fit: <two to five names from the plan's Levers index, by the symptoms in the notes>
+    <what you know: a related unit that matched with the same lever, a note you know is stale>
 
-  Pick the memory notes from docs/plan.md's "Levers index" and MEMORY.md by the symptoms in the drafts' notes
-  (two to five, not the whole index: the worker pays for each in context).
-- For mode "new": `Mode: new. Decompile unit <unit> (<lang>, <size> bytes of code, <n> functions).` plus related
-  units whose headers it can include.
+- Mode "new": `Mode: new. Unit <unit> (<lang>, <size> bytes of code, <n> functions).` plus related units whose
+  headers it can include.
+- Mode "cleanup": `Mode: cleanup. Queue item <header or topic> (plan A3, tools/partials.py --queue).`
+- Never ask a worker for something its definition or the plan forbids: no doc edits, no `tools/`/`config/`
+  changes, no PARTIAL markers or other header changes against the ref. Report-only items come back to you.
 
-Tell the user which unit you start, in one line. Do not decompile yourself meanwhile.
+Tell the user which unit you start, in one line.
 
-## 4. When a worker finishes
+## 4. When a worker finishes (plan "Commits and merges")
 
 Its report and completion notification wake you. In the main checkout, one merge at a time:
-1. If it reported commits: `git merge --no-ff --no-commit decomp/<slug>`. Conflicts are usually shared headers:
-   combine both sides' declarations, keep existing `// PARTIAL` markers.
-   **Then review the diff against docs/plan.md (V4) before the gate:** `git diff --cached | grep '^+.*PARTIAL'` must
-   print nothing, and no header may change against the ref (access specifiers, extra members, stand-ins). A branch
-   that adds any of that is not merged: `git merge --abort` and send the worker back (park the function instead).
-2. `tools/check.sh`. If it exits 0: `git commit -m "Merge decomp/<slug>: <unit>, <matched> matched, <parked> parked"`,
-   then `git worktree remove <the worker's worktree>`, `git branch -d decomp/<slug>` and delete the worktree's own
-   `worktree-agent-*` branch. If not: `git merge --abort`, keep the branch for review and tell the user.
-3. Refresh the unit's rows (`tools/drafts.py --unit <unit>`) and check the worker's claims against them.
-4. Follow-ups it reported (shared headers, `include/khtypes.h`): handle them if cheap, each with `tools/check.sh`
-   and its own commit. Changes to `configure.py` or `tools/` need the user's OK.
-   **`config/SLUS_217.99/symbol_addrs.txt` lines that name unnamed weak or vtable copies are pre-approved**: add them
-   as a commented block for the unit, switch the unit to its full-source variant, `touch` the source and run the
-   full `tools/check.sh`; commit only if it exits 0 and `tools/funcdiff.py <unit>` shows every function MATCH,
-   otherwise revert (`git checkout -- config/SLUS_217.99/symbol_addrs.txt src/<unit>.*`) and report.
-5. A lever the worker found that is new: add it to the memory notes (one file per lever, linked from MEMORY.md).
-6. Refill the slot (sections 2 and 3) right away, then report the merge in a few lines: merged or not, functions
-   matched and parked (before -> after), open issues.
 
-Every few merges, and at the end: `tools/leftovers.py game --update docs/asm-leftovers.md`,
-`tools/leftovers.py lib --update docs/sdk-leftovers.md`, the counts in docs/plan.md ("Where things stand"), one
-commit, `tools/check.sh`.
+1. **Leftover processes first:** list the worker's shells and runs (`/proc/<pid>/cwd` inside its worktree, e.g.
+   `until ... pgrep` waits, permuter runs) and kill them by PID; never with a `pkill -f` pattern your own shell
+   matches.
+2. **Baseline:** `tools/partials.py --summary > build/pool.partials.before`.
+3. `git merge --no-ff --no-commit decomp/<slug>`. Conflicts are usually shared headers: combine both sides'
+   declarations; in a generated doc, take main's side and regenerate it.
+4. **Review the diff against the plan before the gate (V4, header cleanup):** `git diff --cached | grep
+   '^+.*PARTIAL'` prints nothing; no header changes against the ref (access specifiers, extra members, stand-ins);
+   only real C/C++, every kept mechanism with `MATCH:`; no changes to `tools/`/`configure.py`/`config/`/docs the
+   user didn't approve. A branch that fails this is not merged: `git merge --abort`, tell the user, and brief a new
+   worker to park the function instead.
+5. **V5:** `tools/check.sh`. On exit 0: `tools/partials.py --summary` again, then commit with the plan's message,
+   `Merge decomp/<slug>: <unit>, <matched> matched, <parked> parked (stand-ins -N, PARTIAL -M, mechanisms -K)`.
+   Otherwise `git merge --abort`, keep the branch for review and tell the user.
+6. **The docs block** (every merge, plan "Keeping the docs current"): the four regenerations, commit what changed
+   as `docs: regenerate leftovers and progress`, files added by name (never `git add docs`). The hand-kept parts in
+   the same step: the work table of docs/plan.md (drop a unit once it has no unparked function left), the blocker
+   table of `docs/asm-leftovers.md`, `docs/sdk-leftovers.md`'s "Notes per unit"/"Levers" for a library finding the
+   worker reported.
+7. **Clean up:** `git worktree remove --force <worktree>` (after step 1 and a `git -C <worktree> status` check),
+   `git branch -d decomp/<slug>` and the worktree's own `worktree-agent-*` branch.
+8. **Check the worker's claims** against `tools/drafts.py --unit <unit>`.
+9. **Records and memory:** a new lever gets its memory file (one per lever, linked from MEMORY.md) and a row in the
+   plan's Levers index; a unit that is now finished gets its `*-unit-lessons` file and MEMORY.md line (plan
+   "Finishing a unit" 6). A wrong lever (one that broke the plan) is corrected, not kept.
+10. **Follow-ups** the worker reported: those the plan allows you (`config/SLUS_217.99/symbol_addrs.txt` lines that
+    name unnamed weak or vtable copies: add them as a commented block for the unit, switch the unit to its
+    full-source variant, `touch` the source, full `tools/check.sh`, commit only if it exits 0 and
+    `tools/funcdiff.py <unit>` shows every function MATCH, otherwise revert and report). Everything in the plan's
+    "When to stop and ask the user" (a `tools/`/`configure.py`/`config/` change, a header-cleanup decision, ...):
+    ask the user; under an unattended `/loop`, decide it yourself as the plan says and log the decision.
+11. **Refill** the slot (sections 2 and 3) right away, then report the merge in a few lines: merged or not,
+    functions matched and parked (before -> after), the partials deltas, open issues.
 
 ## 5. Keeping it going and stopping
 
@@ -92,8 +115,10 @@ commit, `tools/check.sh`.
   wake signal. On a fallback wakeup with all workers still running, do nothing else.
 - While the usage gate says `WAIT`: don't refill. With none left running, schedule the wakeup for shortly after the
   5-hour window resets (the gate prints the reset time; wakeups are capped at 3600 s, so chain them).
-- Stop refilling when the user asks, when the work list has no unit left with a draft within about 30 lines that
-  no earlier worker of this run already had, or when two merges in a row fail `tools/check.sh` (something
-  systemic: tell the user). Let running workers finish and merge them, then summarize the run: units, functions
-  matched, drafts improved (before -> after), what is left.
+- Stop refilling when the user asks, when the work list has no item left that no earlier worker of this run already
+  had (parked drafts: none within about 30 lines), or when two merges in a row fail `tools/check.sh` (something
+  systemic: tell the user). Let running workers finish and merge them.
+- **At the end** (plan "Record keeping"): V5 on `main`, the docs block, "Where things stand" in docs/plan.md
+  (numbers and date), one commit; then summarize the run for the user: units, functions matched, drafts improved
+  (before -> after), partials deltas, what is left.
 - Never push: that is the user's.
