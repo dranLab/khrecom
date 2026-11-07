@@ -191,7 +191,7 @@ inline void _ctorStrings(void* p) {
     TRACE(__FILE__ "(211)");
     if (!p) AssertApp(__FILE__, 212, "m_pMapCollision", 0);
 }
-/* Parked: 26/128 lines differ with the draft below (53 before a statement-order hill-climb, build/hillstmt.py; size 420 = original). The two vectors are unnamed gcc
+/* Parked: 26/128 lines differ with the draft below (53 before a statement-order hill-climb, build/hillstmt.py, which then stays at 26; member-init lists 46-63; a split chain 46-50; size 420 = original). The two vectors are unnamed gcc
  * constant-pool entries (D_004824A0/B0): a BLKmode compound literal read without a target goes to the pool
  * (output_constant_def), which the draft's _V1 member reads reproduce (two 16-byte entries, lq each). Left: the
  * original loads both before all stores and stores the vtable after the four init() zero stores; ours stores the
