@@ -144,11 +144,6 @@ void _sceCd_cd_callback(void *p)
     sceCdCbfunc_num = 0;
 }
 
-/* Parked: the exit block stores _sceCd_c_cb_sem, sceCdCbfunc_num, cb_thid and keeps cb_flag for the delay slot; ours
-   schedules cb_flag earlier. The exit block on one line with `sceCdCbfunc_num = cb_flag = 0` (decomp-permuter) fixes
-   the code, but two hoisted luis (cb_flag's %hi in fp) then swap registers: funcdiff says MATCH, the SHA-1 fails
-   (gcse PRE order of the symbols; also for the permuter's own one-line loop). */
-#if 0
 void _sceCd_cbLoop(void)
 {
     void *old;
@@ -156,9 +151,12 @@ void _sceCd_cbLoop(void)
     while (1) {
         WaitSema(cb_semid);
         if (sceCdCbfunc_num == -1) {
+            /* MATCH: the barriers hold the four stores in the original's order, cb_flag in the jal slot */
             _sceCd_c_cb_sem = 0;
+            __asm__ volatile("");
             sceCdCbfunc_num = 0;
-            *(volatile int *)&cb_thid = 0;
+            cb_thid = 0;
+            __asm__ volatile("");
             cb_flag = 0;
             ExitDeleteThread();
         }
@@ -173,13 +171,6 @@ void _sceCd_cbLoop(void)
         _sceCd_c_cb_sem = 0;
     }
 }
-#endif
-/* _sceCd_cbLoop's strings in .rodata while it is asm */
-__asm__(".rdata\n"
-        ".align 3\n.asciz \"sceCdCbfunc= %d sceCdCbfunc_num= %d\\n\"\n"
-        ".text\n");
-
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/eecdvd_sceCdCallback", _sceCd_cbLoop);
 
 int sceCdInitEeCB(int prio, void *stack, int stacksize)
 {

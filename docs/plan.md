@@ -41,7 +41,7 @@ every change that is merged without regenerating. Regenerating all four takes ab
 
 ## Where things stand (2026-11-07)
 
-- **Progress:** 11986 of 12311 functions matched: game 11220 of 11323, libraries 766 of 988 (plus 151 hand-written).
+- **Progress:** 11987 of 12311 functions matched: game 11220 of 11323, libraries 767 of 988 (plus 151 hand-written).
   `tools/check.sh` proves the image, but its function totals are too high: it strips `#if 0.*?#endif` before it counts
   `INCLUDE_ASM`, so a parked `#if 0 ... #else INCLUDE_ASM #endif` counts as done (about 12 functions on 2026-11-07). Count
   game functions with `grep -rhE '^INCLUDE_ASM' src --include=*.cpp --include=*.c --exclude-dir=lib | wc -l`. Fixing the regex is a
@@ -74,12 +74,12 @@ every change that is merged without regenerating. Regenerating all four takes ab
   `build/permlines.py` sweeps the order of adjacent statements (no gain on initAttackField, setupFontTex). Check the helpers
   first: `asm volatile` against plain `asm`, and `=&r` where the original keeps inputs and output apart. See memory
   ref-locals-reveal-shape, ti-di-conversion-is-por.
-- **Read the scheduler and reorg, then pin (2026-11-07).** 32 functions in one sitting, most long parked as "scheduling tie"
+- **Read the scheduler and reorg, then pin (2026-11-07).** 33 functions in one sitting, most long parked as "scheduling tie"
   (setCharge, initAttackField, setConfuse, CHumanBoss::initalize, CNakCamera::main, beginStateHitAttack, acWaitReq,
   createBootInfoMsg, setStockInfo, CBattleCard::destroy, the Movement constructor, testPlayingCard, rollDeck,
   getApplyMatrixBBox, checkBBox, pppSetMatrix, _invokePrimary_Main, the last fan, _sceRpcGetPacket, changeMode, replaceNorma,
   itemCardProc, initRecover, chkDamage, _hokanRot, the three CollAttack checks, setStatusWin1, setupFlick,
-  exeMessageDlg, getRandomTargetPos). Dump `-dS -dR -fsched-verbose-9`, `build/jm/schedshow.py <.sched2> <fn signature> <rtl key>` prints the
+  exeMessageDlg, getRandomTargetPos, _sceCd_cbLoop). Dump `-dS -dR -fsched-verbose-9`, `build/jm/schedshow.py <.sched2> <fn signature> <rtl key>` prints the
   successors, priorities and issue order for the block. Ask what the original's order implies, in this order: a tail written out
   (call-arg-order-dependents), a cast store (fixed-scalar-varying-struct-alias), a clobber that marks a register dead for reorg, a load inside both arms for a cross-jump
   (crossjump-block-end-call), an empty asm in one arm to stop one,
@@ -114,7 +114,8 @@ Numbers change with every merge: `tools/check.sh` (totals), `tools/leftovers.py 
    only: a 14-vs-15-refs priority tie), PathData `getNearPath` (9 lines), 2DSprObj `initForSeq` (20/342).
    The hand-kept table at the top of
    `docs/asm-leftovers.md` lists the blockers that need more than a source change.
-2. **Data from source** for the units that still take a section from asm: `pppEiDrawShipoly` (.bss .data .rodata) and
+2. **Data from source** (2026-11-07: CollUtil's `.rodata` is 0x20 of 0x304 while its three functions are assembly: it needs them first)
+   for the units that still take a section from asm: `pppEiDrawShipoly` (.bss .data .rodata) and
    `CollUtil` (.rodata). `Ride` and `CollUtilO` can't (`.rodata` at 4 mod 8), `sddrv_ee`'s `.bss` is blocked (see the
    table at the top of `docs/asm-leftovers.md`).
 3. **Library leftovers**: the parked and not attempted functions of `docs/sdk-leftovers.md`, with its "Working on
