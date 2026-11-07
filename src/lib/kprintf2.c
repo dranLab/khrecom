@@ -46,36 +46,32 @@ static void serialPutchar(int c)
     kputchar(c);
 }
 
-/* The integer value of x * 1e6 (x: the bits of a double) for "0.%d". */
-/* Parked: 9 lines differ */
-#if 0
+/* The integer value of the double whose bits are x (9999 when too large); printfloat passes it d * 1e6. */
 int ftoi(unsigned long x)
 {
-    long e = ((x << 1) >> 53) - 0x433;
-    unsigned long m;
+    long e = (x << 1) >> 53;
 
+    e -= 0x433;
     if (e < -0x35) {
         return 0;
     }
     if (e >= 13) {
         return 9999;
     }
-    m = ((x << 12) >> 12) | (1UL << 52);
+    x = (x << 12) >> 12;
+    x |= 1UL << 52;
     if (e < 0) {
-        m >>= (e = -e) - 2; /* e negated in place (decomp-permuter): 17 -> 9 lines */
-        if ((m & 3) == 3) {
-            m = (m >> 2) + 1;
+        x >>= (e = -e) - 2;
+        if ((x & 3) == 3) {
+            x = (x >> 2) + 1;
         } else {
-            m >>= 2;
+            x >>= 2;
         }
     } else {
-        m <<= e;
+        x <<= e;
     }
-    return m;
+    return x;
 }
-#endif
-int ftoi(unsigned long x);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/kprintf2", ftoi);
 
 static int _sceSnprintf_pf(PutcFunc func, void *ctx, unsigned int *size, const char *fmt, ...);
 
