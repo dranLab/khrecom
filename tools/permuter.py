@@ -63,7 +63,9 @@ def demangle(symbol: str) -> tuple[str, str | None]:
     if symbol.startswith(("_$_", "_._")):
         cls = _mangled_class(symbol[3:])
         return ("~" + cls, cls) if cls else (symbol, None)
-    i = symbol.find("__", 1)
+    # the separator is the first "__" followed by a qualifier or signature (a name may end in "_": damage___19C...)
+    i = next((k for k in range(1, len(symbol) - 2) if symbol.startswith("__", k)
+              and re.match(r"[0-9QCFt]", symbol[k + 2:])), -1)
     if i <= 0:
         return symbol, None
     base, rest = symbol[:i], symbol[i + 2:]
@@ -115,7 +117,7 @@ def definition_pattern(name: str, cls: str | None) -> str:
     q = r"(?:\b" + re.escape(cls) + r"\s*::\s*)" if cls else ""
     n = r"\b" + re.escape(name) if not name.startswith("~") else r"~\s*" + re.escape(name[1:])
     # an optional return type and qualifiers (none for a constructor or destructor), then the name
-    return r"^(?:[^;{}#]*?[\s*&])?" + q + n + r"\s*\([^;{}]*\)\s*(?:const\s*)?\{"
+    return r"^(?:[^;{}#]*?[\s*&:])?" + q + n + r"\s*\([^;{}]*\)\s*(?:const\s*)?\{"
 
 
 # ---------------------------------------------------------------------------------------------------------------
@@ -528,7 +530,7 @@ def main() -> None:
     LOCALS.update(w for w in IDENT.findall(header[header.find("("):]) if w not in KEYWORDS)
     LOCALS.update(m.group(1) for line in body.split("\n") if is_declaration(line)
                   for m in [re.search(r"([A-Za-z_]\w*)\s*(?:\[[^\]]*\])*\s*(?:=[^;]*)?;$", line.strip())] if m)
-    workdir = ROOT / "build" / "permuter" / symbol
+    workdir = ROOT / "build" / "permuter" / re.sub(r"[^\w.-]", "_", symbol)  # the build runs in a shell: no $
     shutil.rmtree(workdir, ignore_errors=True)
     workdir.mkdir(parents=True)
 

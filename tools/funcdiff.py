@@ -77,51 +77,9 @@ def disassemble(obj: Path, name: str, size: int) -> list[str]:
     return lines
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("unit", help="e.g. System/Spad")
-    parser.add_argument("function", nargs="?", help="mangled name; omit for an overview")
-    parser.add_argument("--version", help="folder name under config/ (default: the only one)")
-    parser.add_argument("--full", action="store_true", help="side by side: print every line, not just the differences")
-    parser.add_argument("-C", "--context", type=int, default=3, metavar="N",
-                        help="side by side: matching lines shown around each difference (default 3)")
-    args = parser.parse_args()
-
-    versions = sorted(p.name for p in (ROOT / "config").iterdir() if (p / f"{p.name}.yaml").exists())
-    version = args.version or versions[0]
-    opts = yaml.safe_load((ROOT / "config" / version / f"{version}.yaml").read_text(encoding="utf-8"))["options"]
-    build = Path(opts["build_path"])
-    target, base = build / "expected" / "units" / f"{args.unit}.o", build / "src" / f"{args.unit}.o"
-    # A hand-written .s source builds splat's object path instead: objdiff.json knows it.
-    unit = next((u for u in json.loads((ROOT / "objdiff.json").read_text())["units"] if u["name"] == args.unit), {})
-    base = Path(unit.get("base_path", base))
-    result = subprocess.run(["ninja", str(target), str(base)], cwd=ROOT, capture_output=True, text=True)
-    if result.returncode != 0:
-        sys.exit(result.stdout[-3000:] + result.stderr[-1000:])
-
-    t, b = functions(ROOT / target), functions(ROOT / base)
-    pairs = pair_unnamed(t, b)  # the original's unnamed copies of inline functions -> ours
-    if not args.function:
-        for name in t:
-            if not t[name].data and name not in b:
-                continue  # a 0-byte label (splat's func_ at a jump target inside a function), not a function
-            ours = pairs.get(name, name)
-            diff = t[name].difference(b[ours]) if ours in b else None
-            state = "missing" if ours not in b else "MATCH" if diff is None else "differs"
-            print(f"{state:8} {name} ({len(t[name].data)} bytes)" + (f" = ours {ours}" if ours != name else "")
-                  + (f": {diff}" if diff else ""))
-        extra = [n for n in b if n not in t and n not in pairs.values()]
-        if extra:
-            print("only in ours (not in the original):", ", ".join(extra))
-        return
-
-    if args.function not in t:
-        sys.exit(f"{args.function} not in the original {args.unit}")
-    name = args.function
-    ours = pairs.get(name, name)
-    diff = t[name].difference(b[ours]) if ours in b else "missing in ours"
-    left = disassemble(ROOT / target, name, len(t[name].data))
-    right = disassemble(ROOT / base, ours, len(b[ours].data)) if ours in b else []
+def compare_rows(left: list[str], right: list[str]) -> list[tuple[str, str, str]]:
+    """(mark, original line, our line) per aligned row: "|" a real difference, "~" one only in an offset or
+    address, " " equal. The measure behind "N of M lines differ" (tools/drafts.py uses it too)."""
     # Lines are aligned on a key without branch-target offsets and data addresses (see key()), so code shifted by
     # an earlier difference still lines up. Such lines are marked "~" (they differ only in an offset or address);
     # "|" marks a real difference.
@@ -181,6 +139,55 @@ def main() -> None:
             c = right[j1 + k] if j1 + k < j2 else ""
             mark = ("~" if moved else "|") if tag != "equal" or real_difference(a, c) else "~" if a != c else " "
             rows.append((mark, a, c))
+    return rows
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("unit", help="e.g. System/Spad")
+    parser.add_argument("function", nargs="?", help="mangled name; omit for an overview")
+    parser.add_argument("--version", help="folder name under config/ (default: the only one)")
+    parser.add_argument("--full", action="store_true", help="side by side: print every line, not just the differences")
+    parser.add_argument("-C", "--context", type=int, default=3, metavar="N",
+                        help="side by side: matching lines shown around each difference (default 3)")
+    args = parser.parse_args()
+
+    versions = sorted(p.name for p in (ROOT / "config").iterdir() if (p / f"{p.name}.yaml").exists())
+    version = args.version or versions[0]
+    opts = yaml.safe_load((ROOT / "config" / version / f"{version}.yaml").read_text(encoding="utf-8"))["options"]
+    build = Path(opts["build_path"])
+    target, base = build / "expected" / "units" / f"{args.unit}.o", build / "src" / f"{args.unit}.o"
+    # A hand-written .s source builds splat's object path instead: objdiff.json knows it.
+    unit = next((u for u in json.loads((ROOT / "objdiff.json").read_text())["units"] if u["name"] == args.unit), {})
+    base = Path(unit.get("base_path", base))
+    result = subprocess.run(["ninja", str(target), str(base)], cwd=ROOT, capture_output=True, text=True)
+    if result.returncode != 0:
+        sys.exit(result.stdout[-3000:] + result.stderr[-1000:])
+
+    t, b = functions(ROOT / target), functions(ROOT / base)
+    pairs = pair_unnamed(t, b)  # the original's unnamed copies of inline functions -> ours
+    if not args.function:
+        for name in t:
+            if not t[name].data and name not in b:
+                continue  # a 0-byte label (splat's func_ at a jump target inside a function), not a function
+            ours = pairs.get(name, name)
+            diff = t[name].difference(b[ours]) if ours in b else None
+            state = "missing" if ours not in b else "MATCH" if diff is None else "differs"
+            print(f"{state:8} {name} ({len(t[name].data)} bytes)" + (f" = ours {ours}" if ours != name else "")
+                  + (f": {diff}" if diff else ""))
+        extra = [n for n in b if n not in t and n not in pairs.values()]
+        if extra:
+            print("only in ours (not in the original):", ", ".join(extra))
+        return
+
+    if args.function not in t:
+        sys.exit(f"{args.function} not in the original {args.unit}")
+    name = args.function
+    ours = pairs.get(name, name)
+    diff = t[name].difference(b[ours]) if ours in b else "missing in ours"
+    left = disassemble(ROOT / target, name, len(t[name].data))
+    right = disassemble(ROOT / base, ours, len(b[ours].data)) if ours in b else []
+    rows = compare_rows(left, right)
     real = sum(m == "|" for m, _, _ in rows)
     offsets = sum(m == "~" for m, _, _ in rows)
     print(f"{'MATCH' if diff is None else 'differs'} {name}: original {len(t[name].data)} bytes, "
