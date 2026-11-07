@@ -219,41 +219,49 @@ void *op_oef2_a_get(OEF2_HEADER *table, int code, int number) {
     }
 }
 
-/* MATCH: GPR instructions inside the VU0/MMI asm, as in the original's instruction stream; the split form (C + one asm per VU0/MMI instruction) is not attempted yet: build/progress/cleanup-libppp-mips-asm.md */
+/* MATCH: one asm per VU0 instruction; the float-to-GPR move, the constants and the result move are C. Register locals: r/a/b pin v0/v1/a0 (unpinned: other registers), f pins $f0 so the mtc1 stays before the vrinit (a plain local is combined into the return copy after it). The empty asm keeps the li 0x3ff19120 after the other loads (without it the scheduler issues its lui first, the longer chain) */
 float op_random(float ran) {
-    __asm__ __volatile__(
-        "mfc1 $v0, $f12\n"
-        "lui $v1, 0x4000\n"
-        "lui $a0, 0x4040\n"
-        "li $a1, 0x3ff19120\n"
-        "vrnext.xyzw $vf31, $R\n"
-        "qmtc2.ni $v0, $vf30\n"
-        "qmtc2.ni $v1, $vf29\n"
-        "qmtc2.ni $a0, $vf28\n"
-        "qmtc2.ni $a1, $vf27\n"
-        "vmul.x $vf31, $vf31, $vf29\n"
-        "vsubx.w $vf25, $vf31, $vf27x\n"
-        "vsub.x $vf31, $vf31, $vf28\n"
-        "vmul.x $vf31, $vf31, $vf30\n"
-        "qmfc2.ni $v0, $vf31\n"
-        "mtc1 $v0, $f0\n"
-        "vrinit $R, $vf25w\n");
+    register float r asm("$2") = ran;
+    register int a asm("$3") = 0x40000000;
+    register int b asm("$4") = 0x40400000;
+    int c;
+    register float f asm("$f0");
+
+    __asm__ __volatile__("");
+    c = 0x3ff19120;
+    __asm__ __volatile__("vrnext.xyzw $vf31, $R");
+    __asm__ __volatile__("qmtc2.ni %0, $vf30" : : "r"(r));
+    __asm__ __volatile__("qmtc2.ni %0, $vf29" : : "r"(a));
+    __asm__ __volatile__("qmtc2.ni %0, $vf28" : : "r"(b));
+    __asm__ __volatile__("qmtc2.ni %0, $vf27" : : "r"(c));
+    __asm__ __volatile__("vmul.x $vf31, $vf31, $vf29");
+    __asm__ __volatile__("vsubx.w $vf25, $vf31, $vf27x");
+    __asm__ __volatile__("vsub.x $vf31, $vf31, $vf28");
+    __asm__ __volatile__("vmul.x $vf31, $vf31, $vf30");
+    __asm__ __volatile__("qmfc2.ni %0, $vf31" : "=r"(r));
+    f = r;
+    __asm__ __volatile__("vrinit $R, $vf25w");
+    return f;
 }
 
-/* MATCH: GPR instructions inside the VU0/MMI asm, as in the original's instruction stream; the split form (C + one asm per VU0/MMI instruction) is not attempted yet: build/progress/cleanup-libppp-mips-asm.md */
+/* MATCH: one asm per VU0 instruction, the moves and constants in C, as op_random: r/a/c pin v0/v1/a1, f pins $f0 (mtc1 before the vrinit), the empty asm keeps the li 0x3ff19120 after the other loads */
 float op_random_p(float ran) {
-    __asm__ __volatile__(
-        "mfc1 $v0, $f12\n"
-        "lui $v1, 0x3f80\n"
-        "li $a1, 0x3ff19120\n"
-        "vrnext.xyzw $vf31, $R\n"
-        "qmtc2.ni $v0, $vf30\n"
-        "qmtc2.ni $v1, $vf29\n"
-        "qmtc2.ni $a1, $vf27\n"
-        "vsub.xyzw $vf31, $vf31, $vf29\n"
-        "vsubx.w $vf25, $vf31, $vf27x\n"
-        "vmul.x $vf31, $vf31, $vf30\n"
-        "qmfc2.ni $v0, $vf31\n"
-        "mtc1 $v0, $f0\n"
-        "vrinit $R, $vf25w\n");
+    register float r asm("$2") = ran;
+    register int a asm("$3") = 0x3f800000;
+    register int c asm("$5");
+    register float f asm("$f0");
+
+    __asm__ __volatile__("");
+    c = 0x3ff19120;
+    __asm__ __volatile__("vrnext.xyzw $vf31, $R");
+    __asm__ __volatile__("qmtc2.ni %0, $vf30" : : "r"(r));
+    __asm__ __volatile__("qmtc2.ni %0, $vf29" : : "r"(a));
+    __asm__ __volatile__("qmtc2.ni %0, $vf27" : : "r"(c));
+    __asm__ __volatile__("vsub.xyzw $vf31, $vf31, $vf29");
+    __asm__ __volatile__("vsubx.w $vf25, $vf31, $vf27x");
+    __asm__ __volatile__("vmul.x $vf31, $vf31, $vf30");
+    __asm__ __volatile__("qmfc2.ni %0, $vf31" : "=r"(r));
+    f = r;
+    __asm__ __volatile__("vrinit $R, $vf25w");
+    return f;
 }
