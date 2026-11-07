@@ -1018,19 +1018,6 @@ void CNakCamera::LookPosToAngleDistance() {
     m_vCamRot.y = atan2f(vec.x, vec.z);
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/DebugWindow", main__10CNakCamera);
-/* STOPGAP while main is INCLUDE_ASM: its sprintf formats under their original labels. */
-asm(".section .rodata\n"
-    ".align 3\n"
-    "D_004D9B90:\n"
-    ".asciz \"\\203J\\203\\201\\203\\211\\217\\356\\225\\361(L3:\\216\\345)\"\n"
-    ".align 3\n"
-    "D_004D9BA8:\n"
-    ".asciz \"\\203J\\203\\201\\203\\211\\217\\356\\225\\361(L3:\\213q)\"\n"
-    ".previous\n");
-/* Only the scheduling differs: the m_fProjectionDist store after ViewAngleToProjection is placed after the
- * CDeFocus instance load (the original stores it first, with %hi in v0). */
-#if 0
 void CNakCamera::main() {
     if (this != CWorldEnv::getActiveCamera()) {
         if (m_pWin) {
@@ -1041,8 +1028,8 @@ void CNakCamera::main() {
     }
     {
         FLOAT f = ViewAngleToProjection(DebugWork::g_dw.nakamich.fCamVAngle);
-        CDeFocusPrim* p = CDeFocus::getDeFocus();
         setProjectionDist(f);
+        CDeFocusPrim* p = CDeFocus::getDeFocus();
         if (p) {
             p->stop();
         }
@@ -1072,7 +1059,7 @@ void CNakCamera::main() {
         _setResetPos(NULL, NULL, PI);
     }
 }
-#endif
+
 
 void CNakCamera::disp() {
     G_LINE Line;
