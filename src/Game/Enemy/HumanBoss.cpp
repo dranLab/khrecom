@@ -355,9 +355,12 @@ BOOL CHumanBoss::initalize(INT inGroupID, INT inRsrcID, UINT iFlag) {
     return TRUE;
 }
 
-/* near match, 20 lines (2026-11-05, was 27): the goto-built outer loop reloads iCardCount/pCards like the original (a for loop hoists them); left: the original hoists the m_pEnemyParam load once (t2), ours reloads it too. The ref lists card/j at function level and no getEnemyParam inline
+/* Parked: 20 lines (2026-11-05, was 27): the goto-built outer loop reloads iCardCount/pCards like the original (a for loop hoists them); left: the original hoists the m_pEnemyParam load once (t2), ours reloads it too. The ref lists card/j at function level and no getEnemyParam inline
    2026-11-07: a local for getEnemyParam() before the goto loop: 23 (the m_pEnemyParam reload goes, but iCardCount's load
-   moves to the top of the body); for/do-while forms with or without it: 27. */
+   moves to the top of the body); for/do-while forms with or without it: 27.
+   2026-11-07: a plain for loop reading m_pEnemyParam directly matches, but m_pEnemyParam is private in the ref
+   (CHumanBoss is no friend): not the original source, reverted. Lead: the ref declares `ENEMY_PARAM* getEnemyParam();`
+   non-const (ours is const) - but this method is const, so check how the original reached it. */
 #if 0
 INT CHumanBoss::getAttackCardNum(UINT inFlag) const {
     INT cardNum;
@@ -522,7 +525,8 @@ void CHumanBoss::endStateDead() {
    (the original's `move a3,v1`; ours reloads getEnemyParam() in the enemy-card loop body). Levers that got it here:
    the id % 10000 in a local, UINT search index, one INT i per loop, `cards = deck` before ASSERT(deck) (callee-saved),
    setHumanBossFlag(0, 1), BYTE card number, and a volatile read of the first loop's iCardCount (kept pointer, reloaded
-   count). Permuter 9 min: no gain. */
+   count). Permuter 9 min: no gain. 2026-11-07: m_pEnemyParam read directly matches, but the member is private in the
+   ref: not the original source, reverted; try the ref's non-const getEnemyParam() signature. */
 #if 0
 static inline void _setCard(CARD& c, USHORT kind, BYTE num) { c.m_nId = 0; c.m_nKind2 = kind; c.m_nNumber2 = num; c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0; c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1; }
 void CHumanBoss::setupCardRevolver() {
@@ -654,7 +658,7 @@ __attribute__((section(".sdata"))) void _setupAct_placeholder(void* p, void* q, 
     com_malloc_d(4, __FILE__ "(684)", (UINT)-1);
     if (!r) AssertApp(__FILE__, 0, "m_pStockData", 0);
 }
-/* near match, 18 lines (2026-11-05, was 22: stock arm's chain sMax = sMin): the -1 of the normal acts shares the register of the compares (the original loads it separately); (SHORT)/0xFFFF/local forms tried */
+/* Parked: 18 of 205 lines (2026-11-07): the normal arm's -1 (sMin/sMax) is its own hoisted register in the original (li s4,-1 after li s5,1), ours shares the compares' -1 (s2): loop.c (-dL) combines the arm's HImode -1 movable with the SImode compare constant ("matches 84"); the rest follows (14/12 store order, the assert's __FILE__ lui hoisted too in ours, a loop-align nop); tried: chain orders, separate stores, read-back, (SHORT)/0xFFFF/-1L, INT/SHORT/long locals, m_pEnemyParam direct (all 18; private in the ref, so not used), duplicated normal arm per branch (18, the arms' -1 become subregs), inverted/nested/else-if condition shapes (18-88); permuter 15 min: no gain */
 #if 0
 void CHumanBoss::setupAct() {
     ACT_DATA tmp[8];
@@ -1365,14 +1369,8 @@ BOOL CHumanBoss::canStockAct(const ACT_DATA* inAct) {
     return TRUE;
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/HumanBoss", setStockCard__10CHumanBossPC4CARD);
-/* placeholder for setStockCard (INCLUDE_ASM): its string */
-__attribute__((section(".sdata"))) void _setStockCard_placeholder() {
-    TRACE_USER((USER)5, "getStock() = %d, TotalNumber = %d, CurrentNumber = %d, min = %d, max = %d\n");
-}
-/* near match, 3 lines (2026-11-07): the first beqz of the || takes the subu from the fall-through in the original, sw zero from the
- * target in ours (v0 looks live there; a clobber after the store does not change it) */
-#if 0
+/* MATCH: the roll >= 5 test is the else-if of the reset test, one shared return FALSE after both (separate returns
+   cross-jump or change reorg's delay-slot fills) */
 BOOL CHumanBoss::setStockCard(const CARD* inActiveCard) {
     SHORT totalNumber = m_iStockTotalNumber + inActiveCard->m_nNumber;
 
@@ -1383,11 +1381,8 @@ BOOL CHumanBoss::setStockCard(const CARD* inActiveCard) {
                 clearStockTotalNumber();
                 returnStockAct(0);
                 selectStockAct();
-                return FALSE;
-            }
-            if (m_iStockRollCount >= 5) {
+            } else if (m_iStockRollCount >= 5) {
                 setHumanBossFlag(0x80, 0);
-                __asm__ volatile(""); /* MATCH: keeps this return's own tail */
             }
             return FALSE;
         }
@@ -1399,7 +1394,6 @@ BOOL CHumanBoss::setStockCard(const CARD* inActiveCard) {
     m_pCardRevolver->setStockCard();
     return TRUE;
 }
-#endif
 
 BOOL CHumanBoss::setPlayCard(INT inState) {
     if (!m_pCardRevolver->setPlayCard(0, 0)) {

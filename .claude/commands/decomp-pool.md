@@ -64,7 +64,10 @@ Tell the user which unit you start, in one line. Do not decompile yourself meanw
 
 Its report and completion notification wake you. In the main checkout, one merge at a time:
 1. If it reported commits: `git merge --no-ff --no-commit decomp/<slug>`. Conflicts are usually shared headers:
-   combine both sides' declarations, keep `// PARTIAL` markers.
+   combine both sides' declarations, keep existing `// PARTIAL` markers.
+   **Then review the diff against docs/plan.md (V4) before the gate:** `git diff --cached | grep '^+.*PARTIAL'` must
+   print nothing, and no header may change against the ref (access specifiers, extra members, stand-ins). A branch
+   that adds any of that is not merged: `git merge --abort` and send the worker back (park the function instead).
 2. `tools/check.sh`. If it exits 0: `git commit -m "Merge decomp/<slug>: <unit>, <matched> matched, <parked> parked"`,
    then `git worktree remove <the worker's worktree>`, `git branch -d decomp/<slug>` and delete the worktree's own
    `worktree-agent-*` branch. If not: `git merge --abort`, keep the branch for review and tell the user.

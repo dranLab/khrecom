@@ -73,13 +73,20 @@ variant (name and score). Keep scratch files in `build/`, not `/tmp`.
 
 ## Rules
 
-- Only your unit's files: `src/<unit>.cpp/.c`, `src/<unit>.h`. A declaration you need from another unit's header:
-  add it there minimally only if nothing else works, mark it `// PARTIAL: added for <unit>`, list it in your
-  report. Never change `config/`, `configure.py`, `tools/`, `include/khtypes.h`, `CLAUDE.md`, docs or other units'
+- **Stick to docs/plan.md. Its header cleanup RESOLVES `// PARTIAL` markers: never add one.** No PARTIAL marker,
+  stand-in, extra member or changed access specifier in any header, and nothing in a header against
+  ref/SLUS_217.99 (types.h, src/*.h). A match that needs any of that is not the original's source (e.g. reading a
+  member that is private in the ref): find the ref-legal form (the ref's exact signatures: const, return types)
+  or park the function and say why. Before you report: `git diff main... | grep '^+.*PARTIAL'` prints nothing.
+- Only your unit's files: `src/<unit>.cpp/.c`, `src/<unit>.h`. A declaration missing from another unit's header:
+  add it exactly as the ref declares it (no marker), list it in your report; if that is not possible, report what
+  you would need. Never change `config/`, `configure.py`, `tools/`, `include/khtypes.h`, `CLAUDE.md`, docs or other units'
   sources: report what you would need instead.
 - Don't run `tools/split_objects.py`, `tools/gen_reference.py` or `ninja iso`. Never `git stash`, push, merge,
   rebase or touch `main`.
 - Never commit if `tools/check.sh` fails.
+- To wait for a process, never loop on `pgrep -f "<pattern>"`: the loop's own command line contains the pattern, so
+  it never ends and outlives you. Run the command in the foreground, or wait on its PID (`while kill -0 $pid`).
 
 ## Report (your final message)
 

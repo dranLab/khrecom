@@ -84,6 +84,20 @@ def object_fixups(entries: list, compiled: bool, text_cap: int = SECTION_ALIGN_C
     return " ".join(flags)
 
 
+def align_section_starts(ld_script: Path) -> None:
+    """Sony's linker script starts each output section at ALIGN(128) (see TYPE_SECTION). splat's script sets each
+    section's start label (`cod_SDATA_START = .;`) right after the previous section's last object, so when that
+    object comes from source (no padding in its data) the label lands on the padding instead: `_gp` is computed
+    from cod_SDATA_START and every gp-relative offset shifts (libgcc2___umoddi3, the last .rodata object). Align the
+    location counter before each data section's label; where the section already starts aligned this is a no-op."""
+    text = ld_script.read_text(encoding="utf-8")
+    text, n = re.subn(r"^(\s+)(cod_(?:DATA|RODATA|SDATA|SBSS|BSS)_START = \.;)", r"\1. = ALIGN(., 128);\n\1\2",
+                      text, flags=re.M)
+    if n != 5:
+        sys.exit(f"error: expected 5 data section start labels in {ld_script}, found {n}")
+    ld_script.write_text(text, encoding="utf-8")
+
+
 def own_data_ranges(entries: list) -> str:
     """ee_asm_compat.py's --own-data argument for a compiled object: the address ranges of the data sections that
     come from its source. Weak data (vtables of classes whose virtual functions are all inline) that lies outside
@@ -499,6 +513,7 @@ def main() -> None:
         split.main([build_yaml], modes=["all"], verbose=False, use_cache=False)
         if exp_split.wait() != 0:
             sys.exit(f"error: the expected split failed, see {exp_log.relative_to(ROOT)}")
+    align_section_starts(ROOT / opts["ld_script_path"])
 
     units = expected_units(exp_asm)
     compiled = write_ninja(version, splat_yaml, opts, splat_cfg["sha1"], build_cfg, units)

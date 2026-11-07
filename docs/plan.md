@@ -46,8 +46,8 @@ every change that is merged without regenerating. Regenerating all four takes ab
   (fixed 2026-11-07: it used to count a parked `#if 0 ... #else INCLUDE_ASM #endif` as done).
 - **Game:** 82 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note).
   5 units take a data section from assembly.
-- **Libraries:** 22 parked, 1 not attempted, 27 hand-written (stay assembly), 2 units with data from assembly
-  (__assert, __umoddi3: need a split / link-alignment change);
+- **Libraries:** 19 parked, 1 not attempted, 27 hand-written (stay assembly), no unit with data from assembly
+  (the last two, __assert and __umoddi3, needed the split / link-alignment fixes of 2026-11-07);
   details in `docs/sdk-leftovers.md`.
 - **Header cleanup:** PARTIAL 190 (156 in 44 headers, 34 in 20 .cpp), 14 foreign stand-ins in 9 files, 0
   duplicate classes, 0 untagged mechanisms; classes complete 873, superset 12, gated 3, missing 8.
@@ -226,8 +226,10 @@ units' `.rodata`, so keep the header's line layout (add members in place, `#line
 - Allowed inline asm: the VU0/MMI/COP2 instructions the original wrote as inline asm (see the ref and the
   vu0-asm-function-conversion / ppp-keshptail-patterns memories); empty `asm volatile("" ...)` barriers as a
   lever, with a comment. MIPS arithmetic stays in C (user's rule).
-- Only the unit's `src/U.cpp`/`.h` and the headers its classes need; a new or extended header of another unit
-  gets `// PARTIAL: added for <unit>` while incomplete (hook edits A1/A2 may touch other files).
+- Only the unit's `src/U.cpp`/`.h` and the headers its classes need. Never add a `// PARTIAL` marker, a stand-in or
+  anything against the ref to another unit's header (the header cleanup below removes them); a missing
+  declaration goes in exactly as the ref has it. A match that needs more (e.g. a member private in the ref) is
+  not the original's source: park it (user, 2026-11-07; hook edits A1/A2 may touch other files).
 
 **V5: the gate.** `tools/check.sh` exits 0 before every merge into `main`, again on `main` after it, and at the
 end of every session.

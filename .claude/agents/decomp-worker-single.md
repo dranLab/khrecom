@@ -53,9 +53,10 @@ Everything a command prints stays in your context and is re-read on every later 
 
 ## Rules
 
-- Only create or change files for your unit: `src/<unit>.cpp/.c`, `src/<unit>.h`. If you need declarations from
-  a header that does not exist yet (another unit's class), create it minimally, mark it at the top with
-  `// PARTIAL: added for <unit>`, and list it in your report. Never change `config/`, `configure.py`, `tools/`,
+- **Stick to docs/plan.md. Its header cleanup RESOLVES `// PARTIAL` markers: never add one.** No PARTIAL marker,
+  stand-in, extra member or changed access specifier in any header, nothing against ref/SLUS_217.99; a match that
+  needs it is not the original's source: park it. A missing declaration goes in exactly as the ref has it.
+- Only create or change files for your unit: `src/<unit>.cpp/.c`, `src/<unit>.h`. Never change `config/`, `configure.py`, `tools/`,
   `include/khtypes.h`, `CLAUDE.md` or other units' sources - report what you would need instead.
 - Don't run `tools/split_objects.py`, `tools/gen_reference.py` or `ninja iso`.
 - Keep scratch files in `build/` (gitignored), not `/tmp`.
