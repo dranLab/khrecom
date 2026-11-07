@@ -875,7 +875,7 @@ asm(".section .rodata\n"
     ".previous");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Sound/driver/sddrv_ee", TsSdSepPlayDBG);
 
-/* Parked: 4 lines with the barrier above (2026-11-06): the lbu of byte 13 vs the hoisted lui/li of the scan loop; sep_size forms 4-11 lines. Earlier: Register allocation: sep_size's bytes and the sep_param scan loop get other temporaries (pointer/counter swapped). */
+/* Parked: 4 lines with the barrier above (2026-11-06): the lbu of byte 13 vs the hoisted lui/li of the scan loop; sep_size forms 4-11 lines. 2026-11-07: both bytes loaded before a barrier and pinned give the loads but sll/addu come before the lw (7), a fixed register for the pointer stops the giv (14). Earlier: Register allocation: sep_size's bytes and the sep_param scan loop get other temporaries (pointer/counter swapped). */
 #if 0
 void TsSdSepPlayDBG(int addr, int vol, int pan, int se_id, int mtrack, int dtime) {
     int sep_num;
