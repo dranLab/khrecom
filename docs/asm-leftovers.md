@@ -33,7 +33,6 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `System/Graphic/Effect/libppp/draw/shape` | 2 | 1771 | 2 |  |
 | `Game/Player/Friend` | 1 | 1274 | 1 |  |
 | `System/Graphic/Model` | 3 | 1153 | 3 |  |
-| `System/Graphic/PathData` | 2 | 1075 | 2 |  |
 | `System/Graphic/DeFocus` | 2 | 1014 | 2 |  |
 | `System/Graphic/FrecFont` | 2 | 908 | 2 |  |
 | `Game/Collision/CollUtil` | 3 | 781 | 3 | .rodata |
@@ -47,9 +46,9 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `Form/DebugWindow` | 1 | 549 | 1 |  |
 | `System/Graphic/PackMan` | 2 | 540 | 2 |  |
 | `System/Graphic/Effect/libppp/keProg/pppKeShpTail3X` | 1 | 532 | 1 |  |
-| `Game/Atel/Avatar` | 3 | 531 | 3 |  |
 | `Game/Player/PlayerRiku` | 1 | 520 | 1 |  |
 | `System/Graphic/Effect/libppp/keProg/pppKeShpTail3` | 1 | 514 | 1 |  |
+| `System/Graphic/PathData` | 1 | 489 | 1 |  |
 | `System/Graphic/Glare` | 1 | 446 | 1 |  |
 | `Game/Player/NaviMap` | 1 | 425 | 1 |  |
 | `System/Sound/driver/sddrv_ee` | 2 | 403 | 2 | .bss |
@@ -58,7 +57,6 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `Game/SceneInfo` | 2 | 314 | 2 |  |
 | `System/Rcf` | 3 | 307 | 3 |  |
 | `System/Graphic/Effect/libppp/partMng` | 1 | 292 | 1 |  |
-| `System/Graphic/Gprim` | 2 | 282 | 2 |  |
 | `Game/Collision/CollDisp` | 2 | 262 | 2 |  |
 | `System/Graphic/DispList` | 1 | 245 | 1 |  |
 | `Game/Enemy/BattleEnemy` | 1 | 245 | 1 |  |
@@ -69,13 +67,12 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `Game/Atel/AtelCrossFade` | 1 | 188 | 1 |  |
 | `Game/Enemy/EnemyWhitemushroom` | 1 | 184 | 1 |  |
 | `System/Movie/MSVideo` | 1 | 180 | 1 |  |
+| `Game/Atel/Avatar` | 1 | 139 | 1 |  |
 | `System/TaskMan` | 1 | 135 | 1 |  |
 | `System/Graphic/WorldEnv` | 1 | 128 | 1 |  |
-| `Form/Menu/JiminyMemo` | 1 | 122 | 1 |  |
 | `Game/Collision/CollUtilO` | 1 | 121 | 1 | .rodata |
 | `Game/Card` | 1 | 95 | 1 |  |
 | `System/RcfCD` | 1 | 41 | 1 |  |
-| `System/dlmalloc` | 1 | 14 | 1 |  |
 
 Units with all functions in C but data from asm: `Game/Collision/Ride` (.rodata).
 
@@ -90,7 +87,6 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 |---|---|---:|---|
 | `System/Math3D` | `InvMatrix__6Math3DR7FMATRIXRC7FMATRIX` | 234 | (comment) Same code apart from register allocation: gcc hoists the 1e-8 constants and a "li 20" out of the outer loop (the original keeps them inside), which moves &c into s1. |
 | `System/Wnd` | `init__9CImageWndRt7CPointT1ZiRt6CSizeT1ZiT1T2PCcfG6G_RGBAT7i` | 225 | 5 of 240 lines (2026-11-07; was 14) - the flip block (w2 = w; w = 0 under fgFlip bits, 4 USHORTs) gets other registers (original w a1, h a2, w2 a3, h2 t0; ours w v1, h a1, h2 a2) and the T0..T3 stores another order. Tried (2026-11-05: decl/assignment forms of w, h, w2, h2, INT locals): declaration … |
-| `System/dlmalloc` | `destroy_mspace` | 14 | (comment) Not matching. The original is: lw seg.next; beqz; lw next (A); bnezl L, lw (entry test + body); L: bnezl L, lw. That is "if (sp) { sp = sp->next; while (sp) sp = sp->next; }" with the loop exit test duplicated, but jump2 cross-jumps the peeled "lw; beqz" into the loop (the insn before … |
 | `System/Graphic/DeFocus` | `_makePktDeFocus__12CDeFocusPrim` | 506 | 83 of 596 lines, same size - structure, branches and calls as the original (debug near/far override, auto near/far from the look distance, FRAME/TEST/ALPHA/PRIM A+D blocks with debug colours, sprites, defaults restore). Left: scheduling inside the A+D blocks (store pair order, the _FRAME0_START … |
 | `System/Graphic/DeFocus` | `_makePktBlur__9CBlurPrim` | 508 | 97 of 586 lines, 4 bytes long - structure as the original (debug override, camera-distance Z or 0xFFFF28, A+D header, 6-kind switch of set_tsprite32 patterns, defaults restore). Left: `this` and iZ swap s2/s3 (most lines), the Bak_ registers (original spills the colour, keeps the rate in fp) and … |
 | `System/Graphic/DispList` | `_drawOT__19CDispListShadowDrawR5OTtag` | 245 | 62 of 291 lines, 4 bytes long - logic matches (CShadowModel::getSize inline). Left: the original does not strength-reduce the draw loop over pBuf[j] (li 12 + mult every iteration), which frees an s-register: it keeps i in s6 and spills hHnd, ours spills i. Tried: hHnd as a function-level local or … |
@@ -104,15 +100,12 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `System/Graphic/ModelMan` | `setupDrawEnv__9CModelMan` | 204 | 58 of 242 lines (65 with vFogParam.set inlined) - FVECTOR::setCall gives the original's set call, but the frame is 16 bytes larger (an extra saved register s3 for &wv_i) and the fog/matrix constant block is scheduled differently. |
 | `System/Graphic/PackMan` | `_initFrameEffPacket__Fiiii` | 487 | 2 lines - case 2's two XYZ2 ORs: the original has the X register first (or v0,s2,v0 / or v0,t7,v0), ours puts the shifted Y first; x \| y and y \| x source order, a shared macro for the three cases, case 3's h/nh form with constant 12 and a 15 min permuter run (21k candidates) all stay at 2. … |
 | `System/Graphic/PackMan` | `sceVif1PkCloseUpkCode__FP13pacVif1Packet` | 53 | ~25 lines - register allocation: the original keeps wl (numlen >> 8) in t0 and cl in numlen's register a1, ours swaps them (and the t2/t3 numbering follows); the vn != 3 branch layout, the code copy and the shared divide tail match. cl/wl declaration order, signed locals, ternaries and 5 + 15 min … |
-| `System/Graphic/PathData` | `getNearPath__11CPathVectorR7FVECTORPfT2PiRC7FVECTORPC7FVECTORif` | 586 | 4 lines (2026-11-06, was 9: fNearT = 0.0f right after iNearStep, statement changes from tools/permuter.py; its declaration shuffle was noise); left: the hoisted 0.0f compare constant is a copy of fNearT here, mtc1 zero in the original, and one mov.s $f27,$f3 sits in another arm. 2026-11-07: an … |
 | `System/Graphic/PathData` | `dispDebugLine__11CPathVectori` | 489 | 2 lines - in the first 8-step loop the original issues `mov.s $f21,$f20` (the hoisted 0.125f step) after `addiu s3,sp,608` (&Line.P), ours before it (scheduler tie); everything else matches. tried: t init/step forms (for header, t = t + 0.125f, block scope, init before SubVectorXYZ), ib/k forms of … |
 | `System/Graphic/TexUtil` | `takeSnapShot__8CTexUtilPCc` | 234 | 72 of 280 lines, 4 bytes short - structure as the original (default display env -> width/height/PSM via (INT)(u_long >> n) & mask, TIM2 file and picture headers, per-line StoreImage + writeFile). Left: the reserved-bytes loop (pointer + own counter in the original), the GsTex0 TBW/PSM/TW/TH writes … |
 | `System/Graphic/TexUtil` | `makeCustomClut__8CTexUtilPUlT1ii` | 163 | 20 of 168 lines, same size - up-counting j (the original's reversed count-down), *pSrc read per term (lbu for the low byte) and `iI \| (iI << 16 \| iI << 8)` fixed most of it. Left: the register order of case 1's three channel terms (the original computes the >> 8 term into a1 first) and two … |
 | `System/Graphic/TexUtil` | `setupTexInfo__8CTexUtilR7TexInfoPCUcii` | 116 | 10 of 120 lines, same size - the mult between the allocTex call and its test (`r = allocTex(..); nImageSize = w h; if (r < 0)`, the original fills the bltz slot with it; 19 -> 10). Left: _nDistBufW, where the original adds 64 to the (w-1) of an earlier block and shifts (ours (w-1)>>6 + 1; every … |
 | `System/Graphic/TexUtil` | `setupTexInfoImd__8CTexUtilR7TexInfoPCUci` | 138 | 93 of 153 lines, 16 bytes short - control flow as the original (tex_cnv PSM 19/20 cases, getTransSize else, allocTex, getTransInfo, TEX0). Left: the original keeps &outInfo._TexInfo/_ClutInfo in s1/s0 across the getTransInfo call (one more saved register, frame 0x90), which renumbers most … |
 | `System/Graphic/WorldEnv` | `initialize__9CWorldEnv` | 128 |  |
-| `System/Graphic/Gprim` | `makePkt__6CZFill` | 109 | 2 lines (2026-11-07, 0x206 pinned): only addiu a2,a2,64 sits mid-loop here, at the loop end in the original. `INT v = i + 1` with v 64 - 1 (as PackMan's packet) gets a2 = 63 and the end step but leaves a temp for i (13), a separate x biv or j loses i (9, 27). Earlier: 8 lines - two scheduling … |
-| `System/Graphic/Gprim` | `makePkt__8CRotSprt` | 173 | the corner setup before the two calcVert calls (load/store order of b, c and ab: the original keeps a separate copy of m_P0.y for ab.set's _y parameter) and the register numbering that follows; a reference to m_P1 (not in the ref's locals) reproduces the original's s0 = &m_P1 read of m_P1.y in the … |
 | `System/Graphic/2d/2DSprObj` | `initForSeq__Q22D29C2DSprObjPQ22D213SEQ_ANIMATIONPQ22D210LAY_SCREEN` | 325 | 14 of 340 lines (2026-11-06, was 20: fVec2 is the brace init), all in the sway block. Markers: fVec.set(four sway values) (Coord.h:730) and m_vSway[i].set() (Coord.h:200); the stores come out sway0 x/y, fVec z/w, sway1, fVec x/y. Writing fVec.set + m_vSway[i].set(fVec...) fixes the source shape … |
 | `System/Graphic/2d/2DSprObj` | `move__Q22D29C2DSprObj` | 438 | 25 of 465 lines - only the vertex loop differs: the MMI colour multiply's 0xFF splat is a TImode constant here (`por v0,zero,zero` before `li`, the original only does `li`), the pmulth/tmp registers come out v1/v0 instead of a0/v1, the vertex-loop pointers get other registers and lCol is loaded … |
 | `System/Graphic/Effect/libppp/partMng` | `vramcache` | 292 | (comment) Register allocation: the original keeps abBlock (the VLA's address) on the stack and the assert's string addresses in s5/s6; here abBlock gets s7 and bUseBlockNum s3, so the file name's %hi lives in t0 (saved around the call, 16 more bytes of frame). The return blocks are also laid out … |
@@ -150,8 +143,6 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Game/Collision/CollUtilO` | `_detectColumnColumnEz__9CCollUtilR16CColumnCollisionT1` | 121 | 7 of 125 lines - the original loads columnColl1's radius after columnColl0's (sched1 hoists ours above the z subtraction, so c0.z/c1.R swap f3/f4). Tried: radius statement order, r1 split, direct/SubVector differences, permuter 9 min (23k candidates, no gain); 2026-11-07: an empty barrier gets the … |
 | `Game/Atel/Atel` | `setScreenFader__5CAtelifi` | 189 | 37 of 206 lines, 16 bytes short - logic, switch and jump table match. Left: the original computes the layer as `beqz; b then (li v0,1); else: b end (li 1); then: li 10` (a jump-evaluated boolean threaded away) and keeps nLayer in s1; ours branches once, which rotates the s-registers … |
 | `Game/Atel/AtelCrossFade` | `drawCrossFadeImage__Q24ATEL14CAtelCrossFade` | 188 | (comment) Near-match: the second loop schedules the packet stores differently and hoists the GIF tag constant. |
-| `Game/Atel/Avatar` | `_$_Q24ATEL7CAvatar` | 95 | 6 lines - the implicit lineY/lineX destructor calls get s5/s4 instead of s4/s5: their address pseudos tie on priority (2 refs / 17 insns) and ours numbers lineX first (lreg dump); no body form changed it. The draft uses the full classes of Gprim.h (inline ~C3DLine/~CGPrim). |
-| `Game/Atel/Avatar` | `onMove__Q24ATEL7CAvatariPvi` | 297 | 1 line (was 53) - the final test: the original has `slti 3`, then `bne s6, 0` twice; the switch's range node gives bltz for the first. The empty asm in case 0 settled the registers: pV 3 refs / 13 insns outranked p 14 / 187 by a hair. An INT local keeps slti but the second zero test folds (even … |
 | `Game/Atel/Avatar` | `RotateAvatarMain__Q24ATEL7CAvatar` | 139 | 8 lines - the first isOverAvatarRotTimeLimit() comes out as xori; the original builds bRes with li 1 + movz (its weak copy is xori too). Inline/caller forms and 8 min of permuter (9k candidates) did not change it. The VU0 add/clip block (FVECTOR::addRot in the ref) is written out here: through an … |
 | `Game/Player/Friend` | `setMagic__Q26Friend7CFriendi` | 1274 |  |
 | `Game/Player/NaviMap` | `main__Q25Gauge8CNaviMap` | 425 | (comment) Not matching: in the debug-rotation block (g_dw.player.iTemp == 2) the original keeps PI in $f3 from before the branch and loads 180.0f/-PI in $f2/$f1 (100.0f and -PI share $f1); here 180.0f is hoisted too and the registers of 180.0f/-PI swap (9 lines). Everything else matches; the "deg" … |
@@ -175,10 +166,9 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Form/Menu/Camp` | `setMapCardWin__5CCampi` | 1227 | same size, 33 of 1409 lines differ: the stack slots of the spilled hoisted addresses (&m_pMCInfoNumCtrl, &m_pMCInfoNumFnt, &m_pMCFnt, &m_pMCCard, &m_nMapKind, i + 1) are assigned in another order (orig 0x74 NumFnt, 0x78 MapKind, 0x7c i+1, 0x84 MCCard, 0x88 MCFnt, 0x8c NumCtrl; ours ascending by … |
 | `Form/Menu/Camp` | `setWorldmapCursor__5CCamp` | 853 | 35 of 939 lines differ (62 before _NORMA_PIECES, 2026-11-07). Left: pDoorInfo and nNorma have s4/s3 for s3/s4; an operand barrier on pDoorInfo does not flip them. To enable this draft, drop the data block after its INCLUDE_ASM: it defines pSeqName.4483 too (Ps2EeAs then crashes). tried: … |
 | `Form/Menu/Camp` | `setMainCmd__5CCampii` | 257 | 17 of 276 lines, 8 bytes short (40 before each loop got its own i, as in the ref; was 81, 53 before 2026-11-05: _ref(m_pMainCmdFnt)[i] in the font-replacing loop keeps its own address computation): with the ref's function-level `INT i` plus a block `INT i` in the else branch `this` is in s0 as in … |
-| `Form/Menu/JiminyMemo` | `ScrollBarChange__11CJiminyMemoPPQ22D210C2DSeqCtrlffiii` | 122 | 2 lines (2026-11-07, the 2.0f pinned in case 2): li s5,1 is issued before addiu s3,sp,16 (&vec) in the preheader, the original has them the other way round. An if chain gives that hoist order but loses the switch's dispatch; a pVec local or a pinned pointer before the loop move the registers … |
 | `Form/Menu/RoomCreation` | `menuMain__13CRoomCreation` | 1995 | (comment) menuMain: 78 of 2211 lines, 8 bytes short (92 and 0x50 short before _NORMA_PIECES, 2026-11-07): the by-value NormaSrc arguments are written out now; left: case 0's registers (v1 + s7 where the original keeps a0, s4/s6/s8 from there). To enable this draft, also drop the data block after … |
 
-Totals: 89 functions (37217 instructions) in 51 units, 89 of them parked; 5 units take a data section from assembly.
+Totals: 82 functions (35821 instructions) in 48 units, 82 of them parked; 5 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->
