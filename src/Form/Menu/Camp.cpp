@@ -4376,10 +4376,14 @@ INT CCamp::setButtonHelp(INT nSetCmd, INT nMode, INT nKind) {
     return 1;
 }
 
-/* Parked: 53 of 621 lines differ: in the sleight-list loop the original spills pTechCateTbl and nTechCateCnt and
-   recomputes &pTechCateTbl[nTechSelectTop] from the spilled pointer every iteration; ours strength-reduces it into
-   an s-register (the same giv difference as setMainCmd's font loop). tried: the ref's unused nLine as the loop
-   counter, non-const table pointer, compare operand order (kept: load order); permuter 6 min (68 -> 65). */
+/* Parked: 53 of 621 lines (2026-11-07; tools/drafts.py's "build failed" is the data block after the INCLUDE_ASM, which
+   also defines this function's statics: drop it to build the draft): in the sleight-list loop the original reloads the
+   spilled pTechCateTbl at the loop head and recomputes &pTechCateTbl[nTechSelectTop] from nTechSelectTop (s6, +1 per
+   iteration) every time; ours strength-reduces it (-dL: giv 1104, benefit 7, lifetime 3, reduced: lifetime*66*benefit
+   is far above the 182 insns, so no insn-count/threshold change can stop it; the original's giv was never recognized
+   or had benefit <= 0). The spill slots then differ (orig 0xC8 pTechCateTbl, 0xCC nTechCateCnt). tried: the ref's
+   unused nLine as the loop counter, non-const table pointer, compare operand order (kept: load order), _ref() on the
+   table pointer/its assignment/nTechCateCnt (56-70); permuter 6 min (68 -> 65), 15 min 2026-11-07. */
 #if 0
 INT CCamp::setTechWin(INT nSetCmd) {
     FVECTOR vec;
@@ -4666,7 +4670,8 @@ INT CCamp::setDeckSetWin(INT nSetCmd) {
     return ret;
 }
 
-/* Parked: same size, 33 of 1409 lines differ: the stack slots of the spilled hoisted addresses (&m_pMCInfoNumCtrl,
+/* Parked: same size, 33 of 1409 lines differ (re-measured 2026-11-07; tools/drafts.py's "build failed" is the data
+   block after the INCLUDE_ASM: drop it to build the draft): the stack slots of the spilled hoisted addresses (&m_pMCInfoNumCtrl,
    &m_pMCInfoNumFnt, &m_pMCFnt, &m_pMCCard, &m_nMapKind, i + 1) are assigned in another order (orig 0x74 NumFnt,
    0x78 MapKind, 0x7c i+1, 0x84 MCCard, 0x88 MCFnt, 0x8c NumCtrl; ours ascending by member offset) - stable across
    rebuilds, likely gcse hash-table order; plus one s0 move around a C2DFnt new. tried: ref declaration order,
@@ -5850,11 +5855,16 @@ INT CCamp::setWorldmap(INT nSetCmd) {
     }
     return ret;
 }
-/* Parked: 35 of 939 lines differ (62 before _NORMA_PIECES, 2026-11-07). Left: pDoorInfo and nNorma have s4/s3 for s3/s4; an
-   operand barrier on pDoorInfo does not flip them. To enable this draft, drop the data block after its INCLUDE_ASM: it
-   defines pSeqName.4483 too (Ps2EeAs then crashes). tried: while/do/for shapes of the 0x40 block (`while (isButtonTrg(0x40)) { if (m_bPooWorld) break;
-   ... break; }` gives the original's block order), nested `if (< 4) if (>= 0)` against the sltiu fold, ref locals
-   (id, block-scoped i), set(1,1,1,1) instead of setAll, setLayer before the vec.set. */
+/* Parked: 35 of 939 lines differ (62 before _NORMA_PIECES; re-measured 2026-11-07). Left: pDoorInfo and nNI (not
+   nNorma) have s4/s3 for s3/s4: global-alloc priority (-dl: pDoorInfo 28 refs over 187 insns = 0.60, nNI 22 over 121
+   = 0.73, so nNI is allocated first and takes s3); the original allocates pDoorInfo first. An operand barrier on
+   pDoorInfo does not flip them. To enable this draft, drop the data block after its INCLUDE_ASM: it defines
+   pSeqName.4483 too (Ps2EeAs then crashes; that is tools/drafts.py's "build failed"). tried: while/do/for shapes of
+   the 0x40 block (`while (isButtonTrg(0x40)) { if (m_bPooWorld) break; ... break; }` gives the original's block
+   order), nested `if (< 4) if (>= 0)` against the sltiu fold, ref locals (id, block-scoped i; nNormaIndex/nNorma/
+   fgKeyCard declared at the block top as the ref lists them), set(1,1,1,1) instead of setAll, setLayer before the
+   vec.set, the door search as a pointer loop (37) or pDoorInfo set after the k loop (53), for-scoped nNI, the
+   getNorma* calls on nNI + nNormaIndex without the USHORT n, an empty asm in the nNI loop (44). */
 #if 0
 void CCamp::setWorldmapCursor() {
     RoomInfo* pRoomInfo;
