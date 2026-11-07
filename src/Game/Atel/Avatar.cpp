@@ -685,7 +685,11 @@ void roundPI(FVECTOR& vInOut, INT nInClip);
    change it. The VU0 add/clip block (FVECTOR::addRot in the ref) is written out here: through an inline
    parameter the vRotSpeed address lands in v1 instead of sp. 2026-11-07: seven more forms of the inline's return and a plain
    variable holding 1 change nothing; the inline written out with `register BOOL one asm("$4")` (the testPlayingCard lever) takes
-   one more s register and 16 more bytes of frame (46 lines). */
+   one more s register and 16 more bytes of frame (46 lines). 2026-11-07 (dumps -dj -ds -dc): jump1 already makes the cmov,
+   `t = (lt != 0) ? t : one` with `one = 1` emitted next to it; cse puts const 0 in for t (it knows t = 0 through the asserts'
+   skip blocks), and combine folds `one` in: (ne lt 0) ? 0 : 1 -> eq -> xori. The original's movz means combine left `li 1`
+   alone: its register had a second use or was set in another block. bRes = FALSE/TRUE first, if/else, ternary, != FALSE,
+   the && written out at the call site (no asserts) or through AvatarRotateStruct::isOverTimeLimit(): 8, 27 or 24 lines. */
 #if 0
 BOOL CAvatar::RotateAvatarMain() {
     BOOL bRes;
