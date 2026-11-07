@@ -31,7 +31,7 @@ typedef struct {
     unsigned char buf2[64];
 } ReadIntrData;
 
-int scePrintf(const char *fmt, ...);
+void scePrintf(const char *fmt, ...); /* MATCH: void (no v0 result): sceCdLayerSearchFile reloads SCE_CD_debug into v0 after each call */
 void *memcpy(void *dst, const void *src, unsigned int n);
 int SignalSema(int sema);
 int PollSema(int sema);
@@ -299,8 +299,6 @@ static int PowerOffCB(void)
     return 1;
 }
 
-/* Parked: the 2nd/3rd SCE_CD_debug reloads land in v0 in the original, v1 here. */
-#if 0
 int sceCdLayerSearchFile(sceCdlFILE *fp, const char *name, int layer)
 {
     int i;
@@ -364,17 +362,6 @@ int sceCdLayerSearchFile(sceCdlFILE *fp, const char *name, int layer)
     SignalSema(_sceCd_ncmd_semid);
     return ret;
 }
-#endif
-/* sceCdLayerSearchFile's strings in .rodata while it is asm */
-__asm__(".rdata\n"
-        ".align 3\n.asciz \"Libcdvd bind err CdSearchFile\\n\"\n"
-        ".align 3\n.asciz \"ee call cmd search %s\\n\"\n"
-        ".align 3\n.asciz \"search name %s\\n\"\n"
-        ".align 3\n.asciz \"search size %d\\n\"\n"
-        ".align 3\n.asciz \"search loc lbn %d\\n\"\n"
-        ".text\n");
-
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/eecdvd_sceCdCallback", sceCdLayerSearchFile);
 
 int sceCdSearchFile(sceCdlFILE *fp, const char *name)
 {
@@ -538,7 +525,7 @@ end:
     return 1;
 }
 
-/* Parked: t0/t1 swapped for the _scmd_dr_bind/_sceCd_ee_read_mode %hi, and the order of li/lui before the _sceCd_CdInit_ON store. */
+/* Parked: 6 of 255 lines (2026-11-07): only the %hi registers of _scmd_dr_bind/_sceCd_ee_read_mode, t1/t0 in the original, t0/t1 here (local-alloc: dr's life after sched1 is 1 insn shorter, so it gets t0 first; the original's sched2 still issues dr's lui and store before ee's); live, the c_cnt.66 stopgap goes and the data matches (only these 4 bytes differ in the image); tried: every position of ee/dr, Init_seq and c_cnt++ in the store block, 120 random orders, every split of it over source lines, chained assignments, volatile on _scmd_dr_bind (breaks DiskReady) / off on ee (40 lines) / on CdInit_ON, permuter.py 15 min (its 0 is a %lo swap of the stored globals, imagediff rejects it), decomp_permuter 15 min (nothing below base); the tail's li/lui order was the shared return: case 5 first with break, `case 0: case 1: default:` arm (8 -> 6) */
 #if 0
 int sceCdInit(int mode)
 {
@@ -597,9 +584,6 @@ int sceCdInit(int mode)
     }
     Init_seq = 0;
     switch (mode) {
-    case 0:
-    case 1:
-        break;
     case 5:
         if (SCE_CD_debug > 0) {
             scePrintf("Libcdvd Exit\n");
@@ -609,11 +593,15 @@ int sceCdInit(int mode)
         _sceCd_scmd_semid = -1;
         cb_semid = -1;
         _sceCd_CdInit_ON = 0;
-        return ret;
+        break;
+    case 0:
+    case 1:
+    default:
+        cmd_sem_init();
+        PowerOffCB();
+        _sceCd_CdInit_ON = 1;
+        break;
     }
-    cmd_sem_init();
-    PowerOffCB();
-    _sceCd_CdInit_ON = 1;
     return ret;
 }
 #endif
