@@ -14,6 +14,8 @@ Usage:
     python3 tools/permuter.py lib/pack sceMpegDemuxPssRing
     python3 tools/permuter.py lib/pack sceMpegDemuxPssRing -j 16 --minutes 30
     python3 tools/permuter.py lib/mpc _getRef0 --unsafe          # also mutations that can change behaviour
+    python3 tools/permuter.py System/Rcf _atolen                 # C++: the source name, if unique in the unit,
+    python3 tools/permuter.py Game/Collision/CollDisp setBodyLines__9CCollDispP14CCollisionList   # or the symbol
 
 Mutations (all keep the program's meaning unless --unsafe):
     swap two adjacent declarations              swap two adjacent independent statements
@@ -52,11 +54,77 @@ IDENT = re.compile(r"\b[A-Za-z_]\w*\b")
 
 
 # ---------------------------------------------------------------------------------------------------------------
+# names: the symbol (GCC 2 mangled for C++) and what the source spells
+
+def demangle(symbol: str) -> tuple[str, str | None]:
+    """(name in the source, class or None) of a GCC 2 symbol: `getAttackCardNum__C10CHumanBossUi` ->
+    ("getAttackCardNum", "CHumanBoss"), `main__Q25Gauge8CNaviMap` -> ("main", "CNaviMap"), `__ct__5CTaskFv` ->
+    ("CTask", "CTask"), `_$_5CTask` -> ("~CTask", "CTask"). A C name comes back unchanged with no class."""
+    if symbol.startswith(("_$_", "_._")):
+        cls = _mangled_class(symbol[3:])
+        return ("~" + cls, cls) if cls else (symbol, None)
+    i = symbol.find("__", 1)
+    if i <= 0:
+        return symbol, None
+    base, rest = symbol[:i], symbol[i + 2:]
+    if base == "__ct" or symbol.startswith("__ct__"):
+        cls = _mangled_class(symbol[6:])
+        return (cls, cls) if cls else (symbol, None)
+    cls = _mangled_class(rest[1:] if rest.startswith("C") else rest)
+    return base, cls
+
+
+def _mangled_class(s: str) -> str | None:
+    """The (innermost) class at the start of a mangled qualifier: `10CHumanBossUi` -> CHumanBoss,
+    `Q25Gauge8CNaviMap` -> CNaviMap; None for a plain function's argument list (`FPCc`)."""
+    m = re.match(r"^Q(\d)", s)
+    if m:
+        s, n, name = s[2:], int(m.group(1)), None
+        for _ in range(n):
+            m = re.match(r"^(\d+)", s)
+            if not m:
+                return None
+            k = int(m.group(1))
+            name, s = s[len(m.group(1)):len(m.group(1)) + k], s[len(m.group(1)) + k:]
+        return name
+    m = re.match(r"^(\d+)", s)
+    if not m:
+        return None
+    k = int(m.group(1))
+    return s[len(m.group(1)):len(m.group(1)) + k] or None
+
+
+def resolve(arg: str, symbols) -> tuple[str, str, str | None]:
+    """(symbol, source name, class) for the function named on the command line: a symbol of the unit as it stands,
+    or a plain source name that exactly one symbol of the unit demangles to."""
+    if arg in symbols:
+        name, cls = demangle(arg)
+        return arg, name, cls
+    hits = [s for s in symbols if demangle(s)[0] == arg or (demangle(s)[1] and
+                                                             f"{demangle(s)[1]}::{demangle(s)[0]}" == arg)]
+    if len(hits) == 1:
+        name, cls = demangle(hits[0])
+        return hits[0], name, cls
+    if hits:
+        sys.exit(f"{arg} is ambiguous in this unit: " + ", ".join(sorted(hits)) + " (pass the symbol)")
+    sys.exit(f"{arg}: no such function in the unit's original object")
+
+
+def definition_pattern(name: str, cls: str | None) -> str:
+    """Regex for the start of the function's definition line, up to and including its opening brace."""
+    q = r"(?:\b" + re.escape(cls) + r"\s*::\s*)" if cls else ""
+    n = r"\b" + re.escape(name) if not name.startswith("~") else r"~\s*" + re.escape(name[1:])
+    # an optional return type and qualifiers (none for a constructor or destructor), then the name
+    return r"^(?:[^;{}#]*?[\s*&])?" + q + n + r"\s*\([^;{}]*\)\s*(?:const\s*)?\{"
+
+
+# ---------------------------------------------------------------------------------------------------------------
 # locating the function in the source
 
-def find_function(text: str, name: str) -> tuple[int, int]:
-    """(start, end) of the function's body braces, end exclusive (just after the closing brace)."""
-    for m in re.finditer(r"^[A-Za-z_][^;{}]*\b" + re.escape(name) + r"\s*\([^;{}]*\)\s*\{", text, re.M):
+def find_function(text: str, pattern: str) -> tuple[int, int]:
+    """(start, end) of the function's body braces, end exclusive (just after the closing brace). pattern:
+    definition_pattern() of the function."""
+    for m in re.finditer(pattern, text, re.M):
         start = m.end() - 1
         depth = 0
         i = start
@@ -75,13 +143,14 @@ def find_function(text: str, name: str) -> tuple[int, int]:
             elif text.startswith("//", i):
                 i = text.index("\n", i)
             i += 1
-    raise SystemExit(f"function {name} not found (as a definition) in the source")
+    raise SystemExit(f"function not found (as a definition) in the source: {pattern}")
 
 
-def enable_draft(text: str, name: str) -> str:
+def enable_draft(text: str, pattern: str, symbol: str) -> str:
     """Switch a parked draft on: the #if 0 block around the function's definition becomes #if 1, and the
-    function's INCLUDE_ASM (in the #else, or after the #endif) goes away."""
-    d = re.search(r"^[A-Za-z_][^;{}]*\b" + re.escape(name) + r"\s*\([^;{}]*\)\s*\{", text, re.M)
+    function's INCLUDE_ASM (by its symbol: in the #else, after the #endif, or further away past a placeholder) goes
+    away, with those of the other functions defined in the same block."""
+    d = re.search(pattern, text, re.M)
     if not d:
         return text
     depth, opened = 0, None
@@ -94,7 +163,7 @@ def enable_draft(text: str, name: str) -> str:
             if opened and depth == opened[2]:
                 opened = None
             depth -= 1
-    names = {name}
+    names = {symbol}
     if opened:
         text = text[:opened[0]] + re.sub(r"#\s*if\s+0", "#if 1", text[opened[0]:opened[1]]) + text[opened[1]:]
         depth, end = 0, len(text)  # the block's end: its #else or #endif
@@ -448,21 +517,25 @@ def main() -> None:
     expected = ROOT / build / "expected" / "units" / f"{args.unit}.o"
     subprocess.run(["ninja", str(expected.relative_to(ROOT))], cwd=ROOT, check=True, capture_output=True)
 
-    text = enable_draft(start_text, args.function)
-    start, end = find_function(text, args.function)
+    symbol, name, cls = resolve(args.function, functions(expected))
+    pattern = definition_pattern(name, cls)
+    if symbol != args.function or cls:
+        print(f"{args.function}: symbol {symbol}, defined as {cls + '::' if cls else ''}{name}", flush=True)
+    text = enable_draft(start_text, pattern, symbol)
+    start, end = find_function(text, pattern)
     head, body, tail = text[:start], text[start:end], text[end:]
-    header = head[head.rfind(args.function):]
+    header = head[head.rfind(name):]
     LOCALS.update(w for w in IDENT.findall(header[header.find("("):]) if w not in KEYWORDS)
     LOCALS.update(m.group(1) for line in body.split("\n") if is_declaration(line)
                   for m in [re.search(r"([A-Za-z_]\w*)\s*(?:\[[^\]]*\])*\s*(?:=[^;]*)?;$", line.strip())] if m)
-    workdir = ROOT / "build" / "permuter" / args.function
+    workdir = ROOT / "build" / "permuter" / symbol
     shutil.rmtree(workdir, ignore_errors=True)
     workdir.mkdir(parents=True)
 
     Scorer.build = build
-    scorer = Scorer(args.unit, args.function, source, build_command(f"{build}/src/{args.unit}.o"), expected, workdir)
-    if re.search(r"INCLUDE_ASM\([^)]*,\s*" + re.escape(args.function) + r"\s*\)", head + tail):
-        sys.exit(f"{args.function} is still INCLUDE_ASM'd outside its draft")
+    scorer = Scorer(args.unit, symbol, source, build_command(f"{build}/src/{args.unit}.o"), expected, workdir)
+    if re.search(r"INCLUDE_ASM\([^)]*,\s*" + re.escape(symbol) + r"\s*\)", head + tail):
+        sys.exit(f"{symbol} is still INCLUDE_ASM'd outside its draft")
     base, err = scorer.score(text, "base")
     if base >= 1 << 30:
         sys.exit("the unmodified source does not compile here:\n" + err)
