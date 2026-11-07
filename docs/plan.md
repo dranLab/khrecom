@@ -41,12 +41,12 @@ every change that is merged without regenerating. Regenerating all four takes ab
 
 ## Where things stand (2026-11-07)
 
-- **Progress:** 11991 of 12311 functions matched: game 11222 of 11323, libraries 769 of 988 (plus 151 hand-written).
+- **Progress:** 11994 of 12311 functions matched: game 11225 of 11323, libraries 769 of 988 (plus 151 hand-written).
   `tools/check.sh` proves the image, but its function totals are too high: it strips `#if 0.*?#endif` before it counts
   `INCLUDE_ASM`, so a parked `#if 0 ... #else INCLUDE_ASM #endif` counts as done (about 12 functions on 2026-11-07). Count
   game functions with `grep -rhE '^INCLUDE_ASM' src --include=*.cpp --include=*.c --exclude-dir=lib | wc -l`. Fixing the regex is a
   change to `tools/`: ask first.
-- **Game:** 96 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note).
+- **Game:** 93 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note).
   5 units take a data section from assembly.
 - **Libraries:** 38 parked, 5 not attempted, 27 hand-written (stay assembly), 5 units with data from assembly;
   details in `docs/sdk-leftovers.md`.
@@ -390,6 +390,9 @@ header split the original didn't have, or make a class a template to hide its st
 | Near-tie in global-alloc, or combine/reorg folds an insn | `empty-asm-live-length` (empty asm: +1 live length, blocks stealing; with an operand, a second use) |
 | Temp in s3/t8, giv stepping far from its biv | `asm-temp-odd-register` |
 | `bne; nop` where the original has `bnel` into the loop | a volatile load at the target: reorg never steals it (`_threadReadProc`) |
+| several fields "look volatile", reloads after one store (Sony libs) | union-store-alias-zero |
+| registers rotated by one in a block, hand shapes do not help | union-store-alias-zero (an inline's argument pseudos; decomp-permuter) |
+| a draft says "near match" with no measured diff | remeasure-stale-drafts (its layout may hide it; it can match as it stands) |
 | C units (lib/, libppp, sddrv) | `docs/sdk-leftovers.md` "Levers that worked in lib/", decomp-permuter-c-units |
 | signal 11 in the cc step | cc1plus-silent-segfault, CLAUDE.md pitfalls (Ps2EeAs) |
 

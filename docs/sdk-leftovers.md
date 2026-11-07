@@ -126,10 +126,10 @@ Sorted by unit, then size. `instr`: instructions in the original.
 | `lib/nodebug/snDebugInit` | `snTeq` | 26 | hand-written | trap handler |
 | `lib/graphdev_checkModelVersion` | `sceGsSetDefDispEnv` | 221 | parked | matches except register order in the DISPLAY computation (orig: DY and off[0] + 636 first). |
 | `lib/graphdev_sceGsExecStoreImage` | `sceGsExecStoreImage` | 419 | parked | close, but register allocation differs (the PSMCT24 tail, trxreg.RRW kept extracted instead of raw). |
-| `lib/libpad2` | `scePad2GetButtonInfo` | 56 | parked | 5 lines - button type kept in a1 (orig a3), movz instead of movn for the digital case. |
+| `lib/libpad2` | `scePad2GetButtonInfo` | 56 | parked | 3 lines (2026-11-07, through a pointer to bi, decomp-permuter): case 8's address in v0 and the byte in v1, swapped. |
 | `lib/csc` | `_sceMpegCscStoreRefImage` | 310 | parked | _doCSC2 3 lines (6 before the do-while(0) around the DMA kick) - registers; _sceMpegCscStoreRefImage in s1/s2 for the inlined CSC block's rgb/qwc. |
 | `lib/csc` | `_doCSC2` | 112 | parked | _doCSC2 3 lines (6 before the do-while(0) around the DMA kick) - registers; _sceMpegCscStoreRefImage in s1/s2 for the inlined CSC block's rgb/qwc. |
-| `lib/pack` | `sceMpegDemuxPssRing` | 248 | parked | 4 lines off (2026-11-07, was 6): sw v0,32(sp) and the zero store of ret are swapped in _bsInit's store group, and allGp reloads into v1 where the original has v0. ret after _bsInit moves more of the group (10), before it with a barrier moves the frame setup (18). |
+| `lib/pack` | `sceMpegDemuxPssRing` | 248 | parked | 2 lines off (2026-11-07, was 4: allFunc set between ret and allGp, decomp-permuter): allGp reloads into v1 where the original has v0. Reload hands out spill registers round-robin, so the choice hangs on the reloads before it. |
 | `lib/mpc` | `_getRef0` | 290 | parked | same structure and size as the original; register allocation differs (the original keeps y in s1, n in t9 and spills avg << 2) |
 | `lib/mpc` | `_rix_111` | 72 | hand-written | MMI reference-copy routines (_rix_*: luminance, _ri0_*: chrominance) |
 | `lib/mpc` | `_ri0_111` | 69 | hand-written | MMI reference-copy routines (_rix_*: luminance, _ri0_*: chrominance) |
@@ -152,7 +152,7 @@ Sorted by unit, then size. `instr`: instructions in the original.
 | `lib/eecdvd_sceCdCallback` | `sceCdInit` | 186 | parked | t0/t1 swapped for the _scmd_dr_bind/_sceCd_ee_read_mode %hi, and the order of li/lui before the _sceCd_CdInit_ON store. |
 | `lib/hncAt3dec` | `hncAt3dec_Idle` | 72 | parked | same structure, but the registers differ (orig: out s1, out2 s0, stereo/count s3, i s2). |
 | `lib/libat3dec` | `unpack_mddata` | 316 | parked | structure right; the gain loops keep &gain[0][0][1] in a register and reload 255 (ours hoists it) |
-| `lib/libat3dec` | `gainc_window` | 161 | parked | 11 lines off (23 before the early `lt` compare, decomp-permuter): the original sets the return value -1 at the top of the loop (the conditional returns branch straight to the epilogue) |
+| `lib/libat3dec` | `gainc_window` | 161 | parked | 10 lines off (23 before the early `lt` compare, decomp-permuter): the original sets the return value -1 at the top of the loop (the conditional returns branch straight to the epilogue) |
 | `lib/libat3dec` | `channel_conv_joint` | 122 | parked | close: loop.c bases the inner loop on the channel 0 samples (the original on channel 1) and strength-reduces the band offset (the original recomputes (3 band) 136 from a counter) |
 | `lib/libat3dec` | `at3dec_proc` | 97 | parked | 11 lines off (20 before the 0xF8 pad byte in a variable, decomp-permuter): the original enters the copy loop with the byte the skip loop loaded (reorg), registers differ |
 | `lib/libat3dec` | `f2t_nodata` | 90 | parked | 5 lines off: the band address of the loop is (x << 4) + x with swapped registers |

@@ -153,12 +153,12 @@ One row per merge into main (`partials.py --summary` before and after).
 ## Summary
 
 ```
-PARTIAL: 190 (156 in 44 headers, 34 in 20 .cpp); MATCH: 982
+PARTIAL: 190 (156 in 44 headers, 34 in 20 .cpp); MATCH: 988
   by category: method 46, data member 10, type 14, fwd decl 2, #include 14, changed in place 45, padding 2, path override 1, gate 5, guessed 9, header-level 24, stand-in 13, other 5
 stand-ins: 14 foreign in 9 files (12 names), 198 unattributed, 154 own
 duplicate class names across headers: 0
 padding: 2 arrays, 0 accessors
-mechanisms: 676 sites (0 untagged); #line: 1241
+mechanisms: 675 sites (0 untagged); #line: 1239
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
 classes: complete 874, superset 12, partial 0, gated 3, missing 7, unattributed 309
 ```
@@ -378,7 +378,6 @@ or `untagged`.
 | placeholder | `_sampleEnemyEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
 | placeholder | `_saveLoadCtrlAlloc*` | 1 | 1 | placeholder: an inline function's strings, in the original .rodata order |
 | placeholder | `_statusEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
-| placeholder | `_vf4x*` | 1 | 1 | read by the parked detectMCInit draft only (the ref has iTmp and ret and no parameter) |
 | placeholder | `_vsmeMotionName*` | 1 | 1 | Placeholder: .rodata has "e123_062" after Anim.h's strings (from an unidentified header, as in Game/Enemy/CreateEnemy). |
 | pragma | `#pragma implementation` | 1 | 1 | the Gprim weak tail from C (user-approved pragma mechanism) |
 | pragma | `#pragma interface` | 1 | 1 | the inline functions and vtables only in Gprim.o, as in the originals |
