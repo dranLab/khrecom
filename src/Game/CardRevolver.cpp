@@ -857,11 +857,6 @@ void CCardRevolver::setDeck(CARD* pDeck, INT inShortCut) {
         m_pCardsE->hideHand();
     }
 }
-/* Parked: 5 lines off, the direction `a`: the original computes it as li t3,1 / slt v0,v1,a1 / movz t3,v1,v0
-   with v1 = -1 set in both predecessors of the join, then negates num with bltzl; ours branches (bgez). Worked:
-   one `i` for all three loops (s0), !m_iMode-first rc/pCards select, hand++ after setHand, if/else direction.
-   Tried: 11 forms of a/abs (ternaries, -1 < num, a = -1 before the rc block); permuter 5 min (5534, no gain). */
-#if 0
 void CCardRevolver::rollDeck(INT inNum, INT inFlag, TIMEQ inTime) {
     INT iRemain;
     INT i;
@@ -936,12 +931,10 @@ void CCardRevolver::rollDeck(INT inNum, INT inFlag, TIMEQ inTime) {
         num = 0;
         if (!m_iMode) target = m_nReloadID;
     }
-    if (num < 0) {
-        a = -1;
-        num = -num;
-    } else {
-        a = 1;
-    }
+    a = 1;
+    if (num < 0) a = -1;
+    __asm__ volatile(""); /* MATCH: keeps the movz out of the bltzl slot */
+    num = num < 0 ? -num : num;
     loop = 0;
     while (num > 0) {
         for (i = 0; i < nLimit; i++) {
@@ -969,9 +962,6 @@ void CCardRevolver::rollDeck(INT inNum, INT inFlag, TIMEQ inTime) {
         hand++;
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", rollDeck__Q210CardBattle13CCardRevolveriii);
-#endif
 /* Parked: 12 lines off, all in `limit`: the original loads m_nTotal[m_iMode] (lhu + sll 16) above the m_iMode
    branch and sign-extends (sra 16) only in that arm (interblock-scheduled split extension); ours branches first
    and uses lh. Worked: `if (inMode == -1) ^= 1; else =`, `!old_mode ? m_pCards : m_pCardsE`, indexed
