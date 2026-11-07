@@ -520,7 +520,7 @@ static void get_st(PEiDrawShipoly *param, float *s_min, float *s_max, float *t_m
     *t_max = tmax - 0.01f;
 }
 
-/* Parked: register allocation differs; also short float loops (bc1t hazard nop lost by fix_short_loops) */
+/* Parked: 58 of 815 lines (2026-11-07): register allocation only, same layout: s1 in $f6 and the inner a1 in $f5 (the original the other way); i*16 for linev[.][i + 1] in a1 (original v1), so ret takes v1 (original a0) and r's mfc1 for InterVector, the 6000000 constant and the packet pointer sit one register lower (a1/v1/a0 vs a3/a0/a1); gradation_fadeout's copy in a1 (original a3); s1 += TexScrollS issued after the Fade test's lbu (original before); tried: the line markers (r1 = product; n = r1; r1 = n with the packet headers indexed by idx, tex0l = tex0h = 0 in one statement, s = s1 before the wrap test, t computed before a0/a1 with t += TexScrollT, t0_ = t1_ = t / s0_ = s1_ = t, c0/c1 before vtn /= 2, s0 += before s1 +=, fade before fade_add, linevw in two steps; 102 -> 58), the RotTransPersClip inline */
 #if 0
 void drawShipoly(pppModelSt *mdl, PEiDrawShipoly *p, VEiDrawShipoly *val, VColor *col, sceVu0FVECTOR (*linev)[256]) {
     int poly_num;
@@ -574,8 +574,7 @@ void drawShipoly(pppModelSt *mdl, PEiDrawShipoly *p, VEiDrawShipoly *val, VColor
         tex0l = mph->tex0l;
         tex0h = mph->tex0h;
     } else {
-        tex0l = 0;
-        tex0h = 0;
+        tex0l = tex0h = 0;
     }
     s = 0.0f;
     get_st(p, &s_min, &s_max, &t_min, &t_max);
@@ -607,7 +606,8 @@ void drawShipoly(pppModelSt *mdl, PEiDrawShipoly *p, VEiDrawShipoly *val, VColor
         }
     }
     if (p->Gradation) {
-        n = poly_num * p->GradationCenter;
+        r1 = poly_num * p->GradationCenter;
+        n = r1;
         r1 = n;
         r2 = poly_num - r1;
         if (r1 <= 0.0f) {
@@ -625,54 +625,54 @@ void drawShipoly(pppModelSt *mdl, PEiDrawShipoly *p, VEiDrawShipoly *val, VColor
     packet_db[0] = (long128 *)0x70000000;
     packet_db[1] = (long128 *)0x70002000;
     packet = (QWdata *)0x70000000;
-    n = 0;
-    packet[n].u128 = 0;
-    packet[n].u32[0] = 0x70000007;
-    n++;
-    packet[n].u64[0] = 0x6000000000008001;
-    packet[n].u64[1] = 0xEEEEEE;
-    n++;
+    idx = 0;
+    packet[idx].u128 = 0;
+    packet[idx].u32[0] = 0x70000007;
+    idx++;
+    packet[idx].u64[0] = 0x6000000000008001;
+    packet[idx].u64[1] = 0xEEEEEE;
+    idx++;
     if (!p->ZTest) {
-        packet[n].u64[0] = 0x7000D;
-        packet[n].u64[1] = 0x47;
-        n++;
+        packet[idx].u64[0] = 0x7000D;
+        packet[idx].u64[1] = 0x47;
+        idx++;
     } else {
-        packet[n].u64[0] = 0x3000D;
-        packet[n].u64[1] = 0x47;
-        n++;
+        packet[idx].u64[0] = 0x3000D;
+        packet[idx].u64[1] = 0x47;
+        idx++;
     }
-    packet[n].u64[0] = ppvZFrameBase | 0x31000000 | 0x100000000;
-    packet[n].u64[1] = 0x4E;
-    n++;
-    packet[n].u32[0] = tex0l;
-    packet[n].u32[1] = tex0h;
-    packet[n].u64[1] = 6;
-    n++;
+    packet[idx].u64[0] = ppvZFrameBase | 0x31000000 | 0x100000000;
+    packet[idx].u64[1] = 0x4E;
+    idx++;
+    packet[idx].u32[0] = tex0l;
+    packet[idx].u32[1] = tex0h;
+    packet[idx].u64[1] = 6;
+    idx++;
     switch (p->AlphaMode) {
     case 0:
-        packet[n].u64[0] = 0x8000000044;
+        packet[idx].u64[0] = 0x8000000044;
         break;
     case 1:
-        packet[n].u64[0] = 0x8000000048;
+        packet[idx].u64[0] = 0x8000000048;
         break;
     case 2:
-        packet[n].u64[0] = 0x8000000042;
+        packet[idx].u64[0] = 0x8000000042;
         break;
     case 3:
-        packet[n].u64[0] = 0x8000000041;
+        packet[idx].u64[0] = 0x8000000041;
         break;
     case 4:
-        packet[n].u64[0] = 0x8000000046;
+        packet[idx].u64[0] = 0x8000000046;
         break;
     }
-    packet[n].u64[1] = 0x42;
-    n++;
-    packet[n].u64[0] = 0x60;
-    packet[n].u64[1] = 0x14;
-    n++;
-    packet[n].u64[0] = 0;
-    packet[n].u64[1] = 8;
-    n++;
+    packet[idx].u64[1] = 0x42;
+    idx++;
+    packet[idx].u64[0] = 0x60;
+    packet[idx].u64[1] = 0x14;
+    idx++;
+    packet[idx].u64[0] = 0;
+    packet[idx].u64[1] = 8;
+    idx++;
     pppSendGsPacket((u_long128 *)0x70000000);
     pppWaitDmaGs();
     vtn = p->PolyNumV * 2 + 2;
@@ -681,22 +681,22 @@ void drawShipoly(pppModelSt *mdl, PEiDrawShipoly *p, VEiDrawShipoly *val, VColor
     packet1->u128 = 0;
     packet0->u128 = 0;
     packet0->u32[0] = packet1->u32[0] = 0x70000000 | (vtn * 3 + 1);
-    n = 1;
+    idx = 1;
     if (mdl) {
-        packet0[n].u64[0] = packet1[n].u64[0] =
+        packet0[idx].u64[0] = packet1[idx].u64[0] =
             vtn | 0x8000 | ((u_long)0x5C << 47) | ((u_long)1 << 46) | ((u_long)3 << 60);
     } else {
-        packet0[n].u64[0] = packet1[n].u64[0] =
+        packet0[idx].u64[0] = packet1[idx].u64[0] =
             vtn | 0x8000 | ((u_long)0x5C << 47) | ((u_long)1 << 46) | ((u_long)3 << 60);
     }
-    packet0[n].u64[1] = packet1[n].u64[1] = 0x412;
-    vtn /= 2;
-    spad_id = 0;
+    packet0[idx].u64[1] = packet1[idx].u64[1] = 0x412;
     c0[0] = col->release_col.r;
     c0[1] = col->release_col.g;
     c0[2] = col->release_col.b;
     c0[3] = col->release_col.a;
     *(u_long128 *)c1 = *(u_long128 *)c0;
+    vtn /= 2;
+    spad_id = 0;
     for (i = 0; i < poly_num; i++) {
         float s0;
         float s1;
@@ -736,20 +736,20 @@ void drawShipoly(pppModelSt *mdl, PEiDrawShipoly *p, VEiDrawShipoly *val, VColor
             float linevw;
             float rate;
 
-            linevw = linev[0][i][3] / (p->TexRepeat * 0.01f);
+            linevw = linev[0][i][3];
+            linevw /= p->TexRepeat * 0.01f;
             rate = (s_max - s_min) * linevw;
             s1 = s0 + rate;
+            s = s1;
             if (s1 > s_max) {
                 s = s1 - s_max + s_min;
-            } else {
-                s = s1;
             }
         }
-        s1 += val->TexScrollS;
         s0 += val->TexScrollS;
+        s1 += val->TexScrollS;
         if (p->Fade) {
-            fade_add = 2.0f / (vtn - 1);
             fade = 0.0f;
+            fade_add = 2.0f / (vtn - 1);
         }
         packet = (QWdata *)packet_db[spad_id];
         spad_id ^= 1;
@@ -768,9 +768,10 @@ void drawShipoly(pppModelSt *mdl, PEiDrawShipoly *p, VEiDrawShipoly *val, VColor
             float t1_;
 
             r = j / (float)(vtn - 1);
+            t = (t_max - t_min) * r + t_min;
+            t += val->TexScrollT;
             a0 = alpha0;
             a1 = alpha1;
-            t = (t_max - t_min) * r + t_min + val->TexScrollT;
             if (p->Fade) {
                 a0 *= fade;
                 a1 *= fade;
@@ -812,13 +813,11 @@ void drawShipoly(pppModelSt *mdl, PEiDrawShipoly *p, VEiDrawShipoly *val, VColor
             }
             if (p->TexDir < 2) {
                 s0_ = s0;
-                t0_ = t;
                 s1_ = s1;
-                t1_ = t;
+                t0_ = t1_ = t;
             } else {
-                s0_ = t;
+                s0_ = s1_ = t;
                 t0_ = s0;
-                s1_ = t;
                 t1_ = s1;
             }
             packet[idx].f32[0] = s0_;
@@ -859,7 +858,6 @@ void drawShipoly(pppModelSt *mdl, PEiDrawShipoly *p, VEiDrawShipoly *val, VColor
         }
     }
 }
-
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly", drawShipoly);
 /* drawShipoly's jump table (jtbl_00469F70) while the function is assembly */
