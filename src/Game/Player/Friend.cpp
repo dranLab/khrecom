@@ -9,14 +9,8 @@
 #include "System/Graphic/Str.h"
 #include "Game/Collision/CollUtil.h"
 
-/* MATCH: Placeholders: three empty strings follow CollUtil.h's strings in .rodata (as in Summon). */
+/* MATCH: placeholder: the empty string that follows CollUtil.h's strings in .rodata (identical literals merge: one inline is enough). */
 inline void _emptyStringPlaceholder0() {
-    TRACE("");
-}
-inline void _emptyStringPlaceholder1() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
-    TRACE("");
-}
-inline void _emptyStringPlaceholder2() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
     TRACE("");
 }
 
