@@ -699,7 +699,9 @@ void roundPI(FVECTOR& vInOut, INT nInClip);
 /* Parked: 8 lines - the first isOverAvatarRotTimeLimit() comes out as xori; the original builds bRes with
    li 1 + movz (its weak copy is xori too). Inline/caller forms and 8 min of permuter (9k candidates) did not
    change it. The VU0 add/clip block (FVECTOR::addRot in the ref) is written out here: through an inline
-   parameter the vRotSpeed address lands in v1 instead of sp. */
+   parameter the vRotSpeed address lands in v1 instead of sp. 2026-11-07: seven more forms of the inline's return and a plain
+   variable holding 1 change nothing; the inline written out with `register BOOL one asm("$4")` (the testPlayingCard lever) takes
+   one more s register and 16 more bytes of frame (46 lines). */
 #if 0
 BOOL CAvatar::RotateAvatarMain() {
     BOOL bRes;

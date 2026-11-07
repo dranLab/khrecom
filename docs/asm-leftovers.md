@@ -37,10 +37,10 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `System/Graphic/Model` | 5 | 1277 | 5 |  |
 | `Game/Player/Friend` | 1 | 1274 | 1 |  |
 | `System/Graphic/PathData` | 2 | 1075 | 2 |  |
-| `Game/CardRevolver` | 5 | 1062 | 5 |  |
 | `Game/Enemy/HumanBoss` | 6 | 1030 | 6 |  |
 | `System/Graphic/DeFocus` | 2 | 1014 | 2 |  |
 | `System/Graphic/FrecFont` | 2 | 908 | 2 |  |
+| `Game/CardRevolver` | 4 | 814 | 4 |  |
 | `Game/Collision/CollUtil` | 3 | 781 | 3 | .rodata |
 | `System/Graphic/2d/2DSprObj` | 2 | 763 | 2 |  |
 | `System/Graphic/Effect/libppp/keProg/KeTh` | 1 | 685 | 1 |  |
@@ -83,7 +83,6 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `Game/Collision/CollUtilO` | 1 | 121 | 1 | .rodata |
 | `System/Graphic/Effect/effect` | 1 | 105 | 1 |  |
 | `Game/Card` | 1 | 95 | 1 |  |
-| `Game/CardBattle` | 1 | 89 | 1 |  |
 | `Game/Player/SummonTink` | 1 | 37 | 1 |  |
 | `System/Graphic/Anim` | 1 | 33 | 1 |  |
 | `System/Graphic/2d/2DCard` | 1 | 30 | 1 |  |
@@ -160,9 +159,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `System/TaskMan` | `update__8CTaskManiii` | 135 | 4 lines - the barrier settles nTQ/bPause (s5/s6). Left: the TaskMainParam stores: the original issues the nTQ store early and _SecondaryArray's after _nSysLag's; a scheduling tie across the clear() block. |
 | `System/TaskMan` | `_invokePrimary_Main__8CTaskManR13TaskMainParamR5CTask` | 82 |  |
 | `Game/Card` | `getAttribute__5CCardG4CARDPPCcN32` | 95 | 30 of 124 lines, registers only: buf's address (3 uses / 38 insns) outranks the CCtdMan::m_pInstance address (4 / 110) in global-alloc priority, the original has them the other way round (s6/s5) and keeps card.m_nKind in a0. Worked: `pLF = buf; *pOutStrAttack = pLF;` (parameter registers, 53 -> … |
-| `Game/CardBattle` | `testPlayingCard__Q210CardBattle11CCardBattleUi` | 89 | 2 lines, the final return only - the original computes 4 into v0 and movn's 1 from v1 when iDuelOK (the != path sets v0 = 1 in the bne delay slot, one exit); this form branches (beqz iDuelOK) instead of the movn. `if (!=) return 1; return !iDuelOK ? 4 : 1;` gives the exact movn block, but jump2 … |
 | `Game/CardRevolver` | `main__Q210CardBattle13CCardRevolver` | 321 | 27 lines off, only the TRACE argument loads in the three card dumps: the original loads uiFlag into v1 and uiOwner last into v0 (the card pointer's register), ours the other way round. Worked: state switch with explicit returns, m_pCards[i] indexed directly (pBC temp moved the pointer to t4), … |
-| `Game/CardRevolver` | `rollDeck__Q210CardBattle13CCardRevolveriii` | 248 | 5 lines off, the direction `a`: the original computes it as li t3,1 / slt v0,v1,a1 / movz t3,v1,v0 with v1 = -1 set in both predecessors of the join, then negates num with bltzl; ours branches (bgez). Worked: one `i` for all three loops (s0), !m_iMode-first rc/pCards select, hand++ after setHand, … |
 | `Game/CardRevolver` | `changeMode__Q210CardBattle13CCardRevolverii` | 101 | 12 lines off, all in `limit`: the original loads m_nTotal[m_iMode] (lhu + sll 16) above the m_iMode branch and sign-extends (sra 16) only in that arm (interblock-scheduled split extension); ours branches first and uses lh. Worked: `if (inMode == -1) ^= 1; else =`, `!old_mode ? m_pCards : … |
 | `Game/CardRevolver` | `exeReload__Q210CardBattle13CCardRevolver` | 127 | 14 lines off: register allocation and latch order of the first loop - the original keeps i in t0 and the card offset in a2 (decremented first in the latch, in the continue paths' delay slots), ours the reverse; the second loop's i likewise. Worked (from 48 bytes over to same size): separate … |
 | `Game/CardRevolver` | `initAction__Q210CardBattle13CCardRevolver` | 265 | ~165 lines off, mostly register allocation: ours keeps one more value live across calls (the getStock() == -1 value is CSE'd into an s-register for the later getHand() test), so two flags spill instead of one (bReloadOC) and every flag moves one register. Structure found: decEnchantTime inside … |
@@ -219,7 +216,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Form/Menu/RoomCreation` | `menuMain__13CRoomCreation` | 1995 | (comment) menuMain: the RCNORMA::NormaSrc by-value arguments (createNorma/replaceNorma) are built from four halfword loads in the original, ld in ours; the register allocation in case 0 follows from that (0x50 bytes shorter). |
 | `Form/Menu/SaveLoad` | `exeMessageDlg__11CSaveLoadUI` | 126 | the case-1 OK tail (m_nDlgResult = 1; CSound::playSE(2, -1, 64)) is cross-jumped into the identical tail of case 2/3 in ours, the original keeps both copies; also the lockPadControl(TRUE) tail loads into v1 (original v0) and one nop in the select loop; tried: switch vs if/else chain, combined … |
 
-Totals: 118 functions (42020 instructions) in 61 units, 118 of them parked; 5 units take a data section from assembly.
+Totals: 116 functions (41683 instructions) in 60 units, 116 of them parked; 5 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->
