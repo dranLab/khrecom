@@ -59,11 +59,14 @@ shows a draft's diff after you switch its `#if 0` to `#if 1` (the permuters swit
 
 ## Notes per unit
 
-- **sifrpc** (4 parked; the pair-by-pair copies are stores of alias set 0 for some fields, `_PKT_STORE`, see `union-store-alias-zero`; sceSifCallRpc matched with it, sceSifCheckStatRpc and sceSifExecRequest did not need it: their notes did not describe them): the original copies packet fields load/store pair by pair; ours lets the scheduler hoist
-  loads above stores of other pointer/int types (alias sets); `-fno-strict-aliasing` and scheduling flags don't
-  reproduce it. Locals for the copied pointer/field and a `do { } while (0)` around one copy got `_request_end`
-  (47 -> 11) and `_request_call` (45 -> 8) close; try the same on the others. Same family: sifcmd's
-  `_sceSifCmdIntrHdlr` (registers only).
+- **sifrpc** (`sceSifInitRpc` parked, 2 lines; the four `_request_*` matched 2026-11-07): the original copies packet
+  fields load/store pair by pair; ours lets the scheduler hoist loads above stores of other types (alias sets;
+  `-fno-strict-aliasing` and scheduling flags don't reproduce it). Fields of alias set 0 through a union fix it,
+  on both sides: `_PKT_STORE` for a store later reads must not pass, `_PKT_ANY` for a read that must stay behind
+  earlier stores (memory note `union-store-alias-zero`); search the plain/read/store combinations per field.
+  A `do { } while (0)` far above a return label can add an alignment nop there (its loop note). `sceSifInitRpc`:
+  early return for the RPCINIT test (tail call to sceSifSetReg); left: the `client_table` store after the first
+  handler call's `ori a0`/`move a2`, a sched2 tie. Same family: sifcmd's `_sceSifCmdIntrHdlr` (registers only).
 - **kprintf2** (`_sceSnprintf` parked, 2 lines; data from source 2026-11-07, `printfloat` and `ftoi` matched):
   `_sceSnprintf` is off only by a `nop` between `c.eq.s` and `bc1f` (gcc writes `#nop`). GNU as 2.9-ee-991111
   (`ee-gcc2.9-991111{,-01}/ee/bin/as`) gives exactly that and matches every other function except `ftoi` and
@@ -181,11 +184,7 @@ Sorted by unit, then size. `instr`: instructions in the original.
 | `lib/nodebug/_setlocale_r` | `memchr` | 59 | hand-written | MMI (128-bit compares) |
 | `lib/kprintf2` | `_sceSnprintf` | 837 | parked | 2 of 853 lines, same size (2026-11-07): only the nop between c.eq.s and bc1f in the %f case (gcc writes "#nop"; the original's assembler inserted it at the ".set noreorder" before bc1f). The 991111/991111-01 ee/bin/as (GNU as 2.9-ee-991111) gives exactly that nop and the whole function matches, … |
 | `lib/sifcmd` | `_sceSifCmdIntrHdlr` | 82 | parked | the C below has the original's shape and size, but its registers differ (pkt/size in a2/a0 instead of a3/a1, the scaled index kept apart from id) |
-| `lib/sifrpc` | `sceSifInitRpc` | 103 | parked | 62 lines differ (permuter score) |
-| `lib/sifrpc` | `_request_rdata` | 52 | parked | 7 of 59 lines (2026-11-07, was 10): the strict load/store order is stores of alias set 0: through a union, every later read reloads, also the call's arguments (int casts on both sides do not: cse keeps those). pkt_addr's store is plain: receive loads ahead of it. Left: v0/v1 alternate the other … |
-| `lib/sifrpc` | `_request_end` | 51 | parked | 2 of 53 lines, same size (2026-11-07, was 11): the 0x8000000A-first range check is a third case node (RDATA, only break), the client a local before the tid test (kept in s1 across the call), the bind copy's buff load behind the serve store (empty barrier). Left: buff in v0 for v1: the barrier … |
-| `lib/sifrpc` | `_request_bind` | 51 | parked | 4 of 59 lines, same size (2026-11-07, was 17): !sd arm first, both loads ahead of a barrier, server's store of alias set 0 (sd stays in v0). Left: `ori` and `move a1` against the stores of the same block; all six store orders tried. |
-| `lib/sifrpc` | `_request_call` | 35 | parked | 3 lines, 4 bytes long (2026-11-07, was 8): !qd->start arm first, qd->end's store of alias set 0 (the copies' loads stay behind it), do/while(0) around the fno copy (without it 26). Left: the rsize load goes ahead of the store at 40 and an extra nop before the jr; a union store on any single field … |
+| `lib/sifrpc` | `sceSifInitRpc` | 103 | parked | 2 of 138 lines, same size (2026-11-07, was 44): the RPCINIT test is an early return (the sibcall to sceSifSetReg at the end); the init stores in this order (hill-climbed over all orders from 3 starts, all end at 2). Left: the client_table store (sw a3,28(s0)) issues after the first handler call's … |
 | `lib/filestub` | `_sceFs_Rcv_Intr` | 237 | parked | 14 lines differ (permuter score) |
 | `lib/timer` | `cbTimerHandler` | 173 | parked | scheduling (32 lines; 45 before the handler's time argument in a local, decomp-permuter) |
 | `lib/timer` | `SetNextComp` | 100 | parked | loop shape (15 lines differ) |
@@ -201,7 +200,7 @@ Not listed in the unit's `// SOURCE DATA:` line.
 | `lib/nodebug/__assert` | .rodata |
 | `lib/src/gcc/libgcc2___umoddi3` | .rodata |
 
-Totals: 16 units without a source file (1 with code); 18 units with INCLUDE_ASM functions: 29 parked, 1 not attempted, 27 hand-written; 4 units take a data section from assembly.
+Totals: 16 units without a source file (1 with code); 18 units with INCLUDE_ASM functions: 25 parked, 1 not attempted, 27 hand-written; 4 units take a data section from assembly.
 
 Generated by `tools/leftovers.py lib`.
 <!-- leftovers:lib:end -->
