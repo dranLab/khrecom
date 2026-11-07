@@ -1,8 +1,3 @@
-/* .rodata comes from the original assembly: the split ends it at 0x4893B4, in the middle of CSphereCollision's
- * vtable (Game/Collision/CollUtilO's data holds the rest and CCollision's vtable). The code refers to the
- * original's strings by their labels instead. */
-
-
 #include "khtypes.h"
 #include "Game/Collision/CollInfo.h"
 
@@ -18,24 +13,14 @@
 #include "System/HeapMan.h"
 #include "System/Debug.h"
 #include "System/Spad.h"
-
-extern char D_004891D0[]; /* "c:/KHCOM/MainApp/Game/Collision/CollUtil.h" */
-extern char D_00489248[]; /* "m_pInstance" */
-
-/* Game/Collision/CollUtil.h's accessor (line 194), with the original's strings */
-inline CCollUtil& CCollUtil::instance() {
-    CCollUtil*& p = m_pInstance;
-    if (!p) AssertApp(D_004891D0, 194, D_00489248, 0);
-    return *p;
-}
-#define COLLUTIL_H_LOCAL_ACCESSOR /* MATCH: CollObj.h's collideMap inlines this accessor */
+#include "System/Graphic/Gprim.h"
+#include "System/Graphic/Str.h"
+#define COLLUTIL_H_PATH "c:/KHCOM/MainApp/Game/Collision/CollUtil.h" /* MATCH: the original's path in CollUtil.h's strings */
+#include "Game/Collision/CollUtil.h"
 #include "Game/Collision/CollObj.h"
 #include "Game/Collision/Ride.h"
 #include "include_asm.h"
 
-extern char D_00489258[]; /* "c:/KHCOM/MainApp/Game/Collision/CollUtil.cpp(37)" */
-extern char D_00489290[]; /* "CCollUtil:データフォーマットが異なっています\n" */
-extern char D_004892C0[]; /* "c:/KHCOM/MainApp/Game/Collision/CollUtil.cpp(211)" */
 
 
 
@@ -81,7 +66,7 @@ struct MCD_HEADER {
 CCollUtil* CCollUtil::m_pInstance = __null;
 
 CCollUtil::CCollUtil() {
-    m_pCheckColl = new (D_00489258) CSphereCollision;
+    m_pCheckColl = new (__FILE__ "(37)") CSphereCollision;
     m_pCheckColl->m_Kind = COLL_KIND_PLAYER;
     m_pCheckColl->m_shiftY = 0.0f;
     m_pChipStatus = __null;
@@ -144,7 +129,7 @@ void CCollUtil::_initializeData(void* pDtHead, MCD_INFO* pMCDInfo) {
             pMCDInfo->fMDVal2 = (lv - 4) * 4.0f + 16.0f;
         }
     } else {
-        TRACE(D_00489290);
+        TRACE("CCollUtil:\203f\201[\203^\203t\203H\201[\203}\203b\203g\202\252\210\331\202\310\202\301\202\304\202\242\202\334\202\267\n");
         return;
     }
     pMCDInfo->pMCData = (MC_DATA*)((BYTE*)pDtHead + sizeof(MCD_HEADER));
@@ -226,7 +211,7 @@ void CCollUtil::_backupChipStatus() {
     }
     if (m_pChipStatus) delete[] m_pChipStatus;
     m_pChipStatus = __null;
-    m_pChipStatus = new (D_004892C0) UINT[m_pMCDInfo->iChipSuu];
+    m_pChipStatus = new (__FILE__ "(211)") UINT[m_pMCDInfo->iChipSuu];
     for (i = 0, pChip = m_pMCDInfo->pMCChip; i < m_pMCDInfo->iChipSuu; i++, pChip++) {
         m_pChipStatus[i] = pChip->id;
     }
@@ -524,10 +509,6 @@ static INT __detectMCInitInit_Check(MC_DATA* pMCData, FLOAT fMDVal) {
     }
     return iRet;
 }
-extern char D_004892F8[]; /* PRIM_INFO overflow message */
-extern char D_00489310[]; /* "c:/KHCOM/MainApp/Game/Collision/CollUtil.cpp" */
-extern char D_00489340[]; /* "m_PrimInfoIdx < PRIM_INFO_MAX" */
-extern char D_00489360[]; /* "m_PrimInfoIdx2 < PRIM_INFO2_MAX" */
 static inline INT _dotN(FVECTOR& v) {
     INT ret;
     asm volatile("lqc2 $vf4, 0x0(%1)\n"
@@ -636,13 +617,11 @@ void CCollUtil::detectMCInit(MC_CHIP* pChip, INT iArea) {
         pPrimInfo2->pMcChip = pChip;
     }
     if (!(m_PrimInfoIdx < 0x240)) {
-        TRACE(D_004892F8);
-        if (!(m_PrimInfoIdx < 0x240)) AssertApp(D_00489310, 818, D_00489340, 0);
+        TRACE("PRIM_INFO_MAX \203I\201[\203o\201[\n");
+        if (!(m_PrimInfoIdx < 0x240)) AssertApp(__FILE__, 818, "m_PrimInfoIdx < PRIM_INFO_MAX", 0);
     }
-    if (!(m_PrimInfoIdx2 < 0x40)) AssertApp(D_00489310, 819, D_00489360, 0);
+    if (!(m_PrimInfoIdx2 < 0x40)) AssertApp(__FILE__, 819, "m_PrimInfoIdx2 < PRIM_INFO2_MAX", 0);
 }
-extern char D_00489380[]; /* "m_pPrimInfo" */
-extern char D_00489390[]; /* "m_pPrimInfo2" */
 
 /* Parked: _detectMCD: 35 of 458 lines, same size (2026-11-07) - statements in marker order, chip loop as
  * for (pPrimIdx = pPrimIdx0; iCnt; iCnt--) with its own iArea (this now in s2 as the original), vf4 load via an inline.
@@ -712,9 +691,9 @@ INT CCollUtil::_detectMCD(CCollision& collision) {
     vec0 = m_vCkE0 - m_vCkS0;
     DivVector(vec1, vec0, fLenCnt);
     m_pPrimInfo = (PRIM_INFO*)SPAD::allocSpad(0x2400);
-    if (!m_pPrimInfo) AssertApp(D_00489310, 890, D_00489380, 0);
+    if (!m_pPrimInfo) AssertApp(__FILE__, 890, "m_pPrimInfo", 0);
     m_pPrimInfo2 = (PRIM_INFO2*)SPAD::allocSpad(0x1000);
-    if (!m_pPrimInfo2) AssertApp(D_00489310, 892, D_00489390, 0);
+    if (!m_pPrimInfo2) AssertApp(__FILE__, 892, "m_pPrimInfo2", 0);
     if (m_Radius != 0.0f) {
         m_RadiusL = m_Radius;
         m_Radius2 = m_Radius * m_Radius;
@@ -810,6 +789,8 @@ INT CCollUtil::_detectMCD(CCollision& collision) {
 }
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", _detectMCD__9CCollUtilR10CCollision);
+/* MATCH: _detectMCD's strings while it is INCLUDE_ASM (its asserts at lines 890 and 892) */
+__asm__(".rdata\n.align 3\n.asciz \"m_pPrimInfo\"\n.align 3\n.asciz \"m_pPrimInfo2\"\n.text\n");
 #endif
 INT CCollUtil::detectMap(FVECTOR* pWS, FVECTOR* pWE) {
     FVECTOR vecT;
@@ -1338,4 +1319,4 @@ void CCollUtil::_initDbg() {
         m_PrimInfoMax = 0;
     }
 }
-// SOURCE DATA: .data
+// SOURCE DATA: .data .rodata
