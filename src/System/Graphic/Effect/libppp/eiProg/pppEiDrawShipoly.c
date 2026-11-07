@@ -15,7 +15,6 @@ enum {
 };
 
 extern sceVu0FMATRIX ppvCameraMatrixInv;
-extern char D_00469F88[];
 
 /* a macro, not an inline function: each expansion's asm carries its own line, so jump2 does not cross-jump them */
 #define ApplyMatrix(v0, m, v1)                       \
@@ -202,41 +201,45 @@ typedef union { /* this unit's own QWdata (the ref's pppEiDrawShipoly.c and the 
 } QWdata;
 
 /* sv = screen xyz (12.4 fixed) of v; FALSE if outside the GS drawing range */
-#define RotTransPersClip(ret, sv, v)                 \
-    ret = 1;                                         \
-    __asm__ volatile(                                \
-        "lqc2 $vf12, 0x0(%1)\n"                      \
-        "lqc2 $vf4, 0x0(%2)\n"                       \
-        "lqc2 $vf5, 0x10(%2)\n"                      \
-        "lqc2 $vf6, 0x20(%2)\n"                      \
-        "lqc2 $vf7, 0x30(%2)\n"                      \
-        "vmulax.xyzw $ACC, $vf4, $vf12x\n"           \
-        "vmadday.xyzw $ACC, $vf5, $vf12y\n"          \
-        "vmaddaz.xyzw $ACC, $vf6, $vf12z\n"          \
-        "vmaddw.xyzw $vf14, $vf7, $vf12w\n"          \
-        "vdiv $Q, $vf0w, $vf14w\n"                   \
-        "vmove.xyzw $vf15, $vf14\n"                  \
-        "vsub.w $vf15, $vf15, $vf15\n"               \
-        "vwaitq\n"                                   \
-        "vmulq.xyz $vf15, $vf15, $Q\n"               \
-        "vftoi4.xyz $vf15, $vf15\n"                  \
-        "sqc2 $vf15, 0x0(%0)\n"                      \
-        :                                            \
-        : "r"(sv), "r"(v), "r"(ppvScreenMatrix)      \
-        : "memory");                                 \
-    if (sv[0] < 0) {                                 \
-        ret = 0;                                     \
-    } else if (sv[0] > 0xFFF0) {                     \
-        ret = 0;                                     \
-    }                                                \
-    if (sv[1] < 0) {                                 \
-        ret = 0;                                     \
-    } else if (sv[1] > 0xFFF0) {                     \
-        ret = 0;                                     \
-    }                                                \
-    if (sv[2] <= 0) {                                \
-        ret = 0;                                     \
+static inline int RotTransPersClip(int *sv, float *v) {
+    int ret;
+
+    ret = 1;
+    __asm__ volatile(
+        "lqc2 $vf12, 0x0(%1)\n"
+        "lqc2 $vf4, 0x0(%2)\n"
+        "lqc2 $vf5, 0x10(%2)\n"
+        "lqc2 $vf6, 0x20(%2)\n"
+        "lqc2 $vf7, 0x30(%2)\n"
+        "vmulax.xyzw $ACC, $vf4, $vf12x\n"
+        "vmadday.xyzw $ACC, $vf5, $vf12y\n"
+        "vmaddaz.xyzw $ACC, $vf6, $vf12z\n"
+        "vmaddw.xyzw $vf14, $vf7, $vf12w\n"
+        "vdiv $Q, $vf0w, $vf14w\n"
+        "vmove.xyzw $vf15, $vf14\n"
+        "vsub.w $vf15, $vf15, $vf15\n"
+        "vwaitq\n"
+        "vmulq.xyz $vf15, $vf15, $Q\n"
+        "vftoi4.xyz $vf15, $vf15\n"
+        "sqc2 $vf15, 0x0(%0)\n"
+        :
+        : "r"(sv), "r"(v), "r"(ppvScreenMatrix)
+        : "memory");
+    if (sv[0] < 0) {
+        ret = 0;
+    } else if (sv[0] > 0xFFF0) {
+        ret = 0;
     }
+    if (sv[1] < 0) {
+        ret = 0;
+    } else if (sv[1] > 0xFFF0) {
+        ret = 0;
+    }
+    if (sv[2] <= 0) {
+        ret = 0;
+    }
+    return ret;
+}
 
 /* stv.xy = (screen xy of v + st_sub.xy) * st_scl.xy */
 static inline void RotTransPersST(float *stv, float *v, float *st_sub, float *st_scl) {
@@ -517,9 +520,8 @@ static void get_st(PEiDrawShipoly *param, float *s_min, float *s_max, float *t_m
     *t_max = tmax - 0.01f;
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly", drawShipoly);
+/* Parked: register allocation differs; also short float loops (bc1t hazard nop lost by fix_short_loops) */
 #if 0
-/* register allocation differs; also short float loops (bc1t hazard nop lost by fix_short_loops) */
 void drawShipoly(pppModelSt *mdl, PEiDrawShipoly *p, VEiDrawShipoly *val, VColor *col, sceVu0FVECTOR (*linev)[256]) {
     int poly_num;
     float s_add;
@@ -782,25 +784,15 @@ void drawShipoly(pppModelSt *mdl, PEiDrawShipoly *p, VEiDrawShipoly *val, VColor
             }
             InterVector(lv, linev[1][i], linev[0][i], r);
             lv[3] = 1.0f;
-            {
-                int ret;
-
-                RotTransPersClip(ret, sv0, lv);
-                if (!ret) {
-                    draw = 0;
-                    break;
-                }
+            if (!RotTransPersClip(sv0, lv)) {
+                draw = 0;
+                break;
             }
             InterVector(lv, linev[1][i + 1], linev[0][i + 1], r);
             lv[3] = 1.0f;
-            {
-                int ret;
-
-                RotTransPersClip(ret, sv1, lv);
-                if (!ret) {
-                    draw = 0;
-                    break;
-                }
+            if (!RotTransPersClip(sv1, lv)) {
+                draw = 0;
+                break;
             }
             c0[3] = a0;
             c1[3] = a1;
@@ -868,10 +860,13 @@ void drawShipoly(pppModelSt *mdl, PEiDrawShipoly *p, VEiDrawShipoly *val, VColor
     }
 }
 
+#else
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly", drawShipoly);
+/* drawShipoly's jump table (jtbl_00469F70) while the function is assembly */
+__asm__(".rdata\n.align 3\n.word .L00182DCC\n.word .L00182DE0\n.word .L00182DF4\n.word .L00182E08\n.word .L00182E1C\n.text\n");
 #endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly", drawDistShipoly);
+/* Parked: 24 of 674 lines (2026-11-07): register allocation in the inner j loop only: the original never takes v0 there (the (int)a for c0[3]/c1[3] in v1, the linev[0][i] reload in v1, the InterVector address pairs a0/v1, the RotTransPersST packet pointer a1/v1, the draw and poly_num reloads a0/a1), ours one register lower (v0/v1/a0); the fix_truncsfsi2 result and its scratch are local-alloc, the reloads follow the spill-reg order; tried: line-marker shape (r1 = product; n = r1; r1 = n, the header packet indexed by idx, r -= / *= / += steps in both table loops, r before a, RotTransPersClip as the original's inline at lines 383-421: 36 -> 24), operand/assignment orders, fade/fade_add order; decomp-permuter 15 min (its pycparser base is 136 lines off: no usable gain) */
 #if 0
-/* register allocation of loop temporaries (v0/v1/a0) and a few float regs differs */
 void drawDistShipoly(PEiDrawShipoly *p, VEiDrawShipoly *val, VColor *col, sceVu0FVECTOR (*linev)[256]) {
     int poly_num;
     float gradation;
@@ -918,7 +913,8 @@ void drawDistShipoly(PEiDrawShipoly *p, VEiDrawShipoly *val, VColor *col, sceVu0
     }
     st_scl[1] = st_scl[0] = 1.0f / 1024.0f;
     if (p->Gradation) {
-        n = poly_num * p->GradationCenter;
+        r1 = poly_num * p->GradationCenter;
+        n = r1;
         r1 = n;
         r2 = poly_num - r1;
         if (r1 <= 0.0f) {
@@ -936,56 +932,56 @@ void drawDistShipoly(PEiDrawShipoly *p, VEiDrawShipoly *val, VColor *col, sceVu0
     packet_db[0] = (long128 *)0x70000000;
     packet_db[1] = (long128 *)0x70002000;
     packet = (QWdata *)0x70000000;
-    n = 0;
-    packet[n].u128 = 0;
-    packet[n].u32[0] = 0x70000008;
-    n++;
-    packet[n].u64[0] = 0x7000000000008001;
-    packet[n].u64[1] = 0xEEEEEEE;
-    n++;
+    idx = 0;
+    packet[idx].u128 = 0;
+    packet[idx].u32[0] = 0x70000008;
+    idx++;
+    packet[idx].u64[0] = 0x7000000000008001;
+    packet[idx].u64[1] = 0xEEEEEEE;
+    idx++;
     if (!p->ZTest) {
-        packet[n].u64[0] = 0x7000D;
-        packet[n].u64[1] = 0x47;
-        n++;
+        packet[idx].u64[0] = 0x7000D;
+        packet[idx].u64[1] = 0x47;
+        idx++;
     } else {
-        packet[n].u64[0] = 0x3000D;
-        packet[n].u64[1] = 0x47;
-        n++;
+        packet[idx].u64[0] = 0x3000D;
+        packet[idx].u64[1] = 0x47;
+        idx++;
     }
-    packet[n].u64[0] = ppvZFrameBase | 0x31000000 | 0x100000000;
-    packet[n].u64[1] = 0x4E;
-    n++;
+    packet[idx].u64[0] = ppvZFrameBase | 0x31000000 | 0x100000000;
+    packet[idx].u64[1] = 0x4E;
+    idx++;
     if (p->DistMode == 1) {
-        packet[n].u64[0] = (u_long)(ppvDrawFrameBase << 5) | ((u_long)(ppvDrawWidth / 64) << 14) | ((u_long)10 << 26) |
+        packet[idx].u64[0] = (u_long)(ppvDrawFrameBase << 5) | ((u_long)(ppvDrawWidth / 64) << 14) | ((u_long)10 << 26) |
                            ((u_long)10 << 30);
     } else {
-        packet[n].u64[0] = (u_long)(ppvDispFrameBase << 5) | ((u_long)(ppvDispWidth / 64) << 14) | ((u_long)10 << 26) |
+        packet[idx].u64[0] = (u_long)(ppvDispFrameBase << 5) | ((u_long)(ppvDispWidth / 64) << 14) | ((u_long)10 << 26) |
                            ((u_long)10 << 30);
     }
-    packet[n].u64[1] = 6;
-    n++;
+    packet[idx].u64[1] = 6;
+    idx++;
     switch (p->AlphaMode) {
     case 0:
-        packet[n].u64[0] = 0x8000000044;
+        packet[idx].u64[0] = 0x8000000044;
         break;
     case 1:
-        packet[n].u64[0] = 0x8000000048;
+        packet[idx].u64[0] = 0x8000000048;
         break;
     case 2:
-        packet[n].u64[0] = 0x8000000042;
+        packet[idx].u64[0] = 0x8000000042;
         break;
     }
-    packet[n].u64[1] = 0x42;
-    n++;
-    packet[n].u64[0] = 0x60;
-    packet[n].u64[1] = 0x14;
-    n++;
-    packet[n].u64[0] = 0;
-    packet[n].u64[1] = 8;
-    n++;
-    packet[n].u64[0] = 0;
-    packet[n].u64[1] = 0x3F;
-    n++;
+    packet[idx].u64[1] = 0x42;
+    idx++;
+    packet[idx].u64[0] = 0x60;
+    packet[idx].u64[1] = 0x14;
+    idx++;
+    packet[idx].u64[0] = 0;
+    packet[idx].u64[1] = 8;
+    idx++;
+    packet[idx].u64[0] = 0;
+    packet[idx].u64[1] = 0x3F;
+    idx++;
     pppSendGsPacket((u_long128 *)0x70000000);
     pppWaitDmaGs();
     vtn = p->PolyNumV * 2 + 2;
@@ -1009,7 +1005,10 @@ void drawDistShipoly(PEiDrawShipoly *p, VEiDrawShipoly *val, VColor *col, sceVu0
         r = j / (float)(vtn - 1);
         table_r[j] = r;
         if (!p->Gradation) {
-            table_dr[j] = (r - 0.5f) * (val->Dist + 1.0f) + 0.5f;
+            r -= 0.5f;
+            r *= val->Dist + 1.0f;
+            r += 0.5f;
+            table_dr[j] = r;
         }
     }
     spad_id = 0;
@@ -1036,12 +1035,16 @@ void drawDistShipoly(PEiDrawShipoly *p, VEiDrawShipoly *val, VColor *col, sceVu0
                 gradation = 1.0f;
             }
             for (j = 0; j < vtn; j++) {
-                table_dr[j] = (table_r[j] - 0.5f) * (val->Dist * gradation + 1.0f) + 0.5f;
+                r = table_r[j];
+                r -= 0.5f;
+                r *= val->Dist * gradation + 1.0f;
+                r += 0.5f;
+                table_dr[j] = r;
             }
         }
         if (p->Fade) {
-            fade_add = 2.0f / (vtn - 1);
             fade = 0.0f;
+            fade_add = 2.0f / (vtn - 1);
         }
         packet = (QWdata *)packet_db[spad_id];
         spad_id ^= 1;
@@ -1055,8 +1058,8 @@ void drawDistShipoly(PEiDrawShipoly *p, VEiDrawShipoly *val, VColor *col, sceVu0
                 float a;
                 float r;
 
-                a = col->release_col.a;
                 r = table_r[j];
+                a = col->release_col.a;
                 if (p->Fade) {
                     a *= fade;
                     fade += fade_add;
@@ -1070,25 +1073,15 @@ void drawDistShipoly(PEiDrawShipoly *p, VEiDrawShipoly *val, VColor *col, sceVu0
                 c0[3] = c1[3] = a;
                 InterVector(lv, linev[1][i], linev[0][i], r);
                 lv[3] = 1.0f;
-                {
-                    int ret;
-
-                    RotTransPersClip(ret, sv0, lv);
-                    if (!ret) {
-                        draw = 0;
-                        break;
-                    }
+                if (!RotTransPersClip(sv0, lv)) {
+                    draw = 0;
+                    break;
                 }
                 InterVector(lv, linev[1][i + 1], linev[0][i + 1], r);
                 lv[3] = 1.0f;
-                {
-                    int ret;
-
-                    RotTransPersClip(ret, sv1, lv);
-                    if (!ret) {
-                        draw = 0;
-                        break;
-                    }
+                if (!RotTransPersClip(sv1, lv)) {
+                    draw = 0;
+                    break;
                 }
                 r = table_dr[j];
                 InterVector(lv, linev[1][i], linev[0][i], r);
@@ -1114,19 +1107,18 @@ void drawDistShipoly(PEiDrawShipoly *p, VEiDrawShipoly *val, VColor *col, sceVu0
     }
     pppWaitDmaGs();
 }
-
+#else
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly", drawDistShipoly);
 #endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly", pppEiDrawDrawShipoly);
+/* Parked: 40 of 743 lines (2026-11-07): Type!=0 copy loop: ours hoists li -1 before lui 0x7000 (the original after it; spl is not an original local, but without it the loop gets two givs and s3/s4 swap: 89 lines); Type 1 loop: centv giv and &dv swap a0/a1; Thin loop: i*16 in v0 (original a2), so the point/linev givs and &point[0]/&v sit one register up (v1/a0/a1/a2 vs v0/v1/a0/a1); tried: the ref's locals (dvr in both blocks, len for Distance, linev as the function's static), the line markers' swap order (dvr = dv[1] first, dv0 = dv1 before the swap), spl placement and the [k][3] store forms */
 #if 0
-/* 44 lines differ: Type!=0 copy loop hoists li -1 before lui 0x7000 (original after; spl is not an original local), Type 1 loop swaps a0/a1 (centv giv vs &dv) */
 void pppEiDrawDrawShipoly(pppPObject *pobj, PEiDrawShipoly *param, pppCtrlTable *ctbl) {
     VEiDrawShipoly *val;
     VScale *scl;
     VColor *col;
     pppModelSt *mdl;
     sceVu0FVECTOR *centv;
-    extern sceVu0FVECTOR D_00645050[2][256];
-#define linev D_00645050
+    static sceVu0FVECTOR linev[2][256];
     sceVu0FMATRIX cnv_mat;
     u_int frame_ct;
     u_int smp_num;
@@ -1136,6 +1128,7 @@ void pppEiDrawDrawShipoly(pppPObject *pobj, PEiDrawShipoly *param, pppCtrlTable 
     int j;
     int k;
     int n;
+    float len;
 
     val = (VEiDrawShipoly *)&pobj->val[ctbl->useVal[DRAWSHIPOLY_THIS]];
     scl = (VScale *)&pobj->val[ctbl->useVal[DRAWSHIPOLY_SCALE]];
@@ -1212,7 +1205,8 @@ void pppEiDrawDrawShipoly(pppPObject *pobj, PEiDrawShipoly *param, pppCtrlTable 
         }
         if (param->TexRepeat > 0.0f) {
             for (k = 0; k < poly_num; k++) {
-                Distance(centv[k][3], centv[k], centv[k + 1]);
+                Distance(len, centv[k], centv[k + 1]);
+                centv[k][3] = len;
             }
             centv[k][3] = 0.0f;
         }
@@ -1237,9 +1231,9 @@ void pppEiDrawDrawShipoly(pppPObject *pobj, PEiDrawShipoly *param, pppCtrlTable 
                 dv1[3] = 0.0f;
                 Normalize(dv);
                 SCALE_VECTOR_XYZ(dv, width);
-                dvr = dv[0];
-                dv[0] = -dv[1];
-                dv[1] = dvr;
+                dvr = dv[1];
+                dv[1] = dv[0];
+                dv[0] = -dvr;
                 AddVector(pos0, centv[k], dv);
                 SubVector(pos1, centv[k], dv);
                 linev[0][k][0] = pos0[0];
@@ -1256,6 +1250,7 @@ void pppEiDrawDrawShipoly(pppPObject *pobj, PEiDrawShipoly *param, pppCtrlTable 
             sceVu0FVECTOR pos0;
             sceVu0FVECTOR pos1;
             float width;
+            float dvr;
 
             *(u_long128 *)dv1 = 0;
             *(u_long128 *)dv0 = 0;
@@ -1270,12 +1265,10 @@ void pppEiDrawDrawShipoly(pppPObject *pobj, PEiDrawShipoly *param, pppCtrlTable 
                 Normalize(dv1);
                 SCALE_VECTOR_XYZ(dv1, width);
                 AddVector(dv, dv0, dv1);
-                {
-                    float t = dv[1];
-                    dv[1] = dv[0];
-                    dv[0] = -t;
-                }
                 *(u_long128 *)dv0 = *(u_long128 *)dv1;
+                dvr = dv[1];
+                dv[1] = dv[0];
+                dv[0] = -dvr;
                 AddVector(pos0, centv[k], dv);
                 SubVector(pos1, centv[k], dv);
                 pos0[2] = pos1[2] = 0.0f;
@@ -1333,7 +1326,15 @@ void pppEiDrawDrawShipoly(pppPObject *pobj, PEiDrawShipoly *param, pppCtrlTable 
         drawDistShipoly(param, val, col, linev);
     }
 }
+#else
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly", pppEiDrawDrawShipoly);
+/* placeholder for the function's static linev (.bss) while it is assembly; the code goes to the stripped .sdata */
+__asm__(".section .sdata\n");
+__attribute__((section(".sdata"))) sceVu0FVECTOR *pppEiDrawDrawShipoly_linev(void) {
+    static sceVu0FVECTOR linev[2][256];
 
+    return linev[0];
+}
 #endif
 void pppEiDrawShipoly(pppPObject *pobj, PEiDrawShipoly *param, pppCtrlTable *ctbl) {
     VEiDrawShipoly *val;
@@ -1366,7 +1367,7 @@ void pppEiDrawShipoly(pppPObject *pobj, PEiDrawShipoly *param, pppCtrlTable *ctb
             val->Smp = pppAlloc(&ppvEnv->heapMng, val->SmpNum * 16);
         }
         if (!val->Smp) {
-            TRACE(D_00469F88);
+            TRACE("!!!!!!!!!!!!!!!!!!!!!!!!! Effect pppEiDrawShipoly Malloc FALSE !!!!!!!!!!!!!!!!!!!!!!!\n");
             return;
         }
         switch (param->UvRandom) {
@@ -1585,4 +1586,4 @@ void pppEiDrawShipolyDes(pppPObject *pobj, pppCtrlTable *ctbl) {
         val->Smp = 0;
     }
 }
-/* __asm__("<name>_<ADDR>:") before the statics: splat's unique names, called by the INCLUDE_ASM functions */
+// SOURCE DATA: .data .rodata .bss
