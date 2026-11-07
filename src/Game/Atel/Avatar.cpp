@@ -407,7 +407,8 @@ INT CAvatar::onSetPosPathTop(INT nCmd, void* pParam, INT nID) {
    if on the USHORT gives sltiu. 2026-11-07: `INT nTest = nType; if (nTest < 3) if (nType == 0) { asm volatile("" : "+r"(nType));
    if (nType == 0) ...` gives the exact tail but 2 more refs put nType (8 refs / 200, pri 1200) above pV (750): it needs 7 refs.
    "=r" alone splits the pseudo (frame +16), asm on nTest copies through v0, a register local on s6 reserves s6 for the whole
-   function, a case 0 / case 1,2 tree changes the structure. */
+   function, a case 0 / case 1,2 tree changes the structure. A join between the tests (do/while(0) + break, goto join) gets rid of the asm's
+   refs but jump merges the two tests; goto end out of a do/while keeps both but as bnez + 2 lines of layout (5). */
 #if 0
 INT CAvatar::onMove(INT nCmd, void* pParam, INT nID) {
     AvatarMoveParam* p = (AvatarMoveParam*)pParam;
