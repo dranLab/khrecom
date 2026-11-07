@@ -866,17 +866,6 @@ int TsSdSePlayCheck(int num) {
     return 0;
 }
 
-/* TsSdSepPlayDBG's string literals, for its INCLUDE_ASM; remove with it. */
-asm(".section .rodata\n"
-    ".align 3\n.asciz \"EE:  TsSdSepPlayDBG: ERROR! NO WD!!! wave%04d.wd\\n\"\n"
-    ".align 3\n.asciz \"EE:  TsSdSepPlayDBG: @@@@@@@@@@ SEP PLAY OVER!!! @@@@@@@@@@ sep_num=%d\\n\"\n"
-    ".align 3\n.asciz \"EE:  TsSdSepPlayDBG: se_data_ee_id[%d]=%d\\n\"\n"
-    ".align 3\n.asciz \"EE: nowait_func_buff OVER!!: TsSdSepPlayDBG\\n\"\n"
-    ".previous");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Sound/driver/sddrv_ee", TsSdSepPlayDBG);
-
-/* Parked: 4 lines with the barrier above (2026-11-06): the lbu of byte 13 vs the hoisted lui/li of the scan loop; sep_size forms 4-11 lines. 2026-11-07: both bytes loaded before a barrier and pinned give the loads but sll/addu come before the lw (7), a fixed register for the pointer stops the giv (14). Earlier: Register allocation: sep_size's bytes and the sep_param scan loop get other temporaries (pointer/counter swapped). */
-#if 0
 void TsSdSepPlayDBG(int addr, int vol, int pan, int se_id, int mtrack, int dtime) {
     int sep_num;
     int sep_size;
@@ -895,9 +884,13 @@ void TsSdSepPlayDBG(int addr, int vol, int pan, int se_id, int mtrack, int dtime
         return;
     }
     sep_num = TsSdGetSepNum(addr);
-    do { /* MATCH: empty loop = scheduling barrier (decomp-permuter): 16 -> 4 lines */
-    } while (0);
-    sep_size = ((u_char *)addr)[12] + (((u_char *)addr)[13] << 8);
+    {
+        /* MATCH: the two bytes pinned to a0/v0: v0 keeps byte 13 after the move of sep_num in both schedulers, the
+           original's temporaries for the bytes and the sep_param scan loop (issue-order pins) */
+        register int lo asm("$4") = ((u_char *)addr)[12];
+        register int hi asm("$2") = ((u_char *)addr)[13];
+        sep_size = lo + (hi << 8);
+    }
     for (num = 0; num < 4; num++) {
         if (((sep_param[num] >> 23) & 3) != 2) {
             check = 0;
@@ -936,7 +929,6 @@ void TsSdSepPlayDBG(int addr, int vol, int pan, int se_id, int mtrack, int dtime
         TsPrintN("EE: nowait_func_buff OVER!!: TsSdSepPlayDBG\n");
     }
 }
-#endif
 
 void TsSdSepPlay(int addr, int vol, int pan) {
     TsSdSepPlayDBG(addr, vol, pan, 0, 0, 0);
@@ -1650,7 +1642,7 @@ asm(".section .rodata\n"
     ".previous");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Sound/driver/sddrv_ee", TsSdVsbPlay);
 
-/* Register allocation: addr is spilled instead of kept in s8 (one more stack slot), so most registers differ. */
+/* Parked: 28 of 324 lines (2026-11-07, was 217): every instruction matches except one register swap: the footer/end_flag pointer gets s0 and size/addr2/addr1-addr2 get s2 (original: the reverse). Global-alloc priority: the pointer 14 refs/59 insns = 0.712 beats addr2 4/12 = 0.667; it needs live > 63 or addr2 live <= 11 (empty asm is no help: num 24/195 vs pos 10/81 flip when both get longer). Fixed on the way: header pointer addr + pos + 0x30 (vag_head + 0x30 got hoisted by PRE and cost addr its s8), size == 0xFFFFFFFF (lui/ori), addr1 -= addr2 before data[4] (PRE copy into s4), size2 * 2048 + 0x30 and (vsb_id << 8) + 1 in temporaries (fold reassociates them otherwise). Not ref-honest yet: three block-scope locals (a second data for footer/end_flag, ofs, id) the ref does not list; the original probably got the same temporaries another way (inline helpers or macros?). tried: data forms (one/two/three pointers, vag_head reuse, address expressions), addr2/VolSet expression forms, decomp-permuter 3 runs (only noise) */
 #if 0
 void TsSdVsbPlay(u_int addr, int vsb_id, int num, int vol, int pan) {
     u_int pos;
@@ -1672,7 +1664,7 @@ void TsSdVsbPlay(u_int addr, int vsb_id, int num, int vol, int pan) {
     }
     pos = ((u_int *)addr)[num * 2 + 4] + max * 8 + 16;
     size = ((int *)addr)[num * 2 + 5];
-    if (size == -1) {
+    if (size == 0xFFFFFFFF) {
         TsPrintN("EE:  TsSdStrPlayVSB: ERROR!!!!!!!!!!!!!!!!!!!! No Entry num=%d\n", num);
         return;
     }
@@ -1684,45 +1676,50 @@ void TsSdVsbPlay(u_int addr, int vsb_id, int num, int vol, int pan) {
     size = ConvLittleEndian(vag_head->mVagSize);
     TsPrintN("EE:  TsSdStrPlayVSB: volm=%d, rev=%d, rate=%d, size=0x%08x\n", volm, rev, rate, size);
     addr1 = pos + size + 16;
-    data = (u_char *)(addr + addr1);
-    data[1] = 3;
-    TsPrintN("footer   addr=0x%08x\n", addr1);
-    for (max = 0; max < 16; max++) {
-        TsPrintN("%02x ", data[max]);
+    {
+        u_char *data = (u_char *)(addr + addr1);
+        data[1] = 3;
+        TsPrintN("footer   addr=0x%08x\n", addr1);
+        for (max = 0; max < 16; max++) {
+            TsPrintN("%02x ", data[max]);
+        }
+        TsPrintN("\n");
+        for (max = 16; max < 32; max++) {
+            TsPrintN("%02x ", data[max]);
+        }
+        TsPrintN("\n");
+        size2 = size / 2048;
+        if ((size & 0x7FF) == 0) {
+            size2--;
+        }
+            {
+            int ofs = size2 * 2048 + 0x30;
+            addr2 = pos + ofs;
+        }
+        data = (u_char *)(addr + addr2);
+        if (data[1] == 3) {
+            data[17] = 3;
+            addr1 += 16;
+        }
+        data[1] = 0x10;
+        TsPrintN("end_flag addr=0x%08x\n", addr2);
+        for (max = 0; max < 16; max++) {
+            TsPrintN("%02x ", data[max]);
+        }
+        TsPrintN("\n");
+        for (max = 16; max < 32; max++) {
+            TsPrintN("%02x ", data[max]);
+        }
+        TsPrintN("\n");
     }
-    TsPrintN("\n");
-    for (max = 16; max < 32; max++) {
-        TsPrintN("%02x ", data[max]);
-    }
-    TsPrintN("\n");
-    size2 = size / 2048;
-    if ((size & 0x7FF) == 0) {
-        size2--;
-    }
-    addr2 = pos + size2 * 2048 + 0x30;
-    data = (u_char *)(addr + addr2);
-    if (data[1] == 3) {
-        data[17] = 3;
-        addr1 += 16;
-    }
-    data[1] = 0x10;
-    TsPrintN("end_flag addr=0x%08x\n", addr2);
-    size = addr1 - addr2;
-    for (max = 0; max < 16; max++) {
-        TsPrintN("%02x ", data[max]);
-    }
-    TsPrintN("\n");
-    for (max = 16; max < 32; max++) {
-        TsPrintN("%02x ", data[max]);
-    }
-    TsPrintN("\n");
-    data = (u_char *)vag_head + 0x30;
+    data = (u_char *)(addr + pos + 0x30);
     data[0] = volm;
     data[1] = pan;
     data[2] = 100;
     data[3] = 0;
-    data[4] = size;
-    data[5] = size >> 8;
+    addr1 -= addr2;
+    data[4] = addr1;
+    data[5] = addr1 >> 8;
     data[6] = 0;
     data[7] = 0;
     data[8] = rate;
@@ -1745,7 +1742,10 @@ void TsSdVsbPlay(u_int addr, int vsb_id, int num, int vol, int pan) {
     nowait_func_buff[nowait_func_count++] = 0x1D;
     nowait_func_buff[nowait_func_count++] = vsb_id;
     TsSdStrPlayVoice((u_int)data);
-    TsSdStrVolSet(2, num + (vsb_id << 8) + 1, vol);
+    {
+        int id = (vsb_id << 8) + 1;
+        TsSdStrVolSet(2, num + id, vol);
+    }
 }
 #endif
 
