@@ -1,8 +1,10 @@
 #include "Game/Collision/CollUtilA.h"
 #include "System/HeapMan.h"
+#define COLLUTIL_H_PATH "c:/KHCOM/MainApp/Game/Collision/CollUtil.h" /* MATCH: the original's path in CollUtil.h's strings */
+#include "Game/Collision/CollUtil.h"
 
-// CCollision has an inline virtual destructor: its weak copy ends this object. Its weak vtable _vt$10CCollision
-// is not part of this object (the original linker kept Game/SEMotion's copy); the build drops ours.
+// CCollision has an inline virtual destructor: its weak copy ends this object, its weak vtable ends the .rodata
+// (an unnamed copy at 0x4894E8: the original linker kept Game/SEMotion's name; symbol_addrs.txt names this one).
 
 enum COLL_TYPE {
     COLL_TYPE_NONE = 0,
@@ -211,4 +213,4 @@ INT CCollUtil::_checkWaterSurface(FVECTOR& inPos) {
     }
     return 0;
 }
-
+// SOURCE DATA: .rodata
