@@ -157,12 +157,12 @@ One row per merge into main (`partials.py --summary` before and after).
 ## Summary
 
 ```
-PARTIAL: 185 (155 in 44 headers, 30 in 17 .cpp); MATCH: 1028
+PARTIAL: 185 (155 in 44 headers, 30 in 17 .cpp); MATCH: 1029
   by category: method 46, data member 10, type 14, fwd decl 2, #include 13, changed in place 43, padding 2, path override 1, gate 5, guessed 9, header-level 24, stand-in 11, other 5
 stand-ins: 11 foreign in 6 files (9 names), 170 unattributed, 184 own
 duplicate class names across headers: 0
 padding: 2 arrays, 0 accessors
-mechanisms: 668 sites (0 untagged); #line: 1238
+mechanisms: 669 sites (0 untagged); #line: 1238
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
 classes: complete 1168, superset 17, partial 1, gated 3, missing 6, unattributed 8
 ```
@@ -254,7 +254,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/Str.h` | 1 | 0/0/0/0 | 140 |
 | `System/Graphic/TexInfo.h` | 1 | 2/0/0/0 | 234 |
 | `System/Graphic/modeldata.h` | 2 | 3/0/0/1 | 82 |
-| `System/MainApp.h` | 2 | 1/0/0/1 | 270 |
+| `System/MainApp.h` | 2 | 1/0/0/1 | 271 |
 | `System/RsrcData.h` | 1 | 33/0/0/0 | 29 |
 | `System/SLContainer.h` | 4 | 0/0/0/0 | 252 |
 | `System/Vector.h` | 8 | 7/2/0/0 | 266 |
@@ -301,7 +301,7 @@ or `untagged`.
 | path override | `CARD_H_PATH` | 6 | 6 | the original's Card.h/Status.h strings carry |
 | path override | `CHATMAN_H_PATH` | 2 | 2 | this unit names ChatMan.h so (header default "Game/Atel/ChatMan.h") |
 | path override | `COLLDISP_H_PATH` | 4 | 4 | this unit names CollDisp.h by its full original path |
-| path override | `COLLUTIL_H_PATH` | 14 | 14 | __FILE__ as in the original .rodata |
+| path override | `COLLUTIL_H_PATH` | 15 | 15 | __FILE__ as in the original .rodata |
 | path override | `CTDMAN_H_PATH` | 6 | 6 | this unit names CtdMan.h so (header default "System/CTD/CtdMan.h") |
 | path override | `D2MAN_H_PATH` | 10 | 10 | this unit names 2DMan.h so (header default "System/Graphic/2D/2DMan.h") |
 | path override | `DEBUGPATHDATA_H_PATH` | 3 | 3 | the original includes it under this name |
@@ -419,7 +419,7 @@ than our includers (units with a source only). A heuristic: stand-ins and opt-ou
 |---|---:|---:|---|---|
 | `Form/Menu/JiminyMemo.h` | 3 | 2 | 1: System/MainTaskFactory | 0:  |
 | `Game/Card.h` | 25 | 64 | 0:  | 39: Form/Menu/GameOver, Form/Menu/JMemoFlag, Form/Menu/JiminyMemo, Form/Menu/LevelUp, ... (+35) |
-| `Game/Collision/CollUtil.h` | 153 | 150 | 3: Game/Collision/CollUtil, Game/Collision/CollUtilO, Game/Collision/Ride | 0:  |
+| `Game/Collision/CollUtil.h` | 155 | 151 | 4: Game/Collision/CollUtil, Game/Collision/CollUtilA, Game/Collision/CollUtilF, Game/Collision/CollUtilO | 0:  |
 | `Game/OsdDef.h` | 8 | 7 | 1: System/MainTaskFactory | 0:  |
 | `System/Graphic/Anim.h` | 149 | 149 | 0:  | 2: Game/Gimmick/CreateGimmick, Game/Gimmick/SampleGimmick |
 | `System/Graphic/Str.h` | 141 | 140 | 1: Game/Collision/CollUtil | 0:  |

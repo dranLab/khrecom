@@ -41,10 +41,10 @@ every change that is merged without regenerating. Regenerating all four takes ab
 
 ## Where things stand (2026-11-07)
 
-- **Progress:** 12047 of 12311 functions matched: game 11264 of 11323, libraries 783 of 988 (plus 151 hand-written).
+- **Progress:** 12048 of 12311 functions matched: game 11265 of 11323, libraries 783 of 988 (plus 151 hand-written).
   `tools/check.sh` counts the 151 hand-written units as done too: its total is these matched functions plus 151
   (fixed 2026-11-07: it used to count a parked `#if 0 ... #else INCLUDE_ASM #endif` as done).
-- **Game:** 59 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note).
+- **Game:** 58 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note).
   5 units take a data section from assembly.
 - **Libraries:** 18 parked, 1 not attempted, 27 hand-written (stay assembly), no unit with data from assembly
   (the last two, __assert and __umoddi3, needed the split / link-alignment fixes of 2026-11-07);
@@ -118,10 +118,10 @@ Numbers change with every merge: `tools/check.sh` (totals), `tools/leftovers.py 
    CardRevolver main, HumanBoss getAttackCardNum/setupCardRevolver), never a changed access specifier.
    The hand-kept table at the top of
    `docs/asm-leftovers.md` lists the blockers that need more than a source change.
-2. **Data from source**: CollUtil and Ride (.rodata) after the split fix of 2026-11-07 (a code address is no string
-   start; Ride now starts right at 0x4895C0). CollUtilO waits on a second split fix (user's OK): its range
-   0x4893D8-0x4895C0 also holds CollUtilA's (0x4893D8) and CollUtilF's (0x489460) .rodata, which have no boundaries;
-   its own starts at 0x489500 (recipe tested: build/progress/Game-Collision-CollUtilO.md). `pppEiDrawShipoly` (.bss .data .rodata) as before. `sddrv_ee`'s `.bss` is blocked (see the
+2. **Data from source**: CollUtil and CollUtilO (.rodata); Ride's is done (2026-11-07). Both split fixes of 2026-11-07
+   are in (a code address is no string start; header-only CollUtilA/CollUtilF get their own .rodata), so CollUtilO's
+   own starts at 0x489500: recipe tested in build/progress/Game-Collision-CollUtilO.md (needs the symbol_addrs names
+   of its two vtable copies). `pppEiDrawShipoly` (.bss .data .rodata) as before. `sddrv_ee`'s `.bss` is blocked (see the
    table at the top of `docs/asm-leftovers.md`).
 3. **Library leftovers**: the parked and not attempted functions of `docs/sdk-leftovers.md`, with its "Working on
    a library unit" section.
