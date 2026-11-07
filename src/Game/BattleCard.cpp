@@ -651,10 +651,6 @@ void CBattleCard::setBreak(INT inFlag) {
     m_uiFlag = (INT)m_uiFlag & ~0x2;
     if (inFlag > 0) m_uiFlag |= 0x20;
 }
-/* Parked: 5 lines - the original keeps two copies of `addGimmickCount(-1); break;` (cases 0xe and 6); our jump2
-   cross-jumps case 0xe's tail into case 6. Per-case flag sets, gotos, labels, argument spellings and block scopes
-   all merge too (synthetic tests build/ps/cj/d*.cpp, e*.cpp, f1.cpp). */
-#if 0
 void CBattleCard::destroy(INT inFlag) {
     if (m_uiMode < 8) {
         if (m_uiMode >= 3) return;
@@ -682,6 +678,7 @@ void CBattleCard::destroy(INT inFlag) {
         case 0xe:
             m_pRevolver->exeTrapEffect(0);
             CCardBattle::addGimmickCount(-1);
+            __asm__ volatile(""); /* MATCH: keeps this copy: jump2 would cross-jump it into case 6's */
             break;
         case 6:
             CCardBattle::addGimmickCount(-1);
@@ -697,11 +694,6 @@ void CBattleCard::destroy(INT inFlag) {
         out();
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", destroy__Q210CardBattle11CBattleCardi);
-/* MATCH: placeholder for the asm destroy's string */
-inline void _destroyStringPlaceholder(CBattleCard* p) { TRACE("BC::destroy(); handle=%d\n", p); }
-#endif
 void CBattleCard::setEnchant() {
     changeState(3);
     m_uiMode = 7;
