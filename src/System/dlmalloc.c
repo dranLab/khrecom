@@ -1,6 +1,5 @@
 /* Doug Lea's malloc 2.8.x, mspaces only, with a comment/return-address debug tag in every chunk header. */
 #include "System/dlmalloc.h"
-#include "include_asm.h"
 
 extern int* __errno(void);
 #define MALLOC_FAILURE_ACTION (*__errno() = 12) /* ENOMEM */
@@ -923,29 +922,25 @@ mspace create_mspace_with_base(void* base, size_t capacity, int locked) {
     return (mspace)m;
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/dlmalloc", destroy_mspace);
-
-#if 0
-/* Not matching. The original is: lw seg.next; beqz; lw next (A); bnezl L, lw (entry test + body); L: bnezl L, lw.
- * That is "if (sp) { sp = sp->next; while (sp) sp = sp->next; }" with the loop exit test duplicated, but jump2
- * cross-jumps the peeled "lw; beqz" into the loop (the insn before both tests is the same lw), giving an
- * unrotated loop (40 bytes). An asm statement between them (volatile or "=r"/"0" pass-through) stops the merge
- * but then reorg leaves the second test's delay slot unfilled (64 bytes). The do-while below (one loop test,
- * 48 bytes), the real dlmalloc loop over &ms->seg (tests &seg, addiu), for/while forms and a volatile load
- * for the peeled step were tried too. */
+/* MATCH: the loop body is a goto block after the return, entered by two equal tests (the peeled step's and the
+ * loop's): the original's bnezl/bnezl pair (reorg fills both from the body and deletes it). Written as
+ * "if (sp) { sp = sp->next; while (sp) ... }" jump2 cross-jumps the peeled test into the loop. */
 size_t destroy_mspace(mspace msp) {
     mstate ms = (mstate)msp;
     msegmentptr sp = ms->seg.next;
     msegmentptr next;
     if (sp != 0) {
-        do {
-            next = sp->next;
-            sp = next;
-        } while (sp != 0);
+        sp = sp->next;
+        if (sp != 0) goto body;
+    test:
+        if (sp != 0) goto body;
     }
     return 0;
+body:
+    next = sp->next;
+    sp = next;
+    goto test;
 }
-#endif
 
 void* mspace_malloc(mspace msp, size_t bytes) {
     mstate ms = (mstate)msp;
