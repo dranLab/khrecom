@@ -1075,11 +1075,6 @@ static inline INT _hexValue(INT c) {
     return n;
 }
 
-/* Parked: _atoi: 7 of 78 lines, same size - hex/decimal paths and the isupper branch (_tolower) as the original; left:
- * the decimal loop: the original's top is not aligned and p++ stays last. Real loop forms give the align nop and move
- * p++ (for (;; p++), while, tests in the condition); a goto loop drops it but loses the hoisted lui/li 10. 2026-11-07: a goto loop with the constant in a pinned local still needs the table pointer hoisted by hand
- * (19 lines): the hoists need a real loop, the unaligned top needs none. */
-#if 0
 INT _atoi(const CHAR* lpszInStr) {
     INT nRet = 0;
     const CHAR* p = lpszInStr;
@@ -1094,6 +1089,7 @@ INT _atoi(const CHAR* lpszInStr) {
         } else {
             goto dec;
         }
+        if (!*p) goto end;
         while (*p) {
             n = _hexValue(*p);
             if (n < 0) {
@@ -1106,20 +1102,25 @@ INT _atoi(const CHAR* lpszInStr) {
     dec:
         p = lpszInStr + 1;
         if (*lpszInStr != '#') p = lpszInStr;
-        for (;;) {
-            c = *p;
-            if (!c) goto end;
-            if (!isdigit(c)) goto end;
-            nRet = nRet * 10 + c - '0';
-            p++;
-        }
+        /* MATCH: both set up before a goto loop: a real loop hoists them too, but its top gets the align nop */
+        INT ct = (INT)_ctype_ + 1;
+        INT ten = 10;
+    top:
+        c = *p;
+        if (!c) goto end;
+        if (!(*(const unsigned char*)(c + ct) & 4)) goto end;
+        nRet = nRet * ten + c - '0';
+        asm volatile(""); /* MATCH: p++ last, for the b's slot */
+        p++;
+        goto top;
     }
 end:
-    return nRet;
+    {
+        register INT r asm("$2") = nRet;
+        asm volatile("" : : "r"(r)); /* MATCH: the move stays above the jr: its slot is a nop */
+        return r;
+    }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", _atoi__FPCc);
-#endif
 void CRcf::setLocale(INT nID) {
     s_nLocale = nID;
 }
