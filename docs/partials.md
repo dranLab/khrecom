@@ -157,12 +157,12 @@ One row per merge into main (`partials.py --summary` before and after).
 ## Summary
 
 ```
-PARTIAL: 185 (155 in 44 headers, 30 in 17 .cpp); MATCH: 1024
+PARTIAL: 185 (155 in 44 headers, 30 in 17 .cpp); MATCH: 1028
   by category: method 46, data member 10, type 14, fwd decl 2, #include 13, changed in place 43, padding 2, path override 1, gate 5, guessed 9, header-level 24, stand-in 11, other 5
 stand-ins: 11 foreign in 6 files (9 names), 170 unattributed, 184 own
 duplicate class names across headers: 0
 padding: 2 arrays, 0 accessors
-mechanisms: 668 sites (0 untagged); #line: 1242
+mechanisms: 668 sites (0 untagged); #line: 1238
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
 classes: complete 1168, superset 17, partial 1, gated 3, missing 6, unattributed 8
 ```

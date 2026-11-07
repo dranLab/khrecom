@@ -36,7 +36,6 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `Game/Player/Player` | 2 | 654 | 2 |  |
 | `System/Graphic/TexUtil` | 4 | 651 | 4 |  |
 | `System/Graphic/HermitePathCamera` | 1 | 632 | 1 |  |
-| `Game/Enemy/HumanBoss` | 3 | 558 | 3 |  |
 | `Form/DebugWindow` | 1 | 549 | 1 |  |
 | `System/Graphic/PackMan` | 2 | 540 | 2 |  |
 | `System/Graphic/Effect/libppp/keProg/pppKeShpTail3X` | 1 | 532 | 1 |  |
@@ -47,7 +46,6 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `Game/Collision/CollUtil` | 1 | 424 | 1 | .rodata |
 | `Game/Collision/CollMap` | 2 | 365 | 2 |  |
 | `Game/Player/PlayerCamera` | 1 | 332 | 1 |  |
-| `Game/CardRevolver` | 1 | 321 | 1 |  |
 | `Game/SceneInfo` | 2 | 314 | 2 |  |
 | `System/Graphic/Effect/libppp/partMng` | 1 | 292 | 1 |  |
 | `System/Sound/driver/sddrv_ee` | 1 | 262 | 1 | .bss |
@@ -59,6 +57,7 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `Game/Atel/Atel` | 1 | 189 | 1 |  |
 | `Game/Atel/AtelCrossFade` | 1 | 188 | 1 |  |
 | `Game/Enemy/EnemyWhitemushroom` | 1 | 184 | 1 |  |
+| `Game/Enemy/HumanBoss` | 1 | 181 | 1 |  |
 | `System/Movie/MSVideo` | 1 | 180 | 1 |  |
 | `Game/Atel/Avatar` | 1 | 139 | 1 |  |
 | `System/TaskMan` | 1 | 135 | 1 |  |
@@ -112,7 +111,6 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `System/RcfCD` | `_startCdRead__Fii` | 41 | 4-8 lines, varying between identical builds (the draft above is the C) - the hoisted lui's of the s_n*_R statics get s5/s6 in an order that changes per compiler run (gcse PRE hash order, memory gcse-pre-hash-order); store orders tried (all worse). Kept asm because the result is not reproducible. |
 | `System/TaskMan` | `update__8CTaskManiii` | 135 | 4 lines - the barrier settles nTQ/bPause (s5/s6). Left: the TaskMainParam stores: the original issues the nTQ store early and _SecondaryArray's after _nSysLag's; a scheduling tie across the clear() block. 2026-11-07: the ref lists no ctor for TaskMainParam, but brace init with these values builds … |
 | `Game/Card` | `getAttribute__5CCardG4CARDPPCcN32` | 95 | 30 of 124 lines, registers only: buf's address (3 uses / 38 insns) outranks the CCtdMan::m_pInstance address (4 / 110) in global-alloc priority, the original has them the other way round (s6/s5) and keeps card.m_nKind in a0. Worked: `pLF = buf; *pOutStrAttack = pLF;` (parameter registers, 53 -> … |
-| `Game/CardRevolver` | `main__Q210CardBattle13CCardRevolver` | 321 | 27 of 426 lines (2026-11-07): the TRACE argument loads of the first two card dumps: the original loads uiFlag into v1 and uiOwner last into v0, ours the reverse, and the kind load comes after iHandMax. Cause found: with stack arguments, calls.c precomputes every argument that contains a call (all … |
 | `Game/Map` | `init__4CMapii` | 1046 | 87 of 1193 lines, same size - the bbox loop's &b (ApplyMatrix output) is hoisted into s2 here, the original recomputes it per iteration, which shifts the saved registers of xmin/xmax/zmin/zmax and the division block; for/do/ while/goto loop shapes, by-value apply inline and a 10 min permuter run … |
 | `Game/Map` | `disp__4CMap` | 906 | 709 of 1308 lines, 44 bytes short - structure as the original (debug clamp, shader modes, group selection by player position, pipelined kick/resultCheckBBox display via group table or grid, sky polygons). The 44 bytes: the original keeps two copies of the "flush the last model" block (group and … |
 | `Game/SceneInfo` | `clear__10CSceneInfo` | 139 | 113 lines, 4 bytes long, frame 144 for 128 - the first run of stores: the original reloads m_pMCWork before each store (the *(T*)& scalar stores give that) but keeps two -1 registers and seven s-registers for the %hi parts; statement orders (incl. the lui order) and 7 min of permuter (10k … |
@@ -132,16 +130,14 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Game/Player/PlayerRiku` | `setMagic__Q22PL11CPlayerRikuiii` | 520 | (comment) Best attempt (same structure): BULLET_PARAM field stores and the attack-power loads are scheduled differently. |
 | `Game/Enemy/BattleEnemy` | `initEnemyParam__12CBattleEnemyiii` | 245 | 34 lines - the Riku-game scan loop: the original places the getRsrcData() ternary before the inline getExtraParam's found block and keeps the parameter in s0 (ours: s2, blocks swapped); the rest (seek loops, relocation, floor mapping, basic param) matches; tried: while/for/continue loop forms, … |
 | `Game/Enemy/EnemyWhitemushroom` | `damage___19CEnemyWhitemushroom` | 184 | 3 of 211 lines (2026-11-07): case 4, the vptr load for getLockOnPos comes after all six setupFade stores, the original has it right after the two TIMEQ stores (sw 284/280) and before swc1 268, sw 288, sw 228, sw 272; tried: all store orders, flag forms, barriers, temporaries, call forms, pointer … |
-| `Game/Enemy/HumanBoss` | `getAttackCardNum__C10CHumanBossUi` | 43 | 20 lines (2026-11-05, was 27): the goto-built outer loop reloads iCardCount/pCards like the original (a for loop hoists them); left: the original hoists the m_pEnemyParam load once (t2), ours reloads it too. The ref lists card/j at function level and no getEnemyParam inline 2026-11-07: a local for … |
-| `Game/Enemy/HumanBoss` | `setupCardRevolver__10CHumanBoss` | 334 | 21 of 371 lines - the param pointer is carried in a register copy through the build and enemy-card loops (the original's `move a3,v1`; ours reloads getEnemyParam() in the enemy-card loop body). Levers that got it here: the id % 10000 in a local, UINT search index, one INT i per loop, `cards = … |
-| `Game/Enemy/HumanBoss` | `setupAct__10CHumanBoss` | 181 | 21 of 371 lines - the param pointer is carried in a register copy through the build and enemy-card loops (the original's `move a3,v1`; ours reloads getEnemyParam() in the enemy-card loop body). Levers that got it here: the id % 10000 in a local, UINT search index, one INT i per loop, `cards = … |
+| `Game/Enemy/HumanBoss` | `setupAct__10CHumanBoss` | 181 | 18 of 205 lines (2026-11-07): the normal arm's -1 (sMin/sMax) is its own hoisted register in the original (li s4,-1 after li s5,1), ours shares the compares' -1 (s2): loop.c (-dL) combines the arm's HImode -1 movable with the SImode compare constant ("matches 84"); the rest follows (14/12 store … |
 | `Form/DebugWindow` | `disp__12CDebugWindow` | 549 | (comment) Close: the reload registers of the spilled WW/sign (t0 instead of a3) and the loop's line-font position stores (G_XYZ pointer formed before the x store) differ. |
 | `Form/Menu/Camp` | `setTechWin__5CCampi` | 551 | 53 of 621 lines (2026-11-07; tools/drafts.py's "build failed" is the data block after the INCLUDE_ASM, which also defines this function's statics: drop it to build the draft): in the sleight-list loop the original reloads the spilled pTechCateTbl at the loop head and recomputes … |
 | `Form/Menu/Camp` | `setMapCardWin__5CCampi` | 1227 | same size, 33 of 1409 lines differ (re-measured 2026-11-07; tools/drafts.py's "build failed" is the data block after the INCLUDE_ASM: drop it to build the draft): the stack slots of the spilled hoisted addresses (&m_pMCInfoNumCtrl, &m_pMCInfoNumFnt, &m_pMCFnt, &m_pMCCard, &m_nMapKind, i + 1) are … |
 | `Form/Menu/Camp` | `setWorldmapCursor__5CCamp` | 853 | 35 of 939 lines differ (62 before _NORMA_PIECES; re-measured 2026-11-07). Left: pDoorInfo and nNI (not nNorma) have s4/s3 for s3/s4: global-alloc priority (-dl: pDoorInfo 28 refs over 187 insns = 0.60, nNI 22 over 121 = 0.73, so nNI is allocated first and takes s3); the original allocates … |
 | `Form/Menu/RoomCreation` | `menuMain__13CRoomCreation` | 1995 | (comment) menuMain: 78 of 2211 lines, 8 bytes short (92 and 0x50 short before _NORMA_PIECES, 2026-11-07): the by-value NormaSrc arguments are written out now; left: case 0's registers (v1 + s7 where the original keeps a0, s4/s6/s8 from there). To enable this draft, also drop the data block after … |
 
-Totals: 62 functions (28448 instructions) in 43 units, 62 of them parked; 5 units take a data section from assembly.
+Totals: 59 functions (27750 instructions) in 42 units, 59 of them parked; 5 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->
