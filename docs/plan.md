@@ -118,9 +118,10 @@ Numbers change with every merge: `tools/check.sh` (totals), `tools/leftovers.py 
    reading the private member matched but is not the original: reverted 2026-11-07).
    The hand-kept table at the top of
    `docs/asm-leftovers.md` lists the blockers that need more than a source change.
-2. **Data from source** (2026-11-07: CollUtil's .rodata needs a split fix first: the cut at 0x4893B4 falls inside CSphereCollision's vtable; CollUtil's ends at 0x4893D8 with CCollision's vtable, which probably also lifts CollUtilO's 4-mod-8 blocker: waits on the user)
-   for the units that still take a section from asm: `pppEiDrawShipoly` (.bss .data .rodata) and
-   `CollUtil` (.rodata). `Ride` and `CollUtilO` can't (`.rodata` at 4 mod 8), `sddrv_ee`'s `.bss` is blocked (see the
+2. **Data from source**: CollUtil, CollUtilO and Ride (.rodata). The split fix of 2026-11-07 (a code address is no
+   string start) put their boundaries right (CollUtil ends at 0x4893D8 with CCollision's vtable; CollUtilO and Ride
+   now start 8-aligned): what is left is the header strings (CollUtil.h's inline asserts, twice, in CollUtilO; the
+   extern D_ strings become the inlines' own). `pppEiDrawShipoly` (.bss .data .rodata) as before. `sddrv_ee`'s `.bss` is blocked (see the
    table at the top of `docs/asm-leftovers.md`).
 3. **Library leftovers**: the parked and not attempted functions of `docs/sdk-leftovers.md`, with its "Working on
    a library unit" section.
