@@ -41,10 +41,10 @@ every change that is merged without regenerating. Regenerating all four takes ab
 
 ## Where things stand (2026-11-07)
 
-- **Progress:** 12039 of 12311 functions matched: game 11256 of 11323, libraries 783 of 988 (plus 151 hand-written).
+- **Progress:** 12040 of 12311 functions matched: game 11257 of 11323, libraries 783 of 988 (plus 151 hand-written).
   `tools/check.sh` counts the 151 hand-written units as done too: its total is these matched functions plus 151
   (fixed 2026-11-07: it used to count a parked `#if 0 ... #else INCLUDE_ASM #endif` as done).
-- **Game:** 67 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note).
+- **Game:** 66 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note).
   5 units take a data section from assembly.
 - **Libraries:** 18 parked, 1 not attempted, 27 hand-written (stay assembly), no unit with data from assembly
   (the last two, __assert and __umoddi3, needed the split / link-alignment fixes of 2026-11-07);
@@ -133,7 +133,7 @@ its data comes from source (or is recorded as blocked). Never leave a function t
 ## Working rules
 
 - Sequential in the main checkout by default. Parallel work only through `/decomp-pool` (user decision 2026-11-07):
-  one unit per `decomp-worker` in its own worktree, mode "parked" (the unit's drafts from `tools/drafts.py`) or
+  one unit per `decomp-worker` in its own worktree (that is this rule's form for a pool worker, not a deviation), mode "parked" (the unit's drafts from `tools/drafts.py`) or
   "new"; the coordinator merges one worker at a time with the gate. Parallel compiles inside `tools/permuter.py`,
   `tools/decomp_permuter.py` and `tools/drafts.py` are fine.
 - No changes to `tools/`, `configure.py`, `config/` or the build flags, except `tools/partials.py` (approved)
