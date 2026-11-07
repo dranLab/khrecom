@@ -386,25 +386,17 @@ static unsigned long _alarm_bind(int id, unsigned long schedule, unsigned long a
     return 0x800;
 }
 
-/* Parked: 4 of 59 lines, same size (2026-11-07, was 17): !sd arm first, both loads ahead of a barrier, server's store of alias
-   set 0 (sd stays in v0). Left: `ori` and `move a1` against the stores of the same block; all six store orders tried. */
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/sifrpc", _request_bind);
-#if 0
+/* !sd arm first; server's store of alias set 0 (sd stays in v0). */
 static void _request_bind(RpcBindPkt *bind, struct rpc_data *rd)
 {
     RpcRendPkt *rend;
     sceSifServeData *sd;
 
     rend = _sceRpcGetFPacket(rd);
-    {
-        void *c = bind->client;
-        void *p = bind->rpc.pkt_addr;
-        asm volatile("");
-        rend->rpc.pkt_addr = p;
-        rend->client = c;
-    }
+    rend->rpc.pkt_addr = bind->rpc.pkt_addr;
+    rend->client = bind->client;
     rend->cid = SIF_CMD_RPC_BIND;
-    sd = _search_svdata(bind->sid, rd);
+    sd = _search_svdata(_PKT_ANY(bind->sid, i), rd); /* MATCH: read of alias set 0, behind the cid store */
     if (!sd) {
         rend->server = 0;
         rend->buff = 0;
@@ -416,7 +408,6 @@ static void _request_bind(RpcBindPkt *bind, struct rpc_data *rd)
         iSetTimerAlarm(0x800, _alarm_bind, rend);
     }
 }
-#endif
 
 int sceSifBindRpc(sceSifClientData *cd, unsigned int request, unsigned int mode)
 {
