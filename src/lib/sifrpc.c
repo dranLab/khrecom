@@ -461,11 +461,7 @@ int sceSifBindRpc(sceSifClientData *cd, unsigned int request, unsigned int mode)
 }
 
 /* A call for an EE server: queue it for its thread. */
-/* Parked: 3 lines, 4 bytes long (2026-11-07, was 8): !qd->start arm first, qd->end's store of alias set 0 (the copies' loads
-   stay behind it), do/while(0) around the fno copy (without it 26). Left: the rsize load goes ahead of the store at 40 and an
-   extra nop before the jr; a union store on any single field of the copy does not move it. */
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/sifrpc", _request_call);
-#if 0
+/* !qd->start arm first; qd->end's store of alias set 0 keeps the copies' loads behind it. */
 static void _request_call(RpcCallPkt *call, struct rpc_data *rd)
 {
     sceSifServeData *sd = call->server;
@@ -479,19 +475,16 @@ static void _request_call(RpcCallPkt *call, struct rpc_data *rd)
     _PKT_STORE(qd->end, p) = sd;
     sd->paddr = call->rpc.pkt_addr;
     sd->client = call->client;
-    do {
-        sd->fno = call->fno;
-    } while (0);
+    sd->fno = _PKT_ANY(call->fno, i); /* MATCH: these three reads of alias set 0 keep their pairs in order */
     sd->size = call->ssize;
-    sd->receive = call->receive;
-    sd->rsize = call->rsize;
+    sd->receive = _PKT_ANY(call->receive, p);
+    sd->rsize = _PKT_ANY(call->rsize, i);
     sd->rmode = call->rmode;
     sd->rid = call->rpc.rec_id;
     if (qd->key >= 0 && !qd->active) {
         iWakeupThread(qd->key);
     }
 }
-#endif
 
 int sceSifCallRpc(sceSifClientData *cd, unsigned int fno, unsigned int mode, void *send, int ssize, void *receive,
                   int rsize, sceSifEndFunc end_func, void *end_para)
