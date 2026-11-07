@@ -147,19 +147,20 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-05 | catch-up: the unit merges since 2026-11-03 (placeholders and unit-gate sites dropped as their functions got matched; MATCH comments of the new matches) | 205 | 22 | 0 | 680 (0) | 930 |
 | 2026-11-06 | cleanup: JiminyMemo finish, CPause and CShadowModelMan stand-ins replaced by the owner headers (friends with MATCH) | 202 | 20 | 0 | 676 (0) | 930 |
 | 2026-11-07 | cleanup: MovieScript uses the real CTextWnd, CPointT, CSizeT (the old assembler crash is gone); _vf4x tagged | 201 | 19 | 0 | 677 (0) | 948 |
+| 2026-11-07 | cleanup: CHeapMan moved to HeapMan.h (6 local copies gone), Model uses VramMan.h | 199 | 14 | 0 | 677 (0) | 948 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 201 (165 in 48 headers, 36 in 21 .cpp); MATCH: 948
-  by category: method 46, data member 10, type 14, fwd decl 2, #include 14, changed in place 45, padding 2, path override 1, gate 5, guessed 9, header-level 33, stand-in 15, other 5
-stand-ins: 19 foreign in 14 files (13 names), 198 unattributed, 155 own
+PARTIAL: 199 (165 in 48 headers, 34 in 20 .cpp); MATCH: 948
+  by category: method 46, data member 10, type 14, fwd decl 2, #include 14, changed in place 45, padding 2, path override 1, gate 5, guessed 9, header-level 33, stand-in 13, other 5
+stand-ins: 14 foreign in 9 files (12 names), 198 unattributed, 154 own
 duplicate class names across headers: 0
 padding: 2 arrays, 0 accessors
 mechanisms: 677 sites (0 untagged); #line: 1241
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 873, superset 12, partial 0, gated 3, missing 8, unattributed 309
+classes: complete 874, superset 12, partial 0, gated 3, missing 7, unattributed 309
 ```
 
 ## Queue (top 20)
@@ -188,7 +189,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 
 | class | readiness | home | stand-in files | also defined in | gaps vs ref |
 |---|---|---|---:|---|---|
-| `CHeapMan` | missing | System/HeapMan.h | 5 |  |  |
 | `sceDmaChan` | missing | System/Graphic/Effect/libppp/draw/draw_w.h | 2 |  |  |
 | `tD_CHCR` | missing | System/Graphic/Effect/libppp/draw/draw_w.h | 2 |  |  |
 | `CCMCSemiModelList` | missing | Game/Collision/CollMapCamera.h | 1 |  |  |
