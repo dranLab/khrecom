@@ -3423,7 +3423,9 @@ void CJiminyMemo::ScrollBarInit(D2::C2DSeqCtrl** inSeqCtrl, INT inLayer, FVECTOR
         }
     }
 }
-/* Parked: 22 lines: ours hoists the 2.0f of case 2 out of the loop (an extra saved f24, frame +16, 0.01f moves
+/* Parked: 2 lines (2026-11-07, the 2.0f pinned in case 2): li s5,1 is issued before addiu s3,sp,16 (&vec) in the preheader, the
+   original has them the other way round. An if chain gives that hoist order but loses the switch's dispatch; a pVec local or
+   a pinned pointer before the loop move the registers (30-50 lines). Earlier: 22 lines: ours hoists the 2.0f of case 2 out of the loop (an extra saved f24, frame +16, 0.01f moves
    from f23 to f24); the original loads it inside case 2 like ScrollBarInit does. Everything else matches.
    tried: y expression forms (temp, parenthesised, vec = vPos + .y), case order, INT i at the top, NULL compare, 0 vs
    0.0f w, fRatioPosY reused for the product; tools/permuter.py (fixed wrapper, target draft on, other drafts hidden)
@@ -3453,10 +3455,12 @@ void CJiminyMemo::ScrollBarChange(D2::C2DSeqCtrl** inSeqCtrl, FLOAT inBasePosY, 
                 vec.set(vPos.x, vPos.y + 1.0f, vPos.z, vPos.w);
                 p->setLocalPos(vec);
                 break;
-            case 2:
-                vec.set(vPos.x, vPos.y + inBaseHeight * fRatioHeight - 2.0f, vPos.z, vPos.w);
+            case 2: {
+                register FLOAT fTwo asm("$f4") = 2.0f; /* MATCH: loaded here, not hoisted (ScrollBarInit does the same) */
+                vec.set(vPos.x, vPos.y + inBaseHeight * fRatioHeight - fTwo, vPos.z, vPos.w);
                 p->setLocalPos(vec);
                 break;
+            }
             }
         }
     }
