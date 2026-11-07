@@ -50,13 +50,13 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `Game/Atel/Avatar` | 3 | 531 | 3 |  |
 | `Game/Player/PlayerRiku` | 1 | 520 | 1 |  |
 | `System/Graphic/Effect/libppp/keProg/pppKeShpTail3` | 1 | 514 | 1 |  |
-| `System/Rcf` | 4 | 481 | 4 |  |
 | `System/Graphic/Glare` | 1 | 446 | 1 |  |
 | `Game/Player/NaviMap` | 1 | 425 | 1 |  |
 | `System/Sound/driver/sddrv_ee` | 2 | 403 | 2 | .bss |
 | `Game/Collision/CollMap` | 2 | 365 | 2 |  |
 | `Game/Player/PlayerCamera` | 1 | 332 | 1 |  |
 | `Game/SceneInfo` | 2 | 314 | 2 |  |
+| `System/Rcf` | 3 | 307 | 3 |  |
 | `System/Graphic/Effect/libppp/partMng` | 1 | 292 | 1 |  |
 | `System/Graphic/Gprim` | 2 | 282 | 2 |  |
 | `Game/Collision/CollDisp` | 2 | 262 | 2 |  |
@@ -89,7 +89,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | unit | function | instr | note |
 |---|---|---:|---|
 | `System/Math3D` | `InvMatrix__6Math3DR7FMATRIXRC7FMATRIX` | 234 | (comment) Same code apart from register allocation: gcc hoists the 1e-8 constants and a "li 20" out of the outer loop (the original keeps them inside), which moves &c into s1. |
-| `System/Wnd` | `init__9CImageWndRt7CPointT1ZiRt6CSizeT1ZiT1T2PCcfG6G_RGBAT7i` | 225 | 14 of 239 lines - the flip block (w2 = w; w = 0 under fgFlip bits, 4 USHORTs) gets other registers (original w a1, h a2, w2 a3, h2 t0; ours w v1, h a1, h2 a2) and the T0..T3 stores another order. Tried (2026-11-05: decl/assignment forms of w, h, w2, h2, INT locals): declaration orders (ref's w, h, … |
+| `System/Wnd` | `init__9CImageWndRt7CPointT1ZiRt6CSizeT1ZiT1T2PCcfG6G_RGBAT7i` | 225 | 5 of 240 lines (2026-11-07; was 14) - the flip block (w2 = w; w = 0 under fgFlip bits, 4 USHORTs) gets other registers (original w a1, h a2, w2 a3, h2 t0; ours w v1, h a1, h2 a2) and the T0..T3 stores another order. Tried (2026-11-05: decl/assignment forms of w, h, w2, h2, INT locals): declaration … |
 | `System/dlmalloc` | `destroy_mspace` | 14 | (comment) Not matching. The original is: lw seg.next; beqz; lw next (A); bnezl L, lw (entry test + body); L: bnezl L, lw. That is "if (sp) { sp = sp->next; while (sp) sp = sp->next; }" with the loop exit test duplicated, but jump2 cross-jumps the peeled "lw; beqz" into the loop (the insn before … |
 | `System/Graphic/DeFocus` | `_makePktDeFocus__12CDeFocusPrim` | 506 | 83 of 596 lines, same size - structure, branches and calls as the original (debug near/far override, auto near/far from the look distance, FRAME/TEST/ALPHA/PRIM A+D blocks with debug colours, sprites, defaults restore). Left: scheduling inside the A+D blocks (store pair order, the _FRAME0_START … |
 | `System/Graphic/DeFocus` | `_makePktBlur__9CBlurPrim` | 508 | 97 of 586 lines, 4 bytes long - structure as the original (debug override, camera-distance Z or 0xFFFF28, A+D header, 6-kind switch of set_tsprite32 patterns, defaults restore). Left: `this` and iZ swap s2/s3 (most lines), the Bak_ registers (original spills the colour, keeps the rate in fp) and … |
@@ -130,9 +130,8 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `System/Rcf` | `finalize__4CRcf` | 111 | (comment) Near-match: register allocation of two statics and a loop-bound reload |
 | `System/Rcf` | `_parseRCF_EntryFile__FUii` | 123 | 28 of 169 lines, same size - the 0x7F (sound list) branch's CBuf/RsrcInfo setup: the original loads s_nReadGroup/s_nLinkOwnerGroup/s_bSceneManagedMode into t2/t0/t1 before the CBuf vtable lui and keeps the constant 1 in a3; ours schedules the vtable first (t3/t1/t2, t0). Rest matches with … |
 | `System/Rcf` | `_atolen__FPCc` | 73 | _atolen: 5 of 79 lines, same size - _atoi's guard + while and return as there. Left: block order: the 0x case jumps over the '$' block to a `nRet = 2` behind it, ours falls into its own. Gotos, an else with a goto, do/while(0) + break all come out with the '$' block first (10 lines). The extra nop … |
-| `System/Rcf` | `loadNextCategoryInfo__4CRcfiPciPi` | 174 | (comment) Near-match: register allocation |
 | `System/RcfCD` | `_startCdRead__Fii` | 41 | 4-8 lines, varying between identical builds (the draft above is the C) - the hoisted lui's of the s_n*_R statics get s5/s6 in an order that changes per compiler run (gcse PRE hash order, memory gcse-pre-hash-order); store orders tried (all worse). Kept asm because the result is not reproducible. |
-| `System/TaskMan` | `update__8CTaskManiii` | 135 | 4 lines - the barrier settles nTQ/bPause (s5/s6). Left: the TaskMainParam stores: the original issues the nTQ store early and _SecondaryArray's after _nSysLag's; a scheduling tie across the clear() block. |
+| `System/TaskMan` | `update__8CTaskManiii` | 135 | 4 lines - the barrier settles nTQ/bPause (s5/s6). Left: the TaskMainParam stores: the original issues the nTQ store early and _SecondaryArray's after _nSysLag's; a scheduling tie across the clear() block. 2026-11-07: the ref lists no ctor for TaskMainParam, but brace init with these values builds … |
 | `Game/Card` | `getAttribute__5CCardG4CARDPPCcN32` | 95 | 30 of 124 lines, registers only: buf's address (3 uses / 38 insns) outranks the CCtdMan::m_pInstance address (4 / 110) in global-alloc priority, the original has them the other way round (s6/s5) and keeps card.m_nKind in a0. Worked: `pLF = buf; *pOutStrAttack = pLF;` (parameter registers, 53 -> … |
 | `Game/CardRevolver` | `main__Q210CardBattle13CCardRevolver` | 321 | 27 lines off, only the TRACE argument loads in the three card dumps: the original loads uiFlag into v1 and uiOwner last into v0 (the card pointer's register), ours the other way round. Worked: state switch with explicit returns, m_pCards[i] indexed directly (pBC temp moved the pointer to t4), … |
 | `Game/CardRevolver` | `exeReload__Q210CardBattle13CCardRevolver` | 127 | 14 lines off: register allocation and latch order of the first loop - the original keeps i in t0 and the card offset in a2 (decremented first in the latch, in the continue paths' delay slots), ours the reverse; the second loop's i likewise. Worked (from 48 bytes over to same size): separate … |
@@ -179,7 +178,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Form/Menu/JiminyMemo` | `ScrollBarChange__11CJiminyMemoPPQ22D210C2DSeqCtrlffiii` | 122 | 2 lines (2026-11-07, the 2.0f pinned in case 2): li s5,1 is issued before addiu s3,sp,16 (&vec) in the preheader, the original has them the other way round. An if chain gives that hoist order but loses the switch's dispatch; a pVec local or a pinned pointer before the loop move the registers … |
 | `Form/Menu/RoomCreation` | `menuMain__13CRoomCreation` | 1995 | (comment) menuMain: 78 of 2211 lines, 8 bytes short (92 and 0x50 short before _NORMA_PIECES, 2026-11-07): the by-value NormaSrc arguments are written out now; left: case 0's registers (v1 + s7 where the original keeps a0, s4/s6/s8 from there). To enable this draft, also drop the data block after … |
 
-Totals: 90 functions (37391 instructions) in 51 units, 90 of them parked; 5 units take a data section from assembly.
+Totals: 89 functions (37217 instructions) in 51 units, 89 of them parked; 5 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->
