@@ -509,12 +509,8 @@ void CHumanBoss::stateDead() {
 void CHumanBoss::endStateDead() {
 }
 
-/* Parked: 21 of 371 lines - the param pointer is carried in a register copy through the build and enemy-card loops
-   (the original's `move a3,v1`; ours reloads getEnemyParam() in the enemy-card loop body). Levers that got it here:
-   the id % 10000 in a local, UINT search index, one INT i per loop, `cards = deck` before ASSERT(deck) (callee-saved),
-   setHumanBossFlag(0, 1), BYTE card number, and a volatile read of the first loop's iCardCount (kept pointer, reloaded
-   count). Permuter 9 min: no gain. */
-#if 0
+/* MATCH: m_pEnemyParam read directly (the getEnemyParam() inline loses the register copy of the param pointer in the
+   loops); the id % 10000 in a local, UINT search index, one INT i per loop, `cards = deck` before ASSERT(deck) */
 static inline void _setCard(CARD& c, USHORT kind, BYTE num) { c.m_nId = 0; c.m_nKind2 = kind; c.m_nNumber2 = num; c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0; c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1; }
 void CHumanBoss::setupCardRevolver() {
     CARD_DATA* cardData;
@@ -522,7 +518,7 @@ void CHumanBoss::setupCardRevolver() {
     CARD* deck;
     CARD* cards;
 
-    if (!getEnemyParam()) return;
+    if (!m_pEnemyParam) return;
     UINT id = (UINT)getID() % 10000;
     cardData = __null;
     for (UINT n = 0; n < 12; n++) {
@@ -534,22 +530,22 @@ void CHumanBoss::setupCardRevolver() {
     }
     if (!cardData) return;
     cardNum = 1;
-    for (INT i = 0; i < *(volatile INT*)&getEnemyParam()->iCardCount; i++) {
-        ENEMY_CARD* card = &getEnemyParam()->pCards[i];
+    for (INT i = 0; i < m_pEnemyParam->iCardCount; i++) {
+        ENEMY_CARD* card = &m_pEnemyParam->pCards[i];
         INT j;
         for (j = 0; j < 10; j++) {
             if (card->iCardKind != 14) cardNum += card->bNumber[j];
         }
     }
-    cardNum += getEnemyParam()->iEnemyCard;
+    cardNum += m_pEnemyParam->iEnemyCard;
     m_iTotalCardNum = cardNum;
 #line 537
     deck = new (__FILE__ "(537)") CARD[cardNum];
     cards = deck;
 #line 539
     ASSERT(deck);
-    for (INT i = 0; i < getEnemyParam()->iCardCount; i++) {
-        ENEMY_CARD* card = &getEnemyParam()->pCards[i];
+    for (INT i = 0; i < m_pEnemyParam->iCardCount; i++) {
+        ENEMY_CARD* card = &m_pEnemyParam->pCards[i];
         INT cardKind;
         INT j;
         if (card->iCardKind == 14) continue;
@@ -595,8 +591,8 @@ void CHumanBoss::setupCardRevolver() {
             }
         }
     }
-    for (INT i = 0; i < getEnemyParam()->iEnemyCard; i++) {
-        _setCard(*cards, getEnemyParam()->byEnemyCards[i], 0xFF);
+    for (INT i = 0; i < m_pEnemyParam->iEnemyCard; i++) {
+        _setCard(*cards, m_pEnemyParam->byEnemyCards[i], 0xFF);
         cards++;
     }
     _setCard(*cards, 0xFF, 0);
@@ -611,30 +607,9 @@ void CHumanBoss::setupCardRevolver() {
 #line 623
     ASSERT(m_pCardRevolver);
     if (deck) delete[] deck;
-    if (getEnemyParam()->iEnemyCard > 0) setHumanBossFlag(0, 1);
+    if (m_pEnemyParam->iEnemyCard > 0) setHumanBossFlag(0, 1);
     m_iRemainCardNum = getAttackCardNum(3);
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/HumanBoss", setupCardRevolver__10CHumanBoss);
-/* placeholder for setupCardRevolver (INCLUDE_ASM): its strings, then its jump table */
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) void _setupCardRevolver_placeholder(CHumanBoss* p, void* deck, void* rev) {
-#line 537
-    com_malloc_d(4, __FILE__ "(537)", (UINT)-1);
-#line 539
-    ASSERT(deck);
-#line 622
-    com_malloc_d(4, __FILE__ "(622)", (UINT)-1);
-#line 623
-    if (!rev) AssertApp(__FILE__, __LINE__, "m_pCardRevolver", 0);
-    TRACE(cardDataTbl[0].pName); /* keeps the card table (used by the asm) */
-}
-asm(".rdata\n.align 4\njtbl_004C3B00:\n"
-    ".word .L002CBD50\n.word .L002CBD50\n.word .L002CBD50\n.word .L002CBD50\n"
-    ".word .L002CBD50\n.word .L002CBD50\n.word .L002CBD50\n.word .L002CBD50\n"
-    ".word .L002CBD64\n.word .L002CBD6C\n.word .L002CBD74\n.word .L002CBD7C\n"
-    ".word .L002CBD84\n.word .L002CBD8C\n.text\n");
-#endif
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/HumanBoss", setupAct__10CHumanBoss);
 /* placeholder for setupAct (INCLUDE_ASM): its strings */
