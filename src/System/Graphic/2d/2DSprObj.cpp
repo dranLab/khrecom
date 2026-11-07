@@ -305,33 +305,23 @@ void C2DSprObj::getFukidasiRect(FVECTOR2 (*vOut)[4]) {
         }
     }
 }
-/* Parked: 14 of 340 lines (2026-11-06, was 20: fVec2 is the brace init), all in the sway block. Markers: fVec.set(four
- * sway values) (Coord.h:730) and m_vSway[i].set() (Coord.h:200); the stores come out sway0 x/y, fVec z/w, sway1, fVec x/y.
- * Writing fVec.set + m_vSway[i].set(fVec...) fixes the source shape but moves the spill slots of the hoisted this+off
- * addresses (gcse bucket order, memory gcse-bucket-count-lever: about 8 more insns put them right) and then 16-20 lines
- * stay in that block; 144 orders with locals: 26 at best. Before: same size, same structure: the order of the independent address computations and
- * the 0.25f stores in the prologue (the original puts `addiu s3,sp,32` after the first two fVec2 stores) and the
- * load/store order of the sway block (the original loads x_sway[0], y_sway[0], x_sway[1], y_sway[1] in that order and
- * stores m_vSway[0] first); tried: fVec2 as fields/chain/set/setAll, iAlphaBlend order, six statement orders of the
- * sway block with and without temporaries, an 8 min permuter run (23 -> 23), a 15 min one (2026-11-02, 40k: 20 -> 20). The five `BOOL b = m_status.x_stop;
- * if (b)` blocks are what makes the original's dsll/dsra32/andi extraction. */
-#if 0
 TIMEQ C2DSprObj::initForSeq(SEQ_ANIMATION* pSeqAnim, LAY_SCREEN* pLayScreen) {
     IVECTOR iVec;
     FVECTOR fVec;
+    INT i;
     m_iStep = 1;
     m_status = pSeqAnim->status;
-    { BOOL b = m_status.base_stop; if (b) m_status.base_disable = 1; }
-    { BOOL b = m_status.ofs_stop; if (b) m_status.ofs_disable = 1; }
-    { BOOL b = m_status.rotate_stop; if (b) m_status.rotate_disable = 1; }
-    { BOOL b = m_status.color_stop; if (b) m_status.color_disable = 1; }
-    { BOOL b = m_status.scale_stop; if (b) m_status.scale_disable = 1; }
+    m_status.base_disable |= m_status.base_stop;
+    m_status.ofs_disable |= m_status.ofs_stop;
+    m_status.rotate_disable |= m_status.rotate_stop;
+    m_status.color_disable |= m_status.color_stop;
+    m_status.scale_disable |= m_status.scale_stop;
     FVECTOR fVec2 = { 0.25f, 0.25f, 0.25f, 0.25f };
     INT iAlphaBlend = pSeqAnim->alpha_blend;
     if (iAlphaBlend) {
-        ALPHA nInAlpha = iAlphaBlend == 1 ? ALPHA_PLUS : ALPHA_MINUS;
-        for (INT i = 0; i < m_nPoly; i++) {
-            m_pSprPrim[i].polyGT4.setSemiTrans(nInAlpha);
+        INT a = iAlphaBlend == 1 ? ALPHA_PLUS : ALPHA_MINUS;
+        for (i = 0; i < m_nPoly; i++) {
+            m_pSprPrim[i].polyGT4.setSemiTrans(a);
         }
     }
     m_qTime[0] = pSeqAnim->time[0] * 50;
@@ -375,21 +365,14 @@ TIMEQ C2DSprObj::initForSeq(SEQ_ANIMATION* pSeqAnim, LAY_SCREEN* pLayScreen) {
         m_vCurve.set(pSeqAnim->curve[0][0], pSeqAnim->curve[0][1], pSeqAnim->curve[1][0], pSeqAnim->curve[1][1]);
     }
     if (!m_status.sway_disable) {
-        FLOAT xs0 = pSeqAnim->x_sway[0];
-        FLOAT xs1 = pSeqAnim->x_sway[1];
-        FLOAT ys0 = pSeqAnim->y_sway[0];
-        FLOAT ys1 = pSeqAnim->y_sway[1];
-        m_vSway[1].set(xs1, ys1);
-        fVec.set(xs0, ys0, xs1, ys1);
-        m_vSway[0].set(xs0, ys0);
+        fVec.set(pSeqAnim->x_sway[0], pSeqAnim->y_sway[0], pSeqAnim->x_sway[1], pSeqAnim->y_sway[1]);
+        m_vSway[0].set(fVec.x, fVec.y);
         m_vRotate[0].w = (FLOAT)pSeqAnim->x_sway_count;
+        m_vSway[1].set(fVec.z, fVec.w);
         m_vRotate[1].w = (FLOAT)pSeqAnim->y_sway_count;
     }
     return m_qTime[1] + (m_status.last_cut ? 0 : 50);
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/2d/2DSprObj", initForSeq__Q22D29C2DSprObjPQ22D213SEQ_ANIMATIONPQ22D210LAY_SCREEN);
-#endif
 void C2DSprObj::_main(TIMEQ qTime) {
     FLOAT fRate;
     FVECTOR vec0;
