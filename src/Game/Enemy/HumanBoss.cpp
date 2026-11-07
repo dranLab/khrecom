@@ -355,20 +355,15 @@ BOOL CHumanBoss::initalize(INT inGroupID, INT inRsrcID, UINT iFlag) {
     return TRUE;
 }
 
-/* near match, 20 lines (2026-11-05, was 27): the goto-built outer loop reloads iCardCount/pCards like the original (a for loop hoists them); left: the original hoists the m_pEnemyParam load once (t2), ours reloads it too. The ref lists card/j at function level and no getEnemyParam inline
-   2026-11-07: a local for getEnemyParam() before the goto loop: 23 (the m_pEnemyParam reload goes, but iCardCount's load
-   moves to the top of the body); for/do-while forms with or without it: 27. */
-#if 0
+/* MATCH: m_pEnemyParam read directly, not through the getEnemyParam() inline (the ref lists no inlined this) */
 INT CHumanBoss::getAttackCardNum(UINT inFlag) const {
     INT cardNum;
     INT i;
     ENEMY_CARD* card;
     INT j;
     cardNum = 0;
-    i = 0;
-    if (i < getEnemyParam()->iCardCount) {
-    loop:
-        card = &getEnemyParam()->pCards[i];
+    for (i = 0; i < m_pEnemyParam->iCardCount; i++) {
+        card = &m_pEnemyParam->pCards[i];
         for (j = 0; j < 10; j++) {
             if ((inFlag & 1) && (UINT)card->iCardKind < 4) {
                 cardNum += card->bNumber[j];
@@ -377,13 +372,9 @@ INT CHumanBoss::getAttackCardNum(UINT inFlag) const {
                 cardNum += card->bNumber[j];
             }
         }
-        if (++i < getEnemyParam()->iCardCount) goto loop;
     }
     return cardNum;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/HumanBoss", getAttackCardNum__C10CHumanBossUi);
-#endif
 
 INT CHumanBoss::getRemainCard(UINT inFlag) {
     INT num = 0;
