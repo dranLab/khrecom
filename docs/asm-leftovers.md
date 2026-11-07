@@ -34,7 +34,6 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `System/Graphic/Model` | 3 | 1153 | 3 |  |
 | `System/Graphic/DeFocus` | 2 | 1014 | 2 |  |
 | `Game/Collision/CollUtil` | 3 | 781 | 3 | .rodata |
-| `Game/CardRevolver` | 3 | 713 | 3 |  |
 | `System/Graphic/Effect/libppp/keProg/KeTh` | 1 | 685 | 1 |  |
 | `System/Graphic/FrecFont` | 1 | 656 | 1 |  |
 | `Game/Player/Player` | 2 | 654 | 2 |  |
@@ -50,6 +49,7 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `System/Graphic/Glare` | 1 | 446 | 1 |  |
 | `Game/Collision/CollMap` | 2 | 365 | 2 |  |
 | `Game/Player/PlayerCamera` | 1 | 332 | 1 |  |
+| `Game/CardRevolver` | 1 | 321 | 1 |  |
 | `Game/SceneInfo` | 2 | 314 | 2 |  |
 | `System/Graphic/Effect/libppp/partMng` | 1 | 292 | 1 |  |
 | `System/Sound/driver/sddrv_ee` | 1 | 262 | 1 | .bss |
@@ -114,9 +114,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `System/RcfCD` | `_startCdRead__Fii` | 41 | 4-8 lines, varying between identical builds (the draft above is the C) - the hoisted lui's of the s_n*_R statics get s5/s6 in an order that changes per compiler run (gcse PRE hash order, memory gcse-pre-hash-order); store orders tried (all worse). Kept asm because the result is not reproducible. |
 | `System/TaskMan` | `update__8CTaskManiii` | 135 | 4 lines - the barrier settles nTQ/bPause (s5/s6). Left: the TaskMainParam stores: the original issues the nTQ store early and _SecondaryArray's after _nSysLag's; a scheduling tie across the clear() block. 2026-11-07: the ref lists no ctor for TaskMainParam, but brace init with these values builds … |
 | `Game/Card` | `getAttribute__5CCardG4CARDPPCcN32` | 95 | 30 of 124 lines, registers only: buf's address (3 uses / 38 insns) outranks the CCtdMan::m_pInstance address (4 / 110) in global-alloc priority, the original has them the other way round (s6/s5) and keeps card.m_nKind in a0. Worked: `pLF = buf; *pOutStrAttack = pLF;` (parameter registers, 53 -> … |
-| `Game/CardRevolver` | `main__Q210CardBattle13CCardRevolver` | 321 | 27 lines off, only the TRACE argument loads in the three card dumps: the original loads uiFlag into v1 and uiOwner last into v0 (the card pointer's register), ours the other way round. Worked: state switch with explicit returns, m_pCards[i] indexed directly (pBC temp moved the pointer to t4), … |
-| `Game/CardRevolver` | `exeReload__Q210CardBattle13CCardRevolver` | 127 | 14 of 138 lines (2026-11-07): the reload loop: i and the card offset have each other's registers (t0/a2) and the offset steps first; all six orders of the for increments: 14 or 19. |
-| `Game/CardRevolver` | `initAction__Q210CardBattle13CCardRevolver` | 265 | ~165 lines off, mostly register allocation: ours keeps one more value live across calls (the getStock() == -1 value is CSE'd into an s-register for the later getHand() test), so two flags spill instead of one (bReloadOC) and every flag moves one register. Structure found: decEnchantTime inside … |
+| `Game/CardRevolver` | `main__Q210CardBattle13CCardRevolver` | 321 | 27 of 426 lines (2026-11-07): the TRACE argument loads of the first two card dumps: the original loads uiFlag into v1 and uiOwner last into v0, ours the reverse, and the kind load comes after iHandMax. Cause found: with stack arguments, calls.c precomputes every argument that contains a call (all … |
 | `Game/Map` | `init__4CMapii` | 1046 | 87 of 1193 lines, same size - the bbox loop's &b (ApplyMatrix output) is hoisted into s2 here, the original recomputes it per iteration, which shifts the saved registers of xmin/xmax/zmin/zmax and the division block; for/do/ while/goto loop shapes, by-value apply inline and a 10 min permuter run … |
 | `Game/Map` | `disp__4CMap` | 906 | 709 of 1308 lines, 44 bytes short - structure as the original (debug clamp, shader modes, group selection by player position, pipelined kick/resultCheckBBox display via group table or grid, sky polygons). The 44 bytes: the original keeps two copies of the "flush the last model" block (group and … |
 | `Game/SceneInfo` | `clear__10CSceneInfo` | 139 | 113 lines, 4 bytes long, frame 144 for 128 - the first run of stores: the original reloads m_pMCWork before each store (the *(T*)& scalar stores give that) but keeps two -1 registers and seven s-registers for the %hi parts; statement orders (incl. the lui order) and 7 min of permuter (10k … |
@@ -147,7 +145,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Form/Menu/Camp` | `setWorldmapCursor__5CCamp` | 853 | 35 of 939 lines differ (62 before _NORMA_PIECES; re-measured 2026-11-07). Left: pDoorInfo and nNI (not nNorma) have s4/s3 for s3/s4: global-alloc priority (-dl: pDoorInfo 28 refs over 187 insns = 0.60, nNI 22 over 121 = 0.73, so nNI is allocated first and takes s3); the original allocates … |
 | `Form/Menu/RoomCreation` | `menuMain__13CRoomCreation` | 1995 | (comment) menuMain: 78 of 2211 lines, 8 bytes short (92 and 0x50 short before _NORMA_PIECES, 2026-11-07): the by-value NormaSrc arguments are written out now; left: case 0's registers (v1 + s7 where the original keeps a0, s4/s6/s8 from there). To enable this draft, also drop the data block after … |
 
-Totals: 66 functions (29197 instructions) in 43 units, 66 of them parked; 5 units take a data section from assembly.
+Totals: 64 functions (28805 instructions) in 43 units, 64 of them parked; 5 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->

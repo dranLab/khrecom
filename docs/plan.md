@@ -41,10 +41,10 @@ every change that is merged without regenerating. Regenerating all four takes ab
 
 ## Where things stand (2026-11-07)
 
-- **Progress:** 12040 of 12311 functions matched: game 11257 of 11323, libraries 783 of 988 (plus 151 hand-written).
+- **Progress:** 12042 of 12311 functions matched: game 11259 of 11323, libraries 783 of 988 (plus 151 hand-written).
   `tools/check.sh` counts the 151 hand-written units as done too: its total is these matched functions plus 151
   (fixed 2026-11-07: it used to count a parked `#if 0 ... #else INCLUDE_ASM #endif` as done).
-- **Game:** 66 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note).
+- **Game:** 64 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note).
   5 units take a data section from assembly.
 - **Libraries:** 18 parked, 1 not attempted, 27 hand-written (stay assembly), no unit with data from assembly
   (the last two, __assert and __umoddi3, needed the split / link-alignment fixes of 2026-11-07);
