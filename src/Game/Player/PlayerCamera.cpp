@@ -747,8 +747,8 @@ void CPlayerCamera::procFieldNormal() {
 
 #line 1116
     FVECTOR ofs;
-    ofs._q = 0;
     ofs.w = 1.0f;
+    ofs._q = 0;
     FVECTOR rot;
     calcDirection(rot, ofs, eye);
 

@@ -1175,12 +1175,12 @@ void CImageWnd::init(CPointI& pos0, CSizeI& size0, CPointI& pos1, CSizeI& size1,
             h2 = h;
             h = 0;
         }
-        pPoly->m_T0.set(w, h2);
-        pPoly->m_T1.set(w, h);
-        pPoly->m_T2.set(w2, h2);
         pPoly->m_T3.set(w2, h);
+        pPoly->m_T0.set(w, h2);
+        pPoly->m_T2.set(w2, h2);
         INT& layerFG = m_nLayerFG;
         pPoly->setLayerFG(layerFG);
+        pPoly->m_T1.set(w, h);
         pPoly->setSemiTrans((ALPHA)1);
         m_pPolyGT4 = pPoly;
     }

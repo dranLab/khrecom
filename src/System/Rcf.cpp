@@ -348,8 +348,8 @@ void CRcf::finalize() {
     while (!_isReadThreadSleeping() && _isReadThreadRunning()) {
         Thread::delayThread_1Frame();
     }
-    TerminateThread(s_nReadThreadID);
     DeleteThread(s_nReadThreadID);
+    TerminateThread(s_nReadThreadID);
     s_nReadThreadID = -1;
     _disposeRCF();
     _clearAliasList();
