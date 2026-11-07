@@ -40,6 +40,9 @@ Everything runs in Linux (WSL), from the repo root, with the project's venv: `.v
   PARTIAL/stand-in/mechanism inventory and class readiness vs the ref (`docs/plan.md`, "Header cleanup");
   `--update docs/partials.md` regenerates the report.
 - `tools/setup_worktree.sh` - prepare a fresh git worktree (links game files and tools, runs configure).
+- `tools/helpers/` - the analysis helpers docs/plan.md's methods name (line markers `asmlines.py`, ref locals
+  `reflocals.py`/`refjoin.py`/`refextra.py`, scheduler `schedshow.py`, order searches, variant testers); run from the
+  repo root, read one before use, copy it to `build/` to change it. Several read `build/drafts.log` (`tools/drafts.py`).
 
 A *unit* is one original object file, named after its source path, e.g. `System/Graphic/ColorFader`
 (from `c:/KHCOM/MainApp/System/Graphic/ColorFader.cpp`). Libraries are `lib/...`: see "Library units" below.

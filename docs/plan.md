@@ -52,25 +52,26 @@ every change that is merged without regenerating. Regenerating all four takes ab
 - **Header cleanup:** PARTIAL 190 (156 in 44 headers, 34 in 20 .cpp), 14 foreign stand-ins in 9 files, 0
   duplicate classes, 0 untagged mechanisms; classes complete 873, superset 12, gated 3, missing 8.
   `tools/partials.py --queue` has the ready items.
-- **Method that paid off (2026-11-06):** read `build/asmlines.py` before permuting. Most long-parked drafts had a
+- **Method that paid off (2026-11-06):** read `tools/helpers/asmlines.py` before permuting. Most long-parked drafts had a
   wrong source shape the line markers show directly (one-line brace init, a condition on one line, statement order,
   a direct assignment), not a scheduling accident. See memory void-callee-v0, fvector-brace-init-aligned,
-  gcse-bucket-count-lever. `build/lineorder.py` compresses the markers, `build/normdiff.py` is a register-blind diff,
-  `build/lregpri.py` ranks pseudos by global-alloc priority, `build/secsize.py` compares section sizes with the
-  split, `build/bracetry2.py`/`bracetmp.py` sweep drafts for brace-init forms.
+  gcse-bucket-count-lever. `tools/helpers/lineorder.py` compresses the markers, `tools/helpers/normdiff.py` is a register-blind diff,
+  `tools/helpers/lregpri.py` ranks pseudos by global-alloc priority, `tools/helpers/secsize.py` compares section sizes with the
+  split, `tools/helpers/bracetry2.py`/`bracetmp.py` sweep drafts for brace-init forms.
 
 - **Next method: compare drafts with the ref's locals (2026-11-06).** It matched 23 functions in one sitting (Gprim 12,
   Model 2, CollUtil, CollBody, ShadowModel, EffectMan, BattleEnemyManager, Rcf, BattleCard, ModelMan, AttackMotion 1 each; onMove 53 -> 1, detectMCInit 48 -> 18 lines) after three permuter queues had matched two. The ref lists every local and
   inline scope in order, so a missing or extra local means a wrong source shape: invented `flag`/`bTop` variables, a
   counted-down loop where the ref has `i`, asm helpers for what gcc emits itself (a `por` after `pcpyud` is a DI -> TI
-  conversion, `*(UINT*)&f` gives the `mfc1`). `build/reflocals.py > build/jm/reflocals.log`, then `build/refjoin.py 60`,
+  conversion, `*(UINT*)&f` gives the `mfc1`). `tools/helpers/reflocals.py > build/jm/reflocals.log`, then `tools/helpers/refjoin.py 60` (it and refextra, refcount,
+  regswap, banddiff read `build/drafts.log`: `tools/drafts.py -j 12 > build/drafts.log` first),
   ranks near misses; `build/remeasure.log` was refreshed 2026-11-06 evening (tried without gain: createBootInfoMsg,
   setStockInfo, _invokePrimary_Main, dispDebugLine, setCharge, setDeckInfo, pppSetMatrix, HumanBoss initalize, effect Setup,
-  checkBBox, setAttack (power forms), initEnemyParam (block order), sceVif1PkCloseUpkCode (the ref's locals: 25 -> 43-50), setScreenFader, 2DSprObj move). `build/refextra.py 40` lists drafts with invented locals, the better lead. Parked notes go stale: read the current diff first (stateDestroy and setupDrawMode were one statement swap).
+  checkBBox, setAttack (power forms), initEnemyParam (block order), sceVif1PkCloseUpkCode (the ref's locals: 25 -> 43-50), setScreenFader, 2DSprObj move). `tools/helpers/refextra.py 40` lists drafts with invented locals, the better lead. Parked notes go stale: read the current diff first (stateDestroy and setupDrawMode were one statement swap).
   A permuter queue over the eight drafts changed on 2026-11-06 gained on two (the last fan 3 -> 2, detectMCInit 18 -> 14);
-  onMove, acWaitReq, update, _atoi, _atolen and checkBBox held. `build/regswap.py 60` separates pure register permutations (solve with the priority formula), `build/refcount.py` lists
-  locals declared fewer times than in the ref (one variable per loop: Model::link), `build/banddiff.py lo hi` prints current diffs,
-  `build/permlines.py` sweeps the order of adjacent statements (no gain on initAttackField, setupFontTex). Check the helpers
+  onMove, acWaitReq, update, _atoi, _atolen and checkBBox held. `tools/helpers/regswap.py 60` separates pure register permutations (solve with the priority formula), `tools/helpers/refcount.py` lists
+  locals declared fewer times than in the ref (one variable per loop: Model::link), `tools/helpers/banddiff.py lo hi` prints current diffs,
+  `tools/helpers/permlines.py` sweeps the order of adjacent statements (no gain on initAttackField, setupFontTex). Check the helpers
   first: `asm volatile` against plain `asm`, and `=&r` where the original keeps inputs and output apart. See memory
   ref-locals-reveal-shape, ti-di-conversion-is-por.
 - **Read the scheduler and reorg, then pin (2026-11-07).** 35 functions in one sitting, most long parked as "scheduling tie"
@@ -78,7 +79,7 @@ every change that is merged without regenerating. Regenerating all four takes ab
   createBootInfoMsg, setStockInfo, CBattleCard::destroy, the Movement constructor, testPlayingCard, rollDeck,
   getApplyMatrixBBox, checkBBox, pppSetMatrix, _invokePrimary_Main, the last fan, _sceRpcGetPacket, changeMode, replaceNorma,
   itemCardProc, initRecover, chkDamage, _hokanRot, the three CollAttack checks, setStatusWin1, setupFlick,
-  exeMessageDlg, getRandomTargetPos, _sceCd_cbLoop, EFFECT_DATA::Setup, normalActProc). Dump `-dS -dR -fsched-verbose-9`, `build/jm/schedshow.py <.sched2> <fn signature> <rtl key>` prints the
+  exeMessageDlg, getRandomTargetPos, _sceCd_cbLoop, EFFECT_DATA::Setup, normalActProc). Dump `-dS -dR -fsched-verbose-9`, `tools/helpers/schedshow.py <.sched2> <fn signature> <rtl key>` prints the
   successors, priorities and issue order for the block. Ask what the original's order implies, in this order: a tail written out
   (call-arg-order-dependents), a cast store (fixed-scalar-varying-struct-alias), a clobber that marks a register dead for reorg, a load inside both arms for a cross-jump
   (crossjump-block-end-call), an empty asm in one arm to stop one,
@@ -87,16 +88,16 @@ every change that is merged without regenerating. Regenerating all four takes ab
 - **Re-measure before choosing (2026-11-07):** `tools/drafts.py` scores every parked draft, closest first (about 10 minutes
   with -j 12), whatever its layout, and gives the first error of a draft that does not build (`--failed`); notes go stale.
   Its numbers are funcdiff's, except for the functions whose gcse order varies per compiler run (CRcf::finalize,
-  _parseRCF_EntryFile: gcse-pre-hash-order). Before it, `build/remeasure.py` and `build/jm/rmsort.py`; notes go stale after header fixes (chkDamage's note listed four open
+  _parseRCF_EntryFile: gcse-pre-hash-order). (It replaced `remeasure.py`/`rmsort.py`; the helpers find drafts with its logic, `tools/helpers/draftlib.py`.) Notes go stale after header fixes (chkDamage's note listed four open
   spots, two were gone). 15 drafts report build-failed because a stopgap data block or an extern declaration clashes when they are
-  enabled: `build/jm/en.py` takes a variant that drops it. Those are unmeasured, not far: the three CollAttack checks were each 2 lines.
+  enabled: `tools/helpers/en.py` takes a variant that drops it. Those are unmeasured, not far: the three CollAttack checks were each 2 lines.
 - **Constructor with pool constants (2026-11-07):** CMovement went 53 -> 26 -> 0 once the two constants sat in `u_long128`
   locals (`vZero._q`, TImode pseudos): both lq first, registers and the vtable store right at once (16 lines). The rest was
   store order, so write chains and `init()` out as single stores and run the guarded search. See memory timode-local-pool-constants.
 - **Guarded order search over 25 drafts (2026-11-07, 2-37 lines):** nothing gained. finalize's reported 17 -> 16 is noise: the same source gives 17, 17 and 11 on identical builds (gcse hash order, as
   _startCdRead), so its score means little. What is left there is
   register allocation or scheduling, not statement order: do not rerun it on these drafts unless their source changes.
-- **Order searches (2026-11-07):** `build/hillqueue.py <min> <unit:name>...` climbs runs of simple statements; `build/hillstmt.py`
+- **Order searches (2026-11-07):** `tools/helpers/hillqueue.py <min> <unit:name>...` climbs runs of simple statements; `tools/helpers/hillstmt.py`
   one chosen run. Real gains: Movement ctor 53 -> 26, CImageWnd::init 14 -> 5, calcWorldBBox 45 -> 28, finalize 17 -> 11,
   setupTexInfo 10 -> 6. **A lower line count proves nothing about behaviour; only a match does.** Five moves were wrong and
   were reverted (procFieldNormal, setStockInfo, drawCrossFadeImage, getAttribute, _parseRCF): read every move in context before
@@ -105,7 +106,7 @@ every change that is merged without regenerating. Regenerating all four takes ab
   (about 73 drafts, 12 hours). Only endFieldSub and getNearPath gained, and only their statement changes counted. Do not
   rerun them on a draft whose source did not change; read its line markers instead. tools/permuter.py can't enable some
   drafts and then reports an instant MATCH on the asm (Setup, AttackMotion initialize, CZFill::makePkt, the fans): check
-  with `build/showdraft.py`, not with its score.
+  with `tools/helpers/showdraft.py`, not with its score.
 
 Numbers change with every merge: `tools/check.sh` (totals), `tools/leftovers.py game|lib` (what is left) and
 `tools/partials.py --summary` (cleanup) give the current state.
@@ -164,7 +165,7 @@ its data comes from source (or is recorded as blocked). Never leave a function t
 - The smallest remaining non-weak function first. Small functions (getters, state wrappers, forwards) fill in
   the class layout and the headers that the big functions need.
 - Generated families first where memory has a generator (state wrappers from the vtable order; `acWait*`
-  through `build/vsgen.py`; Gprim's VU0 helpers through `build/gpconv.py`).
+  through `tools/helpers/vsgen.py`; Gprim's VU0 helpers through `tools/helpers/gpconv.py`).
 - Weak functions are inline functions: do them only when their class definition is right, in the class body (or
   `inline` in the header) in the original emission order (key-function-emits-all-inlines,
   weak-emission-definition-order, inline-called-not-inlined).
@@ -416,12 +417,14 @@ header split the original didn't have, or make a class a template to hide its st
 | C units (lib/, libppp, sddrv) | `docs/sdk-leftovers.md` "Levers that worked in lib/", decomp-permuter-c-units |
 | signal 11 in the cc step | cc1plus-silent-segfault, CLAUDE.md pitfalls (Ps2EeAs) |
 
-Scratch scripts in `build/` from earlier sessions (read one before using it; not maintained): `vtry.py`
-(enable a draft, apply text variants, funcdiff each), `vifelse.py` / `ifeshow.sh` (the same for
+Helpers in `tools/helpers/` (moved from `build/` 2026-11-07, run from the repository root; read one before using it;
+copy it to `build/` to change it for an experiment): the method helpers named above, and `vtry.py` (enable a draft, apply
+text variants, funcdiff each; `tryv.py`/`applyv.py`/`permfn.py` around it), `vifelse.py` / `ifeshow.sh` (the same for
 `#if 0 ... #else` drafts), `dumpvar.py` (compile a variant with gcc dump flags such as `-dl -dg -dS`),
-`permute_overload.py` (tools/permuter.py on an overloaded or const method), `hill.py` (statement-order hill
-climb), `permfn.py`, `rocmp.py` (rodata check), `vsgen.py`, `gpconv.py`, `coord_conv.py`, `swap_keep.py`
-(replace a stand-in with an include, keeping the line count).
+`permute_overload.py` (tools/permuter.py on an overloaded or const method), `hill.py` (statement-order hill climb),
+`rocmp.py` (rodata check), `vsgen.py`, `gpconv.py`, `coord_conv.py`, `swap_keep.py` (replace a stand-in with an
+include, keeping the line count). `draftlib.py` is their shared draft finder (every layout, as `tools/drafts.py`).
+One-off scripts of earlier sessions stay in the main checkout's `build/` (named in the memory notes; not maintained).
 
 ## Context economy
 

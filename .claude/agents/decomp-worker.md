@@ -42,9 +42,9 @@ If the brief names no mode: "new" when `src/<unit>.cpp`/`.c` doesn't exist, othe
    into `build/`, which doesn't exist yet). Then `git switch -c decomp/<unit with "/" replaced by "-">` and
    `git merge main` (a worktree can start from an older commit; `git log -1 main` must be in your branch).
 2. `tools/check.sh > build/check.log 2>&1; echo $?` prints 0 before you change anything.
-3. Your `build/` is fresh: the plan's `build/` helpers and records live in the main checkout,
-   `/home/alex/khrecom/build/` (`asmlines.py`, `reflocals.py`, ...: read a script before using it, paths in it may
-   be relative to the main checkout). Read `/home/alex/khrecom/build/progress/<unit>.md` if it exists, the unit's
+3. The plan's helpers are in `tools/helpers/` (run from your worktree's root; read one before using it; to change
+   one for an experiment, copy it to `build/`). Your `build/` is fresh: the records and one-off scripts of earlier
+   sessions live in the main checkout, `/home/alex/khrecom/build/`. Read `/home/alex/khrecom/build/progress/<unit>.md` if it exists, the unit's
    memory lessons file, the levers index and the memory notes the brief names
    (`~/.claude/projects/-home-alex-khrecom/memory/<name>.md`; only those or clearly matching ones: each costs
    context).
@@ -65,7 +65,7 @@ If the brief names no mode: "new" when `src/<unit>.cpp`/`.c` doesn't exist, othe
 - For each function, the plan's loop: **study** (`tools/asm.py`, the ref's signature, parameter names, locals and
   their scopes: a missing or extra local is a wrong source shape), **write** (original line numbers where
   `__LINE__` reaches a message, `#line N`), **iterate** with `tools/funcdiff.py` one change at a time. Shape before
-  registers: the line markers (`build/asmlines.py`), the ref's locals and the branch layout first, then the
+  registers: the line markers (`tools/helpers/asmlines.py`), the ref's locals and the branch layout first, then the
   levers index and the memory notes, then the scheduler/reorg dumps (plan "Read the scheduler and reorg, then
   pin").
 - **Permuters** only on a near miss whose source changed since the last run (plan: they are exhausted on
