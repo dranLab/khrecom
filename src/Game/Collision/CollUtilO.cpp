@@ -524,11 +524,6 @@ INT CCollUtil::distanceSphereO(FVECTOR* pP0) {
     m_vDetect2 = s;
     return 1;
 }
-/* Parked: 7 of 125 lines - the original loads columnColl1's radius after columnColl0's (sched1 hoists ours above the
-   z subtraction, so c0.z/c1.R swap f3/f4). Tried: radius statement order, r1 split, direct/SubVector differences,
-   permuter 9 min (23k candidates, no gain); 2026-11-07: an empty barrier gets the load order but moves the v0 stores out
-   of the block (24), c1's radius in a local read first (7-9). */
-#if 0
 INT CCollUtil::_detectColumnColumnEz(CColumnCollision& columnColl0, CColumnCollision& columnColl1) {
     FVECTOR v0;
     FLOAT r0;
@@ -538,18 +533,16 @@ INT CCollUtil::_detectColumnColumnEz(CColumnCollision& columnColl0, CColumnColli
     FLOAT y10;
     FLOAT y11;
     FVECTOR v1;
-    v0.x = columnColl0.m_inWE.x;
-    v0.z = columnColl0.m_inWE.z;
-    v0.x = columnColl1.m_inWE.x - v0.x;
-    v0.z = columnColl1.m_inWE.z - v0.z;
-    r0 = columnColl0.m_Radius;
-    r1 = r0 + columnColl1.m_Radius;
-    if (r1 * r1 < v0.x * v0.x + v0.z * v0.z) {
+    v0.x = columnColl1.m_inWE.x - columnColl0.m_inWE.x;
+    v0.z = columnColl1.m_inWE.z - columnColl0.m_inWE.z;
+    r0 = v0.x * v0.x + v0.z * v0.z;
+    r1 = columnColl0.m_Radius + columnColl1.m_Radius;
+    if (r1 * r1 < r0) {
         return 0;
     }
     if (columnColl0.m_Type == COLL_TYPE_SPHERE) {
-        y00 = columnColl0.m_inWE.y - r0 + columnColl0.m_shiftY;
-        y01 = columnColl0.m_inWE.y + r0 + columnColl0.m_shiftY;
+        y00 = columnColl0.m_inWE.y - columnColl0.m_Radius + columnColl0.m_shiftY;
+        y01 = columnColl0.m_inWE.y + columnColl0.m_Radius + columnColl0.m_shiftY;
     } else {
         y00 = columnColl0.m_inWS.y + columnColl0.m_shiftY;
         y01 = columnColl0.m_inWE.y + columnColl0.m_shiftY;
@@ -587,8 +580,6 @@ INT CCollUtil::_detectColumnColumnEz(CColumnCollision& columnColl0, CColumnColli
     columnColl1.m_outWE.w = 1.0f;
     return 1;
 }
-#endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtilO", _detectColumnColumnEz__9CCollUtilR16CColumnCollisionT1);
 INT CCollUtil::_detectColumnColumn(CColumnCollision& columnColl0, CColumnCollision& columnColl1) {
     CSphereCollision sphereColl0 = (CSphereCollision&)columnColl0;
     INT ret;
