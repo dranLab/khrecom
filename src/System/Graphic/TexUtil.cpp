@@ -489,12 +489,6 @@ INT CTexUtil::getClutSize(const BYTE* pInTim2) {
     return pHead->ClutSize;
 }
 
-/* Parked: 20 of 168 lines, same size - up-counting j (the original's reversed count-down), *pSrc read per term
- * (lbu for the low byte) and `iI | (iI << 16 | iI << 8)` fixed most of it. Left: the register order of case 1's
- * three channel terms (the original computes the >> 8 term into a1 first) and two instructions in case 2's loop.
- * Term forms and permuter 6 min: no gain. 2026-11-07: 17 lines (was 20) with a local per term, g first: the pixel word and
- * the g term still have each other's registers; a local for the pixel word gives 43 (the original reads the low byte with lbu). */
-#if 0
 void CTexUtil::makeCustomClut(ULONGLONG* inSrc, ULONGLONG* inDest, INT inType, INT inColNum) {
     UINT* pSrc;
     UINT* pDes;
@@ -508,13 +502,14 @@ void CTexUtil::makeCustomClut(ULONGLONG* inSrc, ULONGLONG* inDest, INT inType, I
         break;
     case 1: {
         INT j;
-        for (j = 0; j < inColNum; j++) {
-            UINT g = (((0xFF - (*pSrc >> 8)) << 7) & 0x7F00);
-            UINT r = (((UBYTE)(0xFF - (*pSrc >> 16)) >> 1) << 16);
-            UINT b = ((UBYTE)(0xFF - (UBYTE)*pSrc) >> 1);
-            *pDes = (((*pSrc & 0xFF000000) | b) | g) | r;
-            pSrc++;
-            pDes++;
+        for (j = 0; j < inColNum; j++, pSrc++, pDes++) {
+            UBYTE b = 0xFF - (UBYTE)*pSrc;
+            UBYTE g = 0xFF - (*pSrc >> 8);
+            UBYTE r = 0xFF - (*pSrc >> 16);
+            b >>= 1;
+            g >>= 1;
+            r >>= 1;
+            *pDes = (*pSrc & 0xFF000000) | b | (g << 8) | (r << 16);
         }
         break;
     }
@@ -524,32 +519,26 @@ void CTexUtil::makeCustomClut(ULONGLONG* inSrc, ULONGLONG* inDest, INT inType, I
         FLOAT fG;
         FLOAT fB;
         UINT iI;
-        for (j = 0; j < inColNum; j++) {
+        for (j = 0; j < inColNum; j++, pSrc++, pDes++) {
             fR = (FLOAT)(*pSrc & 0xFF);
             fG = (FLOAT)((*pSrc & 0xFF00) >> 8);
             fB = (FLOAT)((*pSrc & 0xFF0000) >> 16);
-            iI = (UINT)(fR * 0.2989f + fG * 0.5866f + fB * 0.1145f);
+            fR = fR * 0.2989f + fG * 0.5866f + fB * 0.1145f;
+            iI = (UINT)fR;
             if (iI >= 0x100) iI = 0xFF;
             *pDes = (*pSrc & 0xFF000000) | (iI | (iI << 16 | iI << 8));
-            pSrc++;
-            pDes++;
         }
         break;
     }
     default: {
         INT j;
-        for (j = 0; j < inColNum; j++) {
+        for (j = 0; j < inColNum; j++, pSrc++, pDes++) {
             *pDes = *pSrc & 0xFF000000;
-            pSrc++;
-            pDes++;
         }
         break;
     }
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/TexUtil", makeCustomClut__8CTexUtilPUlT1ii);
-#endif
 
 void CTexUtil::makeMonochromeClut(const TexInfo* inpInfo, INT inBufIdx, FLOAT inRate) {
     makeMonochromeClut(inpInfo, 0, inBufIdx, inRate);
