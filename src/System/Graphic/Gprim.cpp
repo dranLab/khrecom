@@ -7,7 +7,6 @@
 #include "System/Coord.h"
 #include "System/Tsin.h"
 #include "System/VramMan.h"
-#include "include_asm.h"
 
 extern INT SCREEN_HEIGHT;
 /* PARTIAL: System/RsrcData.h */
