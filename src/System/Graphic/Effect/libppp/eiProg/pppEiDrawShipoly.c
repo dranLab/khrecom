@@ -741,9 +741,8 @@ void drawShipoly(pppModelSt *mdl, PEiDrawShipoly *p, VEiDrawShipoly *val, VColor
                 float rate;
 
                 linevw = linev[0][i][3];
-                linevw /= p->TexRepeat * 0.01f;
-                rate = (s_max - s_min) * linevw;
-                s1 = s0 + rate;
+                rate = linevw / (p->TexRepeat * 0.01f);
+                s1 = s0 + (s_max - s_min) * rate;
                 s = s1;
                 if (s1 > s_max) {
                     s = s1 - s_max + s_min;
