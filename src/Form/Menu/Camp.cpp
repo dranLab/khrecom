@@ -4375,14 +4375,19 @@ INT CCamp::setButtonHelp(INT nSetCmd, INT nMode, INT nKind) {
     return 1;
 }
 
-/* Parked: 53 of 621 lines (2026-11-07; tools/drafts.py's "build failed" is the data block after the INCLUDE_ASM, which
-   also defines this function's statics: drop it to build the draft): in the sleight-list loop the original reloads the
-   spilled pTechCateTbl at the loop head and recomputes &pTechCateTbl[nTechSelectTop] from nTechSelectTop (s6, +1 per
-   iteration) every time; ours strength-reduces it (-dL: giv 1104, benefit 7, lifetime 3, reduced: lifetime*66*benefit
-   is far above the 182 insns, so no insn-count/threshold change can stop it; the original's giv was never recognized
-   or had benefit <= 0). The spill slots then differ (orig 0xC8 pTechCateTbl, 0xCC nTechCateCnt). tried: the ref's
-   unused nLine as the loop counter, non-const table pointer, compare operand order (kept: load order), _ref() on the
-   table pointer/its assignment/nTechCateCnt (56-70); permuter 6 min (68 -> 65), 15 min 2026-11-07. */
+/* Parked: 36 of 617 lines, same size (2026-11-08; drop the data block after the INCLUDE_ASM to build the draft): s-register
+   roles in the sleight-list loop and one store order. The original increments nTechSelectTop in place before getName
+   (s6, delay slot) and keeps i + 1 in s7 (i in s4, reused for (USHORT)nTechSeqIdx), and stores nTechCateCnt + 1 before
+   the C2DFnt new; this draft (`for (...; i++, nTechSelectTop++)`) gets the roles of i and nTechSelectTop swapped and
+   the nTechCateCnt store after the new. With `nTechSelectTop++;` right after the CButton new (the original's place)
+   the roles are right but loop.c strength-reduces &pTechCateTbl[nTechSelectTop] (-dL: giv benefit 7 - add_cost 4 per
+   biv increment, lifetime 3, 3 * 66 * 3 >= 182 insns: reduced, 53 lines); the original's giv must have had benefit
+   <= 0 (two biv increments? another index form?). Found 2026-11-08 from the .mdebug block tree (no change by itself):
+   pTechCateTbl/nTechSelectTop/nTechCateCnt/nLine in the switch body, scrollBarSeqTbl in the if block, nLine instead
+   of an invented nMax, len declared before pBF. tried: increment at the body end (39), `nTechSelectTop++, i++` (39),
+   `m_pTechCategoryFnt[nTechCateCnt++] = new` + `[nTechCateCnt - 1]` (92-94: nTechCateCnt gets a register), the new
+   as the addFntShift argument (141), no pButton local (143); earlier: nLine as the loop counter, non-const table
+   pointer, compare operand order, _ref() on the table pointer (56-70), permuter 6 + 15 min; 15 min on this draft (2026-11-08, 1698 variants): no gain. */
 #if 0
 INT CCamp::setTechWin(INT nSetCmd) {
     FVECTOR vec;
@@ -4398,14 +4403,15 @@ INT CCamp::setTechWin(INT nSetCmd) {
     float fLightYTbl[9] = { 160.0f, 160.0f, 160.0f, 160.0f, 160.0f, 160.0f, 160.0f, 160.0f, 160.0f };
     static LPCTSTR pStrListTitle = "Sleights List";
     INT ret = 0;
-    const unsigned char (*pTechCateTbl)[2];
-    INT nTechSelectTop;
-    INT nTechCateCnt;
-    static USHORT scrollBarSeqTbl[3] = { 288, 285, 291 };
 
     switch (nSetCmd) {
+        const unsigned char (*pTechCateTbl)[2];
+        INT nTechSelectTop;
+        INT nTechCateCnt;
+        INT nLine;
     case 0:
         if (!m_pTechWinCtrl) {
+            static USHORT scrollBarSeqTbl[3] = { 288, 285, 291 };
             m_pTechWinCtrl = new (__FILE__ "(5381)") C2DSeqCtrl;
             m_pTechWinCtrl->setLayer(0x14);
             m_pTechWinCtrl->enableColorCtrl(TRUE);
@@ -4473,7 +4479,7 @@ INT CCamp::setTechWin(INT nSetCmd) {
         nTechCateCnt = 0;
         rgba.col = 0x807C7C7C;
         nTechSelectTop = m_nTechSelectTop;
-        for (INT i = 0; i < 9; i++) {
+        for (INT i = 0; i < 9; i++, nTechSelectTop++) {
             SHORT nTechKind = pTechCateTbl[nTechSelectTop][0];
             SHORT nTechSeqIdx = pTechCateTbl[nTechSelectTop][1];
             if (m_nTechSelect == nTechSelectTop) {
@@ -4484,12 +4490,13 @@ INT CCamp::setTechWin(INT nSetCmd) {
             }
             C2DMan::getLayPosition(m_pLadName, 0x10, i + 2, vec, 0);
             CButton* pButton = m_pTechButton[i] = new (__FILE__ "(5482)") CButton;
-            nTechSelectTop++;
             pButton->init(m_pSeqName, 0x14, techSeqTbl, vec, m_pTechWinCtrl, CTechnic::getName(nTechKind), 0xF, 1.0f, 1.0f, 0x40,
                           &rgba, nTechSeqIdx);
             if (!CTechnic::canUse(nTechKind)) {
-                CHAR* pBF = (CHAR*)pButton->getButtonFnt();
-                INT len = strlen(pBF);
+                INT len;
+                CHAR* pBF;
+                pBF = (CHAR*)pButton->getButtonFnt();
+                len = strlen(pBF);
                 for (INT j = 0; j < len; j++) {
                     *pBF++ = '?';
                 }
@@ -4505,15 +4512,15 @@ INT CCamp::setTechWin(INT nSetCmd) {
             }
         }
         m_pTechWinBC->select(m_nTechSelect - m_nTechSelectTop, m_pTechButton, fLightXTbl, fLightYTbl);
-        INT nMax = m_nTechSelectMax;
-        if (!nMax) {
-            nMax = 1;
+        nLine = m_nTechSelectMax;
+        if (!nLine) {
+            nLine = 1;
         }
-        fRatioHeight = 9.0f / nMax;
+        fRatioHeight = 9.0f / nLine;
         if (fRatioHeight > 1.0f) {
             fRatioHeight = 1.0f;
         }
-        fRatioPosY = (FLOAT)m_nTechSelectTop / nMax;
+        fRatioPosY = (FLOAT)m_nTechSelectTop / nLine;
         if (fRatioPosY > 1.0f) {
             fRatioPosY = 1.0f;
         }
@@ -4669,13 +4676,18 @@ INT CCamp::setDeckSetWin(INT nSetCmd) {
     return ret;
 }
 
-/* Parked: same size, 33 of 1409 lines differ (re-measured 2026-11-07; tools/drafts.py's "build failed" is the data
-   block after the INCLUDE_ASM: drop it to build the draft): the stack slots of the spilled hoisted addresses (&m_pMCInfoNumCtrl,
-   &m_pMCInfoNumFnt, &m_pMCFnt, &m_pMCCard, &m_nMapKind, i + 1) are assigned in another order (orig 0x74 NumFnt,
-   0x78 MapKind, 0x7c i+1, 0x84 MCCard, 0x88 MCFnt, 0x8c NumCtrl; ours ascending by member offset) - stable across
-   rebuilds, likely gcse hash-table order; plus one s0 move around a C2DFnt new. tried: ref declaration order,
-   chain-store order, p2DSeqCtrl/p2DFnt/p2DCard locals; permuter 15 min (59 -> 58); shared function-level i/j (as the
-   ref lists one i and one j: 256 lines) or j only (38), the block `n` locals as idx/nKind. */
+/* Parked: 23 of 1407 lines (2026-11-08; drop the data block after the INCLUDE_ASM to build the draft): only the spill
+   slots of seven PRE-hoisted values differ (orig 0x74 &m_pMCInfoNumFnt, 0x78 &m_nMapKind, 0x7c i + 1, 0x80 nKind - 161,
+   0x84 &m_pMCCard, 0x88 &m_pMCFnt, 0x8c &m_pMCInfoNumCtrl; ours 0x74 NumCtrl first, i + 1 before MapKind). Slots follow
+   the PRE pseudo numbers = gcse expression-hash bucket order (-dG: raw hash of this+C = 13374 + C, of i+1 = 13258 +
+   reg(i) + 1, bucket = raw % S): the original order needs S = 703 buckets (ours 701, so about 4 more insns at gcse) and
+   the outer case-0 loop counter i as pseudo >= 312 (ours 303, so 9 more pseudos created before that loop) - no other S
+   in 601-899 fits. Found 2026-11-08 from the .mdebug block tree (33 -> 23): nColSeq/cardOld/pCampRoomInfo declared in
+   the switch body, scrollBarSeqTbl in the if block, case 9 without braces, one if for the number loop's display test,
+   no `n` local for the scroll ratio, p2DFnt chains at the four m_pMCInfoFnt news and the two m_pMCFnt news (the
+   original keeps p2DFnt in s0 apart from the new's result), idx = i + m_nMCSelSelectTop. tried: chains at the 5731/5753
+   news (+1 pseudo each, S unchanged), member-first chains (S 699), the original 4-line operator new layout of
+   HeapMan.h (no change); earlier: permuter 15 min (59 -> 58), shared function-level i/j (256), j only (38). */
 #if 0
 INT CCamp::setMapCardWin(INT nSetCmd) {
     static char* pStrNum[4] = { "%02d/99", "%02d", STR_TILDE_02D, "" };
@@ -4694,18 +4706,18 @@ INT CCamp::setMapCardWin(INT nSetCmd) {
     USHORT nKind;
     INT idx;
     INT ret;
-    USHORT nColSeq;
-    CARD cardOld;
-    CampRoomInfo* pCampRoomInfo;
-    static USHORT scrollBarSeqTbl[3] = { 288, 285, 291 };
 
     ret = 0;
     switch (nSetCmd) {
+        USHORT nColSeq;
+        CARD cardOld;
+        CampRoomInfo* pCampRoomInfo;
     case 0:
         m_nMCSelCateSelect = m_nMCSelSelect = m_nMCSelSelectTop = m_nMCSelNumSelect = 0;
         initCardData(1);
         initCardMapKind(m_nMCSelCateSelect);
         if (!m_pMCInfoWinCtrl) {
+            static USHORT scrollBarSeqTbl[3] = { 288, 285, 291 };
             rgba.col = 0x807C7C7C;
             m_pMCInfoWinCtrl = new (__FILE__ "(5731)") C2DSeqCtrl;
             m_pMCInfoWinCtrl->setLayer(0x10);
@@ -4713,14 +4725,14 @@ INT CCamp::setMapCardWin(INT nSetCmd) {
             C2DMan::getLayPosition(m_pLadName, 0x16, 2, vec, 0);
             m_pMCInfoWinCtrl->setPos(vec);
             m_pMCInfoWinCtrl->addSeq(m_pSeqName, 0x143);
-            m_pMCInfoFnt[0] = new (__FILE__ "(5737)") C2DFnt(0, 0, &rgba, 0xE, NULL, 0x40);
-            m_pMCInfoWinCtrl->addFntShift(m_pSeqName, m_pMCInfoFnt[0], -134.0f, -49.0f);
-            m_pMCInfoFnt[1] = new (__FILE__ "(5740)") C2DFnt(0, 0, &rgba, 0xD, CCtdMan::getText(0x500300), 0x40);
-            m_pMCInfoWinCtrl->addFntShift(m_pSeqName, m_pMCInfoFnt[1], -72.0f, 6.0f);
-            m_pMCInfoFnt[2] = new (__FILE__ "(5743)") C2DFnt(0, 0, &rgba, 0xD, CCtdMan::getText(0x500301), 0x40);
-            m_pMCInfoWinCtrl->addFntShift(m_pSeqName, m_pMCInfoFnt[2], -72.0f, 43.0f);
-            m_pMCInfoFnt[3] = new (__FILE__ "(5747)") C2DFnt(0, 0, &rgba, 0xE, NULL, 0x40);
-            m_pMCInfoWinCtrl->addFntShift(m_pSeqName, m_pMCInfoFnt[3], -137.0f, 102.0f);
+            p2DFnt = m_pMCInfoFnt[0] = new (__FILE__ "(5737)") C2DFnt(0, 0, &rgba, 0xE, NULL, 0x40);
+            m_pMCInfoWinCtrl->addFntShift(m_pSeqName, p2DFnt, -134.0f, -49.0f);
+            p2DFnt = m_pMCInfoFnt[1] = new (__FILE__ "(5740)") C2DFnt(0, 0, &rgba, 0xD, CCtdMan::getText(0x500300), 0x40);
+            m_pMCInfoWinCtrl->addFntShift(m_pSeqName, p2DFnt, -72.0f, 6.0f);
+            p2DFnt = m_pMCInfoFnt[2] = new (__FILE__ "(5743)") C2DFnt(0, 0, &rgba, 0xD, CCtdMan::getText(0x500301), 0x40);
+            m_pMCInfoWinCtrl->addFntShift(m_pSeqName, p2DFnt, -72.0f, 43.0f);
+            p2DFnt = m_pMCInfoFnt[3] = new (__FILE__ "(5747)") C2DFnt(0, 0, &rgba, 0xE, NULL, 0x40);
+            m_pMCInfoWinCtrl->addFntShift(m_pSeqName, p2DFnt, -137.0f, 102.0f);
             m_pMCInfoWinCtrl->addSeq(m_pSeqName, 0x13D);
             m_pMCInfoWinCtrl->addSeq(m_pSeqName, 0x13D);
             m_pMCInfoCard = new (__FILE__ "(5753)") C2DCard;
@@ -4758,12 +4770,12 @@ INT CCamp::setMapCardWin(INT nSetCmd) {
             p2DSeqCtrl->setParent(m_pMCSelWinCtrl[0]);
             C2DMan::getLayPosition(m_pLadName, 0x15, 0, vec, 0);
             p2DSeqCtrl->addSeqShift(m_pSeqName, 0x14B, vec.x, vec.y);
-            m_pMCFnt[0] = new (__FILE__ "(5799)") C2DFnt(0, 0, &rgba, 0xC, NULL, 0x40);
-            p2DSeqCtrl->addFntShift(m_pSeqName, m_pMCFnt[0], 22.0f, 1.0f);
+            p2DFnt = m_pMCFnt[0] = new (__FILE__ "(5799)") C2DFnt(0, 0, &rgba, 0xC, NULL, 0x40);
+            p2DSeqCtrl->addFntShift(m_pSeqName, p2DFnt, 22.0f, 1.0f);
             rgba.col = 0x80007878;
             for (INT i = 0; i < 4; i++) {
-                m_pMCFnt[i + 1] = new (__FILE__ "(5804)") C2DFnt(0, 0, &rgba, 0xC, NULL, 0x40);
-                p2DSeqCtrl->addFntShift(m_pSeqName, m_pMCFnt[i + 1], i * 38.0f + -58.0f, 18.0f);
+                p2DFnt = m_pMCFnt[i + 1] = new (__FILE__ "(5804)") C2DFnt(0, 0, &rgba, 0xC, NULL, 0x40);
+                p2DSeqCtrl->addFntShift(m_pSeqName, p2DFnt, i * 38.0f + -58.0f, 18.0f);
             }
             p2DSeqCtrl = m_pMCSelWinCtrl[2] = new (__FILE__ "(5810)") C2DSeqCtrl;
             p2DSeqCtrl->setLayer(0xF);
@@ -4822,7 +4834,7 @@ INT CCamp::setMapCardWin(INT nSetCmd) {
         m_nMCSelSelectTop = 0;
         m_pMCSelWinCtrl[2]->replaceSeq(0, m_pSeqName, mcTabSeqTbl[m_nMCSelCateSelect]);
         initCardMapKind(m_nMCSelCateSelect);
-    case 9: {
+    case 9:
         nColSeq = 0;
         nKind = 0;
         for (INT i = 3; i > 0; i--) {
@@ -4866,7 +4878,7 @@ INT CCamp::setMapCardWin(INT nSetCmd) {
         sprintf(chrTmp, pStrNum[1], m_nMapKindTotal[4]);
         m_pMCFnt[4]->allocText(chrTmp);
         for (INT i = 0; i < 9; i++) {
-            idx = m_nMCSelSelectTop + i;
+            idx = i + m_nMCSelSelectTop;
             p2DCard = m_pMCCard[i];
             p2DCard->destroy(3);
             p2DCard->destroy(2);
@@ -4889,34 +4901,31 @@ INT CCamp::setMapCardWin(INT nSetCmd) {
         for (INT i = 0; i < 10; i++) {
             p2DSeqCtrl = m_pMCInfoNumCtrl[i];
             if ((USHORT)(nKind - 0xA1) < 25) {
-                if (!m_bCategorySelectMode && m_nMapKind[m_nMCSelCateSelect]) {
-                    if (nColSeq != 0x73 || i == 0) {
-                        INT n = m_nCardKind10[idx][i];
-                        p2DSeqCtrl->enableDisp(TRUE);
-                        p2DSeqCtrl->replaceSeq(0, m_pSeqName, nColSeq + i * 2 + (n == 0));
-                        sprintf(chrTmp, pStrNum[2], n);
-                        m_pMCInfoNumFnt[i]->allocText(chrTmp);
-                        continue;
-                    }
+                if (!m_bCategorySelectMode && m_nMapKind[m_nMCSelCateSelect] && (nColSeq != 0x73 || i == 0)) {
+                    INT n = m_nCardKind10[idx][i];
+                    p2DSeqCtrl->enableDisp(TRUE);
+                    p2DSeqCtrl->replaceSeq(0, m_pSeqName, nColSeq + i * 2 + (n == 0));
+                    sprintf(chrTmp, pStrNum[2], n);
+                    m_pMCInfoNumFnt[i]->allocText(chrTmp);
+                } else {
+                    p2DSeqCtrl->enableDisp(FALSE);
                 }
-                p2DSeqCtrl->enableDisp(FALSE);
             } else {
                 p2DSeqCtrl->enableDisp(FALSE);
             }
         }
-        INT n = (m_nMapKind[m_nMCSelCateSelect] + 2) / 3;
-        if (!n) n = 1;
-        fRatioHeight = 3.0f / n;
+        idx = (m_nMapKind[m_nMCSelCateSelect] + 2) / 3;
+        if (!idx) idx = 1;
+        fRatioHeight = 3.0f / idx;
         if (fRatioHeight > 1.0f) {
             fRatioHeight = 1.0f;
         }
-        fRatioPosY = (FLOAT)(m_nMCSelSelectTop / 3) / n;
+        fRatioPosY = (FLOAT)(m_nMCSelSelectTop / 3) / idx;
         if (fRatioPosY > 1.0f) {
             fRatioPosY = 1.0f;
         }
         m_pMCSelScrollBar->change(fRatioPosY, fRatioHeight);
         break;
-    }
     }
     return ret;
 }
@@ -5856,17 +5865,6 @@ INT CCamp::setWorldmap(INT nSetCmd) {
     }
     return ret;
 }
-/* Parked: 35 of 939 lines differ (62 before _NORMA_PIECES; re-measured 2026-11-07). Left: pDoorInfo and nNI (not
-   nNorma) have s4/s3 for s3/s4: global-alloc priority (-dl: pDoorInfo 28 refs over 187 insns = 0.60, nNI 22 over 121
-   = 0.73, so nNI is allocated first and takes s3); the original allocates pDoorInfo first. An operand barrier on
-   pDoorInfo does not flip them. To enable this draft, drop the data block after its INCLUDE_ASM: it defines
-   pSeqName.4483 too (Ps2EeAs then crashes; that is tools/drafts.py's "build failed"). tried: while/do/for shapes of
-   the 0x40 block (`while (isButtonTrg(0x40)) { if (m_bPooWorld) break; ... break; }` gives the original's block
-   order), nested `if (< 4) if (>= 0)` against the sltiu fold, ref locals (id, block-scoped i; nNormaIndex/nNorma/
-   fgKeyCard declared at the block top as the ref lists them), set(1,1,1,1) instead of setAll, setLayer before the
-   vec.set, the door search as a pointer loop (37) or pDoorInfo set after the k loop (53), for-scoped nNI, the
-   getNorma* calls on nNI + nNormaIndex without the USHORT n, an empty asm in the nNI loop (44). */
-#if 0
 void CCamp::setWorldmapCursor() {
     RoomInfo* pRoomInfo;
     DoorInfo* pDoorInfo;
@@ -5880,10 +5878,10 @@ void CCamp::setWorldmapCursor() {
     RCNORMA::NormaSrc normaSrc;
     CARD card;
     USHORT roomId;
+    INT iMoveDirect;
     vec.init();
     idx = -1;
     if (m_nSubStep < 4) if (m_nSubStep >= 0) {
-        INT iMoveDirect;
         if (CPadHandler::isButtonRpt(0x101000, 0)) {
             iMoveDirect = 0;
             idx = searchRoom(0, m_nSubStep & 1);
@@ -5943,39 +5941,12 @@ void CCamp::setWorldmapCursor() {
         if (m_bPooWorld) break;
         if (!(m_nSubStep & 1)) {
             if (!checkNorma(-1, roomId, -1)) break;
-                m_pMapGuideCtrl->enableDisp(0);
-                idx = 0;
-                m_bRoomNorma = TRUE;
-                CSound::playSE(2, -1, 0x40);
-                m_nSubStep |= 1;
-            break;
-        }
-        m_pWMNormaCtrl->enableDisp(0);
-        for (INT i = 0; i < 4; i++) {
-            m_pRoomNormaCtrl[i]->enableDisp(0);
-            m_pWMNormaArrowCtrl->enableDisp(i, 0);
-        }
-        for (INT i = 0; i < 4; i++) {
-            SAFE_DELETE(m_pRoomNorma[i]);
-        }
-        vec.set(1.0f, 1.0f, 1.0f, 1.0f);
-        for (INT i = 0; i < 32; i++) {
-            if (m_pRoomCtrl[i]) {
-                m_pRoomCtrl[i]->setCol(vec);
-            }
-            if (m_pWayCtrl[i]) {
-                m_pWayCtrl[i]->setCol(vec);
-            }
-        }
-        m_pMapGuideCtrl->enableDisp(checkNorma(-1, roomId, -1) != 0);
-        m_nRoomNorma = 0;
-        m_bRoomNorma = FALSE;
-        CSound::playSE(4, -1, 0x40);
-        m_nSubStep &= ~1;
-        break;
-    }
-    if (!m_bPooWorld) {
-        if ((m_nSubStep & 1) && idx >= 0) {
+            m_pMapGuideCtrl->enableDisp(0);
+            idx = 0;
+            m_bRoomNorma = TRUE;
+            CSound::playSE(2, -1, 0x40);
+            m_nSubStep |= 1;
+        } else {
             m_pWMNormaCtrl->enableDisp(0);
             for (INT i = 0; i < 4; i++) {
                 m_pRoomNormaCtrl[i]->enableDisp(0);
@@ -5993,70 +5964,99 @@ void CCamp::setWorldmapCursor() {
                     m_pWayCtrl[i]->setCol(vec);
                 }
             }
-            INT id = m_roomMap[m_nRoomSelect] - 1;
-            if (checkNorma(-1, roomId, -1)) {
-                m_nRoomNorma = 0;
-                m_pWMNormaCtrl->setLocalPos(m_pRoomCtrl[id]->m_seqControl.vPos);
-                m_pWMNormaCtrl->enableDisp(1);
-                for (INT i = 0; i < 4; i++) {
-                    if (!checkNorma(i, roomId, -1)) continue;
-                    pRoomInfo = CSceneInfo::getRoomInfo(roomId);
-                    if (!pRoomInfo) continue;
-                    INT k;
-                    for (k = 0; k < 4; k++) {
-                        pDoorInfo = &pRoomInfo->_doors[k];
-                        if (pDoorInfo->_id == i) break;
-                    }
-                    INT nNormaIndex = pDoorInfo->getNextNormaIndex();
-                    INT nNorma = pDoorInfo->getNormaCount() - nNormaIndex - 1;
-                    if (nNorma < 0) continue;
-                    p2DSeqCtrl = m_pRoomNormaCtrl[i];
-                    p2DSeqCtrl->enableDisp(1);
-                    p2DSeqCtrl->setLayer(0x10);
-                    p2DSeqCtrl->replaceSeq(0, pSeqName, nNorma + 0x3A);
-                    if (nNorma == 0) {
-                        vec.set(i < 2 ? -71.0f : 71.0f, ((i + 1) & 3) < 2 ? 83.0f : -67.0f, 0.0f);
-                    } else {
-                        vec.set(nNorma * -26.0f, ((i + 1) & 3) < 2 ? 95.0f : -81.0f, 0.0f);
-                    }
-                    p2DSeqCtrl->setLocalPos(vec);
-                    m_pWMNormaArrowCtrl->enableDisp(i, 1);
-                    INT fgKeyCard = pDoorInfo->getNormaKeyCardID();
-                    INT nNI;
-                    for (nNI = nNorma; nNI >= 0; nNI--) {
-                        ASSERT_AT(7351, m_nRoomNorma < 4);
-                        C2DCard* p2DCard = m_pRoomNorma[m_nRoomNorma++] = new (__FILE__ "(7352)") C2DCard(1);
-                        p2DCard->setParent(p2DSeqCtrl);
-                        p2DCard->setLayer(0x10);
-                        vec.set(nNI * 82.0f, 0.0f, 0.0f);
-                        p2DCard->setLocalPos(vec);
-                        if (nNI == nNorma && fgKeyCard) {
-                            _setCardNK(card, fgKeyCard, 0);
-                            p2DCard->create(card);
-                        } else {
-                            USHORT n = nNI + nNormaIndex;
-                            normaSrc._nColor = pDoorInfo->getNormaColor(n);
-                            normaSrc._nNumber = pDoorInfo->getNormaNumber(n);
-                            normaSrc._nOp = pDoorInfo->getNormaOperation(n);
-                            {
-                                RCNORMA::NormaSrc t = normaSrc;
-                                _createNormaRaw(p2DCard, _NORMA_PIECES(t), 0);
-                            }
-                        }
-                    }
+            m_pMapGuideCtrl->enableDisp(checkNorma(-1, roomId, -1) != 0);
+            m_nRoomNorma = 0;
+            m_bRoomNorma = FALSE;
+            CSound::playSE(4, -1, 0x40);
+            m_nSubStep &= ~1;
+        }
+        break;
+    }
+    if (!m_bPooWorld) {
+        while ((m_nSubStep & 1) && idx >= 0) {
+            INT id;
+            m_pWMNormaCtrl->enableDisp(0);
+            for (INT i = 0; i < 4; i++) {
+                m_pRoomNormaCtrl[i]->enableDisp(0);
+                m_pWMNormaArrowCtrl->enableDisp(i, 0);
+            }
+            for (INT i = 0; i < 4; i++) {
+                SAFE_DELETE(m_pRoomNorma[i]);
+            }
+            vec.set(1.0f, 1.0f, 1.0f, 1.0f);
+            for (INT i = 0; i < 32; i++) {
+                if (m_pRoomCtrl[i]) {
+                    m_pRoomCtrl[i]->setCol(vec);
                 }
-                vec.set(0.5f, 0.5f, 0.5f, 1.0f);
-                for (INT i = 0; i < 32; i++) {
-                    if (i != id) {
-                        if (m_pRoomCtrl[i]) {
-                            m_pRoomCtrl[i]->setCol(vec);
+                if (m_pWayCtrl[i]) {
+                    m_pWayCtrl[i]->setCol(vec);
+                }
+            }
+            id = m_roomMap[m_nRoomSelect] - 1;
+            if (!checkNorma(-1, roomId, -1)) break;
+            m_nRoomNorma = 0;
+            m_pWMNormaCtrl->setLocalPos(m_pRoomCtrl[id]->m_seqControl.vPos);
+            m_pWMNormaCtrl->enableDisp(1);
+            for (INT i = 0; i < 4; i++) {
+                INT nNormaIndex;
+                INT nNorma;
+                INT fgKeyCard;
+                if (!checkNorma(i, roomId, -1)) continue;
+                pRoomInfo = CSceneInfo::getRoomInfo(roomId);
+                if (!pRoomInfo) continue;
+                for (INT j = 0; j < 4; j++) {
+                    pDoorInfo = &pRoomInfo->_doors[j];
+                    if (pDoorInfo->_id == i) break;
+                }
+                nNormaIndex = pDoorInfo->getNextNormaIndex();
+                nNorma = pDoorInfo->getNormaCount() - nNormaIndex - 1;
+                if (nNorma < 0) continue;
+                p2DSeqCtrl = m_pRoomNormaCtrl[i];
+                p2DSeqCtrl->enableDisp(1);
+                p2DSeqCtrl->setLayer(0x10);
+                p2DSeqCtrl->replaceSeq(0, pSeqName, nNorma + 0x3A);
+                if (nNorma == 0) {
+                    vec.set(i < 2 ? -71.0f : 71.0f, ((i + 1) & 3) < 2 ? 83.0f : -67.0f, 0.0f);
+                } else {
+                    vec.set(nNorma * -26.0f, ((i + 1) & 3) < 2 ? 95.0f : -81.0f, 0.0f);
+                }
+                p2DSeqCtrl->setLocalPos(vec);
+                m_pWMNormaArrowCtrl->enableDisp(i, 1);
+                fgKeyCard = pDoorInfo->getNormaKeyCardID();
+                for (INT k = nNorma; k >= 0; k--) {
+                    ASSERT_AT(7351, m_nRoomNorma < 4);
+                    C2DCard* p2DCard = m_pRoomNorma[m_nRoomNorma++] = new (__FILE__ "(7352)") C2DCard(1);
+                    p2DCard->setParent(p2DSeqCtrl);
+                    p2DCard->setLayer(0x10);
+                    vec.set(k * 82.0f, 0.0f, 0.0f);
+                    p2DCard->setLocalPos(vec);
+                    if (k == nNorma && fgKeyCard) {
+                        _setCardNK(card, fgKeyCard, 0);
+                        p2DCard->create(card);
+                    } else {
+                        INT nNI = k + nNormaIndex;
+                        normaSrc._nColor = pDoorInfo->getNormaColor(nNI);
+                        normaSrc._nNumber = pDoorInfo->getNormaNumber(nNI);
+                        normaSrc._nOp = pDoorInfo->getNormaOperation(nNI);
+                        {
+                            RCNORMA::NormaSrc t = normaSrc;
+                            _createNormaRaw(p2DCard, _NORMA_PIECES(t), 0);
                         }
-                    }
-                    if (m_pWayCtrl[i]) {
-                        m_pWayCtrl[i]->setCol(vec);
                     }
                 }
             }
+            vec.set(0.5f, 0.5f, 0.5f, 1.0f);
+            for (INT i = 0; i < 32; i++) {
+                if (i != id) {
+                    if (m_pRoomCtrl[i]) {
+                        m_pRoomCtrl[i]->setCol(vec);
+                    }
+                }
+                if (m_pWayCtrl[i]) {
+                    m_pWayCtrl[i]->setCol(vec);
+                }
+            }
+            break;
         }
         if (CPadHandler::isButtonTrg(0x10, 0)) {
             if (!(m_nSubStep & 2)) {
@@ -6081,26 +6081,6 @@ void CCamp::setWorldmapCursor() {
     }
     moveWM();
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", setWorldmapCursor__5CCamp);
-#endif
-// setWorldmapCursor__5CCamp: its .rodata/.data, for its INCLUDE_ASM; remove with it.
-asm(".section .rodata\n"
-    ".align 3\n"
-    ".byte 0x5A,0x6F,0x6F,0x6D,0x20,0x4F,0x75,0x74,0x20,0x20,0x20,0x20,0x20,0xF9,0x44,0x53\n"
-    ".byte 0x68,0x6F,0x77,0x20,0x43,0x72,0x69,0x74,0x65,0x72,0x69,0x61,0x00,0x00,0x00,0x00\n"
-    ".byte 0x6D,0x5F,0x6E,0x52,0x6F,0x6F,0x6D,0x4E,0x6F,0x72,0x6D,0x61,0x20,0x3C,0x20,0x34\n"
-    ".byte 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x37,0x33,0x35,0x32,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".section .data\n"
-    ".align 2\n"
-    " pSeqName.4483:\n"
-    ".byte 0x28,0x40,0x4E,0x00\n"
-    " pStrButton.4484:\n"
-    ".byte 0x48,0x40,0x4E,0x00,0xF8,0x43,0x4E,0x00\n"
-    ".section .text");
 INT CCamp::setMainCmd(INT nSetCmd, INT nMode) {
     FVECTOR vec;
     FVECTOR vec2;
