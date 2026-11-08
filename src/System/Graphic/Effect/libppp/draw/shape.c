@@ -239,6 +239,11 @@ void pppStartVu1ShapeProg(int fog) {
    (0x70 is born right after its death); the original needs 0x70's life >= 20 or the mask's <= 27. The `or a0` is
    ready from cycle 15 in our dependency graph and fills the free ALU slot next to tag 1's `sw v1,12(t6)`; in the
    original it issues the cycle after tag 2's `sb t2,3(t6)`, so it must depend on that store there.
+   sched2 (-fsched-verbose-9): issue rate 2, one memory unit, a newly ready insn waits for the next cycle; with the
+   original's order (tag 1 p[1] t21, addiu t6 t22, sb t23, sw t5 t24) the `or a0` must become ready exactly at t24:
+   an anti/output dependence on that sb, or a hidden ALU insn at t23 depending on `addiu t6,a1,32` (e.g. a no-op write
+   of a1 removed after sched2). No call form gives one: via i (a0 in .mdebug), pkt, sp reassigned, dspa, pkt - 3,
+   &sp[0], each with tag 3 id-first and next/qwc/id (4 or 11 lines).
    2026-11-08 shape from the evidence, all neutral: y in its block (.mdebug { y { } }), spa = source / dspa = dest
    (.mdebug registers), spPktSize in qwords on its line (line markers put the sra at 400).
    tried: tag field orders (all 120 per tag 0-3, tags 0-2 also with tag 3 id-first), six call-argument forms,
@@ -344,7 +349,8 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/draw/shap
    operand adds six uses of sh and global-alloc swaps s0/s1: 55 lines; "r"(shi) is neutral and kept) and the $9
    sprite count, read by `move %0, $9` after the loops (as an output operand of the loops: 52-58 lines, spa/spritec
    swap a1/t1).
-   tried: iFog forms (ternary, if/else, braces), asm volatile, spritec output with "=r"/"=&r" and a $9 pin */
+   tried: iFog forms (ternary, if/else, braces), asm volatile, spritec output with "=r"/"=&r" and a $9 pin;
+   tools/permuter.py 15 min on this form (40488 candidates, none better) */
 #if 0
 #define SCE_GIF_SET_TAG(nloop, eop, pre, prim, flg, nreg)                                                \
     ((u_long)(nloop) | ((u_long)(eop) << 15) | ((u_long)(pre) << 46) | ((u_long)(prim) << 47) |       \
