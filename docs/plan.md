@@ -41,10 +41,10 @@ every change that is merged without regenerating. Regenerating all four takes ab
 
 ## Where things stand (2026-11-08)
 
-- **Progress:** 12081 of 12311 functions matched: game 11284 of 11323, libraries 797 of 988 (plus 151 hand-written).
+- **Progress:** 12084 of 12311 functions matched: game 11287 of 11323, libraries 797 of 988 (plus 151 hand-written).
   `tools/check.sh` counts the 151 hand-written units as done too: its total is these matched functions plus 151
   (fixed 2026-11-07: it used to count a parked `#if 0 ... #else INCLUDE_ASM #endif` as done).
-- **Game:** 34 functions still `INCLUDE_ASM` in 25 units, all parked (C draft under `#if 0` with a note).
+- **Game:** 31 functions still `INCLUDE_ASM` in 24 units, all parked (C draft under `#if 0` with a note).
   1 unit takes a data section from assembly (sddrv_ee's `.bss`, blocked: see docs/asm-leftovers.md).
 - **Libraries:** 8 parked, 1 not attempted, 27 hand-written (stay assembly), no unit with data from assembly;
   details in `docs/sdk-leftovers.md`.
@@ -60,6 +60,14 @@ every change that is merged without regenerating. Regenerating all four takes ab
   (memory no-filler-locals), parked with the recipe. Still parked with corrected notes: shape pppVu1ShapeDraw (4),
   HumanBoss setupAct (18: combine_movables merges the -1), Camp setTechWin (36). gcc 2.95.3 sources for reading
   allocator/scheduler/loop ties: `build/gccsrc/gcc-2.95.3/gcc/`.
+  Later the same day: SceneInfo done (rollbackEventDoorState: a reference local without a hard register, which gcc
+  leaves out of .mdebug, dbxout.c:1975; clear: line order), CollMap collideRideR2 (a discarded `getKind();` call shown
+  as a code-less inline block; collideRide parked at 3; both drafts had failed to build because their stopgaps sat
+  outside `#else`). Parked with findings: WorldEnv initialize (the C is the original's; gcse hashes our
+  anonymous-namespace names, which differ from the original's: build change deferred by the user, blocker table),
+  memcpy/memmove (memmove 38 -> 31; the rest looks unreachable from C). tools/decomp_permuter.py fixed (typedef
+  attributes such as mode(TI) were lost in every candidate). Deferred by the user: CVector::push_back placement new
+  (docs/partials.md "Open puzzles").
 - **Method of 2026-11-08: the original's .mdebug block tree.** 22 parked drafts matched in one pool run (MSVideo, TaskMan,
   PackMan 2, Card, AtelCrossFade, TexUtil 4, sddrv_ee, Camp, Model, Player, CollUtil, BattleEnemy, CollDisp 2,
   DebugWindow; lib: timer 2, libat3dec 4, filestub, eecdvd), and in every case the old Parked note named the wrong cause.
