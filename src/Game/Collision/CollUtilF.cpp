@@ -6,16 +6,7 @@
 // CCollision has an inline virtual destructor: its weak copy ends this object, its weak vtable ends the .rodata
 // (an unnamed copy at 0x4894E8: the original linker kept Game/SEMotion's name; symbol_addrs.txt names this one).
 
-enum COLL_TYPE {
-    COLL_TYPE_NONE = 0,
-    COLL_TYPE_POINT = 1,
-};
-
-enum COLL_KIND {
-    COLL_KIND_PLAYER = 0,
-};
-
-#include "Game/Collision/CollInfo.h"
+#include "Game/Collision/CollObj.h"
 
 
 
@@ -25,47 +16,56 @@ enum COLL_KIND {
 
 
 
-class CCollision { /* PARTIAL: stand-in for Game/Collision/CollObj.h CCollision: its inline constructor stores in another order here (m_Kind .. m_fgStatus) and the copy constructor is written out; the header order is the one its other includers need */
-public:
-    /* 0x00 */ FVECTOR m_inWS;
-    /* 0x10 */ FVECTOR m_inWE;
-    /* 0x20 */ FVECTOR m_outWE;
-    /* 0x30 */ FVECTOR m_outNormal;
-    /* 0x40 */ FVECTOR m_outDetect;
-    /* 0x50 */ COLL_TYPE m_Type;
-    /* 0x54 */ COLL_KIND m_Kind;
-    /* 0x58 */ INT m_outStatus;
-    /* 0x5c */ INT m_fgStatus;
-    /* 0x60 */ FLOAT m_Radius;
-    /* 0x64 */ FLOAT m_shiftY;
-    /* 0x68 */ COLL_INFO_UNION m_outInfo;
-    /* 0x6c */ COLL_INFO_UNION m_outInfoO;
 
-    CCollision() {
-        m_Kind = COLL_KIND_PLAYER;
-        m_outInfoO.info = 0;
-        m_outInfo.info = 0;
-        m_shiftY = 0.0f;
-        m_Radius = 0.0f;
-        m_fgStatus = 0;
-    }
-    CCollision(const CCollision& c) {
-        m_inWS = c.m_inWS;
-        m_inWE = c.m_inWE;
-        m_outWE = c.m_outWE;
-        m_outNormal = c.m_outNormal;
-        m_outDetect = c.m_outDetect;
-        m_Type = c.m_Type;
-        m_Kind = c.m_Kind;
-        m_outStatus = c.m_outStatus;
-        m_fgStatus = c.m_fgStatus;
-        m_Radius = c.m_Radius;
-        m_shiftY = c.m_shiftY;
-        m_outInfo = c.m_outInfo;
-        m_outInfoO = c.m_outInfoO;
-    }
-    virtual ~CCollision() {}
-};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #include "System/Coord.h"
 
@@ -129,6 +129,7 @@ INT CCollUtil::_checkLadderUp(FVECTOR& inPos, FVECTOR& inDir, FVECTOR& inHeightD
     FVECTOR vec0;
     FVECTOR vec1;
 
+    coll.initForMap();
     coll.m_inWS = inPos;
     coll.m_inWE = inPos;
     coll.m_inWE.y += inHeightDepth.y;

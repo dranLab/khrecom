@@ -1,98 +1,81 @@
 #include "math_dr.h"
 
-/* MATCH: GPR instructions inside the VU0/MMI asm, as in the original's instruction stream; the split form (C + one asm per VU0/MMI instruction) is not attempted yet: build/progress/cleanup-libppp-mips-asm.md */
+/* MATCH: one asm per VU0/MMI instruction, the 0xbf800000 constant in C (an "r" operand gives the lui into v0). The register locals fix the GPRs the original uses: the three pointers in t4/t3/t2 (unpinned, 5-14 lines differ: gcc keeps lvmat in a1 and picks other copies) and the qmfc2/pext/pcpy temps in v0-t1 (unpinned: 6-16 lines). vaddy, vaddz and vsqrt share one line, as do vwaitq, vaddq and vdiv: Ps2EeAs pads a vsqrt/vdiv within two instructions of a line label with nops (on separate lines: 2 nops each) */
 void op_matrix_light4_vector(sceVu0FMATRIX *mout, sceVu0FMATRIX *lvmat, sceVu0FMATRIX *lwmat) {
-    __asm__ __volatile__(
-        "lui $v0, 0xbf80\n"
-        "qmtc2.ni $v0, $vf19\n"
-        "lqc2 $vf28, 0x0(%1)\n"
-        "lqc2 $vf29, 0x10(%1)\n"
-        "lqc2 $vf30, 0x20(%1)\n"
-        "lqc2 $vf31, 0x30(%1)\n"
-        "vmulx.xyz $vf28, $vf28, $vf19x\n"
-        "vmulx.xyz $vf29, $vf29, $vf19x\n"
-        "vmulx.xyz $vf30, $vf30, $vf19x\n"
-        "vmulx.xyz $vf31, $vf31, $vf19x\n"
-        "vmul.xyz $vf18, $vf28, $vf28\n"
-        "vaddy.x $vf18, $vf18, $vf18y\n"
-        "vaddz.x $vf18, $vf18, $vf18z\n"
-        "vsqrt $Q, $vf18x\n"
-        "vwaitq\n"
-        "vaddq.x $vf18, $vf0, $Q\n"
-        "vdiv $Q, $vf0w, $vf18x\n"
-        "vwaitq\n"
-        "vmulq.xyz $vf28, $vf28, $Q\n"
-        "vmul.xyz $vf18, $vf29, $vf29\n"
-        "vaddy.x $vf18, $vf18, $vf18y\n"
-        "vaddz.x $vf18, $vf18, $vf18z\n"
-        "vsqrt $Q, $vf18x\n"
-        "vwaitq\n"
-        "vaddq.x $vf18, $vf0, $Q\n"
-        "vdiv $Q, $vf0w, $vf18x\n"
-        "vwaitq\n"
-        "vmulq.xyz $vf29, $vf29, $Q\n"
-        "vmul.xyz $vf18, $vf30, $vf30\n"
-        "vaddy.x $vf18, $vf18, $vf18y\n"
-        "vaddz.x $vf18, $vf18, $vf18z\n"
-        "vsqrt $Q, $vf18x\n"
-        "vwaitq\n"
-        "vaddq.x $vf18, $vf0, $Q\n"
-        "vdiv $Q, $vf0w, $vf18x\n"
-        "vwaitq\n"
-        "vmulq.xyz $vf30, $vf30, $Q\n"
-        "vmul.xyz $vf18, $vf31, $vf31\n"
-        "vaddy.x $vf18, $vf18, $vf18y\n"
-        "vaddz.x $vf18, $vf18, $vf18z\n"
-        "vsqrt $Q, $vf18x\n"
-        "vwaitq\n"
-        "vaddq.x $vf18, $vf0, $Q\n"
-        "vdiv $Q, $vf0w, $vf18x\n"
-        "vwaitq\n"
-        "vmulq.xyz $vf31, $vf31, $Q\n"
-        "qmtc2.ni $zero, $vf18\n"
-        "vmulw.xyz $vf28, $vf28, $vf28w\n"
-        "vmulw.xyz $vf29, $vf29, $vf29w\n"
-        "vmulw.xyz $vf30, $vf30, $vf30w\n"
-        "vmulw.xyz $vf31, $vf31, $vf31w\n"
-        "vmove.w $vf28, $vf18\n"
-        "vmove.w $vf29, $vf18\n"
-        "vmove.w $vf30, $vf18\n"
-        "vmove.w $vf31, $vf18\n"
-        "qmfc2.ni $v0, $vf28\n"
-        "qmfc2.ni $v1, $vf29\n"
-        "qmfc2.ni $a0, $vf30\n"
-        "qmfc2.ni $a1, $vf31\n"
-        "pextlw $a2, $v1, $v0\n"
-        "pextuw $a3, $v1, $v0\n"
-        "pextlw $t0, $a1, $a0\n"
-        "pextuw $t1, $a1, $a0\n"
-        "pcpyld $v0, $t0, $a2\n"
-        "pcpyud $v1, $a2, $t0\n"
-        "pcpyld $a0, $t1, $a3\n"
-        "pcpyud $a1, $a3, $t1\n"
-        "qmtc2.ni $v0, $vf28\n"
-        "qmtc2.ni $v1, $vf29\n"
-        "qmtc2.ni $a0, $vf30\n"
-        "qmtc2.ni $a1, $vf31\n"
-        "lqc2 $vf24, 0x0(%2)\n"
-        "lqc2 $vf25, 0x10(%2)\n"
-        "lqc2 $vf26, 0x20(%2)\n"
-        "vmove.w $vf24, $vf18\n"
-        "vmove.w $vf25, $vf18\n"
-        "vmove.w $vf26, $vf18\n"
-        "vmulax.xyzw $ACC, $vf28, $vf24x\n"
-        "vmadday.xyzw $ACC, $vf29, $vf24y\n"
-        "vmaddz.xyzw $vf20, $vf30, $vf24z\n"
-        "vmulax.xyzw $ACC, $vf28, $vf25x\n"
-        "vmadday.xyzw $ACC, $vf29, $vf25y\n"
-        "vmaddz.xyzw $vf21, $vf30, $vf25z\n"
-        "vmulax.xyzw $ACC, $vf28, $vf26x\n"
-        "vmadday.xyzw $ACC, $vf29, $vf26y\n"
-        "vmaddz.xyzw $vf22, $vf30, $vf26z\n"
-        "sqc2 $vf20, 0x0(%0)\n"
-        "sqc2 $vf21, 0x10(%0)\n"
-        "sqc2 $vf22, 0x20(%0)\n"
-        "sqc2 $vf31, 0x30(%0)\n"
-        : : "r"(mout), "r"(lvmat), "r"(lwmat)
-        : "$2", "$3", "$4", "$5", "$6", "$7", "$8", "$9", "memory");
+    register sceVu0FMATRIX *m asm("$12") = mout, *lv asm("$11") = lvmat, *lw asm("$10") = lwmat;
+    register u_long128 r0 asm("$2"), r1 asm("$3"), r2 asm("$4"), r3 asm("$5");
+    register u_long128 r4 asm("$6"), r5 asm("$7"), r6 asm("$8"), r7 asm("$9");
+    __asm__ __volatile__("qmtc2.ni %0, $vf19" : : "r"(0xbf800000));
+    __asm__ __volatile__("lqc2 $vf28, 0x0(%0)" : : "r"(lv) : "memory");
+    __asm__ __volatile__("lqc2 $vf29, 0x10(%0)" : : "r"(lv) : "memory");
+    __asm__ __volatile__("lqc2 $vf30, 0x20(%0)" : : "r"(lv) : "memory");
+    __asm__ __volatile__("lqc2 $vf31, 0x30(%0)" : : "r"(lv) : "memory");
+    __asm__ __volatile__("vmulx.xyz $vf28, $vf28, $vf19x");
+    __asm__ __volatile__("vmulx.xyz $vf29, $vf29, $vf19x");
+    __asm__ __volatile__("vmulx.xyz $vf30, $vf30, $vf19x");
+    __asm__ __volatile__("vmulx.xyz $vf31, $vf31, $vf19x");
+    __asm__ __volatile__("vmul.xyz $vf18, $vf28, $vf28");
+    __asm__ __volatile__("vaddy.x $vf18, $vf18, $vf18y"); __asm__ __volatile__("vaddz.x $vf18, $vf18, $vf18z"); __asm__ __volatile__("vsqrt $Q, $vf18x");
+    __asm__ __volatile__("vwaitq"); __asm__ __volatile__("vaddq.x $vf18, $vf0, $Q"); __asm__ __volatile__("vdiv $Q, $vf0w, $vf18x");
+    __asm__ __volatile__("vwaitq");
+    __asm__ __volatile__("vmulq.xyz $vf28, $vf28, $Q");
+    __asm__ __volatile__("vmul.xyz $vf18, $vf29, $vf29");
+    __asm__ __volatile__("vaddy.x $vf18, $vf18, $vf18y"); __asm__ __volatile__("vaddz.x $vf18, $vf18, $vf18z"); __asm__ __volatile__("vsqrt $Q, $vf18x");
+    __asm__ __volatile__("vwaitq"); __asm__ __volatile__("vaddq.x $vf18, $vf0, $Q"); __asm__ __volatile__("vdiv $Q, $vf0w, $vf18x");
+    __asm__ __volatile__("vwaitq");
+    __asm__ __volatile__("vmulq.xyz $vf29, $vf29, $Q");
+    __asm__ __volatile__("vmul.xyz $vf18, $vf30, $vf30");
+    __asm__ __volatile__("vaddy.x $vf18, $vf18, $vf18y"); __asm__ __volatile__("vaddz.x $vf18, $vf18, $vf18z"); __asm__ __volatile__("vsqrt $Q, $vf18x");
+    __asm__ __volatile__("vwaitq"); __asm__ __volatile__("vaddq.x $vf18, $vf0, $Q"); __asm__ __volatile__("vdiv $Q, $vf0w, $vf18x");
+    __asm__ __volatile__("vwaitq");
+    __asm__ __volatile__("vmulq.xyz $vf30, $vf30, $Q");
+    __asm__ __volatile__("vmul.xyz $vf18, $vf31, $vf31");
+    __asm__ __volatile__("vaddy.x $vf18, $vf18, $vf18y"); __asm__ __volatile__("vaddz.x $vf18, $vf18, $vf18z"); __asm__ __volatile__("vsqrt $Q, $vf18x");
+    __asm__ __volatile__("vwaitq"); __asm__ __volatile__("vaddq.x $vf18, $vf0, $Q"); __asm__ __volatile__("vdiv $Q, $vf0w, $vf18x");
+    __asm__ __volatile__("vwaitq");
+    __asm__ __volatile__("vmulq.xyz $vf31, $vf31, $Q");
+    __asm__ __volatile__("qmtc2.ni $zero, $vf18");
+    __asm__ __volatile__("vmulw.xyz $vf28, $vf28, $vf28w");
+    __asm__ __volatile__("vmulw.xyz $vf29, $vf29, $vf29w");
+    __asm__ __volatile__("vmulw.xyz $vf30, $vf30, $vf30w");
+    __asm__ __volatile__("vmulw.xyz $vf31, $vf31, $vf31w");
+    __asm__ __volatile__("vmove.w $vf28, $vf18");
+    __asm__ __volatile__("vmove.w $vf29, $vf18");
+    __asm__ __volatile__("vmove.w $vf30, $vf18");
+    __asm__ __volatile__("vmove.w $vf31, $vf18");
+    __asm__ __volatile__("qmfc2.ni %0, $vf28" : "=r"(r0));
+    __asm__ __volatile__("qmfc2.ni %0, $vf29" : "=r"(r1));
+    __asm__ __volatile__("qmfc2.ni %0, $vf30" : "=r"(r2));
+    __asm__ __volatile__("qmfc2.ni %0, $vf31" : "=r"(r3));
+    __asm__ __volatile__("pextlw %0, %1, %2" : "=r"(r4) : "r"(r1), "r"(r0));
+    __asm__ __volatile__("pextuw %0, %1, %2" : "=r"(r5) : "r"(r1), "r"(r0));
+    __asm__ __volatile__("pextlw %0, %1, %2" : "=r"(r6) : "r"(r3), "r"(r2));
+    __asm__ __volatile__("pextuw %0, %1, %2" : "=r"(r7) : "r"(r3), "r"(r2));
+    __asm__ __volatile__("pcpyld %0, %1, %2" : "=r"(r0) : "r"(r6), "r"(r4));
+    __asm__ __volatile__("pcpyud %0, %1, %2" : "=r"(r1) : "r"(r4), "r"(r6));
+    __asm__ __volatile__("pcpyld %0, %1, %2" : "=r"(r2) : "r"(r7), "r"(r5));
+    __asm__ __volatile__("pcpyud %0, %1, %2" : "=r"(r3) : "r"(r5), "r"(r7));
+    __asm__ __volatile__("qmtc2.ni %0, $vf28" : : "r"(r0));
+    __asm__ __volatile__("qmtc2.ni %0, $vf29" : : "r"(r1));
+    __asm__ __volatile__("qmtc2.ni %0, $vf30" : : "r"(r2));
+    __asm__ __volatile__("qmtc2.ni %0, $vf31" : : "r"(r3));
+    __asm__ __volatile__("lqc2 $vf24, 0x0(%0)" : : "r"(lw) : "memory");
+    __asm__ __volatile__("lqc2 $vf25, 0x10(%0)" : : "r"(lw) : "memory");
+    __asm__ __volatile__("lqc2 $vf26, 0x20(%0)" : : "r"(lw) : "memory");
+    __asm__ __volatile__("vmove.w $vf24, $vf18");
+    __asm__ __volatile__("vmove.w $vf25, $vf18");
+    __asm__ __volatile__("vmove.w $vf26, $vf18");
+    __asm__ __volatile__("vmulax.xyzw $ACC, $vf28, $vf24x");
+    __asm__ __volatile__("vmadday.xyzw $ACC, $vf29, $vf24y");
+    __asm__ __volatile__("vmaddz.xyzw $vf20, $vf30, $vf24z");
+    __asm__ __volatile__("vmulax.xyzw $ACC, $vf28, $vf25x");
+    __asm__ __volatile__("vmadday.xyzw $ACC, $vf29, $vf25y");
+    __asm__ __volatile__("vmaddz.xyzw $vf21, $vf30, $vf25z");
+    __asm__ __volatile__("vmulax.xyzw $ACC, $vf28, $vf26x");
+    __asm__ __volatile__("vmadday.xyzw $ACC, $vf29, $vf26y");
+    __asm__ __volatile__("vmaddz.xyzw $vf22, $vf30, $vf26z");
+    __asm__ __volatile__("sqc2 $vf20, 0x0(%0)" : : "r"(m) : "memory");
+    __asm__ __volatile__("sqc2 $vf21, 0x10(%0)" : : "r"(m) : "memory");
+    __asm__ __volatile__("sqc2 $vf22, 0x20(%0)" : : "r"(m) : "memory");
+    __asm__ __volatile__("sqc2 $vf31, 0x30(%0)" : : "r"(m) : "memory");
 }

@@ -41,10 +41,10 @@ every change that is merged without regenerating. Regenerating all four takes ab
 
 ## Where things stand (2026-11-07)
 
-- **Progress:** 12048 of 12311 functions matched: game 11265 of 11323, libraries 783 of 988 (plus 151 hand-written).
+- **Progress:** 12049 of 12311 functions matched: game 11266 of 11323, libraries 783 of 988 (plus 151 hand-written).
   `tools/check.sh` counts the 151 hand-written units as done too: its total is these matched functions plus 151
   (fixed 2026-11-07: it used to count a parked `#if 0 ... #else INCLUDE_ASM #endif` as done).
-- **Game:** 58 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note).
+- **Game:** 57 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note).
   5 units take a data section from assembly.
 - **Libraries:** 18 parked, 1 not attempted, 27 hand-written (stay assembly), no unit with data from assembly
   (the last two, __assert and __umoddi3, needed the split / link-alignment fixes of 2026-11-07);
@@ -128,8 +128,9 @@ Numbers change with every merge: `tools/check.sh` (totals), `tools/leftovers.py 
    add/addi: init_spline x3, KeDttMdl_MkGifPk x2, KeDttSpr_MkGifPk, op_md_draw_path3_fog); the md0 family's C forms
    change the whole function (COPY_Q tested); pppColor's split form (C + one asm per VU0/MMI instruction, volatile
    max for the "m" operand) reaches 3 lines. Converted since (2026-11-07/08): Ke.c's three (one dead insn each stays,
-   the rule's exception) and global.c's op_random/op_random_p (no MIPS left). Open: op_matrix_light4_vector,
-   KeDttSpr_MkGifPk_Pre, RyjMegaBirthUserCtrDrawShapeRefPos, pppRyjDrawMegaBirthPrize, pppColor (their comments say so).
+   the rule's exception), global.c's op_random/op_random_p, KeDttSpr_MkGifPk_Pre (no MIPS left) and
+   RyjMegaBirthUserCtrDrawShapeRefPos (its lq/sq copy in C; the VU0 run stays one asm: split 52 lines, a global-alloc
+   tie), op_matrix_light4_vector and pppColor (an empty asm clobbering $2-$4 after the store: local-alloc liveness). pppRyjDrawMegaBirthPrize (the lw in C between two asms; honest "vf1".."vf14" clobbers, a "$8" clobber as a register-dead lever). Item 4 is done: no MIPS left in libppp asm besides the original's own hand-written blocks and the md0 family (tested, kept).
    kh1 has none of them in C. No matched function goes back to parked for this.
 5. **Header cleanup**, interleaved: one `tools/partials.py --queue` item between two work items (see "Header
    cleanup"). The items waiting on a user decision are listed under "When to stop and ask".
@@ -339,7 +340,8 @@ and VECTOR_H_SET_CALL all change the image, so they stay. The global operators a
 asm: __builtin_return_address reloads ra), new, delete, delete[], new(size_t, char*), new[] and placement new, all
 throw(); the sites are `new (__FILE__ "(N)") T` (Camp's setWorldmap keeps the emulated form, MATCH), the local copies
 and the KH_PLACEMENT_NEW_DEFINED gate are gone. MapEnemy.h, SceneInfo.h, CollUtilA.h and Coord.h list gate users
-without a feature macro.
+without a feature macro. Game/Collision/CollObj.h is done (2026-11-08): CollUtilF's stand-ins went once
+_checkLadderUp calls an inline `initForMap()` (m_fgStatus = 0) after the constructor (flow drops the ctor's dead store).
 
 **A4. The ladder**, when completing a header would break another unit's `.rodata` (stop at the first step that
 works): forward declarations instead of includes; move the type to the header the original used (string
