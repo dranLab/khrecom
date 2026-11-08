@@ -43,7 +43,7 @@ struct PL_PARAM;
 struct PATK_DATA;
 class CCollMap;
 class CPlayerDebug;
-
+enum WalkMode { WALKMODE_STAND = 0, WALKMODE_WALK = 1, WALKMODE_RUN = 2 };
 // PARTIAL: moved into namespace PL for Game/Player/PlayerRiku (setPlayerState__7CPlayerQ22PL11PlayerState)
 namespace PL {
 enum PlayerState { // complete (from types.h)
@@ -223,7 +223,7 @@ public: // PARTIAL: members public for Game/Player/PlayerRiku
     HANDLE m_hEffPrize;          /* 0x440 */
     HANDLE m_hEffLevelUp;        /* 0x444 */
     TIMEQ m_tqPrize;             /* 0x448 */
-    INT m_WalkMode;              /* 0x44c WalkMode */
+    WalkMode m_WalkMode;         /* 0x44c */
     TIMEQ m_tqEscape;            /* 0x450 */
     FVECTOR m_vWallPos;          /* 0x460 */
     FLOAT m_fWallDir;            /* 0x470 */
@@ -409,7 +409,7 @@ public:
     INT chkLadderStepNow(BOOL inAir); INT getLadderStepNow(FLOAT inHeight); void initLadder(INT inStep);
     void exeQuickBarrier(); void exeAeroGuard(); void setAeroGuard(INT inFlag);
     INT isNowCardActionState();
-    INT chkWalkMode();
+    WalkMode chkWalkMode();
     void exeWalk(); void setWalkAnim(); void exeStartWait(); INT isStartLadderJump(); void procDropMP(); INT chkBattleIdle(); FLOAT getAirHeight(FVECTOR* inPos, FLOAT inHeight, INT inLimit); FLOAT getFrontAirHeight(FVECTOR* inPos, FLOAT inLength, FLOAT inHeight, FLOAT inDir);
     void recoverCollMap();
     // PARTIAL: added for Game/Gimmick/GimmickWindowLid

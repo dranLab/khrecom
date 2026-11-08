@@ -689,7 +689,7 @@ void CPlayer::_init() {
     m_hEffPrize = 0;
     m_hEffLevelUp = 0;
     m_tqPrize = 0;
-    m_WalkMode = 0;
+    m_WalkMode = WALKMODE_STAND;
     m_tqEscape = 0;
     m_vWallPos.init();
     m_fWallDir = 0.0f;
@@ -1763,7 +1763,7 @@ void CPlayer::beginStateHide() {
     setPlayerState(PL::HIDE);
     clearSpeed();
     setEntityFlag(1, 0);
-    m_WalkMode = 0;
+    m_WalkMode = WALKMODE_STAND;
     if (m_bIsBattleScene) setAnimForce(0x2A, 0, 0, 0, 0, 0);
     else setAnimForce(1, 0, 0, 0, 0, 0);
     setPlayerFlag(0x401001, 0);
@@ -1880,7 +1880,7 @@ void CPlayer::initStartWait() {
     m_tqAttackTimer = 0;
     setPlayerFlag(0x400001, 0);
     offAttack();
-    m_WalkMode = 0;
+    m_WalkMode = WALKMODE_STAND;
     m_uiPadFlag = (INT)m_uiPadFlag & ~1;
     m_hTarget = 0;
     m_hLockon = 0;
@@ -1944,7 +1944,7 @@ void CPlayer::initStandUp(INT inFlag) {
 }
 __asm__(".rdata\n");
 void CPlayer::exeStandUp() {
-    INT PreWalkMode;
+    WalkMode PreWalkMode;
     if (isTrgFlag(0x100000) || isConditionFlag(0x2000000)) {
         TRACE("CPlayer:: exeStandUp -> initTransform(0)\n");
         initTransform(0);
@@ -2039,20 +2039,20 @@ tail:
     }
     if (chkWall(0)) initWall();
 }
-INT CPlayer::chkWalkMode() {
+WalkMode CPlayer::chkWalkMode() {
     FLOAT aim_power = m_fAnalogPower;
     if (aim_power < 0.3f) {
         m_fWalkSpeed = 0.0f;
-        return 0;
+        return WALKMODE_STAND;
     }
     FLOAT dash = 1.0f;
     if (m_pCB && m_pCB->getEnchantKind() == 0x2D) dash = 1.7f;
     if (aim_power < 0.9f) {
         m_fWalkSpeed = m_pParam->MAX_WALK_SPEED * dash;
-        return 1;
+        return WALKMODE_WALK;
     }
     m_fWalkSpeed = aim_power * m_pParam->MAX_RUN_SPEED * dash;
-    return 2;
+    return WALKMODE_RUN;
 }
 void CPlayer::exeWalk() {
     FLOAT aim_dir = m_fAnalogViewDir;
@@ -3513,7 +3513,7 @@ void CPlayer::exeRoomCreation() {
         } else if (isTrgFlag(0x8000)) {
             m_iSubState = 4;
             setTrgFlag(0, 0x8000);
-            m_WalkMode = 0;
+            m_WalkMode = WALKMODE_STAND;
             m_pCam->setFlag(0, 1);
             m_bDmgMuteki = FALSE;
             m_collBody.on();
@@ -3535,7 +3535,7 @@ void CPlayer::exeRoomCreation() {
     case 3:
         if (m_tqStateTimer > 3000) {
             setAnim(2, -1, 0);
-            m_WalkMode = 1;
+            m_WalkMode = WALKMODE_WALK;
             m_fMovePower = 1.0f;
             m_fWalkSpeed = m_pParam->MAX_WALK_SPEED / 60.0f;
             m_pMove->calcVelocityXZ(m_fWalkSpeed);
@@ -3597,7 +3597,7 @@ void CPlayer::exeWorldSelect() {
         } else if (isTrgFlag(0x8000)) {
             m_iSubState = 4;
             setTrgFlag(0, 0x8000);
-            m_WalkMode = 0;
+            m_WalkMode = WALKMODE_STAND;
             m_pCam->setFlag(0, 1);
             m_bDmgMuteki = FALSE;
             m_collBody.on();
@@ -3619,7 +3619,7 @@ void CPlayer::exeWorldSelect() {
     case 3:
         if (m_tqStateTimer > 3000) {
             setAnim(2, -1, 0);
-            m_WalkMode = 1;
+            m_WalkMode = WALKMODE_WALK;
             m_fMovePower = 1.0f;
             m_fWalkSpeed = m_pParam->MAX_WALK_SPEED / 60.0f;
             m_pMove->calcVelocityXZ(m_fWalkSpeed);
@@ -3701,10 +3701,10 @@ void CPlayer::exeCarry() {
         aim_power = m_fAnalogPower;
         if (aim_power < 0.3f) {
             m_fWalkSpeed = 0.0f;
-            m_WalkMode = 0;
+            m_WalkMode = WALKMODE_STAND;
         } else {
             m_fWalkSpeed = m_pParam->CARRY_MOVE_SPEED;
-            m_WalkMode = 1;
+            m_WalkMode = WALKMODE_WALK;
         }
         if (PreWalkMode != m_WalkMode) {
             if (!m_WalkMode) {
@@ -6179,7 +6179,7 @@ void CPlayer::exeItem() {
 }
 void CPlayer::exeStandUp_inFriend() {
     INT oldMode = m_WalkMode;
-    INT mode = chkWalkMode();
+    WalkMode mode = chkWalkMode();
     m_WalkMode = mode;
     if (!mode && oldMode && m_pSE) ((CSEMotion*)m_pSE)->playFootStopSE();
     exeWalk();
@@ -6461,7 +6461,7 @@ void CPlayer::initEscape() {
     m_pMove->setFlag(1, 0); // partial CMovement: (flag, on)
     setPlayerFlag(0x400001, 0);
     setAnim(0x2C, -1, 0);
-    m_WalkMode = 2;
+    m_WalkMode = WALKMODE_RUN;
     m_fMovePower = 1.0f;
     m_fWalkSpeed = m_pParam->MAX_RUN_SPEED / 60.0f;
     m_pMove->calcVelocityXZ(m_fWalkSpeed);
