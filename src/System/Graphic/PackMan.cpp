@@ -1373,28 +1373,28 @@ void sceVif1PkOpenUpkCode(pacVif1Packet* pPacket, u_short vuaddr, u_int upkcmd, 
     pPacket->iVifCode = (upkcmd << 24) | vuaddr;
     pPacket->pCurrent = pc + 2;
 }
-/* Parked: ~25 lines - register allocation: the original keeps wl (numlen >> 8) in t0 and cl in numlen's register a1, ours swaps them (and the t2/t3 numbering follows); the vn != 3 branch layout, the code copy and the shared divide tail match. cl/wl declaration order, signed locals, ternaries and 5 + 15 min of permuter (9k + 19k candidates, 25 -> 24) did not get it.
-   2026-11-07: cl masked in place / through a numlen local (25-40), cl first, the 256 tests swapped (28-29). */
+/* Parked: 10 lines (2026-11-08) - registers only: wl and bits swap t0/t1 (the original has wl in t0), and the two movz issue cl first (the original wl first). Fixed: cl before wl (numlen dies in the wl insn before sched1, so cl gets numlen's a1), cl <<= / cl *= len in place with a shared len, len = 5 - vl + (vn >> 1) (no reassociation), num = wl * (...). Earlier: 25 lines (cl/wl declaration order, signed locals, ternaries, 5 + 15 min permuter); the ref's locals with the old arms gave 43-58. */
 #if 0
 void sceVif1PkCloseUpkCode(pacVif1Packet* pPacket) {
     u_int* pEnd = pPacket->pCurrent - 1;
     u_int code = pPacket->iVifCode;
     u_int bits = (pEnd - pPacket->pVifCode) << 5;
     u_int vn = ((code >> 26) & 3) + 1;
+    u_int cl = pPacket->numlen & 0xff;
     u_int vl = (code >> 24) & 3;
     u_int wl = pPacket->numlen >> 8;
-    u_int cl = pPacket->numlen & 0xff;
     u_int num;
+    u_int len;
     if (!wl) wl = 256;
     if (!cl) cl = 256;
     if (vn != 3) {
-        u_int sh = (vn >> 1) + 5 - vl;
-        if (cl >= wl) num = bits >> sh;
-        else num = bits / (cl << sh) * wl;
+        len = 5 - vl + (vn >> 1);
+        if (cl >= wl) num = bits >> len;
+        else { cl <<= len; num = wl * (bits / cl); }
     } else {
-        u_int n = vn * (32 >> vl);
-        if (cl >= wl) num = bits / n;
-        else num = bits / (cl * n) * wl;
+        len = vn * (32 >> vl);
+        if (cl >= wl) num = bits / len;
+        else { cl *= len; num = wl * (bits / cl); }
     }
     *pPacket->pVifCode = code + (num << 16);
     pPacket->pVifCode = NULL;
