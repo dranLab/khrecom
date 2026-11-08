@@ -39,19 +39,27 @@ every change that is merged without regenerating. Regenerating all four takes ab
   | `docs/partials.md` trend table | one row per cleanup merge (`partials.py --summary` before and after) |
   | `CLAUDE.md` | a tool, rule or toolchain fact changes |
 
-## Where things stand (2026-11-07)
+## Where things stand (2026-11-08)
 
-- **Progress:** 12049 of 12311 functions matched: game 11266 of 11323, libraries 783 of 988 (plus 151 hand-written).
+- **Progress:** 12074 of 12311 functions matched: game 11280 of 11323, libraries 794 of 988 (plus 151 hand-written).
   `tools/check.sh` counts the 151 hand-written units as done too: its total is these matched functions plus 151
   (fixed 2026-11-07: it used to count a parked `#if 0 ... #else INCLUDE_ASM #endif` as done).
-- **Game:** 57 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note).
-  5 units take a data section from assembly.
-- **Libraries:** 18 parked, 1 not attempted, 27 hand-written (stay assembly), no unit with data from assembly
-  (the last two, __assert and __umoddi3, needed the split / link-alignment fixes of 2026-11-07);
+- **Game:** 38 functions still `INCLUDE_ASM` in 29 units, all parked (C draft under `#if 0` with a note).
+  1 unit takes a data section from assembly (sddrv_ee's `.bss`, blocked: see docs/asm-leftovers.md).
+- **Libraries:** 10 parked, 1 not attempted, 27 hand-written (stay assembly), no unit with data from assembly;
   details in `docs/sdk-leftovers.md`.
-- **Header cleanup:** PARTIAL 185 (155 in 44 headers, 30 in 17 .cpp), 11 foreign stand-ins in 6 files, 0
-  duplicate classes, 0 untagged mechanisms; classes complete 873, superset 12, gated 3, missing 8.
+- **Header cleanup:** PARTIAL 183 (155 in 44 headers, 28 in 15 .cpp), 8 foreign stand-ins in 5 files, 0
+  duplicate classes, 0 untagged mechanisms; classes complete 1162, superset 17, gated 3, missing 6.
   `tools/partials.py --queue` has the ready items.
+- **Method of 2026-11-08: the original's .mdebug block tree.** 22 parked drafts matched in one pool run (MSVideo, TaskMan,
+  PackMan 2, Card, AtelCrossFade, TexUtil 4, sddrv_ee, Camp, Model, Player, CollUtil, BattleEnemy, CollDisp 2,
+  DebugWindow; lib: timer 2, libat3dec 4, filestub, eecdvd), and in every case the old Parked note named the wrong cause.
+  Compare the original's locals (register/slot and scope blocks: `build/gat/mdsyms.py`) with ours (`build/m/stabs.py`
+  + `pt.py`): block-scoped declarations, a value living in a different variable than the draft assumed, two
+  variables where the draft had one, an inline's parameter scopes naming the helper called, optimized-away locals
+  (invisible, still needed). It does not help where only reload/spill temporaries differ (pppEiDrawShipoly).
+  Lib units have names only in their .mdebug (no locals).
+
 - **Method that paid off (2026-11-06):** read `tools/helpers/asmlines.py` before permuting. Most long-parked drafts had a
   wrong source shape the line markers show directly (one-line brace init, a condition on one line, statement order,
   a direct assignment), not a scheduling accident. See memory void-callee-v0, fvector-brace-init-aligned,
