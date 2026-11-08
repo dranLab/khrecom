@@ -22,7 +22,7 @@
 extern CEntity* g_pPlayer; /* a CPlayer (Game/Player/Player.h) */
 
 #include "Form/Menu/JMemoFlag.h"
-
+#include "System/Com.h"
 
 
 
@@ -171,47 +171,19 @@ void CEnemyWhitemushroom::beginDamage_() {
     m_iStep = 0;
 }
 
-#include "include_asm.h"
-
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/EnemyWhitemushroom", damage___19CEnemyWhitemushroom);
-/* placeholder for damage_'s data: its static local and string (code in the stripped .sdata), then its jump table
- * (labels of the included assembly) */
-__asm__(".section .sdata\n");
-static void __attribute__((section(".sdata"))) _damagePH() {
-    static CHAR* MemoIDParamName = "MemoID";
-    CJiminyMemoFlag::checkEvent(3, (INT)MemoIDParamName, 1);
-}
-__asm__(
-    ".rdata\n"
-    ".align 2\n"
-    ".word .L002C7660\n"
-    ".word .L002C7698\n"
-    ".word .L002C76B8\n"
-    ".word .L002C76F4\n"
-    ".word .L002C77D4\n"
-    ".word .L002C7854\n"
-    ".text\n");
-
-/* Earlier tries (~45 min): setupFade store orders (all 720, plain/reference/|= flag forms, also written out in
- * place), reference stores, local placement, this casts, explicit temporaries, empty-asm fillers and barriers,
- * ENTITY_H_SETFLAG_DIRECT. Sched dumps (2026-11-07): the vtable entry loads (lh 88/lw 92 through the loaded
- * vptr, unknown base) depend on all six setupFade stores, so every store has priority 9 like the vptr load; sched1
- * then issues the stores first (lower register weight: the load sets a register) and sched2 keeps that order
- * (luid tie). The original's order (sw 284, sw 280, move a1, lw vptr, swc1 268, sw 288, sw 228, sw 272) is what
- * you get when only the two TIMEQ stores conflict with the vtable loads: -fstrict-aliasing plus TIMEQ stores
- * through a union gives exactly that except sw 228, but strict aliasing is not the build's flag and changes the
- * rest of the function. Without it every member store conflicts (alias set 0; `this`-based addresses vary, so the
- * fixed-scalar rule never applies; FLOAT* or INT* pointer stores and CEntity&/CEntity* or qualified calls
- * change nothing). */
-/* Parked: 3 of 211 lines (2026-11-07): case 4, the vptr load for getLockOnPos comes after all six setupFade stores, the original has it right after the two TIMEQ stores (sw 284/280) and before swc1 268, sw 288, sw 228, sw 272; tried: all store orders, flag forms, barriers, temporaries, call forms, pointer stores, sched-dump analysis (above), permuter 15 min (1030 candidates, no gain) */
-#if 0
+/* Shape from the original's .mdebug block tree: case 4 and 5 are if-blocks with pos and the static local
+ * inside, i is the for-scope local, the loop calls getRandF/DEG2RAD. Case 0 repeats the setupDisappear_ tail
+ * (jump2 cross-jumps it into case 4's copy after sched2): in one block with the makePrize call, the li 5 for
+ * m_iStep gives the vptr load (v0) one more dependent, so sched2 issues it before the setupFade stores. */
 void CEnemyWhitemushroom::damage_() {
-    static CHAR* MemoIDParamName = "MemoID";
     switch (m_iStep) {
     case 0:
-        if (!isMotionEnd()) break;
-        changeMotionFileName(Whitemushroom::DisappearMotion, 0, FALSE, -1, 0, 0);
-        goto disappear;
+        if (isMotionEnd()) {
+            changeMotionFileName(Whitemushroom::DisappearMotion, 0, FALSE, -1, 0, 0);
+            setupDisappear_();
+            m_iStep = 5;
+        }
+        break;
     case 1:
         if (isMotionEnd()) {
             changeDefaultState();
@@ -226,41 +198,38 @@ void CEnemyWhitemushroom::damage_() {
     case 3:
         if (getMotionCurrentTime() >= 4500) {
             PRIZE_PARAM param;
-            INT i;
             param.uiFlag = 0;
             param.uiPrizeFlag = 0;
             getLockOnPos(param.vPos);
             param.iNumber = 0;
             param.fSpeed = 0.2f;
             param.PrizeKind = 0xD3;
-            for (i = 0; i < 10; i++) {
-                param.vRot.set((-45.0f - RND::genrand_real1() * 15.0f) * 0.017453292f,
-                               RND::genrand_real1() * 360.0f * 0.017453292f, 0.0f);
+            for (INT i = 0; i < 10; i++) {
+                param.vRot.set(DEG2RAD(-45.0f - getRandF() * 15.0f), DEG2RAD(getRandF() * 360.0f), 0.0f);
                 Math3D::LimitPIVector(param.vRot);
                 CEntityFactory::getInstance()->createPrize(param, NULL);
             }
             m_iStep = 4;
         }
     case 4:
-        if (!isMotionEnd()) break;
-        setupFade(1.0f, 0.0f, getMotionTotalTime(), -1);
-        {
+        if (isMotionEnd()) {
             FVECTOR pos;
+            setupFade(1.0f, 0.0f, getMotionTotalTime(), -1);
             getLockOnPos(pos);
             makePrize(&pos);
+            setupDisappear_();
+            m_iStep = 5;
         }
-    disappear:
-        setupDisappear_();
-        m_iStep = 5;
         break;
     case 5:
-        if (isFade()) break;
-        CJiminyMemoFlag::checkEvent(3, (INT)getExtraParam(MemoIDParamName), 1);
-        out();
+        if (!isFade()) {
+            static CHAR* MemoIDParamName = "MemoID";
+            CJiminyMemoFlag::checkEvent(3, (INT)getExtraParam(MemoIDParamName), 1);
+            out();
+        }
         break;
     }
 }
-#endif
 
 void CEnemyWhitemushroom::endDamage_() {
     bodyCollOn(-1);
