@@ -260,32 +260,23 @@ static void channel_conv_joint(At3Work *w);
 static int gainc_window(char *ch, int band);
 static void f2t_nodata(At3Band *bands, int band);
 
-/* Parked: 63 of 130 lines (2026-11-07; 87 before the band counter j += 2, a second biv kept in the stack slot like the
-   original's, and nw read after the gain tests): what differs is register allocation in the band prologue and the
-   sample loop (the original puts the joint[1] gains in t3/t1 and reuses them for n0/n1, dg0 lands in t1; the band
-   address is offset + w, ours w + offset); tried: load/statement orders of the gain and weight reads, separate
-   variables, decomp-permuter 15 min (only the m operand order, -5) */
-#if 0
 static void channel_conv_joint(At3Work *w)
 {
     int band;
     int k;
     unsigned short w0, w1, g0, g1;
-    unsigned short n0, n1, h0, h1;
-    unsigned short dw0, dw1, dg0, dg1;
+    unsigned short h0, h1;
+    unsigned short dw0, dw1;
+    unsigned short n0, n1, r0, r1;
     int cw0, cw1, cg0, cg1;
     int ndw0, ndw1, ndg0, ndg1;
     unsigned short *pw;
     unsigned short *nw;
-    int (*sp)[3320];
-    int idx;
     int *pr;
     int x;
     int y;
-    int m;
     int j;
 
-    sp = (int (*)[3320])w->ch;
     j = 0;
     for (band = 0; band < 4; band++) {
         g1 = 0x8000;
@@ -293,58 +284,55 @@ static void channel_conv_joint(At3Work *w)
         h1 = 0x8000;
         h0 = 0x8000;
         if (band >= w->joint[1].n) {
-            h1 = w->joint[1].g[1];
             h0 = w->joint[1].g[0];
+            h1 = w->joint[1].g[1];
         }
         if (band >= w->joint[0].n) {
-            g1 = w->joint[0].g[1];
             g0 = w->joint[0].g[0];
+            g1 = w->joint[0].g[1];
         }
         nw = w->joint[1].w[band];
         pw = w->joint[0].w[band];
         w0 = pw[0];
         w1 = pw[1];
+        /* MATCH: integer sum, offset first (original addu offset,w); 3355 ints = ch[1].band[0].spec */
+        pr = (int *)((j + band) * 544 + (int)w) + 3355;
+        h0 = (short)(h0 - g0) >> 3;
+        h1 = (short)(h1 - g1) >> 3;
         dw0 = (nw[0] - w0) >> 3;
         dw1 = (nw[1] - w1) >> 3;
-        dg0 = (short)(h0 - g0) >> 3;
-        dg1 = (short)(h1 - g1) >> 3;
-        cw0 = (dw0 << 3) + w0;
+        cg1 = (h1 << 3) + g1;
         cw1 = (dw1 << 3) + w1;
-        cg0 = (dg0 << 3) + g0;
-        cg1 = (dg1 << 3) + g1;
-        idx = band * 408 + 35;
-        ndw0 = -dw0;
+        cg0 = (h0 << 3) + g0;
+        cw0 = (dw0 << 3) + w0;
+        ndg1 = -h1;
         ndw1 = -dw1;
-        ndg0 = -dg0;
-        ndg1 = -dg1;
-        pr = &((int (*)[136])(w->ch[1]))[j + band][23];
+        ndg0 = -h0;
+        ndw0 = -dw0;
         for (k = 0; k < 256; k++) {
             n0 = w0;
-            h0 = g0;
+            r0 = g0;
             n1 = w1;
-            h1 = g1;
+            r1 = g1;
             if (k - 8 < 0) {
                 n0 = cw0;
-                h0 = cg0;
+                r0 = cg0;
                 n1 = cw1;
-                h1 = cg1;
+                r1 = cg1;
             }
-            cw0 += ndw0;
+            cg1 += ndg1;
             cw1 += ndw1;
             cg0 += ndg0;
-            cg1 += ndg1;
-            x = pr[k - 3320];
-            y = pr[k];
-            m = n1 * (y >> 4) + n0 * (x >> 4);
-            pr[k - 3320] = ((m >> 8) * h0) >> 6;
-            pr[k] = (((x - m) >> 8) * h1) >> 6;
+            cw0 += ndw0;
+            x = pr[-3320];
+            y = *pr;
+            y = n0 * (x >> 4) + n1 * (y >> 4);
+            pr[-3320] = ((y >> 8) * r0) >> 6;
+            *pr++ = (((x - y) >> 8) * r1) >> 6;
         }
         j += 2;
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/libat3dec", channel_conv_joint);
-#endif
 
 /* Parked: first draft (2026-11-07), 334 of 457 lines, 80 bytes short; the butterfly stage has its structure (registers renamed: w, half, step); the window loop
    keeps fewer values on the stack than the original (5 spills at 0x18-0x2C) and the band copy's tail is not interleaved with its setup;
@@ -744,20 +732,20 @@ static int getNoiseSpectrum(char *ch, int nqus, At3Work *w)
     return 0;
 }
 
-/* Parked: 5 of 92 lines (2026-11-07): after the memcpy the original recomputes the band address into fresh registers,
-   (x << 4) + x into v1 and offset + bands; ours reuses v0 and adds bands + offset; tried: q/p order, a band pointer
-   local, bands + band, int-row casts ([408], [136] rows), an index loop (84), decomp-permuter 12 min (no gain) */
-#if 0
 static void f2t_nodata(At3Band *bands, int band)
 {
     int i;
     int v;
     int *p;
     int *q;
+    int k;
 
     memcpy(&bands[band].hdr, &bands[band].save, sizeof(At3Blk23));
-    q = &bands[band].spec[127];
-    p = bands[band].ov;
+    /* MATCH: an integer sum, offset first, of band * 3 rows of 544 bytes: the original multiplies the
+       recomputed band * 3 by 17 << 5 and adds offset + bands (bands[band] gives bands + band * 1632) */
+    k = band * 3;
+    q = (int *)(k * 544 + (int)bands) + 150;
+    p = (int *)(k * 544 + (int)bands) + 279;
     for (i = 0; i < 128; i++) {
         v = *p;
         *q-- = v >> 4;
@@ -766,17 +754,7 @@ static void f2t_nodata(At3Band *bands, int band)
         p++;
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/libat3dec", f2t_nodata);
-#endif
 
-/* Parked: 3 of 337 lines (2026-11-07; 157 before: the levels through a pointer to gain[0][0][1] (the original
-   keeps sp + 4 in s7, a block-local copy in the tail loop gives its move a1,s7), the terminator stored at [i] (the
-   loop's final value), band as the jw/joint loop counter, the tone count and the band limit in nb): only the
-   operand order of the level addresses differs, the original adds pointer + index (addu v1,s7,s0), ours
-   index + pointer; tried: *(gp + k), k[gp], 2-D/3-D pointer types, char * offsets, block-local pointers, a flat
-   gain array (132), decomp-permuter 15 min, tools/permuter.py 10 min (22,692 variants): no gain */
-#if 0
 static int unpack_mddata(At3Chan *ch, int rev, At3Work *w)
 {
     int gain[4][8][2];
@@ -800,20 +778,22 @@ static int unpack_mddata(At3Chan *ch, int rev, At3Work *w)
         w->bitpos += 6;
     }
     nbands = read_unpack_from_msb(2, w) + 1;
+    /* MATCH: the levels at byte offsets (index << 3): the original adds pointer + index; gp[k] expands as
+       index * 4 + pointer (expand_expr puts a MULT first) */
     gp = &gain[0][0][1];
     band = 0;
     do {
         n = read_unpack_from_msb(3, w);
         for (i = 0; i < n; i++) {
-            gp[band * 16 + i * 2] = read_unpack_from_msb(4, w);
+            *(int *)((char *)gp + ((band * 8 + i) << 3)) = read_unpack_from_msb(4, w);
             gain[band][i][0] = read_unpack_from_msb(5, w) << 3;
         }
-        gp[band * 16 + i * 2] = 4;
+        *(int *)((char *)gp + ((band * 8 + i) << 3)) = 4;
         gain[band][i][0] = 0xFF;
     } while (++band < nbands);
     for (; band < 4; band++) {
         int *lev = &gain[0][0][1];
-        lev[band * 16] = 4;
+        *(int *)((char *)lev + (band << 6)) = 4;
         gain[band][0][0] = 0xFF;
     }
     memcpy(&ch->qmfhead, &ch->qmfsave, sizeof(At3Blk23));
@@ -857,16 +837,7 @@ static int unpack_mddata(At3Chan *ch, int rev, At3Work *w)
     memcpy(ch->gain, gain, sizeof(gain));
     return 0;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/libat3dec", unpack_mddata);
-#endif
 
-/* Parked: 7 of 102 lines (2026-11-07; 11 before the skip loop as `while (*--p == 0xF8 && src < p)`, which also
-   makes the pad variable unnecessary): reorg fills the copy loop's entry differently: the original puts p-- in the
-   beqz slot (from the fall-through) and the stolen first store in the jump's slot, ours a beqzl with the w->stream
-   store and p-- in the jump's slot; one alignment nop before the iqmf loop follows; tried: 7 copy-loop forms
-   (while, for, if + do-while, _before, separate ++/--), decomp-permuter 15 min (no gain) */
-#if 0
 int at3dec_proc(At3Work *w)
 {
     int off = 0;
@@ -907,7 +878,4 @@ int at3dec_proc(At3Work *w)
     }
     return 0;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/libat3dec", at3dec_proc);
-#endif
 // SOURCE DATA: .data .rodata

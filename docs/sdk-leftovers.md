@@ -60,6 +60,21 @@ shows a draft's diff after you switch its `#if 0` to `#if 1` (the permuters swit
 - printf family: one variable for several roles (the original's `n`/`p`/`uval` share s-registers), the tail
   `start = p + 1; len = bufend - p; goto output;` per case, `if (val >= 0) {...} else '-'` arm order.
 - Sony's code has inline asm blocks with their own `.set noreorder` loops (DIntr).
+- The same few volatile reads repeated with different registers per copy, plus a store in a `jal` delay slot = a
+  brace-block macro with block-local variables on one source line (`cbTimerHandler`'s `GET_TIME(now)`); `{ }`, not
+  `do { } while (0)`, when an earlier statement has to schedule after the macro's volatile loads (2026-11-08).
+- A conditional exit followed by an unconditional `b` back, the body peeled once before the loop = the `break` in
+  the `else` arm: `if (t2 < t + 0x7333) t = t2; else break;` (`SetNextComp`).
+- `addu ptr,idx` vs ours `idx,ptr` (gcc 2.96 puts a multiply first in an address): pointer + index in a store
+  address = a byte offset with a shift, `*(int *)((char *)p + (k << 3))` (`unpack_mddata`); offset + base in an
+  assigned pointer = an integer sum, offset first, `(int *)(k * 544 + (int)w)` (`f2t_nodata`, `channel_conv_joint`).
+- `(x<<4)+x` vs ours `x+(x<<4)`: the original multiplies an unfolded value (`k = band * 3; k * 544`, not
+  `band * 1632`).
+- A caller's draft can depend on its static callee: `at3dec_proc` matched once `unpack_mddata` was C. Re-measure
+  callers after matching a static callee.
+- The last operand swap of a sum: store it back into one of its inputs (`y = n0 * (x >> 4) + n1 * (y >> 4)`).
+- The original's .mdebug locals (register, slot, scope blocks; `build/gat/mdsyms.py`) exist for the Sony units
+  with debug info, not for libat3dec (names only).
 
 ## Notes per unit
 
@@ -101,7 +116,12 @@ shows a draft's diff after you switch its `#if 0` to `#if 1` (the permuters swit
   `sceCdCbfunc_num = cb_flag = 0`, but two hoisted luis swap registers (SHA-1 fails, gcse order of the symbols).
 - **mpc** (`_getRef0`): decomp-permuter can't parse it (a statement expression `({ ... })` in a condition).
 - **timer** (`TimerBusClock2Freq`, `TimerFreq2BusClock`, matched 2026-11-07 with the Sony group on 991111-01): both match as they stand under ee-gcc2.9-991111-01 (its `div.s`
-  erratum padding keeps it out of the call's delay slot), and no function of the unit differs there. Needs an override.
+  erratum padding keeps it out of the call's delay slot); the `lib/*` override covers it. Unit done 36/36 (2026-11-08):
+  `cbTimerHandler` (GET_TIME brace-block macro, `volatile` overflow field) and `SetNextComp` (break in the else arm).
+- **libat3dec** (2026-11-08: 11/12, unpack_mddata, f2t_nodata, channel_conv_joint, at3dec_proc matched): only
+  `imdct` is left (334 of 457 lines; register-blind still 148 of 390 instructions off; lead: the original stores
+  sh1 = gain + shift - 1 into gain's stack slot, so the source probably reassigns `gain`). `build/fastcmp.py` /
+  `build/mnemdiff.py`: ~1 s per variant without ninja.
 - **lib/init**: a `j $31` left unfilled where the original filled it: the last statement and `}` on one line.
 - **nodebug/__assert**, **libgcc2___umoddi3** (.rodata from source 2026-11-07): needed a split and a link change,
   see "Data:" above (impure.o's .rodata segment; the 128-byte section start alignment).
@@ -161,10 +181,6 @@ Sorted by unit, then size. `instr`: instructions in the original.
 | `lib/eecdvd_sceCdCallback` | `sceCdInit` | 186 | parked | 6 of 255 lines (2026-11-07): only the %hi registers of _scmd_dr_bind/_sceCd_ee_read_mode, t1/t0 in the original, t0/t1 here (local-alloc: dr's life after sched1 is 1 insn shorter, so it gets t0 first; the original's sched2 still issues dr's lui and store before ee's); live, the c_cnt.66 stopgap … |
 | `lib/hncAt3dec` | `hncAt3dec_Idle` | 72 | parked | same structure, but the registers differ (orig: out s1, out2 s0, stereo/count s3, i s2). |
 | `lib/libat3dec` | `imdct` | 389 | parked | first draft (2026-11-07), 334 of 457 lines, 80 bytes short; the butterfly stage has its structure (registers renamed: w, half, step); the window loop keeps fewer values on the stack than the original (5 spills at 0x18-0x2C) and the band copy's tail is not interleaved with its setup; … |
-| `lib/libat3dec` | `unpack_mddata` | 316 | parked | 3 of 337 lines (2026-11-07; 157 before: the levels through a pointer to gain[0][0][1] (the original keeps sp + 4 in s7, a block-local copy in the tail loop gives its move a1,s7), the terminator stored at [i] (the loop's final value), band as the jw/joint loop counter, the tone count and the band … |
-| `lib/libat3dec` | `channel_conv_joint` | 122 | parked | 63 of 130 lines (2026-11-07; 87 before the band counter j += 2, a second biv kept in the stack slot like the original's, and nw read after the gain tests): what differs is register allocation in the band prologue and the sample loop (the original puts the joint[1] gains in t3/t1 and reuses them … |
-| `lib/libat3dec` | `at3dec_proc` | 97 | parked | 7 of 102 lines (2026-11-07; 11 before the skip loop as `while (*--p == 0xF8 && src < p)`, which also makes the pad variable unnecessary): reorg fills the copy loop's entry differently: the original puts p-- in the beqz slot (from the fall-through) and the stolen first store in the jump's slot, … |
-| `lib/libat3dec` | `f2t_nodata` | 90 | parked | 5 of 92 lines (2026-11-07): after the memcpy the original recomputes the band address into fresh registers, (x << 4) + x into v1 and offset + bands; ours reuses v0 and adds bands + offset; tried: q/p order, a band pointer local, bands + band, int-row casts ([408], [136] rows), an index loop (84), … |
 | `lib/nodebug/__errno` | `memmove` | 63 | parked | memcpy/memmove: only register allocation differs (the original moves dst0 out of a0 into t0, a0 then holds the loop temporaries) |
 | `lib/nodebug/__errno` | `memcpy` | 43 | parked | memcpy/memmove: only register allocation differs (the original moves dst0 out of a0 into t0, a0 then holds the loop temporaries) |
 | `lib/nodebug/__errno` | `strncmp` | 114 | hand-written | MMI string routines (128-bit loads and compares) |
@@ -182,8 +198,6 @@ Sorted by unit, then size. `instr`: instructions in the original.
 | `lib/sifcmd` | `_sceSifCmdIntrHdlr` | 82 | parked | the C below has the original's shape and size, but its registers differ (pkt/size in a2/a0 instead of a3/a1, the scaled index kept apart from id) |
 | `lib/sifrpc` | `sceSifInitRpc` | 103 | parked | 2 of 138 lines, same size (2026-11-07, was 44): the RPCINIT test is an early return (the sibcall to sceSifSetReg at the end); the init stores in this order (hill-climbed over all orders from 3 starts, all end at 2). Left: the client_table store (sw a3,28(s0)) issues after the first handler call's … |
 | `lib/filestub` | `_sceFs_Rcv_Intr` | 237 | parked | 14 lines differ (permuter score) |
-| `lib/timer` | `cbTimerHandler` | 173 | parked | scheduling (32 lines; 45 before the handler's time argument in a local, decomp-permuter) |
-| `lib/timer` | `SetNextComp` | 100 | parked | loop shape (15 lines differ) |
 
 ### Data sections from the original assembly
 
@@ -192,7 +206,7 @@ Not listed in the unit's `// SOURCE DATA:` line.
 | unit | sections |
 |---|---|
 
-Totals: 16 units without a source file (1 with code); 14 units with INCLUDE_ASM functions: 18 parked, 1 not attempted, 27 hand-written; 0 units take a data section from assembly.
+Totals: 16 units without a source file (1 with code); 13 units with INCLUDE_ASM functions: 12 parked, 1 not attempted, 27 hand-written; 0 units take a data section from assembly.
 
 Generated by `tools/leftovers.py lib`.
 <!-- leftovers:lib:end -->
