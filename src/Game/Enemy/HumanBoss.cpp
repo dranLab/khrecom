@@ -1365,7 +1365,7 @@ BOOL CHumanBoss::setPlayCard(INT inState) {
     if (!m_pCardRevolver->setPlayCard(0, 0)) {
         return FALSE;
     }
-    setAttackState_(inState);
+    m_iAttackState = inState;
     setBattleEnemyFlag(0x201, 0);
     setHumanBossFlag(0, 0xb0);
     return TRUE;
@@ -1376,7 +1376,7 @@ BOOL CHumanBoss::setPlayStock(INT inState) {
         return FALSE;
     }
     setBattleEnemyFlag(0x201, 0);
-    setAttackState_(inState);
+    m_iAttackState = inState;
     m_pDoBattleAct = m_pUseStock;
     clearStockTotalNumber();
     selectStockAct();
