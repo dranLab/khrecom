@@ -48,8 +48,14 @@ sceDmaChan* sceDmaGetChan(int id);
 void sceDmaSendN(sceDmaChan* d, void* addr, int size);
 }
 
-#include "include_asm.h"
 #include "System/HeapMan.h"
+
+typedef union {
+    u_long128 u128;
+    IVECTOR iv;
+    FVECTOR fv;
+    u_long u64[2];
+} CROSS_VECTOR;
 
 namespace ATEL {
 CAtelCrossFade* CAtelCrossFade::m_pInstance = NULL;
@@ -62,12 +68,6 @@ static inline void _setIVector(IVECTOR& v, INT x, INT y, INT z, INT w) {
     v.w = w;
 }
 
-/* a qword built from two 64-bit or four 32-bit halves (original form unknown) */
-union _QW {
-    u_long128 q;
-    u_long l[2];
-    INT i[4];
-};
 
 CAtelCrossFade::CAtelCrossFade(CTask* pParent) : CTask(pParent, 0x8000) {
     m_nState = 0;
@@ -130,30 +130,34 @@ INT CAtelCrossFade::onSetCrossFadeRGBA(INT nCmd, void* pParam, INT nID) {
     return -1;
 }
 
+/* MATCH: the original's inline at Com.h line 60 (name unknown; the ref's local t is its parameter, the multiply is on
+   its line) reads VSYNC_TIMEQ through a reference: loaded where used, and again after the calls (as TaskMan.h) */
+static inline TIMEQ _VSyncTQ(INT t) { INT& r = VSYNC_TIMEQ; return t * r; }
 INT CAtelCrossFade::onSetCrossFadeRGBA_Anim(INT nCmd, void* pParam, INT nID) {
-    UBYTE* p = (UBYTE*)pParam;
-    FVECTOR vCur;
+    FVECTOR v;
+    IVECTOR iv;
+    FLOAT fRate;
     m_nState |= 1;
-    IVECTOR col = m_Color;
-    vCur.x = col.x;
-    vCur.y = col.y;
-    vCur.z = col.z;
-    vCur.w = col.w;
-    m_ColorAnim._vTargetColor.x = p[3];
-    m_ColorAnim._vTargetColor.y = p[2];
-    m_ColorAnim._vTargetColor.z = p[1];
-    m_ColorAnim._vTargetColor.w = p[0];
-    INT& rVsync = VSYNC_TIMEQ; /* through a reference: loaded where used, and again after the calls */
-    m_ColorAnim._nColorTimeLimit = ((INT*)pParam)[1] * rVsync;
+    m_ColorAnim._vTargetColor.x = ((UBYTE*)pParam)[3];
+    m_ColorAnim._vTargetColor.y = ((UBYTE*)pParam)[2];
+    m_ColorAnim._vTargetColor.z = ((UBYTE*)pParam)[1];
+    m_ColorAnim._vTargetColor.w = ((UBYTE*)pParam)[0];
+    m_ColorAnim._nColorTimeLimit = _VSyncTQ(((INT*)pParam)[1]);
     m_ColorAnim._nColorTimeCount = 0;
-    m_ColorAnim._vColorBuf = vCur;
-    FLOAT fRate = 1.0f / m_ColorAnim._nColorTimeLimit;
-    SubVector(vCur, m_ColorAnim._vTargetColor, vCur);
-    ScaleVector(vCur, vCur, fRate);
-    m_ColorAnim._vColorSpeed = vCur;
-    m_ColorAnim._nColorTimeLimit += rVsync;
+    iv = m_Color;
+    v.x = iv.x;
+    v.y = iv.y;
+    v.z = iv.z;
+    v.w = iv.w;
+    m_ColorAnim._vColorBuf = v;
+    fRate = 1.0f / m_ColorAnim._nColorTimeLimit;
+    SubVector(v, m_ColorAnim._vTargetColor, v);
+    ScaleVector(v, v, fRate);
+    m_ColorAnim._vColorSpeed = v;
+    m_ColorAnim._nColorTimeLimit += _VSyncTQ(1);
     return -1;
 }
+
 
 
 INT CAtelCrossFade::AnimColor() {
@@ -191,75 +195,59 @@ void CAtelCrossFade::storeCrossFadeImage() {
     }
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/AtelCrossFade", drawCrossFadeImage__Q24ATEL14CAtelCrossFade);
-
-/* Near-match: the second loop schedules the packet stores differently and hoists the GIF tag constant. */
-#if 0
 void CAtelCrossFade::drawCrossFadeImage() {
-    INT i;
-    sceGsLoadImage li;
-    _QW qw;
-    u_long128 pkt[9];
-    for (i = 0; i < SCREEN_HEIGHT / 128; i++) {
-        u_long128* p = (u_long128*)((char*)m_pCrossFadeImage + (i << 18));
-        sceGsSetDefLoadImage(&li, VRAM::_TEX_TMP1_START, 8, 0, 0, i * 128, 512, 128);
+    u_long128* p;
+    sceGsLoadImage lp;
+    CROSS_VECTOR cross;
+    u_long128 DmaBuf[9];
+    for (INT i = 0; i < SCREEN_HEIGHT / 128; i++) {
+        p = (u_long128*)((char*)m_pCrossFadeImage + (i << 18));
+        sceGsSetDefLoadImage(&lp, VRAM::_TEX_TMP1_START, 8, 0, 0, i * 128, 512, 128);
         FlushCache(0);
-        sceGsExecLoadImage(&li, p);
+        sceGsExecLoadImage(&lp, p);
         sceGsSyncPath(0, 0);
     }
-    qw.l[0] = 0x40AB400000008001UL;
-    qw.l[1] = 0x16EE;
-    pkt[0] = qw.q;
-    qw.l[0] = 0x44;
-    qw.l[1] = 0x42;
-    pkt[1] = qw.q;
-    qw.l[0] = 0x3000B;
-    qw.l[1] = 0x47;
-    pkt[2] = qw.q;
-    qw.l[0] = (u_long)(VRAM::_TEX_TMP1_START | 0x24020000) | ((u_long)0x9000 << 18);
-    qw.l[1] = 0;
-    pkt[3] = qw.q;
-    qw.i[0] = m_Color.x;
-    qw.i[1] = m_Color.y;
-    qw.i[2] = m_Color.z;
-    qw.i[3] = m_Color.w;
-    pkt[4] = qw.q;
+    cross.u64[0] = 0x40AB400000008001UL;
+    cross.u64[1] = 0x16EE;
+    DmaBuf[0] = cross.u128;
+    cross.u64[0] = 0x44;
+    cross.u64[1] = 0x42;
+    DmaBuf[1] = cross.u128;
+    cross.u64[0] = 0x3000B;
+    cross.u64[1] = 0x47;
+    DmaBuf[2] = cross.u128;
+    cross.u64[0] = (u_long)(VRAM::_TEX_TMP1_START | 0x24020000) | ((u_long)0x9000 << 18);
+    cross.u64[1] = 0;
+    DmaBuf[3] = cross.u128;
+    cross.iv.set(m_Color.x, m_Color.y, m_Color.z, m_Color.w);
+    DmaBuf[4] = cross.u128;
     FlushCache(0);
-    sceDmaSendN(sceDmaGetChan(2), pkt, 5);
+    sceDmaSendN(sceDmaGetChan(2), DmaBuf, 5);
     sceGsSyncPath(0, 0);
-    for (INT j = 0; j < 8; j++) {
-        INT h = SCREEN_HEIGHT;
-        i = j;
-        qw.l[0] = 0x40AB400000008001UL;
-        qw.l[1] = 0x5353;
-        pkt[0] = qw.q;
-        qw.i[0] = i << 10;
-        qw.i[1] = 0;
-        qw.i[2] = 0;
-        qw.i[3] = 0;
-        pkt[1] = qw.q;
-        qw.i[0] = (i << 10) + 0x6FF8;
-        qw.i[1] = ((0x800 - h / 2) << 4) - 8;
-        qw.i[2] = 0xFFFFFF0;
-        qw.i[3] = 0;
-        pkt[2] = qw.q;
-        qw.i[0] = (i + 1) << 10;
-        qw.i[1] = h << 4;
-        qw.i[2] = 0;
-        qw.i[3] = 0;
-        pkt[3] = qw.q;
-        qw.i[0] = ((i + 1) << 10) + 0x6FF8;
-        qw.i[1] = ((h + 0x800 - h / 2) << 4) - 8;
-        qw.i[2] = 0xFFFFFF0;
-        qw.i[3] = 0;
-        pkt[4] = qw.q;
+    for (INT i = 0; i < 8; i++) {
+        cross.u64[0] = 0x40AB400000008001UL;
+        cross.u64[1] = 0x5353;
+        DmaBuf[0] = cross.u128;
+        cross.iv.set(i << 10, 0, 0, 0);
+        DmaBuf[1] = cross.u128;
+        cross.iv.x = (i * 64 + 0x800 - 512 / 2) * 16 - 8;
+        cross.iv.y = (0x800 - SCREEN_HEIGHT / 2) * 16 - 8;
+        cross.iv.z = 0xFFFFFF0;
+        cross.iv.w = 0;
+        DmaBuf[2] = cross.u128;
+        cross.iv.set((i + 1) << 10, SCREEN_HEIGHT << 4, 0, 0);
+        DmaBuf[3] = cross.u128;
+        cross.iv.x = ((i + 1) * 64 + 0x800 - 512 / 2) * 16 - 8;
+        cross.iv.y = (SCREEN_HEIGHT + (0x800 - SCREEN_HEIGHT / 2)) * 16 - 8;
+        cross.iv.z = 0xFFFFFF0;
+        cross.iv.w = 0;
+        DmaBuf[4] = cross.u128;
         FlushCache(0);
-        sceDmaSendN(sceDmaGetChan(2), pkt, 5);
+        sceDmaSendN(sceDmaGetChan(2), DmaBuf, 5);
         sceGsSyncPath(0, 0);
     }
 }
 
-#endif
 
 BOOL CAtelCrossFade::isCrossFadeStoreImage() {
     if (m_CrossFadeFlag & 1) {
