@@ -197,39 +197,29 @@ static const WorldSelTable s_pWorldTableRiku[12] = {
     { 1, (WORLD_ID*)s_WorldTableRiku6 }
 };
 extern "C" char D_00484A10[];
-extern "C" char D_00484900[];
-extern "C" char D_00484910[];
-extern "C" char D_00484920[];
-extern "C" char D_00484930[];
-extern "C" char D_00484940[];
-extern "C" char D_00484950[];
 namespace PLM {
 extern BOOL g_bIsLastSceneBattle;
 }
 extern "C" char D_00484E38[];
 extern "C" int sprintf(char*, const char*, ...);
 
-/* Parked: 113 lines, 4 bytes long, frame 144 for 128 - the first run of stores: the original reloads m_pMCWork before each store (the *(T*)& scalar
-   stores give that) but keeps two -1 registers and seven s-registers for the %hi parts; statement orders
-   (incl. the lui order) and 7 min of permuter (10k candidates, 104 -> 98) did not get closer. */
-#if 0
 void CSceneInfo::clear() {
-    *(SHORT*)&CGameWork::m_pMCWork->_nArea = -1;
-    *(SHORT*)&CGameWork::m_pMCWork->_nScene = -1;
-    *(SHORT*)&CGameWork::m_pMCWork->_nPrevArea = -1;
-    *(SHORT*)&CGameWork::m_pMCWork->_nPrevScene = -1;
-    s_nCurrentFieldScene = -1;
+    *(SHORT*)&_SceneInfoWork::mc()->_nArea = -1; /* MATCH: scalar *(T*)& stores (8 here): the original reloads m_pMCWork after each one (fixed-scalar-varying-struct-alias) */
+    *(SHORT*)&_SceneInfoWork::mc()->_nScene = -1;
+    *(SHORT*)&_SceneInfoWork::mc()->_nPrevArea = -1;
+    *(SHORT*)&_SceneInfoWork::mc()->_nPrevScene = -1;
     s_NextAreaScene._nAreaScene = -1;
     s_nNextBattleScene = -1;
     s_nCurrentBattleScene = -1;
     s_nCurrentBattleRsrc = -1;
-    *(BYTE*)&CGameWork::m_pMCWork->_nFloorIdx = 0xff;
-    *(BYTE*)&CGameWork::m_pMCWork->_nRoomID = 0xff;
-    *(BYTE*)&CGameWork::m_pMCWork->_nPrevRoomID = 0xff;
-    *(BYTE*)&CGameWork::m_pMCWork->_nDoorID = 0xff;
+    s_nCurrentFieldScene = -1;
+    *(BYTE*)&_SceneInfoWork::mc()->_nFloorIdx = 0xff;
+    *(BYTE*)&_SceneInfoWork::mc()->_nRoomID = 0xff;
+    *(BYTE*)&_SceneInfoWork::mc()->_nPrevRoomID = 0xff;
+    *(BYTE*)&_SceneInfoWork::mc()->_nDoorID = 0xff;
+    s_nNextRoomID = 0xff;
     s_nNextDoorID = (DOOR_ID)2;
     s_nNextFloorIdx = 0xff;
-    s_nNextRoomID = 0xff;
     s_nCurrentFloorNumber = 0;
     s_nReqChangeScene = 0;
     s_nReqEnterBattle = GAMEMODE_FIELD;
@@ -240,12 +230,12 @@ void CSceneInfo::clear() {
     clearSceneCache();
     s_GlobalScene.clear();
     _clearMapRsrcCache();
-    s_pFloorFile_Sora = _linkFloorData(D_00484900);
-    s_pFloorFile_Riku = _linkFloorData(D_00484910);
-    s_pEventRoomFile_Sora = _linkEventRoomData(D_00484920);
-    s_pEventRoomFile_Riku = _linkEventRoomData(D_00484930);
-    s_pFloorNormaFile_Sora = _linkNormaData(D_00484940);
-    s_pFloorNormaFile_Riku = _linkNormaData(D_00484950);
+    s_pFloorFile_Sora = _linkFloorData("Rooms1.BIN");
+    s_pFloorFile_Riku = _linkFloorData("Rooms2.BIN");
+    s_pEventRoomFile_Sora = _linkEventRoomData("EventRooms1.BIN");
+    s_pEventRoomFile_Riku = _linkEventRoomData("EventRooms2.BIN");
+    s_pFloorNormaFile_Sora = _linkNormaData("RCNorma1.BIN");
+    s_pFloorNormaFile_Riku = _linkNormaData("RCNorma2.BIN");
     CGame::dbgStartFromBattle(FALSE);
     s_roomExcept._pSrcInfo = NULL;
     s_roomExcept._pStorageInfo = NULL;
@@ -259,10 +249,6 @@ void CSceneInfo::clear() {
         d._pStorageInfo = NULL;
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", clear__10CSceneInfo);
-#endif
-__asm__(".rdata\n.align 3\n.word 0x6D6F6F52\n.word 0x422E3173\n.word 0x00004E49\n.word 0x00000000\n.word 0x6D6F6F52\n.word 0x422E3273\n.word 0x00004E49\n.word 0x00000000\n.word 0x6E657645\n.word 0x6F6F5274\n.word 0x2E31736D\n.word 0x004E4942\n.word 0x6E657645\n.word 0x6F6F5274\n.word 0x2E32736D\n.word 0x004E4942\n.word 0x6F4E4352\n.word 0x31616D72\n.word 0x4E49422E\n.word 0x00000000\n.word 0x6F4E4352\n.word 0x32616D72\n.word 0x4E49422E\n.word 0x00000000\n.text\n");
 void CSceneInfo::initNewGame(BOOL bSora) {
     clear();
     CGameWork::setByte(0, 0x60, !bSora);
