@@ -460,12 +460,12 @@ public:
     BOOL isOverAvatarRotTimeLimit() const {
 #line 635 AVATAR_H_PATH
         if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);
-        return !isAvatarRotEternal() && m_pRotateStruct->_nRotTimeCount >= m_pRotateStruct->_nRotTimeLimit;
+        return !isAvatarRotEternal() && m_pRotateStruct->isOverTimeLimit();
     }
     BOOL isOverAvatarRotTimeLimit(INT t) const {
 #line 636 AVATAR_H_PATH
         if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);
-        return !isAvatarRotEternal() && m_pRotateStruct->_nRotTimeCount + t >= m_pRotateStruct->_nRotTimeLimit;
+        return !isAvatarRotEternal() && m_pRotateStruct->isOverTimeLimit(t);
     }
     void clearAvatarRotTimeCount() {
 #line 643 AVATAR_H_PATH

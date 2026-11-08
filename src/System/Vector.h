@@ -42,9 +42,9 @@ union FVECTOR {
         FVECTOR& vOut = *this;
         FLOAT fPI = 3.1415927f;
         INT nFlag;
-        __asm__ volatile("qmtc2.ni %0, $vf3\n"
-                         "vmr32.w $vf3, $vf3\n" : : "r"(fPI));
-        __asm__ volatile("lqc2 $vf1, 0x0(%1)\n"
+        __asm__ volatile("qmtc2.ni %3, $vf3\n" /* MATCH: one asm statement; a separate qmtc2 asm flushes cse, so the argument address stays in a copy register (Avatar RotateAvatarMain) */
+                         "vmr32.w $vf3, $vf3\n"
+                         "lqc2 $vf1, 0x0(%1)\n"
                          "lqc2 $vf2, 0x0(%2)\n"
                          "vadd.xyz $vf1, $vf1, $vf2\n"
                          "vclipw.xyz $vf1, $vf3w\n"
@@ -54,7 +54,7 @@ union FVECTOR {
                          "sqc2 $vf1, 0x0(%1)\n"
                          "vnop\n"
                          "cfc2.ni %0, $vi18\n"
-                         : "=r"(nFlag) : "r"(this), "r"(&vInSrc) : "memory");
+                         : "=r"(nFlag) : "r"(this), "r"(&vInSrc), "r"(fPI) : "memory");
         if (nFlag & 0x3f) roundPI(vOut, nFlag);
     }
     BOOL operator==(const FVECTOR& inV) const { return _ul[0] == inV._ul[0] && _ul[1] == inV._ul[1]; }
