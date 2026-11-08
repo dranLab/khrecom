@@ -33,9 +33,11 @@ enum MAINTASK_CALLMODE {
     MAINTASK_CALL_HIDE = 2
 };
 
-
 template <class T> class CVector;
 extern INT VSYNC_TIMEQ;
+/* MATCH: VSYNC_TIMEQ read through a reference, as the original's inline at Com.h line 60 (name unknown) does: the
+   loads in TaskMainParam's constructor wait for the stores before it (CVector::clear in CTaskMan::update) */
+static inline INT& _VSyncTimeQ() { return VSYNC_TIMEQ; }
 struct TaskMainParam {
     CVector<int>& _SecondaryArray;
     TIMEQ _nSysTickCount;
@@ -48,11 +50,11 @@ struct TaskMainParam {
     TaskMainParam(CVector<int>& array, TIMEQ nSysTQ, TIMEQ nSysLag, TIMEQ nLag, INT nRnd, INT nFlag)
         : _SecondaryArray(array), _nSysTickCount(nSysTQ), _nSysLag(nSysLag), _nLag(nLag), _nRnd(nRnd), _nProcLevel(4),
           _nFlag(nFlag) {
-        if (nLag <= VSYNC_TIMEQ) {
+        if (nLag <= _VSyncTimeQ()) {
             _nProcLevel = 1;
-        } else if (nLag <= VSYNC_TIMEQ * 2) {
+        } else if (nLag <= _VSyncTimeQ() * 2) {
             _nProcLevel = 2;
-        } else if (nLag <= VSYNC_TIMEQ * 4) {
+        } else if (nLag <= _VSyncTimeQ() * 4) {
             _nProcLevel = 3;
         }
     }
