@@ -812,23 +812,15 @@ INT CCard::getMP(CARD card) {
     }
     return nMooglePoint;
 }
-/* Parked: 30 of 124 lines, registers only: buf's address (3 uses / 38 insns) outranks the CCtdMan::m_pInstance
- * address (4 / 110) in global-alloc priority, the original has them the other way round (s6/s5) and keeps
- * card.m_nKind in a0. Worked: `pLF = buf; *pOutStrAttack = pLF;` (parameter registers, 53 -> 30). Tried: buf/pLF
- * assignment orders, pLF = buf before the getText call, an if-assign ctdID (lreg dump in build/dump). */
-#if 0
 BOOL CCard::getAttribute(CARD card, const CHAR** pOutStrAttack, const CHAR** pOutStrAttribute, const CHAR** pOutStrSpeed,
                          const CHAR** pOutHelp) {
     static char buf[16];
-    CHAR* pLF;
-    INT i;
-    UINT ctdID;
     if (card.m_nKind < 0x7F) {
-        ctdID = card.m_nKind > 0x19 ? 0x319 : card.m_nKind + 0x300;
-        strcpy(buf, CCtdMan::getText(ctdID));
+        CHAR* pLF;
+        strcpy(buf, CCtdMan::getText(card.m_nKind > 0x19 ? 0x319 : card.m_nKind + 0x300));
         pLF = buf;
         *pOutStrAttack = pLF;
-        for (i = 0; i < 2; i++) {
+        for (INT i = 0; i < 2; i++) {
             pLF = strchr(pLF, '\n');
             if (!pLF) break;
             *pLF = 0;
@@ -848,15 +840,6 @@ BOOL CCard::getAttribute(CARD card, const CHAR** pOutStrAttack, const CHAR** pOu
     if (pOutHelp) *pOutHelp = NULL;
     return FALSE;
 }
-#else
-/* placeholder for getAttribute's static (.bss) */
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) char* _getAttributeData() {
-    static char buf[16];
-    return buf;
-}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Card", getAttribute__5CCardG4CARDPPCcN32);
-#endif
 
 void CCard::setShortCut(USHORT inDeckNum, USHORT nIndex) {
     if (m_pCardInfo->_deck[inDeckNum][nIndex].m_nId) m_pCardInfo->_nShortCutIndex[inDeckNum] = nIndex + 1;
