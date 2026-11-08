@@ -45,36 +45,6 @@ extern "C" void sceDmaReset(int mode);
 extern "C" void sceGsResetPath();
 extern "C" void sceGsResetGraph(short mode, short inter, short omode, short ffmode);
 
-struct sceGsDispEnv {
-    u_long pmode;
-    u_long smode2;
-    u_long dispfb;
-    u_long display;
-    u_long bgcolor;
-};
-struct sceGsDrawEnv12 {
-    u_long reg[8][2];
-};
-struct sceGsClear {
-    u_long testa, testaaddr;
-    u_long prim, primaddr;
-    u_long rgbaq, rgbaqaddr;
-    u_long xyz2a, xyz2aaddr;
-    u_long xyz2b, xyz2baddr;
-    u_long testb, testbaddr;
-};
-struct sceGsDBuffDc {
-    sceGsDispEnv disp[2];
-    u_long giftag0[2];
-    sceGsDrawEnv12 draw01;
-    sceGsDrawEnv12 draw02;
-    sceGsClear clear0;
-    u_long giftag1[2];
-    sceGsDrawEnv12 draw11;
-    sceGsDrawEnv12 draw12;
-    sceGsClear clear1;
-};
-
 
 void sceVif1PkInit(pacVif1Packet* pPacket, u_long128* pBase);
 void sceVif1PkReset(pacVif1Packet* pPacket);
@@ -144,8 +114,8 @@ extern u_long128 My_VU0_start[];
 extern INT SCREEN_HEIGHT;
 extern INT DISP_HEIGHT;
 extern INT NMSVIDEO_MAX_WIDTH;
-extern "C" int sceGsSetDefDrawEnv(sceGsDrawEnv12* draw, short psm, short w, short h, short ztest, short zpsm);
-extern "C" int sceGsSetDefDrawEnv2(sceGsDrawEnv12* draw, short psm, short w, short h, short ztest, short zpsm);
+extern "C" int sceGsSetDefDrawEnv(sceGsDrawEnv1* draw, short psm, short w, short h, short ztest, short zpsm);
+extern "C" int sceGsSetDefDrawEnv2(sceGsDrawEnv2* draw, short psm, short w, short h, short ztest, short zpsm);
 extern "C" void sceGsSetDefClear(sceGsClear* cp, short ztest, short x, short y, short w, short h, u_char r, u_char g, u_char b, u_char a, u_int z);
 extern "C" int sceGsSetDefDispEnv(sceGsDispEnv* disp, short psm, short w, short h, short dx, short dy);
 #include "Game/SceneEnv.h"
@@ -155,15 +125,6 @@ void FTOI0Vector(IVECTOR& outVec, const FVECTOR& inVec);
 
 
 
-typedef struct { /* libgraph (eestruct.h) */
-    unsigned int FBP : 9;
-    unsigned int FBW : 6;
-    unsigned int PSM : 5;
-    unsigned int p0 : 12;
-    unsigned int DBX : 11;
-    unsigned int DBY : 11;
-    unsigned int p1 : 10;
-} tGS_DISPFB2;
 #include "System/Graphic/WorldEnv.h"
 #include "System/Graphic/TexCtrl.h"
 
@@ -424,26 +385,24 @@ enum _GS_BUF_SIDE {
 };
 static void _initGsDefDrawEnv(sceGsDBuffDc& db, _GS_BUF_SIDE side, short psm, short w, short h, short ztest, short zpsm, UINT faddr,
                               UINT zaddr, BOOL clear) {
-    sceGsDrawEnv12& env1 = !side ? db.draw01 : db.draw11;
-    sceGsDrawEnv12& env2 = !side ? db.draw02 : db.draw12;
+    sceGsDrawEnv1& env1 = !side ? db.draw01 : db.draw11;
+    sceGsDrawEnv2& env2 = !side ? db.draw02 : db.draw12;
     sceGsClear& clr = !side ? db.clear0 : db.clear1;
     sceGsSetDefDrawEnv(&env1, psm, w, h, ztest, zpsm);
     sceGsSetDefDrawEnv2(&env2, psm, w, h, ztest, zpsm);
-    faddr &= 0x1ff;
-    zaddr &= 0x1ff;
-    env2.reg[0][0] = (env2.reg[0][0] & ~0x1ff) | faddr;
-    env1.reg[0][0] = (env1.reg[0][0] & ~0x1ff) | faddr;
-    env2.reg[1][0] = (env2.reg[1][0] & ~0x1ff) | zaddr;
-    env1.reg[1][0] = (env1.reg[1][0] & ~0x1ff) | zaddr;
+    env2.frame2.FBP = faddr;
+    env1.frame1.FBP = faddr;
+    env2.zbuf2.ZBP = zaddr;
+    env1.zbuf1.ZBP = zaddr;
     if (clear) sceGsSetDefClear(&clr, ztest, 2048 - (w >> 1), 2048 - (h >> 1), w, h, 0, 0, 0, 0, 0);
-    clr.testb = (clr.testb | 1);
-    clr.testb = (clr.testb & ~0xe) | 0xc;
-    clr.testb = clr.testb & ~0xff0;
-    env2.reg[7][0] = clr.testb;
+    clr.testb.ATE = 1;
+    clr.testb.ATST = 6;
+    clr.testb.AREF = 0;
+    env2.test2 = clr.testb;
 }
 static void _initDBuf() {
     sceGsSetDefDispEnv(&s_DBuf.disp[0], 1, 512, DISP_HEIGHT, 0, 0);
-    s_DBuf.disp[0].dispfb = (s_DBuf.disp[0].dispfb & ~0x1ff) | ((VRAM::_FRAME1_START / 32) & 0x1ff);
+    *(u_long*)&s_DBuf.disp[0].dispfb = (*(u_long*)&s_DBuf.disp[0].dispfb & ~0x1ff) | ((VRAM::_FRAME1_START / 32) & 0x1ff);
     _initGsDefDrawEnv(s_DBuf, _GS_BUF_SIDE0, 0, 512, SCREEN_HEIGHT, 2, 0x31, VRAM::_FRAME0_START / 32, VRAM::_ZBUF_START / 32, 1);
     s_nDB = 0;
 }
@@ -481,22 +440,17 @@ static void _setupSysContext() {
     s_SysGpuRegs2._nCLAMP = 5;
     s_SysGpuRegs2._nSCISSOR = ((u_long)(SCREEN_HEIGHT - 1) << 48) | (511 << 16);
     s_SysGpuRegs2._nALPHA = 0x44;
-    s_SysGpuRegs2._nTEST = *(u_long*)&s_DBuf.draw02.reg[7];
+    s_SysGpuRegs2._nTEST = *(u_long*)&s_DBuf.draw02.test2;
     s_SysGpuRegs2._nFBA = 0;
-    s_SysGpuRegs2._nZBUF = *(u_long*)&s_DBuf.draw02.reg[1];
-    s_SysGpuRegs2._nFRAME = *(u_long*)&s_DBuf.draw02.reg[0];
+    s_SysGpuRegs2._nZBUF = *(u_long*)&s_DBuf.draw02.zbuf2;
+    s_SysGpuRegs2._nFRAME = *(u_long*)&s_DBuf.draw02.frame2;
 }
-typedef struct { /* libgraph (eestruct.h) */
-    u_long X : 16;
-    u_long Y : 16;
-    u_long Z : 32;
-} sceGsXyz;
 static u_long128* _makePkt_StillScreen(u_long128* qp);
 void CPackMan::beginScene() {
     s_nDB ^= 1;
     INT nIdx = s_nDB & 1;
-    sceGsDrawEnv12* pDraw1 = &s_DBuf.draw01;
-    sceGsDrawEnv12* pDraw2 = &s_DBuf.draw02;
+    sceGsDrawEnv1* pDraw1 = &s_DBuf.draw01;
+    sceGsDrawEnv2* pDraw2 = &s_DBuf.draw02;
     sceGsClear* pClear = (s_nDawEnableBit & 1) ? &s_DBuf.clear0 : NULL;
     _pkInit(s_pPktBufVif1[nIdx], NULL, 0x8000);
     sceVif1PkReset(s_pPktVif1);
@@ -519,14 +473,14 @@ void CPackMan::beginScene() {
     *qp++ = _pack(0x8000008000, 0x3b);
     IVECTOR& colFog = CWorldEnv::getFogColor();
     if (pClear) {
-        pClear->rgbaq = colFog.x | ((u_long)colFog.y << 8) | ((u_long)colFog.z << 16) | 0x3f80000000000000;
-        *qp++ = _pack(pClear->testa, 0x47);
-        *qp++ = _pack(pClear->prim, 0);
-        *qp++ = _pack(pClear->rgbaq, 1);
-        UINT x0 = ((sceGsXyz*)&pClear->xyz2a)->X;
-        INT y0 = ((sceGsXyz*)&pClear->xyz2a)->Y;
-        UINT xmax = ((sceGsXyz*)&pClear->xyz2b)->X;
-        INT y1 = ((sceGsXyz*)&pClear->xyz2b)->Y;
+        *(u_long*)&pClear->rgbaq = colFog.x | ((u_long)colFog.y << 8) | ((u_long)colFog.z << 16) | 0x3f80000000000000;
+        *qp++ = _pack(*(u_long*)&pClear->testa, 0x47);
+        *qp++ = _pack(*(u_long*)&pClear->prim, 0);
+        *qp++ = _pack(*(u_long*)&pClear->rgbaq, 1);
+        UINT x0 = pClear->xyz2a.X;
+        INT y0 = pClear->xyz2a.Y;
+        UINT xmax = pClear->xyz2b.X;
+        INT y1 = pClear->xyz2b.Y;
         UINT x1 = x0 + 0x400;
         for (; x1 <= xmax; x1 = x0 + 0x400) {
             *qp++ = _pack((u_long)x0 | ((u_long)y0 << 16), 5);
@@ -537,7 +491,7 @@ void CPackMan::beginScene() {
             *qp++ = _pack((u_long)x0 | ((u_long)y0 << 16), 5);
             *qp++ = _pack((u_long)xmax | ((u_long)y1 << 16), 5);
         }
-        *qp++ = _pack(pClear->testb, 0x47);
+        *qp++ = _pack(*(u_long*)&pClear->testb, 0x47);
     }
     if (s_nDrawMode == 1 || s_nDrawMode == 3) qp = _makePkt_StillScreen(qp);
     *qp++ = _pack(5, 8);
@@ -552,9 +506,9 @@ void CPackMan::beginScene() {
     *qp++ = _pack(s_SysGpuRegs2._nFBA, 0x4b);
     _pkCloseGifTag(qp);
     _pkCloseDirectCode();
-    s_SysGpuRegs2._nTEST = pDraw2->reg[7][0];
-    s_SysGpuRegs2._nZBUF = pDraw2->reg[1][0];
-    s_SysGpuRegs2._nFRAME = pDraw2->reg[0][0];
+    s_SysGpuRegs2._nTEST = *(u_long*)&pDraw2->test2;
+    s_SysGpuRegs2._nZBUF = *(u_long*)&pDraw2->zbuf2;
+    s_SysGpuRegs2._nFRAME = *(u_long*)&pDraw2->frame2;
     s_DefaultGpuRegs1 = s_DefaultGpuRegs2 = s_SysGpuRegs2;
     CTexCtrl::transPrefixTex();
     u_long128* pBG = initBGPacket(nIdx);
@@ -617,7 +571,7 @@ void CPackMan::terminateBGPacket() {
     changeLayer(1);
     u_long nZ = (VRAM::_ZBUF_START / 32) | 0x31000000;
     s_DefaultGpuRegs1._nTEST = 0x500fd;
-    s_DefaultGpuRegs2._nTEST = s_DBuf.clear0.testb;
+    s_DefaultGpuRegs2._nTEST = *(u_long*)&s_DBuf.clear0.testb;
     s_DefaultGpuRegs2._nZBUF = nZ;
     s_DefaultGpuRegs1._nZBUF = nZ;
     _checkDmaTag();
@@ -656,7 +610,7 @@ void CPackMan::changeLayer(INT nInLayer) {
         s_nMaxPktSizeVif1 = s_nMaxPktSizeVif1Normal;
     } else {
         s_DefaultGpuRegs1._nTEST = 0x500fd;
-        s_DefaultGpuRegs2._nTEST = s_DBuf.clear0.testb;
+        s_DefaultGpuRegs2._nTEST = *(u_long*)&s_DBuf.clear0.testb;
         s_DefaultGpuRegs2._nZBUF = (VRAM::_ZBUF_START / 32) | 0x31000000;
         s_DefaultGpuRegs1._nZBUF = (VRAM::_ZBUF_START / 32) | 0x31000000;
         s_pPktVif1 = &s_pktVif1;
@@ -708,7 +662,7 @@ void CPackMan::terminateFGPacket() {
     changeLayer(2);
     u_long nZ = (VRAM::_ZBUF_START / 32) | 0x31000000;
     s_DefaultGpuRegs1._nTEST = 0x500fd;
-    s_DefaultGpuRegs2._nTEST = s_DBuf.clear0.testb;
+    s_DefaultGpuRegs2._nTEST = *(u_long*)&s_DBuf.clear0.testb;
     s_DefaultGpuRegs2._nZBUF = nZ;
     s_DefaultGpuRegs1._nZBUF = nZ;
     _checkDmaTag();
@@ -817,19 +771,19 @@ static u_long128* _makePkt_StillScreen(u_long128* qp) {
 static void _setPcrtcMode_FSAA(sceGsDispEnv& inEnv) {
     ULONGLONG nPmode = ((ULONGLONG)(s_nFSAA_Sharpness + 0xc0) << 8) | 0x63;
     *(volatile u_long*)0x12000000 = nPmode;
-    *(volatile u_long*)0x12000070 = inEnv.dispfb;
-    *(volatile u_long*)0x12000090 = inEnv.dispfb;
+    *(volatile u_long*)0x12000070 = *(u_long*)&inEnv.dispfb;
+    *(volatile u_long*)0x12000090 = *(u_long*)&inEnv.dispfb;
     *(volatile INT*)&s_nBGColor = 0; /* MATCH: volatile store keeps its lui first (original lui order) */
-    ULONGLONG nDisplay2 = inEnv.display + s_nDispOffsetX + ((ULONGLONG)s_nDispOffsetY << 12);
+    ULONGLONG nDisplay2 = *(u_long*)&inEnv.display + s_nDispOffsetX + ((ULONGLONG)s_nDispOffsetY << 12);
     *(volatile u_long*)0x120000a0 = nDisplay2;
     *(volatile u_long*)0x12000080 = nDisplay2 - 0x1000;
 }
 static void _setPcrtcMode_BlendBG(sceGsDispEnv& inEnv) {
     ULONGLONG nPmode = ((ULONGLONG)s_nDisp1Alpha << 8) | 0xa1;
     *(volatile u_long*)0x12000000 = nPmode;
-    *(volatile u_long*)0x12000070 = inEnv.dispfb;
-    *(volatile u_long*)0x12000090 = inEnv.dispfb;
-    ULONGLONG nDisplay1 = inEnv.display;
+    *(volatile u_long*)0x12000070 = *(u_long*)&inEnv.dispfb;
+    *(volatile u_long*)0x12000090 = *(u_long*)&inEnv.dispfb;
+    ULONGLONG nDisplay1 = *(u_long*)&inEnv.display;
     nDisplay1 += s_nDispOffsetX;
     nDisplay1 += (ULONGLONG)(s_nDispOffsetY - 1) << 12;
     *(volatile u_long*)0x12000080 = nDisplay1;
@@ -838,7 +792,7 @@ void CPackMan::updateBGBlend(INT nAlpha) {
     s_nDisp1Alpha = nAlpha;
     _setPcrtcMode_BlendBG(s_DBuf.disp[0]);
 }
-ULONGLONG CPackMan::getDefaultTEST() { return s_DBuf.clear0.testb; }
+ULONGLONG CPackMan::getDefaultTEST() { return *(u_long*)&s_DBuf.clear0.testb; }
 void CPackMan::swapDBuf(INT nInFrame) {
     switch (s_nDrawMode) {
     case 3:
@@ -901,7 +855,7 @@ void CPackMan::swapDBuf(INT nInFrame) {
         }
         s_nReqPcrtcMode = -1;
     }
-    tGS_DISPFB2 dispfb = *(tGS_DISPFB2*)&env.dispfb;
+    tGS_DISPFB2 dispfb = env.dispfb;
     if (DebugWork::g_dw.nakamich.iVramDisp) {
         if (!CDebugWindow::isTopDebugWindow()) {
             INT pls = dbgButtonDown(USR_SYSTEM, 8, 1) ? 8 : 2;

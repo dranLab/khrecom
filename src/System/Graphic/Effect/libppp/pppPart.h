@@ -4,6 +4,7 @@
 
 #include "khtypes.h"
 #include "sdk/libvu0.h"
+#include "sdk/libgraph.h"
 
 /* Core particle (ppp) types shared by the libppp units (C). */
 
@@ -338,36 +339,6 @@ int sceGsSetDefLoadImage(sceGsLoadImage *lp, short dbp, short dbw, short dpsm, s
 void op_ot_add_before(u_long128 *packet, int qsize, int otz, int pri);
 void op_ot_add(u_long128 *packet, int qsize, int otz, int pri); /* PARTIAL: added for System/Graphic/Effect/libppp/keProg/pppKeShpDtt */
 
-
-typedef struct {
-    u_long SCAX0 : 11;
-    u_long pad11 : 5;
-    u_long SCAX1 : 11;
-    u_long pad27 : 5;
-    u_long SCAY0 : 11;
-    u_long pad43 : 5;
-    u_long SCAY1 : 11;
-    u_long pad59 : 5;
-} sceGsScissor;
-
-typedef struct {
-    u_long OFX : 16;
-    u_long pad16 : 16;
-    u_long OFY : 16;
-    u_long pad48 : 16;
-} sceGsXyoffset;
-
-typedef struct {
-    u_long ATE : 1;
-    u_long ATST : 3;
-    u_long AREF : 8;
-    u_long AFAIL : 2;
-    u_long DATE : 1;
-    u_long DATM : 1;
-    u_long ZTE : 1;
-    u_long ZTST : 2;
-    u_long pad19 : 45;
-} sceGsTest;
 /* end PARTIAL KeDttSpr */
 
 /* PARTIAL: added for System/Graphic/Effect/libppp/keProg/pppKeTkFade */
