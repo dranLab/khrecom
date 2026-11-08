@@ -770,13 +770,6 @@ static void f2t_nodata(At3Band *bands, int band)
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/libat3dec", f2t_nodata);
 #endif
 
-/* Parked: 3 of 337 lines (2026-11-07; 157 before: the levels through a pointer to gain[0][0][1] (the original
-   keeps sp + 4 in s7, a block-local copy in the tail loop gives its move a1,s7), the terminator stored at [i] (the
-   loop's final value), band as the jw/joint loop counter, the tone count and the band limit in nb): only the
-   operand order of the level addresses differs, the original adds pointer + index (addu v1,s7,s0), ours
-   index + pointer; tried: *(gp + k), k[gp], 2-D/3-D pointer types, char * offsets, block-local pointers, a flat
-   gain array (132), decomp-permuter 15 min, tools/permuter.py 10 min (22,692 variants): no gain */
-#if 0
 static int unpack_mddata(At3Chan *ch, int rev, At3Work *w)
 {
     int gain[4][8][2];
@@ -800,20 +793,22 @@ static int unpack_mddata(At3Chan *ch, int rev, At3Work *w)
         w->bitpos += 6;
     }
     nbands = read_unpack_from_msb(2, w) + 1;
+    /* MATCH: the levels at byte offsets (index << 3): the original adds pointer + index; gp[k] expands as
+       index * 4 + pointer (expand_expr puts a MULT first) */
     gp = &gain[0][0][1];
     band = 0;
     do {
         n = read_unpack_from_msb(3, w);
         for (i = 0; i < n; i++) {
-            gp[band * 16 + i * 2] = read_unpack_from_msb(4, w);
+            *(int *)((char *)gp + ((band * 8 + i) << 3)) = read_unpack_from_msb(4, w);
             gain[band][i][0] = read_unpack_from_msb(5, w) << 3;
         }
-        gp[band * 16 + i * 2] = 4;
+        *(int *)((char *)gp + ((band * 8 + i) << 3)) = 4;
         gain[band][i][0] = 0xFF;
     } while (++band < nbands);
     for (; band < 4; band++) {
         int *lev = &gain[0][0][1];
-        lev[band * 16] = 4;
+        *(int *)((char *)lev + (band << 6)) = 4;
         gain[band][0][0] = 0xFF;
     }
     memcpy(&ch->qmfhead, &ch->qmfsave, sizeof(At3Blk23));
@@ -857,9 +852,6 @@ static int unpack_mddata(At3Chan *ch, int rev, At3Work *w)
     memcpy(ch->gain, gain, sizeof(gain));
     return 0;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/libat3dec", unpack_mddata);
-#endif
 
 /* Parked: 7 of 102 lines (2026-11-07; 11 before the skip loop as `while (*--p == 0xF8 && src < p)`, which also
    makes the pad variable unnecessary): reorg fills the copy loop's entry differently: the original puts p-- in the
