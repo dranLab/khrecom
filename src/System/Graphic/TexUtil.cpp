@@ -1,12 +1,17 @@
 #define GPRIM_H_PATH "c:/KHCOM/MainApp/System/Graphic/Gprim.h" /* MATCH: Gprim.h strings in .rodata use the full path */
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/TexUtil.h"
+#include "System/Graphic/TexCtrl.h"
 #include "System/Buf.h"
 #include "System/VramMan.h"
 #include "System/FileIO.h"
 #include "System/Math3D.h"
 #include "System/Debug.h"
 #include <string.h>
+extern "C" {
+#include "System/Graphic/Effect/libppp/partMng.h"
+#include "System/Graphic/Effect/libppp/draw/draw_w.h"
+}
 
 
 
@@ -391,34 +396,9 @@ struct sceGsDispEnv { /* libgraph */
     tGS_DISPLAY2 display;
     tGS_BGCOLOR bgcolor;
 };
-struct sceGsTex0 { /* libgraph */
-    u_long TBP0 : 14;
-    u_long TBW : 6;
-    u_long PSM : 6;
-    u_long TW : 4;
-    u_long TH : 4;
-    u_long TCC : 1;
-    u_long TFX : 2;
-    u_long CBP : 14;
-    u_long CPSM : 4;
-    u_long CSM : 1;
-    u_long CSA : 5;
-    u_long CLD : 3;
-};
-struct sceGsStoreImage { /* libgraph */
-    u_long128 data[7];
-};
-struct TIM2_FILEHEADER {
-    TIM2_UCHAR8 FileId[4];
-    TIM2_UCHAR8 FormatVersion;
-    TIM2_UCHAR8 FormatId;
-    TIM2_UINT16 Pictures;
-    TIM2_UCHAR8 Reserved[8];
-};
 extern "C" int sceGsSetDefDispEnv(sceGsDispEnv* disp, short psm, short w, short h, short dx, short dy);
 extern "C" int sceGsSetDefStoreImage(sceGsStoreImage* sp, short sbp, short sbw, short spsm, short x, short y, short w, short h);
 extern "C" int sceGsExecStoreImage(sceGsStoreImage* sp, u_long128* dstaddr);
-extern "C" int sceGsSyncPath(int mode, unsigned short timeout);
 extern "C" void FlushCache(int operation);
 extern INT SCREEN_HEIGHT;
 BOOL CTexUtil::takeSnapShot(const CHAR* lpszInFile) {
@@ -451,7 +431,7 @@ BOOL CTexUtil::takeSnapShot(const CHAR* lpszInFile) {
     fhdr.FormatVersion = 3;
     fhdr.FormatId = 0;
     fhdr.Pictures = 1;
-    for (INT i = 0; i < 8; i++) fhdr.Reserved[i] = 0;
+    for (INT i = 0; i < 8; i++) fhdr.pad[i] = 0;
     nImageSize = nBytes * nHeight;
     phdr.TotalSize = nImageSize + 0x30;
     phdr.ClutSize = 0;
