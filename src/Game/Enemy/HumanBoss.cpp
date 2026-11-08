@@ -616,63 +616,71 @@ __attribute__((section(".sdata"))) void _setupAct_placeholder(void* p, void* q, 
     com_malloc_d(4, __FILE__ "(684)", (UINT)-1);
     if (!r) AssertApp(__FILE__, 0, "m_pStockData", 0);
 }
-/* Parked: 18 of 205 lines (2026-11-07): the normal arm's -1 (sMin/sMax) is its own hoisted register in the original (li s4,-1 after li s5,1), ours shares the compares' -1 (s2): loop.c (-dL) combines the arm's HImode -1 movable with the SImode compare constant ("matches 84"); the rest follows (14/12 store order, the assert's __FILE__ lui hoisted too in ours, a loop-align nop); tried: chain orders, separate stores, read-back, (SHORT)/0xFFFF/-1L, INT/SHORT/long locals, m_pEnemyParam direct (all 18; private in the ref, so not used), duplicated normal arm per branch (18, the arms' -1 become subregs), inverted/nested/else-if condition shapes (18-88); permuter 15 min: no gain */
+/* Parked: 18 of 205 lines (2026-11-08): the normal arm's -1 (sMin/sMax, lines 656/657) is its own pass-1 movable in the original (li s4,-1 after li s5,1); ours is combined into the compares' SImode -1 (loop.c combine_movables, -dL "matches 53"). combine_movables only refuses a later movable that is set twice (consec), used outside the loop, or wider than SImode (a DImode -1 would look the same: Ps2EeAs assembles dli -1 as addiu), and no source form gave one. Second spot: loop pass 2 also hoists the assert's __FILE__ %hi (life 4), the original keeps it in the loop (life 1 there); the rest (store order, a loop-align nop) follows. The draft follows the original's .mdebug and line markers: for-scope i (block tree), act++ in the for, the normal arm ending in continue (659), separate sMin/sMax stores (656/657, 666/667), getRand() (Entity.h:575), m_pEnemyParam direct (no inline in the ref), lines 635-743; tried: chain orders, (SHORT)/0xFFFF/-1L/~0UL/-1.0f, long locals, inverted/nested/else-if conditions (all "matches 53"), permuter 15 min on this draft (3619 candidates, no gain) */
 #if 0
-void CHumanBoss::setupAct() {
+#line 635
+void CHumanBoss::setupAct()
+{
+    if (!m_pEnemyParam) return;
+
     ACT_DATA tmp[8];
     ACT_DATA tmp2[8];
     ENEMY_ACT* act;
-    INT i;
-
-    if (!getEnemyParam()) {
-        return;
-    }
-    act = getEnemyParam()->pActs;
-    for (i = 0; i < getEnemyParam()->iActCount; i++, act++) {
-        if (act->iCard[0] == -1 && act->iCard[1] == -1 && act->iCard[2] == -1) {
+    act = m_pEnemyParam->pActs;
+    for (INT i = 0; i < m_pEnemyParam->iActCount; i++, act++)
+    {
+        if (act->iCard[0] == -1 && act->iCard[1] == -1 && act->iCard[2] == -1)
+        {
             continue;
         }
-        if (act->iCard[0] == -1 || act->iCard[1] == -1 || act->iCard[2] == -1) {
+
+        if (act->iCard[0] == -1 || act->iCard[1] == -1 || act->iCard[2] == -1)
+        {
+
             tmp[m_iNormalActNum].iState = act->iActNo + 2;
             tmp[m_iNormalActNum].pAct = act;
             tmp[m_iNormalActNum].bEnable = TRUE;
-            tmp[m_iNormalActNum].sMinNumber = tmp[m_iNormalActNum].sMaxNumber = -1;
+            tmp[m_iNormalActNum].sMinNumber = -1;
+            tmp[m_iNormalActNum].sMaxNumber = -1;
             m_iNormalActNum++;
-        } else {
-            tmp2[m_iStockNum].iState = act->iActNo + 2;
-            tmp2[m_iStockNum].pAct = act;
-            tmp2[m_iStockNum].bEnable = TRUE;
-            tmp2[m_iStockNum].sMaxNumber = tmp2[m_iStockNum].sMinNumber = -1;
-            m_iStockNum++;
-#line 669
-            ASSERT(m_iStockNum <= 8);
+            continue;
         }
+
+
+        tmp2[m_iStockNum].iState = act->iActNo + 2;
+        tmp2[m_iStockNum].pAct = act;
+        tmp2[m_iStockNum].bEnable = TRUE;
+        tmp2[m_iStockNum].sMinNumber = -1;
+        tmp2[m_iStockNum].sMaxNumber = -1;
+        m_iStockNum++;
+        ASSERT(m_iStockNum <= 8);
     }
-    if (m_iNormalActNum > 0) {
-#line 674
+
+    if (m_iNormalActNum > 0)
+    {
         m_pNormalActs = new (__FILE__ "(674)") ACT_DATA[m_iNormalActNum];
         ASSERT(m_pNormalActs);
+        for (INT i = 0; i < m_iNormalActNum; i++)
         {
-            INT i;
-            for (i = 0; i < m_iNormalActNum; i++) {
-                m_pNormalActs[i] = tmp[i];
-            }
+            m_pNormalActs[i] = tmp[i];
         }
     }
-    if (m_iStockNum > 0) {
-#line 684
+
+    if (m_iStockNum > 0)
+    {
         m_pStockData = new (__FILE__ "(684)") ACT_DATA[m_iStockNum];
         ASSERT(m_pStockData);
+        for (INT i = 0; i < m_iStockNum; i++)
         {
-            INT i;
-            for (i = 0; i < m_iStockNum; i++) {
-                m_pStockData[i] = tmp2[i];
-            }
+            m_pStockData[i] = tmp2[i];
         }
-        m_pUseStock = &m_pStockData[RND::genrand_int31() % m_iStockNum];
+
+        m_pUseStock = &m_pStockData[getRand() % m_iStockNum];
     }
+#line 743
 }
 #endif
+#line 664
 
 void CHumanBoss::aiCardBattle() {
     CARD* activeCard;
