@@ -153,6 +153,7 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-07 | cleanup/heapman-operators: the global operators in System/HeapMan.h, sites `new (__FILE__ "(N)") T`, ~300 local copies and the placement-new gate gone | 186 | 11 | 0 | 668 (0) | 1002 |
 | 2026-11-07 | cleanup/vector-types: F_UL, G_XY ... G_ST at the end of Vector.h, QWdata after khtypes.h's u_int128 (the original's type order) | 185 | 11 | 0 | 668 (0) | 1024 |
 | 2026-11-08 | cleanup/Game-Collision-CollObj-initForMap: CollUtilF on the header's collision classes, `initForMap()` inline (m_fgStatus = 0) called in _checkLadderUp (user decision) | 184 | 8 | 0 | 673 (0) | 1035 |
+| 2026-11-08 | cleanup/libgraph-types (with TexUtil's 4 drafts): libgraph types in PackMan.h (ref form) and include/sdk/libgraph.h; PackMan.cpp/TexUtil.cpp/libppp headers on them | 184 | 8 | 0 | 673 (0) | 1040 |
 
 <!-- partials:start -->
 ## Summary
@@ -160,12 +161,12 @@ One row per merge into main (`partials.py --summary` before and after).
 ```
 PARTIAL: 184 (155 in 44 headers, 29 in 16 .cpp); MATCH: 1040
   by category: method 46, data member 10, type 14, fwd decl 2, #include 13, changed in place 43, padding 2, path override 1, gate 5, guessed 9, header-level 24, stand-in 10, other 5
-stand-ins: 8 foreign in 5 files (6 names), 170 unattributed, 184 own
+stand-ins: 8 foreign in 5 files (6 names), 167 unattributed, 181 own
 duplicate class names across headers: 0
 padding: 2 arrays, 0 accessors
 mechanisms: 673 sites (0 untagged); #line: 1237
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 1168, superset 17, partial 1, gated 3, missing 6, unattributed 8
+classes: complete 1162, superset 17, partial 1, gated 3, missing 6, unattributed 8
 ```
 
 ## Queue (top 20)
@@ -237,16 +238,16 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/Effect/EffectMan.h` | 1 | 2/0/0/0 | 173 |
 | `System/Graphic/Effect/ObjType.h` | 1 | 1/0/0/0 | 177 |
 | `System/Graphic/Effect/effect.h` | 3 | 5/1/0/0 | 77 |
-| `System/Graphic/Effect/libppp/draw/draw_w.h` | 2 | 3/0/0/0 | 15 |
+| `System/Graphic/Effect/libppp/draw/draw_w.h` | 2 | 3/0/0/0 | 16 |
 | `System/Graphic/Effect/libppp/draw/global_w.h` | 1 | 0/0/0/0 | 9 |
-| `System/Graphic/Effect/libppp/draw/md.h` | 2 | 0/0/0/0 | 41 |
+| `System/Graphic/Effect/libppp/draw/md.h` | 2 | 0/0/0/0 | 42 |
 | `System/Graphic/Effect/libppp/eiProg/pppChrSclXYZMatrix.h` | 0 | 1/1/0/0 | 1 |
 | `System/Graphic/Effect/libppp/eiProg/pppChrSclXZMatrix.h` | 0 | 1/1/0/0 | 1 |
 | `System/Graphic/Effect/libppp/eiProg/pppChrSclYMatrix.h` | 0 | 1/1/0/0 | 1 |
 | `System/Graphic/Effect/libppp/eiProg/pppChrXSclXYZMatrix.h` | 0 | 1/1/0/0 | 1 |
 | `System/Graphic/Effect/libppp/eiProg/pppChrYSclXYZMatrix.h` | 0 | 1/1/0/0 | 1 |
 | `System/Graphic/Effect/libppp/keProg/pppKeTh.h` | 0 | 6/0/1/0 | 1 |
-| `System/Graphic/Effect/libppp/pppPart.h` | 25 | 24/0/0/0 | 215 |
+| `System/Graphic/Effect/libppp/pppPart.h` | 25 | 21/0/0/0 | 216 |
 | `System/Graphic/Gprim.h` | 1 | 9/0/0/0 | 232 |
 | `System/Graphic/Model.h` | 2 | 8/0/0/0 | 70 |
 | `System/Graphic/Str.h` | 1 | 0/0/0/0 | 141 |
@@ -254,7 +255,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/modeldata.h` | 2 | 3/0/0/1 | 82 |
 | `System/MainApp.h` | 2 | 1/0/0/1 | 274 |
 | `System/RsrcData.h` | 1 | 33/0/0/0 | 29 |
-| `System/SLContainer.h` | 4 | 0/0/0/0 | 252 |
+| `System/SLContainer.h` | 4 | 0/0/0/0 | 253 |
 | `System/Vector.h` | 8 | 7/2/0/0 | 266 |
 
 ## Mechanisms
