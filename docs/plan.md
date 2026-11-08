@@ -130,7 +130,7 @@ Numbers change with every merge: `tools/check.sh` (totals), `tools/leftovers.py 
    max for the "m" operand) reaches 3 lines. Converted since (2026-11-07/08): Ke.c's three (one dead insn each stays,
    the rule's exception), global.c's op_random/op_random_p, KeDttSpr_MkGifPk_Pre (no MIPS left) and
    RyjMegaBirthUserCtrDrawShapeRefPos (its lq/sq copy in C; the VU0 run stays one asm: split 52 lines, a global-alloc
-   tie), op_matrix_light4_vector and pppColor (an empty asm clobbering $2-$4 after the store: local-alloc liveness). Open: pppRyjDrawMegaBirthPrize (its comment says so).
+   tie), op_matrix_light4_vector and pppColor (an empty asm clobbering $2-$4 after the store: local-alloc liveness). pppRyjDrawMegaBirthPrize (the lw in C between two asms; honest "vf1".."vf14" clobbers, a "$8" clobber as a register-dead lever). Item 4 is done: no MIPS left in libppp asm besides the original's own hand-written blocks and the md0 family (tested, kept).
    kh1 has none of them in C. No matched function goes back to parked for this.
 5. **Header cleanup**, interleaved: one `tools/partials.py --queue` item between two work items (see "Header
    cleanup"). The items waiting on a user decision are listed under "When to stop and ask".
