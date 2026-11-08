@@ -1,12 +1,12 @@
 /* SIF commands: EE <-> IOP packets over SIF DMA (channel 5 receives), with handler tables and soft registers. */
 #include "sdk/eekernel.h"
-#include "include_asm.h"
 
 void *memcpy(void *dst, const void *src, unsigned int n);
 unsigned int sceSifGetReg(unsigned int reg);
 int sceSifSetReg(unsigned int reg, unsigned int value);
-void sceSifSetDChain(void);
-void isceSifSetDChain(void);
+/* MATCH: int, as the kernel syscalls (klib.s stubs): v0 set by the call keeps the next load out of v0 */
+int sceSifSetDChain(void);
+int isceSifSetDChain(void);
 int AddDmacHandler(int channel, int (*handler)(int), int next);
 int RemoveDmacHandler(int channel, int id);
 int EnableDmac(int channel);
@@ -173,7 +173,7 @@ unsigned int isceSifSetDma(sceSifDmaData *sdd, int len)
     return _isceSifSetDma(sdd, len);
 }
 
-int _sceSifCmdIntrHdlr(int channel);
+static int _sceSifCmdIntrHdlr(int channel);
 int sceSifSendCmd(int cid, void *pkt, int pktsize, void *src, void *dest, int size);
 
 void sceSifInitCmd(void)
@@ -329,66 +329,56 @@ int isceSifSendCmd(int cid, void *pkt, int pktsize, void *src, void *dest, int s
 }
 
 /* DMA channel 5: a command packet arrived in _pckt_buffer; copy it out, restart the chain, run its handler.
- */
-/* Parked: the C below has the original's shape and size, but its registers differ (pkt/size in a2/a0 instead of
-   a3/a1, the scaled index kept apart from id) */
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/sifcmd", _sceSifCmdIntrHdlr);
-#if 0
+   MATCH: one `size` for the packet size, the quadword count and the handler index (blez on the count, the scaled
+   index written over it); the copy indexes buf (its pointer is a loop giv set after the entry test); the reads go
+   through a volatile header pointer (lbu + andi, cid read three times); `gp` is block-local in each arm (a fourth
+   local quantity in the call block: local-alloc then orders by priority, base before the new gp, as the original). */
 static int _sceSifCmdIntrHdlr(int channel)
 {
     u_long128 buf[7];
     sceSifCmdDataTable *tbl = &_data_table;
     volatile sceSifCmdHdr *pkt = tbl->pktbuf;
-    sceSifCmdData *h;
-    u_long128 *s, *d;
+    u_long128 *s;
     sceSifCmdHandler func;
-    int size, n, i, id, gp;
+    int size, i;
 
     size = pkt->psize;
     if (size == 0) {
         return 0;
     }
-    n = (size + 15) / 16;
+    size = (size + 15) / 16;
     pkt->psize = 0;
     s = (u_long128 *)pkt;
-    d = buf;
-    for (i = 0; i < n; i++) {
-        *d++ = *s++;
+    for (i = 0; i < size; i++) {
+        buf[i] = *s++;
     }
     isceSifSetDChain();
-    if (((volatile sceSifCmdHdr *)buf)->cid < 0) {
-        id = ((volatile sceSifCmdHdr *)buf)->cid & 0x7FFFFFFF;
-        if (id >= tbl->nr_sys_handlers) {
-            goto end;
+    pkt = (volatile sceSifCmdHdr *)buf;
+    if (pkt->cid < 0) {
+        size = pkt->cid & 0x7FFFFFFF;
+        if (size < tbl->nr_sys_handlers) {
+            func = tbl->sys_cmd_handlers[size].func;
+            if (func != 0) {
+                int gp = SetGP(tbl->sys_cmd_handlers[size].gp);
+                func(buf, tbl->sys_cmd_handlers[size].data);
+                SetGP(gp);
+            }
         }
-        h = &tbl->sys_cmd_handlers[id];
-        func = h->func;
-        if (func == 0) {
-            goto end;
-        }
-        gp = SetGP(h->gp);
-        h = &tbl->sys_cmd_handlers[id];
     } else {
-        id = ((volatile sceSifCmdHdr *)buf)->cid;
-        if (id >= tbl->nr_usr_handlers) {
-            goto end;
+        size = pkt->cid;
+        if (size < tbl->nr_usr_handlers) {
+            func = tbl->usr_cmd_handlers[size].func;
+            if (func != 0) {
+                int gp = SetGP(tbl->usr_cmd_handlers[size].gp);
+                func(buf, tbl->usr_cmd_handlers[size].data);
+                SetGP(gp);
+            }
         }
-        h = &tbl->usr_cmd_handlers[id];
-        func = h->func;
-        if (func == 0) {
-            goto end;
-        }
-        gp = SetGP(h->gp);
-        h = &tbl->usr_cmd_handlers[id];
     }
-    func(buf, h->data);
-    SetGP(gp);
-end:
     asm volatile ("sync");
     asm volatile ("ei");
     return 0;
 }
-#endif
 
 /* Write back the data cache lines of [ptr, ptr + size) (hand-written; leaves noreorder on for the return). */
 void sceSifWriteBackDCache(void *ptr, int size)
