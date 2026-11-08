@@ -164,7 +164,7 @@ PARTIAL: 184 (155 in 44 headers, 29 in 16 .cpp); MATCH: 1039
 stand-ins: 8 foreign in 5 files (6 names), 167 unattributed, 181 own
 duplicate class names across headers: 0
 padding: 2 arrays, 0 accessors
-mechanisms: 673 sites (0 untagged); #line: 1237
+mechanisms: 672 sites (0 untagged); #line: 1237
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
 classes: complete 1162, superset 17, partial 1, gated 3, missing 6, unattributed 8
 ```
@@ -375,7 +375,7 @@ or `untagged`.
 | placeholder | `_modelCreate*` | 1 | 1 | placeholder: an inline function's strings, in the original .rodata order |
 | placeholder | `_monstroEventBattleEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
 | placeholder | `_premiumPrizeMessage*` | 12 | 12 | Placeholders for an unknown header's inline functions (prize messages) that come next in .rodata. |
-| placeholder | `_roPh*` | 2 | 2 | placeholder: an inline function's strings, in the original .rodata order |
+| placeholder | `_roPh*` | 1 | 1 | placeholder: an inline function's strings, in the original .rodata order |
 | placeholder | `_roPh0a*` | 1 | 1 | placeholder: an inline function's strings, in the original .rodata order |
 | placeholder | `_roulettePrizeMessage*` | 12 | 12 | placeholder: an inline function's strings, in the original .rodata order |
 | placeholder | `_sampleEnemyEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
