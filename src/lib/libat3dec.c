@@ -850,12 +850,6 @@ static int unpack_mddata(At3Chan *ch, int rev, At3Work *w)
     return 0;
 }
 
-/* Parked: 7 of 102 lines (2026-11-07; 11 before the skip loop as `while (*--p == 0xF8 && src < p)`, which also
-   makes the pad variable unnecessary): reorg fills the copy loop's entry differently: the original puts p-- in the
-   beqz slot (from the fall-through) and the stolen first store in the jump's slot, ours a beqzl with the w->stream
-   store and p-- in the jump's slot; one alignment nop before the iqmf loop follows; tried: 7 copy-loop forms
-   (while, for, if + do-while, _before, separate ++/--), decomp-permuter 15 min (no gain) */
-#if 0
 int at3dec_proc(At3Work *w)
 {
     int off = 0;
@@ -896,7 +890,4 @@ int at3dec_proc(At3Work *w)
     }
     return 0;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/libat3dec", at3dec_proc);
-#endif
 // SOURCE DATA: .data .rodata
