@@ -4374,7 +4374,11 @@ INT CCamp::setButtonHelp(INT nSetCmd, INT nMode, INT nKind) {
    Cause, from the -dG/-dl/-dg dumps (2026-11-08, second pass): gcse PRE turns both for-increments into copies of temps
    computed at the end of bb 50/51 (i + 1 -> r523, nTechSelectTop + 1 -> r529), so neither is a biv (no giv reduction,
    as the original). Global alloc then takes nTechSelectTop first (9 refs / 41 live = 6585, above nTechKind 5625, i 4125,
-   nTechSeqIdx 3564): s3, and the andi temp takes its register. The original's s3 nTechKind, s4 i, s5 nTechSeqIdx,
+   nTechSeqIdx 3564): s3, and the andi temp takes its register (third pass, 2026-11-08: the 41 is after sched1, flow
+   has 71: sched1 issues r529 at the top of bb 50 and the init load last in the preheader; i's 80 is local-alloc's
+   REG_EQUIV doubling of `i = 0`, local-alloc.c:874; -fno-schedule-insns gives yet another order. The original's order
+   comes out exactly if nTechSelectTop's life were doubled as well (82: 3292), which needs a constant first set; no
+   source form found). The original's s3 nTechKind, s4 i, s5 nTechSeqIdx,
    s6 nTechSelectTop need nTechSelectTop below 3564 (7 refs, or about 76 insns of life). With `nTechSelectTop++;` in
    place after the CButton new (its live range is the whole loop: the roles come right) it is a biv and loop.c reduces
    the combined row giv (benefit 21, 53 lines); after getLayPosition 54, after init 53, `+= 1` 53, post-increment in
@@ -4390,7 +4394,9 @@ INT CCamp::setButtonHelp(INT nSetCmd, INT nMode, INT nKind) {
    as the addFntShift argument (141), no pButton local (143); earlier: nLine as the loop counter, non-const table
    pointer, compare operand order, _ref() on the table pointer (56-70), permuter 6 + 15 min; 15 min on this draft
    (2026-11-08, 4907 candidates): 33 only by moving nTechSelectTop = m_nTechSelectTop above the pTechCateTbl ternary
-   (live 53: nTechSelectTop drops below nTechKind, still above i; against line 5470, not taken). */
+   (live 53: nTechSelectTop drops below nTechKind, still above i; against line 5470, not taken); third pass: the ref's
+   G_RGBA techColorTbl[7] (taken, no cast, same 36), `m_nTechSelect == nTechSelectTop`, `++i, ++nTechSelectTop`,
+   split declarations of nTechKind/nTechSeqIdx, `(x & 1) == 0` (36-40), `nTechSeqIdx /= 2` (45). */
 #if 0
 INT CCamp::setTechWin(INT nSetCmd) {
     FVECTOR vec;
@@ -4400,7 +4406,7 @@ INT CCamp::setTechWin(INT nSetCmd) {
     FLOAT fRatioHeight;
     FLOAT fRatioPosY;
     static USHORT techSeqTbl[14] = { 224, 217, 226, 219, 230, 223, 225, 218, 227, 220, 229, 222, 228, 221 };
-    UINT techColorTbl[7] = { 0x80404080, 0x807A6331, 0x80795080, 0x80137B18, 0x80404080, 0x80505050, 0x807A3163 };
+    G_RGBA techColorTbl[7] = { 0x80404080, 0x807A6331, 0x80795080, 0x80137B18, 0x80404080, 0x80505050, 0x807A3163 };
     static char* pTechCateNameTbl[7] = { "Attacks", "Magic", "Summons", "Friends", "Attacks", "Friends", "Duel Attacks" };
     float fLightXTbl[9] = { 556.0f, 556.0f, 556.0f, 556.0f, 556.0f, 556.0f, 556.0f, 556.0f, 556.0f };
     float fLightYTbl[9] = { 160.0f, 160.0f, 160.0f, 160.0f, 160.0f, 160.0f, 160.0f, 160.0f, 160.0f };
@@ -4510,7 +4516,7 @@ INT CCamp::setTechWin(INT nSetCmd) {
             }
             if (!(nTechSeqIdx & 1)) {
                 nTechSeqIdx >>= 1;
-                m_pTechCategoryFnt[nTechCateCnt] = new (__FILE__ "(5516)") C2DFnt(0, 0, (G_RGBA*)&techColorTbl[nTechSeqIdx], 0x10, pTechCateNameTbl[nTechSeqIdx], 0x42);
+                m_pTechCategoryFnt[nTechCateCnt] = new (__FILE__ "(5516)") C2DFnt(0, 0, &techColorTbl[nTechSeqIdx], 0x10, pTechCateNameTbl[nTechSeqIdx], 0x42);
                 pButton->get2DSeqCtrl()->addFntShift(m_pSeqName, m_pTechCategoryFnt[nTechCateCnt++], -90.0f, 1.0f);
             }
         }
@@ -4701,7 +4707,15 @@ INT CCamp::setDeckSetWin(INT nSetCmd) {
    Found 2026-11-08 from the .mdebug block tree (33 -> 23): nColSeq/cardOld/pCampRoomInfo declared in the switch
    body, scrollBarSeqTbl in the if block, case 9 without braces, one if for the number loop's display test, no `n`
    local for the scroll ratio, p2DFnt chains at the four m_pMCInfoFnt news and the two m_pMCFnt news, idx = i +
-   m_nMCSelSelectTop. Earlier: permuter 15 min (59 -> 58), shared function-level i/j (256), j only (38). */
+   m_nMCSelSelectTop. Earlier: permuter 15 min (59 -> 58), shared function-level i/j (256), j only (38). Third pass
+   (2026-11-08), two open shape differences in the .mdebug tree: (1) the original keeps cardOld as a register variable
+   (cardOld/19 = the lw s3,0x160 target); ours has no cardOld symbol: `cardOld = m_pMCInfoCard->m_card` goes through
+   the trivial operator= (ADDRESSOF), loads into a temp and copies, and gcse cprop then replaces the one use (the
+   m_nKind test) and deletes cardOld; `cardOld.m_nId = ...m_card.m_nId` makes the same temp + copy (25); case 9 is past
+   the loop, so it does not supply the missing pseudos anyway. (2) Every operator new block is `{ nRA { } }` in the
+   original, `{ { nRA { } } }` here: System/HeapMan.h written as `{ UINT nRA; { asm } return com_malloc_d(size, msg,
+   nRA); }` (the ref's UINT nRA, lines 150-153) gives the original's tree, but S and the pseudo numbers stay (701,
+   i r303): no help here, and a global header change (not made). */
 #if 0
 INT CCamp::setMapCardWin(INT nSetCmd) {
     static char* pStrNum[4] = { "%02d/99", "%02d", "\x81~%02d", "" };
