@@ -118,8 +118,13 @@ beyond its first steps, or a case under "When to stop and ask the user": stop an
 - Don't run `tools/split_objects.py`, `tools/gen_reference.py` or `ninja iso`. Don't run `ninja`/`tools/check.sh`
   while one of your permuter runs is in its setup step. Never commit `iso/`, `ref/`, `asm/` or `build/`.
 - Scratch files in `build/`, not `/tmp`; `.venv/bin/python`.
-- To wait for a process, never loop on `pgrep -f "<pattern>"`: the loop's own command line contains the pattern, so
-  it never ends and outlives you. Run the command in the foreground, or wait on its PID (`while kill -0 $pid`).
+- Never write a polling loop (`until ...; do sleep N; done`, `while ...; sleep`): not on `pgrep -f` (the loop's own
+  command line contains the pattern, so it never ends), and not on a log file's content either (a run that dies or
+  prints something else leaves the loop sleeping for hours; eecdvd 2026-11-08: six such loops, ~6 h). Run the
+  command in the foreground with a timeout, or start it with `run_in_background` and wait for its notification.
+  If you must wait on a PID, bound it: `timeout 1200 tail --pid=$pid -f /dev/null`.
+- Before your report, nothing of yours may still run: no background command, permuter or loop. Once the work is
+  committed and checked, report; don't start new open-ended explorations.
 - Context economy (plan "Context economy"): long output to `build/<name>.log 2>&1; echo $?; tail -5`; one
   function's assembly at a time; `grep -n`/`sed -n` the part you change; variant searches as a script in `build/`
   that prints one line per variant.
