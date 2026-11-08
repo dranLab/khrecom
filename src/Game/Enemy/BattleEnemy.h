@@ -1,4 +1,4 @@
-// PARTIAL: added for Game/Debug/KisEnemy
+// CBattleEnemy and STOP_DAMAGE (Game/Enemy/BattleEnemy)
 #ifndef GAME_ENEMY_BATTLEENEMY_H
 #define GAME_ENEMY_BATTLEENEMY_H
 
