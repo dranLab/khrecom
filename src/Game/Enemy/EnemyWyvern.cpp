@@ -58,7 +58,7 @@ static CHAR* RushAtkSpdParamName = "RushAtkSpd";
 CEnemyWyvern::CEnemyWyvern(CTask* inParent) : CHeartless(inParent, 0, 0) {
     setEntityFlag(0x80, 0);
     setBattleEnemyFlag(0x100, 0);
-    m_fBodyRviseCoefficient = 0.1f;
+    setBodyRviseCoefficient(0.1f);
     m_fHomingDeg = 10.0f;
 }
 

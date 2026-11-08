@@ -37,7 +37,7 @@ static CHAR* FireBallMotion = "e010_051";
 }
 
 CEnemyFatbandit::CEnemyFatbandit(CTask* inParent) : CHeartless(inParent, 0, 0) {
-    m_fBodyRviseCoefficient = 0.1f;
+    setBodyRviseCoefficient(0.1f);
 }
 
 CEnemyFatbandit::~CEnemyFatbandit() {}

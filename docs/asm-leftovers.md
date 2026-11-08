@@ -42,7 +42,6 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `System/Graphic/DispList` | 1 | 245 | 1 |  |
 | `System/Math3D` | 1 | 234 | 1 |  |
 | `System/Graphic/ModelMan` | 1 | 204 | 1 |  |
-| `Game/Atel/Atel` | 1 | 189 | 1 |  |
 | `Game/Enemy/HumanBoss` | 1 | 181 | 1 |  |
 | `System/Graphic/WorldEnv` | 1 | 128 | 1 |  |
 | `System/Rcf` | 1 | 111 | 1 |  |
@@ -71,8 +70,8 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `System/Graphic/ModelMan` | `setupDrawEnv__9CModelMan` | 204 | 58 of 242 lines (65 with vFogParam.set inlined) - FVECTOR::setCall gives the original's set call, but the frame is 16 bytes larger (an extra saved register s3 for &wv_i) and the fog/matrix constant block is scheduled differently. |
 | `System/Graphic/WorldEnv` | `initialize__9CWorldEnv` | 128 |  |
 | `System/Graphic/Effect/libppp/partMng` | `vramcache` | 292 | (comment) Register allocation: the original keeps abBlock (the VLA's address) on the stack and the assert's string addresses in s5/s6; here abBlock gets s7 and bUseBlockNum s3, so the file name's %hi lives in t0 (saved around the call, 16 more bytes of frame). The return blocks are also laid out … |
-| `System/Graphic/Effect/libppp/draw/shape` | `pppVu1ShapeDraw` | 133 | 4 of 143 lines (2026-11-07): `or a0,a1,a0` (the call argument) issues before `addiu t6,a1,32` instead of after tag 2's next store, and tag 3's `sb t4,3(t6)` comes after its p[1] store instead of first. With tag 3 written id/next/qwc like the others its stores match, but t3/t4 swap: local-alloc … |
-| `System/Graphic/Effect/libppp/draw/shape` | `op_shape_draw` | 1638 | 18 of 1680 lines (2026-11-07), 4 bytes short; and not honest C (V4): the six VU0 loops, the DMA send/wait block and the two OT-add inlines are the original's instruction stream copied from the disassembly (about 1190 asm lines, some 400 of them plain MIPS: loads, stores, branches, address … |
+| `System/Graphic/Effect/libppp/draw/shape` | `pppVu1ShapeDraw` | 133 | 4 of 143 lines (2026-11-08): `or a0,a1,a0` (the call argument) issues before `addiu t6,a1,32` instead of after tag 2's next store, and tag 3's `sb t4,3(t6)` comes after its p[1] store instead of first. With tag 3 written id/next/qwc like the others its stores match, but t3/t4 swap: local-alloc … |
+| `System/Graphic/Effect/libppp/draw/shape` | `op_shape_draw` | 1638 | 18 of 1680 lines (2026-11-08), 4 bytes short; and not honest C (V4): the six VU0 loops, the DMA send/wait block and the two OT-add inlines are the original's instruction stream copied from the disassembly (about 1190 asm lines, some 400 of them plain MIPS: loads, stores, branches, address … |
 | `System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly` | `drawShipoly` | 795 | 58 of 815 lines (2026-11-08): register allocation only, same instructions; block tree, locals and their registers as the original's .mdebug except s1 $f6/a1 $f5 (original $f5/$f6: global-alloc priority 4*24/186 for s1 below 3*12/69 for a1; writing a1 = alpha1 before a0 = alpha0 gives the … |
 | `System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly` | `drawDistShipoly` | 648 | 24 of 674 lines (2026-11-08): register allocation in the inner j loop only, block tree and named locals' registers as the original's .mdebug except the RotTransPersST stv copies (a1/v1 in the original, ours a0/v0): the original never takes v0 there (the (int)a for c0[3]/c1[3] in v1, the … |
 | `System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly` | `pppEiDrawDrawShipoly` | 700 | 40 of 743 lines (2026-11-08): Type!=0 copy loop: ours hoists li -1 before lui 0x7000 (the original after it: in ours loop pass 1 moves the -1 before the giv init is emitted; spl, a pointer local the .mdebug cannot show at function level, keeps the original's single giv: without it two givs and … |
@@ -87,7 +86,6 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Game/SceneInfo` | `rollbackEventDoorState__10CSceneInfoi` | 175 | ~35 lines - the outer room loop: the original re-materializes the s_CurrentFloor address for the room (mtlo/madd) and for the count each iteration; ours shares one base. Door/state/norma logic matches; room addressing forms and 5 min of permuter (42 -> 38) did not get it. |
 | `Game/Collision/CollMap` | `collideRide__8CCollMapi` | 224 | (comment) collideRide and collideRideR2 don't match yet. collideRide: the original's `pRideAtari = NULL` store is not a "fixed scalar" to the scheduler (it is ordered before the coll constructor's stores), as if pRideAtari's address had been taken before; every way of doing that here also moves … |
 | `Game/Collision/CollMap` | `collideRideR2__8CCollMapR10CCollisionPP5CRidei` | 141 |  |
-| `Game/Atel/Atel` | `setScreenFader__5CAtelifi` | 189 | 37 of 206 lines, 16 bytes short - logic, switch and jump table match. Left: the original computes the layer as `beqz; b then (li v0,1); else: b end (li 1); then: li 10` (a jump-evaluated boolean threaded away) and keeps nLayer in s1; ours branches once, which rotates the s-registers … |
 | `Game/Player/PlayerDRiku` | `exeStockSkill__Q22PL12CPlayerDRiku` | 3473 | 108 of 3890 lines (2026-11-07), same size: cross-jumped tails differ (ours merges the 0x683 setAnimSkillEx+setPlayerFlag(0x100000) tail into 0x6xx's copy, the original keeps 0x683's whole and merges the later copy into the setAnimRsrcEx tail at 2525); the sched2 order around global float loads in … |
 | `Game/Player/PlayerRiku` | `setMagic__Q22PL11CPlayerRikuiii` | 520 | (comment) Best attempt (same structure): BULLET_PARAM field stores and the attack-power loads are scheduled differently. |
 | `Game/Enemy/HumanBoss` | `setupAct__10CHumanBoss` | 181 | 18 of 205 lines (2026-11-08): the normal arm's -1 (sMin/sMax, lines 656/657) is its own pass-1 movable in the original (li s4,-1 after li s5,1); ours is combined into the compares' SImode -1 (loop.c combine_movables, -dL "matches 53"). combine_movables only refuses a later movable that is set … |
@@ -95,7 +93,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Form/Menu/Camp` | `setMapCardWin__5CCampi` | 1227 | 23 of 1407 lines (2026-11-08; drop the data block after the INCLUDE_ASM to build the draft): only the spill slots of seven PRE-hoisted values differ (orig 0x74 &m_pMCInfoNumFnt, 0x78 &m_nMapKind, 0x7c i + 1, 0x80 nKind - 161, 0x84 &m_pMCCard, 0x88 &m_pMCFnt, 0x8c &m_pMCInfoNumCtrl; ours 0x74 … |
 | `Form/Menu/RoomCreation` | `menuMain__13CRoomCreation` | 1995 | (comment) menuMain: 78 of 2211 lines, 8 bytes short (92 and 0x50 short before _NORMA_PIECES, 2026-11-07): the by-value NormaSrc arguments are written out now; left: case 0's registers (v1 + s7 where the original keeps a0, s4/s6/s8 from there). To enable this draft, also drop the data block after … |
 
-Totals: 35 functions (21415 instructions) in 26 units, 35 of them parked; 1 units take a data section from assembly.
+Totals: 34 functions (21226 instructions) in 25 units, 34 of them parked; 1 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->

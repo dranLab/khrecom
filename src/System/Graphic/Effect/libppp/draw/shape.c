@@ -232,21 +232,26 @@ void pppStartVu1ShapeProg(int fog) {
 }
 
 
-/* Parked: 4 of 143 lines (2026-11-07): `or a0,a1,a0` (the call argument) issues before `addiu t6,a1,32` instead of after
+/* Parked: 4 of 143 lines (2026-11-08): `or a0,a1,a0` (the call argument) issues before `addiu t6,a1,32` instead of after
    tag 2's next store, and tag 3's `sb t4,3(t6)` comes after its p[1] store instead of first. With tag 3 written
-   id/next/qwc like the others its stores match, but t3/t4 swap: local-alloc then ranks the 0x70 constant (2 refs, 38
-   insns) above the -16 mask (3 refs, 60), the mask avoids t3 (0x70 is born right after its death) and &sh->spvu1 takes
-   t3; writing id last lengthens 0x70's life to 44 (11 -> 4 lines), so the original has some other way to that.
-   tried: tag field orders (all per tag), sp = dspa0 + (spaPktSize >> 4) (34 -> 11), spPktSize in qwords (folds the sra),
-   pkt++, (int) casts, a shared 0x80000000 local; decomp-permuter 15 min on the 11-line form (only a wrong-semantics
-   output gained) */
+   id/next/qwc like the others its stores match, but t3/t4 swap: local-alloc (QTY_CMP_PRI on the sched1 order) ranks
+   the 0x70 constant (2 refs over 18 insns) above the -16 mask (3 refs over 29), 0x70 takes t3, the mask avoids it
+   (0x70 is born right after its death); the original needs 0x70's life >= 20 or the mask's <= 27. The `or a0` is
+   ready from cycle 15 in our dependency graph and fills the free ALU slot next to tag 1's `sw v1,12(t6)`; in the
+   original it issues the cycle after tag 2's `sb t2,3(t6)`, so it must depend on that store there.
+   2026-11-08 shape from the evidence, all neutral: y in its block (.mdebug { y { } }), spa = source / dspa = dest
+   (.mdebug registers), spPktSize in qwords on its line (line markers put the sra at 400).
+   tried: tag field orders (all 120 per tag 0-3, tags 0-2 also with tag 3 id-first), six call-argument forms,
+   sp = dspa0 + (spaPktSize >> 4) (34 -> 11), pkt++, (int) casts, a shared 0x80000000 local; decomp-permuter 15 min
+   on the 11-line form (its base had long128 as int: pycparser drops mode(TI)) and 15 min on this form with a 16-byte
+   struct for long128 in base.c (only 11-line t3/t4 forms); tools/permuter.py 15 min (51574 candidates, none better) */
 #if 0
 #line 346
 void pppVu1ShapeDraw(OSHAPE_VU1 *sh, OSHAPE_IN_VU1 *vu1shi) {
     int spPktSize;
     int spaPktSize;
     int i;
-    long128 *sp; sceDmaTag *pkt; OSPRITE_VU1A *spa; OSPRITE_VU1A *dspa0; OSPRITE_VU1A *dspa; int sh_counter; float y;
+    long128 *sp; sceDmaTag *pkt; OSPRITE_VU1A *spa; OSPRITE_VU1A *dspa0; OSPRITE_VU1A *dspa; int sh_counter;
     sh_counter = sh->counter;
 
     if (sh_counter > 12) sh_counter = 12;
@@ -264,7 +269,7 @@ void pppVu1ShapeDraw(OSHAPE_VU1 *sh, OSHAPE_IN_VU1 *vu1shi) {
 
 
     if (ppvMonochrome) {
-        y = vu1shi->r * 0.3f + vu1shi->g * 0.59f + vu1shi->b * 0.11f;
+        float y = vu1shi->r * 0.3f + vu1shi->g * 0.59f + vu1shi->b * 0.11f;
         vu1shi->b = vu1shi->g = vu1shi->r = y;
     }
 
@@ -272,12 +277,12 @@ void pppVu1ShapeDraw(OSHAPE_VU1 *sh, OSHAPE_IN_VU1 *vu1shi) {
     vu1shi->counter = sh_counter;
     *(u_long *)&vu1shi->tex0_l = *(u_long *)&sh->tex0_l;
 
-    dspa = (OSPRITE_VU1A *)((char *)sh + sh->spvu1a);
-    spa = dspa0 = (OSPRITE_VU1A *)(vu1shi + 1);
+    spa = (OSPRITE_VU1A *)((char *)sh + sh->spvu1a);
+    dspa = dspa0 = (OSPRITE_VU1A *)(vu1shi + 1);
 
     i = sh_counter; while (i--) {
 
-        *(u_long *)spa++ = *(u_long *)dspa++;
+        *(u_long *)dspa++ = *(u_long *)spa++;
     }
 
 
@@ -296,11 +301,11 @@ void pppVu1ShapeDraw(OSHAPE_VU1 *sh, OSHAPE_IN_VU1 *vu1shi) {
     pkt = (sceDmaTag *)(sp + 1);
 
 
-    spPktSize = ((long)(sh->spvu1a - 0x20) + 15) & ~15;
+    spPktSize = (int)(((long)(sh->spvu1a - 0x20) + 15) & ~15) >> 4;
 
-    pkt->id = 0x30; pkt->next = (sceDmaTag *)sh->spvu1; pkt->qwc = spPktSize >> 4;
+    pkt->id = 0x30; pkt->next = (sceDmaTag *)sh->spvu1; pkt->qwc = spPktSize;
     pkt->p[0] = 0;
-    pkt->p[1] = 0x6D008007 | ((spPktSize >> 4) << 17);
+    pkt->p[1] = 0x6D008007 | (spPktSize << 17);
     pkt = (sceDmaTag *)(sp + 2);
 
 
@@ -324,12 +329,19 @@ asm(".section .rodata\n.align 3\n.asciz \"c:/KHCOM/MainApp/System/Graphic/Effect
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/draw/shape", pppVu1ShapeDraw);
 #endif
 
-/* Parked: 18 of 1680 lines (2026-11-07), 4 bytes short; and not honest C (V4): the six VU0 loops, the DMA send/wait
+/* Parked: 18 of 1680 lines (2026-11-08), 4 bytes short; and not honest C (V4): the six VU0 loops, the DMA send/wait
    block and the two OT-add inlines are the original's instruction stream copied from the disassembly (about 1190 asm
    lines, some 400 of them plain MIPS: loads, stores, branches, address arithmetic, .set noreorder delay slots, the
    DMA busy-wait nops). In the C between them: at the join after the loops the count (t1) is copied to a0 before the
    zero-extension (move/li placement, v0/v1/a0), and the two `/ 0x3000` OT divisions have dividend and divisor in
-   swapped registers (v1/v0 in the original). tried: earlier sessions (no record); 2026-11-07 only the V4 review */
+   swapped registers (v1/v0 in the original), the clamp after them is `li a1,255; movn a1,v1,v0` there.
+   2026-11-08: the loops carry the plan's evidence for the original's own asm (.set noreorder with hand-filled delay
+   slots, 28 trapping dadd/addi/add in the original), so the asm may stay (plan item 4) once it uses operands instead
+   of the hard-coded $16/$17/$9 and the `move %0, $9` read. The original's .mdebug block tree gives the operands:
+   function block sh/s1 shi/s0 nPacketSize/a2 spr/t8 sp/a2 spa/a1 spritec/t1 base/t9 nWord/v1 nWord2/a2 iFog/t0
+   (nWord, nWord2, iFog are missing from this draft); { y } { { spr2/v0 spr/a2 w/a0 } } (the spr_get inline has a
+   local w); four OT-add inline blocks { packet/t9 qsize/a2 otz/a1 }; { { w/v0 } } (the DMA send).
+   tried: earlier sessions (no record); 2026-11-07 only the V4 review */
 #if 0
 #define SCE_GIF_SET_TAG(nloop, eop, pre, prim, flg, nreg)                                                \
     ((u_long)(nloop) | ((u_long)(eop) << 15) | ((u_long)(pre) << 46) | ((u_long)(prim) << 47) |       \

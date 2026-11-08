@@ -25,7 +25,7 @@
 #include "Form/Menu/JMemoFlag.h"
 #include "Game/EntityFactory.h"
 #include "Game/Entity.h"
-#include "include_asm.h"
+
 
 
 
@@ -265,23 +265,25 @@ void CAtel::skipEvent() {
 
 static inline BOOL _isActive(CFadeIOMask* p) { return p && !p->isInactive() && !p->isInvisible(); }
 
-/* Parked: 37 of 206 lines, 16 bytes short - logic, switch and jump table match. Left: the original computes the
- * layer as `beqz; b then (li v0,1); else: b end (li 1); then: li 10` (a jump-evaluated boolean threaded away) and
- * keeps nLayer in s1; ours branches once, which rotates the s-registers (nLayer/&pFader/nFaderID/nKind). Tried:
- * ternary, if/else, negated, bool/BOOL temps, a separate layer local, (nKind & 0x80) ? 1 : 0 (37, best). */
-#if 0
 void CAtel::setScreenFader(INT nKind, FLOAT fRate, INT nLayer) {
-    if (nLayer) {
-        nLayer = 10;
-    } else {
+    /* MATCH: TRUE and default written out alike; jump2 cross-jumps them after reload, which leaves the
+     * original's dead `li v0,1` of the TRUE compare in front of an unconditional branch. */
+    switch (nLayer) {
+    case FALSE:
         nLayer = 1;
+        break;
+    case TRUE:
+        nLayer = 10;
+        break;
+    default:
+        nLayer = 10;
+        break;
     }
     INT nFaderID = (nKind & 0x80) ? 1 : 0;
     CFadeIOMask*& pFader = s_pFadeIOMask[nFaderID];
     nKind &= 7;
     if (!pFader) {
-#line 98
-        pFader = new (__FILE__ "(98)") CFadeIOMask(*CTaskMan::getSysTask(0), nLayer);
+        pFader = _newFader(nLayer);
     } else {
         pFader->setLayer(nLayer);
     }
@@ -316,10 +318,6 @@ void CAtel::setScreenFader(INT nKind, FLOAT fRate, INT nLayer) {
     if (!m_pVSM || m_pVSM->isFlagOn(2)) pFader->suspend();
     if (CGame::getFadeMaskProcPrio() != 1) CGame::dispOffFadeMask();
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Atel", setScreenFader__5CAtelifi);
-__asm__(".rdata\n.align 3\n.word .L002301D8\n.word .L002301F8\n.word .L00230234\n.word .L00230250\n.word .L0023029C\n.word .L002302C0\n.text\n");
-#endif
 
 void CAtel::reqWhiteFadeOut(USHORT nTime) {
     CFadeIOMask*& pFader = s_pFadeIOMask[0];

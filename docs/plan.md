@@ -75,7 +75,7 @@ every change that is merged without regenerating. Regenerating all four takes ab
   regswap, banddiff read `build/drafts.log`: `tools/drafts.py -j 12 > build/drafts.log` first),
   ranks near misses; `build/remeasure.log` was refreshed 2026-11-06 evening (tried without gain: createBootInfoMsg,
   setStockInfo, _invokePrimary_Main, dispDebugLine (matched 2026-11-08: ib = i - 1 inside the else arm, ref block scopes), setCharge, setDeckInfo, pppSetMatrix, HumanBoss initalize, effect Setup,
-  checkBBox, setAttack (power forms), initEnemyParam (block order; matched 2026-11-08 via the getRsrcData inline), sceVif1PkCloseUpkCode (the ref's locals: 25 -> 43-50; matched 2026-11-08 by a goto shared tail), setScreenFader; 2DSprObj move matched 2026-11-07). `tools/helpers/refextra.py 40` lists drafts with invented locals, the better lead. Parked notes go stale: read the current diff first (stateDestroy and setupDrawMode were one statement swap).
+  checkBBox, setAttack (power forms), initEnemyParam (block order; matched 2026-11-08 via the getRsrcData inline), sceVif1PkCloseUpkCode (the ref's locals: 25 -> 43-50; matched 2026-11-08 by a goto shared tail), setScreenFader (matched 2026-11-08: identical TRUE/default switch bodies cross-jumped); 2DSprObj move matched 2026-11-07). `tools/helpers/refextra.py 40` lists drafts with invented locals, the better lead. Parked notes go stale: read the current diff first (stateDestroy and setupDrawMode were one statement swap).
   A permuter queue over the eight drafts changed on 2026-11-06 gained on two (the last fan 3 -> 2, detectMCInit 18 -> 14);
   onMove, acWaitReq, update, _atoi, _atolen and checkBBox held. `tools/helpers/regswap.py 60` separates pure register permutations (solve with the priority formula), `tools/helpers/refcount.py` lists
   locals declared fewer times than in the ref (one variable per loop: Model::link), `tools/helpers/banddiff.py lo hi` prints current diffs,
@@ -406,7 +406,7 @@ header split the original didn't have, or make a class a template to hide its st
 | one-line `por/sq` + `swc1 w`, wrong store order around an FVECTOR | fvector-brace-init-aligned |
 | delay slot of a call and the v0/v1 pair after it | void-callee-v0 |
 | spill slots / regs of hoisted `this+off` addresses | gcse-bucket-count-lever, gcse-pre-hash-order |
-| registers swapped, same instructions | scheduling-mismatch-techniques, global-alloc-priority-lreg, asm-barrier-death-note-levers, loop-const-merge-and-load-order, asymmetric-giv-overloads, gcse-pre-hash-order |
+| registers swapped, same instructions | scheduling-mismatch-techniques, global-alloc-priority-lreg, local-alloc-three-quantities, asm-barrier-death-note-levers, loop-const-merge-and-load-order, asymmetric-giv-overloads, gcse-pre-hash-order |
 | preheader hoist order, constant hoisted only in ours | loop-two-pass-hoist-threshold, preheader-giv-init-order, loop-hoist-lifetime-store-order, pathdata-unit-lessons (where an index variable is assigned in the surrounding if/else) |
 | the original repeats a test that cse folds in ours | duplicate-test-masked-form |
 | a hoisted constant is a copy of a variable initialised to it | volatile-asm-cse-flush (`asm volatile("" : : "i"(0))` after the init) |
@@ -419,6 +419,7 @@ header split the original didn't have, or make a class a template to hide its st
 | a load issued after all stores, the original between them | tail-per-case-sched-tie (shared goto tail written out per case) |
 | stores in another order | sched-store-order-reg-weight, volatile-delay-slots-store-permutation, small-union-ctor-stores, fixed-scalar-varying-struct-alias, join-store-per-arm |
 | the original reloads a global/member, ours keeps it (or the reverse) | global-reload-ref-helper, fixed-scalar-varying-struct-alias, const-global-reorg-redundant-load, mapenemy-unit-lessons |
+| a dead `li reg,K` right before an unconditional `b` | atel-unit-lessons (switch case and default written out alike, jump2 merges them after reload) |
 | tails merged or not merged, branch layout | gcc-crossjump-alias-rules, crossjump-dup-arm-stores, crossjump-case-label-chain, state-machine-break-vs-return, guard-plus-while-and-static-members, first-return-stub-ternary, bool-tail-shared-false |
 | loop shape, hoisted constants, extra nops | loop-rotation-break-layout, loop-hoist-constant-order, loop-hoist-lifetime-store-order, loop-align-empty-loop-note, short-loop-padding, div-line-label-nops, preheader-giv-init-order |
 | stack offsets differ | stack-slot-order-decl-position, unused-locals-stack-frame, inline-return-temp-slot |
