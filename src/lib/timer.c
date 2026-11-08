@@ -1,6 +1,5 @@
 /* Timer counters on EE timer 2 (the system time): 128 counters, each optionally with an alarm handler. */
 #include "sdk/eekernel.h"
-#include "include_asm.h"
 
 void *memset(void *s, int c, unsigned int n);
 int AddIntcHandler2(int cause, int (*handler)(int, void *, void *), int next, void *arg);
@@ -40,7 +39,7 @@ typedef struct Counter {
 } Counter;
 
 static struct {
-    unsigned long overflow; /* upper bits of the system time */
+    volatile unsigned long overflow; /* upper bits of the system time */
     int intc_id;
     volatile int serial;
     volatile int used;
@@ -94,7 +93,7 @@ void SetT2_COMP(unsigned int value)
     SetT2((volatile unsigned int *)0xB0001020, value);
 }
 
-int cbTimerHandler(int cause, void *arg, void *addr);
+static int cbTimerHandler(int cause, void *arg, void *addr);
 
 int InitTimer(int prescale)
 {
@@ -288,32 +287,36 @@ static Counter *UnlinkAlarm(Counter *c)
     return next;
 }
 
-/* Parked: scheduling (32 lines; 45 before the handler's time argument in a local, decomp-permuter) */
-#if 0
+/* The system time from T2_COUNT, T2_MODE and the overflow count; a block macro (one source line: the assembler
+   fills SetT2_MODE's delay slot with the overflow store; its own count/mode per use). */
+#define GET_TIME(now)                                                                                            \
+    {                                                                                                            \
+        unsigned int count, mode;                                                                                \
+        count = *T2_COUNT;                                                                                       \
+        mode = *T2_MODE;                                                                                         \
+        if (mode & T2_OVFF) {                                                                                    \
+            g_Timer.overflow++;                                                                                  \
+            SetT2_MODE(mode & ~T2_EQUF);                                                                         \
+            count = *T2_COUNT;                                                                                   \
+        }                                                                                                        \
+        (now) = ((g_Timer.overflow << 16) | count) << ((mode & 3) * 4);                                          \
+    }
 static int cbTimerHandler(int cause, void *arg, void *addr)
 {
     Counter *c;
-    unsigned int count, mode;
     unsigned long now, t, ret, tt;
 
     if ((*T2_MODE & T2_EQUF) && (c = g_Timer.alarm)) {
         do {
-            count = *T2_COUNT;
-            mode = *T2_MODE;
             t = ALARM_TIME(c);
-            if (mode & T2_OVFF) {
-                g_Timer.overflow++;
-                SetT2_MODE(mode & ~T2_EQUF);
-                count = *T2_COUNT;
-            }
-            now = ((g_Timer.overflow << 16) | count) << ((mode & 3) * 4);
+            GET_TIME(now);
             if (now < t) {
                 break;
             }
             g_Timer.next = UnlinkAlarm(c);
             tt = now + c->count - c->base;
             g_Timer.handling = ((int)c << 4) | c->id;
-            asm volatile ("lw\t$gp, %0" : : "m" (c->gp));
+            asm volatile ("lw\t$gp, %0" : : "m" (c->gp)); /* MATCH: the handler's $gp (no C form) */
             ret = c->handler(((int)c << 4) | c->id, c->schedule, tt, c->arg, addr);
             if (ret == 0) {
                 c->mode &= ~2;
@@ -335,29 +338,13 @@ static int cbTimerHandler(int cause, void *arg, void *addr)
     }
     g_Timer.handling = -1;
     g_Timer.next = 0;
-    count = *T2_COUNT;
-    mode = *T2_MODE;
-    if (mode & T2_OVFF) {
-        g_Timer.overflow++;
-        SetT2_MODE(mode & ~T2_EQUF);
-        count = *T2_COUNT;
-    }
-    SetNextComp(((g_Timer.overflow << 16) | count) << ((mode & 3) * 4));
-    count = *T2_COUNT;
-    mode = *T2_MODE;
-    if (mode & T2_OVFF) {
-        g_Timer.overflow++;
-        SetT2_MODE(mode & ~T2_EQUF);
-        count = *T2_COUNT;
-    }
-    now = ((g_Timer.overflow << 16) | count) << ((mode & 3) * 4);
+    GET_TIME(now);
+    SetNextComp(now);
+    GET_TIME(now);
     asm volatile ("sync");
     asm volatile ("ei");
     return 0;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/timer", cbTimerHandler);
-#endif
 
 /* The system time: (overflows << 16 | T2_COUNT) << prescale bits (hand-written; reads past an overflow). */
 #define GET_SYSTEM_TIME(t)                                                                                       \
