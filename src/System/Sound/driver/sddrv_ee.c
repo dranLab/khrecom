@@ -1628,22 +1628,7 @@ int ConvLittleEndian(int a) {
     return (b[0] << 24) | (b[1] << 16) | (b[2] << 8) | b[3];
 }
 
-/* TsSdVsbPlay's string literals, for its INCLUDE_ASM; remove with it. */
-asm(".section .rodata\n"
-    ".align 3\n.asciz \"EE:  TsSdStrPlayVSB: ERROR!!!!!!!!!!!!!!!!!!!! MAX OVER max=%d, num=%d\\n\"\n"
-    ".align 3\n.asciz \"EE:  TsSdStrPlayVSB: ERROR!!!!!!!!!!!!!!!!!!!! No Entry num=%d\\n\"\n"
-    ".align 3\n.asciz \"EE:  TsSdStrPlayVSB: vsb_id=%d, num=%d, vol=%d, pan=%d, pos=0x%08x, size=0x%08x\\n\"\n"
-    ".align 3\n.asciz \"EE:  TsSdStrPlayVSB: volm=%d, rev=%d, rate=%d, size=0x%08x\\n\"\n"
-    ".align 3\n.asciz \"footer   addr=0x%08x\\n\"\n"
-    ".align 3\n.asciz \"%02x \"\n"
-    ".align 3\n.asciz \"\\n\"\n"
-    ".align 3\n.asciz \"end_flag addr=0x%08x\\n\"\n"
-    ".align 3\n.asciz \"header   addr=0x%08x\\n\"\n"
-    ".previous");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Sound/driver/sddrv_ee", TsSdVsbPlay);
-
-/* Parked: 28 of 324 lines (2026-11-07, was 217): every instruction matches except one register swap: the footer/end_flag pointer gets s0 and size/addr2/addr1-addr2 get s2 (original: the reverse). Global-alloc priority: the pointer 14 refs/59 insns = 0.712 beats addr2 4/12 = 0.667; it needs live > 63 or addr2 live <= 11 (empty asm is no help: num 24/195 vs pos 10/81 flip when both get longer). Fixed on the way: header pointer addr + pos + 0x30 (vag_head + 0x30 got hoisted by PRE and cost addr its s8), size == 0xFFFFFFFF (lui/ori), addr1 -= addr2 before data[4] (PRE copy into s4), size2 * 2048 + 0x30 and (vsb_id << 8) + 1 in temporaries (fold reassociates them otherwise). Not ref-honest yet: three block-scope locals (a second data for footer/end_flag, ofs, id) the ref does not list; the original probably got the same temporaries another way (inline helpers or macros?). tried: data forms (one/two/three pointers, vag_head reuse, address expressions), addr2/VolSet expression forms, decomp-permuter 3 runs (only noise) */
-#if 0
+/* The header is written through addr2 (an int), not data: the original .mdebug has data in s2 and addr2 with size and vag_head in s0. */
 void TsSdVsbPlay(u_int addr, int vsb_id, int num, int vol, int pan) {
     u_int pos;
     u_int max;
@@ -1676,61 +1661,9 @@ void TsSdVsbPlay(u_int addr, int vsb_id, int num, int vol, int pan) {
     size = ConvLittleEndian(vag_head->mVagSize);
     TsPrintN("EE:  TsSdStrPlayVSB: volm=%d, rev=%d, rate=%d, size=0x%08x\n", volm, rev, rate, size);
     addr1 = pos + size + 16;
-    {
-        u_char *data = (u_char *)(addr + addr1);
-        data[1] = 3;
-        TsPrintN("footer   addr=0x%08x\n", addr1);
-        for (max = 0; max < 16; max++) {
-            TsPrintN("%02x ", data[max]);
-        }
-        TsPrintN("\n");
-        for (max = 16; max < 32; max++) {
-            TsPrintN("%02x ", data[max]);
-        }
-        TsPrintN("\n");
-        size2 = size / 2048;
-        if ((size & 0x7FF) == 0) {
-            size2--;
-        }
-            {
-            int ofs = size2 * 2048 + 0x30;
-            addr2 = pos + ofs;
-        }
-        data = (u_char *)(addr + addr2);
-        if (data[1] == 3) {
-            data[17] = 3;
-            addr1 += 16;
-        }
-        data[1] = 0x10;
-        TsPrintN("end_flag addr=0x%08x\n", addr2);
-        for (max = 0; max < 16; max++) {
-            TsPrintN("%02x ", data[max]);
-        }
-        TsPrintN("\n");
-        for (max = 16; max < 32; max++) {
-            TsPrintN("%02x ", data[max]);
-        }
-        TsPrintN("\n");
-    }
-    data = (u_char *)(addr + pos + 0x30);
-    data[0] = volm;
-    data[1] = pan;
-    data[2] = 100;
-    data[3] = 0;
-    addr1 -= addr2;
-    data[4] = addr1;
-    data[5] = addr1 >> 8;
-    data[6] = 0;
-    data[7] = 0;
-    data[8] = rate;
-    data[9] = rate >> 8;
-    data[10] = 0;
-    data[11] = (rev << 6) | 0x10;
-    data[12] = size2 + 1;
-    data[13] = 0;
-    data[14] = num + 1;
-    data[15] = vsb_id;
-    TsPrintN("header   addr=0x%08x\n", pos + 0x30);
+    data = (u_char *)(addr + addr1);
+    data[1] = 3;
+    TsPrintN("footer   addr=0x%08x\n", addr1);
     for (max = 0; max < 16; max++) {
         TsPrintN("%02x ", data[max]);
     }
@@ -1739,15 +1672,58 @@ void TsSdVsbPlay(u_int addr, int vsb_id, int num, int vol, int pan) {
         TsPrintN("%02x ", data[max]);
     }
     TsPrintN("\n");
+    size2 = size / 2048;
+    if ((size & 0x7FF) == 0) {
+        size2--;
+    }
+    addr2 = pos + 0x30 + size2 * 2048;
+    data = (u_char *)(addr + addr2);
+    if (data[1] == 3) {
+        data[17] = 3;
+        addr1 += 16;
+    }
+    data[1] = 0x10;
+    TsPrintN("end_flag addr=0x%08x\n", addr2);
+    for (max = 0; max < 16; max++) {
+        TsPrintN("%02x ", data[max]);
+    }
+    TsPrintN("\n");
+    for (max = 16; max < 32; max++) {
+        TsPrintN("%02x ", data[max]);
+    }
+    TsPrintN("\n");
+    addr1 -= addr2;
+    addr2 = addr + pos + 0x30;
+    ((u_char *)addr2)[0] = volm;
+    ((u_char *)addr2)[1] = pan;
+    ((u_char *)addr2)[2] = 100;
+    ((u_char *)addr2)[3] = 0;
+    ((u_char *)addr2)[4] = addr1;
+    ((u_char *)addr2)[5] = addr1 >> 8;
+    ((u_char *)addr2)[6] = 0;
+    ((u_char *)addr2)[7] = 0;
+    ((u_char *)addr2)[8] = rate;
+    ((u_char *)addr2)[9] = rate >> 8;
+    ((u_char *)addr2)[10] = 0;
+    ((u_char *)addr2)[11] = (rev << 6) | 0x10;
+    ((u_char *)addr2)[12] = size2 + 1;
+    ((u_char *)addr2)[13] = 0;
+    ((u_char *)addr2)[14] = num + 1;
+    ((u_char *)addr2)[15] = vsb_id;
+    TsPrintN("header   addr=0x%08x\n", pos + 0x30);
+    for (max = 0; max < 16; max++) {
+        TsPrintN("%02x ", ((u_char *)addr2)[max]);
+    }
+    TsPrintN("\n");
+    for (max = 16; max < 32; max++) {
+        TsPrintN("%02x ", ((u_char *)addr2)[max]);
+    }
+    TsPrintN("\n");
     nowait_func_buff[nowait_func_count++] = 0x1D;
     nowait_func_buff[nowait_func_count++] = vsb_id;
-    TsSdStrPlayVoice((u_int)data);
-    {
-        int id = (vsb_id << 8) + 1;
-        TsSdStrVolSet(2, num + id, vol);
-    }
+    TsSdStrPlayVoice(addr2);
+    TsSdStrVolSet(2, num + 1 + (vsb_id << 8), vol);
 }
-#endif
 
 void TsSdVsbStop(int vsb_id) {
     nowait_func_buff[nowait_func_count++] = 0x1D;
