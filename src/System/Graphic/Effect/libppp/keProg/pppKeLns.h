@@ -6,60 +6,6 @@
 #include "System/Graphic/Effect/libppp/keProg/Ke.h"
 #include "System/Graphic/Effect/libppp/draw/draw_w.h"
 
-/* libgraph */
-typedef struct { /* 0x8 */
-    u_long FBP : 9;
-    u_long pad09 : 7;
-    u_long FBW : 6;
-    u_long pad22 : 2;
-    u_long PSM : 6;
-    u_long pad30 : 2;
-    u_long FBMSK : 32;
-} sceGsFrame;
-
-typedef struct { /* 0x8 */
-    u_long ZBP : 9;
-    u_long pad09 : 15;
-    u_long PSM : 4;
-    u_long pad28 : 4;
-    u_long ZMSK : 1;
-    u_long pad33 : 31;
-} sceGsZbuf;
-
-typedef struct { /* 0x8 */
-    u_long AC : 1;
-    u_long pad01 : 63;
-} sceGsPrmodecont;
-
-typedef struct { /* 0x8 */
-    u_long CLAMP : 1;
-    u_long pad01 : 63;
-} sceGsColclamp;
-
-typedef struct { /* 0x8 */
-    u_long DTHE : 1;
-    u_long pad01 : 63;
-} sceGsDthe;
-
-typedef struct { /* 0x80 */
-    sceGsFrame frame1;
-    u_long frame1addr;
-    sceGsZbuf zbuf1;
-    long zbuf1addr;
-    sceGsXyoffset xyoffset1;
-    long xyoffset1addr;
-    sceGsScissor scissor1;
-    long scissor1addr;
-    sceGsPrmodecont prmodecont;
-    long prmodecontaddr;
-    sceGsColclamp colclamp;
-    long colclampaddr;
-    sceGsDthe dthe;
-    long dtheaddr;
-    sceGsTest test1;
-    long test1addr;
-} sceGsDrawEnv1;
-
 
 extern u_long ppvGsFrame;
 extern u_long ppvGsZbuf;

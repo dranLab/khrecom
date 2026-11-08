@@ -3,8 +3,63 @@
 
 #include "khtypes.h"
 #include "System/Graphic/Gprim.h"
+#include "sdk/libgraph.h"
 
 struct VTransInfo;
+
+typedef struct {
+    tGS_PMODE pmode;
+    tGS_SMODE2 smode2;
+    tGS_DISPFB2 dispfb;
+    tGS_DISPLAY2 display;
+    tGS_BGCOLOR bgcolor;
+} sceGsDispEnv;
+
+typedef struct {
+    sceGsFrame frame2;
+    u_long frame2addr;
+    sceGsZbuf zbuf2;
+    long zbuf2addr;
+    sceGsXyoffset xyoffset2;
+    long xyoffset2addr;
+    sceGsScissor scissor2;
+    long scissor2addr;
+    sceGsPrmodecont prmodecont;
+    long prmodecontaddr;
+    sceGsColclamp colclamp;
+    long colclampaddr;
+    sceGsDthe dthe;
+    long dtheaddr;
+    sceGsTest test2;
+    long test2addr;
+} sceGsDrawEnv2;
+
+typedef struct {
+    sceGsTest testa;
+    long testaaddr;
+    sceGsPrim prim;
+    long primaddr;
+    sceGsRgbaq rgbaq;
+    long rgbaqaddr;
+    sceGsXyz xyz2a;
+    long xyz2aaddr;
+    sceGsXyz xyz2b;
+    long xyz2baddr;
+    sceGsTest testb;
+    long testbaddr;
+} sceGsClear;
+
+typedef struct {
+    sceGsDispEnv disp[2];
+    sceGifTag giftag0;
+    sceGsDrawEnv1 draw01;
+    sceGsDrawEnv2 draw02;
+    sceGsClear clear0;
+    sceGifTag giftag1;
+    sceGsDrawEnv1 draw11;
+    sceGsDrawEnv2 draw12;
+    sceGsClear clear1;
+} sceGsDBuffDc;
 
 typedef struct {
     u_int* pCurrent;    /* 0x00 */

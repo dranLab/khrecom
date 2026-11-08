@@ -7,6 +7,7 @@
 #include "System/FileIO.h"
 #include "System/Math3D.h"
 #include "System/Debug.h"
+#include "System/Graphic/PackMan.h"
 #include <string.h>
 extern "C" {
 #include "System/Graphic/Effect/libppp/partMng.h"
@@ -345,57 +346,6 @@ INT CTexUtil::getFixTexTransInfo(const void* pInData, VTransInfo& outTex, VTrans
     return nRet;
 }
 
-struct tGS_PMODE { /* libgraph (eestruct.h) */
-    unsigned int EN1 : 1;
-    unsigned int EN2 : 1;
-    unsigned int CRTMD : 3;
-    unsigned int MMOD : 1;
-    unsigned int AMOD : 1;
-    unsigned int SLBG : 1;
-    unsigned int ALP : 8;
-    unsigned int p0 : 16;
-    unsigned int p1;
-};
-struct tGS_SMODE2 { /* libgraph (eestruct.h) */
-    unsigned int INT : 1;
-    unsigned int FFMD : 1;
-    unsigned int DPMS : 2;
-    unsigned int p0 : 28;
-    unsigned int p1;
-};
-struct tGS_DISPFB2 { /* libgraph (eestruct.h) */
-    unsigned int FBP : 9;
-    unsigned int FBW : 6;
-    unsigned int PSM : 5;
-    unsigned int p0 : 12;
-    unsigned int DBX : 11;
-    unsigned int DBY : 11;
-    unsigned int p1 : 10;
-};
-struct tGS_DISPLAY2 { /* libgraph (eestruct.h) */
-    unsigned int DX : 12;
-    unsigned int DY : 11;
-    unsigned int MAGH : 4;
-    unsigned int MAGV : 2;
-    unsigned int p0 : 3;
-    unsigned int DW : 12;
-    unsigned int DH : 11;
-    unsigned int p1 : 9;
-};
-struct tGS_BGCOLOR { /* libgraph (eestruct.h) */
-    unsigned int R : 8;
-    unsigned int G : 8;
-    unsigned int B : 8;
-    unsigned int p0 : 8;
-    unsigned int p1;
-};
-struct sceGsDispEnv { /* libgraph */
-    tGS_PMODE pmode;
-    tGS_SMODE2 smode2;
-    tGS_DISPFB2 dispfb;
-    tGS_DISPLAY2 display;
-    tGS_BGCOLOR bgcolor;
-};
 extern "C" int sceGsSetDefDispEnv(sceGsDispEnv* disp, short psm, short w, short h, short dx, short dy);
 extern "C" int sceGsSetDefStoreImage(sceGsStoreImage* sp, short sbp, short sbw, short spsm, short x, short y, short w, short h);
 extern "C" int sceGsExecStoreImage(sceGsStoreImage* sp, u_long128* dstaddr);
