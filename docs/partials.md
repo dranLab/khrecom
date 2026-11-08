@@ -159,7 +159,7 @@ One row per merge into main (`partials.py --summary` before and after).
 ## Summary
 
 ```
-PARTIAL: 183 (155 in 44 headers, 28 in 15 .cpp); MATCH: 1041
+PARTIAL: 183 (155 in 44 headers, 28 in 15 .cpp); MATCH: 1042
   by category: method 46, data member 10, type 13, fwd decl 2, #include 13, changed in place 43, padding 2, path override 1, gate 5, guessed 9, header-level 24, stand-in 10, other 5
 stand-ins: 8 foreign in 5 files (6 names), 167 unattributed, 181 own
 duplicate class names across headers: 0
@@ -233,7 +233,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/PoolList.h` | 1 | 0/0/0/0 | 53 |
 | `Game/SceneEnv.h` | 1 | 1/0/0/0 | 38 |
 | `Game/SceneInfo.h` | 1 | 30/0/0/0 | 86 |
-| `System/Com.h` | 1 | 0/0/0/0 | 8 |
+| `System/Com.h` | 1 | 0/0/0/0 | 9 |
 | `System/Graphic/Camera.h` | 5 | 6/1/0/0 | 109 |
 | `System/Graphic/Effect/EffectMan.h` | 1 | 2/0/0/0 | 173 |
 | `System/Graphic/Effect/ObjType.h` | 1 | 1/0/0/0 | 177 |
