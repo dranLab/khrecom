@@ -260,13 +260,6 @@ static void channel_conv_joint(At3Work *w);
 static int gainc_window(char *ch, int band);
 static void f2t_nodata(At3Band *bands, int band);
 
-/* Parked: 1 of 122 lines (2026-11-08; 63 before: the band address as an integer sum offset first, the deltas of
-   the joint[1] gains computed in their variables h0/h1, separate loop weights n0/n1 and gains r0/r1, d/c/nd in
-   the original's orders, pr set before the deltas and stepped as a pointer, the h and g loads in index order, the
-   m terms y first): only m's addu has its operands swapped (original x-part + y-part into the y-part's v0; with
-   the x term first local-alloc ties m to the x-part and x/y change registers, 12 lines); tried: m as two
-   statements, products in x/y or in temporaries, operand orders of each product */
-#if 0
 static void channel_conv_joint(At3Work *w)
 {
     int band;
@@ -282,7 +275,6 @@ static void channel_conv_joint(At3Work *w)
     int *pr;
     int x;
     int y;
-    int m;
     int j;
 
     j = 0;
@@ -303,6 +295,7 @@ static void channel_conv_joint(At3Work *w)
         pw = w->joint[0].w[band];
         w0 = pw[0];
         w1 = pw[1];
+        /* MATCH: integer sum, offset first (original addu offset,w); 3355 ints = ch[1].band[0].spec */
         pr = (int *)((j + band) * 544 + (int)w) + 3355;
         h0 = (short)(h0 - g0) >> 3;
         h1 = (short)(h1 - g1) >> 3;
@@ -333,16 +326,13 @@ static void channel_conv_joint(At3Work *w)
             cw0 += ndw0;
             x = pr[-3320];
             y = *pr;
-            m = n1 * (y >> 4) + n0 * (x >> 4);
-            pr[-3320] = ((m >> 8) * r0) >> 6;
-            *pr++ = (((x - m) >> 8) * r1) >> 6;
+            y = n0 * (x >> 4) + n1 * (y >> 4);
+            pr[-3320] = ((y >> 8) * r0) >> 6;
+            *pr++ = (((x - y) >> 8) * r1) >> 6;
         }
         j += 2;
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/libat3dec", channel_conv_joint);
-#endif
 
 /* Parked: first draft (2026-11-07), 334 of 457 lines, 80 bytes short; the butterfly stage has its structure (registers renamed: w, half, step); the window loop
    keeps fewer values on the stack than the original (5 spills at 0x18-0x2C) and the band copy's tail is not interleaved with its setup;
