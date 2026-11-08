@@ -4375,14 +4375,19 @@ INT CCamp::setButtonHelp(INT nSetCmd, INT nMode, INT nKind) {
     return 1;
 }
 
-/* Parked: 53 of 621 lines (2026-11-07; tools/drafts.py's "build failed" is the data block after the INCLUDE_ASM, which
-   also defines this function's statics: drop it to build the draft): in the sleight-list loop the original reloads the
-   spilled pTechCateTbl at the loop head and recomputes &pTechCateTbl[nTechSelectTop] from nTechSelectTop (s6, +1 per
-   iteration) every time; ours strength-reduces it (-dL: giv 1104, benefit 7, lifetime 3, reduced: lifetime*66*benefit
-   is far above the 182 insns, so no insn-count/threshold change can stop it; the original's giv was never recognized
-   or had benefit <= 0). The spill slots then differ (orig 0xC8 pTechCateTbl, 0xCC nTechCateCnt). tried: the ref's
-   unused nLine as the loop counter, non-const table pointer, compare operand order (kept: load order), _ref() on the
-   table pointer/its assignment/nTechCateCnt (56-70); permuter 6 min (68 -> 65), 15 min 2026-11-07. */
+/* Parked: 36 of 617 lines, same size (2026-11-08; drop the data block after the INCLUDE_ASM to build the draft): s-register
+   roles in the sleight-list loop and one store order. The original increments nTechSelectTop in place before getName
+   (s6, delay slot) and keeps i + 1 in s7 (i in s4, reused for (USHORT)nTechSeqIdx), and stores nTechCateCnt + 1 before
+   the C2DFnt new; this draft (`for (...; i++, nTechSelectTop++)`) gets the roles of i and nTechSelectTop swapped and
+   the nTechCateCnt store after the new. With `nTechSelectTop++;` right after the CButton new (the original's place)
+   the roles are right but loop.c strength-reduces &pTechCateTbl[nTechSelectTop] (-dL: giv benefit 7 - add_cost 4 per
+   biv increment, lifetime 3, 3 * 66 * 3 >= 182 insns: reduced, 53 lines); the original's giv must have had benefit
+   <= 0 (two biv increments? another index form?). Found 2026-11-08 from the .mdebug block tree (no change by itself):
+   pTechCateTbl/nTechSelectTop/nTechCateCnt/nLine in the switch body, scrollBarSeqTbl in the if block, nLine instead
+   of an invented nMax, len declared before pBF. tried: increment at the body end (39), `nTechSelectTop++, i++` (39),
+   `m_pTechCategoryFnt[nTechCateCnt++] = new` + `[nTechCateCnt - 1]` (92-94: nTechCateCnt gets a register), the new
+   as the addFntShift argument (141), no pButton local (143); earlier: nLine as the loop counter, non-const table
+   pointer, compare operand order, _ref() on the table pointer (56-70), permuter 6 + 15 min. */
 #if 0
 INT CCamp::setTechWin(INT nSetCmd) {
     FVECTOR vec;
@@ -4398,14 +4403,15 @@ INT CCamp::setTechWin(INT nSetCmd) {
     float fLightYTbl[9] = { 160.0f, 160.0f, 160.0f, 160.0f, 160.0f, 160.0f, 160.0f, 160.0f, 160.0f };
     static LPCTSTR pStrListTitle = "Sleights List";
     INT ret = 0;
-    const unsigned char (*pTechCateTbl)[2];
-    INT nTechSelectTop;
-    INT nTechCateCnt;
-    static USHORT scrollBarSeqTbl[3] = { 288, 285, 291 };
 
     switch (nSetCmd) {
+        const unsigned char (*pTechCateTbl)[2];
+        INT nTechSelectTop;
+        INT nTechCateCnt;
+        INT nLine;
     case 0:
         if (!m_pTechWinCtrl) {
+            static USHORT scrollBarSeqTbl[3] = { 288, 285, 291 };
             m_pTechWinCtrl = new (__FILE__ "(5381)") C2DSeqCtrl;
             m_pTechWinCtrl->setLayer(0x14);
             m_pTechWinCtrl->enableColorCtrl(TRUE);
@@ -4473,7 +4479,7 @@ INT CCamp::setTechWin(INT nSetCmd) {
         nTechCateCnt = 0;
         rgba.col = 0x807C7C7C;
         nTechSelectTop = m_nTechSelectTop;
-        for (INT i = 0; i < 9; i++) {
+        for (INT i = 0; i < 9; i++, nTechSelectTop++) {
             SHORT nTechKind = pTechCateTbl[nTechSelectTop][0];
             SHORT nTechSeqIdx = pTechCateTbl[nTechSelectTop][1];
             if (m_nTechSelect == nTechSelectTop) {
@@ -4484,12 +4490,13 @@ INT CCamp::setTechWin(INT nSetCmd) {
             }
             C2DMan::getLayPosition(m_pLadName, 0x10, i + 2, vec, 0);
             CButton* pButton = m_pTechButton[i] = new (__FILE__ "(5482)") CButton;
-            nTechSelectTop++;
             pButton->init(m_pSeqName, 0x14, techSeqTbl, vec, m_pTechWinCtrl, CTechnic::getName(nTechKind), 0xF, 1.0f, 1.0f, 0x40,
                           &rgba, nTechSeqIdx);
             if (!CTechnic::canUse(nTechKind)) {
-                CHAR* pBF = (CHAR*)pButton->getButtonFnt();
-                INT len = strlen(pBF);
+                INT len;
+                CHAR* pBF;
+                pBF = (CHAR*)pButton->getButtonFnt();
+                len = strlen(pBF);
                 for (INT j = 0; j < len; j++) {
                     *pBF++ = '?';
                 }
@@ -4505,15 +4512,15 @@ INT CCamp::setTechWin(INT nSetCmd) {
             }
         }
         m_pTechWinBC->select(m_nTechSelect - m_nTechSelectTop, m_pTechButton, fLightXTbl, fLightYTbl);
-        INT nMax = m_nTechSelectMax;
-        if (!nMax) {
-            nMax = 1;
+        nLine = m_nTechSelectMax;
+        if (!nLine) {
+            nLine = 1;
         }
-        fRatioHeight = 9.0f / nMax;
+        fRatioHeight = 9.0f / nLine;
         if (fRatioHeight > 1.0f) {
             fRatioHeight = 1.0f;
         }
-        fRatioPosY = (FLOAT)m_nTechSelectTop / nMax;
+        fRatioPosY = (FLOAT)m_nTechSelectTop / nLine;
         if (fRatioPosY > 1.0f) {
             fRatioPosY = 1.0f;
         }
