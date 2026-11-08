@@ -230,7 +230,6 @@ public:
     HANDLE getPlayerHandle();
     void makeExpPrize();
     void makePrize();
-#ifdef GAME_ENEMY_BATTLEENEMY_CPP /* MATCH: GAME_ENEMY_BATTLEENEMY_CPP gate, only for its own unit (tested 2026-11-02) */
     virtual void bossDeadDemoCallback() {}
     virtual void setBossDeadEffect();
     virtual void killBossDeadEffect();
@@ -238,15 +237,6 @@ public:
     virtual void bossDeadDemoDispOff();
     virtual BOOL bossDeadDemoSpecial() { return TRUE; }
     virtual void bossDeadDemoEnd() {}
-#else
-    virtual void bossDeadDemoCallback();
-    virtual void setBossDeadEffect();
-    virtual void killBossDeadEffect();
-    virtual void bossCardRevolverDestroy();
-    virtual void bossDeadDemoDispOff();
-    virtual BOOL bossDeadDemoSpecial();
-    virtual void bossDeadDemoEnd();
-#endif
     HANDLE recover(INT inPoint, const CHAR* inEffectName, INT inEffectNo, const FVECTOR& inPos, const CCoord* inParent);
     void kill();
     void attackStateCardDestroy(BOOL inColl);
@@ -264,7 +254,6 @@ protected:
     virtual void beginStateAppear();
     virtual void stateAppear();
     virtual void endStateAppear();
-#ifdef GAME_ENEMY_BATTLEENEMY_CPP /* MATCH: GAME_ENEMY_BATTLEENEMY_CPP gate, only for its own unit (tested 2026-11-02) */
     virtual void beginStateMain() {}
     virtual void stateMain() {}
     virtual void endStateMain() {}
@@ -295,38 +284,6 @@ protected:
     virtual void beginStateItem() {}
     virtual void stateItem() {}
     virtual void endStateItem() {}
-#else
-    virtual void beginStateMain();
-    virtual void stateMain();
-    virtual void endStateMain();
-    virtual void beginStateAttack1();
-    virtual void stateAttack1();
-    virtual void endStateAttack1();
-    virtual void beginStateAttack2();
-    virtual void stateAttack2();
-    virtual void endStateAttack2();
-    virtual void beginStateAttack3();
-    virtual void stateAttack3();
-    virtual void endStateAttack3();
-    virtual void beginStateAttack4();
-    virtual void stateAttack4();
-    virtual void endStateAttack4();
-    virtual void beginStateAttack5();
-    virtual void stateAttack5();
-    virtual void endStateAttack5();
-    virtual void beginStateAttack6();
-    virtual void stateAttack6();
-    virtual void endStateAttack6();
-    virtual void beginStateAttack7();
-    virtual void stateAttack7();
-    virtual void endStateAttack7();
-    virtual void beginStateAttack8();
-    virtual void stateAttack8();
-    virtual void endStateAttack8();
-    virtual void beginStateItem();
-    virtual void stateItem();
-    virtual void endStateItem();
-#endif
     virtual void beginStateSmallDamage();
     virtual void stateSmallDamage();
     virtual void endStateSmallDamage();
@@ -387,7 +344,6 @@ protected:
     virtual void beginStateDead();
     virtual void stateDead();
     virtual void endStateDead();
-#ifdef GAME_ENEMY_BATTLEENEMY_CPP /* MATCH: GAME_ENEMY_BATTLEENEMY_CPP gate, only for its own unit (tested 2026-11-02) */
     virtual void aiCardBattle() {}
     virtual void onGuard() {}
     virtual void onDamage() {}
@@ -399,19 +355,6 @@ protected:
     virtual void onAttackCancel() {}
     virtual void onCardBattleFailed() {}
     virtual INT getDuelAttackState() { return -1; }
-#else
-    virtual void aiCardBattle();
-    virtual void onGuard();
-    virtual void onDamage();
-    virtual void onAbsorb();
-    virtual void onInvalid();
-    virtual void onGimmickCard();
-    virtual void onCardBreak();
-    virtual void onReflect();
-    virtual void onAttackCancel();
-    virtual void onCardBattleFailed();
-    virtual INT getDuelAttackState();
-#endif
     virtual CEntity* createFriendCard(CARD_KIND inKind, INT inParam);
     virtual void notifyHP();
     CBattleEnemyManager* getBattleEnemyManager() const;
