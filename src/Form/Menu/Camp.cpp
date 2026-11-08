@@ -4669,13 +4669,18 @@ INT CCamp::setDeckSetWin(INT nSetCmd) {
     return ret;
 }
 
-/* Parked: same size, 33 of 1409 lines differ (re-measured 2026-11-07; tools/drafts.py's "build failed" is the data
-   block after the INCLUDE_ASM: drop it to build the draft): the stack slots of the spilled hoisted addresses (&m_pMCInfoNumCtrl,
-   &m_pMCInfoNumFnt, &m_pMCFnt, &m_pMCCard, &m_nMapKind, i + 1) are assigned in another order (orig 0x74 NumFnt,
-   0x78 MapKind, 0x7c i+1, 0x84 MCCard, 0x88 MCFnt, 0x8c NumCtrl; ours ascending by member offset) - stable across
-   rebuilds, likely gcse hash-table order; plus one s0 move around a C2DFnt new. tried: ref declaration order,
-   chain-store order, p2DSeqCtrl/p2DFnt/p2DCard locals; permuter 15 min (59 -> 58); shared function-level i/j (as the
-   ref lists one i and one j: 256 lines) or j only (38), the block `n` locals as idx/nKind. */
+/* Parked: 23 of 1407 lines (2026-11-08; drop the data block after the INCLUDE_ASM to build the draft): only the spill
+   slots of seven PRE-hoisted values differ (orig 0x74 &m_pMCInfoNumFnt, 0x78 &m_nMapKind, 0x7c i + 1, 0x80 nKind - 161,
+   0x84 &m_pMCCard, 0x88 &m_pMCFnt, 0x8c &m_pMCInfoNumCtrl; ours 0x74 NumCtrl first, i + 1 before MapKind). Slots follow
+   the PRE pseudo numbers = gcse expression-hash bucket order (-dG: raw hash of this+C = 13374 + C, of i+1 = 13258 +
+   reg(i) + 1, bucket = raw % S): the original order needs S = 703 buckets (ours 701, so about 4 more insns at gcse) and
+   the outer case-0 loop counter i as pseudo >= 312 (ours 303, so 9 more pseudos created before that loop) - no other S
+   in 601-899 fits. Found 2026-11-08 from the .mdebug block tree (33 -> 23): nColSeq/cardOld/pCampRoomInfo declared in
+   the switch body, scrollBarSeqTbl in the if block, case 9 without braces, one if for the number loop's display test,
+   no `n` local for the scroll ratio, p2DFnt chains at the four m_pMCInfoFnt news and the two m_pMCFnt news (the
+   original keeps p2DFnt in s0 apart from the new's result), idx = i + m_nMCSelSelectTop. tried: chains at the 5731/5753
+   news (+1 pseudo each, S unchanged), member-first chains (S 699), the original 4-line operator new layout of
+   HeapMan.h (no change); earlier: permuter 15 min (59 -> 58), shared function-level i/j (256), j only (38). */
 #if 0
 INT CCamp::setMapCardWin(INT nSetCmd) {
     static char* pStrNum[4] = { "%02d/99", "%02d", STR_TILDE_02D, "" };
@@ -4694,18 +4699,18 @@ INT CCamp::setMapCardWin(INT nSetCmd) {
     USHORT nKind;
     INT idx;
     INT ret;
-    USHORT nColSeq;
-    CARD cardOld;
-    CampRoomInfo* pCampRoomInfo;
-    static USHORT scrollBarSeqTbl[3] = { 288, 285, 291 };
 
     ret = 0;
     switch (nSetCmd) {
+        USHORT nColSeq;
+        CARD cardOld;
+        CampRoomInfo* pCampRoomInfo;
     case 0:
         m_nMCSelCateSelect = m_nMCSelSelect = m_nMCSelSelectTop = m_nMCSelNumSelect = 0;
         initCardData(1);
         initCardMapKind(m_nMCSelCateSelect);
         if (!m_pMCInfoWinCtrl) {
+            static USHORT scrollBarSeqTbl[3] = { 288, 285, 291 };
             rgba.col = 0x807C7C7C;
             m_pMCInfoWinCtrl = new (__FILE__ "(5731)") C2DSeqCtrl;
             m_pMCInfoWinCtrl->setLayer(0x10);
@@ -4713,14 +4718,14 @@ INT CCamp::setMapCardWin(INT nSetCmd) {
             C2DMan::getLayPosition(m_pLadName, 0x16, 2, vec, 0);
             m_pMCInfoWinCtrl->setPos(vec);
             m_pMCInfoWinCtrl->addSeq(m_pSeqName, 0x143);
-            m_pMCInfoFnt[0] = new (__FILE__ "(5737)") C2DFnt(0, 0, &rgba, 0xE, NULL, 0x40);
-            m_pMCInfoWinCtrl->addFntShift(m_pSeqName, m_pMCInfoFnt[0], -134.0f, -49.0f);
-            m_pMCInfoFnt[1] = new (__FILE__ "(5740)") C2DFnt(0, 0, &rgba, 0xD, CCtdMan::getText(0x500300), 0x40);
-            m_pMCInfoWinCtrl->addFntShift(m_pSeqName, m_pMCInfoFnt[1], -72.0f, 6.0f);
-            m_pMCInfoFnt[2] = new (__FILE__ "(5743)") C2DFnt(0, 0, &rgba, 0xD, CCtdMan::getText(0x500301), 0x40);
-            m_pMCInfoWinCtrl->addFntShift(m_pSeqName, m_pMCInfoFnt[2], -72.0f, 43.0f);
-            m_pMCInfoFnt[3] = new (__FILE__ "(5747)") C2DFnt(0, 0, &rgba, 0xE, NULL, 0x40);
-            m_pMCInfoWinCtrl->addFntShift(m_pSeqName, m_pMCInfoFnt[3], -137.0f, 102.0f);
+            p2DFnt = m_pMCInfoFnt[0] = new (__FILE__ "(5737)") C2DFnt(0, 0, &rgba, 0xE, NULL, 0x40);
+            m_pMCInfoWinCtrl->addFntShift(m_pSeqName, p2DFnt, -134.0f, -49.0f);
+            p2DFnt = m_pMCInfoFnt[1] = new (__FILE__ "(5740)") C2DFnt(0, 0, &rgba, 0xD, CCtdMan::getText(0x500300), 0x40);
+            m_pMCInfoWinCtrl->addFntShift(m_pSeqName, p2DFnt, -72.0f, 6.0f);
+            p2DFnt = m_pMCInfoFnt[2] = new (__FILE__ "(5743)") C2DFnt(0, 0, &rgba, 0xD, CCtdMan::getText(0x500301), 0x40);
+            m_pMCInfoWinCtrl->addFntShift(m_pSeqName, p2DFnt, -72.0f, 43.0f);
+            p2DFnt = m_pMCInfoFnt[3] = new (__FILE__ "(5747)") C2DFnt(0, 0, &rgba, 0xE, NULL, 0x40);
+            m_pMCInfoWinCtrl->addFntShift(m_pSeqName, p2DFnt, -137.0f, 102.0f);
             m_pMCInfoWinCtrl->addSeq(m_pSeqName, 0x13D);
             m_pMCInfoWinCtrl->addSeq(m_pSeqName, 0x13D);
             m_pMCInfoCard = new (__FILE__ "(5753)") C2DCard;
@@ -4758,12 +4763,12 @@ INT CCamp::setMapCardWin(INT nSetCmd) {
             p2DSeqCtrl->setParent(m_pMCSelWinCtrl[0]);
             C2DMan::getLayPosition(m_pLadName, 0x15, 0, vec, 0);
             p2DSeqCtrl->addSeqShift(m_pSeqName, 0x14B, vec.x, vec.y);
-            m_pMCFnt[0] = new (__FILE__ "(5799)") C2DFnt(0, 0, &rgba, 0xC, NULL, 0x40);
-            p2DSeqCtrl->addFntShift(m_pSeqName, m_pMCFnt[0], 22.0f, 1.0f);
+            p2DFnt = m_pMCFnt[0] = new (__FILE__ "(5799)") C2DFnt(0, 0, &rgba, 0xC, NULL, 0x40);
+            p2DSeqCtrl->addFntShift(m_pSeqName, p2DFnt, 22.0f, 1.0f);
             rgba.col = 0x80007878;
             for (INT i = 0; i < 4; i++) {
-                m_pMCFnt[i + 1] = new (__FILE__ "(5804)") C2DFnt(0, 0, &rgba, 0xC, NULL, 0x40);
-                p2DSeqCtrl->addFntShift(m_pSeqName, m_pMCFnt[i + 1], i * 38.0f + -58.0f, 18.0f);
+                p2DFnt = m_pMCFnt[i + 1] = new (__FILE__ "(5804)") C2DFnt(0, 0, &rgba, 0xC, NULL, 0x40);
+                p2DSeqCtrl->addFntShift(m_pSeqName, p2DFnt, i * 38.0f + -58.0f, 18.0f);
             }
             p2DSeqCtrl = m_pMCSelWinCtrl[2] = new (__FILE__ "(5810)") C2DSeqCtrl;
             p2DSeqCtrl->setLayer(0xF);
@@ -4822,7 +4827,7 @@ INT CCamp::setMapCardWin(INT nSetCmd) {
         m_nMCSelSelectTop = 0;
         m_pMCSelWinCtrl[2]->replaceSeq(0, m_pSeqName, mcTabSeqTbl[m_nMCSelCateSelect]);
         initCardMapKind(m_nMCSelCateSelect);
-    case 9: {
+    case 9:
         nColSeq = 0;
         nKind = 0;
         for (INT i = 3; i > 0; i--) {
@@ -4866,7 +4871,7 @@ INT CCamp::setMapCardWin(INT nSetCmd) {
         sprintf(chrTmp, pStrNum[1], m_nMapKindTotal[4]);
         m_pMCFnt[4]->allocText(chrTmp);
         for (INT i = 0; i < 9; i++) {
-            idx = m_nMCSelSelectTop + i;
+            idx = i + m_nMCSelSelectTop;
             p2DCard = m_pMCCard[i];
             p2DCard->destroy(3);
             p2DCard->destroy(2);
@@ -4889,34 +4894,31 @@ INT CCamp::setMapCardWin(INT nSetCmd) {
         for (INT i = 0; i < 10; i++) {
             p2DSeqCtrl = m_pMCInfoNumCtrl[i];
             if ((USHORT)(nKind - 0xA1) < 25) {
-                if (!m_bCategorySelectMode && m_nMapKind[m_nMCSelCateSelect]) {
-                    if (nColSeq != 0x73 || i == 0) {
-                        INT n = m_nCardKind10[idx][i];
-                        p2DSeqCtrl->enableDisp(TRUE);
-                        p2DSeqCtrl->replaceSeq(0, m_pSeqName, nColSeq + i * 2 + (n == 0));
-                        sprintf(chrTmp, pStrNum[2], n);
-                        m_pMCInfoNumFnt[i]->allocText(chrTmp);
-                        continue;
-                    }
+                if (!m_bCategorySelectMode && m_nMapKind[m_nMCSelCateSelect] && (nColSeq != 0x73 || i == 0)) {
+                    INT n = m_nCardKind10[idx][i];
+                    p2DSeqCtrl->enableDisp(TRUE);
+                    p2DSeqCtrl->replaceSeq(0, m_pSeqName, nColSeq + i * 2 + (n == 0));
+                    sprintf(chrTmp, pStrNum[2], n);
+                    m_pMCInfoNumFnt[i]->allocText(chrTmp);
+                } else {
+                    p2DSeqCtrl->enableDisp(FALSE);
                 }
-                p2DSeqCtrl->enableDisp(FALSE);
             } else {
                 p2DSeqCtrl->enableDisp(FALSE);
             }
         }
-        INT n = (m_nMapKind[m_nMCSelCateSelect] + 2) / 3;
-        if (!n) n = 1;
-        fRatioHeight = 3.0f / n;
+        idx = (m_nMapKind[m_nMCSelCateSelect] + 2) / 3;
+        if (!idx) idx = 1;
+        fRatioHeight = 3.0f / idx;
         if (fRatioHeight > 1.0f) {
             fRatioHeight = 1.0f;
         }
-        fRatioPosY = (FLOAT)(m_nMCSelSelectTop / 3) / n;
+        fRatioPosY = (FLOAT)(m_nMCSelSelectTop / 3) / idx;
         if (fRatioPosY > 1.0f) {
             fRatioPosY = 1.0f;
         }
         m_pMCSelScrollBar->change(fRatioPosY, fRatioHeight);
         break;
-    }
     }
     return ret;
 }
