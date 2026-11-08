@@ -711,10 +711,6 @@ void CDebugWindow::mainProc(INT* iParam) {
     }
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/DebugWindow", disp__12CDebugWindow);
-/* Close: the reload registers of the spilled WW/sign (t0 instead of a3) and the loop's line-font position stores
- * (G_XYZ pointer formed before the x store) differ. */
-#if 0
 void CDebugWindow::disp() {
     INT iIdx;
     INT WW = m_iWw * m_iPitch;
@@ -738,23 +734,15 @@ void CDebugWindow::disp() {
         m_fntTitle.setBrightness(0x40, 0x40, 0, 0x80);
     }
     m_gpFrame.m_P0.set((m_iWx - 2) << 4, m_iWy << 4, 0xFFFF280);
-    INT WW2 = WW + 2;
+    INT WW2 = WW + 2; /* MATCH: WW + 2 stays in s0 across the frame's disp() (no ref local; fold reassociates it otherwise) */
     m_gpFrame.m_P1.set((m_iWx + WW2) << 4, (m_iWy + (m_iPitch + 2) * m_iWh) << 4);
     m_gpFrame.disp();
-    {
-        INT x = m_iWx - 2;
-        INT y = m_iWy - 4;
-        m_gpTitle.m_P0.set(x << 4, (y - m_iPitch) << 4, 0xFFFF280);
-    }
-    {
-        INT x = m_iWx + WW2;
-        INT y = m_iWy;
-        m_gpTitle.m_P1.set(x << 4, y << 4);
-    }
+    m_gpTitle.m_P0.set((m_iWx - 2) << 4, (m_iWy - (m_iPitch + 4)) << 4, 0xFFFF280);
+    m_gpTitle.m_P1.set((m_iWx + WW2) << 4, m_iWy << 4);
     m_gpTitle.disp();
     if (m_iEffCurMax > 0) {
-        INT iCurPos = (m_iPitch + 2) * (m_iCurY - m_iLineTop) + 1;
-        m_gpCur.m_P0.set(m_iWx << 4, (m_iWy + iCurPos) << 4, 0xFFFF280);
+        INT iCurPos = m_iCurY - m_iLineTop;
+        m_gpCur.m_P0.set(m_iWx << 4, (m_iWy + 1 + (m_iPitch + 2) * iCurPos) << 4, 0xFFFF280);
         m_gpCur.m_P1.set((m_iWx + WW) << 4, m_gpCur.m_P0.y + (m_iPitch << 4));
         if ((isAction(m_iCurY) & 0x20) && m_pWinCurX && m_pWinCurX[m_iCurY].iCurX >= 0) {
             m_gpCur.m_P0.x += (m_pWinCurX[m_iCurY].iPosX + m_pWinCurX[m_iCurY].iNextWidth * m_pWinCurX[m_iCurY].iCurX) << 4;
@@ -762,7 +750,7 @@ void CDebugWindow::disp() {
         }
         m_gpCur.disp();
     }
-    m_fntTitle.m_P0.set((m_iWx + WW / 2) << 4, (m_iWy - 2) << 4, 0xFFFF280);
+    m_fntTitle.setPosition(m_iWx + WW / 2, m_iWy - 2, 0xFFFF28);
     m_fntTitle.disp();
     iIdx = m_iLineTop;
     for (INT i = 0; i < m_iWh; i++, iIdx++) {
@@ -835,10 +823,9 @@ void CDebugWindow::disp() {
             }
         }
         if (m_iStatus & 0x10) {
-            m_pWinLine[i].fntString.m_P0.set((m_iWx + WW / 2) << 4, (i * 2 + (m_iPitch * (i + 1) + m_iWy) + 1) << 4,
-                                             0xFFFF280);
+            m_pWinLine[i].fntString.setPosition(m_iWx + WW / 2, i * 2 + (m_iPitch * (i + 1) + m_iWy) + 1, 0xFFFF28);
         } else {
-            m_pWinLine[i].fntString.m_P0.set(m_iWx << 4, (i * 2 + (m_iPitch * (i + 1) + m_iWy) + 1) << 4, 0xFFFF280);
+            m_pWinLine[i].fntString.setPosition(m_iWx, i * 2 + (m_iPitch * (i + 1) + m_iWy) + 1, 0xFFFF28);
         }
         if (isActive()) {
             m_pWinLine[i].fntString.setBrightness(0x80, 0x80, 0x80, 0x80);
@@ -848,7 +835,6 @@ void CDebugWindow::disp() {
         m_pWinLine[i].fntString.disp();
     }
 }
-#endif
 
 static DEBUG_WINDOW_LINE debugCamLine[8] = {
     {"POS-X :% 11.6f", &DebugWork::g_dw.nakamich.vCamPos.x, 4, {0}, 3, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
