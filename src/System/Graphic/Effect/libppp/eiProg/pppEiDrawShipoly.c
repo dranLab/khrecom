@@ -170,7 +170,7 @@ extern sceVu0FMATRIX ppvCameraMatrixInv;
         : "r"(v0), "r"(v1)                           \
         : "memory")
 
-/* v0 = v1 * t + v2 * (1 - t) */
+/* v0 = v1 * t + v2 * (1 - t); MATCH: "$2" clobbered as in the original (its users never take v0 for the asm's inputs or for values dying right before it: local-alloc's fake lifetimes, reload registers) */
 #define InterVector(v0, v1, v2, t)                   \
     __asm__ volatile(                                \
         "lqc2 $vf4, 0x0(%1)\n"                       \
@@ -183,7 +183,7 @@ extern sceVu0FMATRIX ppvCameraMatrixInv;
         "sqc2 $vf9, 0x0(%0)\n"                       \
         :                                            \
         : "r"(v0), "r"(v1), "r"(v2), "r"(t)          \
-        : "memory")
+        : "$2", "memory")
 
 void drawShipoly(pppModelSt *mdl, PEiDrawShipoly *p, VEiDrawShipoly *val, VColor *col, sceVu0FVECTOR (*linev)[256]);
 void drawDistShipoly(PEiDrawShipoly *p, VEiDrawShipoly *val, VColor *col, sceVu0FVECTOR (*linev)[256]);
@@ -520,7 +520,7 @@ static void get_st(PEiDrawShipoly *param, float *s_min, float *s_max, float *t_m
     *t_max = tmax - 0.01f;
 }
 
-/* Parked: 58 of 815 lines (2026-11-08): register allocation only, same instructions; block tree, locals and their registers as the original's .mdebug except s1 $f6/a1 $f5 (original $f5/$f6: global-alloc priority 4*24/186 for s1 below 3*12/69 for a1; writing a1 = alpha1 before a0 = alpha0 gives the original's registers but issues the two movs in the wrong order, 51 lines) and the first clip's ret v1 (original a0: ret1 priority 30000 is allocated before i*16 at 14210, which then lands in a1, original v1); the gradation_fadeout movz copy is a reload (a1, original a3: reload round-robin); s1 += TexScrollS issued after the Fade test's lbu (original before); tried: the line markers (r1 = product; n = r1; r1 = n with the packet headers indexed by idx, tex0l = tex0h = 0 in one statement, s = s1 before the wrap test, t computed before a0/a1 with t += TexScrollT, t0_ = t1_ = t / s0_ = s1_ = t, c0/c1 before vtn /= 2, s0 += before s1 +=, fade before fade_add, linevw in two steps; 102 -> 58), the RotTransPersClip inline, the .mdebug block tree (omd/mph, r1/r2/n, packet locals in their own blocks) and rate = linevw / (TexRepeat * 0.01f) (the original's rate/39), asm clobber forms (no "memory", vf lists), a0/a1, c0/c1, TexDir and Fade statement orders, tools/permuter.py 15 min (40034 candidates, best 53 by its score: the a1-before-a0 swap), decomp-permuter 15 min (its base is 136 lines off; best -3 there from an invented constant variable: noise) */
+/* Parked: 13 of 812 lines (2026-11-09): only the s1/a1 FP registers differ (ours $f6/$f5, original $f5/$f6): global-alloc priority (int)(4*24/185) = 5189 for s1 is below a1's 3*12/69 = 5217 (a0 5294 above both); a1 = alpha1 before a0 = alpha0 gives the registers (6 lines, but the movs issue in the wrong order and the line markers have a0 on 726, a1 on 727); one empty asm in the j loop gives them too but adds 2 to the live length of gradation_del/gradation_add, whose (int) priorities tie (2*4/1012 = 79 = 2*4/1010), and swaps those two; found 2026-11-09: InterVector clobbers "$2" (58 -> 15), s0 = s inside both TexRepeat arms (lines 688/698 carry no code: the copy sits in the branch delay slot), do {} while (0) before the Fade test (lines 704-705; s1 += issues before the Fade lbu), get_st before s = 0.0f and poly_num before s_add (line markers); tried: ternary forms of s, do {} while (0) at the other line gaps of the i/j loops, decomp-permuter 15 min after its TImode fix (base 78; best 54 by an invented pointer copy for the 2nd clip, 34 in the real source: a filler local, not taken); earlier: the RotTransPersClip inline, the .mdebug block tree, rate/linevw forms, c0/c1, TexDir and Fade orders, tools/permuter.py 15 min */
 #if 0
 void drawShipoly(pppModelSt *mdl, PEiDrawShipoly *p, VEiDrawShipoly *val, VColor *col, sceVu0FVECTOR (*linev)[256]) {
     int poly_num;
@@ -542,8 +542,8 @@ void drawShipoly(pppModelSt *mdl, PEiDrawShipoly *p, VEiDrawShipoly *val, VColor
     u_long tex0l;
     u_long tex0h;
 
-    s_add = 0.0f;
     poly_num = p->PolyNumH;
+    s_add = 0.0f;
     gradation = 1.0f;
     gradation_del = 0.0f;
     gradation_add = 0.0f;
@@ -564,8 +564,8 @@ void drawShipoly(pppModelSt *mdl, PEiDrawShipoly *p, VEiDrawShipoly *val, VColor
     } else {
         tex0l = tex0h = 0;
     }
-    s = 0.0f;
     get_st(p, &s_min, &s_max, &t_min, &t_max);
+    s = 0.0f;
     if (p->TexMapping == 0) {
         switch (p->TexDir) {
         case 0:
@@ -728,8 +728,8 @@ void drawShipoly(pppModelSt *mdl, PEiDrawShipoly *p, VEiDrawShipoly *val, VColor
             } else {
                 alpha1 = alpha0 = col->release_col.a;
             }
-            s0 = s;
             if (p->TexRepeat <= 0.0f) {
+                s0 = s;
                 s1 = s0 + s_add;
                 if (s1 > s_max) {
                     s = s_max;
@@ -742,6 +742,7 @@ void drawShipoly(pppModelSt *mdl, PEiDrawShipoly *p, VEiDrawShipoly *val, VColor
 
                 linevw = linev[0][i][3];
                 rate = linevw / (p->TexRepeat * 0.01f);
+                s0 = s;
                 s1 = s0 + (s_max - s_min) * rate;
                 s = s1;
                 if (s1 > s_max) {
@@ -750,6 +751,8 @@ void drawShipoly(pppModelSt *mdl, PEiDrawShipoly *p, VEiDrawShipoly *val, VColor
             }
             s0 += val->TexScrollS;
             s1 += val->TexScrollS;
+            do {
+            } while (0);
             if (p->Fade) {
                 fade = 0.0f;
                 fade_add = 2.0f / (vtn - 1);
@@ -867,8 +870,6 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/eiProg/pp
 /* drawShipoly's jump table (jtbl_00469F70) while the function is assembly */
 __asm__(".rdata\n.align 3\n.word .L00182DCC\n.word .L00182DE0\n.word .L00182DF4\n.word .L00182E08\n.word .L00182E1C\n.text\n");
 #endif
-/* Parked: 24 of 674 lines (2026-11-08): register allocation in the inner j loop only, block tree and named locals' registers as the original's .mdebug except the RotTransPersST stv copies (a1/v1 in the original, ours a0/v0): the original never takes v0 there (the (int)a for c0[3]/c1[3] in v1, the linev[0][i] reload in v1, the InterVector address pairs a0/v1, the draw and poly_num reloads a0/a1), ours one register lower (v0/v1/a0); the fix_truncsfsi2 result is local-alloc (v0 is free in its block in ours), the reloads follow allocate_reload_reg's round-robin (last_spill_reg), and in block 72 sched1 issues the table_dr[j] load before s1 + i*16 so its address and linev[0][i] share v0 (the original keeps them apart); tried: line-marker shape (r1 = product; n = r1; r1 = n, the header packet indexed by idx, r -= / *= / += steps in both table loops, r before a, RotTransPersClip as the original's inline at lines 383-421: 36 -> 24), operand/assignment orders, fade/fade_add order, the .mdebug block tree (r1/r2/n in the Gradation block, the packet locals in a block of their own), c0[3]/c1[3] assignment forms, asm clobber forms (no "memory", vf lists); decomp-permuter 15 min (its pycparser base is 136 lines off: no usable gain), tools/permuter.py 15 min (28397 candidates, best 24) */
-#if 0
 void drawDistShipoly(PEiDrawShipoly *p, VEiDrawShipoly *val, VColor *col, sceVu0FVECTOR (*linev)[256]) {
     int poly_num;
     float gradation;
@@ -1113,10 +1114,7 @@ void drawDistShipoly(PEiDrawShipoly *p, VEiDrawShipoly *val, VColor *col, sceVu0
         pppWaitDmaGs();
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly", drawDistShipoly);
-#endif
-/* Parked: 40 of 743 lines (2026-11-08): Type!=0 copy loop: ours hoists li -1 before lui 0x7000 (the original after it: in ours loop pass 1 moves the -1 before the giv init is emitted; spl, a pointer local the .mdebug cannot show at function level, keeps the original's single giv: without it two givs and s3/s4 swap, 89 lines); Type 1 loop: centv giv and &dv swap a0/a1 (&dv is one sp+96 pseudo set in three loops, priority 4*21/56 above the giv's 4*16/47); Thin loop: i*16 in v0 (original a2), so the point/linev givs and &point[0]/&v sit one register up (v1/a0/a1/a2 vs v0/v1/a0/a1); block tree and named locals' registers equal the original's .mdebug; tried: the ref's locals (dvr in the loop bodies, len in the TexRepeat block, linev as the function's static, spl at function level), the line markers' swap order (dvr = dv[1] first, dv0 = dv1 before the swap), spl placement, biv and pointer-arithmetic forms, the [k][3] store forms, asm clobber forms, tools/permuter.py 15 min (44680 candidates, best 40) */
+/* Parked: 2 of 743 lines (2026-11-09): only the Type!=0 copy loop's preheader: ours issues li a2,-1 before lui a1,0x7000 (the original after it, both after the 1.0f): the -1 of the if-converted n < 0 test (made by the first jump pass) is a pass-1 movable, and loop.c emits the strength-reduced giv init after the movables; the original's order fits the -1 moving in loop pass 2, or a giv init that comes first; spl (a pointer local the ref does not list; it has no location, so the .mdebug cannot show it) keeps the single giv: without it two givs, 51 lines; found 2026-11-09: InterVector clobbers "$2" (40 -> 2: the Type 1 and Thin loop registers), frame_ct before smp_num (line markers); tried: spl as a biv (before the for, in the for), spl placements, index forms of the [3] store, forms of the wrap test (one line, ternary, n <= -1, n = smp_num + n), else { if } nesting (lines 1215/1216), do {} while (0) in the loop, decomp-permuter 15 min (its base is 166 lines off in its layout: nothing); earlier: the ref's locals, the line markers' swap order, biv and pointer-arithmetic forms, the [k][3] store forms, tools/permuter.py 15 min */
 #if 0
 void pppEiDrawDrawShipoly(pppPObject *pobj, PEiDrawShipoly *param, pppCtrlTable *ctbl) {
     VEiDrawShipoly *val;
@@ -1139,8 +1137,8 @@ void pppEiDrawDrawShipoly(pppPObject *pobj, PEiDrawShipoly *param, pppCtrlTable 
     val = (VEiDrawShipoly *)&pobj->val[ctbl->useVal[DRAWSHIPOLY_THIS]];
     scl = (VScale *)&pobj->val[ctbl->useVal[DRAWSHIPOLY_SCALE]];
     col = (VColor *)&pobj->val[ctbl->useVal[DRAWSHIPOLY_COLOR]];
-    smp_num = val->SmpNum;
     frame_ct = val->FrameCt - 1;
+    smp_num = val->SmpNum;
     smp = val->Smp;
     poly_num = param->PolyNumH;
     if (!smp) {
