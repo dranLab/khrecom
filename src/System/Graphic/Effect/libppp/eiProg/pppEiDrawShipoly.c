@@ -520,7 +520,7 @@ static void get_st(PEiDrawShipoly *param, float *s_min, float *s_max, float *t_m
     *t_max = tmax - 0.01f;
 }
 
-/* Parked: 58 of 815 lines (2026-11-07): register allocation only, same layout: s1 in $f6 and the inner a1 in $f5 (the original the other way); i*16 for linev[.][i + 1] in a1 (original v1), so ret takes v1 (original a0) and r's mfc1 for InterVector, the 6000000 constant and the packet pointer sit one register lower (a1/v1/a0 vs a3/a0/a1); gradation_fadeout's copy in a1 (original a3); s1 += TexScrollS issued after the Fade test's lbu (original before); tried: the line markers (r1 = product; n = r1; r1 = n with the packet headers indexed by idx, tex0l = tex0h = 0 in one statement, s = s1 before the wrap test, t computed before a0/a1 with t += TexScrollT, t0_ = t1_ = t / s0_ = s1_ = t, c0/c1 before vtn /= 2, s0 += before s1 +=, fade before fade_add, linevw in two steps; 102 -> 58), the RotTransPersClip inline */
+/* Parked: 58 of 815 lines (2026-11-08): register allocation only, same instructions; block tree, locals and their registers as the original's .mdebug except s1 $f6/a1 $f5 (original $f5/$f6: global-alloc priority 4*24/186 for s1 below 3*12/69 for a1; writing a1 = alpha1 before a0 = alpha0 gives the original's registers but issues the two movs in the wrong order, 51 lines) and the first clip's ret v1 (original a0: ret1 priority 30000 is allocated before i*16 at 14210, which then lands in a1, original v1); the gradation_fadeout movz copy is a reload (a1, original a3: reload round-robin); s1 += TexScrollS issued after the Fade test's lbu (original before); tried: the line markers (r1 = product; n = r1; r1 = n with the packet headers indexed by idx, tex0l = tex0h = 0 in one statement, s = s1 before the wrap test, t computed before a0/a1 with t += TexScrollT, t0_ = t1_ = t / s0_ = s1_ = t, c0/c1 before vtn /= 2, s0 += before s1 +=, fade before fade_add, linevw in two steps; 102 -> 58), the RotTransPersClip inline, the .mdebug block tree (omd/mph, r1/r2/n, packet locals in their own blocks) and rate = linevw / (TexRepeat * 0.01f) (the original's rate/39), asm clobber forms (no "memory", vf lists), a0/a1, c0/c1, TexDir and Fade statement orders, tools/permuter.py 15 min (40034 candidates, best 53 by its score: the a1-before-a0 swap), decomp-permuter 15 min (its base is 136 lines off; best -3 there from an invented constant variable: noise) */
 #if 0
 void drawShipoly(pppModelSt *mdl, PEiDrawShipoly *p, VEiDrawShipoly *val, VColor *col, sceVu0FVECTOR (*linev)[256]) {
     int poly_num;
@@ -541,21 +541,6 @@ void drawShipoly(pppModelSt *mdl, PEiDrawShipoly *p, VEiDrawShipoly *val, VColor
     int vtn;
     u_long tex0l;
     u_long tex0h;
-    OMD_H *omd;
-    OMD_PRIM_H *mph;
-    float r1;
-    float r2;
-    int n;
-    sceVu0IVECTOR c1;
-    sceVu0IVECTOR c0;
-    QWdata *packet;
-    QWdata *packet0;
-    QWdata *packet1;
-    int i;
-    int j;
-    int idx;
-    int spad_id;
-    long128 *packet_db[2];
 
     s_add = 0.0f;
     poly_num = p->PolyNumH;
@@ -569,6 +554,9 @@ void drawShipoly(pppModelSt *mdl, PEiDrawShipoly *p, VEiDrawShipoly *val, VColor
         return;
     }
     if (mdl) {
+        OMD_H *omd;
+        OMD_PRIM_H *mph;
+
         omd = mdl->omd;
         mph = (OMD_PRIM_H *)((char *)omd + omd->pa);
         tex0l = mph->tex0l;
@@ -606,6 +594,10 @@ void drawShipoly(pppModelSt *mdl, PEiDrawShipoly *p, VEiDrawShipoly *val, VColor
         }
     }
     if (p->Gradation) {
+        float r1;
+        float r2;
+        int n;
+
         r1 = poly_num * p->GradationCenter;
         n = r1;
         r1 = n;
@@ -622,239 +614,251 @@ void drawShipoly(pppModelSt *mdl, PEiDrawShipoly *p, VEiDrawShipoly *val, VColor
             gradation_del = 1.0f / r2;
         }
     }
-    packet_db[0] = (long128 *)0x70000000;
-    packet_db[1] = (long128 *)0x70002000;
-    packet = (QWdata *)0x70000000;
-    idx = 0;
-    packet[idx].u128 = 0;
-    packet[idx].u32[0] = 0x70000007;
-    idx++;
-    packet[idx].u64[0] = 0x6000000000008001;
-    packet[idx].u64[1] = 0xEEEEEE;
-    idx++;
-    if (!p->ZTest) {
-        packet[idx].u64[0] = 0x7000D;
-        packet[idx].u64[1] = 0x47;
-        idx++;
-    } else {
-        packet[idx].u64[0] = 0x3000D;
-        packet[idx].u64[1] = 0x47;
-        idx++;
-    }
-    packet[idx].u64[0] = ppvZFrameBase | 0x31000000 | 0x100000000;
-    packet[idx].u64[1] = 0x4E;
-    idx++;
-    packet[idx].u32[0] = tex0l;
-    packet[idx].u32[1] = tex0h;
-    packet[idx].u64[1] = 6;
-    idx++;
-    switch (p->AlphaMode) {
-    case 0:
-        packet[idx].u64[0] = 0x8000000044;
-        break;
-    case 1:
-        packet[idx].u64[0] = 0x8000000048;
-        break;
-    case 2:
-        packet[idx].u64[0] = 0x8000000042;
-        break;
-    case 3:
-        packet[idx].u64[0] = 0x8000000041;
-        break;
-    case 4:
-        packet[idx].u64[0] = 0x8000000046;
-        break;
-    }
-    packet[idx].u64[1] = 0x42;
-    idx++;
-    packet[idx].u64[0] = 0x60;
-    packet[idx].u64[1] = 0x14;
-    idx++;
-    packet[idx].u64[0] = 0;
-    packet[idx].u64[1] = 8;
-    idx++;
-    pppSendGsPacket((u_long128 *)0x70000000);
-    pppWaitDmaGs();
-    vtn = p->PolyNumV * 2 + 2;
-    packet0 = (QWdata *)packet_db[0];
-    packet1 = (QWdata *)packet_db[1];
-    packet1->u128 = 0;
-    packet0->u128 = 0;
-    packet0->u32[0] = packet1->u32[0] = 0x70000000 | (vtn * 3 + 1);
-    idx = 1;
-    if (mdl) {
-        packet0[idx].u64[0] = packet1[idx].u64[0] =
-            vtn | 0x8000 | ((u_long)0x5C << 47) | ((u_long)1 << 46) | ((u_long)3 << 60);
-    } else {
-        packet0[idx].u64[0] = packet1[idx].u64[0] =
-            vtn | 0x8000 | ((u_long)0x5C << 47) | ((u_long)1 << 46) | ((u_long)3 << 60);
-    }
-    packet0[idx].u64[1] = packet1[idx].u64[1] = 0x412;
-    c0[0] = col->release_col.r;
-    c0[1] = col->release_col.g;
-    c0[2] = col->release_col.b;
-    c0[3] = col->release_col.a;
-    *(u_long128 *)c1 = *(u_long128 *)c0;
-    vtn /= 2;
-    spad_id = 0;
-    for (i = 0; i < poly_num; i++) {
-        float s0;
-        float s1;
-        int draw;
+    {
+        sceVu0IVECTOR c1;
+        sceVu0IVECTOR c0;
+        QWdata *packet;
+        QWdata *packet0;
+        QWdata *packet1;
+        int i;
+        int j;
+        int idx;
+        int spad_id;
+        long128 *packet_db[2];
 
-        draw = 1;
-        if (p->Gradation) {
-            alpha0 = col->release_col.a * gradation;
-            if (gradation >= 1.0f) {
+        packet_db[0] = (long128 *)0x70000000;
+        packet_db[1] = (long128 *)0x70002000;
+        packet = (QWdata *)0x70000000;
+        idx = 0;
+        packet[idx].u128 = 0;
+        packet[idx].u32[0] = 0x70000007;
+        idx++;
+        packet[idx].u64[0] = 0x6000000000008001;
+        packet[idx].u64[1] = 0xEEEEEE;
+        idx++;
+        if (!p->ZTest) {
+            packet[idx].u64[0] = 0x7000D;
+            packet[idx].u64[1] = 0x47;
+            idx++;
+        } else {
+            packet[idx].u64[0] = 0x3000D;
+            packet[idx].u64[1] = 0x47;
+            idx++;
+        }
+        packet[idx].u64[0] = ppvZFrameBase | 0x31000000 | 0x100000000;
+        packet[idx].u64[1] = 0x4E;
+        idx++;
+        packet[idx].u32[0] = tex0l;
+        packet[idx].u32[1] = tex0h;
+        packet[idx].u64[1] = 6;
+        idx++;
+        switch (p->AlphaMode) {
+        case 0:
+            packet[idx].u64[0] = 0x8000000044;
+            break;
+        case 1:
+            packet[idx].u64[0] = 0x8000000048;
+            break;
+        case 2:
+            packet[idx].u64[0] = 0x8000000042;
+            break;
+        case 3:
+            packet[idx].u64[0] = 0x8000000041;
+            break;
+        case 4:
+            packet[idx].u64[0] = 0x8000000046;
+            break;
+        }
+        packet[idx].u64[1] = 0x42;
+        idx++;
+        packet[idx].u64[0] = 0x60;
+        packet[idx].u64[1] = 0x14;
+        idx++;
+        packet[idx].u64[0] = 0;
+        packet[idx].u64[1] = 8;
+        idx++;
+        pppSendGsPacket((u_long128 *)0x70000000);
+        pppWaitDmaGs();
+        vtn = p->PolyNumV * 2 + 2;
+        packet0 = (QWdata *)packet_db[0];
+        packet1 = (QWdata *)packet_db[1];
+        packet1->u128 = 0;
+        packet0->u128 = 0;
+        packet0->u32[0] = packet1->u32[0] = 0x70000000 | (vtn * 3 + 1);
+        idx = 1;
+        if (mdl) {
+            packet0[idx].u64[0] = packet1[idx].u64[0] =
+                vtn | 0x8000 | ((u_long)0x5C << 47) | ((u_long)1 << 46) | ((u_long)3 << 60);
+        } else {
+            packet0[idx].u64[0] = packet1[idx].u64[0] =
+                vtn | 0x8000 | ((u_long)0x5C << 47) | ((u_long)1 << 46) | ((u_long)3 << 60);
+        }
+        packet0[idx].u64[1] = packet1[idx].u64[1] = 0x412;
+        c0[0] = col->release_col.r;
+        c0[1] = col->release_col.g;
+        c0[2] = col->release_col.b;
+        c0[3] = col->release_col.a;
+        *(u_long128 *)c1 = *(u_long128 *)c0;
+        vtn /= 2;
+        spad_id = 0;
+        for (i = 0; i < poly_num; i++) {
+            float s0;
+            float s1;
+            int draw;
+
+            draw = 1;
+            if (p->Gradation) {
+                alpha0 = col->release_col.a * gradation;
+                if (gradation >= 1.0f) {
+                    if (!gradation_fadeout) {
+                        gradation_fadeout = 1;
+                    }
+                }
                 if (!gradation_fadeout) {
-                    gradation_fadeout = 1;
+                    gradation += gradation_add;
+                } else {
+                    gradation -= gradation_del;
                 }
-            }
-            if (!gradation_fadeout) {
-                gradation += gradation_add;
+                if (gradation < 0.0f) {
+                    gradation = 0.0f;
+                } else if (gradation >= 1.0f) {
+                    gradation = 1.0f;
+                }
+                alpha1 = col->release_col.a * gradation;
             } else {
-                gradation -= gradation_del;
+                alpha1 = alpha0 = col->release_col.a;
             }
-            if (gradation < 0.0f) {
-                gradation = 0.0f;
-            } else if (gradation >= 1.0f) {
-                gradation = 1.0f;
-            }
-            alpha1 = col->release_col.a * gradation;
-        } else {
-            alpha1 = alpha0 = col->release_col.a;
-        }
-        s0 = s;
-        if (p->TexRepeat <= 0.0f) {
-            s1 = s0 + s_add;
-            if (s1 > s_max) {
-                s = s_max;
+            s0 = s;
+            if (p->TexRepeat <= 0.0f) {
+                s1 = s0 + s_add;
+                if (s1 > s_max) {
+                    s = s_max;
+                } else {
+                    s = s1;
+                }
             } else {
+                float linevw;
+                float rate;
+
+                linevw = linev[0][i][3];
+                rate = linevw / (p->TexRepeat * 0.01f);
+                s1 = s0 + (s_max - s_min) * rate;
                 s = s1;
-            }
-        } else {
-            float linevw;
-            float rate;
-
-            linevw = linev[0][i][3];
-            linevw /= p->TexRepeat * 0.01f;
-            rate = (s_max - s_min) * linevw;
-            s1 = s0 + rate;
-            s = s1;
-            if (s1 > s_max) {
-                s = s1 - s_max + s_min;
-            }
-        }
-        s0 += val->TexScrollS;
-        s1 += val->TexScrollS;
-        if (p->Fade) {
-            fade = 0.0f;
-            fade_add = 2.0f / (vtn - 1);
-        }
-        packet = (QWdata *)packet_db[spad_id];
-        spad_id ^= 1;
-        idx = 2;
-        for (j = 0; j < vtn; j++) {
-            sceVu0FVECTOR lv;
-            sceVu0IVECTOR sv0;
-            sceVu0IVECTOR sv1;
-            float r;
-            float a0;
-            float a1;
-            float t;
-            float s0_;
-            float s1_;
-            float t0_;
-            float t1_;
-
-            r = j / (float)(vtn - 1);
-            t = (t_max - t_min) * r + t_min;
-            t += val->TexScrollT;
-            a0 = alpha0;
-            a1 = alpha1;
-            if (p->Fade) {
-                a0 *= fade;
-                a1 *= fade;
-                fade += fade_add;
-                if (fade >= 1.0f) {
-                    fade = 1.0f;
-                    fade_add = -fade_add;
-                } else if (fade <= 0.0f) {
-                    fade = 0.0f;
+                if (s1 > s_max) {
+                    s = s1 - s_max + s_min;
                 }
             }
-            InterVector(lv, linev[1][i], linev[0][i], r);
-            lv[3] = 1.0f;
-            if (!RotTransPersClip(sv0, lv)) {
-                draw = 0;
-                break;
+            s0 += val->TexScrollS;
+            s1 += val->TexScrollS;
+            if (p->Fade) {
+                fade = 0.0f;
+                fade_add = 2.0f / (vtn - 1);
             }
-            InterVector(lv, linev[1][i + 1], linev[0][i + 1], r);
-            lv[3] = 1.0f;
-            if (!RotTransPersClip(sv1, lv)) {
-                draw = 0;
-                break;
+            packet = (QWdata *)packet_db[spad_id];
+            spad_id ^= 1;
+            idx = 2;
+            for (j = 0; j < vtn; j++) {
+                sceVu0FVECTOR lv;
+                sceVu0IVECTOR sv0;
+                sceVu0IVECTOR sv1;
+                float r;
+                float a0;
+                float a1;
+                float t;
+                float s0_;
+                float s1_;
+                float t0_;
+                float t1_;
+
+                r = j / (float)(vtn - 1);
+                t = (t_max - t_min) * r + t_min;
+                t += val->TexScrollT;
+                a0 = alpha0;
+                a1 = alpha1;
+                if (p->Fade) {
+                    a0 *= fade;
+                    a1 *= fade;
+                    fade += fade_add;
+                    if (fade >= 1.0f) {
+                        fade = 1.0f;
+                        fade_add = -fade_add;
+                    } else if (fade <= 0.0f) {
+                        fade = 0.0f;
+                    }
+                }
+                InterVector(lv, linev[1][i], linev[0][i], r);
+                lv[3] = 1.0f;
+                if (!RotTransPersClip(sv0, lv)) {
+                    draw = 0;
+                    break;
+                }
+                InterVector(lv, linev[1][i + 1], linev[0][i + 1], r);
+                lv[3] = 1.0f;
+                if (!RotTransPersClip(sv1, lv)) {
+                    draw = 0;
+                    break;
+                }
+                c0[3] = a0;
+                c1[3] = a1;
+                if (sv0[2] > 24000000) {
+                    draw = 0;
+                    break;
+                }
+                if (sv0[2] > 6000000) {
+                    c0[3] = c0[3] * (1.0f - (sv0[2] - 6000000.0f) / 18000000.0f);
+                }
+                if (sv1[2] > 24000000) {
+                    draw = 0;
+                    break;
+                }
+                if (sv1[2] > 6000000) {
+                    c1[3] = c1[3] * (1.0f - (sv1[2] - 6000000.0f) / 18000000.0f);
+                }
+                if (p->TexDir < 2) {
+                    s0_ = s0;
+                    s1_ = s1;
+                    t0_ = t1_ = t;
+                } else {
+                    s0_ = s1_ = t;
+                    t0_ = s0;
+                    t1_ = s1;
+                }
+                packet[idx].f32[0] = s0_;
+                packet[idx].f32[1] = t0_;
+                packet[idx].f32[2] = 1.0f;
+                packet[idx].u32[3] = 0;
+                idx++;
+                packet[idx++].u128 = *(u_long128 *)c0;
+                packet[idx++].u128 = *(u_long128 *)sv0;
+                packet[idx].f32[0] = s1_;
+                packet[idx].f32[1] = t1_;
+                packet[idx].f32[2] = 1.0f;
+                packet[idx].u32[3] = 0;
+                idx++;
+                packet[idx++].u128 = *(u_long128 *)c1;
+                packet[idx++].u128 = *(u_long128 *)sv1;
             }
-            c0[3] = a0;
-            c1[3] = a1;
-            if (sv0[2] > 24000000) {
-                draw = 0;
-                break;
+            pppWaitDmaGs();
+            if (draw) {
+                pppSendGsPacket((u_long128 *)packet);
             }
-            if (sv0[2] > 6000000) {
-                c0[3] = c0[3] * (1.0f - (sv0[2] - 6000000.0f) / 18000000.0f);
-            }
-            if (sv1[2] > 24000000) {
-                draw = 0;
-                break;
-            }
-            if (sv1[2] > 6000000) {
-                c1[3] = c1[3] * (1.0f - (sv1[2] - 6000000.0f) / 18000000.0f);
-            }
-            if (p->TexDir < 2) {
-                s0_ = s0;
-                s1_ = s1;
-                t0_ = t1_ = t;
-            } else {
-                s0_ = s1_ = t;
-                t0_ = s0;
-                t1_ = s1;
-            }
-            packet[idx].f32[0] = s0_;
-            packet[idx].f32[1] = t0_;
-            packet[idx].f32[2] = 1.0f;
-            packet[idx].u32[3] = 0;
-            idx++;
-            packet[idx++].u128 = *(u_long128 *)c0;
-            packet[idx++].u128 = *(u_long128 *)sv0;
-            packet[idx].f32[0] = s1_;
-            packet[idx].f32[1] = t1_;
-            packet[idx].f32[2] = 1.0f;
-            packet[idx].u32[3] = 0;
-            idx++;
-            packet[idx++].u128 = *(u_long128 *)c1;
-            packet[idx++].u128 = *(u_long128 *)sv1;
         }
         pppWaitDmaGs();
-        if (draw) {
-            pppSendGsPacket((u_long128 *)packet);
-        }
-    }
-    pppWaitDmaGs();
-    if (!ppvUserStopPartF && !(ppvMng->bFlagStop || ppvMng->bBoolSlow)) {
-        val->TexScrollT += p->TexScrollT;
-        val->TexScrollS += p->TexScrollS;
-        while (val->TexScrollT > 1.0f) {
-            val->TexScrollT -= 1.0f;
-        }
-        while (val->TexScrollT < 0.0f) {
-            val->TexScrollT += 1.0f;
-        }
-        while (val->TexScrollS > 1.0f) {
-            val->TexScrollS -= 1.0f;
-        }
-        while (val->TexScrollS < 0.0f) {
-            val->TexScrollS += 1.0f;
+        if (!ppvUserStopPartF && !(ppvMng->bFlagStop || ppvMng->bBoolSlow)) {
+            val->TexScrollT += p->TexScrollT;
+            val->TexScrollS += p->TexScrollS;
+            while (val->TexScrollT > 1.0f) {
+                val->TexScrollT -= 1.0f;
+            }
+            while (val->TexScrollT < 0.0f) {
+                val->TexScrollT += 1.0f;
+            }
+            while (val->TexScrollS > 1.0f) {
+                val->TexScrollS -= 1.0f;
+            }
+            while (val->TexScrollS < 0.0f) {
+                val->TexScrollS += 1.0f;
+            }
         }
     }
 }
@@ -863,7 +867,7 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/eiProg/pp
 /* drawShipoly's jump table (jtbl_00469F70) while the function is assembly */
 __asm__(".rdata\n.align 3\n.word .L00182DCC\n.word .L00182DE0\n.word .L00182DF4\n.word .L00182E08\n.word .L00182E1C\n.text\n");
 #endif
-/* Parked: 24 of 674 lines (2026-11-07): register allocation in the inner j loop only: the original never takes v0 there (the (int)a for c0[3]/c1[3] in v1, the linev[0][i] reload in v1, the InterVector address pairs a0/v1, the RotTransPersST packet pointer a1/v1, the draw and poly_num reloads a0/a1), ours one register lower (v0/v1/a0); the fix_truncsfsi2 result and its scratch are local-alloc, the reloads follow the spill-reg order; tried: line-marker shape (r1 = product; n = r1; r1 = n, the header packet indexed by idx, r -= / *= / += steps in both table loops, r before a, RotTransPersClip as the original's inline at lines 383-421: 36 -> 24), operand/assignment orders, fade/fade_add order; decomp-permuter 15 min (its pycparser base is 136 lines off: no usable gain), tools/permuter.py 15 min (28397 candidates, best 24) */
+/* Parked: 24 of 674 lines (2026-11-08): register allocation in the inner j loop only, block tree and named locals' registers as the original's .mdebug except the RotTransPersST stv copies (a1/v1 in the original, ours a0/v0): the original never takes v0 there (the (int)a for c0[3]/c1[3] in v1, the linev[0][i] reload in v1, the InterVector address pairs a0/v1, the draw and poly_num reloads a0/a1), ours one register lower (v0/v1/a0); the fix_truncsfsi2 result is local-alloc (v0 is free in its block in ours), the reloads follow allocate_reload_reg's round-robin (last_spill_reg), and in block 72 sched1 issues the table_dr[j] load before s1 + i*16 so its address and linev[0][i] share v0 (the original keeps them apart); tried: line-marker shape (r1 = product; n = r1; r1 = n, the header packet indexed by idx, r -= / *= / += steps in both table loops, r before a, RotTransPersClip as the original's inline at lines 383-421: 36 -> 24), operand/assignment orders, fade/fade_add order, the .mdebug block tree (r1/r2/n in the Gradation block, the packet locals in a block of their own), c0[3]/c1[3] assignment forms, asm clobber forms (no "memory", vf lists); decomp-permuter 15 min (its pycparser base is 136 lines off: no usable gain), tools/permuter.py 15 min (28397 candidates, best 24) */
 #if 0
 void drawDistShipoly(PEiDrawShipoly *p, VEiDrawShipoly *val, VColor *col, sceVu0FVECTOR (*linev)[256]) {
     int poly_num;
@@ -876,21 +880,6 @@ void drawDistShipoly(PEiDrawShipoly *p, VEiDrawShipoly *val, VColor *col, sceVu0
     int vtn;
     sceVu0FVECTOR st_scl;
     sceVu0FVECTOR st_sub;
-    float r1;
-    float r2;
-    int n;
-    sceVu0IVECTOR c1;
-    sceVu0IVECTOR c0;
-    QWdata *packet;
-    QWdata *packet0;
-    QWdata *packet1;
-    int i;
-    int j;
-    int idx;
-    int spad_id;
-    long128 *packet_db[2];
-    float table_r[16];
-    float table_dr[16];
 
     poly_num = p->PolyNumH;
     gradation = 1.0f;
@@ -911,6 +900,10 @@ void drawDistShipoly(PEiDrawShipoly *p, VEiDrawShipoly *val, VColor *col, sceVu0
     }
     st_scl[1] = st_scl[0] = 1.0f / 1024.0f;
     if (p->Gradation) {
+        float r1;
+        float r2;
+        int n;
+
         r1 = poly_num * p->GradationCenter;
         n = r1;
         r1 = n;
@@ -927,188 +920,203 @@ void drawDistShipoly(PEiDrawShipoly *p, VEiDrawShipoly *val, VColor *col, sceVu0
             gradation_del = 1.0f / r2;
         }
     }
-    packet_db[0] = (long128 *)0x70000000;
-    packet_db[1] = (long128 *)0x70002000;
-    packet = (QWdata *)0x70000000;
-    idx = 0;
-    packet[idx].u128 = 0;
-    packet[idx].u32[0] = 0x70000008;
-    idx++;
-    packet[idx].u64[0] = 0x7000000000008001;
-    packet[idx].u64[1] = 0xEEEEEEE;
-    idx++;
-    if (!p->ZTest) {
-        packet[idx].u64[0] = 0x7000D;
-        packet[idx].u64[1] = 0x47;
-        idx++;
-    } else {
-        packet[idx].u64[0] = 0x3000D;
-        packet[idx].u64[1] = 0x47;
-        idx++;
-    }
-    packet[idx].u64[0] = ppvZFrameBase | 0x31000000 | 0x100000000;
-    packet[idx].u64[1] = 0x4E;
-    idx++;
-    if (p->DistMode == 1) {
-        packet[idx].u64[0] = (u_long)(ppvDrawFrameBase << 5) | ((u_long)(ppvDrawWidth / 64) << 14) | ((u_long)10 << 26) |
-                           ((u_long)10 << 30);
-    } else {
-        packet[idx].u64[0] = (u_long)(ppvDispFrameBase << 5) | ((u_long)(ppvDispWidth / 64) << 14) | ((u_long)10 << 26) |
-                           ((u_long)10 << 30);
-    }
-    packet[idx].u64[1] = 6;
-    idx++;
-    switch (p->AlphaMode) {
-    case 0:
-        packet[idx].u64[0] = 0x8000000044;
-        break;
-    case 1:
-        packet[idx].u64[0] = 0x8000000048;
-        break;
-    case 2:
-        packet[idx].u64[0] = 0x8000000042;
-        break;
-    }
-    packet[idx].u64[1] = 0x42;
-    idx++;
-    packet[idx].u64[0] = 0x60;
-    packet[idx].u64[1] = 0x14;
-    idx++;
-    packet[idx].u64[0] = 0;
-    packet[idx].u64[1] = 8;
-    idx++;
-    packet[idx].u64[0] = 0;
-    packet[idx].u64[1] = 0x3F;
-    idx++;
-    pppSendGsPacket((u_long128 *)0x70000000);
-    pppWaitDmaGs();
-    vtn = p->PolyNumV * 2 + 2;
-    packet0 = (QWdata *)packet_db[0];
-    packet1 = (QWdata *)packet_db[1];
-    packet1->u128 = 0;
-    packet0->u128 = 0;
-    packet0->u32[0] = packet1->u32[0] = 0x70000000 | (vtn * 3 + 1);
-    packet0[1].u64[0] = packet1[1].u64[0] =
-        vtn | 0x8000 | ((u_long)0x5C << 47) | ((u_long)1 << 46) | ((u_long)3 << 60);
-    packet0[1].u64[1] = packet1[1].u64[1] = 0x412;
-    vtn = (u_int)vtn >> 1;
-    c0[0] = col->release_col.r;
-    c0[1] = col->release_col.g;
-    c0[2] = col->release_col.b;
-    c0[3] = col->release_col.a;
-    *(u_long128 *)c1 = *(u_long128 *)c0;
-    for (j = 0; j < vtn; j++) {
-        float r;
+    {
+        sceVu0IVECTOR c1;
+        sceVu0IVECTOR c0;
+        QWdata *packet;
+        QWdata *packet0;
+        QWdata *packet1;
+        int i;
+        int j;
+        int idx;
+        int spad_id;
+        long128 *packet_db[2];
+        float table_r[16];
+        float table_dr[16];
 
-        r = j / (float)(vtn - 1);
-        table_r[j] = r;
-        if (!p->Gradation) {
-            r -= 0.5f;
-            r *= val->Dist + 1.0f;
-            r += 0.5f;
-            table_dr[j] = r;
+        packet_db[0] = (long128 *)0x70000000;
+        packet_db[1] = (long128 *)0x70002000;
+        packet = (QWdata *)0x70000000;
+        idx = 0;
+        packet[idx].u128 = 0;
+        packet[idx].u32[0] = 0x70000008;
+        idx++;
+        packet[idx].u64[0] = 0x7000000000008001;
+        packet[idx].u64[1] = 0xEEEEEEE;
+        idx++;
+        if (!p->ZTest) {
+            packet[idx].u64[0] = 0x7000D;
+            packet[idx].u64[1] = 0x47;
+            idx++;
+        } else {
+            packet[idx].u64[0] = 0x3000D;
+            packet[idx].u64[1] = 0x47;
+            idx++;
         }
-    }
-    spad_id = 0;
-    for (i = 0; i < poly_num; i++) {
-        int draw;
-
-        draw = 1;
-        if (p->Gradation) {
+        packet[idx].u64[0] = ppvZFrameBase | 0x31000000 | 0x100000000;
+        packet[idx].u64[1] = 0x4E;
+        idx++;
+        if (p->DistMode == 1) {
+            packet[idx].u64[0] = (u_long)(ppvDrawFrameBase << 5) | ((u_long)(ppvDrawWidth / 64) << 14) | ((u_long)10 << 26) |
+                               ((u_long)10 << 30);
+        } else {
+            packet[idx].u64[0] = (u_long)(ppvDispFrameBase << 5) | ((u_long)(ppvDispWidth / 64) << 14) | ((u_long)10 << 26) |
+                               ((u_long)10 << 30);
+        }
+        packet[idx].u64[1] = 6;
+        idx++;
+        switch (p->AlphaMode) {
+        case 0:
+            packet[idx].u64[0] = 0x8000000044;
+            break;
+        case 1:
+            packet[idx].u64[0] = 0x8000000048;
+            break;
+        case 2:
+            packet[idx].u64[0] = 0x8000000042;
+            break;
+        }
+        packet[idx].u64[1] = 0x42;
+        idx++;
+        packet[idx].u64[0] = 0x60;
+        packet[idx].u64[1] = 0x14;
+        idx++;
+        packet[idx].u64[0] = 0;
+        packet[idx].u64[1] = 8;
+        idx++;
+        packet[idx].u64[0] = 0;
+        packet[idx].u64[1] = 0x3F;
+        idx++;
+        pppSendGsPacket((u_long128 *)0x70000000);
+        pppWaitDmaGs();
+        vtn = p->PolyNumV * 2 + 2;
+        packet0 = (QWdata *)packet_db[0];
+        packet1 = (QWdata *)packet_db[1];
+        packet1->u128 = 0;
+        packet0->u128 = 0;
+        packet0->u32[0] = packet1->u32[0] = 0x70000000 | (vtn * 3 + 1);
+        packet0[1].u64[0] = packet1[1].u64[0] =
+            vtn | 0x8000 | ((u_long)0x5C << 47) | ((u_long)1 << 46) | ((u_long)3 << 60);
+        packet0[1].u64[1] = packet1[1].u64[1] = 0x412;
+        vtn = (u_int)vtn >> 1;
+        c0[0] = col->release_col.r;
+        c0[1] = col->release_col.g;
+        c0[2] = col->release_col.b;
+        c0[3] = col->release_col.a;
+        *(u_long128 *)c1 = *(u_long128 *)c0;
+        for (j = 0; j < vtn; j++) {
             float r;
 
-            if (gradation >= 1.0f) {
-                if (!gradation_fadeout) {
-                    gradation_fadeout = 1;
-                }
-            }
-            if (!gradation_fadeout) {
-                gradation += gradation_add;
-            } else {
-                gradation -= gradation_del;
-            }
-            if (gradation < 0.0f) {
-                gradation = 0.0f;
-            } else if (gradation >= 1.0f) {
-                gradation = 1.0f;
-            }
-            for (j = 0; j < vtn; j++) {
-                r = table_r[j];
+            r = j / (float)(vtn - 1);
+            table_r[j] = r;
+            if (!p->Gradation) {
                 r -= 0.5f;
-                r *= val->Dist * gradation + 1.0f;
+                r *= val->Dist + 1.0f;
                 r += 0.5f;
                 table_dr[j] = r;
             }
         }
-        if (p->Fade) {
-            fade = 0.0f;
-            fade_add = 2.0f / (vtn - 1);
-        }
-        packet = (QWdata *)packet_db[spad_id];
-        spad_id ^= 1;
-        {
-            idx = 2;
+        spad_id = 0;
+        for (i = 0; i < poly_num; i++) {
+            int draw;
 
-            for (j = 0; j < vtn; j++) {
-                sceVu0FVECTOR lv;
-                sceVu0IVECTOR sv0;
-                sceVu0IVECTOR sv1;
-                float a;
+            draw = 1;
+            if (p->Gradation) {
                 float r;
 
-                r = table_r[j];
-                a = col->release_col.a;
-                if (p->Fade) {
-                    a *= fade;
-                    fade += fade_add;
-                    if (fade >= 1.0f) {
-                        fade = 1.0f;
-                        fade_add = -fade_add;
-                    } else if (fade <= 0.0f) {
-                        fade = 0.0f;
+                if (gradation >= 1.0f) {
+                    if (!gradation_fadeout) {
+                        gradation_fadeout = 1;
                     }
                 }
-                c0[3] = c1[3] = a;
-                InterVector(lv, linev[1][i], linev[0][i], r);
-                lv[3] = 1.0f;
-                if (!RotTransPersClip(sv0, lv)) {
-                    draw = 0;
-                    break;
+                if (!gradation_fadeout) {
+                    gradation += gradation_add;
+                } else {
+                    gradation -= gradation_del;
                 }
-                InterVector(lv, linev[1][i + 1], linev[0][i + 1], r);
-                lv[3] = 1.0f;
-                if (!RotTransPersClip(sv1, lv)) {
-                    draw = 0;
-                    break;
+                if (gradation < 0.0f) {
+                    gradation = 0.0f;
+                } else if (gradation >= 1.0f) {
+                    gradation = 1.0f;
                 }
-                r = table_dr[j];
-                InterVector(lv, linev[1][i], linev[0][i], r);
-                lv[3] = 1.0f;
-                RotTransPersST(packet[idx++].f32, lv, st_sub, st_scl);
-                packet[idx++].u128 = *(u_long128 *)c0;
-                sv0[0] -= 8;
-                sv0[1] -= 8;
-                packet[idx++].u128 = *(u_long128 *)sv0;
-                InterVector(lv, linev[1][i + 1], linev[0][i + 1], r);
-                lv[3] = 1.0f;
-                RotTransPersST(packet[idx++].f32, lv, st_sub, st_scl);
-                packet[idx++].u128 = *(u_long128 *)c1;
-                sv1[0] -= 8;
-                sv1[1] -= 8;
-                packet[idx++].u128 = *(u_long128 *)sv1;
+                for (j = 0; j < vtn; j++) {
+                    r = table_r[j];
+                    r -= 0.5f;
+                    r *= val->Dist * gradation + 1.0f;
+                    r += 0.5f;
+                    table_dr[j] = r;
+                }
+            }
+            if (p->Fade) {
+                fade = 0.0f;
+                fade_add = 2.0f / (vtn - 1);
+            }
+            packet = (QWdata *)packet_db[spad_id];
+            spad_id ^= 1;
+            {
+                idx = 2;
+
+                for (j = 0; j < vtn; j++) {
+                    sceVu0FVECTOR lv;
+                    sceVu0IVECTOR sv0;
+                    sceVu0IVECTOR sv1;
+                    float a;
+                    float r;
+
+                    r = table_r[j];
+                    a = col->release_col.a;
+                    if (p->Fade) {
+                        a *= fade;
+                        fade += fade_add;
+                        if (fade >= 1.0f) {
+                            fade = 1.0f;
+                            fade_add = -fade_add;
+                        } else if (fade <= 0.0f) {
+                            fade = 0.0f;
+                        }
+                    }
+                    c0[3] = c1[3] = a;
+                    InterVector(lv, linev[1][i], linev[0][i], r);
+                    lv[3] = 1.0f;
+                    if (!RotTransPersClip(sv0, lv)) {
+                        draw = 0;
+                        break;
+                    }
+                    InterVector(lv, linev[1][i + 1], linev[0][i + 1], r);
+                    lv[3] = 1.0f;
+                    if (!RotTransPersClip(sv1, lv)) {
+                        draw = 0;
+                        break;
+                    }
+                    r = table_dr[j];
+                    InterVector(lv, linev[1][i], linev[0][i], r);
+                    lv[3] = 1.0f;
+                    RotTransPersST(packet[idx++].f32, lv, st_sub, st_scl);
+                    packet[idx++].u128 = *(u_long128 *)c0;
+                    sv0[0] -= 8;
+                    sv0[1] -= 8;
+                    packet[idx++].u128 = *(u_long128 *)sv0;
+                    InterVector(lv, linev[1][i + 1], linev[0][i + 1], r);
+                    lv[3] = 1.0f;
+                    RotTransPersST(packet[idx++].f32, lv, st_sub, st_scl);
+                    packet[idx++].u128 = *(u_long128 *)c1;
+                    sv1[0] -= 8;
+                    sv1[1] -= 8;
+                    packet[idx++].u128 = *(u_long128 *)sv1;
+                }
+            }
+            pppWaitDmaGs();
+            if (draw) {
+                pppSendGsPacket((u_long128 *)packet);
             }
         }
         pppWaitDmaGs();
-        if (draw) {
-            pppSendGsPacket((u_long128 *)packet);
-        }
     }
-    pppWaitDmaGs();
 }
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly", drawDistShipoly);
 #endif
-/* Parked: 40 of 743 lines (2026-11-07): Type!=0 copy loop: ours hoists li -1 before lui 0x7000 (the original after it; spl is not an original local, but without it the loop gets two givs and s3/s4 swap: 89 lines); Type 1 loop: centv giv and &dv swap a0/a1; Thin loop: i*16 in v0 (original a2), so the point/linev givs and &point[0]/&v sit one register up (v1/a0/a1/a2 vs v0/v1/a0/a1); tried: the ref's locals (dvr in both blocks, len for Distance, linev as the function's static), the line markers' swap order (dvr = dv[1] first, dv0 = dv1 before the swap), spl placement and the [k][3] store forms */
+/* Parked: 40 of 743 lines (2026-11-08): Type!=0 copy loop: ours hoists li -1 before lui 0x7000 (the original after it: in ours loop pass 1 moves the -1 before the giv init is emitted; spl, a pointer local the .mdebug cannot show at function level, keeps the original's single giv: without it two givs and s3/s4 swap, 89 lines); Type 1 loop: centv giv and &dv swap a0/a1 (&dv is one sp+96 pseudo set in three loops, priority 4*21/56 above the giv's 4*16/47); Thin loop: i*16 in v0 (original a2), so the point/linev givs and &point[0]/&v sit one register up (v1/a0/a1/a2 vs v0/v1/a0/a1); block tree and named locals' registers equal the original's .mdebug; tried: the ref's locals (dvr in the loop bodies, len in the TexRepeat block, linev as the function's static, spl at function level), the line markers' swap order (dvr = dv[1] first, dv0 = dv1 before the swap), spl placement, biv and pointer-arithmetic forms, the [k][3] store forms, asm clobber forms, tools/permuter.py 15 min (44680 candidates, best 40) */
 #if 0
 void pppEiDrawDrawShipoly(pppPObject *pobj, PEiDrawShipoly *param, pppCtrlTable *ctbl) {
     VEiDrawShipoly *val;
@@ -1126,7 +1134,7 @@ void pppEiDrawDrawShipoly(pppPObject *pobj, PEiDrawShipoly *param, pppCtrlTable 
     int j;
     int k;
     int n;
-    float len;
+    sceVu0FVECTOR *spl;
 
     val = (VEiDrawShipoly *)&pobj->val[ctbl->useVal[DRAWSHIPOLY_THIS]];
     scl = (VScale *)&pobj->val[ctbl->useVal[DRAWSHIPOLY_SCALE]];
@@ -1183,8 +1191,6 @@ void pppEiDrawDrawShipoly(pppPObject *pobj, PEiDrawShipoly *param, pppCtrlTable 
             }
         }
     } else if (val->GetPosCt >= 3) {
-        sceVu0FVECTOR *spl;
-
         for (k = 0; k < val->GetPosCt; k++) {
             spl = &((sceVu0FVECTOR *)0x70000000)[k];
             n = frame_ct - k;
@@ -1202,6 +1208,8 @@ void pppEiDrawDrawShipoly(pppPObject *pobj, PEiDrawShipoly *param, pppCtrlTable 
             ApplyMatrix(centv[k], cnv_mat, centv[k]);
         }
         if (param->TexRepeat > 0.0f) {
+            float len;
+
             for (k = 0; k < poly_num; k++) {
                 Distance(len, centv[k], centv[k + 1]);
                 centv[k][3] = len;
@@ -1215,12 +1223,13 @@ void pppEiDrawDrawShipoly(pppPObject *pobj, PEiDrawShipoly *param, pppCtrlTable 
             sceVu0FVECTOR pos0;
             sceVu0FVECTOR pos1;
             float width;
-            float dvr;
 
             *(u_long128 *)dv1 = 0;
             *(u_long128 *)dv0 = 0;
             width = param->Width * scl->scl.x * ppvParScl[0];
             for (k = 0; k < poly_num + 1; k++) {
+                float dvr;
+
                 if (k == poly_num) {
                     SubVector(dv, centv[poly_num - 1], centv[poly_num]);
                 } else {
@@ -1248,12 +1257,13 @@ void pppEiDrawDrawShipoly(pppPObject *pobj, PEiDrawShipoly *param, pppCtrlTable 
             sceVu0FVECTOR pos0;
             sceVu0FVECTOR pos1;
             float width;
-            float dvr;
 
             *(u_long128 *)dv1 = 0;
             *(u_long128 *)dv0 = 0;
             width = param->Width * scl->scl.x * ppvParScl[0];
             for (k = 0; k < poly_num + 1; k++) {
+                float dvr;
+
                 if (k == poly_num) {
                     dv1[0] = dv1[2] = 0.0f;
                 } else {
