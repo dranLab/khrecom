@@ -33,7 +33,6 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `System/Graphic/Effect/libppp/keProg/KeTh` | 1 | 685 | 1 |  |
 | `System/Graphic/FrecFont` | 1 | 656 | 1 |  |
 | `System/Graphic/HermitePathCamera` | 1 | 632 | 1 |  |
-| `Form/DebugWindow` | 1 | 549 | 1 |  |
 | `System/Graphic/Effect/libppp/keProg/pppKeShpTail3X` | 1 | 532 | 1 |  |
 | `Game/Player/PlayerRiku` | 1 | 520 | 1 |  |
 | `System/Graphic/Effect/libppp/keProg/pppKeShpTail3` | 1 | 514 | 1 |  |
@@ -42,7 +41,6 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `Game/Collision/CollMap` | 2 | 365 | 2 |  |
 | `Game/SceneInfo` | 2 | 314 | 2 |  |
 | `System/Graphic/Effect/libppp/partMng` | 1 | 292 | 1 |  |
-| `Game/Collision/CollDisp` | 2 | 262 | 2 |  |
 | `System/Graphic/DispList` | 1 | 245 | 1 |  |
 | `System/Math3D` | 1 | 234 | 1 |  |
 | `System/Graphic/ModelMan` | 1 | 204 | 1 |  |
@@ -92,8 +90,6 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Game/Map` | `disp__4CMap` | 906 | 709 of 1308 lines, 44 bytes short - structure as the original (debug clamp, shader modes, group selection by player position, pipelined kick/resultCheckBBox display via group table or grid, sky polygons). The 44 bytes: the original keeps two copies of the "flush the last model" block (group and … |
 | `Game/SceneInfo` | `clear__10CSceneInfo` | 139 | 113 lines, 4 bytes long, frame 144 for 128 - the first run of stores: the original reloads m_pMCWork before each store (the *(T*)& scalar stores give that) but keeps two -1 registers and seven s-registers for the %hi parts; statement orders (incl. the lui order) and 7 min of permuter (10k … |
 | `Game/SceneInfo` | `rollbackEventDoorState__10CSceneInfoi` | 175 | ~35 lines - the outer room loop: the original re-materializes the s_CurrentFloor address for the room (mtlo/madd) and for the count each iteration; ours shares one base. Door/state/norma logic matches; room addressing forms and 5 min of permuter (42 -> 38) did not get it. |
-| `Game/Collision/CollDisp` | `setAttackLines__9CCollDispP14CCollisionList` | 167 | 62 of 178 lines - logic and jump table match; `this`, the collision and the end position take other registers. Tried (2026-11-02): pColl/type declaration order (62), inline getCollision()/getType() calls without locals as the ref's locals suggest (104). |
-| `Game/Collision/CollDisp` | `setBodyLines__9CCollDispP14CCollisionList` | 95 | 38 of 105 lines (2026-11-07), same size: the s registers come out rotated by one through the loop (this s1 for s2, ...). The ref has no pColl/type locals but dropping either is worse (53-66); swapping their declarations: 38-39. |
 | `Game/Collision/CollMap` | `collideRide__8CCollMapi` | 224 | (comment) collideRide and collideRideR2 don't match yet. collideRide: the original's `pRideAtari = NULL` store is not a "fixed scalar" to the scheduler (it is ordered before the coll constructor's stores), as if pRideAtari's address had been taken before; every way of doing that here also moves … |
 | `Game/Collision/CollMap` | `collideRideR2__8CCollMapR10CCollisionPP5CRidei` | 141 |  |
 | `Game/Atel/Atel` | `setScreenFader__5CAtelifi` | 189 | 37 of 206 lines, 16 bytes short - logic, switch and jump table match. Left: the original computes the layer as `beqz; b then (li v0,1); else: b end (li 1); then: li 10` (a jump-evaluated boolean threaded away) and keeps nLayer in s1; ours branches once, which rotates the s-registers … |
@@ -102,12 +98,11 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Game/Player/PlayerRiku` | `setMagic__Q22PL11CPlayerRikuiii` | 520 | (comment) Best attempt (same structure): BULLET_PARAM field stores and the attack-power loads are scheduled differently. |
 | `Game/Enemy/EnemyWhitemushroom` | `damage___19CEnemyWhitemushroom` | 184 | 3 of 211 lines (2026-11-07): case 4, the vptr load for getLockOnPos comes after all six setupFade stores, the original has it right after the two TIMEQ stores (sw 284/280) and before swc1 268, sw 288, sw 228, sw 272; tried: all store orders, flag forms, barriers, temporaries, call forms, pointer … |
 | `Game/Enemy/HumanBoss` | `setupAct__10CHumanBoss` | 181 | 18 of 205 lines (2026-11-08): the normal arm's -1 (sMin/sMax, lines 656/657) is its own pass-1 movable in the original (li s4,-1 after li s5,1); ours is combined into the compares' SImode -1 (loop.c combine_movables, -dL "matches 53"). combine_movables only refuses a later movable that is set … |
-| `Form/DebugWindow` | `disp__12CDebugWindow` | 549 | (comment) Close: the reload registers of the spilled WW/sign (t0 instead of a3) and the loop's line-font position stores (G_XYZ pointer formed before the x store) differ. |
 | `Form/Menu/Camp` | `setTechWin__5CCampi` | 551 | 36 of 617 lines, same size (2026-11-08; drop the data block after the INCLUDE_ASM to build the draft): s-register roles in the sleight-list loop and one store order. The original increments nTechSelectTop in place before getName (s6, delay slot) and keeps i + 1 in s7 (i in s4, reused for … |
 | `Form/Menu/Camp` | `setMapCardWin__5CCampi` | 1227 | 23 of 1407 lines (2026-11-08; drop the data block after the INCLUDE_ASM to build the draft): only the spill slots of seven PRE-hoisted values differ (orig 0x74 &m_pMCInfoNumFnt, 0x78 &m_nMapKind, 0x7c i + 1, 0x80 nKind - 161, 0x84 &m_pMCCard, 0x88 &m_pMCFnt, 0x8c &m_pMCInfoNumCtrl; ours 0x74 … |
 | `Form/Menu/RoomCreation` | `menuMain__13CRoomCreation` | 1995 | (comment) menuMain: 78 of 2211 lines, 8 bytes short (92 and 0x50 short before _NORMA_PIECES, 2026-11-07): the by-value NormaSrc arguments are written out now; left: case 0's registers (v1 + s7 where the original keeps a0, s4/s6/s8 from there). To enable this draft, also drop the data block after … |
 
-Totals: 41 functions (23038 instructions) in 31 units, 41 of them parked; 1 units take a data section from assembly.
+Totals: 38 functions (22227 instructions) in 29 units, 38 of them parked; 1 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->
