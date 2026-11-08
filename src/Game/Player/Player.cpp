@@ -5046,26 +5046,6 @@ FLOAT CPlayer::getDefAttr(ATK_ATTR inAttr) const {
     if ((UINT)inAttr < 6) return m_fDefAttr[inAttr];
     return m_fDefAttr[5];
 }
-/* placeholder: rodata of chkDamage__7CPlayer */
-__asm__(".rdata\n");
-inline void _roPh20() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
-    TRACE("CPlayer:: (initDamage)\n");
-    TRACE("-------- Damege Info ------------------\n");
-    TRACE("Sora : HP = %d/%d\n");
-    TRACE("Riku : HP = %d/%d, DP = %d/%d,\n");
-    TRACE("Riku : HP = %d/%d\n");
-    TRACE("Flag PL  : 0x%08x\n");
-    TRACE("Flag CON : 0x%08x\n");
-    TRACE("Flag TRG : 0x%08x\n");
-    TRACE("Flag BTL : 0x%08x\n");
-    TRACE("---------------------------------------\n");
-    TRACE("CPlayer::chkDamage(); ++++ DEAD ++++\n");
-    TRACE("CPlayer::chkDamage(); NG = Now Card Play TRG!!\n");
-    TRACE("CPlayer::chkDamage(); NG = Now Card Play!\n");
-    TRACE("CPlayer::chkDamage(); [REFRECT]  x(Now Card Play TRG)\n");
-    TRACE("CPlayer::chkDamage(); [REFRECT]  x(Now Card Play)\n");
-    TRACE("PL::chkDamage(); kind=%d, \x81\xa6\x96\xa2\x8d\xec\x90\xac\x81i\x82\xc6\x82\xe8\x82\xa0\x82\xa6\x82\xb8\x8f\xac\x83_\x83\x81\x81[\x83W\x88\xb5\x82\xa2\x81j\n");
-}
 BOOL CPlayer::chkDamage() {
     INT face;
     FVECTOR dir;
