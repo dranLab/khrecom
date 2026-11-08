@@ -260,20 +260,21 @@ static void channel_conv_joint(At3Work *w);
 static int gainc_window(char *ch, int band);
 static void f2t_nodata(At3Band *bands, int band);
 
-/* Parked: 40 of 123 lines (2026-11-08; 63 before: the band address as an integer sum offset first, the joint[1]
-   gains, their deltas and the loop's weights in one variable each (h0: t1, h1: t3), d/c/nd computed in the
-   original's orders, pr set before the deltas and stepped as a pointer): only the global-alloc order differs,
-   ours allocates pr, then the loop gains n1, n0 (short-lived, priority 1.78/1.42/1.23) before h0, h1 and the c's;
-   the original gives cg1 a1, cw1 a2, cg0 a3, cw0 t0, h0 t1, pr t2, h1 t3, n1 t4, n0 t5; tried: c and increment
-   orders, increments at the loop end */
+/* Parked: 1 of 122 lines (2026-11-08; 63 before: the band address as an integer sum offset first, the deltas of
+   the joint[1] gains computed in their variables h0/h1, separate loop weights n0/n1 and gains r0/r1, d/c/nd in
+   the original's orders, pr set before the deltas and stepped as a pointer, the h and g loads in index order, the
+   m terms y first): only m's addu has its operands swapped (original x-part + y-part into the y-part's v0; with
+   the x term first local-alloc ties m to the x-part and x/y change registers, 12 lines); tried: m as two
+   statements, products in x/y or in temporaries, operand orders of each product */
 #if 0
 static void channel_conv_joint(At3Work *w)
 {
     int band;
     int k;
     unsigned short w0, w1, g0, g1;
-    unsigned short n0, n1, h0, h1;
+    unsigned short h0, h1;
     unsigned short dw0, dw1;
+    unsigned short n0, n1, r0, r1;
     int cw0, cw1, cg0, cg1;
     int ndw0, ndw1, ndg0, ndg1;
     unsigned short *pw;
@@ -291,12 +292,12 @@ static void channel_conv_joint(At3Work *w)
         h1 = 0x8000;
         h0 = 0x8000;
         if (band >= w->joint[1].n) {
-            h1 = w->joint[1].g[1];
             h0 = w->joint[1].g[0];
+            h1 = w->joint[1].g[1];
         }
         if (band >= w->joint[0].n) {
-            g1 = w->joint[0].g[1];
             g0 = w->joint[0].g[0];
+            g1 = w->joint[0].g[1];
         }
         nw = w->joint[1].w[band];
         pw = w->joint[0].w[band];
@@ -316,15 +317,15 @@ static void channel_conv_joint(At3Work *w)
         ndg0 = -h0;
         ndw0 = -dw0;
         for (k = 0; k < 256; k++) {
-            h1 = w0;
-            n0 = g0;
-            h0 = w1;
-            n1 = g1;
+            n0 = w0;
+            r0 = g0;
+            n1 = w1;
+            r1 = g1;
             if (k - 8 < 0) {
-                h1 = cw0;
-                n0 = cg0;
-                h0 = cw1;
-                n1 = cg1;
+                n0 = cw0;
+                r0 = cg0;
+                n1 = cw1;
+                r1 = cg1;
             }
             cg1 += ndg1;
             cw1 += ndw1;
@@ -332,9 +333,9 @@ static void channel_conv_joint(At3Work *w)
             cw0 += ndw0;
             x = pr[-3320];
             y = *pr;
-            m = h1 * (x >> 4) + h0 * (y >> 4);
-            pr[-3320] = ((m >> 8) * n0) >> 6;
-            *pr++ = (((x - m) >> 8) * n1) >> 6;
+            m = n1 * (y >> 4) + n0 * (x >> 4);
+            pr[-3320] = ((m >> 8) * r0) >> 6;
+            *pr++ = (((x - m) >> 8) * r1) >> 6;
         }
         j += 2;
     }
