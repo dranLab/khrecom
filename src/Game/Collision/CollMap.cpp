@@ -78,21 +78,11 @@ INT CCollMap::collideRideForCheck(BOOL fgExceptNowRide) {
     return ret;
 }
 
-/* collideRide and collideRideR2 don't match yet. collideRide: the original's `pRideAtari = NULL` store is not a
- * "fixed scalar" to the scheduler (it is ordered before the coll constructor's stores), as if pRideAtari's address had
- * been taken before; every way of doing that here also moves `&pRideAtari` into $a2 early. collideRideR2: the original
- * loads the list head before spilling pTargetPos, i.e. the normalVec copy doesn't alias the head load (the original
- * FVECTOR has its own operator= and constructor). */
+/* Parked: 3 of 259 lines (2026-11-08): only `pRideAtari = NULL` (sw zero,0x90(sp)) is issued last instead of first, before the coll constructor's stores. sched1 dump: our store is the insn fixup_var_refs/purge_addressof creates when &pRideAtari is taken later (mem/f, a fixed scalar, so it has no dependence on the getListSize load and ranks below the constructor stores, 3 dependents against 4); with the address taken before the store (a CRide** local, test only) the store is a plain stack MEM, ties on 4 dependents and goes first by insn order, as in the original, but &pRideAtari then sits in a register. The .mdebug block tree and the ref's locals now equal ours (getKind for kind, v[3] not getTrans, *getCollision() for detectEtc, type = getType() | rideType). tried: statement/declaration order of the NULL store, coll, rideType, pList and the m_pCollision stores; declaration with initializer; (void)&pRideAtari (no effect); empty asm barriers (16 lines); permuter 15 min after these changes (1216 candidates, no gain) */
 #if 0
 INT CCollMap::collideRide(BOOL fgExceptNowRide) {
-    INT kind;
-    CCollisionList* pList;
-    INT rideType;
-    INT ret0;
-    CRide* pRideAtari;
-    if (!m_Enable) return 0;
-    if (!m_pCollision) return 0;
-    kind = m_pCollision->m_Kind & 0xe;
+    if (!m_Enable || !m_pCollision) return 0;
+    INT kind = getKind() & 0xe;
     if (kind != (COLL_KIND_SHADOW & 0xe)) {
         TIMEQ nTimeq = CMainApp::getTickCount();
         if (m_nTimeq != nTimeq) {
@@ -104,9 +94,10 @@ INT CCollMap::collideRide(BOOL fgExceptNowRide) {
     } else {
         m_fgSameFrame = 1;
     }
-    pList = m_pCollListR2;
-    rideType = getType() << 3;
-    pRideAtari = NULL;
+    CCollisionList* pList = m_pCollListR2;
+    INT rideType = getType() << 3;
+    INT ret0;
+    CRide* pRideAtari = NULL;
     CCollision coll;
     INT inLocal;
     FVECTOR* pTargetPos;
@@ -133,15 +124,15 @@ INT CCollMap::collideRide(BOOL fgExceptNowRide) {
         if (pEntry->getHandle() == getHandle()) continue;
         if (m_pNowHang == pEntry) continue;
         if (fgExceptNowRide && m_pNowRide == pEntry) continue;
-        INT type = pEntry->getType();
-        switch (type | rideType) {
+        INT type = pEntry->getType() | rideType;
+        switch (type) {
         case COLL_TYPE_MODELW | (COLL_TYPE_POINT << 3):
         case COLL_TYPE_MODELW | (COLL_TYPE_SPHERE << 3):
             if (kind == (COLL_KIND_SHADOW & 0xe)) continue;
         case COLL_TYPE_MODEL | (COLL_TYPE_POINT << 3):
         case COLL_TYPE_MODEL | (COLL_TYPE_SPHERE << 3):
             if ((UINT)pEntry->getKind() <= (UINT)COLL_KIND_SHADOW + 3 && !m_bExceptBSCheck) {
-                SubVector(vTmp, *pTargetPos, ((CRideModel*)pEntry)->m_MCDInfo.pMatrix->getTrans());
+                SubVector(vTmp, *pTargetPos, ((CRideModel*)pEntry)->m_MCDInfo.pMatrix->v[3]);
                 if (InnerProduct(vTmp, vTmp) > ((CRideModel*)pEntry)->m_fBSRadius2) continue;
             }
             if (((CRideModel*)pEntry)->m_fgMove) inLocal = (m_pNowRide == pEntry);
@@ -151,7 +142,7 @@ INT CCollMap::collideRide(BOOL fgExceptNowRide) {
             break;
         case COLL_TYPE_ETC | (COLL_TYPE_POINT << 3):
         case COLL_TYPE_ETC | (COLL_TYPE_SPHERE << 3):
-            ret0 = pEntry->detectEtc(*m_pCollision);
+            ret0 = pEntry->detectEtc(*getCollision());
             break;
         }
         if (ret0) {
@@ -166,50 +157,7 @@ INT CCollMap::collideRide(BOOL fgExceptNowRide) {
     }
     return 0;
 }
-
-INT CCollMap::collideRideR2(CCollision& coll, CRide** ppRideAtari, BOOL fgExceptNowRide) {
-    INT ret0 = 0;
-    INT ret1;
-    INT inLocal;
-    FVECTOR normalVec = coll.m_outNormal;
-    FVECTOR* pTargetPos = getStartPos();
-    FVECTOR vTmp;
-    CCollisionList* pList = m_pCollListR2;
-    SJ_FOREACH(CCollObj, pEntry, *pList) {
-        if (!pEntry->isEnable()) continue;
-        if (pEntry->getHandle() == m_hTask) continue;
-        if (m_pNowHang == pEntry) continue;
-        if (fgExceptNowRide && m_pNowRide == pEntry) continue;
-        CRideModel* pModel = (CRideModel*)pEntry;
-        if ((UINT)pEntry->getKind() <= (UINT)COLL_KIND_SHADOW + 3 && !m_bExceptBSCheck) {
-            SubVector(vTmp, *pTargetPos, pModel->m_MCDInfo.pMatrix->getTrans());
-            if (InnerProduct(vTmp, vTmp) > pModel->m_fBSRadius2) continue;
-        }
-        if (pModel->m_fgMove) {
-            if (m_fgSameFrame) inLocal = 1;
-            else inLocal = (m_pNowRide == pEntry);
-        } else {
-            inLocal = 1;
-        }
-        ret1 = CCollUtil::detectOCD(coll, &pModel->m_MCDInfo, pModel->m_pOCDWork, inLocal);
-        if (ret1) {
-            if (coll.m_outNormal.y >= normalVec.y) {
-                *ppRideAtari = pModel;
-                normalVec = coll.m_outNormal;
-            } else {
-                coll.m_outNormal = normalVec;
-            }
-            coll.m_inWE = coll.m_outWE;
-            if (m_pNowHang) {
-                ret0 = ret1;
-                break;
-            }
-        }
-        ret0 |= ret1;
-    }
-    return ret0;
-}
-#endif
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollMap", collideRide__8CCollMapi);
 /* placeholder for collideRide's local CCollision: a reference to its destructor from code emitted here makes gcc
  * output the (weak) destructor first, as in the original. The build strips .sdata (-G0 code has none). */
@@ -240,7 +188,46 @@ __asm__(
     ".word .L00225A50\n"
     ".word .L00225954\n"
     ".text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollMap", collideRideR2__8CCollMapR10CCollisionPP5CRidei);
+#endif
+
+INT CCollMap::collideRideR2(CCollision& coll, CRide** ppRideAtari, BOOL fgExceptNowRide) {
+    INT ret0 = 0;
+    INT ret1;
+    INT inLocal;
+    getKind(); /* MATCH: the original calls getKind() on this here and drops the result: its .mdebug has a second CCollObj inline block on this before the loop and the m_pCollision load carries getKind's line (CollObj.h:62); the call orders the list-head load before the pTargetPos spill */
+    FVECTOR normalVec = coll.m_outNormal;
+    FVECTOR* pTargetPos = getStartPos();
+    FVECTOR vTmp;
+    CCollisionList* pList = m_pCollListR2;
+    SJ_FOREACH(CCollObj, pEntry, *pList) {
+        if (!pEntry->isEnable()) continue;
+        if (pEntry->getHandle() == getHandle()) continue;
+        if (m_pNowHang == pEntry) continue;
+        if (fgExceptNowRide && m_pNowRide == pEntry) continue;
+        if ((UINT)pEntry->getKind() <= (UINT)COLL_KIND_SHADOW + 3 && !m_bExceptBSCheck) {
+            SubVector(vTmp, *pTargetPos, ((CRideModel*)pEntry)->m_MCDInfo.pMatrix->v[3]);
+            if (InnerProduct(vTmp, vTmp) > ((CRideModel*)pEntry)->m_fBSRadius2) continue;
+        }
+        if (((CRideModel*)pEntry)->m_fgMove && !m_fgSameFrame) inLocal = (m_pNowRide == pEntry);
+        else inLocal = 1;
+        ret1 = CCollUtil::detectOCD(coll, &((CRideModel*)pEntry)->m_MCDInfo, ((CRideModel*)pEntry)->m_pOCDWork, inLocal);
+        if (ret1) {
+            if (coll.m_outNormal.y >= normalVec.y) {
+                normalVec = coll.m_outNormal;
+                *ppRideAtari = (CRide*)pEntry;
+            } else {
+                coll.m_outNormal = normalVec;
+            }
+            coll.m_inWE = coll.m_outWE;
+            if (m_pNowHang) {
+                ret0 = ret1;
+                break;
+            }
+        }
+        ret0 |= ret1;
+    }
+    return ret0;
+}
 
 void CCollMap::registerLastRide(HANDLE hTask) {
     if (m_pRider) {
