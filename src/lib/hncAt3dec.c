@@ -8,8 +8,6 @@ typedef struct {
     int size;
 } hncAt3decParam;
 
-#include "include_asm.h"
-
 void *memset(void *dst, int c, unsigned int n);
 int init_at3dec(int a, int b, int c, char *work);
 int at3dec_proc(char *work);
@@ -54,8 +52,6 @@ int hncAt3dec_Init(hncAt3decParam *param)
     return init_at3dec(ch, b, c, work);
 }
 
-/* Parked: same structure, but the registers differ (orig: out s1, out2 s0, stereo/count s3, i s2). */
-#if 0
 int hncAt3dec_Idle(hncAt3decParam *param)
 {
     char *work = param->work;
@@ -85,12 +81,9 @@ int hncAt3dec_Idle(hncAt3decParam *param)
     } else {
         for (j = 4; j != 0; j--) {
             final_dout((short *)(work + 0x2a90) + i, out);
+            out += 0x100;
             i += 0x100;
-            out = out2;
-            out2 += 0x100;
         }
     }
     return 0;
 }
-#endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/hncAt3dec", hncAt3dec_Idle);
