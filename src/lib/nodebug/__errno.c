@@ -128,8 +128,57 @@ void *memmove(void *dst_void, const void *src_void, size_t length)
 #endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/nodebug/__errno", memcpy);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/nodebug/__errno", memmove);
-/* Hand-written: MMI string routines (128-bit loads and compares) */
+/* Parked: memset 12 of 47 lines, same size (2026-11-08): registers only, in the fill-pattern block: the original
+   has andi t1 / move t0,t1 / dsll v1,t0,8 / or t0,v1,t1 / pcpyh v1,t0 (the masked byte in two registers, a copy this
+   C never produces: cse merges every same-mode copy, ours is andi t0 / dsll v0 / or t0 / pcpyh t0,t0), its block
+   locals all skip v0 (the n >= 32 test in t2) and the pcpyh/pcpyld results are v1/t0 (ours t0/v1); an empty
+   asm("" : "+r") gives the move, but then m moves to t0 (16 lines). Everything else (both loops, size_t while (n--)
+   with its lui/ori -1 twice, the short-loop nops) is this compiler's. tried: int/long/unsigned/unsigned char masked
+   locals, u_long128 locals (every DI<->TI conversion adds a por), separate pcpyh input/output variables, c &= 0xff
+   (then sb stores the masked a1), pcpyld with two operands, before the loop or in an if, decomp_permuter 15 min
+   (no gain) */
+#if 0
+void *memset(void *m, int c, size_t n)
+{
+    char *s = (char *)m;
+    long buffer;
+    u_long128 qbuffer;
+    long *aligned_addr;
+
+    /* newlib memset.c with SCE's blocks: TOO_SMALL(n) is n < sizeof(long), UNALIGNED(m) a quadword test */
+    if (!(n < 8) && !((long)m & 15)) {
+        aligned_addr = (long *)m;
+        buffer = c & 0xff;
+        buffer = (buffer << 8) | buffer;
+        /* MATCH: MMI instruction (the low halfword copied through each doubleword) */
+        asm("pcpyh %0, %1" : "=r"(buffer) : "r"(buffer));
+
+        while (n >= 32) {
+            /* MATCH: MMI instruction (the doubleword into both halves); loop-invariant, gcc hoists it */
+            asm("pcpyld %0, %1, %1" : "=r"(qbuffer) : "r"(buffer));
+            *(u_long128 *)aligned_addr = qbuffer;
+            aligned_addr += 2;
+            *(u_long128 *)aligned_addr = qbuffer;
+            aligned_addr += 2;
+            n -= 32;
+        }
+
+        while (n >= 8) {
+            *aligned_addr++ = buffer;
+            n -= 8;
+        }
+        s = (char *)aligned_addr;
+    }
+
+    while (n--)
+        *s++ = (char)c;
+
+    return m;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/nodebug/__errno", memset);
+#endif
+/* Hand-written: MMI string routines (128-bit loads and compares) */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/nodebug/__errno", strcat);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/nodebug/__errno", strchr);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/nodebug/__errno", strcmp);
