@@ -6,7 +6,6 @@ the closest result. Revisit after the units with few leftovers are done; lessons
 | Unit | Function / data | Remaining difference |
 |---|---|---|
 | System/Sound/driver/sddrv_ee | `.bss` from asm | `static STR_DATA_CHK str_data_ee[6]` (the ref's only static) is 0x60 of the 0x110 bytes; with it alone everything after moves by 0x80. The rest is unknown. |
-| Game/Enemy/EnemyWhitemushroom | `damage_` | Case 4: the original loads the vptr for `getLockOnPos` right after setupFade's two TIMEQ stores. Ours loads it after all six stores, because the vtable-entry loads (unknown base) depend on every store. All 720 store orders (several flag forms, inline and written out), reference stores, asm fillers/barriers and local placement were tried. `-fstrict-aliasing` moves the load (an aliasing question), but that is not the build flag. ~45 min. Data comes from source (placeholder + jump table asm). |
 | System/Graphic/Effect/libppp/keProg/pppKeShpTail3 | `pppKeShpTail3Draw` | 37 lines, all in one region: between the ScreenMatrix copy and the CMat asm the original addresses the stack-resident `pw` through `$a3` (`move a3,sp`, a copy of the soft frame pointer = &mat0). A dummy `mat0` pointer reproduces the copy, but CSE keeps the fixed frame register canonical, so `pw` never uses it. Near-match (with hacks) in the source. ~45 min (plus hill climbs and random mutation search). |
 | System/Graphic/Effect/libppp/keProg/pppKeShpTail3X | `pppKeShpTail3XDraw` | Same as pppKeShpTail3Draw: 37 lines, only `pw` addressed through `$a3` (copy of the soft frame pointer) between the ScreenMatrix copy and the CMat asm. Other compiler versions don't match either. ~45 min (shared with Tail3, plus a random mutation search). |
 
@@ -44,7 +43,6 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `System/Math3D` | 1 | 234 | 1 |  |
 | `System/Graphic/ModelMan` | 1 | 204 | 1 |  |
 | `Game/Atel/Atel` | 1 | 189 | 1 |  |
-| `Game/Enemy/EnemyWhitemushroom` | 1 | 184 | 1 |  |
 | `Game/Enemy/HumanBoss` | 1 | 181 | 1 |  |
 | `Game/Atel/Avatar` | 1 | 139 | 1 |  |
 | `System/Graphic/WorldEnv` | 1 | 128 | 1 |  |
@@ -94,13 +92,12 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Game/Atel/Avatar` | `RotateAvatarMain__Q24ATEL7CAvatar` | 139 | 8 lines - the first isOverAvatarRotTimeLimit() comes out as xori; the original builds bRes with li 1 + movz (its weak copy is xori too). Inline/caller forms and 8 min of permuter (9k candidates) did not change it. The VU0 add/clip block (FVECTOR::addRot in the ref) is written out here: through an … |
 | `Game/Player/PlayerDRiku` | `exeStockSkill__Q22PL12CPlayerDRiku` | 3473 | 108 of 3890 lines (2026-11-07), same size: cross-jumped tails differ (ours merges the 0x683 setAnimSkillEx+setPlayerFlag(0x100000) tail into 0x6xx's copy, the original keeps 0x683's whole and merges the later copy into the setAnimRsrcEx tail at 2525); the sched2 order around global float loads in … |
 | `Game/Player/PlayerRiku` | `setMagic__Q22PL11CPlayerRikuiii` | 520 | (comment) Best attempt (same structure): BULLET_PARAM field stores and the attack-power loads are scheduled differently. |
-| `Game/Enemy/EnemyWhitemushroom` | `damage___19CEnemyWhitemushroom` | 184 | 3 of 211 lines (2026-11-07): case 4, the vptr load for getLockOnPos comes after all six setupFade stores, the original has it right after the two TIMEQ stores (sw 284/280) and before swc1 268, sw 288, sw 228, sw 272; tried: all store orders, flag forms, barriers, temporaries, call forms, pointer … |
 | `Game/Enemy/HumanBoss` | `setupAct__10CHumanBoss` | 181 | 18 of 205 lines (2026-11-08): the normal arm's -1 (sMin/sMax, lines 656/657) is its own pass-1 movable in the original (li s4,-1 after li s5,1); ours is combined into the compares' SImode -1 (loop.c combine_movables, -dL "matches 53"). combine_movables only refuses a later movable that is set … |
 | `Form/Menu/Camp` | `setTechWin__5CCampi` | 551 | 36 of 617 lines, same size (2026-11-08; drop the data block after the INCLUDE_ASM to build the draft): s-register roles in the sleight-list loop and one store order. The original increments nTechSelectTop in place before getName (s6, delay slot) and keeps i + 1 in s7 (i in s4, reused for … |
 | `Form/Menu/Camp` | `setMapCardWin__5CCampi` | 1227 | 23 of 1407 lines (2026-11-08; drop the data block after the INCLUDE_ASM to build the draft): only the spill slots of seven PRE-hoisted values differ (orig 0x74 &m_pMCInfoNumFnt, 0x78 &m_nMapKind, 0x7c i + 1, 0x80 nKind - 161, 0x84 &m_pMCCard, 0x88 &m_pMCFnt, 0x8c &m_pMCInfoNumCtrl; ours 0x74 … |
 | `Form/Menu/RoomCreation` | `menuMain__13CRoomCreation` | 1995 | (comment) menuMain: 78 of 2211 lines, 8 bytes short (92 and 0x50 short before _NORMA_PIECES, 2026-11-07): the by-value NormaSrc arguments are written out now; left: case 0's registers (v1 + s7 where the original keeps a0, s4/s6/s8 from there). To enable this draft, also drop the data block after … |
 
-Totals: 37 functions (21738 instructions) in 28 units, 37 of them parked; 1 units take a data section from assembly.
+Totals: 36 functions (21554 instructions) in 27 units, 36 of them parked; 1 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->
