@@ -1,7 +1,6 @@
 /* SIF RPC on the EE: client calls/binds/data transfers to IOP servers and the EE-side server queues. */
 #include "sdk/eekernel.h"
 #include "sdk/sifrpc.h"
-#include "include_asm.h"
 
 void sceSifInitCmd(void);
 void sceSifExitCmd(void);
@@ -144,14 +143,6 @@ void _request_call(RpcCallPkt *call, struct rpc_data *rd);
 
 void _request_rdata(RpcOtherDataPkt *rdata, struct rpc_data *rd);
 
-/* Parked: 2 of 138 lines, same size (2026-11-07, was 44): the RPCINIT test is an early return (the sibcall to sceSifSetReg
-   at the end); the init stores in this order (hill-climbed over all orders from 3 starts, all end at 2). Left: the
-   client_table store (sw a3,28(s0)) issues after the first handler call's `ori a0`/`move a2` instead of before them, a
-   sched2 tie in one cycle (the pid store, lo_sum base, conflicts with the int stores only after reload). Barriers after any
-   store 26-41, value/32/&_data_table in locals 33-56, volatile 41; permuter (15 min, 31k) and decomp-permuter (15 min)
-   found nothing below. */
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/sifrpc", sceSifInitRpc);
-#if 0
 void sceSifInitRpc(unsigned int mode)
 {
     DIntr();
@@ -167,12 +158,12 @@ void sceSifInitRpc(unsigned int mode)
     _data_table.pkt_table_len = 32;
     _data_table.unused1 = 0;
     _data_table.unused2 = 0;
-    _data_table.rdata_table_len = 32;
-    _data_table.client_table_len = 32;
-    _data_table.pid = 1;
-    _data_table.rdata_table_idx = 0;
     _data_table.rdata_table = UNCACHED(_free_buffer);
+    _data_table.rdata_table_len = 32;
     _data_table.client_table = UNCACHED(_free_buffer2);
+    _data_table.client_table_len = 32;
+    _data_table.rdata_table_idx = 0;
+    _data_table.pid = 1;
     sceSifAddCmdHandler(SIF_CMD_RPC_END, (void *)_request_end, &_data_table);
     sceSifAddCmdHandler(SIF_CMD_RPC_BIND, (void *)_request_bind, &_data_table);
     sceSifAddCmdHandler(SIF_CMD_RPC_CALL, (void *)_request_call, &_data_table);
@@ -187,7 +178,6 @@ void sceSifInitRpc(unsigned int mode)
     }
     sceSifSetReg(SIF_SYSREG_RPCINIT, 1);
 }
-#endif
 
 void sceSifExitRpc(void)
 {
