@@ -1919,13 +1919,13 @@ void CPlayer::initStandUp(INT inFlag) {
     } else {
         m_WalkMode = chkWalkMode();
         switch (m_WalkMode) {
-        case 0:
+        case WALKMODE_STAND:
             setPlayerState(PL::STAND);
             break;
-        case 1:
+        case WALKMODE_WALK:
             setPlayerState(PL::WALK);
             break;
-        case 2:
+        case WALKMODE_RUN:
             setPlayerState(PL::RUN);
             break;
         }
@@ -2016,14 +2016,14 @@ tail:
     PreWalkMode = m_WalkMode;
     m_WalkMode = chkWalkMode();
     switch (m_WalkMode) {
-    case 0:
-        if (PreWalkMode && m_pSE) ((CSEMotion*)m_pSE)->playFootStopSE();
+    case WALKMODE_STAND:
+        if (PreWalkMode != WALKMODE_STAND && m_pSE) ((CSEMotion*)m_pSE)->playFootStopSE();
         setPlayerState(STAND);
         break;
-    case 1:
+    case WALKMODE_WALK:
         setPlayerState(WALK);
         break;
-    case 2:
+    case WALKMODE_RUN:
         setPlayerState(RUN);
         break;
     }
@@ -2057,7 +2057,7 @@ WalkMode CPlayer::chkWalkMode() {
 void CPlayer::exeWalk() {
     FLOAT aim_dir = m_fAnalogViewDir;
     FLOAT d0 = Movement::Homing(m_fDir, aim_dir, 0.2f, m_fFrameRate);
-    if (m_WalkMode) m_fDir = d0;
+    if (m_WalkMode != WALKMODE_STAND) m_fDir = d0;
     setWalkAnim();
     FLOAT dirY = getDir();
     FVECTOR v = { 0.0f, aim_dir, 0.0f, 0.0f };
@@ -2087,14 +2087,14 @@ void CPlayer::setWalkAnim() {
     case AVOID:
     case JUMP:
         switch (m_WalkMode) {
-        case 0:
+        case WALKMODE_STAND:
             anim = isBattleFlag(1) ? 0x2A : 1;
             break;
-        case 1:
+        case WALKMODE_WALK:
             if (isBattleFlag(1)) anim = 0x2B;
             else anim = isPlayerFlag(2) ? 2 : 0x12;
             break;
-        case 2:
+        case WALKMODE_RUN:
             if (!isBattleFlag(1)) anim = isPlayerFlag(2) ? 3 : 0x13;
             else anim = 0x2C;
             break;
@@ -2102,26 +2102,26 @@ void CPlayer::setWalkAnim() {
         break;
     case CARRY:
         switch (m_WalkMode) {
-        case 0:
+        case WALKMODE_STAND:
             anim = 0x18;
             break;
-        case 1:
+        case WALKMODE_WALK:
             anim = 0x19;
             break;
-        case 2:
+        case WALKMODE_RUN:
             anim = 0x19;
             break;
         }
         break;
     default:
         switch (m_WalkMode) {
-        case 0:
+        case WALKMODE_STAND:
             anim = 0x2A;
             break;
-        case 1:
+        case WALKMODE_WALK:
             anim = 0x2B;
             break;
-        case 2:
+        case WALKMODE_RUN:
             anim = 0x2C;
             break;
         }
@@ -2908,7 +2908,7 @@ void CPlayer::exeJump() {
     vel.y = m_fJumpSpdY;
     m_pMove->setVel(vel);
     m_WalkMode = chkWalkMode();
-    if (m_WalkMode) {
+    if (m_WalkMode != WALKMODE_STAND) {
         aim_dir = m_fAnalogViewDir;
         d0 = Movement::Homing(m_fDir, aim_dir, 0.1f, m_fFrameRate);
         v._q = 0;
@@ -2995,13 +2995,13 @@ void CPlayer::exeJumpLand() {
         m_WalkMode = chkWalkMode();
         setWalkAnim();
         switch (m_WalkMode) {
-        case 0:
+        case WALKMODE_STAND:
             setPlayerState(PL::STAND);
             break;
-        case 1:
+        case WALKMODE_WALK:
             setPlayerState(PL::WALK);
             break;
-        case 2:
+        case WALKMODE_RUN:
             setPlayerState(PL::RUN);
             break;
         }
@@ -3642,7 +3642,7 @@ void CPlayer::exeCarry() {
     CGimmickCarry* pGimmick;
     FVECTOR pos;
     FVECTOR rot;
-    INT PreWalkMode;
+    WalkMode PreWalkMode;
     FLOAT aim_power;
     INT frame;
     frameTQ = getMotionCurrentTime();
@@ -3707,7 +3707,7 @@ void CPlayer::exeCarry() {
             m_WalkMode = WALKMODE_WALK;
         }
         if (PreWalkMode != m_WalkMode) {
-            if (!m_WalkMode) {
+            if (m_WalkMode == WALKMODE_STAND) {
                 if (m_pSE) ((CSEMotion*)m_pSE)->playFootStopSE();
                 pGimmick->CarryStand();
             } else {
@@ -6178,10 +6178,10 @@ void CPlayer::exeItem() {
     }
 }
 void CPlayer::exeStandUp_inFriend() {
-    INT oldMode = m_WalkMode;
+    WalkMode PreWalkMode = m_WalkMode;
     WalkMode mode = chkWalkMode();
     m_WalkMode = mode;
-    if (!mode && oldMode && m_pSE) ((CSEMotion*)m_pSE)->playFootStopSE();
+    if (mode == WALKMODE_STAND && PreWalkMode != WALKMODE_STAND && m_pSE) ((CSEMotion*)m_pSE)->playFootStopSE();
     exeWalk();
 }
 void CPlayer::initCharge() {
