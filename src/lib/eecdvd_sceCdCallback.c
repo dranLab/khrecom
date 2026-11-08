@@ -2,7 +2,6 @@
    search file and disk ready. The RPC buffers are read through the uncached segment (0x20000000). */
 #include "sdk/eekernel.h"
 #include "sdk/sifrpc.h"
-#include "include_asm.h"
 
 #define UNCACHED(p) ((unsigned int)(p) | 0x20000000)
 
@@ -70,8 +69,6 @@ static int _sf_bind = -1;
 static int _scmd_dr_bind = -1;
 static int _scmd_bind = -1;
 static int _it_bind = -1;
-/* sceCdInit's static counter (its .data slot follows _it_bind) while sceCdInit is asm */
-static int c_cnt __asm__("c_cnt.66") = 0;
 
 /* defined at the end of the file (emitted after sceCdInit's static) */
 extern volatile int sceCdCbfunc_num;
@@ -525,8 +522,6 @@ end:
     return 1;
 }
 
-/* Parked: 6 of 255 lines (2026-11-07): only the %hi registers of _scmd_dr_bind/_sceCd_ee_read_mode, t1/t0 in the original, t0/t1 here (local-alloc: dr's life after sched1 is 1 insn shorter, so it gets t0 first; the original's sched2 still issues dr's lui and store before ee's); live, the c_cnt.66 stopgap goes and the data matches (only these 4 bytes differ in the image); tried: every position of ee/dr, Init_seq and c_cnt++ in the store block, 120 random orders, every split of it over source lines, chained assignments, volatile on _scmd_dr_bind (breaks DiskReady) / off on ee (40 lines) / on CdInit_ON, permuter.py 15 min (its 0 is a %lo swap of the stored globals, imagediff rejects it), decomp_permuter 15 min (nothing below base); the tail's li/lui order was the shared return: case 5 first with break, `case 0: case 1: default:` arm (8 -> 6) */
-#if 0
 int sceCdInit(int mode)
 {
     static int c_cnt = 0;
@@ -541,15 +536,18 @@ int sceCdInit(int mode)
         return 0;
     }
     sceSifInitRpc(0);
+    /* this store order (and _it_bind = 0 first below) is what gives the original's registers: it sets the
+       lifetimes sched1 leaves for local-alloc (t1/t0 for _scmd_dr_bind/_sceCd_ee_read_mode) and the
+       global-alloc priority of the _it_bind/c_cnt %hi (s4/s5); sched2 then restores the original store order */
     Init_seq = 1;
-    _icmd_bind = -1;
     _sf_bind = -1;
     _ncmd_bind = -1;
     _scmd_bind = -1;
     _scmd_dr_bind = -1;
+    _it_bind = -1;
+    _icmd_bind = -1;
     _sceCd_ee_read_mode = 0;
     c_cnt++;
-    _it_bind = -1;
     while (1) {
         if ((r = sceSifBindRpc(&cd_init, 0x80000592, 0)) < 0) {
             if (SCE_CD_debug > 0) {
@@ -559,9 +557,9 @@ int sceCdInit(int mode)
             continue;
         }
         if (cd_init.serve != 0) {
+            _it_bind = 0;
             init_mode = mode;
             rdata = _sceCd_scmdrdata;
-            _it_bind = 0;
             sceSifWriteBackDCache(&init_mode, 4);
             if (sceSifCallRpc(&cd_init, 0, 0, &init_mode, 4, rdata, 16, 0, 0) < 0) {
                 Init_seq = 0;
@@ -604,14 +602,6 @@ int sceCdInit(int mode)
     }
     return ret;
 }
-#endif
-/* sceCdInit's strings in .rodata while it is asm */
-__asm__(".rdata\n"
-        ".align 3\n.asciz \"Libcdvd bind err %d CD_Init %d\\n\"\n"
-        ".align 3\n.asciz \"Libcdvd Exit\\n\"\n"
-        ".text\n");
-
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/eecdvd_sceCdCallback", sceCdInit);
 
 int sceCdDiskReady_old(int mode)
 {
