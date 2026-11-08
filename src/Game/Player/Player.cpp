@@ -4516,7 +4516,7 @@ INT CPlayer::startSingleAction() {
     m_iStepStockSkill++;
     return TRUE;
 }
-/* Parked: 13 of 118 lines (2026-11-08): around the g_fGravity load the original has %hi(g_fGravity) in v0 and the 3 for m_JumpState in v1 (lwc1 before li v1,3; its PRE copy move s0,v0 after lw a0,m_uiCardID), ours hi in v1 and 3 in v0 (li before lwc1, move s0 right after it), and the g_CardBreakTime %hi issues earlier. The rest matches. Cause: local-alloc; sched1 issues the PRE copy right after the lui, so hi dies before li 3 is born and gets the other register; for the original's pair li 3 must be born inside hi's life and hi allocated first, which plain statement order can't give (hi's chain has the higher priority). The source order is the $LM order (gravity 7818, JumpState 7819, break time 7823, combo 7824). tried: casts on all four (32 combinations, plain/cast BCL), operand order, one-line forms, two-step gravity, register pins and barriers in the initAttackField form (15 layouts, best 10, none 0), tools/permuter.py 15 min (12, no gain). */
+/* Parked: 7 of 115 lines (2026-11-08): the order matches the original now (MoveSpdXZ as an if/else store in each arm, the original's lines 7814-7817: the stores merge only in jump2, so sched1 no longer sees the store at the join); left is local-alloc: the 3 for m_JumpState in a0 (original v1), m_uiCardID/sll/addu chain in v1 (original a0), the g_pBattleCardList load in a0 (original v1). The CardID chain (qty of 6 refs) outranks the BCL load (2 refs) and takes v1; the original needs the BCL load allocated first (its life 1 insn, or the CardID load issued >= 3 slots earlier in sched1, which loses the tie to the lui of g_pBattleCardList). tried: casts on all four (32 combinations, plain/cast BCL), operand order, one-line forms, two-step gravity, register pins and barriers in the initAttackField form (15 layouts, best 10, none 0), tools/permuter.py 15 min (12, no gain) on the ternary form; on the if/else form: casts on BCL/gravity/CardBreakTime/JumpState/CardID, BCL index operand orders, combo as if/else (11). */
 #if 0
 void CPlayer::initAttack(INT inNo) {
     setPlayerState(PL::ATTACK);
@@ -4533,7 +4533,10 @@ void CPlayer::initAttack(INT inNo) {
     m_bIsAttackHit = FALSE;
     m_bNextTrg = FALSE;
     m_iNextAttack = 0;
-    *(FLOAT*)&m_fMoveSpdXZ = isAir() ? m_fJumpSpdXZ : m_fWalkSpeed;
+    if (isAir())
+        m_fMoveSpdXZ = m_fJumpSpdXZ;
+    else
+        m_fMoveSpdXZ = m_fWalkSpeed;
     m_fJumpGravity = PL::g_fGravity * 0.16f;
     m_JumpState = 3;
     m_tqCardBreakTime = PL::g_CardBreakTime[(*(BC_PARAM**)&CardBattle::g_pBattleCardList)[m_uiCardID].BREAK];
