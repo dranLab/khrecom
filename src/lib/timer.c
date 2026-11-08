@@ -168,7 +168,7 @@ int GetTimerPreScaleFactor(void)
 }
 
 unsigned long iGetTimerSystemTime(void);
-void SetNextComp(unsigned long now);
+static void SetNextComp(unsigned long now);
 
 int StartTimerSystemTime(void)
 {
@@ -214,9 +214,6 @@ int StopTimerSystemTime(void)
 #define ALARM_TIME(c) ((c)->schedule + (c)->base - (c)->count)
 
 /* Program the compare register for the next alarm (alarms closer than 0x7333 to it are merged). */
-/* Parked: loop shape (15 lines differ) */
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/timer", SetNextComp);
-#if 0
 static void SetNextComp(unsigned long now)
 {
     Counter *c;
@@ -237,10 +234,11 @@ static void SetNextComp(unsigned long now)
     t = ALARM_TIME(c);
     for (c = c->next; c; c = c->next) {
         t2 = ALARM_TIME(c);
-        if (t2 >= t + 0x7333) {
+        if (t2 < t + 0x7333) {
+            t = t2;
+        } else {
             break;
         }
-        t = t2;
     }
     prescale = mode & 3;
     if ((long)(t - now) < 0x7333) {
@@ -251,7 +249,6 @@ static void SetNextComp(unsigned long now)
     SetT2_MODE(mode & ~T2_OVFF);
     SetT2_COMP((int)(t >> (prescale * 4)));
 }
-#endif
 
 static void InsertAlarm(Counter *c)
 {
@@ -292,7 +289,6 @@ static Counter *UnlinkAlarm(Counter *c)
 }
 
 /* Parked: scheduling (32 lines; 45 before the handler's time argument in a local, decomp-permuter) */
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/timer", cbTimerHandler);
 #if 0
 static int cbTimerHandler(int cause, void *arg, void *addr)
 {
@@ -359,6 +355,8 @@ static int cbTimerHandler(int cause, void *arg, void *addr)
     asm volatile ("ei");
     return 0;
 }
+#else
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/timer", cbTimerHandler);
 #endif
 
 /* The system time: (overflows << 16 | T2_COUNT) << prescale bits (hand-written; reads past an overflow). */
