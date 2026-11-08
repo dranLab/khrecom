@@ -281,7 +281,7 @@ void CPlayerDRiku::beginStateWait() {
             setEntityFlag(1, 0);
             setAnimForce(0x2a, 0, 0, 0, 0, 0);
         }
-        m_WalkMode = 0;
+        m_WalkMode = WALKMODE_STAND;
         setPlayerFlag(0x401001, 0);
         ((_CollBodyView*)m_collBody)->offBody();
     }

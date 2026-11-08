@@ -190,7 +190,7 @@ void CPlayerRiku::beginStateWait() {
     m_iState = 2;
     if (!(m_uiPlayerFlag & 0x100)) {
         clearSpeed();
-        m_WalkMode = 0;
+        m_WalkMode = WALKMODE_STAND;
         setEntityFlag(1, 0);
         setAnimForce(0x2a, 0, 0, 0, 0, 0);
         m_uiPlayerFlag = (m_uiPlayerFlag | 0x401001) & ~0;

@@ -4770,13 +4770,13 @@ void CPlayerSora::exeDogeRoll() {
         m_WalkMode = chkWalkMode();
         setWalkAnim();
         switch (m_WalkMode) {
-        case 0:
+        case WALKMODE_STAND:
             setPlayerState(PL::STAND);
             break;
-        case 1:
+        case WALKMODE_WALK:
             setPlayerState(PL::WALK);
             break;
-        case 2:
+        case WALKMODE_RUN:
             setPlayerState(PL::RUN);
             break;
         }
