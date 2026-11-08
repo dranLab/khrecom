@@ -41,16 +41,25 @@ every change that is merged without regenerating. Regenerating all four takes ab
 
 ## Where things stand (2026-11-08)
 
-- **Progress:** 12074 of 12311 functions matched: game 11280 of 11323, libraries 794 of 988 (plus 151 hand-written).
+- **Progress:** 12081 of 12311 functions matched: game 11284 of 11323, libraries 797 of 988 (plus 151 hand-written).
   `tools/check.sh` counts the 151 hand-written units as done too: its total is these matched functions plus 151
   (fixed 2026-11-07: it used to count a parked `#if 0 ... #else INCLUDE_ASM #endif` as done).
-- **Game:** 38 functions still `INCLUDE_ASM` in 29 units, all parked (C draft under `#if 0` with a note).
+- **Game:** 34 functions still `INCLUDE_ASM` in 25 units, all parked (C draft under `#if 0` with a note).
   1 unit takes a data section from assembly (sddrv_ee's `.bss`, blocked: see docs/asm-leftovers.md).
-- **Libraries:** 10 parked, 1 not attempted, 27 hand-written (stay assembly), no unit with data from assembly;
+- **Libraries:** 8 parked, 1 not attempted, 27 hand-written (stay assembly), no unit with data from assembly;
   details in `docs/sdk-leftovers.md`.
-- **Header cleanup:** PARTIAL 183 (155 in 44 headers, 28 in 15 .cpp), 8 foreign stand-ins in 5 files, 0
-  duplicate classes, 0 untagged mechanisms; classes complete 1162, superset 17, gated 3, missing 6.
-  `tools/partials.py --queue` has the ready items.
+- **Header cleanup:** PARTIAL 162 (134 in 44 headers, 28 in 15 .cpp), 8 foreign stand-ins in 5 files, 0
+  duplicate classes, 0 untagged mechanisms; classes complete 1165, superset 16, gated 3, missing 6.
+  `tools/partials.py --queue` has the ready items (the R1/R2 gate items there stay, see "Queue state").
+- **Pool run of 2026-11-08 (afternoon):** 6 parked drafts matched (PathData dispDebugLine, EnemyWhitemushroom damage_,
+  Avatar RotateAvatarMain, Atel setScreenFader, lib sifcmd _sceSifCmdIntrHdlr, lib hncAt3dec_Idle; all six units now
+  complete) and the BattleEnemy.h cleanup (PARTIAL -21). Every old note named the wrong cause: an index assigned in
+  the wrong if/else arm, a goto tail to be written out per case, a local initialised at its declaration, identical
+  switch bodies cross-jumped, one variable reused for three roles plus a 4th local quantity (local-alloc's 3-quantity
+  sort), a hand-written PRE result. Camp setMapCardWin matched only with invented unused locals: rejected by the user
+  (memory no-filler-locals), parked with the recipe. Still parked with corrected notes: shape pppVu1ShapeDraw (4),
+  HumanBoss setupAct (18: combine_movables merges the -1), Camp setTechWin (36). gcc 2.95.3 sources for reading
+  allocator/scheduler/loop ties: `build/gccsrc/gcc-2.95.3/gcc/`.
 - **Method of 2026-11-08: the original's .mdebug block tree.** 22 parked drafts matched in one pool run (MSVideo, TaskMan,
   PackMan 2, Card, AtelCrossFade, TexUtil 4, sddrv_ee, Camp, Model, Player, CollUtil, BattleEnemy, CollDisp 2,
   DebugWindow; lib: timer 2, libat3dec 4, filestub, eecdvd), and in every case the old Parked note named the wrong cause.
