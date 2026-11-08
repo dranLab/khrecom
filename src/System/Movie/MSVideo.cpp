@@ -14,7 +14,7 @@
 #include "System/Debug.h"
 #include <string.h>
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-#include "include_asm.h"
+
 
 
 
@@ -637,10 +637,6 @@ void CMoviePlayer::setLoadImageTagsTile(u_int* tags, void* image, int x, int y, 
     setLoadImageTagsYX(tags, image, 0, x, y, width, height);
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Movie/MSVideo", setLoadImageTagsYX__12CMoviePlayerPUiPviiiii);
-// Not matching: mby - 1 is not hoisted into a register for the inner loop (the original keeps it in s8 and
-// spills i * 16), so the j++ / dsay increments are scheduled differently.
-#if 0
 void CMoviePlayer::setLoadImageTagsYX(u_int* tags, void* image, int skip, int x, int y, int width, int height) {
     u_int* p = (u_int*)UNCACHED(tags);
     u_int dbp = VRAM::_TEX_PREFIX_START;
@@ -661,12 +657,10 @@ void CMoviePlayer::setLoadImageTagsYX(u_int* tags, void* image, int skip, int x,
     p += 4;
     for (i = 0; i < mbx; i++) {
         for (j = 0; j < mby; j++) {
-            eop = 0;
-            if (i == mbx - 1) eop = 1;
-            p += 4;
+            eop = (j == mby - 1 && i == mbx - 1) ? 1 : 0;
             setDMAscTag(p, 0, 0, 0, 1, 0, 4);
+            p += 4;
             setGIFtag(p, 0xE, 1, 0, 0, 0, 0, 2);
-            if (j != mby - 1) eop = 0;
             p += 4;
             setTRXPOS(p, 0, x + i * 16, y + j * 16);
             p += 4;
@@ -681,7 +675,6 @@ void CMoviePlayer::setLoadImageTagsYX(u_int* tags, void* image, int skip, int x,
     }
     setDMAscTag(p, 0, 0, 0, 7, 0, 0);
 }
-#endif
 
 void CMoviePlayer::setDMAscTag(u_int* p, u_int spr, void* addr, u_int irq, u_int id, u_int pce, u_int qwc) {
     *(u_long*)p = ((u_long)spr << 63) | ((u_long)((u_int)addr & 0xfffffff0) << 32) | ((u_long)irq << 31) |
