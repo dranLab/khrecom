@@ -4370,16 +4370,27 @@ INT CCamp::setButtonHelp(INT nSetCmd, INT nMode, INT nKind) {
 /* Parked: 36 of 617 lines, same size (2026-11-08; drop the data block after the INCLUDE_ASM to build the draft): s-register
    roles in the sleight-list loop and one store order. The original increments nTechSelectTop in place before getName
    (s6, delay slot) and keeps i + 1 in s7 (i in s4, reused for (USHORT)nTechSeqIdx), and stores nTechCateCnt + 1 before
-   the C2DFnt new; this draft (`for (...; i++, nTechSelectTop++)`) gets the roles of i and nTechSelectTop swapped and
-   the nTechCateCnt store after the new. With `nTechSelectTop++;` right after the CButton new (the original's place)
-   the roles are right but loop.c strength-reduces &pTechCateTbl[nTechSelectTop] (-dL: giv benefit 7 - add_cost 4 per
-   biv increment, lifetime 3, 3 * 66 * 3 >= 182 insns: reduced, 53 lines); the original's giv must have had benefit
-   <= 0 (two biv increments? another index form?). Found 2026-11-08 from the .mdebug block tree (no change by itself):
-   pTechCateTbl/nTechSelectTop/nTechCateCnt/nLine in the switch body, scrollBarSeqTbl in the if block, nLine instead
-   of an invented nMax, len declared before pBF. tried: increment at the body end (39), `nTechSelectTop++, i++` (39),
+   the C2DFnt new; this draft gets the roles of i and nTechSelectTop swapped and the nTechCateCnt store after the new.
+   Cause, from the -dG/-dl/-dg dumps (2026-11-08, second pass): gcse PRE turns both for-increments into copies of temps
+   computed at the end of bb 50/51 (i + 1 -> r523, nTechSelectTop + 1 -> r529), so neither is a biv (no giv reduction,
+   as the original). Global alloc then takes nTechSelectTop first (9 refs / 41 live = 6585, above nTechKind 5625, i 4125,
+   nTechSeqIdx 3564): s3, and the andi temp takes its register. The original's s3 nTechKind, s4 i, s5 nTechSeqIdx,
+   s6 nTechSelectTop need nTechSelectTop below 3564 (7 refs, or about 76 insns of life). With `nTechSelectTop++;` in
+   place after the CButton new (its live range is the whole loop: the roles come right) it is a biv and loop.c reduces
+   the combined row giv (benefit 21, 53 lines); after getLayPosition 54, after init 53, `+= 1` 53, post-increment in
+   the second table load 52, *pTechCateTbl[n] 53; pTechCateTbl forced to memory changes the frame (62/84: the original's
+   pTechCateTbl is a spilled pseudo, its slot order ret/-204, pTechCateTbl/-200, nTechCateCnt/-196 matches this draft).
+   Line markers: nTechSelectTop = m_nTechSelectTop is line 5470 (before nTechCateCnt = 0 and rgba), the test is
+   `nTechSelectTop == m_nTechSelect` (bne s6,v1): both applied, no change in the count. The nTechCateCnt + 1 store
+   carries HeapMan.h:150 in the original: a post-increment flushed inside the inlined operator new, i.e.
+   `m_pTechCategoryFnt[nTechCateCnt++] = new ...`. Earlier (.mdebug block tree): pTechCateTbl/nTechSelectTop/
+   nTechCateCnt/nLine in the switch body, scrollBarSeqTbl in the if block, nLine instead of an invented nMax, len
+   declared before pBF. tried: increment at the body end (39), `nTechSelectTop++, i++` (39),
    `m_pTechCategoryFnt[nTechCateCnt++] = new` + `[nTechCateCnt - 1]` (92-94: nTechCateCnt gets a register), the new
    as the addFntShift argument (141), no pButton local (143); earlier: nLine as the loop counter, non-const table
-   pointer, compare operand order, _ref() on the table pointer (56-70), permuter 6 + 15 min; 15 min on this draft (2026-11-08, 1698 variants): no gain. */
+   pointer, compare operand order, _ref() on the table pointer (56-70), permuter 6 + 15 min; 15 min on this draft
+   (2026-11-08, 4907 candidates): 33 only by moving nTechSelectTop = m_nTechSelectTop above the pTechCateTbl ternary
+   (live 53: nTechSelectTop drops below nTechKind, still above i; against line 5470, not taken). */
 #if 0
 INT CCamp::setTechWin(INT nSetCmd) {
     FVECTOR vec;
@@ -4468,13 +4479,13 @@ INT CCamp::setTechWin(INT nSetCmd) {
             m_pTechButton[i] = NULL;
         }
         pTechCateTbl = !m_bPlayerKind ? m_techSoraCateTbl : m_techRikuCateTbl;
+        nTechSelectTop = m_nTechSelectTop;
         nTechCateCnt = 0;
         rgba.col = 0x807C7C7C;
-        nTechSelectTop = m_nTechSelectTop;
         for (INT i = 0; i < 9; i++, nTechSelectTop++) {
             SHORT nTechKind = pTechCateTbl[nTechSelectTop][0];
             SHORT nTechSeqIdx = pTechCateTbl[nTechSelectTop][1];
-            if (m_nTechSelect == nTechSelectTop) {
+            if (nTechSelectTop == m_nTechSelect) {
                 m_nTechKind = nTechKind;
                 if (m_fgNewTbl[nTechKind] > 0) {
                     m_fgNewTbl[nTechKind] = -1;
