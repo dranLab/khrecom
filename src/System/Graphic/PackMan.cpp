@@ -961,9 +961,8 @@ static void _loadMicroProgram() {
     sceDmaSend(s_pDmaChanVif0, My_VU0_start);
     CModel::resetMicroProgram();
 }
-void _initFramePacket(INT nKind);                          /* static in the original (still INCLUDE_ASM) */
 static void _initFramePacketForMovie(INT nAlpha);
-void _initFrameEffPacket(INT transKind, INT in_Xofs, INT in_Yofs, INT in_Alpha); /* static in the original (still INCLUDE_ASM) */
+static void _initFrameEffPacket(INT transKind, INT in_Xofs, INT in_Yofs, INT in_Alpha);
 void CPackMan::setFrameEffect(INT nKind, INT n1, INT n2, INT n3) {
     if (nKind >= 6) return;
     INT nMode = getDrawMode();
@@ -1107,9 +1106,6 @@ static void _initFramePacketForMovie(INT nAlpha) {
     sceVif1PkTerminate(pPkt);
     if (intr) EIntr();
 }
-/* Parked: 2 lines - case 2's two XYZ2 ORs: the original has the X register first (or v0,s2,v0 / or v0,t7,v0), ours puts the shifted Y first; x | y and y | x source order, a shared macro for the three cases, case 3's h/nh form with constant 12 and a 15 min permuter run (21k candidates) all stay at 2. 2026-11-07: x0/x1 before the loop moves the hoisted li (15 lines); INT or UINT x0 gives 4; a local for the shifted value and
-   ULONGLONG x0 change nothing: the constant ends up second in every form tried. */
-#if 0
 static void _initFrameEffPacket(INT transKind, INT in_Xofs, INT in_Yofs, INT in_Alpha) {
     pacVif1Packet* pPkt = &s_pktVif1FrameEff;
     INT intr = DIntr();
@@ -1154,18 +1150,22 @@ static void _initFrameEffPacket(INT transKind, INT in_Xofs, INT in_Yofs, INT in_
         qp[4] = _pack(0x156, 0);
         qp[5] = _pack(0x40808080, 1);
         qp += 6;
-        for (INT i = 0; i < 16; i++) {
-            INT v = i + 1;
-            qp[0] = _pack((i * 32) | ((u_long)(v * 32 - 1) << 16) | ((u_long)(SCREEN_HEIGHT - 1) << 48), 0x40);
-            qp[1] = _pack(0x80008, 3);
-            INT ofs = 0x8000;
-            u_long x0 = 0x6fa0;
-            ULONGLONG z = (u_long)0xfffff << 32;
-            qp[2] = _pack(x0 | ((u_long)(ofs - ((SCREEN_HEIGHT + 12) / 2) * 16) << 16) | z, 5);
-            qp[3] = _pack(((u_long)(UINT)(DISP_HEIGHT * 16 + 8) << 16) | 0x2008, 3);
-            u_long x1 = 0x9060;
-            qp[4] = _pack(x1 | ((u_long)(((SCREEN_HEIGHT + 12) / 2) * 16 + ofs) << 16) | z, 5);
-            qp += 5;
+        {
+            INT h = (12 + 0x200) / 2; /* case 3 with offsets 12: x0 from h, not a constant, keeps X first in the OR (cse) */
+            INT nh = -h;
+            for (INT i = 0; i < 16; i++) {
+                INT v = i + 1;
+                qp[0] = _pack((i * 32) | ((u_long)(v * 32 - 1) << 16) | ((u_long)(SCREEN_HEIGHT - 1) << 48), 0x40);
+                qp[1] = _pack(0x80008, 3);
+                INT ofs = 0x8000;
+                u_long x0 = nh * 16 + ofs;
+                ULONGLONG z = (u_long)0xfffff << 32;
+                qp[2] = _pack(x0 | ((u_long)(ofs - ((SCREEN_HEIGHT + 12) / 2) * 16) << 16) | z, 5);
+                qp[3] = _pack(((u_long)(UINT)(DISP_HEIGHT * 16 + 8) << 16) | 0x2008, 3);
+                u_long x1 = h * 16 + ofs;
+                qp[4] = _pack(x1 | ((u_long)(((SCREEN_HEIGHT + 12) / 2) * 16 + ofs) << 16) | z, 5);
+                qp += 5;
+            }
         }
         break;
     case 3:
@@ -1211,9 +1211,6 @@ static void _initFrameEffPacket(INT transKind, INT in_Xofs, INT in_Yofs, INT in_
     sceVif1PkTerminate(pPkt);
     if (intr) EIntr();
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", _initFrameEffPacket__Fiiii);
-#endif
 void CPackMan::enableZWrite(BOOL inEnable, INT inAddr) {
     QWdata* qp = (QWdata*)_pkOpenGifTag(_pack(0x1000800000008000, 0xe));
     u_long nZbuf = (VRAM::_ZBUF_START / 32) | 0x31000000;
