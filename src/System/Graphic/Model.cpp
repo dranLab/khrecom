@@ -550,56 +550,49 @@ static void getApplyMatrixBBox(FVECTOR& vOutMax, FVECTOR& vOutMin, const FMATRIX
                  "sqc2 $vf9, 0x0(%6)"
                  : : "r"(&Mat), "r"(&vMN[0]), "r"(pMax), "r"(&vInMax), "r"(&vInMin), "r"(&vOutMax), "r"(&vOutMin) : "memory");
 }
-/* Parked: 38 lines off: the original keeps &pCrd->m_World as the strength-reduced loop pointer (s3 += 0xd0, counter counted down), &vMax/&vMin in s8/s7 for the init stores and the VU0 block, and loads the final bbox into f4/f5/f0..f3 in max-then-min order. Tried: pCrd[i] indexing (keeps the counter, 41 lines), _x/_y/_z temporaries, set helpers. */
-#if 0
 void CModel::calcWorldBBox(BOOL bCalc) {
-    INT i;
-    FVECTOR v[2];
-    FVECTOR vMax;
-    FVECTOR vMin;
-    CCoord* pCrd;
-    INT iBoneNum;
-    if ((m_nFlag & 0x200) && !bCalc) return;
-    iBoneNum = m_pData->m_nBoneNum;
-    if (!(m_pData)) AssertApp(__FILE__, 1067, "m_pData", 0);
-    pCrd = &getCrd(0);
-    vMax.set(-1.70141183e+38f, -1.70141183e+38f, -1.70141183e+38f, 1.0f);
-    vMin.set(1.70141183e+38f, 1.70141183e+38f, 1.70141183e+38f, 1.0f);
-    for (i = 0; i < iBoneNum; i++, pCrd++) {
-        BBOX* bb = getBBox(i);
-        if (bb->x[0] <= bb->x[1]) {
-            v[0].set(bb->x[1], bb->y[1], bb->z[1], 1.0f);
-            v[1].set(bb->x[0], bb->y[0], bb->z[0], 1.0f);
-            getApplyMatrixBBox(v[0], v[1], pCrd->getWorldMatrix(), v[0], v[1]);
-            asm volatile("lqc2 $vf4, 0x0(%0)\n"
-                         "lqc2 $vf5, 0x0(%1)\n"
-                         "lqc2 $vf6, 0x0(%2)\n"
-                         "lqc2 $vf7, 0x0(%3)\n"
-                         "vmax.xyz $vf4, $vf4, $vf6\n"
-                         "vmini.xyz $vf5, $vf5, $vf7\n"
-                         "sqc2 $vf4, 0x0(%0)\n"
-                         "sqc2 $vf5, 0x0(%1)" : : "r"(&vMax), "r"(&vMin), "r"(&v[0]), "r"(&v[1]) : "memory");
+    if (!isWBBox() || bCalc) {
+        INT i;
+        FVECTOR v[2];
+        FVECTOR vMax;
+        FVECTOR vMin;
+        CCoord* pCrd;
+        INT iBoneNum;
+        if (!(m_pData)) AssertApp(__FILE__, 1067, "m_pData", 0);
+        pCrd = &getCrd(0);
+        iBoneNum = m_pData->m_nBoneNum;
+        vMax.set(-1.70141183e+38f, -1.70141183e+38f, -1.70141183e+38f, 1.0f);
+        vMin.set(1.70141183e+38f, 1.70141183e+38f, 1.70141183e+38f, 1.0f);
+        for (i = 0; i < iBoneNum; i++) {
+            BBOX* bb = getBBox(i);
+            if (bb->x[0] <= bb->x[1]) {
+                FMATRIX& m = pCrd[i].getWorldMatrix(); /* optimized out, so the .mdebug (and the ref) has no entry for it; read before the sets, as the original's block order shows */
+                v[0].set(bb->x[1], bb->y[1], bb->z[1], 1.0f);
+                v[1].set(bb->x[0], bb->y[0], bb->z[0], 1.0f);
+                getApplyMatrixBBox(v[0], v[1], m, v[0], v[1]);
+                asm volatile("lqc2 $vf4, 0x0(%0)\n"
+                             "lqc2 $vf5, 0x0(%1)\n"
+                             "lqc2 $vf6, 0x0(%2)\n"
+                             "lqc2 $vf7, 0x0(%3)\n"
+                             "vmax.xyz $vf4, $vf4, $vf6\n"
+                             "vmini.xyz $vf5, $vf5, $vf7\n"
+                             "sqc2 $vf4, 0x0(%0)\n"
+                             "sqc2 $vf5, 0x0(%1)" : : "r"(&vMax), "r"(&vMin), "r"(&v[0]), "r"(&v[1]) : "memory");
+            }
         }
+        if (m_Mode == 0x10) {
+            vMax.y = vMin.y + (vMax.y - vMin.y) * CShadowModelMan::getUpPer();
+            vMin.y = vMin.y - CShadowModelMan::getDownLen();
+        }
+        m_BBox.x[1] = vMax.x;
+        m_BBox.y[1] = vMax.y;
+        m_BBox.z[1] = vMax.z;
+        m_BBox.x[0] = vMin.x;
+        m_BBox.y[0] = vMin.y;
+        m_BBox.z[0] = vMin.z;
+        setWBBox(TRUE);
     }
-    if (m_Mode == 0x10) {
-        FLOAT _y = vMin.y;
-        vMin.y = _y - CShadowModelMan::getDownLen();
-        vMax.y = _y + (vMax.y - _y) * CShadowModelMan::getUpPer();
-    }
-    m_BBox.x[1] = vMax.x;
-    m_BBox.y[1] = vMax.y;
-    m_BBox.z[1] = vMax.z;
-    m_BBox.x[0] = vMin.x;
-    m_BBox.y[0] = vMin.y;
-    m_BBox.z[0] = vMin.z;
-    m_nFlag |= 0x200;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", calcWorldBBox__6CModeli);
-#endif
-/* MATCH: stripped placeholder (.sdata): the parked calcWorldBBox's float constants at their .rodata position */
-__asm__(".section .sdata\n");
-BOOL __attribute__((section(".sdata"))) _calcWorldBBox_rodata(FLOAT a, FLOAT b) { return a < -1.70141183e+38f && b > 1.70141183e+38f; }
 void CModel::getWorldBBox(FVECTOR& vMax, FVECTOR& vMin) {
     calcWorldBBox(0);
     vMax.x = m_BBox.x[1];
