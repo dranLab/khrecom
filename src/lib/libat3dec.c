@@ -744,20 +744,20 @@ static int getNoiseSpectrum(char *ch, int nqus, At3Work *w)
     return 0;
 }
 
-/* Parked: 5 of 92 lines (2026-11-07): after the memcpy the original recomputes the band address into fresh registers,
-   (x << 4) + x into v1 and offset + bands; ours reuses v0 and adds bands + offset; tried: q/p order, a band pointer
-   local, bands + band, int-row casts ([408], [136] rows), an index loop (84), decomp-permuter 12 min (no gain) */
-#if 0
 static void f2t_nodata(At3Band *bands, int band)
 {
     int i;
     int v;
     int *p;
     int *q;
+    int k;
 
     memcpy(&bands[band].hdr, &bands[band].save, sizeof(At3Blk23));
-    q = &bands[band].spec[127];
-    p = bands[band].ov;
+    /* MATCH: an integer sum, offset first, of band * 3 rows of 544 bytes: the original multiplies the
+       recomputed band * 3 by 17 << 5 and adds offset + bands (bands[band] gives bands + band * 1632) */
+    k = band * 3;
+    q = (int *)(k * 544 + (int)bands) + 150;
+    p = (int *)(k * 544 + (int)bands) + 279;
     for (i = 0; i < 128; i++) {
         v = *p;
         *q-- = v >> 4;
@@ -766,9 +766,6 @@ static void f2t_nodata(At3Band *bands, int band)
         p++;
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/libat3dec", f2t_nodata);
-#endif
 
 static int unpack_mddata(At3Chan *ch, int rev, At3Work *w)
 {
