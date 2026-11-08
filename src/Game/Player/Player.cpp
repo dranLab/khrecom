@@ -4516,8 +4516,6 @@ INT CPlayer::startSingleAction() {
     m_iStepStockSkill++;
     return TRUE;
 }
-/* Parked: 7 of 115 lines (2026-11-08): the order matches the original now (MoveSpdXZ as an if/else store in each arm, the original's lines 7814-7817: the stores merge only in jump2, so sched1 no longer sees the store at the join); left is local-alloc: the 3 for m_JumpState in a0 (original v1), m_uiCardID/sll/addu chain in v1 (original a0), the g_pBattleCardList load in a0 (original v1). The CardID chain (qty of 6 refs) outranks the BCL load (2 refs) and takes v1; the original needs the BCL load allocated first (its life 1 insn, or the CardID load issued >= 3 slots earlier in sched1, which loses the tie to the lui of g_pBattleCardList). tried: casts on all four (32 combinations, plain/cast BCL), operand order, one-line forms, two-step gravity, register pins and barriers in the initAttackField form (15 layouts, best 10, none 0), tools/permuter.py 15 min (12, no gain) on the ternary form; on the if/else form: casts on BCL/gravity/CardBreakTime/JumpState/CardID, BCL index operand orders, combo as if/else (11). */
-#if 0
 void CPlayer::initAttack(INT inNo) {
     setPlayerState(PL::ATTACK);
     setBattleFlag(0, 0x10);
@@ -4537,9 +4535,11 @@ void CPlayer::initAttack(INT inNo) {
         m_fMoveSpdXZ = m_fJumpSpdXZ;
     else
         m_fMoveSpdXZ = m_fWalkSpeed;
-    m_fJumpGravity = PL::g_fGravity * 0.16f;
-    m_JumpState = 3;
-    m_tqCardBreakTime = PL::g_CardBreakTime[(*(BC_PARAM**)&CardBattle::g_pBattleCardList)[m_uiCardID].BREAK];
+    /* MATCH: the two stores through _ref() keep the g_pBattleCardList load after them (a plain member store never
+       conflicts with a global scalar load); that sched1 order gives the original's v0/v1/a0 allocation. */
+    _ref(m_fJumpGravity) = PL::g_fGravity * 0.16f;
+    _ref(m_JumpState) = 3;
+    m_tqCardBreakTime = PL::g_CardBreakTime[CardBattle::g_pBattleCardList[m_uiCardID].BREAK];
     m_iComboBoost = isConditionFlag(0x40000000) ? m_iComboBoost + 20 : 0;
     setAttack();
     m_fDistXZ = m_fDistY = 0.0f;
@@ -4550,9 +4550,6 @@ void CPlayer::initAttack(INT inNo) {
         m_fJumpGravity = PL::g_fGravity;
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initAttack__7CPlayeri);
-#endif
 void CPlayer::setAttack() {
     CEntity* pTarget;
     FLOAT distY;
