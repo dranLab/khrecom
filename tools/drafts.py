@@ -30,7 +30,8 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "tools"))
 from compare_compilers import functions  # noqa: E402
 from funcdiff import compare_rows, disassemble  # noqa: E402
-from permuter import Scorer, build_command, definition_pattern, demangle, enable_draft  # noqa: E402
+from permuter import (Scorer, build_command, definition_pattern, demangle, disabled, enable_draft,  # noqa: E402
+                      select_definition)
 
 INCLUDE_ASM = re.compile(r'^INCLUDE_ASM\("[^"]*",\s*([^)\s]+)\s*\);', re.M)
 
@@ -39,20 +40,6 @@ def version_and_build() -> tuple[str, str]:
     version = sorted(p.name for p in (ROOT / "config").iterdir() if (p / f"{p.name}.yaml").exists())[0]
     opts = yaml.safe_load((ROOT / "config" / version / f"{version}.yaml").read_text())["options"]
     return version, opts["build_path"]
-
-
-def disabled(text: str, pos: int) -> bool:
-    """Whether pos lies inside an `#if 0` region (nesting counted)."""
-    stack = []
-    for m in re.finditer(r"^\s*#\s*(if|ifdef|ifndef|else|elif|endif)\b(.*)$", text[:pos], re.M):
-        kind = m.group(1)
-        if kind.startswith("if"):
-            stack.append(kind == "if" and m.group(2).strip().split("/")[0].strip() == "0")
-        elif kind in ("else", "elif") and stack:
-            stack[-1] = False
-        elif kind == "endif" and stack:
-            stack.pop()
-    return any(stack)
 
 
 def jobs_for(unit: str, source: Path) -> list[tuple[str, str, str]]:
@@ -64,13 +51,10 @@ def jobs_for(unit: str, source: Path) -> list[tuple[str, str, str]]:
             continue  # an INCLUDE_ASM in a disabled region is not compiled
         symbol = m.group(1)
         name, cls = demangle(symbol)
-        d = None
-        for d in re.finditer(definition_pattern(name, cls), text, re.M):
-            if disabled(text, d.start()):
-                break
-        else:
-            d = None
-        out.append((unit, symbol, "draft" if d else "no draft"))
+        pattern = definition_pattern(name, cls)
+        k, _ = select_definition(text, pattern, symbol)  # overloads: by parameter count, then the parked one
+        d = list(re.finditer(pattern, text, re.M))[k] if k is not None else None
+        out.append((unit, symbol, "draft" if d and disabled(text, d.start()) else "no draft"))
     return out
 
 
