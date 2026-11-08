@@ -23,7 +23,7 @@ Everything runs in Linux (WSL), from the repo root, with the project's venv: `.v
   build gives its first error. The re-measure step: notes go stale when headers change.
 - `.venv/bin/python tools/permuter.py <unit> <function> [--minutes N] [-j N]` - random source mutations of one nearly
   matching function (statement/declaration order, operand order, temporaries, ...), compiled in parallel and scored
-  (C and C++: the function is its symbol, `Class::name`, or a source name unique in the unit; overloads: `--overload <params>`)
+  (C and C++: the function is its symbol, `Class::name`, or a source name unique in the unit; overloads: picked by the symbol's parameter count, then the parked draft; `--overload <params>` when still ambiguous)
   against the original; the best variant goes to `build/permuter/<function>/best.c` (+ `best.diff`). Parked drafts
   under `#if 0` are switched on in its copies; the real source is never touched. Check a result's semantics.
 - `.venv/bin/python tools/decomp_permuter.py <unit> <function> [--minutes N] [-j N]` - for `.c` units only: runs

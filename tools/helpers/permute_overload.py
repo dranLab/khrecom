@@ -14,7 +14,7 @@ def patched_functions(path):
 permuter.functions = patched_functions
 orig_dis = permuter.disassemble
 permuter.disassemble = lambda obj, name, size: orig_dis(obj, mangled if name == method else name, size)
-def find_function(text, pattern):
+def find_function(text, pattern, index=0):
     # permuter passes definition_pattern(); of its matches, take the overload whose parameter list has psub
     for m in re.finditer(pattern, text, re.M):
         if psub not in m.group(0)[m.group(0).find("("):]:

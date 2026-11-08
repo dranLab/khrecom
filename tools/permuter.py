@@ -120,13 +120,123 @@ def definition_pattern(name: str, cls: str | None) -> str:
     return r"^(?:[^;{}#]*?[\s*&:])?" + q + n + r"\s*\([^;{}]*\)\s*(?:const\s*)?\{"
 
 
+def mangled_param_count(symbol: str) -> int | None:
+    """Number of parameters a GCC 2 symbol encodes (`setupTexInfo__8CTexUtilR7TexInfoPCUcii` -> 4, `...Fv` -> 0);
+    None when the encoding is not understood (templates, member pointers) or the symbol is a C name."""
+    if symbol.startswith(("_$_", "_._")):
+        return 0  # a destructor
+    i = next((k for k in range(1, len(symbol) - 2) if symbol.startswith("__", k)
+              and re.match(r"[0-9QCFt]", symbol[k + 2:])), -1)
+    if i <= 0:
+        return None
+    s = symbol[i + 2:]
+    try:
+        if s.startswith("F"):
+            pos = 1
+        else:
+            pos = _skip_name(s, 1 if s.startswith("C") else 0)
+        if s[pos:] in ("", "v"):
+            return 0
+        count = 0
+        while pos < len(s):
+            if s[pos] == "T":  # a repeat of an earlier parameter: T<n> or T_<n>_
+                m = re.match(r"T(?:_\d+_|\d)", s[pos:])
+                pos, count = pos + m.end(), count + 1
+            elif s[pos] == "N":  # several repeats: N<count><index>, N_<count>_<index>
+                m = re.match(r"N(?:_(\d+)_|(\d))(?:_\d+_|\d)", s[pos:])
+                pos, count = pos + m.end(), count + int(m.group(1) or m.group(2))
+            else:
+                pos, count = _skip_type(s, pos), count + 1
+        return count
+    except (AttributeError, IndexError, ValueError):
+        return None
+
+
+def _skip_name(s: str, pos: int) -> int:
+    """Past a mangled class name at s[pos]: <len><name> or Q<n><len><name>... (Q_<n>_ for more than 9)."""
+    if s[pos] == "Q":
+        m = re.match(r"Q(?:_(\d+)_|(\d))", s[pos:])
+        pos += m.end()
+        for _ in range(int(m.group(1) or m.group(2))):
+            pos = _skip_name(s, pos)
+        return pos
+    m = re.match(r"\d+", s[pos:])
+    return pos + m.end() + int(m.group(0))
+
+
+def _skip_type(s: str, pos: int) -> int:
+    """Past one mangled parameter type at s[pos]."""
+    while s[pos] in "CVUS":  # const, volatile, unsigned, signed
+        pos += 1
+    c = s[pos]
+    if c in "PR":
+        return _skip_type(s, pos + 1)
+    if c == "A":  # array: A<n>_<type>
+        return _skip_type(s, s.index("_", pos) + 1)
+    if c == "F":  # function type: F<params>_<return>
+        pos += 1
+        while s[pos] != "_":
+            pos = _skip_type(s, pos)
+        return _skip_type(s, pos + 1)
+    if c == "G":  # a class passed by value: G<name>
+        return _skip_name(s, pos + 1)
+    if c == "Q" or c.isdigit():
+        return _skip_name(s, pos)
+    if c in "vcsilxfdrbwe":
+        return pos + 1
+    raise ValueError(s[pos:])
+
+
+def source_param_count(definition: str) -> int:
+    """Number of parameters in a definition's head (`T X::f(INT a, const B& b) {` -> 2)."""
+    params = definition[definition.index("(") + 1:definition.rindex(")")]
+    params = re.sub(r"/\*.*?\*/|//[^\n]*", "", params, flags=re.S).strip()
+    if params in ("", "void"):
+        return 0
+    depth, count = 0, 1
+    for c in params:
+        depth += c in "(<[" and 1 or (c in ")>]" and -1 or 0)
+        count += c == "," and depth == 0
+    return count
+
+
+def select_definition(text: str, pattern: str, symbol: str) -> tuple[int | None, bool]:
+    """(index among pattern's matches of the symbol's definition, whether that choice is unique). Overloads: the
+    definitions whose parameter count is the symbol's; of those, while the symbol is still INCLUDE_ASM'd, the one
+    in an `#if 0` region (its parked draft). (None, False) when nothing matches."""
+    defs = list(re.finditer(pattern, text, re.M))
+    if not defs:
+        return None, False
+    idx = list(range(len(defs)))
+    n = mangled_param_count(symbol)
+    if n is not None and len(idx) > 1:
+        idx = [k for k in idx if source_param_count(defs[k].group(0)) == n] or idx
+    if len(idx) > 1 and re.search(r"^\s*INCLUDE_ASM\([^)]*,\s*" + re.escape(symbol) + r"\s*\);", text, re.M):
+        idx = [k for k in idx if disabled(text, defs[k].start())] or idx
+    return idx[0], len(idx) == 1
+
+
+def disabled(text: str, pos: int) -> bool:
+    """Whether pos lies inside an `#if 0` region (nesting counted)."""
+    stack = []
+    for m in re.finditer(r"^\s*#\s*(if|ifdef|ifndef|else|elif|endif)\b(.*)$", text[:pos], re.M):
+        kind = m.group(1)
+        if kind.startswith("if"):
+            stack.append(kind == "if" and m.group(2).strip().split("/")[0].strip() == "0")
+        elif kind in ("else", "elif") and stack:
+            stack[-1] = False
+        elif kind == "endif" and stack:
+            stack.pop()
+    return any(stack)
+
+
 # ---------------------------------------------------------------------------------------------------------------
 # locating the function in the source
 
-def find_function(text: str, pattern: str) -> tuple[int, int]:
+def find_function(text: str, pattern: str, index: int = 0) -> tuple[int, int]:
     """(start, end) of the function's body braces, end exclusive (just after the closing brace). pattern:
-    definition_pattern() of the function."""
-    for m in re.finditer(pattern, text, re.M):
+    definition_pattern() of the function; index: which of its matches (select_definition(), for overloads)."""
+    for m in list(re.finditer(pattern, text, re.M))[index:]:
         start = m.end() - 1
         depth = 0
         i = start
@@ -151,10 +261,11 @@ def find_function(text: str, pattern: str) -> tuple[int, int]:
 def enable_draft(text: str, pattern: str, symbol: str) -> str:
     """Switch a parked draft on: the #if 0 block around the function's definition becomes #if 1, and the
     function's INCLUDE_ASM (by its symbol: in the #else, after the #endif, or further away past a placeholder) goes
-    away, with those of the other functions defined in the same block."""
-    d = re.search(pattern, text, re.M)
-    if not d:
+    away, with those of the other functions defined in the same block. Overloads: select_definition()."""
+    k, _ = select_definition(text, pattern, symbol)
+    if k is None:
         return text
+    d = list(re.finditer(pattern, text, re.M))[k]
     depth, opened = 0, None
     for m in re.finditer(r"^\s*#\s*(if|ifdef|ifndef|endif)\b(.*)$", text[:d.start()], re.M):
         if m.group(1).startswith("if"):
@@ -550,13 +661,16 @@ def main() -> None:
     if args.overload:  # only the definition whose parameter list contains the substring
         pattern = pattern.replace(r"\s*\([^;{}]*\)", r"\s*\((?=[^;{}]*?" + re.escape(args.overload) + r")[^;{}]*\)", 1)
     defs = [m.group(0)[m.group(0).index("("):].split(")")[0] + ")" for m in re.finditer(pattern, start_text, re.M)]
-    if len(defs) > 1:
+    index, unique = select_definition(start_text, pattern, symbol)
+    if len(defs) > 1 and unique:
+        print(f"{symbol}: the overload {defs[index]} (parameter count, parked draft)", flush=True)
+    elif len(defs) > 1:
         sys.exit(f"{cls + '::' if cls else ''}{name} has {len(defs)} definitions in the source: " + "; ".join(defs) +
                  " - pick one with --overload <a substring of its parameters>")
     if symbol != args.function or cls:
         print(f"{args.function}: symbol {symbol}, defined as {cls + '::' if cls else ''}{name}", flush=True)
     text = enable_draft(start_text, pattern, symbol)
-    start, end = find_function(text, pattern)
+    start, end = find_function(text, pattern, index or 0)
     head, body, tail = text[:start], text[start:end], text[end:]
     header = head[head.rfind(name):]
     LOCALS.update(w for w in IDENT.findall(header[header.find("("):]) if w not in KEYWORDS)
