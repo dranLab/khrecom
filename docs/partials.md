@@ -154,19 +154,20 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-07 | cleanup/vector-types: F_UL, G_XY ... G_ST at the end of Vector.h, QWdata after khtypes.h's u_int128 (the original's type order) | 185 | 11 | 0 | 668 (0) | 1024 |
 | 2026-11-08 | cleanup/Game-Collision-CollObj-initForMap: CollUtilF on the header's collision classes, `initForMap()` inline (m_fgStatus = 0) called in _checkLadderUp (user decision) | 184 | 8 | 0 | 673 (0) | 1035 |
 | 2026-11-08 | cleanup/libgraph-types (with TexUtil's 4 drafts): libgraph types in PackMan.h (ref form) and include/sdk/libgraph.h; PackMan.cpp/TexUtil.cpp/libppp headers on them | 184 | 8 | 0 | 673 (0) | 1040 |
+| 2026-11-08 | cleanup/Game-Enemy-BattleEnemy.h: CBattleEnemy as the ref class (STOP_DAMAGE/MES_CARD_INFO types, ref access), unit gate and state-template mechanism dropped, accessor vs direct member per the original's .mdebug block tree (user decision) | 162 | 8 | 0 | 663 (0) | 1033 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 183 (155 in 44 headers, 28 in 15 .cpp); MATCH: 1042
-  by category: method 46, data member 10, type 13, fwd decl 2, #include 13, changed in place 43, padding 2, path override 1, gate 5, guessed 9, header-level 24, stand-in 10, other 5
-stand-ins: 8 foreign in 5 files (6 names), 167 unattributed, 181 own
+PARTIAL: 162 (134 in 44 headers, 28 in 15 .cpp); MATCH: 1034
+  by category: method 30, data member 9, type 13, fwd decl 2, #include 13, changed in place 42, padding 2, gate 5, guessed 9, header-level 23, stand-in 10, other 4
+stand-ins: 8 foreign in 5 files (6 names), 166 unattributed, 181 own
 duplicate class names across headers: 0
 padding: 2 arrays, 0 accessors
-mechanisms: 672 sites (0 untagged); #line: 1237
+mechanisms: 663 sites (0 untagged); #line: 1234
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 1163, superset 17, partial 1, gated 3, missing 6, unattributed 8
+classes: complete 1165, superset 16, partial 1, gated 3, missing 6, unattributed 8
 ```
 
 ## Queue (top 20)
@@ -184,7 +185,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 1.0 | `Game/Collision/CollObj.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R1 | 1.0 | `Game/Collision/CollUtil.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R1 | 1.0 | `Game/Collision/CollUtilA.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
-| R1 | 1.0 | `Game/Enemy/BattleEnemy.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R1 | 1.0 | `System/Coord.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R1 | 1.0 | `System/Vector.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R2 | 6.0 | `System/Graphic/Anim.h` | ready | 0 stand-in files, 0 dup headers, 6 gate users |  () | gated strings: ANIM_H_GETFLAG_DECL_ONLY |
@@ -218,7 +218,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Collision/CollObj.h` | 2 | 13/0/0/0 | 175 |
 | `Game/Collision/CollUtilA.h` | 1 | 11/0/0/0 | 26 |
 | `Game/Debug/DWTBGM.h` | 1 | 0/0/0/0 | 1 |
-| `Game/Enemy/BattleEnemy.h` | 23 | 0/1/0/0 | 58 |
+| `Game/Enemy/BattleEnemy.h` | 2 | 2/0/0/0 | 58 |
 | `Game/Enemy/EnemyParam.h` | 3 | 4/0/0/0 | 16 |
 | `Game/Entity.h` | 2 | 2/0/0/0 | 150 |
 | `Game/EntityFactory.h` | 1 | 2/0/0/0 | 49 |
@@ -266,7 +266,6 @@ or `untagged`.
 | kind | key | sites | tagged | reason, or an untagged site |
 |---|---|---:|---:|---|
 | feature | `ANIM_H_GETFLAG_DECL_ONLY` | 4 | 4 | the original calls CAnim::getFlag out of line |
-| feature | `BATTLEENEMY_H_STATE_TEMPLATE` | 1 | 1 | this unit sees m_EnemyState as the real CStateTemplate array (System/Fsm.h strings and the state table) |
 | feature | `COLLOBJ_H_INFO_AS_INT` | 1 | 1 | getDetectInfo as INT (see CollObj.h) |
 | feature | `ENTITY_H_SETFLAG_DIRECT` | 2 | 2 | setEntityFlag(0, 0x1000) as a plain and (createAvatar) |
 | feature | `GAME_COLLISION_COLLOBJ_H` | 1 | 1 | Game/Collision/CollUtil.h tests it (collideMap, see below) |
@@ -274,7 +273,6 @@ or `untagged`.
 | feature | `MODELDATA_H_TEXINFO_CTOR` | 2 | 2 | RSRC_NEW(TexInfo) in _setupTexData runs the constructor (memset) |
 | feature | `VECTOR_H_SET_CALL` | 1 | 1 | FVECTOR::setCall (the original calls FVECTOR::set out of line) |
 | feature site | `ANIM_H_GETFLAG_DECL_ONLY` | 2 | 2 | these units' originals call CAnim::getFlag out of line (Entity, EffectMotion, SEMotion, GimmickLotusLeaf) |
-| feature site | `BATTLEENEMY_H_STATE_TEMPLATE` | 2 | 2 | Game/Enemy/BattleEnemy sees m_EnemyState as the real CStateTemplate array |
 | feature site | `COLLOBJ_H_INFO_AS_INT` | 1 | 1 | System/Graphic/TriangleIK was written against an INT result: with the union its else branch schedules the TRACE arguments differently |
 | feature site | `ENTITY_H_SETFLAG_DIRECT` | 2 | 2 | the plain form, for Game/Atel/Atel (createAvatar) and Game/Atel/Avatar (ctor, InitAvatar) |
 | feature site | `GAME_COLLISION_COLLOBJ_H` | 1 | 1 | the collision classes' collideMap, when Game/Collision/CollObj.h came first (see there) |
@@ -390,7 +388,6 @@ or `untagged`.
 | unit gate | `FORM_MENU_SAVELOAD_CPP` | 1 | 1 | unit gate (its header gives this unit its own parts); without it the unit compiles only against its full header (tested 2026-11-02) |
 | unit gate | `GAME_ATEL_VSME_CPP` | 1 | 1 | CVSM's flag accessors are only inline in this unit (Game/Atel/VSME.h) |
 | unit gate | `GAME_BULLET_BULLET_CPP` | 1 | 1 | unit gate (its header gives this unit its own parts); without it the image differs (tested 2026-11-02) |
-| unit gate | `GAME_ENEMY_BATTLEENEMY_CPP` | 1 | 1 | unit gate (its header gives this unit its own parts); without it the unit compiles only against its full header (tested 2026-11-02) |
 | unit gate | `GAME_ENTITY_CPP` | 1 | 1 | unit gate (its header gives this unit its own parts); without it the image differs (tested 2026-11-02) |
 | unit gate | `GAME_GIMMICK_BASEGIMMICK_CPP` | 1 | 1 | unit gate (its header gives this unit its own parts); without it the image differs (tested 2026-11-02) |
 | unit gate | `GAME_PLAYER_PLAYERGAUGE_CPP` | 1 | 1 | unit gate (its header gives this unit its own parts); without it the link fails (inlines this unit must emit) (tested 2026-11-02) |
@@ -402,7 +399,6 @@ or `untagged`.
 | unit gate site | `FORM_MENU_SAVELOAD_CPP` | 8 | 8 | FORM_MENU_SAVELOAD_CPP gate, only for its own unit (tested 2026-11-02) |
 | unit gate site | `GAME_ATEL_VSME_CPP` | 1 | 1 | Game/Atel/Atel (CAtel::start ...) calls these out of line: inline-called-not-inlined |
 | unit gate site | `GAME_BULLET_BULLET_CPP` | 1 | 1 | GAME_BULLET_BULLET_CPP gate, only for its own unit (tested 2026-11-02) |
-| unit gate site | `GAME_ENEMY_BATTLEENEMY_CPP` | 5 | 5 | GAME_ENEMY_BATTLEENEMY_CPP gate, only for its own unit (tested 2026-11-02) |
 | unit gate site | `GAME_ENTITY_CPP` | 1 | 1 | GAME_ENTITY_CPP gate, only for its own unit (tested 2026-11-02) |
 | unit gate site | `GAME_GIMMICK_BASEGIMMICK_CPP` | 1 | 1 | GAME_GIMMICK_BASEGIMMICK_CPP gate, only for its own unit (tested 2026-11-02) |
 | unit gate site | `GAME_PLAYER_PLAYERGAUGE_CPP` | 1 | 1 | not in the original class: the key unit would emit a weak copy |

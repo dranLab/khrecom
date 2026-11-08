@@ -115,7 +115,7 @@ void CHeartless::aiCardBattle() {
         for (INT i = 0; i < getEnemyParam()->iActCount; i++) {
             if (getEnemyParam()->pActs[i].iActNo == DebugWork::g_dw.enemy.sActNo) {
                 setBattleEnemyFlag(0x200, 0);
-                setAttackState_(DebugWork::g_dw.enemy.sActNo + 2);
+                m_iAttackState = DebugWork::g_dw.enemy.sActNo + 2;
                 return;
             }
         }
@@ -457,7 +457,7 @@ BOOL CHeartless::canEvade() {
 }
 
 BOOL CHeartless::canAttack() {
-    return canAttack_(&getEnemyParam()->pActs[getAttackState() - 2]);
+    return canAttack_(&getEnemyParam()->pActs[m_iAttackState - 2]);
 }
 
 BOOL CHeartless::canAttack(INT inIndex) {
@@ -467,11 +467,11 @@ BOOL CHeartless::canAttack(INT inIndex) {
 }
 
 INT CHeartless::randomBattleCardNumber() const {
-    return getCardNumber_(getAttackState());
+    return getCardNumber_(m_iAttackState);
 }
 
 INT CHeartless::getBattleCardNumber(INT inState) const {
-    if (inState < 0) inState = getAttackState();
+    if (inState < 0) inState = m_iAttackState;
     return getCardNumber_(inState);
 }
 
