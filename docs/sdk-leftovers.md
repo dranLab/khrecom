@@ -49,6 +49,9 @@ shows a draft's diff after you switch its `#if 0` to `#if 1` (the permuters swit
 
 - A constant in a variable set before the stores it should precede (`_getAllRefs`'s `2`, `at3dec_proc`'s `0xF8`).
 - An early `if (x < 0) return x;` instead of an `if` around the success path (`scePad2CreateSocket`).
+- A block of struct-field init stores: first try the struct's own field order, or the ps2sdk reimplementation's
+  order where one exists, before any search (`sceSifInitRpc`: equal-priority ties go by rank_for_schedule's
+  register weight, then the earlier luid, so the source order decides).
 - A statement duplicated into both arms of the preceding `if` (`add_separators`' `count++`).
 - `do { ... } while (0)` around one statement or block as a scheduling barrier / loop note (`relocate_dll`'s
   `patch()`, `_request_call`'s `fno` copy, `_doCSC2`'s DMA kick).
@@ -89,14 +92,15 @@ shows a draft's diff after you switch its `#if 0` to `#if 1` (the permuters swit
 
 ## Notes per unit
 
-- **sifrpc** (`sceSifInitRpc` parked, 2 lines; the four `_request_*` matched 2026-11-07): the original copies packet
+- **sifrpc** done 24/24 (the four `_request_*` 2026-11-07, `sceSifInitRpc` 2026-11-08): the original copies packet
   fields load/store pair by pair; ours lets the scheduler hoist loads above stores of other types (alias sets;
   `-fno-strict-aliasing` and scheduling flags don't reproduce it). Fields of alias set 0 through a union fix it,
   on both sides: `_PKT_STORE` for a store later reads must not pass, `_PKT_ANY` for a read that must stay behind
   earlier stores (memory note `union-store-alias-zero`); search the plain/read/store combinations per field.
   A `do { } while (0)` far above a return label can add an alignment nop there (its loop note). `sceSifInitRpc`:
-  early return for the RPCINIT test (tail call to sceSifSetReg); left: the `client_table` store after the first
-  handler call's `ori a0`/`move a2`, a sched2 tie. (sifcmd's `_sceSifCmdIntrHdlr`, once listed as the same family, matched 2026-11-08 by source shape.)
+  early return for the RPCINIT test (tail call to sceSifSetReg); the init stores in the struct's field order with
+  pid last (ps2sdk's SifInitRpc order). The old "sched2 tie" note was the statement order: a hill climb over all
+  orders from 3 starts never reached it. (sifcmd's `_sceSifCmdIntrHdlr`, once listed as the same family, matched 2026-11-08 by source shape.)
 - **kprintf2** (`_sceSnprintf` parked, 2 lines; data from source 2026-11-07, `printfloat` and `ftoi` matched):
   `_sceSnprintf` is off only by a `nop` between `c.eq.s` and `bc1f` (gcc writes `#nop`). GNU as 2.9-ee-991111
   (`ee-gcc2.9-991111{,-01}/ee/bin/as`) gives exactly that and matches every other function except `ftoi` and
@@ -195,6 +199,7 @@ Sorted by unit, then size. `instr`: instructions in the original.
 | `lib/mpc` | `_rix_000` | 29 | hand-written | MMI reference-copy routines (_rix_*: luminance, _ri0_*: chrominance) |
 | `lib/libat3dec` | `imdct` | 389 | parked | first draft (2026-11-07), 334 of 457 lines, 80 bytes short; the butterfly stage has its structure (registers renamed: w, half, step); the window loop keeps fewer values on the stack than the original (5 spills at 0x18-0x2C) and the band copy's tail is not interleaved with its setup; … |
 | `lib/nodebug/__errno` | `memmove` | 63 | parked | memcpy 11 of 43 lines, memmove 31 of 68 (2026-11-08): registers only, one cause in both: the original keeps the first parameter in t0, gives the quadword loop lq v1/sltiu a0/lq v0 (ours v0/v1/v0) and copies the byte loop's -1 from the entry test's register (li v0,-1; beq; move a0,v0; ours li … |
+| `lib/nodebug/__errno` | `memset` | 46 | parked | memset 12 of 47 lines, same size (2026-11-08): registers only, in the fill-pattern block: the original has andi t1 / move t0,t1 / dsll v1,t0,8 / or t0,v1,t1 / pcpyh v1,t0 (the masked byte in two registers, a copy this C never produces: cse merges every same-mode copy, ours is andi t0 / dsll v0 / … |
 | `lib/nodebug/__errno` | `memcpy` | 43 | parked | memcpy 11 of 43 lines, memmove 31 of 68 (2026-11-08): registers only, one cause in both: the original keeps the first parameter in t0, gives the quadword loop lq v1/sltiu a0/lq v0 (ours v0/v1/v0) and copies the byte loop's -1 from the entry test's register (li v0,-1; beq; move a0,v0; ours li … |
 | `lib/nodebug/__errno` | `strncmp` | 114 | hand-written | MMI string routines (128-bit loads and compares) |
 | `lib/nodebug/__errno` | `strncpy` | 114 | hand-written | MMI string routines (128-bit loads and compares) |
@@ -203,12 +208,10 @@ Sorted by unit, then size. `instr`: instructions in the original.
 | `lib/nodebug/__errno` | `strlen` | 81 | hand-written | MMI string routines (128-bit loads and compares) |
 | `lib/nodebug/__errno` | `strcat` | 76 | hand-written | MMI string routines (128-bit loads and compares) |
 | `lib/nodebug/__errno` | `strcpy` | 70 | hand-written | MMI string routines (128-bit loads and compares) |
-| `lib/nodebug/__errno` | `memset` | 46 | hand-written | MMI string routines (128-bit loads and compares) |
 | `lib/nodebug/strround` | `fftoa` | 367 | parked | fftoa: register allocation still differs (x, exp, n, ... one s-register off) |
 | `lib/nodebug/strround` | `_vfprintf_r` | 1041 | not attempted |  |
 | `lib/nodebug/_setlocale_r` | `memchr` | 59 | hand-written | MMI (128-bit compares) |
 | `lib/kprintf2` | `_sceSnprintf` | 837 | parked | 2 of 853 lines, same size (2026-11-07): only the nop between c.eq.s and bc1f in the %f case (gcc writes "#nop"; the original's assembler inserted it at the ".set noreorder" before bc1f). The 991111/991111-01 ee/bin/as (GNU as 2.9-ee-991111) gives exactly that nop and the whole function matches, … |
-| `lib/sifrpc` | `sceSifInitRpc` | 103 | parked | 2 of 138 lines, same size (2026-11-07, was 44): the RPCINIT test is an early return (the sibcall to sceSifSetReg at the end); the init stores in this order (hill-climbed over all orders from 3 starts, all end at 2). Left: the client_table store (sw a3,28(s0)) issues after the first handler call's … |
 
 ### Data sections from the original assembly
 
@@ -217,7 +220,7 @@ Not listed in the unit's `// SOURCE DATA:` line.
 | unit | sections |
 |---|---|
 
-Totals: 16 units without a source file (1 with code); 9 units with INCLUDE_ASM functions: 8 parked, 1 not attempted, 27 hand-written; 0 units take a data section from assembly.
+Totals: 16 units without a source file (1 with code); 8 units with INCLUDE_ASM functions: 8 parked, 1 not attempted, 26 hand-written; 0 units take a data section from assembly.
 
 Generated by `tools/leftovers.py lib`.
 <!-- leftovers:lib:end -->
@@ -247,7 +250,12 @@ Generated by `tools/leftovers.py lib`.
   loop's three local quantities get v1/a0/v0 in the original, which local-alloc can't give from this C, and the byte
   loop copies its -1 from the entry test's register, which no 2.95.3 pass creates from a constant: possibly edited
   compiler output, like the MMI neighbours. `memset` (marked hand-written) looks compiled (size_t `while (n--)`'s
-  lui/ori -1, short-loop padding nops; only pcpyh/pcpyld need asm): worth a try. `long long` is 128-bit on this
-  compiler ("unsupported wide integer operation").
+  lui/ori -1, short-loop padding nops; only pcpyh/pcpyld need asm): tried 2026-11-08/09, a C draft at 12 of 47
+  lines, parked: only the fill pattern block differs (the original's `move t0,t1` after the andi, which no C form
+  gives: cse merges same-mode copies, an int->long extension folds into the andi, any DI<->TI conversion of a
+  u_long128 local adds a `por`); decomp-permuter 15 min, ties only. cse also never turns memcpy's `li -1` into a copy
+  of a register holding -1 (a constant costs 0, a pseudo 1: cse.c:496, mips.h CONST_COSTS), which backs the
+  edited-output reading. `long long` is 128-bit on this compiler ("unsupported wide integer operation", also for
+  int->TI conversions and TImode shifts/multiplies).
 
   Logs: `build/dpq.log`; outputs per function in `build/decomp-permuter/<function>/`.
