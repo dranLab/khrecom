@@ -49,8 +49,8 @@ inline void _emptyStringPlaceholder0() {
 #include "System/Rnd.h"
 #include "Game/EntityFactory.h"
 #include "Game/Collision/CollBody.h"
-/* PARTIAL: until SOURCE DATA, the unit's copy of the header static BattleEnemy::BadStatusEffectName (its .data
- * comes from the original assembly) */
+/* MATCH: the original loads BattleEnemy::BadStatusEffectName/SpeedParamName late (setBadStatusEffect,
+ * beginStateTerror): read through a reference helper */
 template <class T> static inline T& _ref(T& x) { return x; }
 /* ENEMY_PARAM's inline attribute rate (name unknown) */
 static inline FLOAT _getAttrRate(ENEMY_PARAM* inParam, INT inAttr) {
