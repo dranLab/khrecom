@@ -166,7 +166,7 @@ duplicate class names across headers: 0
 padding: 2 arrays, 0 accessors
 mechanisms: 672 sites (0 untagged); #line: 1237
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 1162, superset 17, partial 1, gated 3, missing 6, unattributed 8
+classes: complete 1163, superset 17, partial 1, gated 3, missing 6, unattributed 8
 ```
 
 ## Queue (top 20)
@@ -226,7 +226,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Movement.h` | 4 | 1/0/0/0 | 105 |
 | `Game/OsdDef.h` | 1 | 5/1/0/0 | 7 |
 | `Game/Player/DWTPlayer.h` | 2 | 0/0/0/0 | 5 |
-| `Game/Player/Player.h` | 32 | 2/1/0/0 | 72 |
+| `Game/Player/Player.h` | 32 | 3/1/0/0 | 72 |
 | `Game/Player/PlayerAnim.h` | 1 | 1/0/0/0 | 1 |
 | `Game/Player/PlayerAttack.h` | 1 | 1/0/0/0 | 26 |
 | `Game/Player/PlayerGauge.h` | 3 | 6/1/0/0 | 15 |
