@@ -4516,8 +4516,6 @@ INT CPlayer::startSingleAction() {
     m_iStepStockSkill++;
     return TRUE;
 }
-/* Parked: 13 of 118 lines (2026-11-08): around the g_fGravity load the original has %hi(g_fGravity) in v0 and the 3 for m_JumpState in v1 (lwc1 before li v1,3; its PRE copy move s0,v0 after lw a0,m_uiCardID), ours hi in v1 and 3 in v0 (li before lwc1, move s0 right after it), and the g_CardBreakTime %hi issues earlier. The rest matches. Cause: local-alloc; sched1 issues the PRE copy right after the lui, so hi dies before li 3 is born and gets the other register; for the original's pair li 3 must be born inside hi's life and hi allocated first, which plain statement order can't give (hi's chain has the higher priority). The source order is the $LM order (gravity 7818, JumpState 7819, break time 7823, combo 7824). tried: casts on all four (32 combinations, plain/cast BCL), operand order, one-line forms, two-step gravity, register pins and barriers in the initAttackField form (15 layouts, best 10, none 0), tools/permuter.py 15 min (12, no gain). */
-#if 0
 void CPlayer::initAttack(INT inNo) {
     setPlayerState(PL::ATTACK);
     setBattleFlag(0, 0x10);
@@ -4533,10 +4531,15 @@ void CPlayer::initAttack(INT inNo) {
     m_bIsAttackHit = FALSE;
     m_bNextTrg = FALSE;
     m_iNextAttack = 0;
-    *(FLOAT*)&m_fMoveSpdXZ = isAir() ? m_fJumpSpdXZ : m_fWalkSpeed;
-    m_fJumpGravity = PL::g_fGravity * 0.16f;
-    m_JumpState = 3;
-    m_tqCardBreakTime = PL::g_CardBreakTime[(*(BC_PARAM**)&CardBattle::g_pBattleCardList)[m_uiCardID].BREAK];
+    if (isAir())
+        m_fMoveSpdXZ = m_fJumpSpdXZ;
+    else
+        m_fMoveSpdXZ = m_fWalkSpeed;
+    /* MATCH: the two stores through _ref() keep the g_pBattleCardList load after them (a plain member store never
+       conflicts with a global scalar load); that sched1 order gives the original's v0/v1/a0 allocation. */
+    _ref(m_fJumpGravity) = PL::g_fGravity * 0.16f;
+    _ref(m_JumpState) = 3;
+    m_tqCardBreakTime = PL::g_CardBreakTime[CardBattle::g_pBattleCardList[m_uiCardID].BREAK];
     m_iComboBoost = isConditionFlag(0x40000000) ? m_iComboBoost + 20 : 0;
     setAttack();
     m_fDistXZ = m_fDistY = 0.0f;
@@ -4547,9 +4550,6 @@ void CPlayer::initAttack(INT inNo) {
         m_fJumpGravity = PL::g_fGravity;
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initAttack__7CPlayeri);
-#endif
 void CPlayer::setAttack() {
     CEntity* pTarget;
     FLOAT distY;
@@ -5045,26 +5045,6 @@ void CPlayer::setDefAttr(FLOAT* inAttr) {
 FLOAT CPlayer::getDefAttr(ATK_ATTR inAttr) const {
     if ((UINT)inAttr < 6) return m_fDefAttr[inAttr];
     return m_fDefAttr[5];
-}
-/* placeholder: rodata of chkDamage__7CPlayer */
-__asm__(".rdata\n");
-inline void _roPh20() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
-    TRACE("CPlayer:: (initDamage)\n");
-    TRACE("-------- Damege Info ------------------\n");
-    TRACE("Sora : HP = %d/%d\n");
-    TRACE("Riku : HP = %d/%d, DP = %d/%d,\n");
-    TRACE("Riku : HP = %d/%d\n");
-    TRACE("Flag PL  : 0x%08x\n");
-    TRACE("Flag CON : 0x%08x\n");
-    TRACE("Flag TRG : 0x%08x\n");
-    TRACE("Flag BTL : 0x%08x\n");
-    TRACE("---------------------------------------\n");
-    TRACE("CPlayer::chkDamage(); ++++ DEAD ++++\n");
-    TRACE("CPlayer::chkDamage(); NG = Now Card Play TRG!!\n");
-    TRACE("CPlayer::chkDamage(); NG = Now Card Play!\n");
-    TRACE("CPlayer::chkDamage(); [REFRECT]  x(Now Card Play TRG)\n");
-    TRACE("CPlayer::chkDamage(); [REFRECT]  x(Now Card Play)\n");
-    TRACE("PL::chkDamage(); kind=%d, \x81\xa6\x96\xa2\x8d\xec\x90\xac\x81i\x82\xc6\x82\xe8\x82\xa0\x82\xa6\x82\xb8\x8f\xac\x83_\x83\x81\x81[\x83W\x88\xb5\x82\xa2\x81j\n");
 }
 BOOL CPlayer::chkDamage() {
     INT face;
