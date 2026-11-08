@@ -260,11 +260,12 @@ static void channel_conv_joint(At3Work *w);
 static int gainc_window(char *ch, int band);
 static void f2t_nodata(At3Band *bands, int band);
 
-/* Parked: 63 of 130 lines (2026-11-07; 87 before the band counter j += 2, a second biv kept in the stack slot like the
-   original's, and nw read after the gain tests): what differs is register allocation in the band prologue and the
-   sample loop (the original puts the joint[1] gains in t3/t1 and reuses them for n0/n1, dg0 lands in t1; the band
-   address is offset + w, ours w + offset); tried: load/statement orders of the gain and weight reads, separate
-   variables, decomp-permuter 15 min (only the m operand order, -5) */
+/* Parked: 40 of 123 lines (2026-11-08; 63 before: the band address as an integer sum offset first, the joint[1]
+   gains, their deltas and the loop's weights in one variable each (h0: t1, h1: t3), d/c/nd computed in the
+   original's orders, pr set before the deltas and stepped as a pointer): only the global-alloc order differs,
+   ours allocates pr, then the loop gains n1, n0 (short-lived, priority 1.78/1.42/1.23) before h0, h1 and the c's;
+   the original gives cg1 a1, cw1 a2, cg0 a3, cw0 t0, h0 t1, pr t2, h1 t3, n1 t4, n0 t5; tried: c and increment
+   orders, increments at the loop end */
 #if 0
 static void channel_conv_joint(At3Work *w)
 {
@@ -272,20 +273,17 @@ static void channel_conv_joint(At3Work *w)
     int k;
     unsigned short w0, w1, g0, g1;
     unsigned short n0, n1, h0, h1;
-    unsigned short dw0, dw1, dg0, dg1;
+    unsigned short dw0, dw1;
     int cw0, cw1, cg0, cg1;
     int ndw0, ndw1, ndg0, ndg1;
     unsigned short *pw;
     unsigned short *nw;
-    int (*sp)[3320];
-    int idx;
     int *pr;
     int x;
     int y;
     int m;
     int j;
 
-    sp = (int (*)[3320])w->ch;
     j = 0;
     for (band = 0; band < 4; band++) {
         g1 = 0x8000;
@@ -304,40 +302,39 @@ static void channel_conv_joint(At3Work *w)
         pw = w->joint[0].w[band];
         w0 = pw[0];
         w1 = pw[1];
+        pr = (int *)((j + band) * 544 + (int)w) + 3355;
+        h0 = (short)(h0 - g0) >> 3;
+        h1 = (short)(h1 - g1) >> 3;
         dw0 = (nw[0] - w0) >> 3;
         dw1 = (nw[1] - w1) >> 3;
-        dg0 = (short)(h0 - g0) >> 3;
-        dg1 = (short)(h1 - g1) >> 3;
-        cw0 = (dw0 << 3) + w0;
+        cg1 = (h1 << 3) + g1;
         cw1 = (dw1 << 3) + w1;
-        cg0 = (dg0 << 3) + g0;
-        cg1 = (dg1 << 3) + g1;
-        idx = band * 408 + 35;
-        ndw0 = -dw0;
+        cg0 = (h0 << 3) + g0;
+        cw0 = (dw0 << 3) + w0;
+        ndg1 = -h1;
         ndw1 = -dw1;
-        ndg0 = -dg0;
-        ndg1 = -dg1;
-        pr = &((int (*)[136])(w->ch[1]))[j + band][23];
+        ndg0 = -h0;
+        ndw0 = -dw0;
         for (k = 0; k < 256; k++) {
-            n0 = w0;
-            h0 = g0;
-            n1 = w1;
-            h1 = g1;
+            h1 = w0;
+            n0 = g0;
+            h0 = w1;
+            n1 = g1;
             if (k - 8 < 0) {
-                n0 = cw0;
-                h0 = cg0;
-                n1 = cw1;
-                h1 = cg1;
+                h1 = cw0;
+                n0 = cg0;
+                h0 = cw1;
+                n1 = cg1;
             }
-            cw0 += ndw0;
+            cg1 += ndg1;
             cw1 += ndw1;
             cg0 += ndg0;
-            cg1 += ndg1;
-            x = pr[k - 3320];
-            y = pr[k];
-            m = n1 * (y >> 4) + n0 * (x >> 4);
-            pr[k - 3320] = ((m >> 8) * h0) >> 6;
-            pr[k] = (((x - m) >> 8) * h1) >> 6;
+            cw0 += ndw0;
+            x = pr[-3320];
+            y = *pr;
+            m = h1 * (x >> 4) + h0 * (y >> 4);
+            pr[-3320] = ((m >> 8) * n0) >> 6;
+            *pr++ = (((x - m) >> 8) * n1) >> 6;
         }
         j += 2;
     }
