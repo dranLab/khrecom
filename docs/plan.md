@@ -406,7 +406,7 @@ header split the original didn't have, or make a class a template to hide its st
 | one-line `por/sq` + `swc1 w`, wrong store order around an FVECTOR | fvector-brace-init-aligned |
 | delay slot of a call and the v0/v1 pair after it | void-callee-v0 |
 | spill slots / regs of hoisted `this+off` addresses | gcse-bucket-count-lever, gcse-pre-hash-order |
-| registers swapped, same instructions | scheduling-mismatch-techniques, global-alloc-priority-lreg, asm-barrier-death-note-levers, loop-const-merge-and-load-order, asymmetric-giv-overloads, gcse-pre-hash-order |
+| registers swapped, same instructions | scheduling-mismatch-techniques, global-alloc-priority-lreg, local-alloc-three-quantities, asm-barrier-death-note-levers, loop-const-merge-and-load-order, asymmetric-giv-overloads, gcse-pre-hash-order |
 | preheader hoist order, constant hoisted only in ours | loop-two-pass-hoist-threshold, preheader-giv-init-order, loop-hoist-lifetime-store-order, pathdata-unit-lessons (where an index variable is assigned in the surrounding if/else) |
 | the original repeats a test that cse folds in ours | duplicate-test-masked-form |
 | a hoisted constant is a copy of a variable initialised to it | volatile-asm-cse-flush (`asm volatile("" : : "i"(0))` after the init) |
