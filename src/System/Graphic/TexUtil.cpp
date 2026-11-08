@@ -1,13 +1,17 @@
 #define GPRIM_H_PATH "c:/KHCOM/MainApp/System/Graphic/Gprim.h" /* MATCH: Gprim.h strings in .rodata use the full path */
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/TexUtil.h"
+#include "System/Graphic/TexCtrl.h"
 #include "System/Buf.h"
 #include "System/VramMan.h"
 #include "System/FileIO.h"
 #include "System/Math3D.h"
 #include "System/Debug.h"
-#include "include_asm.h"
 #include <string.h>
+extern "C" {
+#include "System/Graphic/Effect/libppp/partMng.h"
+#include "System/Graphic/Effect/libppp/draw/draw_w.h"
+}
 
 
 
@@ -341,66 +345,60 @@ INT CTexUtil::getFixTexTransInfo(const void* pInData, VTransInfo& outTex, VTrans
     return nRet;
 }
 
-/* Parked: 72 of 280 lines, 4 bytes short - structure as the original (default display env -> width/height/PSM
- * via (INT)(u_long >> n) & mask, TIM2 file and picture headers, per-line StoreImage + writeFile). Left: the
- * reserved-bytes loop (pointer + own counter in the original), the GsTex0 TBW/PSM/TW/TH writes (the original
- * goes through a pointer and a 64-bit shift) and the header store order. Bitfield/shift forms, a separate loop
- * variable and permuter 6 min tried. */
-#if 0
+struct tGS_PMODE { /* libgraph (eestruct.h) */
+    unsigned int EN1 : 1;
+    unsigned int EN2 : 1;
+    unsigned int CRTMD : 3;
+    unsigned int MMOD : 1;
+    unsigned int AMOD : 1;
+    unsigned int SLBG : 1;
+    unsigned int ALP : 8;
+    unsigned int p0 : 16;
+    unsigned int p1;
+};
+struct tGS_SMODE2 { /* libgraph (eestruct.h) */
+    unsigned int INT : 1;
+    unsigned int FFMD : 1;
+    unsigned int DPMS : 2;
+    unsigned int p0 : 28;
+    unsigned int p1;
+};
+struct tGS_DISPFB2 { /* libgraph (eestruct.h) */
+    unsigned int FBP : 9;
+    unsigned int FBW : 6;
+    unsigned int PSM : 5;
+    unsigned int p0 : 12;
+    unsigned int DBX : 11;
+    unsigned int DBY : 11;
+    unsigned int p1 : 10;
+};
+struct tGS_DISPLAY2 { /* libgraph (eestruct.h) */
+    unsigned int DX : 12;
+    unsigned int DY : 11;
+    unsigned int MAGH : 4;
+    unsigned int MAGV : 2;
+    unsigned int p0 : 3;
+    unsigned int DW : 12;
+    unsigned int DH : 11;
+    unsigned int p1 : 9;
+};
+struct tGS_BGCOLOR { /* libgraph (eestruct.h) */
+    unsigned int R : 8;
+    unsigned int G : 8;
+    unsigned int B : 8;
+    unsigned int p0 : 8;
+    unsigned int p1;
+};
 struct sceGsDispEnv { /* libgraph */
-    u_long pmode;
-    u_long smode2;
-    u_long dispfb;
-    u_long display;
-    u_long bgcolor;
-};
-struct tGS_DISPFB { /* libgraph (eestruct.h) */
-    u_long FBP : 9;
-    u_long FBW : 6;
-    u_long PSM : 5;
-    u_long p0 : 12;
-    u_long DBX : 11;
-    u_long DBY : 11;
-    u_long p1 : 10;
-};
-struct tGS_DISPLAY { /* libgraph (eestruct.h) */
-    u_long DX : 12;
-    u_long DY : 11;
-    u_long MAGH : 4;
-    u_long MAGV : 2;
-    u_long p0 : 3;
-    u_long DW : 12;
-    u_long DH : 11;
-    u_long p1 : 9;
-};
-struct tGS_TEX0 { /* libgraph (eestruct.h) */
-    u_long TBP0 : 14;
-    u_long TBW : 6;
-    u_long PSM : 6;
-    u_long TW : 4;
-    u_long TH : 4;
-    u_long TCC : 1;
-    u_long TFX : 2;
-    u_long CBP : 14;
-    u_long CPSM : 4;
-    u_long CSM : 1;
-    u_long CSA : 5;
-    u_long CLD : 3;
-};
-struct sceGsStoreImage { /* libgraph */
-    u_long128 data[7];
-};
-struct TIM2_FILEHEADER {
-    TIM2_UCHAR8 FileId[4];
-    TIM2_UCHAR8 FormatVersion;
-    TIM2_UCHAR8 FormatId;
-    TIM2_UINT16 Pictures;
-    TIM2_UCHAR8 Reserved[8];
+    tGS_PMODE pmode;
+    tGS_SMODE2 smode2;
+    tGS_DISPFB2 dispfb;
+    tGS_DISPLAY2 display;
+    tGS_BGCOLOR bgcolor;
 };
 extern "C" int sceGsSetDefDispEnv(sceGsDispEnv* disp, short psm, short w, short h, short dx, short dy);
 extern "C" int sceGsSetDefStoreImage(sceGsStoreImage* sp, short sbp, short sbw, short spsm, short x, short y, short w, short h);
 extern "C" int sceGsExecStoreImage(sceGsStoreImage* sp, u_long128* dstaddr);
-extern "C" int sceGsSyncPath(int mode, unsigned short timeout);
 extern "C" void FlushCache(int operation);
 extern INT SCREEN_HEIGHT;
 BOOL CTexUtil::takeSnapShot(const CHAR* lpszInFile) {
@@ -409,19 +407,18 @@ BOOL CTexUtil::takeSnapShot(const CHAR* lpszInFile) {
     INT nHeight;
     INT nFormat;
     INT nBytes;
+    INT nImageType;
     INT hFile;
     TIM2_FILEHEADER fhdr;
     TIM2_PICTUREHEADER phdr;
     INT nImageSize;
-    INT i;
-    unsigned char pBuf[4096];
-    sceGsStoreImage si;
 
     sceGsSetDefDispEnv(&disp, 1, 0x200, SCREEN_HEIGHT, 0, 0);
-    nWidth = (UINT)(((INT)(disp.display >> 32) & 0xFFF) + 1) / (UINT)(((INT)(disp.display >> 23) & 0xF) + 1);
-    nHeight = ((INT)(disp.display >> 44) & 0x7FF) + 1;
-    nFormat = (INT)(disp.dispfb >> 15) & 0x1F;
+    nWidth = (disp.display.DW + 1) / (disp.display.MAGH + 1);
+    nHeight = disp.display.DH + 1;
+    nFormat = disp.dispfb.PSM;
     nBytes = nWidth * 3;
+    nImageType = 2;
     hFile = CFileIO::openFile(lpszInFile, 0x202, 0);
     if (hFile < 0) {
         TRACE("file create failure.\n");
@@ -434,7 +431,7 @@ BOOL CTexUtil::takeSnapShot(const CHAR* lpszInFile) {
     fhdr.FormatVersion = 3;
     fhdr.FormatId = 0;
     fhdr.Pictures = 1;
-    for (i = 7; i >= 0; i--) fhdr.Reserved[i] = 0;
+    for (INT i = 0; i < 8; i++) fhdr.pad[i] = 0;
     nImageSize = nBytes * nHeight;
     phdr.TotalSize = nImageSize + 0x30;
     phdr.ClutSize = 0;
@@ -444,12 +441,15 @@ BOOL CTexUtil::takeSnapShot(const CHAR* lpszInFile) {
     phdr.PictFormat = 0;
     phdr.MipMapTextures = 1;
     phdr.ClutType = 0;
-    phdr.ImageType = 2;
+    phdr.ImageType = nImageType;
     phdr.ImageWidth = nWidth;
     phdr.ImageHeight = nHeight;
-    phdr.GsTex0 = ((u_long)((nWidth + 63) / 64 & 0x3F) << 14) | ((u_long)nFormat << 20);
-    ((tGS_TEX0*)&phdr.GsTex0)->TW = CTexUtil::getBitDepth(nWidth);
-    ((tGS_TEX0*)&phdr.GsTex0)->TH = CTexUtil::getBitDepth(nHeight);
+    sceGsTex0* pTex0 = (sceGsTex0*)&phdr.GsTex0;
+    phdr.GsTex0 = 0;
+    pTex0->TBW = (nWidth + 63) / 64;
+    pTex0->PSM = nFormat;
+    pTex0->TW = CTexUtil::getBitDepth(nWidth);
+    pTex0->TH = CTexUtil::getBitDepth(nHeight);
     phdr.GsTex1 = 0;
     phdr.GsTexaFbaPabe = 0;
     phdr.GsTexClut = 0;
@@ -457,11 +457,12 @@ BOOL CTexUtil::takeSnapShot(const CHAR* lpszInFile) {
     CFileIO::writeFile(hFile, &phdr, 0x30);
     sceGsSyncPath(0, 0);
     TRACE("Start SnapShot\n");
-    for (i = 0; i < nHeight; i++) {
+    for (INT i = 0; i < nHeight; i++) {
+        unsigned char pBuf[4096];
+        sceGsStoreImage si;
         memset(pBuf, 0, 0x1000);
         TRACE(".");
-        sceGsSetDefStoreImage(&si, VRAM::_FRAME0_START, (INT)(disp.dispfb >> 9) & 0x3F, nFormat, (INT)(disp.dispfb >> 32) & 0x7FF,
-                              ((INT)(disp.dispfb >> 43) & 0x7FF) + i, nWidth, 1);
+        sceGsSetDefStoreImage(&si, VRAM::_FRAME0_START, disp.dispfb.FBW, nFormat, disp.dispfb.DBX, disp.dispfb.DBY + i, nWidth, 1);
         FlushCache(0);
         sceGsExecStoreImage(&si, (u_long128*)pBuf);
         sceGsSyncPath(0, 0);
@@ -471,16 +472,6 @@ BOOL CTexUtil::takeSnapShot(const CHAR* lpszInFile) {
     CFileIO::closeFile(hFile);
     return TRUE;
 }
-#else
-/* Placeholder: takeSnapShot's strings (INCLUDE_ASM below). */
-__attribute__((section(".sdata"))) void _takeSnapShotStrings() {
-    TRACE("file create failure.\n");
-    TRACE("Start SnapShot\n");
-    TRACE(".");
-    TRACE("\nEnd SnapShot!!\n");
-}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/TexUtil", takeSnapShot__8CTexUtilPCc);
-#endif
 
 INT CTexUtil::getClutSize(const BYTE* pInTim2) {
     TIM2_PICTUREHEADER* pHead = Tim2GetPictureHeader(pInTim2, 0);
@@ -489,12 +480,6 @@ INT CTexUtil::getClutSize(const BYTE* pInTim2) {
     return pHead->ClutSize;
 }
 
-/* Parked: 20 of 168 lines, same size - up-counting j (the original's reversed count-down), *pSrc read per term
- * (lbu for the low byte) and `iI | (iI << 16 | iI << 8)` fixed most of it. Left: the register order of case 1's
- * three channel terms (the original computes the >> 8 term into a1 first) and two instructions in case 2's loop.
- * Term forms and permuter 6 min: no gain. 2026-11-07: 17 lines (was 20) with a local per term, g first: the pixel word and
- * the g term still have each other's registers; a local for the pixel word gives 43 (the original reads the low byte with lbu). */
-#if 0
 void CTexUtil::makeCustomClut(ULONGLONG* inSrc, ULONGLONG* inDest, INT inType, INT inColNum) {
     UINT* pSrc;
     UINT* pDes;
@@ -508,13 +493,14 @@ void CTexUtil::makeCustomClut(ULONGLONG* inSrc, ULONGLONG* inDest, INT inType, I
         break;
     case 1: {
         INT j;
-        for (j = 0; j < inColNum; j++) {
-            UINT g = (((0xFF - (*pSrc >> 8)) << 7) & 0x7F00);
-            UINT r = (((UBYTE)(0xFF - (*pSrc >> 16)) >> 1) << 16);
-            UINT b = ((UBYTE)(0xFF - (UBYTE)*pSrc) >> 1);
-            *pDes = (((*pSrc & 0xFF000000) | b) | g) | r;
-            pSrc++;
-            pDes++;
+        for (j = 0; j < inColNum; j++, pSrc++, pDes++) {
+            UBYTE b = 0xFF - (UBYTE)*pSrc;
+            UBYTE g = 0xFF - (*pSrc >> 8);
+            UBYTE r = 0xFF - (*pSrc >> 16);
+            b >>= 1;
+            g >>= 1;
+            r >>= 1;
+            *pDes = (*pSrc & 0xFF000000) | b | (g << 8) | (r << 16);
         }
         break;
     }
@@ -524,32 +510,26 @@ void CTexUtil::makeCustomClut(ULONGLONG* inSrc, ULONGLONG* inDest, INT inType, I
         FLOAT fG;
         FLOAT fB;
         UINT iI;
-        for (j = 0; j < inColNum; j++) {
+        for (j = 0; j < inColNum; j++, pSrc++, pDes++) {
             fR = (FLOAT)(*pSrc & 0xFF);
             fG = (FLOAT)((*pSrc & 0xFF00) >> 8);
             fB = (FLOAT)((*pSrc & 0xFF0000) >> 16);
-            iI = (UINT)(fR * 0.2989f + fG * 0.5866f + fB * 0.1145f);
+            fR = fR * 0.2989f + fG * 0.5866f + fB * 0.1145f;
+            iI = (UINT)fR;
             if (iI >= 0x100) iI = 0xFF;
             *pDes = (*pSrc & 0xFF000000) | (iI | (iI << 16 | iI << 8));
-            pSrc++;
-            pDes++;
         }
         break;
     }
     default: {
         INT j;
-        for (j = 0; j < inColNum; j++) {
+        for (j = 0; j < inColNum; j++, pSrc++, pDes++) {
             *pDes = *pSrc & 0xFF000000;
-            pSrc++;
-            pDes++;
         }
         break;
     }
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/TexUtil", makeCustomClut__8CTexUtilPUlT1ii);
-#endif
 
 void CTexUtil::makeMonochromeClut(const TexInfo* inpInfo, INT inBufIdx, FLOAT inRate) {
     makeMonochromeClut(inpInfo, 0, inBufIdx, inRate);
@@ -693,88 +673,73 @@ void CTexUtil::makeWhiteClut(const TexInfo* inpInfo, INT inSrcBufIdx, INT inOutB
     }
 }
 
-/* Parked: 10 of 120 lines, same size - the mult between the allocTex call and its test (`r = allocTex(..);
- * nImageSize = w * h; if (r < 0)`, the original fills the bltz slot with it; 19 -> 10). Left: _nDistBufW, where the
- * original adds 64 to the (w-1) of an earlier block and shifts (ours (w-1)>>6 + 1; every source form with +64
- * folds to w+63 and is CSE'd with the first _align, 51 lines: nW1 locals, inline helpers, casts), the qwImage
- * sra position and one clut zero store (_nDistY last in the original). permuter 5 min (old form): no gain. */
-#if 0
 BOOL CTexUtil::setupTexInfo(TexInfo& outInfo, const BYTE* pInTex, INT nWidth, INT nHeight) {
     INT nTexSize;
     INT nTexPos;
     INT nClutPos;
 
     nTexSize = _align(_align(nWidth, 64) / 4 * nHeight, 64) / 64;
-    INT r = CVramMan::allocTex(nTexSize, 0, nTexPos, nClutPos, 0);
-    INT nImageSize = nWidth * nHeight;
-    if (r < 0) return FALSE;
+    if (CVramMan::allocTex(nTexSize, 0, nTexPos, nClutPos, 0) < 0) return FALSE;
     VTransInfo& tex = outInfo._TexInfo;
     VTransInfo& clut = outInfo._ClutInfo;
+    INT nAlignW = 64; /* as in getTransInfo; the ref omits it (a constant pseudo has no debug location) */
+    INT nImageSize = nWidth * nHeight >> 2;
     tex._nDistPos = nTexPos;
+    tex._nFormat = 0;
     tex._pImage = (ULONGLONG*)pInTex;
     tex._nDistX = 0;
     tex._nDistY = 0;
     tex._nDistW = nWidth;
-    tex._nFormat = 0;
     tex._nDistH = nHeight;
     tex._nTw = CTexUtil::getBitDepth(nWidth);
     tex._nTh = CTexUtil::getBitDepth(nHeight);
-    tex._nDistBufW = (UINT)(nWidth - 1) / 64 + 1;
-    tex._qwImage = nImageSize >> 2;
+    tex._nDistBufW = _align(nWidth, nAlignW) >> 6;
+    tex._qwImage = nImageSize;
     tex._nTransSize = nTexSize;
-    clut._nTransSize = 0;
     clut._nDistPos = 0;
     clut._nFormat = 0;
     clut._pImage = NULL;
     clut._nDistX = 0;
     clut._nDistY = 0;
     clut._nDistBufW = 1;
+    clut._nTransSize = 0;
     outInfo._nTPage = SCE_GS_SET_TEX0(nTexPos, tex._nDistBufW, tex._nFormat, tex._nTw, tex._nTh, 1, 0, nClutPos,
                                       clut._nFormat, 0, 0, 1);
     return TRUE;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/TexUtil", setupTexInfo__8CTexUtilR7TexInfoPCUcii);
-#endif
 
-/* Parked: 93 of 153 lines, 16 bytes short - control flow as the original (tex_cnv PSM 19/20 cases, getTransSize
- * else, allocTex, getTransInfo, TEX0). Left: the original keeps &outInfo._TexInfo/_ClutInfo in s1/s0 across the
- * getTransInfo call (one more saved register, frame 0x90), which renumbers most registers; it also tests tex_cnv
- * with andi 4 where ours shifts (bitfield types and ==1/!=0 tests tried). */
-#if 0
 BOOL CTexUtil::setupTexInfoImd(TexInfo& outInfo, const BYTE* pInImd, INT nAllocType) {
-    const IMD_HEADER* pImd = (const IMD_HEADER*)pInImd;
     INT nTexSize = 0;
     INT nClutSize = 0;
     TIM2_PICTUREHEADER tim2Header;
     INT nTexPos;
     INT nClutPos;
 
-    if (pImd->tex_cnv) {
+    if (((IMD_HEADER*)pInImd)->tex_cnv) {
         tim2Header.ImageType = 3;
-        switch (pImd->tex_psm) {
+        switch (((IMD_HEADER*)pInImd)->tex_psm) {
         case 20:
-            tim2Header.ImageWidth = pImd->tex_w >> 1;
-            tim2Header.ImageHeight = pImd->tex_h >> 2;
             nClutSize = 1;
+            tim2Header.ImageWidth = ((IMD_HEADER*)pInImd)->tex_w >> 1;
+            tim2Header.ImageHeight = ((IMD_HEADER*)pInImd)->tex_h >> 2;
             outInfo._ClutInfo._qwImage = 4;
             outInfo._ClutInfo._nDistW = 8;
             outInfo._ClutInfo._nDistH = 2;
             break;
         case 19:
-            tim2Header.ImageWidth = pImd->tex_w >> 1;
-            tim2Header.ImageHeight = pImd->tex_h >> 1;
             nClutSize = 4;
+            tim2Header.ImageWidth = ((IMD_HEADER*)pInImd)->tex_w >> 1;
+            tim2Header.ImageHeight = ((IMD_HEADER*)pInImd)->tex_h >> 1;
             outInfo._ClutInfo._qwImage = 64;
             outInfo._ClutInfo._nDistW = 16;
             outInfo._ClutInfo._nDistH = 16;
             break;
         }
-        nTexSize = (_align(tim2Header.ImageWidth, 64) * tim2Header.ImageHeight & ~63) >> 6;
+        nTexSize = _align(_align(tim2Header.ImageWidth, 64) * tim2Header.ImageHeight, 64) / 64;
     } else {
-        tim2Header.ImageType = pImd->tex_type;
-        tim2Header.ImageWidth = pImd->tex_w;
-        tim2Header.ImageHeight = pImd->tex_h;
+        tim2Header.ImageType = ((IMD_HEADER*)pInImd)->tex_type;
+        tim2Header.ImageWidth = ((IMD_HEADER*)pInImd)->tex_w;
+        tim2Header.ImageHeight = ((IMD_HEADER*)pInImd)->tex_h;
         CTexUtil::getTransSize(tim2Header, nTexSize, nClutSize);
     }
     if (CVramMan::allocTex(nTexSize, nClutSize, nTexPos, nClutPos, nAllocType) < 0) return FALSE;
@@ -785,16 +750,18 @@ BOOL CTexUtil::setupTexInfoImd(TexInfo& outInfo, const BYTE* pInImd, INT nAllocT
         outInfo._nTexSize = 0;
         outInfo._nClutSize = 0;
     }
-    CTexUtil::getTransInfo(tim2Header, outInfo._TexInfo, outInfo._ClutInfo, nTexPos, nClutPos);
-    outInfo._TexInfo._pImage = (ULONGLONG*)(pInImd + pImd->tex_ofs);
-    outInfo._ClutInfo._pImage = (ULONGLONG*)(pInImd + pImd->clut_ofs);
-    outInfo._TexInfo._nTransSize = nTexSize;
-    outInfo._ClutInfo._nTransSize = nClutSize;
-    outInfo._nTPage = SCE_GS_SET_TEX0(nTexPos, pImd->tex_bw, pImd->tex_psm, pImd->tex_tw, pImd->tex_th, 1, 0, nClutPos,
-                                      outInfo._ClutInfo._nFormat, 0, 0, 1);
+    { /* block-local references: the debug info (and so the ref) has no entry for this block's locals */
+        VTransInfo& tex = outInfo._TexInfo;
+        VTransInfo& clut = outInfo._ClutInfo;
+        CTexUtil::getTransInfo(tim2Header, tex, clut, nTexPos, nClutPos);
+        tex._pImage = (ULONGLONG*)(pInImd + ((IMD_HEADER*)pInImd)->tex_ofs);
+        clut._pImage = (ULONGLONG*)(pInImd + ((IMD_HEADER*)pInImd)->clut_ofs);
+        tex._nTransSize = nTexSize;
+        clut._nTransSize = nClutSize;
+        outInfo._nTPage = SCE_GS_SET_TEX0(nTexPos, ((IMD_HEADER*)pInImd)->tex_bw, ((IMD_HEADER*)pInImd)->tex_psm,
+                                          ((IMD_HEADER*)pInImd)->tex_tw, ((IMD_HEADER*)pInImd)->tex_th, 1, 0,
+                                          nClutPos, clut._nFormat, 0, 0, 1);
+    }
     return TRUE;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/TexUtil", setupTexInfoImd__8CTexUtilR7TexInfoPCUci);
-#endif
 // SOURCE DATA: .data .rodata
