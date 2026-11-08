@@ -20,7 +20,6 @@
 #include "Game/Collision/CollBody.h"
 #include "Game/Debug/DebugWork.h"
 #include "Game/GameWork.h"
-#include "include_asm.h"
 #include "System/HeapMan.h"
 
 template <class T> static inline T& _ref(T& v) { return v; }
@@ -53,8 +52,6 @@ static inline void _unitMatrix(FMATRIX& m) {
 static inline void _unitVec(FVECTOR& v) {
     asm volatile("sqc2 $vf0, 0x0(%0)" : : "r"(&v));
 }
-
-static inline BOOL _isTypeMask(INT type, UINT mask) { return (1 << type) & mask; }
 
 static inline FLOAT _sqrtf(FLOAT x) {
     FLOAT ret;
@@ -153,21 +150,12 @@ void CCollDisp::main() {
     }
 }
 
-/* Parked: 62 of 178 lines - logic and jump table match; `this`, the collision and the end position take other
- * registers. Tried (2026-11-02): pColl/type declaration order (62), inline getCollision()/getType() calls without
- * locals as the ref's locals suggest (104). */
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollDisp", setAttackLines__9CCollDispP14CCollisionList);
-/* setAttackLines' jump table (the function is still assembly). */
-asm(".rdata\n.align 4\njtbl_00488490:\n"
-    ".word .L002233D8\n.word .L00223554\n.word .L00223554\n.word .L00223418\n.word .L00223418\n.word .L00223554\n"
-    ".word .L00223458\n.word .L00223554\n.word .L00223554\n.word .L00223554\n.word .L00223514\n.text\n");
-#if 0
 void CCollDisp::setAttackLines(CCollisionList* pList) {
     for (CCollObj *pEntry = pList->getHead(), *__pn = pEntry ? pEntry->getNext() : NULL; pEntry;
          pEntry = __pn, __pn = __pn ? __pn->getNext() : NULL) {
-        CCollision* pColl = pEntry->getCollision();
         INT type = pEntry->getType();
-        if (!_isTypeMask(type, 0x9B6)) continue;
+        if (!((1 << type) & 0x9B6U)) continue;
+        CCollision* pColl = pEntry->getCollision();
         if (!checkRange(pColl->m_inWE)) continue;
         switch (type) {
         case 1:
@@ -182,11 +170,13 @@ void CCollDisp::setAttackLines(CCollisionList* pList) {
             break;
         case 7:
             if (m_nDispAtkNum < 18) {
+                /* a block-local cast: the original's .mdebug has a block here (its local optimized away) */
+                CPoly3Collision* pPoly3 = (CPoly3Collision*)pColl;
                 drawCapsule(m_pLines[m_nDispAtkNum + 20], pColl->m_inWS, pColl->m_inWE, pColl->m_shiftY,
                             pColl->m_Radius, 0x800808FF);
-                drawCapsule(m_pLines[m_nDispAtkNum + 21], pColl->m_inWE, pColl->m_outWE, pColl->m_shiftY,
+                drawCapsule(m_pLines[m_nDispAtkNum + 21], pColl->m_inWE, pPoly3->m_BasePos, pColl->m_shiftY,
                             pColl->m_Radius, 0x800808FF);
-                drawCapsule(m_pLines[m_nDispAtkNum + 22], pColl->m_outWE, pColl->m_inWS, pColl->m_shiftY,
+                drawCapsule(m_pLines[m_nDispAtkNum + 22], pPoly3->m_BasePos, pColl->m_inWS, pColl->m_shiftY,
                             pColl->m_Radius, 0x800808FF);
                 m_nDispAtkNum += 3;
             }
@@ -205,7 +195,6 @@ void CCollDisp::setAttackLines(CCollisionList* pList) {
         if (m_nDispAtkNum >= 20) break;
     }
 }
-#endif
 
 void CCollDisp::setBodyLines(CCollisionList* pList) {
     static unsigned int rgba_tbl[4] = {0x800808FF, 0x80C06060, 0x8000C000, 0x8000C0C0};
