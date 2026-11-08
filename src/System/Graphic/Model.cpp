@@ -984,11 +984,10 @@ void CModel::disp0_SetMicroCode(u_long128* pMProg) {
 void CModel::_disp0_SetTexture(INT nFlag, u_long* pTag) {
     if (!(nFlag & 6)) sendTexture(pTag);
 }
-/* Parked: 137 of 659 lines off, same size; mostly registers: the original gives this s5 and iFlags&2 s4 (ours swapped), the bone/light min() selects use movn (an if-form gives that but swaps s0/s1 globally), the no-light branch materializes zero twice. Worked: case 2 with default, (USHORT) mode compares inline, pcpyld tied to the tag word, _ref(m_iSendFlg) after the GIF stores, cache-hit close in the else arm, x/y/z/w colour stores, pextlw pack with a non-early-clobber temp. Tried: iFlags &= 2, a BOOL copy, zero variants; permuter 20 min (19316 candidates, stays 145). */
-#if 0
+/* the original's inline helpers (.mdebug: tmp/out128 in the pack blocks, out64 and a u_long128 x in the hi64 blocks) */
 static inline u_long128 _packWord(INT x, INT y, INT z, INT w) {
-    u_long128 tmp;
     u_long128 out128;
+    u_long128 tmp;
     __asm__ volatile("pextlw %0, %3, %2\n"
                      "pextlw %1, %5, %4\n"
                      "pextlw %0, %1, %0\n"
@@ -996,30 +995,32 @@ static inline u_long128 _packWord(INT x, INT y, INT z, INT w) {
                      : "r"(x), "r"(z), "r"(y), "r"(w));
     return out128;
 }
-static inline ULONGLONG _lo64(u_long128 x) {
-    ULONGLONG out64;
-    __asm__ volatile("por %0, $0, %1" : "=r"(out64) : "r"(x));
-    return out64;
-}
 static inline ULONGLONG _hi64(u_long128 x) {
     ULONGLONG out64;
     __asm__ volatile("pcpyud %0, %1, $0" : "=r"(out64) : "r"(x));
     return out64;
 }
+static inline u_long128 _makeGifTag(u_long lo, u_long hi) {
+    u_long128 tag;
+    __asm__ volatile("pcpyld %0, %1, %2" : "=r"(tag) : "r"(hi), "0"(lo));
+    return tag;
+}
+/* Parked: 93 of 655 lines (2026-11-08): the block tree equals the original's .mdebug except before pack #1 (original: a CModel inline, x invisible, y visible, x loaded after y) and the colour-matrix getter (original has no block there but the getter's addiu shape). Still differs: this in s4 / iFlags&2 in s5, the original swaps them (global alloc: this 47 refs/504 insns = 0.4663 beats the bone-loop addr giv 9/58 = 0.4655; one more insn in this's range would flip it), the semikind arm (original copies m_Mode to a1 for the switch compares), y's u16 ? u16 : 0x92 (ours branches, original li+movz), GIF tag store order, the no-light zero stores, two loop-align nops (+8 bytes, one insn out of phase). Tried: the .mdebug locals/blocks (149 -> 93: rawMode = pData[1][3], for-scoped i, tex0Buf in the else-if, t0/t1 + a $3 clobber, plain casts for the lo halves, then-block i/j, offset block, iSize < N ? iSize : N), memcpy for the light rows, calc(BOOL) defined after CLightUnit (isCalc inlined), getMode(), (version & 0xFFFF), ?: / != 0 / INT / USHORT forms for y. Earlier: permuter 20 min on the old draft (no gain). */
+#if 0
 void CModel::_disp0_SetPacket(UINT nMode, const int (*pData)[4], INT semikind, u_long nInTest, INT iFlags, u_long* tex0) {
+    UINT rawMode;
     QWdata* pQw;
     ULONGLONG lTest;
     ULONGLONG lAlpha;
     ULONGLONG lClamp;
+    INT iGifTagNum;
     UINT version;
+    UINT inbuffer;
     u_long128 qColorScale;
     u_long128 qOBLM;
     u_long128 qPP;
-    INT i;
-    u_long tex0Buf[16];
-    u_long128 tag;
 
-    version = pData[1][3];
+    rawMode = pData[1][3];
     CPackMan::pkCall((u_long128*)pData, 0);
     CPackMan::pkAddCode(0x10000000);
     if (m_pWSMatCache != m_pWSMat || (m_iSendFlg & 0x400)) {
@@ -1035,8 +1036,8 @@ void CModel::_disp0_SetPacket(UINT nMode, const int (*pData)[4], INT semikind, u
         lAlpha = 0x80000000A8;
         lTest = nInTest;
     } else {
-        UINT rawMode = getMode();
-        if ((USHORT)rawMode == 0x4005 || (USHORT)rawMode == 0x4205) lTest = 0x53001;
+        version = m_Mode;
+        if ((USHORT)version == 0x4005 || (USHORT)version == 0x4205) lTest = 0x53001;
         else lTest = nInTest;
         switch (semikind) {
         case 1:
@@ -1047,7 +1048,7 @@ void CModel::_disp0_SetPacket(UINT nMode, const int (*pData)[4], INT semikind, u
             break;
         case 2:
         default:
-            if ((USHORT)rawMode == 0x4005 || (USHORT)rawMode == 0x4205) lAlpha = 0x58;
+            if ((USHORT)version == 0x4005 || (USHORT)version == 0x4205) lAlpha = 0x58;
             else lAlpha = 0x48;
             break;
         }
@@ -1056,15 +1057,15 @@ void CModel::_disp0_SetPacket(UINT nMode, const int (*pData)[4], INT semikind, u
     if (isClampRepeat() && !(iFlags & 2)) lClamp = 0;
 
     CPackMan::pkOpenDirectCode(0);
-    __asm__ volatile("pcpyld %0, %1, %2" : "=r"(tag) : "r"((u_long)0xE), "0"((u_long)(m_iBeforeDirectQNum + 4) | 0x8000 | 0x1000000000000000));
-    pQw = (QWdata*)CPackMan::pkOpenGifTagManual(tag);
-    pQw[0].ul64[0] = lTest;
-    pQw[0].ul64[1] = 0x47;
-    pQw[1].ul64[0] = lAlpha;
-    pQw[1].ul64[1] = 0x42;
-    pQw[2].ul64[0] = lClamp;
-    pQw[2].ul64[1] = 8;
-    if (_ref(m_iSendFlg) & 4) {
+    iGifTagNum = m_iBeforeDirectQNum + 4;
+    pQw = (QWdata*)CPackMan::pkOpenGifTagManual(_makeGifTag((u_long)iGifTagNum | 0x8000 | 0x1000000000000000, 0xE));
+    ((u_long*)pQw)[0] = lTest;
+    ((u_long*)pQw)[1] = 0x47;
+    ((u_long*)pQw)[2] = lAlpha;
+    ((u_long*)pQw)[3] = 0x42;
+    ((u_long*)pQw)[4] = lClamp;
+    ((u_long*)pQw)[5] = 8;
+    if (m_iSendFlg & 4) {
         pQw[3].ul64[1] = 3;
     } else {
         pQw[3].ul64[0] = CPackMan::getDefault_ZBUF_1();
@@ -1073,7 +1074,7 @@ void CModel::_disp0_SetPacket(UINT nMode, const int (*pData)[4], INT semikind, u
     pQw += 4;
     if (m_pBeforeDirect) {
         QWdata* pQwSrc = (QWdata*)m_pBeforeDirect;
-        for (i = 0; i < m_iBeforeDirectQNum; i++) {
+        for (INT i = 0; i < m_iBeforeDirectQNum; i++) {
             pQw->ul128 = pQwSrc->ul128;
             pQw++;
             pQwSrc++;
@@ -1090,16 +1091,17 @@ void CModel::_disp0_SetPacket(UINT nMode, const int (*pData)[4], INT semikind, u
         pQw[5].ul128 = *(u_long128*)&CShadowModelMan::getShadowParam();
         CPackMan::pkCloseUpkCodeV4_32(pQw + 6);
     } else if (m_TransTexCount) {
+        u_long tex0Buf[16];
         if (!tex0) {
             tex0 = tex0Buf;
             getTexParam(tex0Buf);
         }
         pQw = (QWdata*)CPackMan::pkOpenUpkCodeV4_32(0x18, 4, 4);
-        for (i = 0; i < m_TransTexCount; i++) {
+        for (INT i = 0; i < m_TransTexCount; i++) {
             if (!tex0[i]) {
                 pQw->ul128 = 0;
             } else {
-                if (version & 0x400000) tex0[i] &= ~((u_long)1 << 34);
+                if (rawMode & 0x400000) tex0[i] &= ~((u_long)1 << 34);
                 pQw->ul64[0] = tex0[i];
                 if (m_TexUV) pQw->ul64[1] = m_TexUV[i].luv;
                 else pQw->ul64[1] = 0;
@@ -1109,52 +1111,40 @@ void CModel::_disp0_SetPacket(UINT nMode, const int (*pData)[4], INT semikind, u
         CPackMan::pkCloseUpkCodeV4_32(pQw);
     }
 
-    {
-        const QWdata* pHead = (const QWdata*)pData;
-        INT y;
-        if (!pHead[1].s16[3]) {
-            y = pHead[1].u16[7];
-            if (!y) y = 0x92;
-        } else {
-            y = pHead[1].s16[5];
-        }
-        qPP = _packWord(m_BBoxFlag, y, iFlags & 2, m_ShaderOption);
-    }
+    qPP = _packWord(m_BBoxFlag, !((const QWdata*)pData)[1].s16[3] ? (((const QWdata*)pData)[1].u16[7] ? ((const QWdata*)pData)[1].u16[7] : 0x92) : ((const QWdata*)pData)[1].s16[5], iFlags & 2, m_ShaderOption);
     if (iFlags & 2) {
-        FVECTOR* pColor = (FVECTOR*)&qColorScale;
-        pColor->x = 1.0f;
-        pColor->y = 1.0f;
-        pColor->z = 1.0f;
-        pColor->w = 1.0f;
+        ((FVECTOR*)&qColorScale)->set(1.0f, 1.0f, 1.0f, 1.0f);
     } else if (m_Mode == 0x10) {
-        u_long128 tmp;
-        __asm__ volatile("lqc2 $vf4, 0x0(%2)\n"
-                         "mfc1 %0, %3\n"
-                         "pcpyld %0, %0, $0\n"
-                         "mfc1 %0, %4\n"
-                         "qmtc2.ni %0, $vf5\n"
+        FLOAT t0 = CShadowModelMan::getColorDensity();
+        FLOAT t1 = CShadowModelMan::getAlphaDensity();
+        __asm__ volatile("lqc2 $vf4, 0x0(%1)\n"
+                         "mfc1 $3, %2\n"
+                         "pcpyld $3, $3, $0\n"
+                         "mfc1 $3, %3\n"
+                         "qmtc2.ni $3, $vf5\n"
                          "vmulz.xyz $vf4, $vf4, $vf5z\n"
                          "vmulx.w $vf4, $vf4, $vf5x\n"
-                         "sqc2 $vf4, 0x0(%1)\n"
-                         : "=&r"(tmp)
-                         : "r"(&qColorScale), "r"(&getColorScale()), "f"(CShadowModelMan::getColorDensity()), "f"(CShadowModelMan::getAlphaDensity())
-                         : "memory");
+                         "sqc2 $vf4, 0x0(%0)\n"
+                         : : "r"(&qColorScale), "r"(&m_ColorScale), "f"(t0), "f"(t1)
+                         : "$3", "memory");
     } else {
-        qColorScale = *(u_long128*)&getColorScale();
+        qColorScale = *(u_long128*)&m_ColorScale;
     }
     pQw = (QWdata*)CPackMan::pkOpenUpkCodeV4_32(0x12, 4, 4);
     pQw->ul128 = 0;
     pQw++;
     qOBLM = _packWord((INT)m_pCrds, m_BoneStart, (INT)m_pLightUnit, nMode);
     MODEL_SEND_CACHE& sModelCache = CModelMan::getModelCacheRef();
-    if (sModelCache.lOBLM_L != _lo64(qOBLM) || sModelCache.lOBLM_H != _hi64(qOBLM) ||
-        ((u_long*)&sModelCache.ivPP)[0] != _lo64(qPP) || ((u_long*)&sModelCache.ivPP)[1] != _hi64(qPP) ||
+    if (sModelCache.lOBLM_L != (u_long)qOBLM || sModelCache.lOBLM_H != _hi64(qOBLM) ||
+        ((u_long*)&sModelCache.ivPP)[0] != (u_long)qPP || ((u_long*)&sModelCache.ivPP)[1] != _hi64(qPP) ||
         ((u_long*)&sModelCache.fvColorScale)[0] != *(u_long*)&qColorScale ||
         ((u_long*)&sModelCache.fvColorScale)[1] != _hi64(qColorScale) || (m_iSendFlg & 0x800)) {
         INT boneNum;
         INT boneSize;
         INT w;
         CCoord* pCrd;
+        INT i;
+        INT j;
         INT iSize;
         INT bottom;
         UINT* p32;
@@ -1171,13 +1161,8 @@ void CModel::_disp0_SetPacket(UINT nMode, const int (*pData)[4], INT semikind, u
         if (m_pLightUnit) {
             m_pLightUnit->calc(TRUE);
             pQw = (QWdata*)CPackMan::pkOpenUpkCodeV4_32(4, 4, 4);
-            {
-                FMATRIX& mLight = m_pLightUnit->getLightMatrix();
-                pQw[0].ul128 = ((QWdata*)&mLight)[0].ul128;
-                pQw[1].ul128 = ((QWdata*)&mLight)[1].ul128;
-                pQw[2].ul128 = ((QWdata*)&mLight)[2].ul128;
-            }
-            pQw[3].ul128 = *(u_long128*)&m_pLightUnit->getAmbientVector();
+            memcpy(pQw, m_pLightUnit, 0x30);
+            pQw[3].ul128 = ((QWdata*)m_pLightUnit)[8].ul128;
             *(FMATRIX*)&pQw[4] = m_pLightUnit->getColorMatrix();
         } else {
             pQw = (QWdata*)CPackMan::pkOpenUpkCodeV4_32(4, 4, 4);
@@ -1198,50 +1183,49 @@ void CModel::_disp0_SetPacket(UINT nMode, const int (*pData)[4], INT semikind, u
         CPackMan::pkCloseUpkCodeV4_32(pQw + 1);
 
         pCrd = &m_pCrds->Crd(m_BoneStart);
-        {
-            INT addr = 0x28;
-            i = 0;
-            w = boneNum;
+        i = 0;
+        iSize = boneNum;
+        do {
+            j = iSize < 0x40 ? iSize : 0x3F;
+            pQw = (QWdata*)CPackMan::pkOpenUpkCodeV4_32(i * boneSize + 0x28, boneSize, 4);
+            iSize -= j;
             do {
-                iSize = w >= 0x40 ? 0x3F : w;
-                pQw = (QWdata*)CPackMan::pkOpenUpkCodeV4_32(addr, boneSize, 4);
-                w -= iSize;
-                do {
-                    *(FMATRIX*)pQw = pCrd[i].m_World;
-                    addr += boneSize;
-                    i++;
-                    pQw += 4;
-                } while (--iSize > 0);
-                CPackMan::pkCloseUpkCodeV4_32(pQw);
-            } while (w > 0);
-        }
-        if ((nMode == 0x40EE || nMode == 0x406E) && m_pLightUnit) {
-            u_long128* p = (u_long128*)m_pLightUnit->getPointLightData();
-            if (p) {
-                INT k = 0;
-                w = boneNum;
-                do {
-                    iSize = w >= 0x1A ? 0x19 : w;
-                    w -= iSize;
-                    pQw = (QWdata*)CPackMan::pkOpenUpkCodeV4_32(k * boneSize + 0x2F, boneSize, 10);
+                *(FMATRIX*)pQw = pCrd[i].getWorldMatrix();
+                i++;
+                pQw += 4;
+            } while (--j > 0);
+            CPackMan::pkCloseUpkCodeV4_32(pQw);
+        } while (iSize > 0);
+        if (nMode == 0x40EE || nMode == 0x406E) {
+            if (m_pLightUnit) {
+                u_long128* p = (u_long128*)m_pLightUnit->getPointLightData();
+                if (p) {
+                    i = 0;
+                    iSize = boneNum;
                     do {
-                        INT offset;
-                        for (offset = 0; offset < 10; offset++) {
-                            pQw->ul128 = p[offset];
-                            pQw++;
-                        }
-                        k++;
-                    } while (--iSize > 0);
-                    CPackMan::pkCloseUpkCodeV4_32(pQw);
-                } while (w > 0);
+                        j = iSize < 0x1A ? iSize : 0x19;
+                        iSize -= j;
+                        pQw = (QWdata*)CPackMan::pkOpenUpkCodeV4_32(i * boneSize + 0x2F, boneSize, 10);
+                        do {
+                            for (INT k = 0; k < 10; k++) {
+                                pQw->ul128 = p[k];
+                                pQw++;
+                            }
+                            i++;
+                        } while (--j > 0);
+                        CPackMan::pkCloseUpkCodeV4_32(pQw);
+                    } while (iSize > 0);
+                }
             }
         }
-        iSize = boneSize * boneNum + 0x28;
+        w = boneSize * boneNum + 0x28;
         bottom = 0x400 - m_pShader->m_WorkSize;
         p32 = (UINT*)CPackMan::pkGetCurrentPointer();
-        bottom = (bottom - iSize) / 2;
-        p32[0] = iSize | 0x03000000;
-        p32[1] = bottom | 0x02000000;
+        {
+            INT offset = (bottom - w) / 2;
+            p32[0] = w | 0x03000000;
+            p32[1] = offset | 0x02000000;
+        }
         p32[2] = MPG_START | 0x14000000;
         p32[3] = 0x11000000;
         CPackMan::pkSetCurrentPointer(p32 + 4);
@@ -1251,16 +1235,15 @@ void CModel::_disp0_SetPacket(UINT nMode, const int (*pData)[4], INT semikind, u
     CPackMan::pkCnt(0);
     CPackMan::pkAddCode(0x11000000);
     if (m_pAfterDirect) {
+        QWdata* pQwSrc;
         CPackMan::pkOpenDirectCode(0);
-        __asm__ volatile("pcpyld %0, %1, %2" : "=r"(tag) : "r"((u_long)0xE), "0"((u_long)m_iAfterDirectQNum | 0x8000 | 0x1000000000000000));
-        pQw = (QWdata*)CPackMan::pkOpenGifTagManual(tag);
-        {
-            QWdata* pQwSrc = (QWdata*)m_pAfterDirect;
-            for (i = 0; i < m_iAfterDirectQNum; i++) {
-                pQw->ul128 = pQwSrc->ul128;
-                pQw++;
-                pQwSrc++;
-            }
+        inbuffer = m_iAfterDirectQNum;
+        pQw = (QWdata*)CPackMan::pkOpenGifTagManual(_makeGifTag((u_long)inbuffer | 0x8000 | 0x1000000000000000, 0xE));
+        pQwSrc = (QWdata*)m_pAfterDirect;
+        for (INT i = 0; i < m_iAfterDirectQNum; i++) {
+            pQw->ul128 = pQwSrc->ul128;
+            pQw++;
+            pQwSrc++;
         }
         CPackMan::pkCloseGifTagManual((UINT*)pQw);
         CPackMan::pkCloseDirectCode();
@@ -1452,7 +1435,7 @@ void CModelBG::makePkt() {
     CPackMan::pkOpenDirectCode(0);
 }
 FIX4 CBBox::calcZ() { return 0x640; }
-/* Parked: 116 lines off, register allocation: structure matches (8-corner RotTransPers loop with min/max and W range, colour checks, four line-strip GIF packets), but the original keeps this in s4, &m_C0 in s1 and different caller-saved temporaries spilled around RotTransPers. Tried: x[0] > x[1] compare, a G_RGBA set helper (worse). */
+/* Parked: 108 of 458 lines (2026-11-08), register allocation: structure matches (8-corner RotTransPers loop with min/max and W range, colour checks, four line-strip GIF packets), but the original keeps this in s4, &m_C0 in s1 and different caller-saved temporaries spilled around RotTransPers; ours also builds a second c[x][y][z] pointer giv ((y*32 + x*64) + c for the .x/.y reads, c + x*64 + y*32 for the argument), the original one. The original .mdebug shows m_C0.set(r, g, b) inlines (G_RGBA this in v1 and s1), isSemiTrans() per packet plus five more inline blocks per packet and four in the range test; with the set()/isSemiTrans() forms the stores match but the draft grows to 136 lines (more spills). Tried: x[0] > x[1] compare, a G_RGBA set helper, (&c[x][y][z])->x reads (202). */
 #if 0
 static inline u_long _xyz(const IVECTOR& v) { return (u_long)v.x | ((u_long)v.y << 16) | ((u_long)v.z << 32); }
 void CBBox::makePkt() {

@@ -123,10 +123,9 @@ public:
         _calc(ctr);
     }
     void calc() { m_iFlags &= ~1; }
-    /* MATCH: types.h lists a second calc() without parameters: the BOOL is a guess, the body is what Model inlines */
-    void calc(BOOL bInCheck) {
-        if (!isCalc()) _calc();
-    }
+    /* MATCH: types.h lists a second calc() without parameters: the BOOL is a guess, the body is what Model inlines;
+       defined after the class, so that isCalc() is inlined into it (Model has no weak isCalc) */
+    void calc(BOOL bInCheck);
     BOOL isCalc() { return m_iFlags & 1; }
     void setAmbient(const FVECTOR& in_color);
     void setLight(INT idx, FVECTOR in_light, FVECTOR in_color);
@@ -148,6 +147,10 @@ protected:
         _calc(ctr);
     }
 };
+
+inline void CLightUnit::calc(BOOL bInCheck) {
+    if (!isCalc()) _calc();
+}
 
 class CMapLightUnit : public CLightUnit {
 protected:
