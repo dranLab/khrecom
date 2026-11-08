@@ -20,7 +20,7 @@
 #include "System/Graphic/WorldEnv.h"
 #include "Game/Game.h"
 #include "Form/DebugWindow.h"
-#include "include_asm.h"
+
 
 extern "C" int rand();
 
@@ -174,19 +174,15 @@ ISLCManagerT<CTask>& CTaskMan::getSLCManager() {
     return *_pSLCManager;
 }
 
-/* Parked: 4 lines - the barrier settles nTQ/bPause (s5/s6). Left: the TaskMainParam stores: the original issues the nTQ
-   store early and _SecondaryArray's after _nSysLag's; a scheduling tie across the clear() block. 2026-11-07: the ref
-   lists no ctor for TaskMainParam, but brace init with these values builds a temporary (80 lines): the ctor stays. */
-#if 0
 #line 223
 void CTaskMan::update(TIMEQ nTQ, TIMEQ nDispTQ, BOOL bPause) {
     ASSERT(_pRootTask && _pRootList);
     TIMEQ nSysLag = CPlaySpeedCtrl::getSysProgressTime(nDispTQ);
     TIMEQ nLag = CPlaySpeedCtrl::getProgressTime(nSysLag);
     INT nFlag = bPause ? (SHORT)(_nTaskFlag | 1) : (SHORT)(_nTaskFlag & ~1);
-    __asm__ volatile("" : : "r"(nTQ)); /* MATCH: a third ref for nTQ: it outranks bPause and takes s5 */
     _pSecondaryTaskArray->clear();
-    TaskMainParam param(*_ref(_pSecondaryTaskArray), nTQ, nSysLag, nLag, _nRnd, nFlag);
+    /* MATCH: both globals read through _ref: the original loads them after clear()'s stores (reloads the array) */
+    TaskMainParam param(*_ref(_pSecondaryTaskArray), nTQ, nSysLag, nLag, _ref(_nRnd), nFlag);
     if (_nPauseReq) {
         if (_nPauseReq == 1) {
             CGame::suspendGameTask();
@@ -205,15 +201,6 @@ void CTaskMan::update(TIMEQ nTQ, TIMEQ nDispTQ, BOOL bPause) {
     _invokeDisp();
     _updateMainTask();
 }
-#else
-/* placeholder for update's string */
-__asm__(".section .sdata\n");
-#line 223
-static void __attribute__((section(".sdata"))) _updateStrings() {
-    ASSERT(_pRootTask && _pRootList);
-}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/TaskMan", update__8CTaskManiii);
-#endif
 
 void CTaskMan::postprocess() {
     _pRootTask->invokeSweepChildren();
