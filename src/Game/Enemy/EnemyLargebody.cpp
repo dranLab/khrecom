@@ -30,7 +30,7 @@ static CHAR* Attack2Motion = "e009_053";
 }
 
 CEnemyLargebody::CEnemyLargebody(CTask* inParent) : CHeartless(inParent, 0, 0) {
-    m_fBodyRviseCoefficient = 0.1f;
+    setBodyRviseCoefficient(0.1f);
 }
 
 CEnemyLargebody::~CEnemyLargebody() {}

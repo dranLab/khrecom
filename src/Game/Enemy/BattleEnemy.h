@@ -7,14 +7,15 @@
 #include "Game/Entity.h"
 #include "Game/CollParam.h"     // PARTIAL: added for Game/Enemy/EnemyBluerhapsody (ATK_KIND)
 #include "Game/AttackMotion.h" // PARTIAL: added for Game/Enemy/EnemyBluerhapsody (ATK_ATTR)
-#ifdef BATTLEENEMY_H_STATE_TEMPLATE // MATCH: Game/Enemy/BattleEnemy sees m_EnemyState as the real CStateTemplate array
 #include "System/Fsm.h"
-#endif
+#include "System/Graphic/Effect/ObjType.h"
 
 struct ENEMY_PARAM;
+struct BASIC_ENEMY_PARAM;
 struct ENEMY_ACT;
 namespace BattleEnemy {
-INT GameModeHp(INT inHp); // PARTIAL: added for Game/Enemy/BattleEnemy
+INT GameModeHp(INT inHp);
+FLOAT GameModeAp(FLOAT inAp);
 }
 
 #include "Game/CardKindEnum.h"
@@ -39,11 +40,20 @@ inline void _battleEnemyCheckIndex(INT inIndex, INT inState) {
     if (!(inState < 8)) AssertApp(__FILE__, __LINE__, "BTL_ENEMY_STATE_ATTACK1 <= inState && inState < BTL_ENEMY_STATE_ATTACK_MAX", 0);
 }
 
-class CBattleEnemyManager; struct MES_CARD_INFO;
+class CBattleEnemyManager;
+
+struct STOP_DAMAGE {
+    FVECTOR vDetectPos;
+    char szHitEffectName[16];
+    SHORT sHitEffectNo;
+    SHORT sHitIndex;
+    ObjType::eObjType hitEffectObjType;
+    ATK_KIND dmgKind;
+    INT iDamage;
+};
 
 class CBattleEnemy : public CEntity {
-private: friend class CHumanBoss; /* MATCH: CHumanBoss reads m_pEnemyParam directly (getAttackCardNum, setupCardRevolver: the inline getter changes PRE) */
-    // PARTIAL: split into the original members for Game/Enemy/BattleEnemy (same layout)
+private: friend class CHumanBoss; friend class CHeartless; friend class CEnemyHeartsoldier; friend class CEnemySpadesoldier; /* MATCH: they use private members (the ref can't show friends): CHumanBoss reads m_pEnemyParam (getAttackCardNum, setupCardRevolver: the inline getter changes PRE) and sets m_iAttackState (setPlayCard, setPlayStock), CHeartless reads m_iAttackState and calls canAttack_ (aiCardBattle, canAttack, randomBattleCardNumber), all without an inline scope in the original .mdebug; CEnemyHeartsoldier/CEnemySpadesoldier call selectDamageMotion_ (beginStateDead) */
     FVECTOR m_vHitBackVel;       /* 0x1d0 */
     FVECTOR m_vConfusePlayerPos; /* 0x1e0 */
     FVECTOR m_vBackupVel;        /* 0x1f0 */
@@ -69,35 +79,34 @@ private: friend class CHumanBoss; /* MATCH: CHumanBoss reads m_pEnemyParam direc
     HANDLE m_hRecover;           /* 0x254 */
     HANDLE m_hDeath;             /* 0x258 */
     HANDLE m_hHitEffect;         /* 0x25c */
-    HANDLE m_hSpotLight[2];      /* 0x260 */
+    int m_hSpotLight[2];         /* 0x260 */
     TIMEQ m_tqCancelTimer;       /* 0x268 */
     TIMEQ m_tqBindTimer;         /* 0x26c */
     TIMEQ m_tqConfuseTimer;      /* 0x270 */
     TIMEQ m_tqHitBackTimer;      /* 0x274 */
     TIMEQ m_tqTime;              /* 0x278 */
     FLOAT m_fDamage;             /* 0x27c */
-protected:
     FLOAT m_fBodyRviseCoefficient; /* 0x280 */
-private:
     INT m_iExp;                  /* 0x284 */
     short m_sAttrDmgSeIdentifyNo[6]; /* 0x288 */
     INT m_iCardBreakSeIdentifyNo; /* 0x294 */
     CState* m_pDefaultState;     /* 0x298 */
     CState* m_pMainState;        /* 0x29c */
     ENEMY_PARAM* m_pEnemyParam;  /* 0x2a0 */
-    struct BASIC_ENEMY_PARAM* m_pBasicParam; /* 0x2a4 */
-    UBYTE m_MesCardInfo[0x24];   /* 0x2a8 MES_CARD_INFO */
+    BASIC_ENEMY_PARAM* m_pBasicParam; /* 0x2a4 */
+    MES_CARD_INFO m_MesCardInfo; /* 0x2a8 */
+protected:
     SHORT m_sStopDamageCount;    /* 0x2cc */
     SHORT m_sStopDamagePtr;      /* 0x2ce */
-    UBYTE m_StopDamage[0x180];   /* 0x2d0 STOP_DAMAGE[8] */
-#ifdef BATTLEENEMY_H_STATE_TEMPLATE /* MATCH: see the include above */
+    STOP_DAMAGE m_StopDamage[8]; /* 0x2d0 */
+private:
     CStateTemplate<CBattleEnemy> m_EnemyState[31]; /* 0x450 */
     static void (CBattleEnemy::*m_pBeginStateTbl[])();
     static void (CBattleEnemy::*m_pStateTbl[])();
     static void (CBattleEnemy::*m_pEndStateTbl[])();
-#else
-    UBYTE m_EnemyState[0x3e0];   /* 0x450 CStateTemplate<CBattleEnemy>[31] */
-#endif
+    static INT m_iDuelCardNum;
+    static INT m_iDuelCardPtr;
+    static int m_iDuelCardArray[10];
 
 public:
     CBattleEnemy(CTask* inParent, CState* inDefaultState, CState* inMainState);
@@ -109,7 +118,6 @@ public:
     virtual BOOL initalize(INT inGroupID, INT inRsrcID) { return initalize(inGroupID, inRsrcID, 0); }
     virtual void onMsg(INT inMsg, void* inExtraInfo);
     virtual void onOut();
-    /* The original inline members, in the order this object emits them (weak). */
     void setBattleEnemyFlag(ULONGLONG inOn, ULONGLONG inOff) { m_ullBtlEnemyFlag = (m_ullBtlEnemyFlag | inOn) & ~inOff; }
     void setHp(INT inHp) { m_iHp = inHp; }
     void setGroupNo(INT inNo) { m_iGroupNo = inNo; }
@@ -128,12 +136,20 @@ public:
     UINT getBattleEnemyFlag() const { return m_ullBtlEnemyFlag; }
     INT getHp() const { return m_iHp; }
     INT getGroupNo() const { return m_iGroupNo; }
+    HANDLE getNearestChild(FLOAT& outDist, CEntity& inEntity);
     CARD_KIND getCardKind() const { return m_CardKind; }
     CARD_KIND getDuelCardKind() const { return m_DuelCardKind; }
     INT getParam() const { return m_iParam; }
+    INT getHpMax() const;
+    INT getSize() const;
+    FLOAT getExtraParam(const CHAR* inParamName);
+    FLOAT getAttackPoint(INT inIndex, ATK_KIND inAtkKind, USHORT inUpFlag, ATK_KIND* outAtkKind, INT inFinish);
+    ATK_ATTR getAttackAttr(INT inIndex) const;
+    INT getAttackRate() const;
     ENEMY_PARAM* getEnemyParam() const { return m_pEnemyParam; }
     INT getHpPercent() const { return getHp() * 100 / getHpMax(); }
-    const struct MES_CARD_INFO* getMesCardInfo() const { return (const struct MES_CARD_INFO*)m_MesCardInfo; }
+    virtual void getUseCardPos(FVECTOR& outPos);
+    const MES_CARD_INFO& getMesCardInfo() const { return m_MesCardInfo; }
     TIMEQ getStopTime() const { return m_tqTime; }
     INT getExp() const { return m_iExp; }
     ULONGLONG isCardBattle() const { return m_ullBtlEnemyFlag & 0x1ULL; }
@@ -143,7 +159,7 @@ public:
     ULONGLONG isPermissionCardBattle() const { return m_ullBtlEnemyFlag & 0x10ULL; }
     ULONGLONG isNoCreateCard() const { return m_ullBtlEnemyFlag & 0x20ULL; }
     ULONGLONG isHitAttack() const { return m_ullBtlEnemyFlag & 0x40ULL; }
-    ULONGLONG isReload() const { return m_ullBtlEnemyFlag & 0x80ULL; }
+    LONGLONG isReload() const { return m_ullBtlEnemyFlag & 0x80ULL; }
     ULONGLONG isFly() const { return m_ullBtlEnemyFlag & 0x100ULL; }
     ULONGLONG isPutCardReady() const { return m_ullBtlEnemyFlag & 0x200ULL; }
     ULONGLONG isNoHpSub() const { return m_ullBtlEnemyFlag & 0x400ULL; }
@@ -182,98 +198,38 @@ public:
     ULONGLONG isFaint() const { return m_ullBtlEnemyFlag & 0x80000000000ULL; }
     ULONGLONG isNoDmgResponseOnMagnet() const { return m_ullBtlEnemyFlag & 0x100000000000ULL; }
     ULONGLONG isNoKillCount() const { return m_ullBtlEnemyFlag & 0x200000000000ULL; }
+    BOOL isPlayingCardBattle();
+    BOOL isCurrentState(INT inState);
+    BOOL isValidSynchro();
+    BOOL canCardBattle();
     BOOL canFlick() const {
         if (isNoDmgResponse()) return FALSE;
         if (isNoBigDamage()) return FALSE;
         return TRUE;
     }
+    BOOL canKill();
+    void changeMainState(INT inState);
+    virtual void changeMotion(INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo);
+    BOOL changeMotionIndex(INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo);
 #line 399 BATTLEENEMY_H_PATH
     void changeAttackRate(INT inIndex) {
         if (!(0 <= inIndex && inIndex < 2)) AssertApp(__FILE__, __LINE__, "0 <= inIndex && inIndex < 2", 0);
         m_iActiveAttackRate = inIndex;
     }
-#line 2000 BATTLEENEMY_H_PATH
-    void getPlayerPosition(FVECTOR& outPos);
-    FLOAT getExtraParam(const CHAR* inParamName);
-    void endCardBattle(CState* inState, TIMEQ inNextAttackWait);
-    BOOL turnToPlayer(FLOAT inLimit);
-    // PARTIAL: added for Game/Enemy/EnemySearchghost
-    BOOL turnToPlayerY(FLOAT inLimit);
-    void playerHomingY(FLOAT inRate); // PARTIAL: added for Game/Enemy/EnemySeaneon
-    // PARTIAL: added for Game/Enemy/EnemyBluerhapsody
-    FLOAT getAttackPoint(INT inIndex, ATK_KIND inAtkKind, USHORT inUpFlag, ATK_KIND* outAtkKind, INT inFinish);
-    ATK_ATTR getAttackAttr(INT inIndex) const;
-    HANDLE getPlayerHandle(); // PARTIAL: added for Game/Enemy/EnemyFatbandit
-    void makePrize();
-    void setupFlick();
-    BOOL isQuickRecover_();
-    void enemyCardDash_();
-    void continuousDamageProc_();
-    BOOL isNowPlayDamageMotion_();
-    BOOL canBlackroomCard_();
-    INT checkHitPos();
-    BOOL isLastLeave_(INT inResultHp);
-    BOOL isReraise_();
-    BOOL setupDuelCard();
-    void cardBattleProc_();
-    void setGuardEffect_(const FVECTOR* inPos);
-    void reviseObject_();
-    void setHitEffect_();
-    void updateSpotLight_();
-    INT computeDamage_(FLOAT inDamage, FLOAT inAttr);
-    INT computeDamage_(FLOAT inDamage, FLOAT inAttr, ATK_KIND inAtkKind);
-    BOOL initEnemyParam(INT inGroupID, INT inRsrcID, INT inIndex);
-    void initFSM_();
-    void initRoom_();
-    void setupHitBack();
-    void makeRoulettePrize(const FVECTOR* inPos);
-    BOOL checkResist_(ATK_KIND inDmgKind);
-    CBattleEnemyManager* getBattleEnemyManager() const;
-    void makeExpPrize(const FVECTOR* inPos);
-    void makePremiumPrize(const FVECTOR* inPos);
-    void makeCard(const FVECTOR* inPos);
-    BOOL hitTest_();
-    void homingMoveXZToPlayer(FLOAT inRate, FLOAT inSpeed);
-    void createFriendCard_(INT inRate);
-    void attackStateCardDestroy(BOOL inColl);
-    void changeDamageMotion(INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr);
-    void updateHitBackTimer_();
-    BOOL changeMotionIndex(INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo);
-    BOOL changeSmallDamageState_(ATK_KIND inDmgKind);
-    void playDamageSE(ATK_KIND inDmgKind); void changeDamageState_(ATK_KIND inDmgKind);
-    // PARTIAL: added for Game/Enemy/EnemyHeartsoldier
-    void changeDefaultState();
-    void playSmallDamageSE();
-    void playBigDamageSE();
-    INT selectDamageMotion_();
-    void makeExpPrize();              // PARTIAL: added for Game/Enemy/BossDeadDemo
-    static void setBossKilledFlag();
-    static INT m_iDuelCardNum;        // PARTIAL: added for Game/Enemy/BattleEnemy
-    static INT m_iDuelCardPtr;
-    static int m_iDuelCardArray[10];
-    // PARTIAL: added for Game/Enemy/BattleEnemyManager
-    HANDLE getNearestChild(FLOAT& outDist, CEntity& inEntity);
-    INT getHpMax() const;
-    BOOL isCurrentState(INT inState); // PARTIAL: added for Game/Enemy/HumanBoss
-    static INT getPlayerState();             // PARTIAL: added for Game/Enemy/HumanBoss
-    // PARTIAL: added for Game/Enemy/EnemyAirpirate
-    INT getAttackRate() const;
-#ifndef GAME_ENEMY_BATTLEENEMY_CPP /* MATCH: GAME_ENEMY_BATTLEENEMY_CPP gate, only for its own unit (tested 2026-11-02) */
-    INT getAttackState() const { return m_iAttackState; } // PARTIAL: added for Game/Enemy/Heartless
-#endif
-    BOOL canAttack_(const ENEMY_ACT* inAct);
-    BOOL destroyCard(); // PARTIAL: added for Game/Enemy/EnemyBarrelspider
-    // PARTIAL: added for Game/Enemy/EnemyWhitemushroom
-    void changeBattleEnemyState(INT inState);
-    void makePrize(const FVECTOR* inPos);
-    // PARTIAL: added for Game/Enemy/EnemyCreapplant
-    void setBadStatusEffect(INT inKind, FLOAT inParam);
-    void killBadStatusEffect();
-    BOOL canCardBattle();
-    HANDLE recover(INT inPoint, const CHAR* inEffectName, INT inEffectNo, const FVECTOR& inPos, const CCoord* inParent);
-    virtual void getUseCardPos(FVECTOR& outPos);
-    virtual void changeMotion(INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo);
     virtual BOOL startCardBattle();
+    void endCardBattle(CState* inState, TIMEQ inNextAttackWait);
+    INT checkHitPos();
+    void playerHomingY(FLOAT inRate);
+    void homingToPlayer(FLOAT inRate);
+    void homingToPlayerY(FLOAT inRate);
+    BOOL turnToPlayer(FLOAT inLimit);
+    BOOL turnToPlayerY(FLOAT inLimit);
+    void homingMoveToPlayer(FLOAT inRate, FLOAT inSpeed);
+    void homingMoveXZToPlayer(FLOAT inRate, FLOAT inSpeed);
+    void getPlayerPosition(FVECTOR& outPos);
+    HANDLE getPlayerHandle();
+    void makeExpPrize();
+    void makePrize();
 #ifdef GAME_ENEMY_BATTLEENEMY_CPP /* MATCH: GAME_ENEMY_BATTLEENEMY_CPP gate, only for its own unit (tested 2026-11-02) */
     virtual void bossDeadDemoCallback() {}
     virtual void setBossDeadEffect();
@@ -291,14 +247,20 @@ public:
     virtual BOOL bossDeadDemoSpecial();
     virtual void bossDeadDemoEnd();
 #endif
+    HANDLE recover(INT inPoint, const CHAR* inEffectName, INT inEffectNo, const FVECTOR& inPos, const CCoord* inParent);
+    void kill();
+    void attackStateCardDestroy(BOOL inColl);
     virtual void onBio(INT inParam);
     virtual void onGift(INT inParam);
+    static INT getPlayerState();
+    static void setBossKilledFlag();
 
 protected:
     virtual void updateBefore();
     virtual void updateAfter();
     virtual void updatePositionAfter();
     virtual void lastUpdate();
+    void changeDefaultState();
     virtual void beginStateAppear();
     virtual void stateAppear();
     virtual void endStateAppear();
@@ -452,28 +414,36 @@ protected:
 #endif
     virtual CEntity* createFriendCard(CARD_KIND inKind, INT inParam);
     virtual void notifyHP();
+    CBattleEnemyManager* getBattleEnemyManager() const;
+#line 673 BATTLEENEMY_H_PATH
+    void setAttackState(INT inState) {
+        if (!(2 <= inState && inState < 10)) AssertApp(__FILE__, __LINE__, "BTL_ENEMY_STATE_ATTACK1 <= inState && inState < BTL_ENEMY_STATE_ATTACK_MAX", 0);
+        m_iAttackState = inState;
+    }
+    void makePrize(const FVECTOR* inPos);
+    void makeExpPrize(const FVECTOR* inPos);
+    void makePremiumPrize(const FVECTOR* inPos);
+    void makeRoulettePrize(const FVECTOR* inPos);
+    void makeCard(const FVECTOR* inPos);
+    void changeBattleEnemyState(INT inState);
+    void setBadStatusEffect(INT inKind, FLOAT inParam);
+    void killBadStatusEffect();
+    void setupFlick();
     virtual void commonBeginAttack();
     virtual void commonEndAttack();
-
-public: // PARTIAL: state wrappers added for Game/Enemy/BattleEnemy
-    BOOL isValidSynchro();
-    BOOL canKill();
-    void homingToPlayerY(FLOAT inRate);
-    void homingMoveToPlayer(FLOAT inRate, FLOAT inSpeed);
-    void kill();
     void notifyDead();
-    void enableConfuse_(BOOL inEnable);
-    void updateDamageTimer_();
-    void updateBindTimer_();
-    void updateConfuseTimer_();
-    void enableBind_(BOOL inEnable);
-    void homingToPlayer(FLOAT inRate);
-    INT getSize() const;
-    FLOAT getDamageRate_() const;
-    void changeMainState(INT inState);
-    BOOL isPlayingCardBattle();
-    BOOL addEnemyKillCount_();
-    BOOL canCreateEnemyCard_();
+    void setupHitBack();
+    BOOL initEnemyParam(INT inGroupID, INT inRsrcID, INT inIndex);
+    void playSmallDamageSE();
+    void playBigDamageSE();
+    void playDamageSE(ATK_KIND inDmgKind);
+    BOOL setupDuelCard();
+    BOOL destroyCard();
+    BOOL canAttack(const ENEMY_ACT* inAct) { return canAttack_(inAct); }
+    void changeDamageMotion(INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr);
+    BOOL checkResist_(ATK_KIND inDmgKind);
+
+private:
     void beginStateAppear_();
     void stateAppear_();
     void endStateAppear_();
@@ -567,19 +537,38 @@ public: // PARTIAL: state wrappers added for Game/Enemy/BattleEnemy
     void beginStateDead_();
     void stateDead_();
     void endStateDead_();
-public:
-#ifndef GAME_ENEMY_BATTLEENEMY_CPP /* MATCH: GAME_ENEMY_BATTLEENEMY_CPP gate, only for its own unit (tested 2026-11-02) */
-    void setAttackState_(INT inState) { m_iAttackState = inState; } // PARTIAL: added for Game/Enemy/Heartless (no range check)
-#endif
-public:
-    // PARTIAL: added for Game/Enemy/EnemyAirpirate (last in the class: it sets the original line number)
-#line 673 BATTLEENEMY_H_PATH
-    void setAttackState(INT inState) {
-        if (!(2 <= inState && inState < 10)) AssertApp(__FILE__, __LINE__, "BTL_ENEMY_STATE_ATTACK1 <= inState && inState < BTL_ENEMY_STATE_ATTACK_MAX", 0);
-        m_iAttackState = inState;
-    }
-    BOOL canAttack(const ENEMY_ACT* inAct) { return canAttack_(inAct); }
+    void initFSM_();
+    void initRoom_();
+    BOOL hitTest_();
+    INT computeDamage_(FLOAT inDamage, FLOAT inAttr);
+    INT computeDamage_(FLOAT inDamage, FLOAT inAttr, ATK_KIND inAtkKind);
+    void changeDamageState_(ATK_KIND inDmgKind);
     BOOL cancelTimeOver_() const { return m_tqCancelTimer <= 0; }
+    BOOL canAttack_(const ENEMY_ACT* inAct);
+    INT selectDamageMotion_();
+    void enableBind_(BOOL inEnable);
+    void enableConfuse_(BOOL inEnable);
+    void setGuardEffect_(const FVECTOR* inPos);
+    FLOAT getDamageRate_() const;
+    BOOL isLastLeave_(INT inResultHp);
+    BOOL isReraise_();
+    BOOL isQuickRecover_();
+    void enemyCardDash_();
+    void createFriendCard_(INT inRate);
+    void setHitEffect_();
+    void cardBattleProc_();
+    void reviseObject_();
+    void updateBindTimer_();
+    void updateConfuseTimer_();
+    void updateHitBackTimer_();
+    void updateDamageTimer_();
+    BOOL isNowPlayDamageMotion_();
+    BOOL addEnemyKillCount_();
+    BOOL changeSmallDamageState_(ATK_KIND inDmgKind);
+    void updateSpotLight_();
+    BOOL canCreateEnemyCard_();
+    void continuousDamageProc_();
+    BOOL canBlackroomCard_();
 };
 
 #endif /* GAME_ENEMY_BATTLEENEMY_H */

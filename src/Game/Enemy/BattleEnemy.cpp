@@ -1,7 +1,6 @@
 #define GAME_ENEMY_BATTLEENEMY_CPP /* MATCH: unit gate (its header gives this unit its own parts); without it the unit compiles only against its full header (tested 2026-11-02) */
 #include "System/TaskMan.h"
 #include "khtypes.h"
-#define BATTLEENEMY_H_STATE_TEMPLATE /* MATCH: this unit sees m_EnemyState as the real CStateTemplate array (System/Fsm.h strings and the state table) */
 #define BATTLEENEMY_H_PATH "c:/KHCOM/MainApp/Game/Enemy/BattleEnemy.h" /* MATCH: this unit names BattleEnemy.h so (header default "Game/Enemy/BattleEnemy.h") */
 #define GPRIM_H_PATH "System/Graphic/GPrim.h" /* MATCH: this unit names Gprim.h so (header default "System/Graphic/Gprim.h") */
 /* .rodata starts with the strings of the included headers' inline functions, in this order. */
@@ -128,15 +127,6 @@ struct PRIZE_DATA {
 
 
 extern "C" void sceVu0InversMatrix(FMATRIX& m0, const FMATRIX& m1);
-struct STOP_DAMAGE {
-    FVECTOR vDetectPos;
-    char szHitEffectName[16];
-    SHORT sHitEffectNo;
-    SHORT sHitIndex;
-    ObjType::eObjType hitEffectObjType;
-    ATK_KIND dmgKind;
-    INT iDamage;
-};
 #include "Form/Menu/JMemoFlag.h"
 
 
@@ -413,7 +403,7 @@ CBattleEnemy::CBattleEnemy(CTask* inParent, CState* inDefaultState, CState* inMa
     m_hSpotLight[0] = 0;
     m_hSpotLight[1] = 0;
     for (i = 5; i >= 0; i--) m_sAttrDmgSeIdentifyNo[i] = 0;
-    memset(m_MesCardInfo, 0, sizeof(m_MesCardInfo));
+    memset(&m_MesCardInfo, 0, sizeof(m_MesCardInfo));
 }
 CBattleEnemy::~CBattleEnemy() {
     CEffectMan::killEffect(m_hBadStatus, 0.0f);
@@ -503,7 +493,7 @@ BOOL CBattleEnemy::initalize(INT inGroupID, INT inRsrcID, UINT iFlag) {
 void CBattleEnemy::onMsg(INT inMsg, void* inExtraInfo) {
     if (inMsg == 0x70F0F0F0) setAppearEffect();
     if (m_iHp <= 0) return;
-    if (inExtraInfo) *(MES_CARD_INFO*)m_MesCardInfo = *(MES_CARD_INFO*)inExtraInfo;
+    if (inExtraInfo) m_MesCardInfo = *(MES_CARD_INFO*)inExtraInfo;
     switch (inMsg) {
     case 1:
         TRACE("CBattleEnemy::onMsg = CB_MES_START, EnemyID = %d\n", (UINT)getID() % 10000);
@@ -1339,7 +1329,7 @@ void CBattleEnemy::stateStop() {
                 if (!m_pEnemyParam) AssertApp(__FILE__, 0xA44, "m_pEnemyParam", 0);
                 FLOAT attr = _getAttrRate(m_pEnemyParam, hit->getDamageAttr());
                 if (attr >= 1000.0f) attr = 100.0f;
-                STOP_DAMAGE* stopDmg = &((STOP_DAMAGE*)m_StopDamage)[m_sStopDamageCount];
+                STOP_DAMAGE* stopDmg = &m_StopDamage[m_sStopDamageCount];
                 if (hit->getDamageKind() == ATK_KIND_GRAVITY) {
                     INT dmg = m_iHp * (FLOAT)m_pBodyColl->getDamage() / 100.0f;
                     stopDmg->iDamage = dmg * attr / 100.0f;
@@ -1389,7 +1379,7 @@ void CBattleEnemy::stateStop() {
             }
             break;
         }
-        STOP_DAMAGE* stopDmg = &((STOP_DAMAGE*)m_StopDamage)[m_sStopDamagePtr];
+        STOP_DAMAGE* stopDmg = &m_StopDamage[m_sStopDamagePtr];
         if (!isHitPoints()) {
             if (!(DebugWork::g_dw.enemy.uiFlag & 1)) m_iHp -= stopDmg->iDamage;
             if (getHp() >= getHpMax()) m_iHp = getHpMax();
@@ -2148,7 +2138,7 @@ HANDLE CBattleEnemy::recover(INT inPoint, const CHAR* inEffectName, INT inEffect
     m_hRecover = 0;
     if (isCurrentState(18) && m_iSysStep == 0) {
         if (m_sStopDamageCount >= 8) goto fail;
-        STOP_DAMAGE* stopDmg = &((STOP_DAMAGE*)m_StopDamage)[m_sStopDamageCount++];
+        STOP_DAMAGE* stopDmg = &m_StopDamage[m_sStopDamageCount++];
         stopDmg->iDamage = -inPoint;
         stopDmg->dmgKind = ATK_KIND_DMG_SMALL;
         stopDmg->sHitEffectNo = inEffectNo;

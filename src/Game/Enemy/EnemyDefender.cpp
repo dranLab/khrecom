@@ -38,7 +38,7 @@ static CHAR* Figa2Motion = "e026_052";
 }
 
 CEnemyDefender::CEnemyDefender(CTask* inParent) : CHeartless(inParent, 0, 0) {
-    m_fBodyRviseCoefficient = 0.1f;
+    setBodyRviseCoefficient(0.1f);
 }
 
 CEnemyDefender::~CEnemyDefender() {}
