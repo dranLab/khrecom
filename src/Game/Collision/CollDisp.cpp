@@ -207,23 +207,16 @@ void CCollDisp::setAttackLines(CCollisionList* pList) {
 }
 #endif
 
-/* Parked: 38 of 105 lines, same size - structure matches (case 4/5 column first, `case 2: default:` sphere); left:
- * the s-registers are rotated (original this s1, collision s0, type s2, fg s3, &m_inWE s4) and the sphere arm
- * recomputes &m_inWE where ours reuses it. Tried: this vs a pThis copy, decl orders, separate case 2/default
- * sphere bodies (no cross-jump, 44-51 lines), inline getCollision()/getType() calls without locals as the ref's
- * locals suggest (66), permuter 10 min (38 -> 38). */
-/* Parked: 38 of 105 lines (2026-11-07), same size: the s registers come out rotated by one through the loop (this s1 for
-   s2, ...). The ref has no pColl/type locals but dropping either is worse (53-66); swapping their declarations: 38-39. */
-#if 0
 void CCollDisp::setBodyLines(CCollisionList* pList) {
     static unsigned int rgba_tbl[4] = {0x800808FF, 0x80C06060, 0x8000C000, 0x8000C0C0};
     for (CCollObj *pEntry = pList->getHead(), *__pn = pEntry ? pEntry->getNext() : NULL; pEntry;
          pEntry = __pn, __pn = __pn ? __pn->getNext() : NULL) {
-        INT fg = pEntry->isEnable() | (*(SHORT*)((UBYTE*)pEntry + 0x84) << 1);
+        INT fg = pEntry->isEnable() | (((CCollBody*)pEntry)->isEnableBody() << 1);
         if (!fg) continue;
-        CCollision* pColl = pEntry->getCollision();
         INT type = pEntry->getType();
-        if (!_isTypeMask(type, 0x34)) continue;
+        if (!((1 << type) & 0x34U)) continue;
+        /* pColl after the type test: the ref has no pColl (its pseudo is copy-propagated away, as in the original). */
+        CCollision* pColl = pEntry->getCollision();
         if (!checkRange(pColl->m_inWE)) continue;
         UINT uiCol = rgba_tbl[fg];
         switch (type) {
@@ -239,37 +232,6 @@ void CCollDisp::setBodyLines(CCollisionList* pList) {
         if (++m_nDispBodyNum >= 20) break;
     }
 }
-#else
-__asm__(".section .sdata\n");
-/* Placeholder for the INCLUDE_ASM'd setBodyLines below (emits its static table in place). */
-void __attribute__((section(".sdata"))) _setBodyLines(CCollDisp* pThis, CCollisionList* pList) {
-    static unsigned int rgba_tbl[4] = {0x800808FF, 0x80C06060, 0x8000C000, 0x8000C0C0};
-    for (CCollObj *pEntry = pList->getHead(), *__pn = pEntry ? pEntry->getNext() : NULL; pEntry;
-         pEntry = __pn, __pn = __pn ? __pn->getNext() : NULL) {
-        INT fg = pEntry->isEnable() | (*(SHORT*)((UBYTE*)pEntry + 0x84) << 1);
-        if (!fg) continue;
-        CCollision* pColl = pEntry->getCollision();
-        INT type = pEntry->getType();
-        if (!_isTypeMask(type, 0x34)) continue;
-        if (!pThis->checkRange(pColl->m_inWE)) continue;
-        UINT uiCol = rgba_tbl[fg];
-        switch (type) {
-        case 2:
-            pThis->drawSphere(pThis->m_pLines[pThis->m_nDispBodyNum], pColl->m_inWE, pColl->m_shiftY, pColl->m_Radius, uiCol);
-            break;
-        case 4:
-        case 5:
-            pThis->drawColumn(pThis->m_pLines[pThis->m_nDispBodyNum], pColl->m_inWS, pColl->m_inWE, pColl->m_shiftY, pColl->m_Radius, uiCol);
-            break;
-        default:
-            pThis->drawSphere(pThis->m_pLines[pThis->m_nDispBodyNum], pColl->m_inWE, pColl->m_shiftY, pColl->m_Radius, uiCol);
-            break;
-        }
-        if (++pThis->m_nDispBodyNum >= 20) break;
-    }
-}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollDisp", setBodyLines__9CCollDispP14CCollisionList);
-#endif
 
 BOOL CCollDisp::checkRange(const FVECTOR& refPos) {
     FVECTOR tmp;
