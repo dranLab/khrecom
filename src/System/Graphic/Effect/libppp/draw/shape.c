@@ -329,19 +329,22 @@ asm(".section .rodata\n.align 3\n.asciz \"c:/KHCOM/MainApp/System/Graphic/Effect
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/draw/shape", pppVu1ShapeDraw);
 #endif
 
-/* Parked: 18 of 1680 lines (2026-11-08), 4 bytes short; and not honest C (V4): the six VU0 loops, the DMA send/wait
-   block and the two OT-add inlines are the original's instruction stream copied from the disassembly (about 1190 asm
-   lines, some 400 of them plain MIPS: loads, stores, branches, address arithmetic, .set noreorder delay slots, the
-   DMA busy-wait nops). In the C between them: at the join after the loops the count (t1) is copied to a0 before the
-   zero-extension (move/li placement, v0/v1/a0), and the two `/ 0x3000` OT divisions have dividend and divisor in
-   swapped registers (v1/v0 in the original), the clamp after them is `li a1,255; movn a1,v1,v0` there.
-   2026-11-08: the loops carry the plan's evidence for the original's own asm (.set noreorder with hand-filled delay
-   slots, 28 trapping dadd/addi/add in the original), so the asm may stay (plan item 4) once it uses operands instead
-   of the hard-coded $16/$17/$9 and the `move %0, $9` read. The original's .mdebug block tree gives the operands:
-   function block sh/s1 shi/s0 nPacketSize/a2 spr/t8 sp/a2 spa/a1 spritec/t1 base/t9 nWord/v1 nWord2/a2 iFog/t0
-   (nWord, nWord2, iFog are missing from this draft); { y } { { spr2/v0 spr/a2 w/a0 } } (the spr_get inline has a
-   local w); four OT-add inline blocks { packet/t9 qsize/a2 otz/a1 }; { { w/v0 } } (the DMA send).
-   tried: earlier sessions (no record); 2026-11-07 only the V4 review */
+/* Parked: 5 of 1680 lines (2026-11-08): only the join after the six loops differs, registers of three block-local
+   values: the original has `move a0,t1` (the $9 read), `li v1,32`, `andi v0,a1,0x800`, ours `move v1,t1`, `li v0,32`,
+   `andi a0,a1,0x800`. They are the block's only 3 local quantities, so local-alloc takes them in birth order
+   (memory local-alloc-three-quantities): ours sched1 order is lhu, li 32, move, zext, and, movn. The original reads $9
+   on line 2049 before `iFog` (line 2059), but with that order the asm issues before the `lhu` and the `b` slots after
+   the loops stay empty (13 lines); iFog first gives the right order and only this swap.
+   2026-11-08 from the line markers and the .mdebug block tree (18 -> 5, size now right): ref locals (nWord =
+   *(word *)(spr - 8), nWord / 0x3000 as its own statement in the first branch; nWord2 = the qword count; iFog; sp/spa
+   at function level), spr_get with the ref's local w (sceGsSyncPath at the call site), the OT-add inlines and the DMA
+   kick with operands instead of pinned locals, the DMA tag stores and `sync` as C statements (lines 2117-2119).
+   The asm is the original's own (plan item 4): .set noreorder with hand-filled delay slots split across statements,
+   trapping addi/add/dadd, `bne $zero,...`, the 4-nop VIF1 wait. Still hard-coded: $17 (sh) in the loops (an "r"(sh)
+   operand adds six uses of sh and global-alloc swaps s0/s1: 55 lines; "r"(shi) is neutral and kept) and the $9
+   sprite count, read by `move %0, $9` after the loops (as an output operand of the loops: 52-58 lines, spa/spritec
+   swap a1/t1).
+   tried: iFog forms (ternary, if/else, braces), asm volatile, spritec output with "=r"/"=&r" and a $9 pin */
 #if 0
 #define SCE_GIF_SET_TAG(nloop, eop, pre, prim, flg, nreg)                                                \
     ((u_long)(nloop) | ((u_long)(eop) << 15) | ((u_long)(pre) << 46) | ((u_long)(prim) << 47) |       \
@@ -351,11 +354,14 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/draw/shap
 static inline word shape_spr_get(void) {
     word spr2;
     word spr;
+    word w;
 
-    sceGsSyncPath(0, 0);
-    spr = spr_a[spr_index++];
+    w = spr_index;
+    spr = spr_a[w];
     spr2 = spr + 0x2000;
-    spr_a[spr_index] = spr2;
+    w++;
+    spr_a[w] = spr2;
+    spr_index = w;
     return spr;
 }
 
@@ -365,29 +371,22 @@ static inline void shape_ot_add(u_qword *packet, int qsize, int otz) {
     } else if (otz > 255) {
         otz = 255;
     }
-    {
-    register u_qword *p asm("$25") = packet;
-    register int q asm("$6") = qsize;
-    register int z asm("$5") = otz;
-    register u_long128 *ot asm("$4") = ow_ot;
-
     __asm__ volatile(
 ".set\tnoreorder\n"
 "\tpsubw\t$2, $2, $2\n"
 "\tlui\t$2, 0x2000\n"
-"\taddi\t$3, $6, -0x1\n"
+"\taddi\t$3, %1, -0x1\n"
 "\tor\t$2, $2, $3\n"
-"\tsq\t$2, 0x0($25)\n"
-"\tdsll\t$2, $5, 4\n"
-"\tadd\t$2, $2, $4\n"
+"\tsq\t$2, 0x0(%0)\n"
+"\tdsll\t$2, %2, 4\n"
+"\tadd\t$2, $2, %3\n"
 "\tlw\t$3, 0x8($2)\n"
-"\tsw\t$25, 0x8($2)\n"
+"\tsw\t%0, 0x8($2)\n"
 "\taddiu\t$2, $2, 0x10\n"
-"\tsw\t$25, 0x4($3)\n"
-"\tsw\t$2, 0x4($25)\n"
+"\tsw\t%0, 0x4($3)\n"
+"\tsw\t$2, 0x4(%0)\n"
 "\t.set\treorder\n"
-        : : "r"(p), "r"(q), "r"(z), "r"(ot) : "$2", "$3", "memory");
-    }
+        : : "r"(packet), "r"(qsize), "r"(otz), "r"(ow_ot) : "$2", "$3", "memory");
 }
 
 static inline void shape_ot_add2(u_qword *packet, int qsize, int otz) {
@@ -396,87 +395,75 @@ static inline void shape_ot_add2(u_qword *packet, int qsize, int otz) {
     } else if (otz > 255) {
         otz = 255;
     }
-    {
-    register u_qword *p asm("$25") = packet;
-    register int q asm("$6") = qsize;
-    register int z asm("$5") = otz;
-    register u_long128 *ot asm("$4") = ow_ot;
-
     __asm__ volatile(
 ".set\tnoreorder\n"
 "\tpsubw\t$2, $2, $2\n"
 "\tlui\t$2, 0x2000\n"
-"\taddi\t$3, $6, -0x1\n"
+"\taddi\t$3, %1, -0x1\n"
 "\tor\t$2, $2, $3\n"
-"\tsq\t$2, 0x0($25)\n"
-"\tdsll\t$2, $5, 4\n"
-"\tadd\t$2, $2, $4\n"
+"\tsq\t$2, 0x0(%0)\n"
+"\tdsll\t$2, %2, 4\n"
+"\tadd\t$2, $2, %3\n"
 "\tlw\t$3, 0x8($2)\n"
-"\tsw\t$25, 0x8($2)\n"
+"\tsw\t%0, 0x8($2)\n"
 "\taddiu\t$2, $2, 0x10\n"
-"\tsw\t$25, 0x4($3)\n"
-"\tsw\t$2, 0x4($25)\n"
+"\tsw\t%0, 0x4($3)\n"
+"\tsw\t$2, 0x4(%0)\n"
 "\t.set\treorder\n"
-        : : "r"(p), "r"(q), "r"(z), "r"(ot) : "$2", "$3", "memory");
-    }
+        : : "r"(packet), "r"(qsize), "r"(otz), "r"(ow_ot) : "$2", "$3", "memory");
 }
 
-#define SHAPE_DMA_SEND(packet, qsize, L)                                 \
+/* The DMA kick after the tag: wait for VIF1, start the chain at packet (scratchpad bit set), wait again. */
+#define SHAPE_DMA_KICK(packet)                                            \
     {                                                                     \
-        register u_qword *p asm("$25") = (packet);                        \
-        register int q asm("$6") = (qsize);                               \
+        word w = 0x1000A000;                                              \
                                                                           \
         __asm__ volatile(                                                 \
 ".set\tnoreorder\n"                                                       \
-"\taddiu\t$3, $6, -0x1\n" \
-"\tlui\t$2, 0x7000\n" \
-"\tor\t$2, $3, $2\n" \
-"\tsd\t$zero, 0x8($25)\n" \
-"\tsd\t$2, 0x0($25)\n" \
-"\tsync\n" \
-"\tlui\t$2, 0x1000\n" \
-"\tori\t$2, $2, 0xa000\n" \
-"$Ldma_0017FED8" L ":\n" \
-"\tlw\t$3, 0x0($2)\n" \
+"$Ldma0_%=:\n" \
+"\tlw\t$3, 0x0(%1)\n" \
 "\tnop\n" \
 "\tnop\n" \
 "\tnop\n" \
 "\tnop\n" \
 "\tandi\t$3, $3, 0x100\n" \
-"\tbne\t$zero, $3, $Ldma_0017FED8" L "\n" \
+"\tbne\t$zero, $3, $Ldma0_%=\n" \
 "\tlui\t$5, 0x8000\n" \
-"\tor\t$25, $5, $25\n" \
+"\tor\t%0, $5, %0\n" \
 "\taddiu\t$5, $zero, -0x1\n" \
-"\tlw\t$6, 0x30($2)\n" \
-"\tbnel\t$6, $5, $Ldma_0017FF0C" L "\n" \
-"\tsw\t$25, 0x30($2)\n" \
-"$Ldma_0017FF0C" L ":\n" \
+"\tlw\t$6, 0x30(%1)\n" \
+"\tbnel\t$6, $5, $Ldma1_%=\n" \
+"\tsw\t%0, 0x30(%1)\n" \
+"$Ldma1_%=:\n" \
 "\taddiu\t$4, $zero, -0xD\n" \
-"\tsw\t$zero, 0x20($2)\n" \
+"\tsw\t$zero, 0x20(%1)\n" \
 "\tand\t$4, $4, $3\n" \
 "\tori\t$4, $4, 0x105\n" \
-"\tsw\t$4, 0x0($2)\n" \
-"$Ldma_0017FF20" L ":\n" \
-"\tlw\t$3, 0x0($2)\n" \
+"\tsw\t$4, 0x0(%1)\n" \
+"$Ldma2_%=:\n" \
+"\tlw\t$3, 0x0(%1)\n" \
 "\tnop\n" \
 "\tnop\n" \
 "\tnop\n" \
 "\tnop\n" \
 "\tandi\t$3, $3, 0x100\n" \
-"\tbne\t$zero, $3, $Ldma_0017FF20" L "\n" \
+"\tbne\t$zero, $3, $Ldma2_%=\n" \
 "\tnop\n" \
 "\t.set\treorder\n"                                                       \
-            : "+r"(p) : "r"(q) : "$2", "$3", "$4", "$5", "$6", "memory");        \
+            : "+r"(packet) : "r"(w) : "$3", "$4", "$5", "$6", "memory");   \
     }
 
 #define SHAPE_LOOP_REGS "$2", "$3", "$4", "$7", "$8", "$9", "$10", "$11", "$12", "$13", "$14", "$15"
 
 void *op_shape_draw(OSHAPE_VU1 *sh, OSHAPE_IN *shi, int nPacketSize) {
     char *spr;
-    register char *base asm("$25");
+    register OSPRITE_VU1 *sp asm("$6");
+    OSPRITE_VU1A *spa;
     u_short spritec;
-    word w;
-    int flag;
+    register char *base asm("$25");
+    word nWord;
+    word nWord2;
+    int iFog;
 
     if (shi->flag & 0x80) {
         if (ppvCurPrimpLen + nPacketSize >= ppvPrimpLen) {
@@ -490,22 +477,17 @@ void *op_shape_draw(OSHAPE_VU1 *sh, OSHAPE_IN *shi, int nPacketSize) {
     if (shi->flag & 0x80) {
         spr = (char *)(((u_int)shi->packet + 15) & 0xFFFFFFF0);
     } else {
+        sceGsSyncPath(0, 0);
         spr = (char *)shape_spr_get();
     }
     base = spr;
     {
-        register OSPRITE_VU1 *sp asm("$6");
-        char *spa;
-
         sp = sh->spvu1;
-        spa = sh->spvu1a + (char *)sh;
-        {
-            register u_long128 *tbl asm("$3") = ot1_mpg_table;
-            __asm__ volatile("lqc2 $vf12, 0x30(%0)\n"
-                             "\tlqc2 $vf13, 0x40(%0)\n"
-                             "\tlqc2 $vf14, 0x50(%0)"
-                             : : "r"(tbl));
-        }
+        spa = (OSPRITE_VU1A *)((char *)sh + sh->spvu1a);
+        __asm__ volatile("lqc2 $vf12, 0x30(%0)\n"
+                         "\tlqc2 $vf13, 0x40(%0)\n"
+                         "\tlqc2 $vf14, 0x50(%0)"
+                         : : "r"(ot1_mpg_table));
         if (shi->flag & 0x10) {
             spr += 0x60;
         } else {
@@ -518,7 +500,7 @@ void *op_shape_draw(OSHAPE_VU1 *sh, OSHAPE_IN *shi, int nPacketSize) {
 ".set\tnoreorder\n"
 "\tlhu\t$15, 0x2($17)\n"
 "\tdaddu\t$9, $zero, $zero\n"
-"\tlw\t$2, 0x4($16)\n"
+"\tlw\t$2, 0x4(%3)\n"
 "\tlui\t$3, 0x3c00\n"
 "\tqmtc2.ni\t$3, $vf1\n"
 "\tpextlb\t$2, $zero, $2\n"
@@ -526,7 +508,7 @@ void *op_shape_draw(OSHAPE_VU1 *sh, OSHAPE_IN *shi, int nPacketSize) {
 "\tqmtc2.ni\t$2, $vf15\n"
 "\tvitof0.xyzw\t$vf15, $vf15\n"
 "\tvmulx.xyzw\t$vf15, $vf15, $vf1x\n"
-"\tlw\t$2, 0x10($16)\n"
+"\tlw\t$2, 0x10(%3)\n"
 "\tlqc2\t$vf28, 0x0($2)\n"
 "\tlqc2\t$vf29, 0x10($2)\n"
 "\tlqc2\t$vf30, 0x20($2)\n"
@@ -537,8 +519,8 @@ void *op_shape_draw(OSHAPE_VU1 *sh, OSHAPE_IN *shi, int nPacketSize) {
 "\tpaddw\t$13, $zero, $zero\n"
 "\tppacw\t$12, $14, $zero\n"
 "\tld\t$11, 0x10($17)\n"
-"\tlhu\t$2, 0xA($16)\n"
-"\tlhu\t$3, 0x8($16)\n"
+"\tlhu\t$2, 0xA(%3)\n"
+"\tlhu\t$3, 0x8(%3)\n"
 "\tdsll32\t$2, $2, 5\n"
 "\tor\t$2, $2, $3\n"
 "\tdadd\t$11, $11, $2\n"
@@ -654,14 +636,14 @@ void *op_shape_draw(OSHAPE_VU1 *sh, OSHAPE_IN *shi, int nPacketSize) {
 "\tnop\n"
 "\t.set\treorder\n"
                         : "+r"(spr), "+r"(sp), "+r"(spa)
-                        :
+                        : "r"(shi)
                         : SHAPE_LOOP_REGS);
                 } else {
                     __asm__ volatile(
 ".set\tnoreorder\n"
 "\tlhu\t$15, 0x2($17)\n"
 "\tdaddu\t$9, $zero, $zero\n"
-"\tlw\t$2, 0x4($16)\n"
+"\tlw\t$2, 0x4(%3)\n"
 "\tlui\t$3, 0x3c00\n"
 "\tqmtc2.ni\t$3, $vf1\n"
 "\tpextlb\t$2, $zero, $2\n"
@@ -669,12 +651,12 @@ void *op_shape_draw(OSHAPE_VU1 *sh, OSHAPE_IN *shi, int nPacketSize) {
 "\tqmtc2.ni\t$2, $vf15\n"
 "\tvitof0.xyzw\t$vf15, $vf15\n"
 "\tvmulx.xyzw\t$vf15, $vf15, $vf1x\n"
-"\tlw\t$2, 0x10($16)\n"
+"\tlw\t$2, 0x10(%3)\n"
 "\tlqc2\t$vf28, 0x0($2)\n"
 "\tlqc2\t$vf29, 0x10($2)\n"
 "\tlqc2\t$vf30, 0x20($2)\n"
 "\tlqc2\t$vf31, 0x30($2)\n"
-"\tlw\t$3, 0x1C($16)\n"
+"\tlw\t$3, 0x1C(%3)\n"
 "\tbnez\t$3, $LshB_0017ECA8\n"
 "\tnop\n"
 "\tdaddu\t$3, $2, $zero\n"
@@ -689,8 +671,8 @@ void *op_shape_draw(OSHAPE_VU1 *sh, OSHAPE_IN *shi, int nPacketSize) {
 "\tpaddw\t$13, $zero, $zero\n"
 "\tppacw\t$12, $14, $zero\n"
 "\tld\t$11, 0x10($17)\n"
-"\tlhu\t$2, 0xA($16)\n"
-"\tlhu\t$3, 0x8($16)\n"
+"\tlhu\t$2, 0xA(%3)\n"
+"\tlhu\t$3, 0x8(%3)\n"
 "\tdsll32\t$2, $2, 5\n"
 "\tor\t$2, $2, $3\n"
 "\tdadd\t$11, $11, $2\n"
@@ -817,7 +799,7 @@ void *op_shape_draw(OSHAPE_VU1 *sh, OSHAPE_IN *shi, int nPacketSize) {
 "\tnop\n"
 "\t.set\treorder\n"
                         : "+r"(spr), "+r"(sp), "+r"(spa)
-                        :
+                        : "r"(shi)
                         : SHAPE_LOOP_REGS);
                 }
             } else {
@@ -827,7 +809,7 @@ void *op_shape_draw(OSHAPE_VU1 *sh, OSHAPE_IN *shi, int nPacketSize) {
 "\taddiu\t$4, $4, %%lo(OsFog)\n"
 "\tlhu\t$15, 0x2($17)\n"
 "\tdaddu\t$9, $zero, $zero\n"
-"\tlw\t$2, 0x4($16)\n"
+"\tlw\t$2, 0x4(%3)\n"
 "\tlui\t$3, 0x3c00\n"
 "\tqmtc2.ni\t$3, $vf1\n"
 "\tpextlb\t$2, $zero, $2\n"
@@ -835,12 +817,12 @@ void *op_shape_draw(OSHAPE_VU1 *sh, OSHAPE_IN *shi, int nPacketSize) {
 "\tqmtc2.ni\t$2, $vf15\n"
 "\tvitof0.xyzw\t$vf15, $vf15\n"
 "\tvmulx.xyzw\t$vf15, $vf15, $vf1x\n"
-"\tlw\t$2, 0x10($16)\n"
+"\tlw\t$2, 0x10(%3)\n"
 "\tlqc2\t$vf28, 0x0($2)\n"
 "\tlqc2\t$vf29, 0x10($2)\n"
 "\tlqc2\t$vf30, 0x20($2)\n"
 "\tlqc2\t$vf31, 0x30($2)\n"
-"\tlw\t$3, 0x1C($16)\n"
+"\tlw\t$3, 0x1C(%3)\n"
 "\tbnez\t$3, $LshC_0017EF1C\n"
 "\tnop\n"
 "\tdaddu\t$3, $2, $zero\n"
@@ -855,13 +837,13 @@ void *op_shape_draw(OSHAPE_VU1 *sh, OSHAPE_IN *shi, int nPacketSize) {
 "\tpaddw\t$13, $zero, $zero\n"
 "\tppacw\t$12, $14, $zero\n"
 "\tld\t$11, 0x10($17)\n"
-"\tlhu\t$2, 0xA($16)\n"
-"\tlhu\t$3, 0x8($16)\n"
+"\tlhu\t$2, 0xA(%3)\n"
+"\tlhu\t$3, 0x8(%3)\n"
 "\tdsll32\t$2, $2, 5\n"
 "\tor\t$2, $2, $3\n"
 "\tdadd\t$11, $11, $2\n"
 "\tori\t$10, $zero, 0x8000\n"
-"\tlhu\t$2, 0x2($16)\n"
+"\tlhu\t$2, 0x2(%3)\n"
 "\tandi\t$3, $2, 0x400\n"
 "\tlqc2\t$vf19, 0x20($4)\n"
 "\tbnez\t$3, $LshC_0017EF74\n"
@@ -1009,7 +991,7 @@ void *op_shape_draw(OSHAPE_VU1 *sh, OSHAPE_IN *shi, int nPacketSize) {
 "\tnop\n"
 "\t.set\treorder\n"
                     : "+r"(spr), "+r"(sp), "+r"(spa)
-                    :
+                    : "r"(shi)
                     : SHAPE_LOOP_REGS);
             }
         } else {
@@ -1019,7 +1001,7 @@ void *op_shape_draw(OSHAPE_VU1 *sh, OSHAPE_IN *shi, int nPacketSize) {
 ".set\tnoreorder\n"
 "\tlhu\t$15, 0x2($17)\n"
 "\tdaddu\t$9, $zero, $zero\n"
-"\tlw\t$2, 0x4($16)\n"
+"\tlw\t$2, 0x4(%3)\n"
 "\tlui\t$3, 0x3c00\n"
 "\tqmtc2.ni\t$3, $vf1\n"
 "\tpextlb\t$2, $zero, $2\n"
@@ -1027,7 +1009,7 @@ void *op_shape_draw(OSHAPE_VU1 *sh, OSHAPE_IN *shi, int nPacketSize) {
 "\tqmtc2.ni\t$2, $vf15\n"
 "\tvitof0.xyzw\t$vf15, $vf15\n"
 "\tvmulx.xyzw\t$vf15, $vf15, $vf1x\n"
-"\tlw\t$2, 0x10($16)\n"
+"\tlw\t$2, 0x10(%3)\n"
 "\tlqc2\t$vf28, 0x0($2)\n"
 "\tlqc2\t$vf29, 0x10($2)\n"
 "\tlqc2\t$vf30, 0x20($2)\n"
@@ -1038,8 +1020,8 @@ void *op_shape_draw(OSHAPE_VU1 *sh, OSHAPE_IN *shi, int nPacketSize) {
 "\tpaddw\t$13, $zero, $zero\n"
 "\tppacw\t$12, $14, $zero\n"
 "\tld\t$11, 0x10($17)\n"
-"\tlhu\t$2, 0xA($16)\n"
-"\tlhu\t$3, 0x8($16)\n"
+"\tlhu\t$2, 0xA(%3)\n"
+"\tlhu\t$3, 0x8(%3)\n"
 "\tdsll32\t$2, $2, 5\n"
 "\tor\t$2, $2, $3\n"
 "\tdadd\t$11, $11, $2\n"
@@ -1220,14 +1202,14 @@ void *op_shape_draw(OSHAPE_VU1 *sh, OSHAPE_IN *shi, int nPacketSize) {
 "\tnop\n"
 "\t.set\treorder\n"
                         : "+r"(spr), "+r"(sp), "+r"(spa)
-                        :
+                        : "r"(shi)
                         : SHAPE_LOOP_REGS);
                 } else {
                     __asm__ volatile(
 ".set\tnoreorder\n"
 "\tlhu\t$15, 0x2($17)\n"
 "\tdaddu\t$9, $zero, $zero\n"
-"\tlw\t$2, 0x4($16)\n"
+"\tlw\t$2, 0x4(%3)\n"
 "\tlui\t$3, 0x3c00\n"
 "\tqmtc2.ni\t$3, $vf1\n"
 "\tpextlb\t$2, $zero, $2\n"
@@ -1235,12 +1217,12 @@ void *op_shape_draw(OSHAPE_VU1 *sh, OSHAPE_IN *shi, int nPacketSize) {
 "\tqmtc2.ni\t$2, $vf15\n"
 "\tvitof0.xyzw\t$vf15, $vf15\n"
 "\tvmulx.xyzw\t$vf15, $vf15, $vf1x\n"
-"\tlw\t$2, 0x10($16)\n"
+"\tlw\t$2, 0x10(%3)\n"
 "\tlqc2\t$vf28, 0x0($2)\n"
 "\tlqc2\t$vf29, 0x10($2)\n"
 "\tlqc2\t$vf30, 0x20($2)\n"
 "\tlqc2\t$vf31, 0x30($2)\n"
-"\tlw\t$3, 0x1C($16)\n"
+"\tlw\t$3, 0x1C(%3)\n"
 "\tbnez\t$3, $LshE_0017F524\n"
 "\tnop\n"
 "\tdaddu\t$3, $2, $zero\n"
@@ -1255,8 +1237,8 @@ void *op_shape_draw(OSHAPE_VU1 *sh, OSHAPE_IN *shi, int nPacketSize) {
 "\tpaddw\t$13, $zero, $zero\n"
 "\tppacw\t$12, $14, $zero\n"
 "\tld\t$11, 0x10($17)\n"
-"\tlhu\t$2, 0xA($16)\n"
-"\tlhu\t$3, 0x8($16)\n"
+"\tlhu\t$2, 0xA(%3)\n"
+"\tlhu\t$3, 0x8(%3)\n"
 "\tdsll32\t$2, $2, 5\n"
 "\tor\t$2, $2, $3\n"
 "\tdadd\t$11, $11, $2\n"
@@ -1472,7 +1454,7 @@ void *op_shape_draw(OSHAPE_VU1 *sh, OSHAPE_IN *shi, int nPacketSize) {
 "\tnop\n"
 "\t.set\treorder\n"
                         : "+r"(spr), "+r"(sp), "+r"(spa)
-                        :
+                        : "r"(shi)
                         : SHAPE_LOOP_REGS);
                 }
             } else {
@@ -1482,7 +1464,7 @@ void *op_shape_draw(OSHAPE_VU1 *sh, OSHAPE_IN *shi, int nPacketSize) {
 "\taddiu\t$4, $4, %%lo(OsFog)\n"
 "\tlhu\t$15, 0x2($17)\n"
 "\tdaddu\t$9, $zero, $zero\n"
-"\tlw\t$2, 0x4($16)\n"
+"\tlw\t$2, 0x4(%3)\n"
 "\tlui\t$3, 0x3c00\n"
 "\tqmtc2.ni\t$3, $vf1\n"
 "\tpextlb\t$2, $zero, $2\n"
@@ -1490,12 +1472,12 @@ void *op_shape_draw(OSHAPE_VU1 *sh, OSHAPE_IN *shi, int nPacketSize) {
 "\tqmtc2.ni\t$2, $vf15\n"
 "\tvitof0.xyzw\t$vf15, $vf15\n"
 "\tvmulx.xyzw\t$vf15, $vf15, $vf1x\n"
-"\tlw\t$2, 0x10($16)\n"
+"\tlw\t$2, 0x10(%3)\n"
 "\tlqc2\t$vf28, 0x0($2)\n"
 "\tlqc2\t$vf29, 0x10($2)\n"
 "\tlqc2\t$vf30, 0x20($2)\n"
 "\tlqc2\t$vf31, 0x30($2)\n"
-"\tlw\t$3, 0x1C($16)\n"
+"\tlw\t$3, 0x1C(%3)\n"
 "\tbnez\t$3, $LshF_0017F8FC\n"
 "\tnop\n"
 "\tdaddu\t$3, $2, $zero\n"
@@ -1510,13 +1492,13 @@ void *op_shape_draw(OSHAPE_VU1 *sh, OSHAPE_IN *shi, int nPacketSize) {
 "\tpaddw\t$13, $zero, $zero\n"
 "\tppacw\t$12, $14, $zero\n"
 "\tld\t$11, 0x10($17)\n"
-"\tlhu\t$2, 0xA($16)\n"
-"\tlhu\t$3, 0x8($16)\n"
+"\tlhu\t$2, 0xA(%3)\n"
+"\tlhu\t$3, 0x8(%3)\n"
 "\tdsll32\t$2, $2, 5\n"
 "\tor\t$2, $2, $3\n"
 "\tdadd\t$11, $11, $2\n"
 "\tori\t$10, $zero, 0x8000\n"
-"\tlhu\t$2, 0x2($16)\n"
+"\tlhu\t$2, 0x2(%3)\n"
 "\tandi\t$3, $2, 0x400\n"
 "\tlqc2\t$vf19, 0x20($4)\n"
 "\tbnez\t$3, $LshF_0017F954\n"
@@ -1757,15 +1739,12 @@ void *op_shape_draw(OSHAPE_VU1 *sh, OSHAPE_IN *shi, int nPacketSize) {
 "\tnop\n"
 "\t.set\treorder\n"
                     : "+r"(spr), "+r"(sp), "+r"(spa)
-                    :
+                    : "r"(shi)
                     : SHAPE_LOOP_REGS);
             }
         }
     }
-    w = 0;
-    if (shi->flag & 0x800) {
-        w = 0x20;
-    }
+    iFog = 0; if (shi->flag & 0x800) iFog = 0x20;
     __asm__("move %0, $9" : "=r"(spritec));
     if (spritec != 0) {
         if (shi->flag & 0x10) {
@@ -1786,25 +1765,30 @@ void *op_shape_draw(OSHAPE_VU1 *sh, OSHAPE_IN *shi, int nPacketSize) {
             }
             if (sh->flag & 8) {
                 *(u_long *)(base + 0x58) = 0x412412412412E6L;
-                *(u_long *)(base + 0x50) = SCE_GIF_SET_TAG(spritec, 0, 1, w | 0x54, 0, 14);
+                *(u_long *)(base + 0x50) = SCE_GIF_SET_TAG(spritec, 0, 1, iFog | 0x54, 0, 14);
             } else {
                 *(u_long *)(base + 0x58) = 0x42412E6;
-                *(u_long *)(base + 0x50) = SCE_GIF_SET_TAG(spritec, 0, 1, w | 0x56, 0, 7);
+                *(u_long *)(base + 0x50) = SCE_GIF_SET_TAG(spritec, 0, 1, iFog | 0x56, 0, 7);
             }
             *(u_long *)(spr + 0x00) = 0x1000000000008001L;
             *(u_long *)(spr + 0x08) = 0xE;
             *(u_long128 *)(spr + 0x10) = *(u_long128 *)&os_gs2_register.test;
             spr += 0x20;
             {
-                int qsize = (spr - base) / 16;
+                nWord2 = (spr - base) / 16;
                 if (shi->flag & 0x80) {
                     if (shi->flag & 0x20) {
-                        shape_ot_add((u_qword *)base, qsize, shi->ot);
+                        shape_ot_add((u_qword *)base, nWord2, shi->ot);
                     } else {
-                        shape_ot_add2((u_qword *)base, qsize, *(int *)(spr - 8) / 0x3000);
+                        nWord = *(word *)(spr - 8);
+                        nWord = nWord / 0x3000;
+                        shape_ot_add2((u_qword *)base, nWord2, nWord);
                     }
                 } else {
-                    SHAPE_DMA_SEND((u_qword *)base, qsize, "a")
+                    *(u_long *)base = (nWord2 - 1) | 0x70000000;
+                    *(u_long *)(base + 8) = 0;
+                    __asm__ volatile("sync");
+                    SHAPE_DMA_KICK(base)
                 }
             }
         } else {
@@ -1825,21 +1809,25 @@ void *op_shape_draw(OSHAPE_VU1 *sh, OSHAPE_IN *shi, int nPacketSize) {
             }
             if (sh->flag & 8) {
                 *(u_long *)(base + 0x48) = 0x412412412412E6L;
-                *(u_long *)(base + 0x40) = SCE_GIF_SET_TAG(spritec, 1, 1, w | 0x54, 0, 14);
+                *(u_long *)(base + 0x40) = SCE_GIF_SET_TAG(spritec, 1, 1, iFog | 0x54, 0, 14);
             } else {
                 *(u_long *)(base + 0x48) = 0x42412E6;
-                *(u_long *)(base + 0x40) = SCE_GIF_SET_TAG(spritec, 1, 1, w | 0x56, 0, 7);
+                *(u_long *)(base + 0x40) = SCE_GIF_SET_TAG(spritec, 1, 1, iFog | 0x56, 0, 7);
             }
             {
-                int qsize = (spr - base) / 16;
+                nWord2 = (spr - base) / 16;
                 if (shi->flag & 0x80) {
                     if (shi->flag & 0x20) {
-                        shape_ot_add((u_qword *)base, qsize, shi->ot);
+                        shape_ot_add((u_qword *)base, nWord2, shi->ot);
                     } else {
-                        shape_ot_add2((u_qword *)base, qsize, *(int *)(spr - 8) / 0x3000);
+                        nWord = *(word *)(spr - 8);
+                        shape_ot_add2((u_qword *)base, nWord2, nWord / 0x3000);
                     }
                 } else {
-                    SHAPE_DMA_SEND((u_qword *)base, qsize, "b")
+                    *(u_long *)base = (nWord2 - 1) | 0x70000000;
+                    *(u_long *)(base + 8) = 0;
+                    __asm__ volatile("sync");
+                    SHAPE_DMA_KICK(base)
                 }
             }
         }
