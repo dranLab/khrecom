@@ -60,26 +60,17 @@ typedef union {
 namespace ATEL {
 CAtelCrossFade* CAtelCrossFade::m_pInstance = NULL;
 
-/* (original form unknown) */
-static inline void _setIVector(IVECTOR& v, INT x, INT y, INT z, INT w) {
-    v.x = x;
-    v.y = y;
-    v.z = z;
-    v.w = w;
-}
-
-
 CAtelCrossFade::CAtelCrossFade(CTask* pParent) : CTask(pParent, 0x8000) {
     m_nState = 0;
     m_pCrossFadeImage = NULL;
     m_CrossFadeFlag = 0;
-    _setIVector(m_Color, 0x80, 0x80, 0x80, 0x50);
+    m_Color.set(0x80, 0x80, 0x80, 0x50);
     TRACE("CAtelCrossFade Create\n");
 }
 
 CAtelCrossFade::~CAtelCrossFade() {
     TRACE("CAtelCrossFade Delete\n");
-    CAtelCrossFade*& rInstance = m_pInstance; /* through a reference: stored before the m_pCrossFadeImage load */
+    CAtelCrossFade*& rInstance = m_pInstance; /* MATCH: through a reference: stored before the m_pCrossFadeImage load */
     rInstance = NULL;
     if (m_pCrossFadeImage) {
         com_free(m_pCrossFadeImage);
@@ -126,7 +117,7 @@ INT CAtelCrossFade::onDrawTexImage(INT nCmd, void* pParam, INT nID) {
 
 INT CAtelCrossFade::onSetCrossFadeRGBA(INT nCmd, void* pParam, INT nID) {
     INT c = *(INT*)pParam;
-    _setIVector(m_Color, (UINT)c >> 24, (c >> 16) & 0xFF, (c >> 8) & 0xFF, c & 0xFF);
+    m_Color.set((UINT)c >> 24, (c >> 16) & 0xFF, (c >> 8) & 0xFF, c & 0xFF);
     return -1;
 }
 
@@ -169,10 +160,10 @@ INT CAtelCrossFade::AnimColor() {
     if (!bRes) {
         ScaleVector(ColorSpeed, m_ColorAnim._vColorSpeed, getFrameRate());
         AddVector(m_ColorAnim._vColorBuf, m_ColorAnim._vColorBuf, ColorSpeed);
-        _setIVector(m_Color, (INT)m_ColorAnim._vColorBuf.x, (INT)m_ColorAnim._vColorBuf.y,
+        m_Color.set((INT)m_ColorAnim._vColorBuf.x, (INT)m_ColorAnim._vColorBuf.y,
                     (INT)m_ColorAnim._vColorBuf.z, (INT)m_ColorAnim._vColorBuf.w);
     } else {
-        _setIVector(m_Color, (INT)m_ColorAnim._vColorBuf.x, (INT)m_ColorAnim._vColorBuf.y,
+        m_Color.set((INT)m_ColorAnim._vColorBuf.x, (INT)m_ColorAnim._vColorBuf.y,
                     (INT)m_ColorAnim._vColorBuf.z, (INT)m_ColorAnim._vColorBuf.w);
         m_nState ^= 1;
         setCrossFadeFlag(0, 2);
