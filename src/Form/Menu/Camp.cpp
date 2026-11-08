@@ -354,14 +354,6 @@ public:
 
 using namespace D2;
 
-/* STOPGAP: string literals that functions still INCLUDE_ASM'd use first: their bytes are in those functions' asm
- * blocks, which gcc doesn't see, so a literal here would be a second copy. Replace them by the literals once those
- * functions are C. */
-extern CHAR D_004E33E0[]; /* "%d", setDeckInfo */
-#define STR_PCT_D D_004E33E0
-extern CHAR D_004E33E8[]; /* "\x81~%02d", setDeckInfo */
-#define STR_TILDE_02D D_004E33E8
-
 template <class T> static inline T& _ref(T& v) { return v; }
 
 /* CCard's inline accessors (not in the original's symbols) */
@@ -4378,16 +4370,27 @@ INT CCamp::setButtonHelp(INT nSetCmd, INT nMode, INT nKind) {
 /* Parked: 36 of 617 lines, same size (2026-11-08; drop the data block after the INCLUDE_ASM to build the draft): s-register
    roles in the sleight-list loop and one store order. The original increments nTechSelectTop in place before getName
    (s6, delay slot) and keeps i + 1 in s7 (i in s4, reused for (USHORT)nTechSeqIdx), and stores nTechCateCnt + 1 before
-   the C2DFnt new; this draft (`for (...; i++, nTechSelectTop++)`) gets the roles of i and nTechSelectTop swapped and
-   the nTechCateCnt store after the new. With `nTechSelectTop++;` right after the CButton new (the original's place)
-   the roles are right but loop.c strength-reduces &pTechCateTbl[nTechSelectTop] (-dL: giv benefit 7 - add_cost 4 per
-   biv increment, lifetime 3, 3 * 66 * 3 >= 182 insns: reduced, 53 lines); the original's giv must have had benefit
-   <= 0 (two biv increments? another index form?). Found 2026-11-08 from the .mdebug block tree (no change by itself):
-   pTechCateTbl/nTechSelectTop/nTechCateCnt/nLine in the switch body, scrollBarSeqTbl in the if block, nLine instead
-   of an invented nMax, len declared before pBF. tried: increment at the body end (39), `nTechSelectTop++, i++` (39),
+   the C2DFnt new; this draft gets the roles of i and nTechSelectTop swapped and the nTechCateCnt store after the new.
+   Cause, from the -dG/-dl/-dg dumps (2026-11-08, second pass): gcse PRE turns both for-increments into copies of temps
+   computed at the end of bb 50/51 (i + 1 -> r523, nTechSelectTop + 1 -> r529), so neither is a biv (no giv reduction,
+   as the original). Global alloc then takes nTechSelectTop first (9 refs / 41 live = 6585, above nTechKind 5625, i 4125,
+   nTechSeqIdx 3564): s3, and the andi temp takes its register. The original's s3 nTechKind, s4 i, s5 nTechSeqIdx,
+   s6 nTechSelectTop need nTechSelectTop below 3564 (7 refs, or about 76 insns of life). With `nTechSelectTop++;` in
+   place after the CButton new (its live range is the whole loop: the roles come right) it is a biv and loop.c reduces
+   the combined row giv (benefit 21, 53 lines); after getLayPosition 54, after init 53, `+= 1` 53, post-increment in
+   the second table load 52, *pTechCateTbl[n] 53; pTechCateTbl forced to memory changes the frame (62/84: the original's
+   pTechCateTbl is a spilled pseudo, its slot order ret/-204, pTechCateTbl/-200, nTechCateCnt/-196 matches this draft).
+   Line markers: nTechSelectTop = m_nTechSelectTop is line 5470 (before nTechCateCnt = 0 and rgba), the test is
+   `nTechSelectTop == m_nTechSelect` (bne s6,v1): both applied, no change in the count. The nTechCateCnt + 1 store
+   carries HeapMan.h:150 in the original: a post-increment flushed inside the inlined operator new, i.e.
+   `m_pTechCategoryFnt[nTechCateCnt++] = new ...`. Earlier (.mdebug block tree): pTechCateTbl/nTechSelectTop/
+   nTechCateCnt/nLine in the switch body, scrollBarSeqTbl in the if block, nLine instead of an invented nMax, len
+   declared before pBF. tried: increment at the body end (39), `nTechSelectTop++, i++` (39),
    `m_pTechCategoryFnt[nTechCateCnt++] = new` + `[nTechCateCnt - 1]` (92-94: nTechCateCnt gets a register), the new
    as the addFntShift argument (141), no pButton local (143); earlier: nLine as the loop counter, non-const table
-   pointer, compare operand order, _ref() on the table pointer (56-70), permuter 6 + 15 min; 15 min on this draft (2026-11-08, 1698 variants): no gain. */
+   pointer, compare operand order, _ref() on the table pointer (56-70), permuter 6 + 15 min; 15 min on this draft
+   (2026-11-08, 4907 candidates): 33 only by moving nTechSelectTop = m_nTechSelectTop above the pTechCateTbl ternary
+   (live 53: nTechSelectTop drops below nTechKind, still above i; against line 5470, not taken). */
 #if 0
 INT CCamp::setTechWin(INT nSetCmd) {
     FVECTOR vec;
@@ -4476,13 +4479,13 @@ INT CCamp::setTechWin(INT nSetCmd) {
             m_pTechButton[i] = NULL;
         }
         pTechCateTbl = !m_bPlayerKind ? m_techSoraCateTbl : m_techRikuCateTbl;
+        nTechSelectTop = m_nTechSelectTop;
         nTechCateCnt = 0;
         rgba.col = 0x807C7C7C;
-        nTechSelectTop = m_nTechSelectTop;
         for (INT i = 0; i < 9; i++, nTechSelectTop++) {
             SHORT nTechKind = pTechCateTbl[nTechSelectTop][0];
             SHORT nTechSeqIdx = pTechCateTbl[nTechSelectTop][1];
-            if (m_nTechSelect == nTechSelectTop) {
+            if (nTechSelectTop == m_nTechSelect) {
                 m_nTechKind = nTechKind;
                 if (m_fgNewTbl[nTechKind] > 0) {
                     m_fgNewTbl[nTechKind] = -1;
@@ -4679,18 +4682,29 @@ INT CCamp::setDeckSetWin(INT nSetCmd) {
 /* Parked: 23 of 1407 lines (2026-11-08; drop the data block after the INCLUDE_ASM to build the draft): only the spill
    slots of seven PRE-hoisted values differ (orig 0x74 &m_pMCInfoNumFnt, 0x78 &m_nMapKind, 0x7c i + 1, 0x80 nKind - 161,
    0x84 &m_pMCCard, 0x88 &m_pMCFnt, 0x8c &m_pMCInfoNumCtrl; ours 0x74 NumCtrl first, i + 1 before MapKind). Slots follow
-   the PRE pseudo numbers = gcse expression-hash bucket order (-dG: raw hash of this+C = 13374 + C, of i+1 = 13258 +
-   reg(i) + 1, bucket = raw % S): the original order needs S = 703 buckets (ours 701, so about 4 more insns at gcse) and
-   the outer case-0 loop counter i as pseudo >= 312 (ours 303, so 9 more pseudos created before that loop) - no other S
-   in 601-899 fits. Found 2026-11-08 from the .mdebug block tree (33 -> 23): nColSeq/cardOld/pCampRoomInfo declared in
-   the switch body, scrollBarSeqTbl in the if block, case 9 without braces, one if for the number loop's display test,
-   no `n` local for the scroll ratio, p2DFnt chains at the four m_pMCInfoFnt news and the two m_pMCFnt news (the
-   original keeps p2DFnt in s0 apart from the new's result), idx = i + m_nMCSelSelectTop. tried: chains at the 5731/5753
-   news (+1 pseudo each, S unchanged), member-first chains (S 699), the original 4-line operator new layout of
-   HeapMan.h (no change); earlier: permuter 15 min (59 -> 58), shared function-level i/j (256), j only (38). */
+   the PRE pseudo numbers = gcse expression-hash bucket order (-dG: raw hash of (plus (reg R) C) = 13258 + R + C, this
+   is r116; bucket = raw % S, S = max_cuid / 2 | 1). Solved (build/camp/solve.py, build/camp/probe.py in the 2026-11-08
+   worker's worktree: S and the PRE order of one variant in about a second): the original needs S = 703 (ours 701:
+   max_cuid 1400, four more insns at gcse give 703, eight give 705) and the outer i of the 2x5 loop as pseudo >= 313
+   (ours 303: ten more pseudos created before that loop); no other S in 681-729 fits. A filler variant matches
+   (V1-V3, stable over rebuilds): four empty asms after the scrollBarSeqTbl line plus ten unused INT locals there;
+   rejected by the user on 2026-11-08 (invented locals are not the original's source). Ruled out as the pseudo
+   source: HeapMan.h's operator new (a block-local UINT nRA without the statement expression: no change; `UINT nRA =
+   RET_ADDR()` +1 pseudo per new, S unchanged, a global header change), CtdMan.h instance() without the reference
+   local (+2 per getText, global), chains p2DSeqCtrl/p2DCard = at the 5731/5753 news (+1 pseudo, +1 insn each:
+   with them two empty asms reach S 703 but i is only 305), `new T()`, the 4-argument vec.set, casts, split chains
+   (-2), member-first chains (S 699). Likely natural source, not yet tested where it counts: the original sets cards
+   with an inline CARD member at CardKind.h:553-558 (.mdebug block "CARD *this; USHORT inKind", line 553 = the -1
+   default), i.e. CARD::init(USHORT inKind, CHAR inNumber = -1) with cardDataTbl in CardKind.h, where this unit has the
+   _setCardNK helper; a probe with the member form in case 9 alone changed nothing (it comes after the loop), so the
+   missing pseudos must come from header inlines used before it (CardKind.h/Card.h forms, operator new, getText).
+   Found 2026-11-08 from the .mdebug block tree (33 -> 23): nColSeq/cardOld/pCampRoomInfo declared in the switch
+   body, scrollBarSeqTbl in the if block, case 9 without braces, one if for the number loop's display test, no `n`
+   local for the scroll ratio, p2DFnt chains at the four m_pMCInfoFnt news and the two m_pMCFnt news, idx = i +
+   m_nMCSelSelectTop. Earlier: permuter 15 min (59 -> 58), shared function-level i/j (256), j only (38). */
 #if 0
 INT CCamp::setMapCardWin(INT nSetCmd) {
-    static char* pStrNum[4] = { "%02d/99", "%02d", STR_TILDE_02D, "" };
+    static char* pStrNum[4] = { "%02d/99", "%02d", "\x81~%02d", "" };
     static USHORT mcTabSeqTbl[5] = { 330, 329, 327, 326, 328 };
     static unsigned char colSeqTbl[3] = { 116, 95, 75 };
     FVECTOR vec;
@@ -5010,7 +5024,7 @@ INT CCamp::setStatusWin(INT nSetCmd) {
     static USHORT statusSeqTbl[16] = { 300, 300, 300, 299, 299, 297, 298, 298, 298, 300, 300, 300, 299, 297, 296, 298 };
     static USHORT techSeqTbl[7] = { 302, 307, 305, 306, 303, 352, 304 };
     static USHORT techTabSeqTbl[9] = { 335, 336, 337, 338, 339, 340, 341, 342, 343 };
-    static char* statusStr[2] = { STR_PCT_D, "%d/%d" };
+    static char* statusStr[2] = { "%d", "%d/%d" };
     float fLightXTbl[8] = { 284.0f, 284.0f, 284.0f, 284.0f, 284.0f, 284.0f, 284.0f, 284.0f };
     float fLightYTbl[8] = { 168.0f, 168.0f, 168.0f, 168.0f, 168.0f, 168.0f, 168.0f, 168.0f };
     char buf[64];
@@ -6213,7 +6227,7 @@ INT CCamp::setMainCmdHist(INT nSetCmd, INT nMode) {
 }
 
 INT CCamp::setStatusWin0(INT nSetCmd) {
-    static char* pStrEtc[6] = { "Sora", "Riku", "LV", STR_PCT_D, "HP", "%d/%d" };
+    static char* pStrEtc[6] = { "Sora", "Riku", "LV", "%d", "HP", "%d/%d" };
     FVECTOR vec;
     FVECTOR vec2;
     C2DFnt* p2DFnt;
@@ -7376,9 +7390,5 @@ const unsigned char CCamp::m_techRikuCateTbl[14][2] = {
  * disassembled as references to D_004E5374, inside this object's card name strings. Until
  * config/SLUS_217.99/symbol_addrs.txt defines "D_004E5374 = 0x004E5374;", define it here. */
 asm(".globl D_004E5374\nD_004E5374 = 0x004E5374");
-
-asm(".globl D_004E3C80\nD_004E3C80 = 0x004E3C80"); /* "%d/%d" (setStatusWin's statusStr), used by asm setMapCardWin */
-
-asm(".globl D_004E33E8\nD_004E33E8 = 0x004E33E8"); /* "\x81~%02d" in asm setDeckInfo's .rodata */
 
 // SOURCE DATA: .data .rodata
