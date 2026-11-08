@@ -18,6 +18,8 @@ Usage:
     .venv/bin/python tools/decomp_permuter.py lib/kprintf2 ftoi --minutes 15 -j 16
     .venv/bin/python tools/decomp_permuter.py lib/kprintf2 ftoi --setup-only   # then edit base.c (PERM_* macros)
     .venv/bin/python tools/decomp_permuter.py lib/kprintf2 ftoi --resume       # run on the existing directory
+Typedef attributes (`long128 __attribute__((mode(TI)))`) are lost in pycparser's output: setup writes typedefs.sed and
+compile.sh puts them back into every candidate before compiling it.
 Arguments after `--` go to decomp-permuter (e.g. `-- --stack-diffs`).
 """
 
@@ -50,8 +52,22 @@ def objdump(func: str, obj: str) -> None:
             print(line)
 
 
-def compile_script(command: str, unit: str, source: Path, obj: str) -> str:
-    """compile.sh <in.c> -o <out.o>: the unit's command with the candidate as input and private outputs."""
+def typedef_restores(text: str) -> str:
+    """A sed script that puts back the attributes of typedefs such as `typedef int long128 __attribute__((mode(TI)));`.
+    pycparser keeps attributes on variables but prints typedefs without them (`typedef int long128;`), so every
+    candidate would compile long128/u_long128 as a 4-byte int (wrong pointer arithmetic, wrong loads and stores).
+    One line stays one line, so the -g line numbers don't move; base.c itself (attributes intact) doesn't match."""
+    lines = []
+    for m in re.finditer(r"^[ \t]*typedef\b[^;{}]*?\b(\w+)\s*(__attribute__\s*\(\(.*?\)\))\s*;[ \t]*$", text, re.M):
+        name = m.group(1)
+        repl = m.group(0).strip().replace("\\", "\\\\").replace("&", "\\&").replace("|", "\\|")
+        lines.append(rf"s|^[ \t]*typedef\b[^;]*\b{name};[ \t]*$|{repl}|")
+    return "\n".join(lines) + ("\n" if lines else "")
+
+
+def compile_script(command: str, unit: str, source: Path, obj: str, restore: Path | None = None) -> str:
+    """compile.sh <in.c> -o <out.o>: the unit's command with the candidate as input and private outputs. With
+    restore (typedef_restores' sed script), the candidate gets its typedef attributes back before it is compiled."""
     rel = str(source.relative_to(ROOT))
     steps = []
     for step in command.split(" && "):
@@ -72,6 +88,7 @@ def compile_script(command: str, unit: str, source: Path, obj: str) -> str:
             'trap \'rm -rf "$T"\' EXIT\n'
             f"cd {ROOT}\n"
             'export TMPDIR="$T"\n'
+            + (f'sed -f {restore} "$IN" > "$T/in.c"; IN="$T/in.c"\n' if restore else "")
             + "\n".join(steps) + "\n")
 
 
@@ -159,7 +176,10 @@ def setup(unit: str, func: str, workdir: Path) -> None:
     shutil.rmtree(workdir, ignore_errors=True)
     workdir.mkdir(parents=True)
     preprocess(command, source, text, workdir / "base.c", workdir)
-    (workdir / "compile.sh").write_text(compile_script(command, unit, source, obj))
+    restore = workdir / "typedefs.sed"  # pycparser drops typedef attributes (mode(TI)): compile.sh puts them back
+    restore.write_text(typedef_restores((workdir / "base.c").read_text(encoding="latin-1")))
+    (workdir / "compile.sh").write_text(compile_script(command, unit, source, obj,
+                                                       restore if restore.read_text() else None))
     (workdir / "compile.sh").chmod(0o755)
     shutil.copy(expected, workdir / "target.o")
     objdump_cmd = shlex.join([sys.executable, str(Path(__file__).resolve()), "--objdump", func])
