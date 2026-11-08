@@ -4387,7 +4387,7 @@ INT CCamp::setButtonHelp(INT nSetCmd, INT nMode, INT nKind) {
    of an invented nMax, len declared before pBF. tried: increment at the body end (39), `nTechSelectTop++, i++` (39),
    `m_pTechCategoryFnt[nTechCateCnt++] = new` + `[nTechCateCnt - 1]` (92-94: nTechCateCnt gets a register), the new
    as the addFntShift argument (141), no pButton local (143); earlier: nLine as the loop counter, non-const table
-   pointer, compare operand order, _ref() on the table pointer (56-70), permuter 6 + 15 min. */
+   pointer, compare operand order, _ref() on the table pointer (56-70), permuter 6 + 15 min; 15 min on this draft (2026-11-08, 1698 variants): no gain. */
 #if 0
 INT CCamp::setTechWin(INT nSetCmd) {
     FVECTOR vec;
