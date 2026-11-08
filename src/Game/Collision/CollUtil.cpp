@@ -538,7 +538,7 @@ static inline void _calcCk(FVECTOR& vCk0, FVECTOR& vCkVec, FVECTOR& vCk1, FVECTO
                  "sqc2 $vf6, 0x0(%4)\n"
                  "sqc2 $vf5, 0x0(%3)" : : "r"(&_vCkS0), "r"(&_vCkE), "r"(&vCk0), "r"(&vCkVec), "r"(&vCk1) : "memory");
 }
-static inline void _loadVf4(FVECTOR& v) { asm volatile("lqc2 $vf4, 0x0(%0)" : : "r"(&v)); }
+static inline void _loadVf4(FVECTOR& vCkS) { asm volatile("lqc2 $vf4, 0x0(%0)" : : "r"(&vCkS)); } /* the ref's vCkS */
 static inline FLOAT _dotNf(FVECTOR& v) {
     INT iTmp;
     FLOAT ret;
@@ -623,18 +623,8 @@ void CCollUtil::detectMCInit(MC_CHIP* pChip, INT iArea) {
     if (!(m_PrimInfoIdx2 < 0x40)) AssertApp(__FILE__, 819, "m_PrimInfoIdx2 < PRIM_INFO2_MAX", 0);
 }
 
-/* Parked: _detectMCD: 35 of 458 lines, same size (2026-11-07) - statements in marker order, chip loop as
- * for (pPrimIdx = pPrimIdx0; iCnt; iCnt--) with its own iArea (this now in s2 as the original), vf4 load via an inline.
- * Left: ours hoists iArea0*4 out of the retry loop and spills it (104(sp); the original recomputes the sll per pass), so
- * the spill slots of &m_vCkS/iLoopCnt/pPrimIdx0 move by 4 and iArea0/&m_vCkE swap s4/s5; the 5-tries exit
- * (original `beqz` to the block + `b` back, ours `bnez` to the top: expand_end_loop uses the break's condjump as the loop
- * end; while/for/do/goto-over/body-decl forms all give it); `beqz` vs `beqzl` at the ret test. The sll is gcse PRE
- * (iArea0<<2 at 953 reaches 971); tried: distancePoint as a CCollUtil inline member (CollUtil.h:410 in the markers, no
- * change); permuter 15 min on this draft (26643 candidates): no gain. */
-#if 0
 INT CCollUtil::_detectMCD(CCollision& collision) {
     INT i;
-    INT ret;
     INT j;
     FVECTOR vec0;
     FVECTOR vec1;
@@ -644,6 +634,7 @@ INT CCollUtil::_detectMCD(CCollision& collision) {
     MC_DATA* pMCData;
     MC_CHIP* pMCChip;
     FLOAT fMDVal2;
+    INT ret;
     collision.m_outInfo.info = 0;
     if (!m_pMCDInfo) {
         if (collision.m_inWE.y < -1.0f) {
@@ -676,7 +667,7 @@ INT CCollUtil::_detectMCD(CCollision& collision) {
         if (collision.m_fgStatus & 4) collision.m_fgStatus ^= 4;
     }
     collision.m_outWE = collision.m_inWE;
-    ret = 0;
+    iFg = 0;
     fLenCnt = (_getLength(m_vCkE0, m_vCkS0) + m_Radius) * 0.9903441f;
     if (fLenCnt == 0.0f) return 0;
     iLenCnt = (INT)fLenCnt;
@@ -722,76 +713,76 @@ INT CCollUtil::_detectMCD(CCollision& collision) {
             m_vCkS = m_vCkS0;
             m_vCkE = m_vCkE0;
         }
-        {
-            INT iIdx;
-            INT iArea;
-            USHORT* pPrimIdx0;
-            USHORT* pPrimIdx;
-            INT iLoopCnt;
-            INT iArea0;
-            _loadVf4(m_vCkS);
-            FVECTOR& vCkS = m_vCkS;
-            INT iCnt;
-            MC_CHIP* pChip;
-            iArea0 = __detectMCInitInit_Check(pMCData, fMDVal2);
-            if (iArea0 < 0) continue;
-            iIdx = pMCData->tbl[iArea0][0];
-            pPrimIdx0 = &pMCData->prim[iIdx];
-            iLoopCnt = 0;
-            while (1) {
-                if (iArea0 != -1) {
-                    m_PrimInfoIdx = 0;
-                    m_PrimInfoIdx2 = 0;
-                    iCnt = pMCData->tbl[iArea0][1];
-                    for (pPrimIdx = pPrimIdx0; iCnt; iCnt--) {
-                        INT iArea;
-                        pChip = &pMCChip[*pPrimIdx++];
-                        if (!pChip->id) {
-                            iArea = __detectMCInitInit(pChip);
-                            if (iArea >= 0) detectMCInit(pChip, iArea);
-                        }
+        _loadVf4(m_vCkS); /* MATCH: before the declarations: its parameter's spill slot comes first (.mdebug) */
+        INT iIdx;
+        INT iArea;
+        USHORT* pPrimIdx0;
+        USHORT* pPrimIdx;
+        INT iLoopCnt;
+        INT iArea0;
+        iArea = __detectMCInitInit_Check(pMCData, fMDVal2);
+        if (iArea < 0) continue;
+        iIdx = pMCData->tbl[iArea][0];
+        pPrimIdx0 = &pMCData->prim[iIdx];
+        iLoopCnt = 0;
+        iArea0 = -1;
+        while (1) {
+            if (iArea != iArea0) {
+                INT iCnt;
+                iArea0 = iArea;
+                m_PrimInfoIdx = 0;
+                m_PrimInfoIdx2 = 0;
+                iCnt = pMCData->tbl[iArea0][1];
+                pPrimIdx = pPrimIdx0;
+                for (j = 0; j < iCnt; j++) {
+                    MC_CHIP* pChip;
+                    INT iArea;
+                    pChip = &pMCChip[*pPrimIdx++];
+                    if (!pChip->id) {
+                        iArea = __detectMCInitInit(pChip);
+                        if (iArea >= 0) detectMCInit(pChip, iArea);
                     }
                 }
-                if (!detectMap(&vCkS, &m_vCkE)) goto next;
-                ret = 1;
-                if (_getLength(m_vCkE, vCkS) < 0.00375f) {
+            }
+            if (detectMap(&m_vCkS, &m_vCkE)) {
+                iFg = 1;
+                if (_getLength(m_vCkE, m_vCkS) < 0.00375f) {
                     m_vCkE = m_vCkS;
                     iLenCnt = 0;
-                    goto next;
+                    break;
                 }
-                if (++iLoopCnt >= 5) break;
+                if (++iLoopCnt >= 5) {
+                    m_vCkE = m_vCkS;
+                    m_vNormal2.set(0.0f, 1.0f, 0.0f, 0.0f);
+                    iLenCnt = 0;
+                    break;
+                }
+            } else {
+                break;
             }
-            m_vCkE = m_vCkS;
-            iLenCnt = 0;
-            m_vNormal2.set(0.0f, 1.0f, 0.0f, 0.0f);
+            iArea0 = -1;
         }
-    next:
-        if (ret) {
+        if (iFg) {
             if (!m_fgSliding) break;
             if (!iLenCnt) break;
         }
     }
     SPAD::freeSpad(0x2400);
     SPAD::freeSpad(0x1000);
-    iFg = 0;
-    if (ret) {
-        iFg = 1;
+    ret = 0;
+    if (iFg) {
         m_vCkE.y -= m_ShiftY;
         collision.m_outWE = m_vCkE;
         collision.m_outNormal = m_vNormal2;
         m_vDetect2.y -= m_ShiftY;
         collision.m_outDetect = m_vDetect2;
         collision.m_outStatus = m_DetectStatus;
+        ret = 1;
     }
     m_iInfo2.infoPID &= 0x7F;
     collision.m_outInfo.info = m_iInfo2.info;
-    return iFg;
+    return ret;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", _detectMCD__9CCollUtilR10CCollision);
-/* MATCH: _detectMCD's strings while it is INCLUDE_ASM (its asserts at lines 890 and 892) */
-__asm__(".rdata\n.align 3\n.asciz \"m_pPrimInfo\"\n.align 3\n.asciz \"m_pPrimInfo2\"\n.text\n");
-#endif
 INT CCollUtil::detectMap(FVECTOR* pWS, FVECTOR* pWE) {
     FVECTOR vecT;
     PRIM_INFO2* pPrimInfo2;
