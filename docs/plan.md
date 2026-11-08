@@ -39,18 +39,28 @@ every change that is merged without regenerating. Regenerating all four takes ab
   | `docs/partials.md` trend table | one row per cleanup merge (`partials.py --summary` before and after) |
   | `CLAUDE.md` | a tool, rule or toolchain fact changes |
 
-## Where things stand (2026-11-08)
+## Where things stand (2026-11-09)
 
-- **Progress:** 12084 of 12311 functions matched: game 11287 of 11323, libraries 797 of 988 (plus 151 hand-written).
+- **Progress:** 12088 of 12311 functions matched: game 11290 of 11323, libraries 798 of 988 (plus 151 hand-written).
   `tools/check.sh` counts the 151 hand-written units as done too: its total is these matched functions plus 151
   (fixed 2026-11-07: it used to count a parked `#if 0 ... #else INCLUDE_ASM #endif` as done).
-- **Game:** 31 functions still `INCLUDE_ASM` in 24 units, all parked (C draft under `#if 0` with a note).
+- **Game:** 28 functions still `INCLUDE_ASM` in 22 units, all parked (C draft under `#if 0` with a note).
   1 unit takes a data section from assembly (sddrv_ee's `.bss`, blocked: see docs/asm-leftovers.md).
-- **Libraries:** 8 parked, 1 not attempted, 27 hand-written (stay assembly), no unit with data from assembly;
+- **Libraries:** 8 parked, 1 not attempted, 26 hand-written (stay assembly), no unit with data from assembly;
   details in `docs/sdk-leftovers.md`.
 - **Header cleanup:** PARTIAL 162 (134 in 44 headers, 28 in 15 .cpp), 8 foreign stand-ins in 5 files, 0
-  duplicate classes, 0 untagged mechanisms; classes complete 1165, superset 16, gated 3, missing 6.
+  duplicate classes, 0 untagged mechanisms; classes complete 1165, superset 16, partial 1, gated 3, missing 6.
   `tools/partials.py --queue` has the ready items (the R1/R2 gate items there stay, see "Queue state").
+- **Pool run of 2026-11-08/09 (night, 3 workers, 8 units):** 4 parked drafts matched: CollMap collideRide (a volatile
+  cast store before the local CCollision: CollMap done), Glare makePkt (never measured: built, laid out on the line
+  markers, `u_long*` stores, a wrong FRAME constant: Glare done), lib sifrpc sceSifInitRpc (init stores in struct field
+  order: sifrpc done), pppEiDrawShipoly drawDistShipoly (the InterVector asm clobbers `"$2"`; drawShipoly 58 -> 13,
+  pppEiDrawDrawShipoly 40 -> 2). Improved: shape op_shape_draw 18 -> 5 (its asm is the original's hand-written kind,
+  plan item 4). memset (was hand-written) has a C draft at 12. Corrected notes, no gain: HumanBoss setupAct 18 (a
+  DImode loop-top local gives 8 but is not in the .mdebug), Camp setTechWin 36 / setMapCardWin 23, shape
+  pppVu1ShapeDraw 4, memcpy 11 / memmove 31. Open for the user: System/HeapMan.h operator new with the ref's function-level
+  `UINT nRA` (the original's block tree for every new site; global header), and a GIF-tag inline at Gprim.h:969/973
+  (line markers in Glare, DeFocus, AtWater, ScreenMask, FrecFont; memory glare-unit-lessons).
 - **Pool run of 2026-11-08 (afternoon):** 6 parked drafts matched (PathData dispDebugLine, EnemyWhitemushroom damage_,
   Avatar RotateAvatarMain, Atel setScreenFader, lib sifcmd _sceSifCmdIntrHdlr, lib hncAt3dec_Idle; all six units now
   complete) and the BattleEnemy.h cleanup (PARTIAL -21). Every old note named the wrong cause: an index assigned in
@@ -74,7 +84,8 @@ every change that is merged without regenerating. Regenerating all four takes ab
   Compare the original's locals (register/slot and scope blocks: `build/gat/mdsyms.py`) with ours (`build/m/stabs.py`
   + `pt.py`): block-scoped declarations, a value living in a different variable than the draft assumed, two
   variables where the draft had one, an inline's parameter scopes naming the helper called, optimized-away locals
-  (invisible, still needed). It does not help where only reload/spill temporaries differ (pppEiDrawShipoly).
+  (invisible, still needed). (pppEiDrawShipoly, once named here as a case it can't help, was a missing `"$2"` asm
+  clobber: memory asm-gpr-clobber-v0.)
   Lib units have names only in their .mdebug (no locals).
 
 - **Method that paid off (2026-11-06):** read `tools/helpers/asmlines.py` before permuting. Most long-parked drafts had a
@@ -430,6 +441,7 @@ header split the original didn't have, or make a class a template to hide its st
 | array row base in its own register, no folded offset | row-base-pointer-register |
 | v0/v1 swapped in several switch arms, a tail cross-jumped only in ours | shared-switch-intermediate-var |
 | reload/spill register one off after inline asms | asm-inout-earlyclobber-reload |
+| registers one lower around a VU0 asm, the original never uses v0 there | asm-gpr-clobber-v0 (the asm clobbers `"$2"`) |
 | a giv step at the loop end in the original, mid-loop in ours | separate-biv-for-increment |
 | peeled first test + rotated loop with `bnezl` | goto-layout-reorg-prediction (dlmalloc: goto body after the return) |
 | a table or argument load stuck after a local struct store | rodata-table-extern-const (the symbol is in `.rodata`: declare it const) |
