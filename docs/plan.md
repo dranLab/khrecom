@@ -130,7 +130,7 @@ Numbers change with every merge: `tools/check.sh` (totals), `tools/leftovers.py 
    max for the "m" operand) reaches 3 lines. Converted since (2026-11-07/08): Ke.c's three (one dead insn each stays,
    the rule's exception), global.c's op_random/op_random_p, KeDttSpr_MkGifPk_Pre (no MIPS left) and
    RyjMegaBirthUserCtrDrawShapeRefPos (its lq/sq copy in C; the VU0 run stays one asm: split 52 lines, a global-alloc
-   tie). Open: op_matrix_light4_vector, pppRyjDrawMegaBirthPrize, pppColor (their comments say so).
+   tie) and op_matrix_light4_vector. Open: pppRyjDrawMegaBirthPrize, pppColor (their comments say so).
    kh1 has none of them in C. No matched function goes back to parked for this.
 5. **Header cleanup**, interleaved: one `tools/partials.py --queue` item between two work items (see "Header
    cleanup"). The items waiting on a user decision are listed under "When to stop and ask".
@@ -340,7 +340,8 @@ and VECTOR_H_SET_CALL all change the image, so they stay. The global operators a
 asm: __builtin_return_address reloads ra), new, delete, delete[], new(size_t, char*), new[] and placement new, all
 throw(); the sites are `new (__FILE__ "(N)") T` (Camp's setWorldmap keeps the emulated form, MATCH), the local copies
 and the KH_PLACEMENT_NEW_DEFINED gate are gone. MapEnemy.h, SceneInfo.h, CollUtilA.h and Coord.h list gate users
-without a feature macro.
+without a feature macro. Game/Collision/CollObj.h is done (2026-11-08): CollUtilF's stand-ins went once
+_checkLadderUp calls an inline `initForMap()` (m_fgStatus = 0) after the constructor (flow drops the ctor's dead store).
 
 **A4. The ladder**, when completing a header would break another unit's `.rodata` (stop at the first step that
 works): forward declarations instead of includes; move the type to the header the original used (string

@@ -152,14 +152,15 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-07 | tools/partials.py reads the ref's .c files (measure only: the libppp C units' own types no longer count as foreign copies) | 188 | 11 | 0 | 673 (0) | 1002 |
 | 2026-11-07 | cleanup/heapman-operators: the global operators in System/HeapMan.h, sites `new (__FILE__ "(N)") T`, ~300 local copies and the placement-new gate gone | 186 | 11 | 0 | 668 (0) | 1002 |
 | 2026-11-07 | cleanup/vector-types: F_UL, G_XY ... G_ST at the end of Vector.h, QWdata after khtypes.h's u_int128 (the original's type order) | 185 | 11 | 0 | 668 (0) | 1024 |
+| 2026-11-08 | cleanup/Game-Collision-CollObj-initForMap: CollUtilF on the header's collision classes, `initForMap()` inline (m_fgStatus = 0) called in _checkLadderUp (user decision) | 184 | 8 | 0 | 673 (0) | 1035 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 185 (155 in 44 headers, 30 in 17 .cpp); MATCH: 1035
-  by category: method 46, data member 10, type 14, fwd decl 2, #include 13, changed in place 43, padding 2, path override 1, gate 5, guessed 9, header-level 24, stand-in 11, other 5
-stand-ins: 11 foreign in 6 files (9 names), 170 unattributed, 184 own
+PARTIAL: 184 (155 in 44 headers, 29 in 16 .cpp); MATCH: 1035
+  by category: method 46, data member 10, type 14, fwd decl 2, #include 13, changed in place 43, padding 2, path override 1, gate 5, guessed 9, header-level 24, stand-in 10, other 5
+stand-ins: 8 foreign in 5 files (6 names), 170 unattributed, 184 own
 duplicate class names across headers: 0
 padding: 2 arrays, 0 accessors
 mechanisms: 673 sites (0 untagged); #line: 1238
@@ -179,6 +180,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 2.0 | `Game/Enemy/MapEnemy.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
 | R1 | 2.0 | `Game/SceneInfo.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
 | R1 | 2.0 | `System/Graphic/TexInfo.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
+| R1 | 1.0 | `Game/Collision/CollObj.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R1 | 1.0 | `Game/Collision/CollUtil.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R1 | 1.0 | `Game/Collision/CollUtilA.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R1 | 1.0 | `Game/Enemy/BattleEnemy.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
@@ -186,7 +188,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 1.0 | `System/Vector.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R2 | 6.0 | `System/Graphic/Anim.h` | ready | 0 stand-in files, 0 dup headers, 6 gate users |  () | gated strings: ANIM_H_GETFLAG_DECL_ONLY |
 | R2 | 6.0 | `System/Graphic/modeldata.h` | ready | 0 stand-in files, 0 dup headers, 6 gate users |  () | gated strings: MODELDATA_H_TEXINFO |
-| R2 | 3.0 | `Game/Collision/CollObj.h` | ready | 1 stand-in files, 0 dup headers, 1 gate users | CCollision, COLL_KIND, COLL_TYPE (3 complete) | weak hint: CSJointListT<CCollObj> not in Game/Collision/CollUtilF, CSJointT<CCollObj> not in Game/Collision/CollUtilF |
 
 ## Classes with foreign copies
 
@@ -195,11 +196,8 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `sceDmaChan` | missing | System/Graphic/Effect/libppp/draw/draw_w.h | 2 |  |  |
 | `tD_CHCR` | missing | System/Graphic/Effect/libppp/draw/draw_w.h | 2 |  |  |
 | `CCMCSemiModelList` | missing | Game/Collision/CollMapCamera.h | 1 |  |  |
-| `CCollision` | complete | Game/Collision/CollObj.h | 1 |  |  |
 | `CDispListSemiSingleSort` | missing | System/Graphic/ModelMan.h | 1 |  |  |
 | `CMCSemiModel` | missing | Game/Collision/CollMapCamera.h | 1 |  |  |
-| `COLL_KIND` | complete | Game/Collision/CollObj.h | 1 |  |  |
-| `COLL_TYPE` | complete | Game/Collision/CollObj.h | 1 |  |  |
 | `ChatWndCreateCTDParam` | missing | Game/Atel/VSME.h | 1 |  |  |
 
 ## Headers
@@ -216,7 +214,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/CardBattle.h` | 1 | 6/0/0/0 | 146 |
 | `Game/CardKindEnum.h` | 1 | 1/0/0/0 | 100 |
 | `Game/Collision/CollInfo.h` | 1 | 1/0/0/0 | 177 |
-| `Game/Collision/CollObj.h` | 2 | 13/0/0/0 | 174 |
+| `Game/Collision/CollObj.h` | 2 | 13/0/0/0 | 175 |
 | `Game/Collision/CollUtilA.h` | 1 | 11/0/0/0 | 26 |
 | `Game/Debug/DWTBGM.h` | 1 | 0/0/0/0 | 1 |
 | `Game/Enemy/BattleEnemy.h` | 23 | 0/1/0/0 | 58 |
