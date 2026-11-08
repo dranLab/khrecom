@@ -78,17 +78,11 @@ INT CCollMap::collideRideForCheck(BOOL fgExceptNowRide) {
     return ret;
 }
 
-/* Parked: 3 of 259 lines (2026-11-08): the store `pRideAtari = NULL` (sw zero,0x90(sp)) is issued first in the original, before the coll constructor's stores, last in ours; tried: see below */
+/* Parked: 3 of 259 lines (2026-11-08): only `pRideAtari = NULL` (sw zero,0x90(sp)) is issued last instead of first, before the coll constructor's stores. sched1 dump: our store is the insn fixup_var_refs/purge_addressof creates when &pRideAtari is taken later (mem/f, a fixed scalar, so it has no dependence on the getListSize load and ranks below the constructor stores, 3 dependents against 4); with the address taken before the store (a CRide** local, test only) the store is a plain stack MEM, ties on 4 dependents and goes first by insn order, as in the original, but &pRideAtari then sits in a register. The .mdebug block tree and the ref's locals now equal ours (getKind for kind, v[3] not getTrans, *getCollision() for detectEtc, type = getType() | rideType). tried: statement/declaration order of the NULL store, coll, rideType, pList and the m_pCollision stores; declaration with initializer; (void)&pRideAtari (no effect); empty asm barriers (16 lines); permuter 15 min after these changes (1216 candidates, no gain) */
 #if 0
 INT CCollMap::collideRide(BOOL fgExceptNowRide) {
-    INT kind;
-    CCollisionList* pList;
-    INT rideType;
-    INT ret0;
-    CRide* pRideAtari;
-    if (!m_Enable) return 0;
-    if (!m_pCollision) return 0;
-    kind = getKind() & 0xe;
+    if (!m_Enable || !m_pCollision) return 0;
+    INT kind = getKind() & 0xe;
     if (kind != (COLL_KIND_SHADOW & 0xe)) {
         TIMEQ nTimeq = CMainApp::getTickCount();
         if (m_nTimeq != nTimeq) {
@@ -100,9 +94,10 @@ INT CCollMap::collideRide(BOOL fgExceptNowRide) {
     } else {
         m_fgSameFrame = 1;
     }
-    pList = m_pCollListR2;
-    rideType = getType() << 3;
-    pRideAtari = NULL;
+    CCollisionList* pList = m_pCollListR2;
+    INT rideType = getType() << 3;
+    INT ret0;
+    CRide* pRideAtari = NULL;
     CCollision coll;
     INT inLocal;
     FVECTOR* pTargetPos;
@@ -129,8 +124,8 @@ INT CCollMap::collideRide(BOOL fgExceptNowRide) {
         if (pEntry->getHandle() == getHandle()) continue;
         if (m_pNowHang == pEntry) continue;
         if (fgExceptNowRide && m_pNowRide == pEntry) continue;
-        INT type = pEntry->getType();
-        switch (type | rideType) {
+        INT type = pEntry->getType() | rideType;
+        switch (type) {
         case COLL_TYPE_MODELW | (COLL_TYPE_POINT << 3):
         case COLL_TYPE_MODELW | (COLL_TYPE_SPHERE << 3):
             if (kind == (COLL_KIND_SHADOW & 0xe)) continue;
