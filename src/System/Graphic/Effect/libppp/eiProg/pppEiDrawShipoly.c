@@ -170,7 +170,7 @@ extern sceVu0FMATRIX ppvCameraMatrixInv;
         : "r"(v0), "r"(v1)                           \
         : "memory")
 
-/* v0 = v1 * t + v2 * (1 - t) */
+/* v0 = v1 * t + v2 * (1 - t); MATCH: "$2" clobbered as in the original (its users never take v0 for the asm's inputs or for values dying right before it: local-alloc's fake lifetimes, reload registers) */
 #define InterVector(v0, v1, v2, t)                   \
     __asm__ volatile(                                \
         "lqc2 $vf4, 0x0(%1)\n"                       \
@@ -183,7 +183,7 @@ extern sceVu0FMATRIX ppvCameraMatrixInv;
         "sqc2 $vf9, 0x0(%0)\n"                       \
         :                                            \
         : "r"(v0), "r"(v1), "r"(v2), "r"(t)          \
-        : "memory")
+        : "$2", "memory")
 
 void drawShipoly(pppModelSt *mdl, PEiDrawShipoly *p, VEiDrawShipoly *val, VColor *col, sceVu0FVECTOR (*linev)[256]);
 void drawDistShipoly(PEiDrawShipoly *p, VEiDrawShipoly *val, VColor *col, sceVu0FVECTOR (*linev)[256]);
@@ -867,8 +867,6 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/eiProg/pp
 /* drawShipoly's jump table (jtbl_00469F70) while the function is assembly */
 __asm__(".rdata\n.align 3\n.word .L00182DCC\n.word .L00182DE0\n.word .L00182DF4\n.word .L00182E08\n.word .L00182E1C\n.text\n");
 #endif
-/* Parked: 24 of 674 lines (2026-11-08): register allocation in the inner j loop only, block tree and named locals' registers as the original's .mdebug except the RotTransPersST stv copies (a1/v1 in the original, ours a0/v0): the original never takes v0 there (the (int)a for c0[3]/c1[3] in v1, the linev[0][i] reload in v1, the InterVector address pairs a0/v1, the draw and poly_num reloads a0/a1), ours one register lower (v0/v1/a0); the fix_truncsfsi2 result is local-alloc (v0 is free in its block in ours), the reloads follow allocate_reload_reg's round-robin (last_spill_reg), and in block 72 sched1 issues the table_dr[j] load before s1 + i*16 so its address and linev[0][i] share v0 (the original keeps them apart); tried: line-marker shape (r1 = product; n = r1; r1 = n, the header packet indexed by idx, r -= / *= / += steps in both table loops, r before a, RotTransPersClip as the original's inline at lines 383-421: 36 -> 24), operand/assignment orders, fade/fade_add order, the .mdebug block tree (r1/r2/n in the Gradation block, the packet locals in a block of their own), c0[3]/c1[3] assignment forms, asm clobber forms (no "memory", vf lists); decomp-permuter 15 min (its pycparser base is 136 lines off: no usable gain), tools/permuter.py 15 min (28397 candidates, best 24) */
-#if 0
 void drawDistShipoly(PEiDrawShipoly *p, VEiDrawShipoly *val, VColor *col, sceVu0FVECTOR (*linev)[256]) {
     int poly_num;
     float gradation;
@@ -1113,9 +1111,6 @@ void drawDistShipoly(PEiDrawShipoly *p, VEiDrawShipoly *val, VColor *col, sceVu0
         pppWaitDmaGs();
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly", drawDistShipoly);
-#endif
 /* Parked: 40 of 743 lines (2026-11-08): Type!=0 copy loop: ours hoists li -1 before lui 0x7000 (the original after it: in ours loop pass 1 moves the -1 before the giv init is emitted; spl, a pointer local the .mdebug cannot show at function level, keeps the original's single giv: without it two givs and s3/s4 swap, 89 lines); Type 1 loop: centv giv and &dv swap a0/a1 (&dv is one sp+96 pseudo set in three loops, priority 4*21/56 above the giv's 4*16/47); Thin loop: i*16 in v0 (original a2), so the point/linev givs and &point[0]/&v sit one register up (v1/a0/a1/a2 vs v0/v1/a0/a1); block tree and named locals' registers equal the original's .mdebug; tried: the ref's locals (dvr in the loop bodies, len in the TexRepeat block, linev as the function's static, spl at function level), the line markers' swap order (dvr = dv[1] first, dv0 = dv1 before the swap), spl placement, biv and pointer-arithmetic forms, the [k][3] store forms, asm clobber forms, tools/permuter.py 15 min (44680 candidates, best 40) */
 #if 0
 void pppEiDrawDrawShipoly(pppPObject *pobj, PEiDrawShipoly *param, pppCtrlTable *ctbl) {
