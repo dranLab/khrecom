@@ -90,9 +90,12 @@ static inline void _cameraMatrix(FMATRIX& matOut, FVECTOR& vInPos, FVECTOR& vInZ
     sceVu0CameraMatrix(matOut, vecPos, vecDir, vecV);
 }
 
-/* initialize: not deterministic here. The registers of the gcse-hoisted %hi() loads follow PRE's expression hash
- * order, which hashes symbol-name pointers, so the output changes between compiler runs (this version matches in
- * about 1 of 6). */
+/* Parked: 0-8 of 177 lines (2026-11-08): this draft is the original source. Compiled with the original's own
+ * anonymous-namespace name (c:/KHCOM/MainApp/System/Graphic/WorldEnv.cpp + suffix UPaaaa = pid 2588, via a rewritten .ii
+ * line marker and a chosen pid) it matches every time; our build names the namespace src_..._WorldEnv.cpp + a random
+ * pid suffix, which changes gcse PRE's hash order of the hoisted lui's (_vecFixCameraPos/Yd/Zd -> s0/s1/s3 rotate per
+ * compile: MATCH in about 1 of 6 builds, else 5 or 8 lines; tools/drafts.py's copy has another path: 37-45).
+ * Needs the original anonymous-namespace name in the build (tools change). tried: .mdebug block tree (equal except operator new's nRA scope, no code change), fixed pid alone. */
 #if 0
 #line 84
 void CWorldEnv::initialize() {
@@ -120,7 +123,7 @@ void CWorldEnv::initialize() {
 
     _pEffLightMan = new (__FILE__ "(107)") CEffectLightMan;
 }
-#endif
+#else
 /* MATCH: placeholder for initialize's .rodata (its allocation messages) */
 inline void _initializeStrings() {
     com_malloc_d(0, __FILE__ "(103)", 0);
@@ -128,6 +131,7 @@ inline void _initializeStrings() {
     com_malloc_d(0, __FILE__ "(107)", 0);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/WorldEnv", initialize__9CWorldEnv);
+#endif
 
 void CWorldEnv::finalize() {
     if (_pFrustum) delete _pFrustum;
