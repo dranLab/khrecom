@@ -130,8 +130,9 @@ public:
     virtual void reset(INT nArg) {}
     CBuf* getDataSrc() const { return m_pDataSrc; }
     BYTE* getRsrcData() const {
-        BYTE* p = NULL;
+        BYTE* p;
         if (m_pDataSrc) p = m_pDataSrc->getBufPtr();
+        else p = NULL; // an else arm, not a NULL default: BattleEnemy's initEnemyParam needs the if/else layout
         return p;
     }
     INT getDataSize() const { return m_pDataSrc ? m_pDataSrc->getBufSize() : -1; }

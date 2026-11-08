@@ -48,10 +48,9 @@ inline void _emptyStringPlaceholder0() {
 #include "System/Com.h"
 #include "System/Rnd.h"
 #include "Game/EntityFactory.h"
-#include "include_asm.h"
 #include "Game/Collision/CollBody.h"
-/* PARTIAL: until SOURCE DATA, the unit's copy of the header static BattleEnemy::BadStatusEffectName (its .data
- * comes from the original assembly) */
+/* MATCH: the original loads BattleEnemy::BadStatusEffectName/SpeedParamName late (setBadStatusEffect,
+ * beginStateTerror): read through a reference helper */
 template <class T> static inline T& _ref(T& x) { return x; }
 /* ENEMY_PARAM's inline attribute rate (name unknown) */
 static inline FLOAT _getAttrRate(ENEMY_PARAM* inParam, INT inAttr) {
@@ -82,7 +81,6 @@ struct CB_ENCHANT_VIEW {
 static inline INT _getEnchantKind(CardBattle::CCardBattle* p, INT inUser) {
     return ((CB_ENCHANT_VIEW*)p)->m_cardEnchant[inUser - 1].m_nKind < 0x44 ? 0 : ((CB_ENCHANT_VIEW*)p)->m_cardEnchant[inUser - 1].m_nKind - 0x43;
 }
-extern "C" char D_004AD588[];
 extern "C" char D_004AC8E8[];
 extern "C" char D_004AC8F0[];
 extern "C" char D_004AC920[];
@@ -2295,71 +2293,63 @@ void CBattleEnemy::setupHitBack() {
     m_tqHitBackTimer = 500;
     m_vHitBackVel = vel;
 }
-/* Parked: 34 lines - the Riku-game scan loop: the original places the getRsrcData() ternary before the inline
- * getExtraParam's found block and keeps the parameter in s0 (ours: s2, blocks swapped); the rest (seek loops,
- * relocation, floor mapping, basic param) matches; tried: while/for/continue loop forms, value local, implicit
- * != 0 test, function-scope param, param = NULL placement, combined !param || !setup test, permuter 5 min
- * (6235 candidates, no gain) */
-#if 0
+/* RsrcDef.h:171 in the original (as in Game/Atel/VSME) */
+static inline INT makeRsrcID(INT nGroup, INT nMember) { return nGroup * 10000 + nMember; }
 BOOL CBattleEnemy::initEnemyParam(INT inGroupID, INT inRsrcID, INT inIndex) {
     INT start = 0;
+    ENEMY_PARAM* param;
     if (CGame::isRikuGame()) {
         INT count = 0;
-        CRsrcDB::initSeekRsrc(0x15, inGroupID * 10000 + inRsrcID);
-        CRsrcData* rsrc;
-        while ((rsrc = CRsrcDB::seekNextRsrc())) {
+        CRsrcDB::initSeekRsrc(0x15, makeRsrcID(inGroupID, inRsrcID));
+        while (CRsrcData* rsrc = CRsrcDB::seekNextRsrc()) {
             ENEMY_PARAM* param = (ENEMY_PARAM*)rsrc->getRsrcData();
-            if (!param) {
-                count++;
-                continue;
-            }
-            _setupEnemyParam(param);
-            if (param->getExtraParam(BattleEnemy::RikuParamName) != 0.0f) {
-                start = count;
-                break;
+            if (param) {
+                _setupEnemyParam(param);
+                if (param->getExtraParam(BattleEnemy::RikuParamName) != 0.0f) {
+                    start = count;
+                    break;
+                }
             }
             count++;
         }
     }
-    ENEMY_PARAM* param = NULL;
-    CRsrcDB::initSeekRsrc(0x15, inGroupID * 10000 + inRsrcID);
+    param = NULL;
+    CRsrcDB::initSeekRsrc(0x15, makeRsrcID(inGroupID, inRsrcID));
     for (INT i = 0; i < start; i++) CRsrcDB::seekNextRsrc();
     for (INT i = 0; i < inIndex + 1; i++) {
         CRsrcData* rsrc = CRsrcDB::seekNextRsrc();
         if (!rsrc) return FALSE;
         param = (ENEMY_PARAM*)rsrc->getRsrcData();
     }
-    if (!param || !_setupEnemyParam(param)) return FALSE;
-    m_pEnemyParam = param;
-    SHORT floor = CSceneInfo::getCurrentFloorNumber();
-    if (floor >= 0) {
-        switch (floor) {
-        case 15:
-            floor = 2;
-            break;
-        case 14:
-        case 100:
-            floor = 0;
-            break;
-        default:
-            floor--;
-            if (floor < 0) floor = 0;
-            break;
+    if (param && _setupEnemyParam(param)) {
+        m_pEnemyParam = param;
+        SHORT floor = CSceneInfo::getCurrentFloorNumber();
+        if (floor >= 0) {
+            switch (floor) {
+            case 15:
+                floor = 2;
+                break;
+            case 14:
+            case 100:
+                floor = 0;
+                break;
+            default:
+                floor--;
+                if (floor < 0) floor = 0;
+                break;
+            }
+        } else {
+            floor += 12;
         }
-    } else {
-        floor += 12;
+        if (!(0 <= floor && floor < 13)) AssertApp(__FILE__, 0x1203, "0 <= floor && floor < ENEMY_PARAM::BASIC_MAX", 0);
+        m_pBasicParam = _getBasicParam(param, floor);
+        m_iHp = BattleEnemy::GameModeHp(m_pBasicParam->iHP);
+        m_iExp = m_pBasicParam->iExp;
+        if (DebugWork::g_dw.enemy.uiFlag & 0x800) m_iHp = m_iHp * DebugWork::g_dw.enemy.iHpPercent / 100;
+        return TRUE;
     }
-    if (!(0 <= floor && floor < 13)) AssertApp(__FILE__, 0x1203, D_004AD588, 0);
-    m_pBasicParam = _getBasicParam(param, floor);
-    m_iHp = BattleEnemy::GameModeHp(m_pBasicParam->iHP);
-    m_iExp = m_pBasicParam->iExp;
-    if (DebugWork::g_dw.enemy.uiFlag & 0x800) m_iHp = m_iHp * DebugWork::g_dw.enemy.iHpPercent / 100;
-    return TRUE;
+    return FALSE;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", initEnemyParam__12CBattleEnemyiii);
-#endif
-__asm__(".rdata\n.align 3\n.word 0x3D3C2030\n.word 0x6F6C6620\n.word 0x2620726F\n.word 0x6C662026\n.word 0x20726F6F\n.word 0x4E45203C\n.word 0x5F594D45\n.word 0x41524150\n.word 0x423A3A4D\n.word 0x43495341\n.word 0x58414D5F\n.word 0x00000000\n.word 0x00000000\n.word 0x00000000\n.text\n");
 void CBattleEnemy::playSmallDamageSE() {
     if (isNoPlayDamageSE()) return;
     INT fileID = (INT)getExtraParam(BattleEnemy::FileIDParamName);
