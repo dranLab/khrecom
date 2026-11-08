@@ -78,8 +78,6 @@ INT CCollMap::collideRideForCheck(BOOL fgExceptNowRide) {
     return ret;
 }
 
-/* Parked: 3 of 259 lines (2026-11-08): only `pRideAtari = NULL` (sw zero,0x90(sp)) is issued last instead of first, before the coll constructor's stores. sched1 dump: our store is the insn fixup_var_refs/purge_addressof creates when &pRideAtari is taken later (mem/f, a fixed scalar, so it has no dependence on the getListSize load and ranks below the constructor stores, 3 dependents against 4); with the address taken before the store (a CRide** local, test only) the store is a plain stack MEM, ties on 4 dependents and goes first by insn order, as in the original, but &pRideAtari then sits in a register. The .mdebug block tree and the ref's locals now equal ours (getKind for kind, v[3] not getTrans, *getCollision() for detectEtc, type = getType() | rideType). tried: statement/declaration order of the NULL store, coll, rideType, pList and the m_pCollision stores; declaration with initializer; (void)&pRideAtari (no effect); empty asm barriers (16 lines); permuter 15 min after these changes (1216 candidates, no gain) */
-#if 0
 INT CCollMap::collideRide(BOOL fgExceptNowRide) {
     if (!m_Enable || !m_pCollision) return 0;
     INT kind = getKind() & 0xe;
@@ -97,7 +95,10 @@ INT CCollMap::collideRide(BOOL fgExceptNowRide) {
     CCollisionList* pList = m_pCollListR2;
     INT rideType = getType() << 3;
     INT ret0;
-    CRide* pRideAtari = NULL;
+    CRide* pRideAtari;
+    /* MATCH: the original issues this store first, before coll's constructor stores; a plain store becomes a fixed
+     * scalar MEM once &pRideAtari is taken (purge_addressof) and sched1 sinks it below them (volatile-cast-local-store) */
+    *(CRide* volatile*)&pRideAtari = NULL;
     CCollision coll;
     INT inLocal;
     FVECTOR* pTargetPos;
@@ -157,38 +158,6 @@ INT CCollMap::collideRide(BOOL fgExceptNowRide) {
     }
     return 0;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollMap", collideRide__8CCollMapi);
-/* placeholder for collideRide's local CCollision: a reference to its destructor from code emitted here makes gcc
- * output the (weak) destructor first, as in the original. The build strips .sdata (-G0 code has none). */
-__attribute__((section(".sdata"))) void _collideRideLocals() { CCollision coll; }
-/* collideRide's jump table (labels of the included assembly) */
-__asm__(
-    ".rdata\n"
-    ".align 3\n"
-    ".word .L00225960\n"
-    ".word .L00225A34\n"
-    ".word .L00225A50\n"
-    ".word .L00225A50\n"
-    ".word .L00225954\n"
-    ".word .L00225A50\n"
-    ".word .L00225A50\n"
-    ".word .L00225A50\n"
-    ".word .L00225A50\n"
-    ".word .L00225A50\n"
-    ".word .L00225A50\n"
-    ".word .L00225A50\n"
-    ".word .L00225A50\n"
-    ".word .L00225A50\n"
-    ".word .L00225A50\n"
-    ".word .L00225A50\n"
-    ".word .L00225960\n"
-    ".word .L00225A34\n"
-    ".word .L00225A50\n"
-    ".word .L00225A50\n"
-    ".word .L00225954\n"
-    ".text\n");
-#endif
 
 INT CCollMap::collideRideR2(CCollision& coll, CRide** ppRideAtari, BOOL fgExceptNowRide) {
     INT ret0 = 0;
