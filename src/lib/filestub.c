@@ -3,7 +3,6 @@
 #include "sdk/sifrpc.h"
 #include "sdk/sifdev.h"
 #include "sdk/stdarg.h"
-#include "include_asm.h"
 
 typedef signed char s8;
 typedef unsigned char u8;
@@ -444,9 +443,7 @@ static _sceFsIob* get_iob(s32 fd) {
     return ret;
 }
 
-/* Parked: 14 lines differ (permuter score) */
-#if 0
-void _sceFs_Rcv_Intr(void* pkt, void* data) {
+static void _sceFs_Rcv_Intr(void* pkt, void* data) {
     s32 ee_semid;
     u32 ee_retmod;
     void* ee_retadr;
@@ -458,15 +455,9 @@ void _sceFs_Rcv_Intr(void* pkt, void* data) {
     void* r_addr;
     u32 r_size;
     u32 rp;
-    s32 sel;
 
-    sel = 0;
-    if (_fs_rcv_bufdbl) {
-        sel = ((s32*)pkt)[3];
-    }
-    ee_retbuf_sel = sel;
-    rp = (u32)&_rcv_data_cmd[sel];
-    rp |= 0x20000000;
+    ee_retbuf_sel = _fs_rcv_bufdbl ? ((s32*)pkt)[3] : 0;
+    rp = UNCACHED(&_rcv_data_cmd[ee_retbuf_sel]);
     memcpy(&ee_semid, (void*)(rp + 0x0), sizeof(s32));
     memcpy(&ee_retmod, (void*)(rp + 0x4), sizeof(s32));
     memcpy(&ee_retadr, (void*)(rp + 0x8), sizeof(s32));
@@ -528,17 +519,6 @@ void _sceFs_Rcv_Intr(void* pkt, void* data) {
         iSignalSema(ee_semid);
     }
 }
-#endif
-void _sceFs_Rcv_Intr(void* pkt, void* data);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/filestub", _sceFs_Rcv_Intr);
-/* _sceFs_Rcv_Intr's jump table (the function is still assembly). */
-asm(".rdata\n.align 3\njtbl_004FEEE0:\n"
-    ".word .L00388848\n.word .L00388AB0\n.word .L00388AB0\n.word .L00388AB0\n.word .L00388AB0\n"
-    ".word .L00388AB0\n.word .L00388AB0\n.word .L00388AB0\n.word .L00388AB0\n.word .L003888F0\n"
-    ".word .L003889CC\n.word .L00388AB0\n.word .L00388AB0\n.word .L00388AB0\n.word .L00388AB0\n"
-    ".word .L00388AB0\n.word .L00388AB0\n.word .L00388AB0\n.word .L00388AB0\n.word .L00388AB0\n"
-    ".word .L00388AB0\n.word .L00388A68\n.word .L00388AB0\n.word .L00388A68\n.word .L00388A68\n"
-    ".text\n");
 
 static void _sceFsSemInit(void) {
     struct SemaParam param;
