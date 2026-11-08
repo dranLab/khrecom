@@ -1823,17 +1823,14 @@ void CSceneInfo::backupEventDoorState() {
         }
     }
 }
-/* Parked: ~35 lines - the outer room loop: the original re-materializes the s_CurrentFloor address for the room
-   (mtlo/madd) and for the count each iteration; ours shares one base. Door/state/norma logic matches; room
-   addressing forms and 5 min of permuter (42 -> 38) did not get it. */
-#if 0
 void CSceneInfo::rollbackEventDoorState(BOOL bInitFloor) {
     USHORT nFloorIdx = getCurrentFloorIndex();
     if (nFloorIdx == 0xff) return;
+    FloorInfo& floor = s_CurrentFloor; /* not in the ref: it got no register (all s-regs taken), so .mdebug has no entry */
     STORAGE::_EventDoorInfo* pInfoBackupTbl = _SceneInfoWork::mc()->_nEventDoorInfoTbl[nFloorIdx];
     BYTE* pStateBackupTbl = _SceneInfoWork::mc()->_nEventDoorStateTbl[nFloorIdx];
-    for (USHORT i = 0; i < s_CurrentFloor._nRoomCount; i++) {
-        RoomInfo& room = s_CurrentFloor._rooms[i];
+    for (USHORT i = 0; i < floor._nRoomCount; i++) {
+        RoomInfo& room = floor._rooms[i];
         for (INT j = 0; j < 4; j++) {
             DoorInfo& door = room._doors[j];
             if (door._nDstRoom < 0) continue;
@@ -1882,8 +1879,8 @@ void CSceneInfo::rollbackEventDoorState(BOOL bInitFloor) {
                     }
                 } else if (stat == DOOR_STAT_CLOSED) {
                     if (door.isSpecialDoor()) {
-                        bResetNorma = TRUE;
                         door.initNorma();
+                        bResetNorma = TRUE;
                     }
                 }
                 if (bResetNorma) {
@@ -1899,10 +1896,6 @@ void CSceneInfo::rollbackEventDoorState(BOOL bInitFloor) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", rollbackEventDoorState__10CSceneInfoi);
-__asm__(".rdata\n.align 3\n.word 0x726F6F64\n.word 0x4E705F2E\n.word 0x616D726F\n.word 0x49637253\n.word 0x006F666E\n.word 0x00000000\n.word .L0021664C\n.word .L00216654\n.word .L0021665C\n.word .L00216674\n.word .L0021666C\n.word .L00216664\n.text\n");
-#endif
 void _setOpenFlagEventDoor(const DoorInfo& door) {
     USHORT nFloor = CSceneInfo::getCurrentFloorIndex();
     INT nEvIdx = door._type - 1;
