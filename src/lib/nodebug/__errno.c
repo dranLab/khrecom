@@ -33,7 +33,15 @@ int *__errno(void)
    neighbours. memmove: newlib's int len = length, declared first (38 -> 31); tried: quadword loop as while/do/for,
    statement order, temporaries, long/u_long128 pointers, byte loop forms, len int/size_t/long/int parameter, all 120
    declaration orders, dst0 references, every installed compiler and -f flag (diagnosis only), decomp_permuter 15 min
-   each (memcpy 85k iterations): no gain */
+   each (memcpy 85k iterations): no gain. 2026-11-09 (unchanged, 11/31): the quadword loop needs lq2 issued by sched1
+   right after sq1 (local-alloc's fake lifetime then keeps lq1 off lq2's v0, sltiu gets a0, dst0 moves to t0), but the
+   sq1 -> lq2 memory dependence costs 2 cycles, so sched1 puts dst += 16 between, as the original's final order does:
+   sched1 and sched2 would need different dependence graphs. aligned_dst[0]/[1] + aligned_dst += 2 gives the t0/a0
+   part (lq regs swapped, sq 16(a3): 9 lines but 176 bytes, a different shape). The -1 copy has the shape of
+   cse_set_around_loop's copy into the REG_LOOP_TEST_P register (cse.c ~8350, inserted after the entry test's set),
+   which needs an in-loop source costlier than a pseudo. Also tried: do {} while (0) barriers, explicit/shared/scoped
+   temps, index and pointer-increment forms, an index loop, alias-set changes (strict aliasing is off), 10 compilers x
+   30 flags for the copy: no gain */
 #if 0
 void *memcpy(void *dst0, const void *src0, size_t len0)
 {
@@ -136,7 +144,10 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/nodebug/__errno", memmove);
    with its lui/ori -1 twice, the short-loop nops) is this compiler's. tried: int/long/unsigned/unsigned char masked
    locals, u_long128 locals (every DI<->TI conversion adds a por), separate pcpyh input/output variables, c &= 0xff
    (then sb stores the masked a1), pcpyld with two operands, before the loop or in an if, decomp_permuter 15 min
-   (no gain) */
+   (no gain). 2026-11-09 (unchanged, 12): newlib's d = c & 0xff with buffer = d; buffer = (buffer << 8) | d (gives
+   the original's or operand order), the newlib i < LBLOCKSIZE loop, d as int/unsigned/long, a separate pcpyh output
+   variable (16 variants: 12-18); empty asm clobbers of $2/$3 at each point (14 variants: 12-18, 9 only with one
+   inside the quadword loop, which moves the globals: an invented mechanism, not kept) */
 #if 0
 void *memset(void *m, int c, size_t n)
 {
