@@ -975,8 +975,6 @@ void CModel::disp0_SetMicroCode(u_long128* pMProg) {
 void CModel::_disp0_SetTexture(INT nFlag, u_long* pTag) {
     if (!(nFlag & 6)) sendTexture(pTag);
 }
-/* Parked: 93 of 655 lines (2026-11-08): the block tree equals the original's .mdebug except before pack #1 (original: a CModel inline, x invisible, y visible, x loaded after y) and the colour-matrix getter (original has no block there but the getter's addiu shape). Still differs: this in s4 / iFlags&2 in s5, the original swaps them (global alloc: this 47 refs/504 insns = 0.4663 beats the bone-loop addr giv 9/58 = 0.4655; one more insn in this's range would flip it), the semikind arm (original copies m_Mode to a1 for the switch compares), y's u16 ? u16 : 0x92 (ours branches, original li+movz), GIF tag store order, the no-light zero stores, two loop-align nops (+8 bytes, one insn out of phase). Tried: the .mdebug locals/blocks (149 -> 93: rawMode = pData[1][3], for-scoped i, tex0Buf in the else-if, t0/t1 + a $3 clobber, plain casts for the lo halves, then-block i/j, offset block, iSize < N ? iSize : N), memcpy for the light rows, calc(BOOL) defined after CLightUnit (isCalc inlined), getMode(), (version & 0xFFFF), ?: / != 0 / INT / USHORT forms for y. Earlier: permuter 20 min on the old draft (no gain). */
-#if 0
 void CModel::_disp0_SetPacket(UINT nMode, const int (*pData)[4], INT semikind, u_long nInTest, INT iFlags, u_long* tex0) {
     UINT rawMode;
     QWdata* pQw;
@@ -1009,6 +1007,7 @@ void CModel::_disp0_SetPacket(UINT nMode, const int (*pData)[4], INT semikind, u
         version = m_Mode;
         if ((USHORT)version == 0x4005 || (USHORT)version == 0x4205) lTest = 0x53001;
         else lTest = nInTest;
+        version = m_Mode; /* read again: gcse's copy of the first read is the switch's a1 (version itself in v0) */
         switch (semikind) {
         case 1:
             lAlpha = 0x44;
@@ -1081,7 +1080,14 @@ void CModel::_disp0_SetPacket(UINT nMode, const int (*pData)[4], INT semikind, u
         CPackMan::pkCloseUpkCodeV4_32(pQw);
     }
 
-    qPP = _packWord(m_BBoxFlag, !((const QWdata*)pData)[1].s16[3] ? (((const QWdata*)pData)[1].u16[7] ? ((const QWdata*)pData)[1].u16[7] : 0x92) : ((const QWdata*)pData)[1].s16[5], iFlags & 2, m_ShaderOption);
+    /* y of the _packWord below is a register parameter in the .mdebug, the same register as inbuffer */
+    if (!((const QWdata*)pData)[1].s16[3]) {
+        inbuffer = ((const QWdata*)pData)[1].u16[7];
+        if (!inbuffer) inbuffer = 0x92;
+    } else {
+        inbuffer = ((const QWdata*)pData)[1].s16[5];
+    }
+    qPP = _packWord(getBBoxFlag(), inbuffer, iFlags & 2, m_ShaderOption);
     if (iFlags & 2) {
         ((FVECTOR*)&qColorScale)->set(1.0f, 1.0f, 1.0f, 1.0f);
     } else if (m_Mode == 0x10) {
@@ -1129,7 +1135,9 @@ void CModel::_disp0_SetPacket(UINT nMode, const int (*pData)[4], INT semikind, u
         CPackMan::pkCloseUpkCodeV4_32(pQw + 5);
 
         if (m_pLightUnit) {
-            m_pLightUnit->calc(TRUE);
+            /* the .mdebug shows isCalc() inlined into this function's own lines (no calc() block): _calc() is called
+               directly, protected in the ref (friend CModel in LightUnit.h) */
+            if (!m_pLightUnit->isCalc()) m_pLightUnit->_calc();
             pQw = (QWdata*)CPackMan::pkOpenUpkCodeV4_32(4, 4, 4);
             memcpy(pQw, m_pLightUnit, 0x30);
             pQw[3].ul128 = ((QWdata*)m_pLightUnit)[8].ul128;
@@ -1139,7 +1147,7 @@ void CModel::_disp0_SetPacket(UINT nMode, const int (*pData)[4], INT semikind, u
             pQw[0].ul128 = 0;
             pQw[1].ul128 = 0;
             pQw[2].ul128 = 0;
-            pQw[3].ul128 = *(u_long128*)&ONE_VECTOR;
+            pQw[3].ul128 = ONE_VECTOR._q;
             pQw[4].ul128 = 0;
             pQw[5].ul128 = 0;
             pQw[6].ul128 = 0;
@@ -1170,8 +1178,8 @@ void CModel::_disp0_SetPacket(UINT nMode, const int (*pData)[4], INT semikind, u
             if (m_pLightUnit) {
                 u_long128* p = (u_long128*)m_pLightUnit->getPointLightData();
                 if (p) {
-                    i = 0;
                     iSize = boneNum;
+                    i = 0;
                     do {
                         j = iSize < 0x1A ? iSize : 0x19;
                         iSize -= j;
@@ -1189,7 +1197,8 @@ void CModel::_disp0_SetPacket(UINT nMode, const int (*pData)[4], INT semikind, u
             }
         }
         w = boneSize * boneNum + 0x28;
-        bottom = 0x400 - m_pShader->m_WorkSize;
+        bottom = 0x400;
+        bottom -= m_pShader->m_WorkSize;
         p32 = (UINT*)CPackMan::pkGetCurrentPointer();
         {
             INT offset = (bottom - w) / 2;
@@ -1202,6 +1211,10 @@ void CModel::_disp0_SetPacket(UINT nMode, const int (*pData)[4], INT semikind, u
     } else {
         CPackMan::pkCloseUpkCodeV4_32(pQw);
     }
+    /* MATCH: an empty asm adds one insn to the life of this (47 refs over 505 insns): global-alloc's priority
+       then ranks the bone loop's address giv (9 refs over 58) first, which gives it s4 and this s5 as in the
+       original (a near tie: 0.46535 vs 0.46552; 0.46627 without) */
+    asm volatile("");
     CPackMan::pkCnt(0);
     CPackMan::pkAddCode(0x11000000);
     if (m_pAfterDirect) {
@@ -1220,9 +1233,6 @@ void CModel::_disp0_SetPacket(UINT nMode, const int (*pData)[4], INT semikind, u
     }
     CModelMan::incDrawCount();
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _disp0_SetPacket__6CModelUiPA3_CiiUliPUl);
-#endif
 void CSemiModel::link(CModel* m) {
     UINT rawMode;
     m_pModel = m;
