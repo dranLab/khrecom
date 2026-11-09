@@ -326,11 +326,12 @@ static inline void _rotMatrixX(FMATRIX& m, const TDEG& a) {
     rx.m[2][1] = -s;
     m = _mulMatrix(m, rx);
 }
-/* Parked: 82 of 1190 lines, same size (2026-11-09) - only xmin/xmax/zmin/zmax's registers and the division block's
+/* Parked: 82 of 1190 lines, 8 bytes short (2026-11-09) - only xmin/xmax/zmin/zmax's registers and the division block's
    schedule differ: the original keeps xmax's quotient apart (mflo v1; move s6,v1: cse kept the variable canonical, so
    xmax dies twice and goes to global-alloc, s6 after the fptodp temps s3-s5), ours lets cse replace xmax by the
    quotient (local-alloc ties them: xmin s2, xmax s1, zmax s3). make_regs_eqv keeps the variable only when it is
-   referenced outside the cse path (from the qq loop's end to the else label), not visible in the original's code.
+   referenced outside the cse path (from the qq loop's end to the else label), not visible in the original's code;
+   the 8 bytes are that copy and its schedule.
    Worked: ApplyMatrix through the Coord.h-style by-value inline (line markers Coord.h:634-635; 87 -> 82), by-value
    _mulMatrix, _getAZFTbl inline, angles by const TDEG&, vec in its own scope, min/max init before v[], zero-store
    order. Tried: division block in line order / per-coordinate / one-line forms, xmax if/ternary/compare forms, int
