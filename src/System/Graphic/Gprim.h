@@ -226,6 +226,7 @@ public:
 
 
 
+
 class CGTexPrim : public CGPrim {
 protected:
     TexInfo* m_pTexInfo;
@@ -233,7 +234,6 @@ protected:
     static INT m_nTmpTexArea;
 
 public:
-    virtual ~CGTexPrim() {}
     CGTexPrim() { m_pTexInfo = NULL; }
     void setTPage(const TexInfo* pInInfo) { m_pTexInfo = (TexInfo*)pInInfo; }
     void setTPage(const CHAR* pTexName);
@@ -270,6 +270,7 @@ public:
 
 
 
+
 class CGTexPrim2D : public CGPrim {
 protected:
     TexInfo* m_pTexInfo;
@@ -278,7 +279,6 @@ protected:
     static USHORT m_nCacheIdxOld;
 
 public:
-    /* MATCH: implicit destructor, as ~CPolyGT4ST's (2DSprObj's destructor inlines them for its CPolyGT4ST members) */
     CGTexPrim2D() { m_pTexInfo = NULL; }
     void setTPage(const TexInfo* pInInfo) { m_pTexInfo = (TexInfo*)pInInfo; }
     void setTPage(const CHAR* pTexName);
@@ -324,12 +324,12 @@ public:
 
 
 
+
 class CScissoring : public CGPrim {
 public:
     G_XY m_P0;
     G_XY m_P1;
 
-    virtual ~CScissoring() {}
     void setRect(G_XY& scissoringStart, G_XY& scissoringEnd);
     void setDefault();
     virtual UINT getPacketSize() const { return 3; }
@@ -375,16 +375,17 @@ private:
 
 
 
+
 class CZFill : public CGPrim {
 public:
     INT m_nZ;
 
-    virtual ~CZFill() {}
     CZFill() { m_nZ = 0; }
     virtual UINT getPacketSize() const { return 32; }
 private:
     virtual void makePkt();
 };
+
 
 
 
@@ -399,12 +400,12 @@ public:
     G_XYZ m_P1;
     G_RGBA m_C0;
 
-    virtual ~CTile() {}
     virtual UINT getPacketSize() const { return 3; }
 private:
     virtual FIX4 calcZ() { return m_P0.z; }
     virtual void makePkt();
 };
+
 
 
 
@@ -423,7 +424,6 @@ public:
     G_UV m_T0;
     G_UV m_T1;
 
-    virtual ~CSprt() {}
     CSprt() { m_C0.set(0x80, 0x80, 0x80, 0x80); }
     void setUVWH(USHORT u, USHORT v, USHORT w, USHORT h) {
         FIX4 _x = w << 4;
@@ -438,6 +438,7 @@ private:
     virtual FIX4 calcZ() { return m_P0.z; }
     virtual void makePkt();
 };
+
 
 
 
@@ -467,7 +468,6 @@ public:
     G_UV m_T2;
     G_UV m_T3;
 
-    virtual ~CPolyGT4() {}
     CPolyGT4() {
         m_C0.set(0x80, 0x80, 0x80, 0x80);
         m_C3 = m_C2 = m_C1 = m_C0;
@@ -477,6 +477,7 @@ private:
     virtual FIX4 calcZ() { return (UINT)(m_P0.z + m_P1.z + m_P2.z + m_P3.z) >> 2; }
     virtual void makePkt();
 };
+
 
 
 class CPolyGT4ST : public CGTexPrim2D {
@@ -494,11 +495,11 @@ public:
     G_ST m_T2;
     G_ST m_T3;
 
-    /* MATCH: implicit destructor (see ~CGTexPrim2D) */
     virtual UINT getPacketSize() const { return CGTexPrim2D::getPacketSize() + 12; }
 private:
     virtual void makePkt();
 };
+
 
 
 
@@ -513,12 +514,12 @@ public:
     G_XYZ m_P1;
     G_RGBA m_C0;
 
-    virtual ~CLineF2() {}
     virtual UINT getPacketSize() const { return 3; }
 private:
     virtual FIX4 calcZ() { return (UINT)(m_P0.z + m_P1.z) >> 1; }
     virtual void makePkt();
 };
+
 
 
 
@@ -533,12 +534,12 @@ public:
     G_RGBA m_C2;
     G_RGBA m_C3;
 
-    virtual ~CPolyG4() {}
     virtual UINT getPacketSize() const { return 6; }
 private:
     virtual FIX4 calcZ() { return (UINT)(m_P0.z + m_P1.z + m_P2.z + m_P3.z) >> 2; }
     virtual void makePkt();
 };
+
 
 
 
@@ -554,7 +555,6 @@ public:
     FIX4 m_RX;
     FIX4 m_RY;
 
-    virtual ~CCircle() {}
     virtual UINT getPacketSize() const { return 104; }
 protected:
     virtual FIX4 calcZ() { return m_P0.z; }
@@ -565,10 +565,10 @@ protected:
 
 
 
+
 class CScreenColoredMask : public CTile {
 public:
     CScreenColoredMask();
-    virtual ~CScreenColoredMask() {}
 };
 
 
@@ -642,9 +642,9 @@ public:
 
 
 
+
 class CRotSprt : public CSprt, public C2DRot {
 public:
-    virtual ~CRotSprt() {}
 private:
     virtual FIX4 calcZ() { return m_Center.z; }
     virtual void makePkt();
@@ -1157,6 +1157,7 @@ inline FIX4 CTPrim::calcZ() {
 
 
 
+
 class C3DTile : public CGPrim {
 protected:
     IVECTOR p0;
@@ -1168,7 +1169,6 @@ public:
     G_RGBA m_C0;
     CCoord* m_pCrd;
 
-    virtual ~C3DTile() {}
     C3DTile() {
         m_P0.set(-0.5f, -0.5f, 0.0f);
         m_P1.set(0.5f, 0.5f, 0.0f);
@@ -1178,6 +1178,7 @@ private:
     virtual FIX4 calcZ();
     virtual void makePkt();
 };
+
 
 
 
@@ -1206,7 +1207,6 @@ public:
     G_UV m_T1;
     CCoord* m_pCrd;
 
-    virtual ~C3DSprt() {}
     C3DSprt() {
         m_P0.set(-0.5f, -0.5f, 0.0f);
         m_P1.set(0.5f, 0.5f, 0.0f);
@@ -1229,6 +1229,7 @@ private:
 
 
 
+
 class C3DRotSprt : public C3DSprt {
 protected:
     IVECTOR p10;
@@ -1236,13 +1237,13 @@ protected:
 public:
     TDEG m_Rot;
 
-    virtual ~C3DRotSprt() {}
     C3DRotSprt() { m_Rot = 0; }
     virtual UINT getPacketSize() const { return CGTexPrim::getPacketSize() + 7; }
 private:
     virtual FIX4 calcZ();
     virtual void makePkt();
 };
+
 
 
 
@@ -1269,7 +1270,6 @@ public:
     G_RGBA m_C0;
     CCoord* m_pCrd;
 
-    virtual ~C3DPolyFT4() {}
     C3DPolyFT4() {
         m_C0.col = 0x80808080;
         m_S0.set(0.0f, 0.0f);
@@ -1282,6 +1282,7 @@ private:
     virtual FIX4 calcZ();
     virtual void makePkt();
 };
+
 
 
 
@@ -1306,7 +1307,6 @@ public:
     G_RGBA m_C3;
     CCoord* m_pCrd;
 
-    virtual ~C3DPolyGT4() {}
     C3DPolyGT4() {
         m_C0.col = 0x80808080;
         m_C1.col = 0x80808080;
@@ -1331,6 +1331,7 @@ private:
 
 
 
+
 class C3DPolyFT3 : public CGTexPrim {
 protected:
     IVECTOR p0;
@@ -1346,7 +1347,6 @@ public:
     G_RGBA m_C0;
     CCoord* m_pCrd;
 
-    virtual ~C3DPolyFT3() {}
     C3DPolyFT3() {
         m_C0.col = 0x80808080;
         m_S0.set(0.0f, 0.0f);
@@ -1358,6 +1358,7 @@ private:
     virtual FIX4 calcZ();
     virtual void makePkt();
 };
+
 
 
 
@@ -1382,7 +1383,6 @@ public:
     G_RGBA m_C2;
     CCoord* m_pCrd;
 
-    virtual ~C3DPolyGT3() {}
     C3DPolyGT3() {
         m_C0.col = 0x80808080;
         m_C1.col = 0x80808080;
@@ -1401,8 +1401,6 @@ private:
 
 
 
-
-
 class C3DLine : public CGPrim {
 protected:
     IVECTOR p0;
@@ -1414,12 +1412,15 @@ public:
     G_RGBA m_C1;
     CCoord* m_pCrd;
 
+    /* MATCH: declared, unlike the other derived destructors (the original's is at line 1334, the class end: implicit);
+     * implicit, ~CAvatar's inlined copies for lineX/Y/Z take other registers (its gcse fillers were tuned to this) */
     virtual ~C3DLine() {}
     virtual UINT getPacketSize() const { return 4; }
 private:
     virtual FIX4 calcZ();
     virtual void makePkt();
 };
+
 
 
 
@@ -1437,7 +1438,6 @@ public:
     CCoord* m_pCrd0;
     CCoord* m_pCrd1;
 
-    virtual ~C3DLineCoord2() {}
     virtual UINT getPacketSize() const { return 4; }
 private:
     virtual FIX4 calcZ();
@@ -1461,6 +1461,7 @@ private:
 };
 
 
+
 class C3DPolyG4 : public CGPrim {
 protected:
     IVECTOR p0;
@@ -1478,12 +1479,12 @@ public:
     G_RGBA m_C3;
     CCoord* m_pCrd;
 
-    virtual ~C3DPolyG4() {}
     virtual UINT getPacketSize() const { return 6; }
 private:
     virtual FIX4 calcZ();
     virtual void makePkt();
 };
+
 
 
 
@@ -1501,12 +1502,12 @@ public:
     G_RGBA m_C2;
     CCoord* m_pCrd;
 
-    virtual ~C3DPolyG3() {}
     virtual UINT getPacketSize() const { return 5; }
 private:
     virtual FIX4 calcZ();
     virtual void makePkt();
 };
+
 
 
 
@@ -1538,7 +1539,6 @@ public:
     G_RGBA m_C0;
     G_RGBA m_C1;
 
-    virtual ~C3DCircle() {}
     C3DCircle() {}
     virtual UINT getPacketSize() const { return 104; }
 protected:
@@ -1554,12 +1554,12 @@ protected:
 
 
 
+
 class C3DPointLight : public C3DCircle {
 public:
     FLOAT m_R00;
     INT m_Active;
 
-    virtual ~C3DPointLight() {}
     virtual UINT getPacketSize() const { return m_Active ? 308 : 204; }
 private:
     virtual void makePkt();
