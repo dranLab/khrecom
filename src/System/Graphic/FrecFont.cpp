@@ -315,12 +315,6 @@ USHORT CFrecFont::toSJIS(USHORT nType, USHORT nCode) {
     return 0;
 }
 
-static inline void _setQW(u_long128*& qp, INT i, u_long data, u_long addr) {
-    u_long128 out128;
-    __asm__ volatile("pcpyld %0, %1, %0" : "=r"(out128) : "r"(addr), "0"(data));
-    qp[i] = out128;
-}
-
 static inline u_long _uv(const G_UV& t) {
     return (u_long)((t.u << 4) | 8) | (u_long)((t.v << 4) | 8) << 16;
 }
@@ -353,11 +347,11 @@ void _makeFontPkt(const _FontInfo& font, USHORT nCode, FIX4 x, FIX4 y, FIX4 w, F
         p1.set(x + w, y + h);
         t0.set(u, v);
         t1.set(u + s - 1, v + nFontSize);
-        _setQW(qp, 0, font._nTex0[nPage][palette], 7);
-        _setQW(qp, 1, _uv(t0), 3);
-        _setQW(qp, 2, _xyz(p0), 5);
-        _setQW(qp, 3, _uv(t1), 3);
-        _setQW(qp, 4, _xyz(p1), 5);
+        qp[0] = _makeQW(font._nTex0[nPage][palette], 7);
+        qp[1] = _makeQW(_uv(t0), 3);
+        qp[2] = _makeQW(_xyz(p0), 5);
+        qp[3] = _makeQW(_uv(t1), 3);
+        qp[4] = _makeQW(_xyz(p1), 5);
         qp += 5;
     }
 }
@@ -399,9 +393,7 @@ static inline UINT _mulColor(UINT iCol, UINT iMul) {
     return _packColor(_clampColor(ivCol));
 }
 static inline void _setRGBAQ(u_long128*& qp, UINT iCol) {
-    u_long128 out128;
-    __asm__ volatile("pcpyld %0, %1, %0" : "=r"(out128) : "r"((u_long)1), "0"((u_long)iCol));
-    *qp++ = out128;
+    *qp++ = _makeQW(iCol, 1);
 }
 
 void CFrecFont::makePkt(CFntM2& prim) {
@@ -481,13 +473,11 @@ void CFrecFont::makePkt(CFntM2& prim) {
     UINT nStyleBak = nStyle = nStyle & 0xD0;
     INT nLine = 0;
     INT nChar = 0;
-    u_long128 tag;
-    __asm__ volatile("pcpyld %0, %1, %0" : "=r"(tag) : "r"((u_long)0xE), "0"((u_long)0x1000800000008000UL));
-    u_long128* qp = CPackMan::pkOpenGifTag(tag);
-    _setQW(qp, 0, 5, 9);
-    _setQW(qp, 1, s_nTEX2_2, 0x17);
-    _setQW(qp, 2, 0x356, 0);
-    _setQW(qp, 3, colBase.col, 1);
+    u_long128* qp = CPackMan::pkOpenGifTag(_makeQW(0x1000800000008000UL, 0xE));
+    qp[0] = _makeQW(5, 9);
+    qp[1] = _makeQW(s_nTEX2_2, 0x17);
+    qp[2] = _makeQW(0x356, 0);
+    qp[3] = _makeQW(colBase.col, 1);
     qp += 4;
     while (*pStr) {
         USHORT c = *pStr++;
@@ -654,7 +644,7 @@ void CFrecFont::makePkt(CFntM2& prim) {
         x += space.x;
         if (prim.getDispChars() && nChar >= prim.getDispChars()) break;
     }
-    _setQW(qp, 0, CPackMan::getDefault_CLAMP_2(), 9);
+    qp[0] = _makeQW(CPackMan::getDefault_CLAMP_2(), 9);
     qp++;
     CPackMan::pkCloseGifTag(qp);
     prim.setCurrentDispChars(nChar);

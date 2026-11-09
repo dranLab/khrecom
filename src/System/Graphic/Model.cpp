@@ -1000,11 +1000,6 @@ static inline ULONGLONG _hi64(u_long128 x) {
     __asm__ volatile("pcpyud %0, %1, $0" : "=r"(out64) : "r"(x));
     return out64;
 }
-static inline u_long128 _makeGifTag(u_long lo, u_long hi) {
-    u_long128 tag;
-    __asm__ volatile("pcpyld %0, %1, %2" : "=r"(tag) : "r"(hi), "0"(lo));
-    return tag;
-}
 /* Parked: 93 of 655 lines (2026-11-08): the block tree equals the original's .mdebug except before pack #1 (original: a CModel inline, x invisible, y visible, x loaded after y) and the colour-matrix getter (original has no block there but the getter's addiu shape). Still differs: this in s4 / iFlags&2 in s5, the original swaps them (global alloc: this 47 refs/504 insns = 0.4663 beats the bone-loop addr giv 9/58 = 0.4655; one more insn in this's range would flip it), the semikind arm (original copies m_Mode to a1 for the switch compares), y's u16 ? u16 : 0x92 (ours branches, original li+movz), GIF tag store order, the no-light zero stores, two loop-align nops (+8 bytes, one insn out of phase). Tried: the .mdebug locals/blocks (149 -> 93: rawMode = pData[1][3], for-scoped i, tex0Buf in the else-if, t0/t1 + a $3 clobber, plain casts for the lo halves, then-block i/j, offset block, iSize < N ? iSize : N), memcpy for the light rows, calc(BOOL) defined after CLightUnit (isCalc inlined), getMode(), (version & 0xFFFF), ?: / != 0 / INT / USHORT forms for y. Earlier: permuter 20 min on the old draft (no gain). */
 #if 0
 void CModel::_disp0_SetPacket(UINT nMode, const int (*pData)[4], INT semikind, u_long nInTest, INT iFlags, u_long* tex0) {
@@ -1058,7 +1053,7 @@ void CModel::_disp0_SetPacket(UINT nMode, const int (*pData)[4], INT semikind, u
 
     CPackMan::pkOpenDirectCode(0);
     iGifTagNum = m_iBeforeDirectQNum + 4;
-    pQw = (QWdata*)CPackMan::pkOpenGifTagManual(_makeGifTag((u_long)iGifTagNum | 0x8000 | 0x1000000000000000, 0xE));
+    pQw = (QWdata*)CPackMan::pkOpenGifTagManual(_makeQW((u_long)iGifTagNum | 0x8000 | 0x1000000000000000, 0xE));
     ((u_long*)pQw)[0] = lTest;
     ((u_long*)pQw)[1] = 0x47;
     ((u_long*)pQw)[2] = lAlpha;
@@ -1238,7 +1233,7 @@ void CModel::_disp0_SetPacket(UINT nMode, const int (*pData)[4], INT semikind, u
         QWdata* pQwSrc;
         CPackMan::pkOpenDirectCode(0);
         inbuffer = m_iAfterDirectQNum;
-        pQw = (QWdata*)CPackMan::pkOpenGifTagManual(_makeGifTag((u_long)inbuffer | 0x8000 | 0x1000000000000000, 0xE));
+        pQw = (QWdata*)CPackMan::pkOpenGifTagManual(_makeQW((u_long)inbuffer | 0x8000 | 0x1000000000000000, 0xE));
         pQwSrc = (QWdata*)m_pAfterDirect;
         for (INT i = 0; i < m_iAfterDirectQNum; i++) {
             pQw->ul128 = pQwSrc->ul128;
@@ -1394,13 +1389,11 @@ void CFadeModel::makePkt() {
         if (m_pModel->m_nFlag & 0x20) {
             ULONGLONG lFrame;
             u_long* pQw;
-            u_long128 tag;
             lFrame = CPackMan::getDefault_FRAME_1() | 0xFFFFFFFF00000000;
             CPackMan::pkCnt(0);
             CPackMan::pkAddCode(0x13000000);
             CPackMan::pkOpenDirectCode(0);
-            __asm__ volatile("pcpyld %0, %2, %1" : "=r"(tag) : "r"((u_long)0x1000000000008001), "0"((u_long)0xE));
-            pQw = (u_long*)CPackMan::pkOpenGifTagManual(tag);
+            pQw = (u_long*)CPackMan::pkOpenGifTagManual(_makeQW(0x1000000000008001, 0xE));
             pQw[0] = lFrame;
             pQw[1] = 0x4C;
             CPackMan::pkCloseGifTagManual((UINT*)(pQw + 2));
@@ -1412,8 +1405,7 @@ void CFadeModel::makePkt() {
                 }
             }
             CPackMan::pkOpenDirectCode(0);
-            __asm__ volatile("pcpyld %0, %2, %1" : "=r"(tag) : "r"((u_long)0x1000000000008001), "0"((u_long)0xE));
-            pQw = (u_long*)CPackMan::pkOpenGifTagManual(tag);
+            pQw = (u_long*)CPackMan::pkOpenGifTagManual(_makeQW(0x1000000000008001, 0xE));
             pQw[0] = CPackMan::getDefault_FRAME_1();
             pQw[1] = 0x4C;
             CPackMan::pkCloseGifTagManual((UINT*)(pQw + 2));

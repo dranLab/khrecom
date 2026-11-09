@@ -149,12 +149,6 @@ FIX4 CBlurPrim::calcZ() {
     return m_nCalcZOfs + 0xffffc08;
 }
 extern INT SCREEN_HEIGHT;
-/* one A+D qword (register address addr, value data) */
-static inline void _setAD(QWdata* qp, u_long data, u_long addr) {
-    u_long128 out128;
-    __asm__ volatile("pcpyld %0, %2, %1" : "=r"(out128) : "r"(data), "r"(addr));
-    *(u_long128*)qp = out128;
-}
 QWdata* setTSspriteScissor32(QWdata* qp, FIX4 ofsx, FIX4 ofsy, INT width, INT height, FIX4 u0, FIX4 v0, FIX4 u1, FIX4 v1) {
     INT cnt;
     INT scix0;
@@ -164,20 +158,20 @@ QWdata* setTSspriteScissor32(QWdata* qp, FIX4 ofsx, FIX4 ofsy, INT width, INT he
     scix0 = 0;
     scix1 = 31;
     for (i = 0; i < cnt; i++) {
-        _setAD(qp, (u_long)scix0 | ((u_long)scix1 << 16) | ((u_long)(height - 1) << 48), 0x41);
+        *(u_long128*)qp = _makeQW((u_long)scix0 | ((u_long)scix1 << 16) | ((u_long)(height - 1) << 48), 0x41);
         qp++;
-        _setAD(qp, (u_long)u0 | ((u_long)v0 << 16), 3);
+        *(u_long128*)qp = _makeQW((u_long)u0 | ((u_long)v0 << 16), 3);
         qp++;
-        _setAD(qp, (u_long)(ofsx + ((0x800 - 0x200 / 2) << 4)) | ((u_long)((((0x800 - SCREEN_HEIGHT / 2) << 4)) + ofsy) << 16), 4);
+        *(u_long128*)qp = _makeQW((u_long)(ofsx + ((0x800 - 0x200 / 2) << 4)) | ((u_long)((((0x800 - SCREEN_HEIGHT / 2) << 4)) + ofsy) << 16), 4);
         qp++;
-        _setAD(qp, (u_long)u1 | ((u_long)v1 << 16), 3);
+        *(u_long128*)qp = _makeQW((u_long)u1 | ((u_long)v1 << 16), 3);
         qp++;
-        _setAD(qp, (u_long)(((width + (0x800 - 0x200 / 2)) << 4) + ofsx) | ((u_long)(((height + (0x800 - SCREEN_HEIGHT / 2)) << 4) + ofsy) << 16), 4);
+        *(u_long128*)qp = _makeQW((u_long)(((width + (0x800 - 0x200 / 2)) << 4) + ofsx) | ((u_long)(((height + (0x800 - SCREEN_HEIGHT / 2)) << 4) + ofsy) << 16), 4);
         qp++;
         scix0 += 32;
         scix1 += 32;
     }
-    _setAD(qp, ((u_long)(width - 1) << 16) | ((u_long)(height - 1) << 48), 0x41);
+    *(u_long128*)qp = _makeQW(((u_long)(width - 1) << 16) | ((u_long)(height - 1) << 48), 0x41);
     return qp + 1;
 }
 union PRIMIVECTOR {
@@ -211,9 +205,7 @@ QWdata* set_csprite64(QWdata* qp, FIX4 plsx, FIX4 plsy, UINT z, INT ScrW, INT Sc
     if (qp) {
         CPackMan::pkCloseGifTag(qp);
     }
-    u_long128 tag;
-    __asm__ volatile("pcpyld %0, %2, %1" : "=r"(tag) : "r"((u_long)cnt | 0x2400000000000000UL), "r"((u_long)0x44));
-    pul64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(tag);
+    pul64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(_makeQW((u_long)cnt | 0x2400000000000000UL, 0x44));
     for (i = 0; i < cnt; i++) {
         pul64[0] = pv[0].ul64;
         pul64[1] = pv[1].ul64;
@@ -223,8 +215,7 @@ QWdata* set_csprite64(QWdata* qp, FIX4 plsx, FIX4 plsy, UINT z, INT ScrW, INT Sc
     }
     CPackMan::pkCloseGifTagManual((UINT*)pul64);
     if (qp) {
-        __asm__ volatile("pcpyld %0, %2, %1" : "=r"(tag) : "r"((u_long)0x1000000000008000UL), "0"((u_long)0xE));
-        qp = (QWdata*)CPackMan::pkOpenGifTag(tag);
+        qp = (QWdata*)CPackMan::pkOpenGifTag(_makeQW(0x1000000000008000UL, 0xE));
     }
     return qp;
 }
@@ -279,9 +270,7 @@ QWdata* set_tsprite32(QWdata* qp, FIX4 plsx, FIX4 plsy, UINT z, INT ScrW, INT Sc
     if (qp) {
         CPackMan::pkCloseGifTag(qp);
     }
-    u_long128 tag;
-    __asm__ volatile("pcpyld %0, %2, %1" : "=r"(tag) : "r"((u_long)cnt | 0x4400000000000000UL), "r"((u_long)0x4343));
-    pul64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(tag);
+    pul64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(_makeQW((u_long)cnt | 0x4400000000000000UL, 0x4343));
     for (i = 0; i < cnt; i++) {
         pul64[0] = uv[0].ul64;
         pul64[1] = pv[0].ul64;
@@ -295,8 +284,7 @@ QWdata* set_tsprite32(QWdata* qp, FIX4 plsx, FIX4 plsy, UINT z, INT ScrW, INT Sc
     }
     CPackMan::pkCloseGifTagManual((UINT*)pul64);
     if (qp) {
-        __asm__ volatile("pcpyld %0, %2, %1" : "=r"(tag) : "r"((u_long)0x1000000000008000UL), "0"((u_long)0xE));
-        qp = (QWdata*)CPackMan::pkOpenGifTag(tag);
+        qp = (QWdata*)CPackMan::pkOpenGifTag(_makeQW(0x1000000000008000UL, 0xE));
     }
     return qp;
 }
@@ -316,11 +304,6 @@ static inline void _loadRotTransPers(const FMATRIX& m) {
 static inline void _setADq(QWdata* qp, u_long data, u_long addr) {
     qp->ul64[1] = addr;
     qp->ul64[0] = data;
-}
-static inline void _setADp(QWdata* qp, u_long data, u_long addr) {
-    u_long128 out128;
-    __asm__ volatile("pcpyld %0, %1, %0" : "=r"(out128) : "r"(addr), "0"(data));
-    qp->ul128 = out128;
 }
 /* Parked: 83 of 596 lines, same size - structure, branches and calls as the original (debug near/far override,
  * auto near/far from the look distance, FRAME/TEST/ALPHA/PRIM A+D blocks with debug colours, sprites, defaults
@@ -343,7 +326,6 @@ void CDeFocusPrim::_makePktDeFocus() {
     FLOAT BAK_Near;
     FLOAT BAK_Far;
     QWdata* qp;
-    u_long128 tag;
 
     if (DebugWork::g_dw.sys.m_iDeFocus) return;
     if (m_iStatus & 0x10000) return;
@@ -388,8 +370,7 @@ void CDeFocusPrim::_makePktDeFocus() {
     }
     _loadRotTransPers(CWorldEnv::getWorldScreenMatrix());
     if (!(m_iStatus & 1)) {
-        __asm__ volatile("pcpyld %0, %2, %1" : "=r"(tag) : "r"((u_long)0x1000000000000000UL), "0"((u_long)0xE));
-        qp = (QWdata*)CPackMan::pkOpenGifTag(tag);
+        qp = (QWdata*)CPackMan::pkOpenGifTag(_makeQW(0x1000000000000000UL, 0xE));
         _setADq(qp, 0x60, 0x15);
         qp++;
         _setADq(qp, (u_long)VRAM::_FRAME0_START | 0x24020000 | ((u_long)0x9000 << 18), 7);
@@ -412,8 +393,7 @@ void CDeFocusPrim::_makePktDeFocus() {
         RotTransPersClipW(vIPos, vFar[1]);
         if (!vIPos.w) {
             if (!qp) {
-                __asm__ volatile("pcpyld %0, %2, %1" : "=r"(tag) : "r"((u_long)0x1000000000000000UL), "0"((u_long)0xE));
-                qp = (QWdata*)CPackMan::pkOpenGifTag(tag);
+                qp = (QWdata*)CPackMan::pkOpenGifTag(_makeQW(0x1000000000000000UL, 0xE));
             }
             _setADq(qp, 0x51001, 0x48);
             qp++;
@@ -433,8 +413,7 @@ void CDeFocusPrim::_makePktDeFocus() {
     if (!(m_iStatus & 2)) {
         RotTransPersClipW(vIPos, vNear);
         if (!vIPos.w) {
-            __asm__ volatile("pcpyld %0, %2, %1" : "=r"(tag) : "r"((u_long)0x1000000000000000UL), "0"((u_long)0xE));
-            qp = (QWdata*)CPackMan::pkOpenGifTag(tag);
+            qp = (QWdata*)CPackMan::pkOpenGifTag(_makeQW(0x1000000000000000UL, 0xE));
             _setADq(qp, 1, 0x15);
             qp++;
             _setADq(qp, (u_long)VRAM::_FRAME0_START | 0x24020000 | ((u_long)0xC800 << 19), 7);
@@ -472,11 +451,10 @@ void CDeFocusPrim::_makePktDeFocus() {
             set_tsprite32(__null, 0, -48, 0xFFFF28, 0x200, SCREEN_HEIGHT, 0x200, SCREEN_HEIGHT);
         }
     }
-    __asm__ volatile("pcpyld %0, %2, %1" : "=r"(tag) : "r"((u_long)0x1000000000008000UL), "0"((u_long)0xE));
-    qp = (QWdata*)CPackMan::pkOpenGifTag(tag);
-    _setADp(&qp[0], CPackMan::getDefault_ALPHA_2(), 0x43);
-    _setADp(&qp[1], CPackMan::getDefault_TEST_2(), 0x48);
-    _setADp(&qp[2], 0x60, 0x15);
+    qp = (QWdata*)CPackMan::pkOpenGifTag(_makeQW(0x1000000000008000UL, 0xE));
+    &qp[0]->ul128 = _makeQW(CPackMan::getDefault_ALPHA_2(), 0x43);
+    &qp[1]->ul128 = _makeQW(CPackMan::getDefault_TEST_2(), 0x48);
+    &qp[2]->ul128 = _makeQW(0x60, 0x15);
     CPackMan::pkCloseGifTag(qp + 3);
     m_fFar = BAK_Far;
     m_fNear = BAK_Near;
@@ -505,7 +483,6 @@ void CBlurPrim::_makePktBlur() {
     FVECTOR vLook;
     FVECTOR vN;
     IVECTOR vIPos;
-    u_long128 tag;
 
     Bak_iBlurKind = m_iKind;
     Bak_iBlurRate = m_iRate;
@@ -538,8 +515,7 @@ void CBlurPrim::_makePktBlur() {
         if (vIPos.w) goto end;
         iZ = vIPos.z >> 4;
     }
-    __asm__ volatile("pcpyld %0, %2, %1" : "=r"(tag) : "r"((u_long)0x1000000000000000UL), "0"((u_long)0xE));
-    qp = (QWdata*)CPackMan::pkOpenGifTag(tag);
+    qp = (QWdata*)CPackMan::pkOpenGifTag(_makeQW(0x1000000000000000UL, 0xE));
     _setADq(qp, (u_long)VRAM::_FRAME0_START | 0x24020000 | ((u_long)0x9000 << 18), 7);
     qp++;
     _setADq(qp, 0x51001, 0x48);
@@ -620,11 +596,10 @@ void CBlurPrim::_makePktBlur() {
         CPackMan::pkCloseGifTag(qp);
         break;
     }
-    __asm__ volatile("pcpyld %0, %2, %1" : "=r"(tag) : "r"((u_long)0x1000000000008000UL), "0"((u_long)0xE));
-    qp = (QWdata*)CPackMan::pkOpenGifTag(tag);
-    _setADp(&qp[0], CPackMan::getDefault_ALPHA_2(), 0x43);
-    _setADp(&qp[1], CPackMan::getDefault_TEST_2(), 0x48);
-    _setADp(&qp[2], 0x60, 0x15);
+    qp = (QWdata*)CPackMan::pkOpenGifTag(_makeQW(0x1000000000008000UL, 0xE));
+    &qp[0]->ul128 = _makeQW(CPackMan::getDefault_ALPHA_2(), 0x43);
+    &qp[1]->ul128 = _makeQW(CPackMan::getDefault_TEST_2(), 0x48);
+    &qp[2]->ul128 = _makeQW(0x60, 0x15);
     CPackMan::pkCloseGifTag(qp + 3);
 end:
     m_iAlpha = Bak_iBlurAlpha;
