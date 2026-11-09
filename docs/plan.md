@@ -41,16 +41,35 @@ every change that is merged without regenerating. Regenerating all four takes ab
 
 ## Where things stand (2026-11-09)
 
-- **Progress:** 12088 of 12311 functions matched: game 11290 of 11323, libraries 798 of 988 (plus 151 hand-written).
+- **Progress:** 12107 of 12311 functions matched: game 11306 of 11323, libraries 801 of 988 (plus 151 hand-written).
   `tools/check.sh` counts the 151 hand-written units as done too: its total is these matched functions plus 151
   (fixed 2026-11-07: it used to count a parked `#if 0 ... #else INCLUDE_ASM #endif` as done).
-- **Game:** 28 functions still `INCLUDE_ASM` in 22 units, all parked (C draft under `#if 0` with a note).
+- **Game:** 12 functions still `INCLUDE_ASM` in 10 units, all parked (C draft under `#if 0` with a note).
   1 unit takes a data section from assembly (sddrv_ee's `.bss`, blocked: see docs/asm-leftovers.md).
-- **Libraries:** 8 parked, 1 not attempted, 26 hand-written (stay assembly), no unit with data from assembly;
+- **Libraries:** 6 parked, 0 not attempted, 26 hand-written (stay assembly), no unit with data from assembly;
   details in `docs/sdk-leftovers.md`.
 - **Header cleanup:** PARTIAL 162 (134 in 44 headers, 28 in 15 .cpp), 8 foreign stand-ins in 5 files, 0
-  duplicate classes, 0 untagged mechanisms; classes complete 1165, superset 16, partial 1, gated 3, missing 6.
+  duplicate classes, 0 untagged mechanisms; classes complete 1177, superset 16, partial 1, gated 3, missing 6.
   `tools/partials.py --queue` has the ready items (the R1/R2 gate items there stay, see "Queue state").
+- **2026-11-09 (day): cleanups and a pool run (3 workers, 20 units).** Cleanups first, approved by the user:
+  System/HeapMan.h `operator new`/`new[]` with the ref's function-level `UINT nRA` (73 debug allocations and the last
+  local return-address asm copies became new-expressions), and one System/Graphic/Gprim.h on the original's line
+  layout (GprimFull.h and the pragma pair gone; the free inlines 752-1055 such as `_makeQW` at 969; 37 stand-ins
+  replaced). Then 19 parked drafts matched: ModelMan setupDrawEnv (inline InversMatrix wrapper, Coord.h:613),
+  pppEiDrawShipoly 2 (a `posv` pointer the .mdebug can't show, accepted by the user), pppKeShpTail3/3X (a GNU nested
+  function's static chain), RoomCreation menuMain, DeFocus 2, PlayerRiku setMagic, partMng vramcache (loop reversal),
+  PlayerDRiku exeStockSkill, Model _disp0_SetPacket, KeTh KeThBP_Update (two ifs with identical bodies), HermitePathCamera
+  updatePos, shape op_shape_draw, FrecFont makePkt, lib strround fftoa and _vfprintf_r, lib mpc _getRef0. RoomCreation,
+  DeFocus, PlayerRiku, partMng, PlayerDRiku, KeTh, HermitePathCamera, FrecFont, ModelMan, strround and mpc are complete.
+  Improved, still parked: libat3dec imdct 334 -> 2 (two swapped loads, a sched1 tie), Map init 87 -> 82 (by-value
+  ApplyMatrix wrapper, Coord.h:634), Camp setTechWin 36 -> 27, DispList _drawOT 62 -> 59, Math3D InvMatrix 93 -> 90,
+  graphdev sceGsSetDefDispEnv 96 -> 21. Rejected by the user (memory no-filler-locals): HumanBoss setupAct's match
+  with an invented `FLOAT none` (source kept in build/HumanBoss.match-variant.cpp) and Model CBBox::makePkt's nine
+  padding asms (parked at 18). No change: memcpy 11 / memset 12 / memmove 31 (no compiler or flag set gives the
+  copied -1). Blocked: WorldEnv, Rcf, RcfCD (gcse hashes of anonymous-namespace names), kprintf2 _sceSnprintf (needs
+  another assembler), sddrv_ee .bss. Every remaining item had a worker this run; what is left is in
+  docs/asm-leftovers.md and docs/sdk-leftovers.md. Open: a Coord.h cleanup (the original's Coord.h reaches ~635 with
+  the InversMatrix/ApplyMatrix wrappers; memory modelman-unit-lessons, map-unit-lessons).
 - **Pool run of 2026-11-08/09 (night, 3 workers, 8 units):** 4 parked drafts matched: CollMap collideRide (a volatile
   cast store before the local CCollision: CollMap done), Glare makePkt (never measured: built, laid out on the line
   markers, `u_long*` stores, a wrong FRAME constant: Glare done), lib sifrpc sceSifInitRpc (init stores in struct field
@@ -58,9 +77,8 @@ every change that is merged without regenerating. Regenerating all four takes ab
   pppEiDrawDrawShipoly 40 -> 2). Improved: shape op_shape_draw 18 -> 5 (its asm is the original's hand-written kind,
   plan item 4). memset (was hand-written) has a C draft at 12. Corrected notes, no gain: HumanBoss setupAct 18 (a
   DImode loop-top local gives 8 but is not in the .mdebug), Camp setTechWin 36 / setMapCardWin 23, shape
-  pppVu1ShapeDraw 4, memcpy 11 / memmove 31. Open for the user: System/HeapMan.h operator new with the ref's function-level
-  `UINT nRA` (the original's block tree for every new site; global header), and a GIF-tag inline at Gprim.h:969/973
-  (line markers in Glare, DeFocus, AtWater, ScreenMask, FrecFont; memory glare-unit-lessons).
+  pppVu1ShapeDraw 4, memcpy 11 / memmove 31. The two items left open for the user then (HeapMan.h `nRA`, the Gprim.h:969
+  GIF-tag inline) were done on 2026-11-09 (next entry above).
 - **Pool run of 2026-11-08 (afternoon):** 6 parked drafts matched (PathData dispDebugLine, EnemyWhitemushroom damage_,
   Avatar RotateAvatarMain, Atel setScreenFader, lib sifcmd _sceSifCmdIntrHdlr, lib hncAt3dec_Idle; all six units now
   complete) and the BattleEnemy.h cleanup (PARTIAL -21). Every old note named the wrong cause: an index assigned in
