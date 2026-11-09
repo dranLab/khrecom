@@ -334,13 +334,13 @@ static void channel_conv_joint(At3Work *w)
     }
 }
 
-/* Parked: 83 of 457 lines (2026-11-09): same instructions, registers match from the prologue through the window loop except:
-   the butterfly spills n >> 1's stand-in n * 4 instead (fp holds n >> 1; the call arm schedules a2 = i before a0 = p), the
-   band copy's reload and scratch registers (band/ch reloaded into t1/t2, original t0/t1), the window prologue's order (w + 254
-   init first, original after the spills) and a few window-loop issue orders; tried: shapes from the original's register reuse
-   (step = the abs temp, p = odd-band source / butterfly pointer / window base, i = every counter and the butterfly's k,
-   the window's t1 reused for out), memcpy of two recomputed member addresses ((src|dst)&7 test),
-   indexed loops (givs), hi before lo (andi first), mx[i] before cc[i] (giv order), a pointer for ov after the second if */
+/* Parked: 12 of 457 lines (2026-11-09): only the window loop's issue order differs: its prologue sets w + 254 (t6) before
+   mx + 127 (s4), the original after the stack spills; the mx step (addiu s4, -4) comes late, and the last block issues
+   a_wind[mi] before i-- and the two final addu swapped; tried: shapes from the original's register reuse (step = the abs temp,
+   p = odd-band source / butterfly pointer / window base, i = every counter and the butterfly's k, the window's t1 reused
+   for out), memcpy of two recomputed member addresses ((src|dst)&7 test), indexed loops (givs), hi before lo (andi first),
+   mx[i] before cc[i] (giv order), n = step * 2 inside the half loop (65 insns: loop.c moves n * 4 only in its second pass,
+   so n >> 1 is spilled as in the original), w + 2 == p, a pointer for ov after the second if */
 #if 0
 typedef struct {
     int v[4];
@@ -396,9 +396,9 @@ int imdct(char *ch, int band, int gain)
     for (i = 0; i < 256; i++) w[i] <<= shift;
     step = 64;
     do {
-        n = step * 2;
         half = step / 2;
         do {
+            n = step * 2;
             i = n;
             p = w;
             if (i >= 5) {
@@ -412,7 +412,7 @@ int imdct(char *ch, int band, int gain)
                     p += 2;
                 } while (i > 0);
             }
-            if (p == w + 2) {
+            if (w + 2 == p) {
                 imdct_ch2(w + step, w, &coefpost[0x2FC + half * 4], tbl.v);
                 w = p;
             } else {
