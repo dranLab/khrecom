@@ -88,16 +88,6 @@ void pppKeShpTail3(pppPObject *pobj, PKeShpTail3 *dat, pppCtrlTable *ctbl) {
     }
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/keProg/pppKeShpTail3", pppKeShpTail3Draw);
-
-/* 37 lines differ, all between the ScreenMatrix copy and the CMat asm: the original addresses the stack-resident
- * pw through $a3 ("move a3,sp", a copy of the soft frame pointer, i.e. &mat0) instead of sp. The dummy pointer m
- * (set to mat0, kept by an empty asm) reproduces the "move a3,sp" and everything before, but CSE keeps the fixed
- * frame register canonical, so pw's address never uses it. Other hacks: the "m"(pw) asm after UnitMatrix gives
- * the original size (pw lives on the stack in the original), and fRnd = 1 - fRnd * RndScl fixes the float
- * registers. Tried (~45 min): asm positions/forms for pw and mat0, volatile pw, statement-order hill climbs,
- * ternary/macro forms of the matrix copies. */
-#if 0
 /* VU0 macro-mode helpers (vf26..vf31 as scratch, as in the original) */
 #define TAIL_SUB(d, t, s)                                                               \
     __asm__ __volatile__("lqc2 $vf31, 0x0(%1)\n"                                        \
@@ -212,6 +202,27 @@ void pppKeShpTail3Draw(pppPObject *pobj, PKeShpTail3 *dat, pppCtrlTable *ctbl) {
         sceVu0FVECTOR _P0;
         sceVu0FMATRIX ZMat;
     } *pw;
+    /* MATCH: a nested function: pw lives in memory (a nested function uses it) and the inlined copy addresses it
+     * through the static chain, a copy of the frame base ("move a3,sp"; "lw 0x120(a3)" after the if/else join) */
+    auto __inline__ void SetMat(int World) {
+        if (World) {
+            TAIL3_COPYMAT(pw->WMat, ppvCameraMatrix);
+        } else {
+            TAIL3_COPYMAT(pw->WMat, ppvWorldMatrix);
+        }
+        TAIL3_COPYMAT(pw->SMat, ppvScreenMatrix);
+        /* MATCH: not a struct-field store, so the ppvPObj load below stays after it (alias.c) */
+        ((float *)pw->AMat)[3] = 0.0f;
+        ((float *)pw->AMat)[7] = 0.0f;
+        __asm__ __volatile__("lqc2 $vf31, 0x0(%1)\n"
+                             "\tlqc2 $vf30, 0x0(%2)\n"
+                             "\tlqc2 $vf29, 0x10(%2)\n"
+                             "\tvmulx.xyz $vf28, $vf30, $vf31x\n"
+                             "\tvmuly.xyz $vf27, $vf29, $vf31y\n"
+                             "\tsqc2 $vf28, 0x80(%0)\n"
+                             "\tsqc2 $vf27, 0x90(%0)"
+                             : : "r"(pw), "r"(ppvParScl), "r"(ppvPObj->cmat));
+    }
 
     if (dat->Shp == 0xFFFF) {
         return;
@@ -242,7 +253,6 @@ void pppKeShpTail3Draw(pppPObject *pobj, PKeShpTail3 *dat, pppCtrlTable *ctbl) {
     ah = (OANM_HEADER *)shp->shape;
     sceVu0CopyMatrix(mat0, ppvPObj->cmat);
     sceVu0UnitMatrix(mat1);
-    __asm__ __volatile__("" : : "m"(*&pw)); /* hack: keeps pw in memory, as in the original */
     scl = dat->Scl0;
     sclSft = (scl - dat->Scl1) / f;
     d = dat->Sep;
@@ -269,24 +279,7 @@ void pppKeShpTail3Draw(pppPObject *pobj, PKeShpTail3 *dat, pppCtrlTable *ctbl) {
     cntBas = ah->seq[0].wait;
     seqBas = ah->seqc;
     rnd = pThis->Seed;
-    { sceVu0FVECTOR *m = mat0;
-    if (dat->World) {
-        TAIL3_COPYMAT(pw->WMat, ppvCameraMatrix);
-    } else {
-        TAIL3_COPYMAT(pw->WMat, ppvWorldMatrix);
-    }
-    TAIL3_COPYMAT(pw->SMat, ppvScreenMatrix);
-    pw->AMat[0][3] = 0.0f;
-    pw->AMat[1][3] = 0.0f;
-    __asm__ __volatile__("lqc2 $vf31, 0x0(%1)\n"
-                         "\tlqc2 $vf30, 0x0(%2)\n"
-                         "\tlqc2 $vf29, 0x10(%2)\n"
-                         "\tvmulx.xyz $vf28, $vf30, $vf31x\n"
-                         "\tvmuly.xyz $vf27, $vf29, $vf31y\n"
-                         "\tsqc2 $vf28, 0x80(%0)\n"
-                         "\tsqc2 $vf27, 0x90(%0)"
-                         : : "r"(pw), "r"(ppvParScl), "r"(ppvPObj->cmat));
-    __asm__ __volatile__("" : : "r"(m)); }
+    SetMat(dat->World);
     TAIL3_LOAD(pw);
     __asm__ __volatile__("lqc2 $vf29, 0x0(%0)\n"
                          "\tlqc2 $vf28, 0x0(%1)\n"
@@ -355,12 +348,9 @@ void pppKeShpTail3Draw(pppPObject *pobj, PKeShpTail3 *dat, pppCtrlTable *ctbl) {
                 c -= d;
                 break;
             }
-            {
-                int t = j++;
-
-                if (t == 27) {
-                    j = 0;
-                }
+            /* MATCH: the unsigned sizeof compare keeps fold-const.c from turning j++ == 27 into ++j == 28 */
+            if (j++ == sizeof(pThis->Stk) / sizeof(pThis->Stk[0]) - 1) {
+                j = 0;
             }
             if (j == k) {
                 goto end;
@@ -388,7 +378,6 @@ end:
     }
     op_spr_free(0x180);
 }
-#endif
 
 void pppKeShpTail3Con(pppPObject *pobj, pppCtrlTable *ctbl) {
     VKeShpTail3 *pThis = (VKeShpTail3 *)&pobj->val[ctbl->useVal[IKeShpTail3_This]];
