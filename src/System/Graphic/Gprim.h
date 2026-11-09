@@ -891,24 +891,24 @@ inline UINT _vecToCol(u_long128 iCol) {
 
 
 
+/* The original's inline at 810-823 (.mdebug: the multiplier qword loaded at 810, all seven instructions at 821; in
+ * 2DSprObj's move and FrecFont's makePkt): an unpacked colour times another, /128, clamped to 255. Name ours.
+ * MATCH: one asm statement including the 0xFF load (C can't place it there: a TImode tmp adds por, a constant operand
+ * is hoisted out of the vertex loop, a register local moves the product); tmp tied to ivCol keeps v1/a0 */
+inline u_long128 _mulCol(u_long128 ivCol, u_long128 iMul) {
+    u_long128 tmp;
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    __asm__ volatile("pmulth %1, %0, %2\n"
+                     "addiu %0, $0, 0xff\n"
+                     "pextlw %0, %0, %0\n"
+                     "pcpyld %0, %0, %0\n"
+                     "psrlw %1, %1, 7\n"
+                     "pcgtw %0, %1, %0\n"
+                     "por %0, %1, %0\n"
+                     : "=r"(tmp), "=r"(ivCol) : "r"(iMul), "0"(ivCol));
+    return tmp;
+}
 
 
 
