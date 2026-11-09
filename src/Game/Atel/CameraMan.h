@@ -49,7 +49,7 @@ public:
         if (m_pInstance) return;
         TRACE("CCameraMan::initialize\n");
         if (!(__null == m_pInstance)) AssertApp(__FILE__, __LINE__, "__null == m_pInstance", 0);
-        m_pInstance = new (com_malloc_d(sizeof(CCameraMan), __FILE__ "(68)", ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; }))) CCameraMan(pParent);
+        m_pInstance = new (__FILE__ "(68)") CCameraMan(pParent);
         if (!(m_pInstance)) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
         m_pInstance->setup();
     }

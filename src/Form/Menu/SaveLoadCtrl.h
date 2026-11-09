@@ -405,10 +405,10 @@ inline C2DSeqScrollbarCtrl::C2DSeqScrollbarCtrl(CTask* pParent)
     for (INT i = 0; i < 3; i++) {
         m_pCtrls[i] = NULL;
     }
-    for (INT j = 0; j < 3; j++) {
-        UINT nRA;
-        __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA));
-        m_pParts[j] = new (com_malloc_d(sizeof(C2DSeqAgent), __FILE__ "(310)", nRA)) C2DSeqAgent(pParent);
+    for (INT i = 0; i < 3; i++) {
+
+
+        m_pParts[i] = new (__FILE__ "(310)") C2DSeqAgent(pParent);
     }
 }
 

@@ -72,7 +72,7 @@ private:
 /* MATCH: name unknown (inlined everywhere; the ref's CDelayedFree has no such member) */
 #line 130
 inline void DelayedFree(void* pInPtr) {
-    CMallocPtr* pPtr = new (com_malloc_d(sizeof(CMallocPtr), __FILE__ "(131)", ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; }))) CMallocPtr(pInPtr);
+    CMallocPtr* pPtr = new (__FILE__ "(131)") CMallocPtr(pInPtr);
     if (!pPtr) AssertApp(__FILE__, __LINE__, "pPtr", 0);
     CDelayedFree::addFreePtr(*pPtr);
 }
@@ -97,7 +97,7 @@ public:
 template <class T>
 void DelayedDelete(T* pInBuf, BOOL bInArray) {
     if (pInBuf) {
-        CNewPtrT<T>* pPtr = new (com_malloc_d(sizeof(CNewPtrT<T>), __FILE__ "(141)", ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; }))) CNewPtrT<T>(pInBuf, bInArray);
+        CNewPtrT<T>* pPtr = new (__FILE__ "(141)") CNewPtrT<T>(pInBuf, bInArray);
 #line 142
         if (!pPtr) AssertApp(__FILE__, __LINE__, "pPtr", 0);
         CDelayedFree::addFreePtr(*pPtr);

@@ -17,13 +17,13 @@ struct ZONEPARTS;
 #endif
 #line 75 MAPUNIT_H_PATH
 template <class T> CTask* NewClass(CTask* map, const ZONEPARTS& parts) {
-    CTask* p;
-    char* msg = __FILE__ "(80)";
-    UINT nRA;
-    __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA));
-    p = (CTask*)com_malloc_d(sizeof(T), msg, nRA);
-    if (p != NULL) p = new (p) T(map, parts);
-    return p;
+
+
+
+
+    return new (__FILE__ "(80)") T(map, parts);
+
+
 }
 
 #endif /* SYSTEM_GRAPHIC_MAPUNIT_H */
