@@ -47,13 +47,13 @@ inline void operator delete(void* mem) { com_free(mem); }
 inline void operator delete[](void* mem) { com_free(mem); }
 inline void* operator new(size_t size, char* msg) throw() {
     UINT nRA;
-    __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); /* MATCH: see above */
+    __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA));
     return com_malloc_d(size, msg, nRA);
 }
 
 inline void* operator new[](size_t size, char* msg) throw() {
     UINT nRA;
-    __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); /* MATCH: see above */
+    __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA));
     return com_malloc_d(size, msg, nRA);
 }
 inline void* operator new(size_t, void* p) throw() { return p; }
