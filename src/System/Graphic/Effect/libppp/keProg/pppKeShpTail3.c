@@ -3,7 +3,6 @@
 #include "System/Graphic/Effect/libppp/eiProg/pppColor.h"
 #include "System/Graphic/Effect/libppp/draw/shape.h"
 #include "System/Graphic/Effect/libppp/draw/sin_t.h"
-#include "include_asm.h"
 
 int rand(void);
 
