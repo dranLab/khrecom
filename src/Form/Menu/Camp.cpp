@@ -4367,36 +4367,33 @@ INT CCamp::setButtonHelp(INT nSetCmd, INT nMode, INT nKind) {
     return 1;
 }
 
-/* Parked: 36 of 617 lines, same size (2026-11-08; drop the data block after the INCLUDE_ASM to build the draft): s-register
-   roles in the sleight-list loop and one store order. The original increments nTechSelectTop in place before getName
-   (s6, delay slot) and keeps i + 1 in s7 (i in s4, reused for (USHORT)nTechSeqIdx), and stores nTechCateCnt + 1 before
-   the C2DFnt new; this draft gets the roles of i and nTechSelectTop swapped and the nTechCateCnt store after the new.
-   Cause, from the -dG/-dl/-dg dumps (2026-11-08, second pass): gcse PRE turns both for-increments into copies of temps
-   computed at the end of bb 50/51 (i + 1 -> r523, nTechSelectTop + 1 -> r529), so neither is a biv (no giv reduction,
-   as the original). Global alloc then takes nTechSelectTop first (9 refs / 41 live = 6585, above nTechKind 5625, i 4125,
-   nTechSeqIdx 3564): s3, and the andi temp takes its register (third pass, 2026-11-08: the 41 is after sched1, flow
-   has 71: sched1 issues r529 at the top of bb 50 and the init load last in the preheader; i's 80 is local-alloc's
-   REG_EQUIV doubling of `i = 0`, local-alloc.c:874; -fno-schedule-insns gives yet another order. The original's order
-   comes out exactly if nTechSelectTop's life were doubled as well (82: 3292), which needs a constant first set; no
-   source form found). The original's s3 nTechKind, s4 i, s5 nTechSeqIdx,
-   s6 nTechSelectTop need nTechSelectTop below 3564 (7 refs, or about 76 insns of life). With `nTechSelectTop++;` in
-   place after the CButton new (its live range is the whole loop: the roles come right) it is a biv and loop.c reduces
-   the combined row giv (benefit 21, 53 lines); after getLayPosition 54, after init 53, `+= 1` 53, post-increment in
-   the second table load 52, *pTechCateTbl[n] 53; pTechCateTbl forced to memory changes the frame (62/84: the original's
-   pTechCateTbl is a spilled pseudo, its slot order ret/-204, pTechCateTbl/-200, nTechCateCnt/-196 matches this draft).
-   Line markers: nTechSelectTop = m_nTechSelectTop is line 5470 (before nTechCateCnt = 0 and rgba), the test is
-   `nTechSelectTop == m_nTechSelect` (bne s6,v1): both applied, no change in the count. The nTechCateCnt + 1 store
-   carries HeapMan.h:150 in the original: a post-increment flushed inside the inlined operator new, i.e.
-   `m_pTechCategoryFnt[nTechCateCnt++] = new ...`. Earlier (.mdebug block tree): pTechCateTbl/nTechSelectTop/
-   nTechCateCnt/nLine in the switch body, scrollBarSeqTbl in the if block, nLine instead of an invented nMax, len
-   declared before pBF. tried: increment at the body end (39), `nTechSelectTop++, i++` (39),
-   `m_pTechCategoryFnt[nTechCateCnt++] = new` + `[nTechCateCnt - 1]` (92-94: nTechCateCnt gets a register), the new
-   as the addFntShift argument (141), no pButton local (143); earlier: nLine as the loop counter, non-const table
-   pointer, compare operand order, _ref() on the table pointer (56-70), permuter 6 + 15 min; 15 min on this draft
-   (2026-11-08, 4907 candidates): 33 only by moving nTechSelectTop = m_nTechSelectTop above the pTechCateTbl ternary
-   (live 53: nTechSelectTop drops below nTechKind, still above i; against line 5470, not taken); third pass: the ref's
-   G_RGBA techColorTbl[7] (taken, no cast, same 36), `m_nTechSelect == nTechSelectTop`, `++i, ++nTechSelectTop`,
-   split declarations of nTechKind/nTechSeqIdx, `(x & 1) == 0` (36-40), `nTechSeqIdx /= 2` (45). */
+/* Parked: 27 of 612 lines (2026-11-09; drop the data block after the INCLUDE_ASM to build the draft): only the s-register
+   roles in the sleight-list loop differ (original s3 nTechKind, s4 i, s5 nTechSeqIdx, s6 nTechSelectTop, i + 1 in s7;
+   this draft s3 nTechSelectTop, s4 nTechKind, s5 i, s6 nTechSeqIdx, nTechSelectTop + 1 in s7). 2026-11-09: 36 -> 27 by
+   `C2DFnt* pFnt = m_pTechCategoryFnt[nTechCateCnt++] = new ...; addFntShift(m_pSeqName, pFnt, ...)`: the nTechCateCnt
+   store before the new (HeapMan.h:150 in the original: the post-increment is flushed inside the inlined operator new),
+   the 1.0f load order and the spilled nTechCateCnt all come right. pFnt is not in the ref and not in our .mdebug either
+   (no hard register, like pButton): a used local invisible in the .mdebug, so the user decides; evidence: the original
+   passes the new'd pointer (a2 = a0) to addFntShift without reloading m_pTechCategoryFnt[], and
+   `[nTechCateCnt - 1]` reloads (92). Cause of the roles (dumps -dG/-dl/-dg): gcse PRE turns both for-increments into
+   copies of temps computed at the end of bb 50 (after canUse; sched1 issues them before getName), so neither is a biv
+   (no giv reduction, as the original). Global alloc takes nTechSelectTop first (9 refs / 41 live = 6585; nTechKind
+   12/64 = 5625, i 11/80 = 4125 (local-alloc.c:874 doubles i's life for its `i = 0` REG_EQUIV), nTechSeqIdx 12/102 =
+   3529); the original's order needs nTechSelectTop below nTechSeqIdx: 7 refs (one in-loop use fewer) or about 77
+   insns of life (a doubled life needs a constant first set); flow counts refs per block depth (flow.c:2676), the
+   block tree is equal to the original's, so no hidden loop. In-place `nTechSelectTop++` in the body (A: after the
+   CButton new) gives the right roles but makes it a biv: loop.c reduces the combined row giv (benefit 21; 46 lines on
+   the pFnt draft). Line markers: nTechSelectTop = m_nTechSelectTop is line 5470 (after the 5469 ternary). tried
+   (2026-11-09, pFnt draft): increment after getLayPosition (47), `nTechSelectTop++` in the compare (44),
+   `nTechSelectTop++, i++` (30), pre-increments / `+= 1` / reversed compare / init after rgba (27, priorities
+   unchanged); permuter 15 min on the pFnt draft (5486 candidates): only the init above the ternary again (against
+   line 5470). Earlier (2026-11-08): increment at the body end (39), the new as the addFntShift argument (141: the
+   instance is evaluated before the new), no pButton local (143), nLine as the loop counter, non-const table
+   pointer, _ref() on the table pointer (56-70), pTechCateTbl forced to memory (62/84: the original's is a spilled
+   pseudo, slots ret/-204 pTechCateTbl/-200 nTechCateCnt/-196 as here), the ref's G_RGBA techColorTbl[7] (kept),
+   split nTechKind/nTechSeqIdx declarations, `(x & 1) == 0`, `nTechSeqIdx /= 2`; .mdebug block tree (applied):
+   pTechCateTbl/nTechSelectTop/nTechCateCnt/nLine in the switch body, scrollBarSeqTbl in the if block, len before pBF;
+   permuter runs 6 + 15 + 15 min. */
 #if 0
 INT CCamp::setTechWin(INT nSetCmd) {
     FVECTOR vec;
@@ -4516,8 +4513,8 @@ INT CCamp::setTechWin(INT nSetCmd) {
             }
             if (!(nTechSeqIdx & 1)) {
                 nTechSeqIdx >>= 1;
-                m_pTechCategoryFnt[nTechCateCnt] = new (__FILE__ "(5516)") C2DFnt(0, 0, &techColorTbl[nTechSeqIdx], 0x10, pTechCateNameTbl[nTechSeqIdx], 0x42);
-                pButton->get2DSeqCtrl()->addFntShift(m_pSeqName, m_pTechCategoryFnt[nTechCateCnt++], -90.0f, 1.0f);
+                C2DFnt* pFnt = m_pTechCategoryFnt[nTechCateCnt++] = new (__FILE__ "(5516)") C2DFnt(0, 0, &techColorTbl[nTechSeqIdx], 0x10, pTechCateNameTbl[nTechSeqIdx], 0x42);
+                pButton->get2DSeqCtrl()->addFntShift(m_pSeqName, pFnt, -90.0f, 1.0f);
             }
         }
         m_pTechWinBC->select(m_nTechSelect - m_nTechSelectTop, m_pTechButton, fLightXTbl, fLightYTbl);
@@ -4715,7 +4712,10 @@ INT CCamp::setDeckSetWin(INT nSetCmd) {
    the loop, so it does not supply the missing pseudos anyway. (2) Every operator new block is `{ nRA { } }` in the
    original, `{ { nRA { } } }` here: System/HeapMan.h written as `{ UINT nRA; { asm } return com_malloc_d(size, msg,
    nRA); }` (the ref's UINT nRA, lines 150-153) gives the original's tree, but S and the pseudo numbers stay (701,
-   i r303): no help here, and a global header change (not made). */
+   i r303): no help here, and a global header change (not made). 2026-11-09 (-dr dump): the 184 pseudos before the outer
+   i are about 6 per operator new, 4 per new-expression's null check/ctor, 11 per virtual call (vtable load, delta,
+   float constants), 14 per CCtdMan::getText; the 10 missing ones are one such construct's worth with no code of its
+   own (in setTechWin a used but .mdebug-invisible local, pFnt, was the missing piece). */
 #if 0
 INT CCamp::setMapCardWin(INT nSetCmd) {
     static char* pStrNum[4] = { "%02d/99", "%02d", "\x81~%02d", "" };
