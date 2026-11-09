@@ -15,23 +15,9 @@ extern INT _ZBUF_START;
 
 extern INT SCREEN_HEIGHT;
 
-/* one qword of an A+D packet (data, register address) */
-static inline void _setAD(u_long128* qp, u_long data, u_long addr) {
-    u_long128 v;
-    __asm__ volatile("pcpyld %0, %1, %0" : "=r"(v) : "r"(addr), "0"(data));
-    *qp = v;
-}
-
 /* (original form unknown: a plain -h folds into a subtraction) */
 static inline INT _neg(INT v) {
     return -v;
-}
-
-/* the same for a constant value: tied to the output, a constant is first zero-extended to 128 bits (por) */
-static inline void _setADConst(u_long128* qp, u_long data, u_long addr) {
-    u_long128 v;
-    __asm__ volatile("pcpyld %0, %2, %1" : "=r"(v) : "r"(data), "r"(addr));
-    *qp = v;
 }
 
 CFadeIOMask::CFadeIOMask(CTask& inParent, USHORT nLayerDepth) : CTask(&inParent, 0x8000) {
@@ -99,18 +85,16 @@ UINT CScreenMaskPrim::getPacketSize() const {
 }
 
 void CScreenMaskPrim::makePkt() {
-    u_long128 tag;
-    __asm__ volatile("pcpyld %0, %2, %1" : "=r"(tag) : "r"((u_long)0x1000800000008000UL), "0"((u_long)0xE));
-    u_long128* qp = CPackMan::pkOpenGifTag(tag);
+    u_long128* qp = CPackMan::pkOpenGifTag(_makeQW(0x1000800000008000UL, 0xE));
     if (m_nFlag & 1) {
-        _setAD(qp, (VRAM::_ZBUF_START / 32) | 0x31000000, 0x4F);
+        *qp = _makeQW((VRAM::_ZBUF_START / 32) | 0x31000000, 0x4F);
         qp++;
     }
-    _setADConst(qp, 0x30000, 0x48);
+    *qp = _makeQW(0x30000, 0x48);
     qp++;
-    _setAD(qp, ((u_long)(m_nAttribute & 1) << 6) | 0x206, 0);
+    *qp = _makeQW(((u_long)(m_nAttribute & 1) << 6) | 0x206, 0);
     qp++;
-    _setAD(qp, (u_long)m_col.col, 1);
+    *qp = _makeQW((u_long)m_col.col, 1);
     qp++;
     UINT y0 = (_neg(SCREEN_HEIGHT) << 3) + 0x8000;
     UINT y1 = (SCREEN_HEIGHT << 3) + 0x8000;
@@ -118,20 +102,20 @@ void CScreenMaskPrim::makePkt() {
     UINT x = 0x7000;
     UINT nx = 0x7400;
     do {
-        _setAD(qp, (u_long)x | ((u_long)y0 << 16), 5);
+        *qp = _makeQW((u_long)x | ((u_long)y0 << 16), 5);
         qp++;
-        _setAD(qp, (u_long)nx | ((u_long)y1 << 16), 5);
+        *qp = _makeQW((u_long)nx | ((u_long)y1 << 16), 5);
         qp++;
         x = nx;
         nx = x + 0x400;
     } while (nx <= xEnd);
     if (x < xEnd) {
-        _setAD(qp, (u_long)x | ((u_long)y0 << 16), 5);
+        *qp = _makeQW((u_long)x | ((u_long)y0 << 16), 5);
         qp++;
-        _setAD(qp, (u_long)xEnd | ((u_long)y1 << 16), 5);
+        *qp = _makeQW((u_long)xEnd | ((u_long)y1 << 16), 5);
         qp++;
     }
-    _setAD(qp, CPackMan::getDefault_TEST_2(), 0x48);
+    *qp = _makeQW(CPackMan::getDefault_TEST_2(), 0x48);
     CPackMan::pkCloseGifTag(qp + 1);
 }
 

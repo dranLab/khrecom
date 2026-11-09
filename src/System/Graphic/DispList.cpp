@@ -72,13 +72,6 @@ static inline void _fixTestReg(ULONGLONG& nTest) {
     nTest = (nTest & ~0x70000) | 0x30000;
 }
 
-static inline u_long128 _pack(u_long lo, u_long hi) {
-    u_long128 r;
-    __asm__ volatile("pcpyld %0, %2, %1" : "=r"(r) : "r"(lo), "r"(hi));
-    return r;
-}
-
-
 #include "System/Graphic/DispList.h"
 class CDispListSemiSingleSort : public CDispListSemiBase { /* PARTIAL: stand-in for System/Graphic/ModelMan's class (defined in ModelMan.cpp, not in a header yet): only draw, defined here */
 public:
@@ -440,10 +433,10 @@ void CDispListSemiBase::_updateTestMode(const CDrawable* pInPrim) {
     CPackMan::setDefault_TEST_2(nTest);
     CPackMan::setDefault_ALPHA_2(nAlpha);
     CPackMan::setDefault_ZBUF_2(nZbuf);
-    u_long128* qp = CPackMan::pkOpenGifTagManual(_pack(0x1000800000008003, 0xe));
-    qp[0] = _pack(nTest, 0x48);
-    qp[1] = _pack(nAlpha, 0x43);
-    qp[2] = _pack(nZbuf, 0x4f);
+    u_long128* qp = CPackMan::pkOpenGifTagManual(_makeQW(0x1000800000008003, 0xe));
+    qp[0] = _makeQW(nTest, 0x48);
+    qp[1] = _makeQW(nAlpha, 0x43);
+    qp[2] = _makeQW(nZbuf, 0x4f);
     CPackMan::pkCloseGifTagManual((UINT*)(qp + 3));
 }
 void CDispListSemi::insert(CDrawable& inPrim, FIX4 inZ) {
@@ -535,9 +528,9 @@ void CDispListWithoutZ::_enableZTest(BOOL bEnable) {
     if (!bEnable) nZbuf |= (ULONGLONG)1 << 32;
     CPackMan::setDefault_TEST_2(nTest);
     CPackMan::setDefault_ZBUF_2(nZbuf);
-    u_long128* p = CPackMan::pkOpenGifTagManual(_pack(0x1000800000008002, 0xe));
-    p[0] = _pack(nTest, 0x48);
-    p[1] = _pack(nZbuf, 0x4f);
+    u_long128* p = CPackMan::pkOpenGifTagManual(_makeQW(0x1000800000008002, 0xe));
+    p[0] = _makeQW(nTest, 0x48);
+    p[1] = _makeQW(nZbuf, 0x4f);
     CPackMan::pkCloseGifTagManual((UINT*)(p + 2));
 }
 void CDispListWithoutZ::_updateAlphaMode(ALPHA inAlpha) {
@@ -568,8 +561,8 @@ void CDispListWithoutZ::_updateAlphaMode(ALPHA inAlpha) {
         break;
     }
     CPackMan::setDefault_ALPHA_2(nAlpha);
-    u_long128* qp = CPackMan::pkOpenGifTagManual(_pack(0x1000800000008001, 0xe));
-    qp[0] = _pack(nAlpha, 0x43);
+    u_long128* qp = CPackMan::pkOpenGifTagManual(_makeQW(0x1000800000008001, 0xe));
+    qp[0] = _makeQW(nAlpha, 0x43);
     CPackMan::pkCloseGifTagManual((UINT*)(qp + 1));
 }
 void CDispListBG::_beginDraw() {

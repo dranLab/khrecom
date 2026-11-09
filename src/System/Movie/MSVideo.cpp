@@ -25,14 +25,6 @@ template <class T> static inline T& _ref(T& v) { return v; }
 #define UNCACHED(p) ((((u_int)(p)) & 0x0fffffff) | 0x20000000)
 #define T0_COUNT (*(volatile u_int*)0x10000000)
 
-/* GS register write (data | address << 64); volatile keeps each qword's computation before its store. */
-#define PACK128(hi, lo)                                                                           \
-    ({                                                                                            \
-        u_long128 out128;                                                                         \
-        __asm__ volatile("pcpyld %0, %2, %1" : "=r"(out128) : "r"((u_long)(lo)), "r"((u_long)(hi))); \
-        out128;                                                                                   \
-    })
-
 extern "C" {
 int sceMpegInit();
 int sceMpegCreate(sceMpeg* mp, u_char* work_area, int work_area_size);
@@ -727,22 +719,22 @@ void CMoviePlayer::setTransScr0ImageTags(u_int* tags, int width, int height) {
     p += 4;
     setGIFtag(p, 0xE, 1, 0, 0, 0, 0, 7);
     p += 4;
-    *(u_long128*)&p[0] = PACK128(0x47, 0x30000);
-    *(u_long128*)&p[4] = PACK128(0x4E, (u_long)(VRAM::_ZBUF_START / 32) | 0x31000000 | ((u_long)1 << 32));
-    *(u_long128*)&p[8] = PACK128(0x4C, (u_long)(VRAM::_FRAME0_START / 32) | 0x1080000);
-    *(u_long128*)&p[12] = PACK128(0x42, 0x44);
-    *(u_long128*)&p[16] = PACK128(0x14, 0x61);
-    *(u_long128*)&p[20] = PACK128(0x08, 0x05);
-    *(u_long128*)&p[24] = PACK128(0x4A, 0);
+    *(u_long128*)&p[0] = _makeQW(0x30000, 0x47);
+    *(u_long128*)&p[4] = _makeQW((u_long)(VRAM::_ZBUF_START / 32) | 0x31000000 | ((u_long)1 << 32), 0x4E);
+    *(u_long128*)&p[8] = _makeQW((u_long)(VRAM::_FRAME0_START / 32) | 0x1080000, 0x4C);
+    *(u_long128*)&p[12] = _makeQW(0x44, 0x42);
+    *(u_long128*)&p[16] = _makeQW(0x61, 0x14);
+    *(u_long128*)&p[20] = _makeQW(0x05, 0x08);
+    *(u_long128*)&p[24] = _makeQW(0, 0x4A);
     p += 28;
     setDMAscTag(p, 0, 0, 0, 1, 0, 4);
     p += 4;
     setGIFtag(p, 0xE, 1, 0, 0, 0, 0, 3);
     p += 4;
-    *(u_long128*)&p[0] = PACK128(0x06, (u_long)VRAM::_TEX_PREFIX_START |
-                                           ((u_long)(NMSVIDEO_MAX_WIDTH / 64) << 14) | 0x20000006A8000000);
-    *(u_long128*)&p[4] = PACK128(0x01, 0x80808080);
-    *(u_long128*)&p[8] = PACK128(0x00, 0x116);
+    *(u_long128*)&p[0] = _makeQW((u_long)VRAM::_TEX_PREFIX_START |
+                                           ((u_long)(NMSVIDEO_MAX_WIDTH / 64) << 14) | 0x20000006A8000000, 0x06);
+    *(u_long128*)&p[4] = _makeQW(0x80808080, 0x01);
+    *(u_long128*)&p[8] = _makeQW(0x116, 0x00);
     p += 12;
     for (i = 0; i < 16; i++) {
         eop = (i + 1 >= 16);
@@ -750,16 +742,16 @@ void CMoviePlayer::setTransScr0ImageTags(u_int* tags, int width, int height) {
         p += 4;
         setGIFtag(p, 0xE, 1, 0, 0, 0, eop, 5);
         p += 4;
-        *(u_long128*)&p[0] = PACK128(0x40, (u_long)(i * 32) | ((u_long)((i + 1) * 32 - 1) << 16) |
-                                               ((u_long)(SCREEN_HEIGHT - 1) << 48));
-        *(u_long128*)&p[4] = PACK128(0x03, 0x80008);
-        *(u_long128*)&p[8] = PACK128(0x05, 0xFFFFF76107000);
+        *(u_long128*)&p[0] = _makeQW((u_long)(i * 32) | ((u_long)((i + 1) * 32 - 1) << 16) |
+                                               ((u_long)(SCREEN_HEIGHT - 1) << 48), 0x40);
+        *(u_long128*)&p[4] = _makeQW(0x80008, 0x03);
+        *(u_long128*)&p[8] = _makeQW(0xFFFFF76107000, 0x05);
         {
             INT u = (width - 1) * 16 + 8;
             INT v = height * 16 + 8;
-            *(u_long128*)&p[12] = PACK128(0x03, (u_long)(u_int)u | ((u_long)(u_int)v << 16));
+            *(u_long128*)&p[12] = _makeQW((u_long)(u_int)u | ((u_long)(u_int)v << 16), 0x03);
         }
-        *(u_long128*)&p[16] = PACK128(0x05, 0xFFFFF89F09000);
+        *(u_long128*)&p[16] = _makeQW(0xFFFFF89F09000, 0x05);
         p += 20;
     }
     setDMAscTag(p, 0, 0, 0, 7, 0, 0);
