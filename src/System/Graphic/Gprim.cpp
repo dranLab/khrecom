@@ -35,25 +35,6 @@ QWdata* _makePkt_TriangleStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* p
 QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Back);
 QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* pCrd, BOOL Back);
 #define _prefetch(p, ofs) __asm__ volatile("pref 0, %1(%0)" : : "r"(p), "i"(ofs))
-static inline u_long128 _screenClamp(const FVECTOR& inFVec) {
-    u_long128 outVec128;
-    u_long128 tmp;
-    __asm__ volatile("lqc2 $vf4, 0x0(%2)\n"
-                     "lui %0, 0x4500\n"
-                     "lui %1, 0x457f\n"
-                     "ori %1, %1, 0xf000\n"
-                     "pextlw %0, %1, %0\n"
-                     "pextlw %0, %0, %0\n"
-                     "qmtc2.ni %0, $vf5\n"
-                     "vadd.xy $vf4, $vf4, $vf5\n"
-                     "vmaxz.xy $vf4, $vf4, $vf0z\n"
-                     "vminiz.xy $vf4, $vf4, $vf5z\n"
-                     "vftoi4.xyz $vf4, $vf4\n"
-                     "qmfc2.ni %0, $vf4\n"
-                     : "=r"(outVec128), "=&r"(tmp)
-                     : "r"(&inFVec));
-    return outVec128;
-}
 static inline u_long _gsXYZ(FIX4 x, FIX4 y, FIX4 z) {
     return (u_long)(x + 0x8000) | ((u_long)(y + 0x8000) << 16) | ((u_long)(z >> 4) << 32);
 }

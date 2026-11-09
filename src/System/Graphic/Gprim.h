@@ -835,27 +835,27 @@ inline FIX4 CTPrim::calcZ() {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/* The original's inline at 752-770 (.mdebug: inFVec, tmp, outVec128; all twelve insns at 768): a vertex clamped to the
+ * screen, to fixed point; name ours. MATCH: lui/ori in the asm (as C operands the constants are hoisted: tested) */
+inline u_long128 _screenClamp(const FVECTOR& inFVec) {
+    u_long128 outVec128;
+    u_long128 tmp;
+    __asm__ volatile("lqc2 $vf4, 0x0(%2)\n"
+                     "lui %0, 0x4500\n"
+                     "lui %1, 0x457f\n"
+                     "ori %1, %1, 0xf000\n"
+                     "pextlw %0, %1, %0\n"
+                     "pextlw %0, %0, %0\n"
+                     "qmtc2.ni %0, $vf5\n"
+                     "vadd.xy $vf4, $vf4, $vf5\n"
+                     "vmaxz.xy $vf4, $vf4, $vf0z\n"
+                     "vminiz.xy $vf4, $vf4, $vf5z\n"
+                     "vftoi4.xyz $vf4, $vf4\n"
+                     "qmfc2.ni %0, $vf4\n"
+                     : "=r"(outVec128), "=&r"(tmp)
+                     : "r"(&inFVec));
+    return outVec128;
+}
 
 /* The original's colour inlines at 774-782 and 792-800 (.mdebug: the colour word loaded at 774, pextlb/pextlh at 780;
  * the qword loaded at 792, ppach/ppacb at 798; ref locals iCol/ivCol as here). Their names are ours. */
