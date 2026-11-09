@@ -1051,16 +1051,16 @@ inline FIX4 CTPrim::calcZ() {
 
 
 
+/* The original's inline at 969-975 (.mdebug: parameters x, z set up at 969, local out128, the pcpyld at 973; inlined
+ * 371 times in 11 units): a qword from x (low) and z (high doubleword), GIF tags and A+D data. Its name is not in the
+ * debug info, _makeQW is ours. MATCH: asm volatile (plain, equal tags are merged in Gprim's makePkt functions) */
+inline u_long128 _makeQW(ULONGLONG x, ULONGLONG z) {
+    u_long128 out128;
 
 
-
-
-
-
-
-
-
-
+    __asm__ volatile("pcpyld %0, %2, %1" : "=r"(out128) : "r"(x), "r"(z));
+    return out128;
+}
 
 
 
