@@ -334,7 +334,8 @@ static inline void _rotMatrixX(FMATRIX& m, const TDEG& a) {
    Worked: ApplyMatrix through the Coord.h-style by-value inline (line markers Coord.h:634-635; 87 -> 82), by-value
    _mulMatrix, _getAZFTbl inline, angles by const TDEG&, vec in its own scope, min/max init before v[], zero-store
    order. Tried: division block in line order / per-coordinate / one-line forms, xmax if/ternary/compare forms, int
-   declarations before the floats, v[] in its own block; earlier for/do/while/goto loop shapes, 10 min permuter. */
+   declarations before the floats, v[] in its own block; permuter 15 min on this draft (11.9k, no gain); earlier
+   for/do/while/goto loop shapes, 10 min permuter. */
 #if 0
 void CMap::init(BOOL bUseMapUnit, BOOL bTexClampRepeat) {
     INT nModelCount = 0;
