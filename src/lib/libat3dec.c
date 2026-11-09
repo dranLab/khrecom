@@ -334,20 +334,23 @@ static void channel_conv_joint(At3Work *w)
     }
 }
 
-/* Parked: 12 of 457 lines (2026-11-09): only the window loop's issue order differs: its prologue sets w + 254 (t6) before
-   mx + 127 (s4), the original after the stack spills; the mx step (addiu s4, -4) comes late, and the last block issues
-   a_wind[mi] before i-- and the two final addu swapped; tried: shapes from the original's register reuse (step = the abs temp,
-   p = odd-band source / butterfly pointer / window base, i = every counter and the butterfly's k, the window's t1 reused
-   for out), memcpy of two recomputed member addresses ((src|dst)&7 test), indexed loops (givs), hi before lo (andi first),
-   mx[i] before cc[i] (giv order), n = step * 2 inside the half loop (65 insns: loop.c moves n * 4 only in its second pass,
-   so n >> 1 is spilled as in the original), w + 2 == p, a pointer for ov after the second if */
+/* Parked: 4 of 457 lines (2026-11-09): the whole image matches except one swap in the window loop's last block: ours loads
+   a_wind[mi] (lh a2, 0(s2)) before ((short *)ov)[1] (lh v0, 2(t7)), the original the other way round (sched1: the a_wind load
+   kills its base register, reg weight 0, so it issues first; a product held in a separate variable that is live elsewhere,
+   e.g. max, gives the original order but puts the product in a3); tried: shapes from the original's register reuse
+   (step = the abs temp, p = odd-band source / butterfly pointer / window base, i = every counter and the butterfly's k,
+   the window's t1 reused for out), memcpy of two recomputed member addresses ((src|dst)&7 test), indexed loops (givs),
+   hi before lo (andi first), t1/t0 loads before mx[i]/cc[i] (giv order), const mx/cc/ca (rodata tables; the mx step then
+   issues early), n = step * 2 inside the half loop (65 insns: loop.c moves n * 4 only in its second pass, so n >> 1 is
+   spilled as in the original), w + 2 == p, a pointer for ov after the second if; operand orders of the last two statements,
+   ternaries, decomp-permuter 2 x 20 min */
 #if 0
 typedef struct {
     int v[4];
 } At3Tbl4;
-extern unsigned short cc[];
-extern short ca[];
-extern int mx[];
+extern const unsigned short cc[];
+extern const short ca[];
+extern const int mx[];
 extern int coefpost[];
 void imdct_sub(int *a, int *b, int n);
 void imdct_ch(int *a, int *b, int *coef, int *tbl);
@@ -431,10 +434,10 @@ int imdct(char *ch, int band, int gain)
     p = ((At3Band *)ch)[band].spec;
     gain = gain + shift - 1;
     for (i = 127; i >= 0; i--) {
+        int t0 = w[i * 2];
+        int t1 = w[i * 2 + 1];
         int mi = mx[i];
         int ci = cc[i];
-        int t1 = w[i * 2 + 1];
-        int t0 = w[i * 2];
         int r, d, e, lo, hi;
         int *ov;
         r = ci * (t1 >> 16) + ((ci * ((t1 >> 1) & 0x7FFF)) >> 15);
