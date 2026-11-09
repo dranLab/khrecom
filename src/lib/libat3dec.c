@@ -334,12 +334,13 @@ static void channel_conv_joint(At3Work *w)
     }
 }
 
-/* Parked: 173 of 457 lines (2026-11-09): same instructions and order almost everywhere, registers differ: the window loop's
-   counter i gets t1 (original t3), the butterfly spills n * 4 instead of n >> 1 (frame 160, original 144), the window loop's
-   invariants and the band copy's scratch registers are allocated differently; tried: shapes from the original's register reuse
+/* Parked: 83 of 457 lines (2026-11-09): same instructions, registers match from the prologue through the window loop except:
+   the butterfly spills n >> 1's stand-in n * 4 instead (fp holds n >> 1; the call arm schedules a2 = i before a0 = p), the
+   band copy's reload and scratch registers (band/ch reloaded into t1/t2, original t0/t1), the window prologue's order (w + 254
+   init first, original after the spills) and a few window-loop issue orders; tried: shapes from the original's register reuse
    (step = the abs temp, p = odd-band source / butterfly pointer / window base, i = every counter and the butterfly's k,
-   the window's x reused for out), memcpy of two recomputed member addresses ((src|dst)&7 test), indexed loops (givs),
-   hi before lo (andi first), a pointer for ov after the second if; register-level work not started */
+   the window's t1 reused for out), memcpy of two recomputed member addresses ((src|dst)&7 test),
+   indexed loops (givs), hi before lo (andi first), mx[i] before cc[i] (giv order), a pointer for ov after the second if */
 #if 0
 typedef struct {
     int v[4];
@@ -430,10 +431,10 @@ int imdct(char *ch, int band, int gain)
     p = ((At3Band *)ch)[band].spec;
     gain = gain + shift - 1;
     for (i = 127; i >= 0; i--) {
+        int mi = mx[i];
+        int ci = cc[i];
         int t1 = w[i * 2 + 1];
         int t0 = w[i * 2];
-        int ci = cc[i];
-        int mi = mx[i];
         int r, d, e, lo, hi;
         int *ov;
         r = ci * (t1 >> 16) + ((ci * ((t1 >> 1) & 0x7FFF)) >> 15);
@@ -449,9 +450,7 @@ int imdct(char *ch, int band, int gain)
         else t1 = (hi >> (gain - 15)) + (lo >> gain);
         ov = (int *)(mi * 4 + (int)p) + 256;
         p[mi + 128] = t1 + ((((short *)ov)[1] * a_wind[mi]) >> 3);
-        lo = d << (15 - shift);
-        hi = d >> shift;
-        *ov = lo + hi * ca[mi];
+        *ov = (d << (15 - shift)) + (d >> shift) * ca[mi];
     }
     return 0;
 }
