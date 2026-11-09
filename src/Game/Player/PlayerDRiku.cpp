@@ -40,7 +40,6 @@ inline void _emptyStringPlaceholder2() { /* MATCH: placeholder: an inline functi
 #include "System/Graphic/Effect/EffectMan.h"
 #include "System/TaskMan.h"
 #include "System/Debug.h"
-#include "include_asm.h"
 
 namespace PL {
 extern UINT g_uiStartCondition;
@@ -1008,8 +1007,6 @@ void CPlayerDRiku::initStockSkill(INT inNo) {
     setTrgFlag(0, 0x40000);
     m_hMagicCore = 0;
 }
-/* Parked: 108 of 3890 lines (2026-11-07), same size: cross-jumped tails differ (ours merges the 0x683 setAnimSkillEx+setPlayerFlag(0x100000) tail into 0x6xx's copy, the original keeps 0x683's whole and merges the later copy into the setAnimRsrcEx tail at 2525); the sched2 order around global float loads in 0x67c/0x67d (the original loads m_pMove before lbu WORK1 and g_fAntiGravity/g_fGravity, its m_pMove load must have a higher priority than ours' 11); pTarget gets s2 instead of s0 in 0x69c; f0/f1 choices in 0x69c and 0x4a8 (pos.y = m_vMarkPos.y + 5/7 arms); store order of the zero stores at 840/844 and 1188/972 in two later cases; 0x4a8 has a dead (m_fAnalogViewDir - m_fDir) < -PI compare. Worked: case 1's switch needs a third empty case above 0x690 (any value; 0x6ae here: the tree's root is then 0x690), m_pWeapon->isOnAttack() for the two onAttack tests (ref: two CPlayerWeapon inlines), 0xaa/0xab set the attack without m_AtkAttr (_setAttackNoAttr), _upKind/_limitPI as one expression, two block-local FVECTORs in 0x4a8, 0x69b's arrive/else arm order, 0x73c's offWeapon tail, 0x73d's setMagic(0xb9) loop with onWeapon(1). The ref writes the attack set out with CPlayer inlines (95 CPlayer* this scopes, 5 INT inState = Player.h:465's setter). Tried: switch forms for case 1. Same family as the parked CPlayerRiku/CPlayerSora exeStockSkill drafts. */
-#if 0
 static inline void _setAttack(CPlayerDRiku* p, UINT inID) {
     p->m_uiAttackID = inID;
     p->m_pAtkData = &g_AttackDataList[inID];
@@ -1128,7 +1125,7 @@ void CPlayerDRiku::exeStockSkill() {
         return;
     case 0x67c:
         if (!m_bNextTrg) {
-            m_bNextTrg = TRUE;
+            _ref(m_bNextTrg) = TRUE;
             m_fJumpSpdY = g_fAntiGravity * m_pAtkData->WORK1;
             vel = m_pMove->getVel();
             vel.y = m_fJumpSpdY;
@@ -1137,7 +1134,7 @@ void CPlayerDRiku::exeStockSkill() {
         procTargetMark();
         procAttackMove(frame, m_pAtkData->RADIUS * 0.1f, m_pAtkData->MAX_SPEED, 1, 0.15f);
         if (!isMotionEnd()) return;
-        m_iSubState = 0x67d;
+        _ref(m_iSubState) = 0x67d;
         m_fJumpSpdY = g_fGravity * m_pAtkData->WORK2;
         vel = m_pMove->getVel();
         vel.y = m_fJumpSpdY;
@@ -1206,7 +1203,7 @@ void CPlayerDRiku::exeStockSkill() {
             m_pMove->setVel(vel);
             setAnimSkillEx(1, 0, 0, 0, 0);
             setPlayerFlag(0x100000, 0);
-            return;
+            break;
         }
         clearSpeed();
         procSkillEnd(-1);
@@ -1280,53 +1277,53 @@ void CPlayerDRiku::exeStockSkill() {
         return;
     case 0x69c:
         setPlayerFlag(0x400000, 0);
-        if (isFade()) return;
-        pTarget = m_hTarget > 0 ? (CBattleEnemy*)CTaskMan::getTask(m_hMark) : NULL;
-        if (++m_nAttackCount >= m_pAtkData->TRG_FRAME) {
-            setAnimSkillEx(4, -1, 0, 0, 0);
-            searchWarpPos(m_fJumpDir);
-            m_vAppearPos = m_vEnemyPos;
-            setPos(m_vEnemyPos);
-            pos.x = m_vStartPos.x;
-            if (!(m_pPLM->isJaferBattle())) pos.y = m_vEnemyPos.y + 5.0f;
-            else pos.y = 7.0f;
-            pos.z = m_vStartPos.z;
-            setOldPos(pos);
-            m_iSubState = 0x69d;
-            _setAttackNoAttr(this, 0xaa);
-            m_pCam->changeNowPlayer(getHandle(), getHandle());
-            m_pCam->changeCamMode(4, 0);
-            m_bNextTrg = FALSE;
-        } else {
-            if (pTarget) {
-                pTarget->getLockOnPos(m_vMarkPos);
+        if (!isFade()) {
+            CEntity* pTarget = m_hTarget > 0 ? (CEntity*)CTaskMan::getTask(m_hMark) : NULL;
+            if (++m_nAttackCount >= m_pAtkData->TRG_FRAME) {
+                setAnimSkillEx(4, -1, 0, 0, 0);
+                searchWarpPos(m_fJumpDir);
+                m_vAppearPos = m_vEnemyPos;
+                setPos(m_vEnemyPos);
+                pos.x = m_vStartPos.x;
+                pos.y = !m_pPLM->isJaferBattle() ? m_vEnemyPos.y + 5.0f : 7.0f;
+                pos.z = m_vStartPos.z;
+                setOldPos(pos);
+                m_iSubState = 0x69d;
+                _setAttackNoAttr(this, 0xaa);
+                m_pCam->changeNowPlayer(getHandle(), getHandle());
+                m_pCam->changeCamMode(4, 0);
+                m_bNextTrg = FALSE;
             } else {
-                pTarget = m_hTarget > 0 ? (CBattleEnemy*)CTaskMan::getTask(m_hTarget) : NULL;
                 if (pTarget) {
-                    m_hMark = m_hTarget;
                     pTarget->getLockOnPos(m_vMarkPos);
+                } else {
+                    pTarget = m_hTarget > 0 ? (CEntity*)CTaskMan::getTask(m_hTarget) : NULL;
+                    if (pTarget) {
+                        m_hMark = m_hTarget;
+                        pTarget->getLockOnPos(m_vMarkPos);
+                    }
+                }
+                setAnimSkillEx(m_nAttackCount % 3 + 1, -1, 0, 0, 0);
+                setTimer(m_pAtkData->WORK2 * 100);
+                m_fJumpDir = _limitPI(m_fJumpDir + 0.31415927f);
+                searchWarpPos(m_fJumpDir);
+                warp(m_vWarpPos[0]);
+                m_iSubState = 0x69b;
+                if (m_pPLM->isJaferBattle()) {
+                    pos.set(m_vWarpPos[0].x, 7.0f, m_vWarpPos[0].z, 1.0f);
+                    setOldPos(pos);
+                }
+                if (pTarget) {
+                    m_pCam->changeNowPlayer(m_hMark, 0);
+                    m_pCam->changeCamMode(3, 0);
                 }
             }
-            setAnimSkillEx(m_nAttackCount % 3 + 1, -1, 0, 0, 0);
-            setTimer(m_pAtkData->WORK2 * 100);
-            m_fJumpDir = _limitPI(m_fJumpDir + 0.31415927f);
-            searchWarpPos(m_fJumpDir);
-            warp(m_vWarpPos[0]);
-            m_iSubState = 0x69b;
-            if (m_pPLM->isJaferBattle()) {
-                pos.set(m_vWarpPos[0].x, 7.0f, m_vWarpPos[0].z, 1.0f);
-                setOldPos(pos);
-            }
-            if (pTarget) {
-                m_pCam->changeNowPlayer(m_hMark, 0);
-                m_pCam->changeCamMode(3, 0);
-            }
+            setupFade(0.0f, 1.0f, m_pAtkData->MOVE_START_FRAME * 50, -1);
+            updateCoord();
+            coordFix();
+            m_vCenterPos = *(FVECTOR*)((UBYTE*)&Crd(m_iBoneCenter) + 0xc0); /* CCoord::m_World.v[3] */
+            setEffect(g_EffTbl_HitMark[21].pEffectName, 0x26, &m_vCenterPos, NULL, 0.0f);
         }
-        setupFade(0.0f, 1.0f, m_pAtkData->MOVE_START_FRAME * 50, -1);
-        updateCoord();
-        coordFix();
-        m_vCenterPos = *(FVECTOR*)((UBYTE*)&Crd(m_iBoneCenter) + 0xc0); /* CCoord::m_World.v[3] */
-        setEffect(g_EffTbl_HitMark[21].pEffectName, 0x26, &m_vCenterPos, NULL, 0.0f);
         return;
     case 0x69d:
         setPlayerFlag(0x400000, 0);
@@ -1431,9 +1428,9 @@ void CPlayerDRiku::exeStockSkill() {
         if (!isMotionEnd()) break;
         m_iSubState = 0x4a8;
         setAnimSkillEx(1, 0, 0, 0, 0);
+        setTimer(m_pAtkData->TRG_FRAME * 50);
         m_uiStep = 0;
         m_iCount = 0;
-        setTimer(m_pAtkData->TRG_FRAME * 50);
         PlayerCamera::CPlayerCamera::setBattleCamData(getHandle(), &Friend::g_HolyBurstCamParam);
         m_pCam->changeNowPlayer(getHandle(), 0);
         m_pCam->changeCamMode(3, 0);
@@ -1449,9 +1446,8 @@ void CPlayerDRiku::exeStockSkill() {
                 m_iSubState = 0x4a9;
                 setAnimSkillEx(2, -1, 1, 0, 0);
                 setConditionFlag(0, 0x80000);
+                m_fWalkSpeed = m_fJumpSpdXZ = 0.0f;
                 m_fWallRadius = 0.5f;
-                m_fJumpSpdXZ = 0.0f;
-                m_fWalkSpeed = 0.0f;
                 m_pMove->calcVelocityXZ(0.0f);
                 clearSpeed();
                 PlayerCamera::CPlayerCamera::setBattleCamData(0, NULL);
@@ -1463,14 +1459,14 @@ void CPlayerDRiku::exeStockSkill() {
         {
             FLOAT speed = 0.0f;
             if (m_fAnalogPower >= 0.3f) {
-                _limitPI(m_fAnalogViewDir - m_fDir);
+                FVECTOR v;
                 speed = m_pAtkData->WORK2 * 0.1f;
-                m_fDir = Movement::Homing(m_fDir, m_fAnalogViewDir, 0.2f, m_fFrameRate);
-                FVECTOR r0;
-                r0._q = 0;
-                r0.y = m_fDir;
-                FVECTOR r1 = r0;
-                setRot(r1);
+                _limitPI(m_fAnalogViewDir - m_fDir);
+                FLOAT d = Movement::Homing(m_fDir, m_fAnalogViewDir, 0.2f, m_fFrameRate);
+                FVECTOR tmp = { 0.0f, d, 0.0f, 0.0f };
+                setDir(d);
+                v = tmp;
+                setRot(v);
             }
             m_fWalkSpeed = speed / 60.0f;
             m_fJumpSpdXZ = Movement::Approach(m_fJumpSpdXZ, m_fWalkSpeed, 0.02f, m_fFrameRate);
@@ -1800,7 +1796,6 @@ void CPlayerDRiku::exeStockSkill() {
         m_bIsAttackHit = FALSE;
         procAttackMove(frame, 0.0f, 0.0f, 2, 1.0f);
         calcAppearPos(2.0f, 0.55f, NULL);
-        m_vAppearPos.y = getPos().y;
         break;
     case 0x73c:
         if (procAttackCollision(frame)) return;
@@ -1861,17 +1856,6 @@ void CPlayerDRiku::exeStockSkill() {
     }
     procGravity(frame, m_pAtkData->MOVE_END_FRAME, 1);
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerDRiku", exeStockSkill__Q22PL12CPlayerDRiku);
-#endif
-
-// exeStockSkill__Q22PL12CPlayerDRiku: its .rodata, for its INCLUDE_ASM; remove with it.
-asm(".section .rodata\n"
-    ".align 3\n"
-    "D_004A1D78:\n"
-    ".asciz \"exeStockSkill:  DARKBREAK  Entry NG...\\n\"\n"
-    ".align 2\n"
-    ".section .text");
 void CPlayerDRiku::setMagic(INT inState, INT inCardID, INT inSkillID) {
     FVECTOR pos;
     FVECTOR rot;
