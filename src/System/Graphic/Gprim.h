@@ -889,15 +889,15 @@ inline UINT _vecToCol(u_long128 iCol) {
 
 
 
-
-
 /* The original's inline at 810-823 (.mdebug: the multiplier qword loaded at 810, all seven instructions at 821; in
  * 2DSprObj's move and FrecFont's makePkt): an unpacked colour times another, /128, clamped to 255. Name ours.
  * MATCH: one asm statement including the 0xFF load (C can't place it there: a TImode tmp adds por, a constant operand
- * is hoisted out of the vertex loop, a register local moves the product); tmp tied to ivCol keeps v1/a0 */
-inline u_long128 _mulCol(u_long128 ivCol, u_long128 iMul) {
+ * is hoisted out of the vertex loop, a register local moves the product); the result ivCol tied to the colour keeps
+ * v1/a0. The .mdebug has tmp (product) and ivCol (result) as body locals and the colour parameter unwritten (a parameter
+ * fed by a nested inline is not listed: FrecFont, 2DSprObj); its name is ours. */
+inline u_long128 _mulCol(u_long128 iCol, u_long128 iMul) {
+    u_long128 ivCol;
     u_long128 tmp;
-
 
     __asm__ volatile("pmulth %1, %0, %2\n"
                      "addiu %0, $0, 0xff\n"
@@ -906,15 +906,15 @@ inline u_long128 _mulCol(u_long128 ivCol, u_long128 iMul) {
                      "psrlw %1, %1, 7\n"
                      "pcgtw %0, %1, %0\n"
                      "por %0, %1, %0\n"
-                     : "=r"(tmp), "=r"(ivCol) : "r"(iMul), "0"(ivCol));
-    return tmp;
+                     : "=r"(ivCol), "=r"(tmp) : "r"(iMul), "0"(iCol));
+    return ivCol;
 }
 
-
-
-
-
-
+/* The original's inline at 827 (.mdebug: iCol, iMul; the colour word loaded at 827; only in FrecFont's makePkt): a
+ * colour times another through the three inlines above. Name ours. */
+inline UINT _mulColor(UINT iCol, UINT iMul) {
+    return _vecToCol(_mulCol(_colToVec(iCol), _colToVec(iMul)));
+}
 
 
 
