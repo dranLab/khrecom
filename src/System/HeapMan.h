@@ -43,8 +43,17 @@ public:
 inline void* operator new(size_t size) throw() { return com_malloc(size); }
 inline void operator delete(void* mem) { com_free(mem); }
 inline void operator delete[](void* mem) { com_free(mem); }
-inline void* operator new(size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
-inline void* operator new[](size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
+inline void* operator new(size_t size, char* msg) throw() {
+    UINT nRA;
+    __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); /* MATCH: see above */
+    return com_malloc_d(size, msg, nRA);
+}
+
+inline void* operator new[](size_t size, char* msg) throw() {
+    UINT nRA;
+    __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); /* MATCH: see above */
+    return com_malloc_d(size, msg, nRA);
+}
 inline void* operator new(size_t, void* p) throw() { return p; }
 
 #endif /* SYSTEM_HEAPMAN_H */
