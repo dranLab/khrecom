@@ -1114,14 +1114,17 @@ void drawDistShipoly(PEiDrawShipoly *p, VEiDrawShipoly *val, VColor *col, sceVu0
         pppWaitDmaGs();
     }
 }
-/* Parked: 2 of 743 lines (2026-11-09): only the Type!=0 copy loop's preheader: ours issues li a2,-1 before lui a1,0x7000 (the original after it, both after the 1.0f): the -1 of the if-converted n < 0 test (made by the first jump pass) is a pass-1 movable, and loop.c emits the strength-reduced giv init after the movables; the original's order fits the -1 moving in loop pass 2, or a giv init that comes first; spl (a pointer local the ref does not list; it has no location, so the .mdebug cannot show it) keeps the single giv: without it two givs, 51 lines; found 2026-11-09: InterVector clobbers "$2" (40 -> 2: the Type 1 and Thin loop registers), frame_ct before smp_num (line markers); tried: spl as a biv (before the for, in the for), spl placements, index forms of the [3] store, forms of the wrap test (one line, ternary, n <= -1, n = smp_num + n), else { if } nesting (lines 1215/1216), do {} while (0) in the loop, decomp-permuter 15 min (its base is 166 lines off in its layout: nothing); earlier: the ref's locals, the line markers' swap order, biv and pointer-arithmetic forms, the [k][3] store forms, tools/permuter.py 15 min */
-#if 0
 void pppEiDrawDrawShipoly(pppPObject *pobj, PEiDrawShipoly *param, pppCtrlTable *ctbl) {
     VEiDrawShipoly *val;
     VScale *scl;
     VColor *col;
     pppModelSt *mdl;
     sceVu0FVECTOR *centv;
+    /* the scratchpad control points, a pointer like centv: it never gets a register (its constant is rematerialised),
+       so gcc leaves it out of the .mdebug (dbxout_symbol_location) and the ref cannot list it; the original's line
+       markers have two code-less lines right after centv's assignment. Only through a variable is the copy loop's
+       base a register in loop.c (giv init = copy, issued before the hoisted -1); the cast literal gives li -1 first */
+    sceVu0FVECTOR *posv;
     static sceVu0FVECTOR linev[2][256];
     sceVu0FMATRIX cnv_mat;
     u_int frame_ct;
@@ -1132,7 +1135,6 @@ void pppEiDrawDrawShipoly(pppPObject *pobj, PEiDrawShipoly *param, pppCtrlTable 
     int j;
     int k;
     int n;
-    sceVu0FVECTOR *spl;
 
     val = (VEiDrawShipoly *)&pobj->val[ctbl->useVal[DRAWSHIPOLY_THIS]];
     scl = (VScale *)&pobj->val[ctbl->useVal[DRAWSHIPOLY_SCALE]];
@@ -1150,6 +1152,7 @@ void pppEiDrawDrawShipoly(pppPObject *pobj, PEiDrawShipoly *param, pppCtrlTable 
         mdl = &ppvEnv->lpModel[param->Model];
     }
     centv = (sceVu0FVECTOR *)0x70001800;
+    posv = (sceVu0FVECTOR *)0x70000000;
     switch (param->Coordinate) {
     case 0:
         CopyMatrix(cnv_mat, ppvWorldMatrix);
@@ -1176,13 +1179,13 @@ void pppEiDrawDrawShipoly(pppPObject *pobj, PEiDrawShipoly *param, pppCtrlTable 
                     if (n < 0) {
                         n += smp_num;
                     }
-                    CopyVector(((sceVu0FVECTOR *)0x70000000)[k], smp[n * 2 + j]);
-                    ((sceVu0FVECTOR *)0x70000000)[k][3] = 1.0f;
-                    ApplyMatrix(((sceVu0FVECTOR *)0x70000000)[k], cnv_mat, ((sceVu0FVECTOR *)0x70000000)[k]);
+                    CopyVector(posv[k], smp[n * 2 + j]);
+                    posv[k][3] = 1.0f;
+                    ApplyMatrix(posv[k], cnv_mat, posv[k]);
                 }
-                init_spline((sceVu0FVECTOR *)0x70000000, val->GetPosCt, (sceVu0FVECTOR *)0x70000800);
+                init_spline(posv, val->GetPosCt, (sceVu0FVECTOR *)0x70000800);
                 for (k = 0; k < poly_num + 1; k++) {
-                    spline(linev[j][k], (sceVu0FVECTOR *)0x70000000, k / (poly_num / (float)(val->GetPosCt - 1)),
+                    spline(linev[j][k], posv, k / (poly_num / (float)(val->GetPosCt - 1)),
                            (sceVu0FVECTOR *)0x70000800);
                     linev[j][k][3] = 1.0f;
                 }
@@ -1190,17 +1193,16 @@ void pppEiDrawDrawShipoly(pppPObject *pobj, PEiDrawShipoly *param, pppCtrlTable 
         }
     } else if (val->GetPosCt >= 3) {
         for (k = 0; k < val->GetPosCt; k++) {
-            spl = &((sceVu0FVECTOR *)0x70000000)[k];
             n = frame_ct - k;
             if (n < 0) {
                 n += smp_num;
             }
-            CopyVector(*spl, smp[n]);
-            (*spl)[3] = 1.0f;
+            CopyVector(posv[k], smp[n]);
+            posv[k][3] = 1.0f;
         }
-        init_spline((sceVu0FVECTOR *)0x70000000, val->GetPosCt, (sceVu0FVECTOR *)0x70000800);
+        init_spline(posv, val->GetPosCt, (sceVu0FVECTOR *)0x70000800);
         for (k = 0; k < poly_num + 1; k++) {
-            spline(centv[k], (sceVu0FVECTOR *)0x70000000, (float)k / poly_num * (val->GetPosCt - 1),
+            spline(centv[k], posv, (float)k / poly_num * (val->GetPosCt - 1),
                    (sceVu0FVECTOR *)0x70000800);
             centv[k][3] = 1.0f;
             ApplyMatrix(centv[k], cnv_mat, centv[k]);
@@ -1332,16 +1334,6 @@ void pppEiDrawDrawShipoly(pppPObject *pobj, PEiDrawShipoly *param, pppCtrlTable 
         drawDistShipoly(param, val, col, linev);
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly", pppEiDrawDrawShipoly);
-/* placeholder for the function's static linev (.bss) while it is assembly; the code goes to the stripped .sdata */
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) sceVu0FVECTOR *pppEiDrawDrawShipoly_linev(void) {
-    static sceVu0FVECTOR linev[2][256];
-
-    return linev[0];
-}
-#endif
 void pppEiDrawShipoly(pppPObject *pobj, PEiDrawShipoly *param, pppCtrlTable *ctbl) {
     VEiDrawShipoly *val;
     int i;
