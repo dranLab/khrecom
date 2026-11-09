@@ -456,26 +456,6 @@ INT CCollUtil::__detectMCInitInit(MC_CHIP* pChip) {
                  "vmaddw.xyzw $vf4, $vf11, $vf4w");
     return __detectMCInitInit_Check((MC_DATA*)pChip->data, m_fMDVal);
 }
-static inline INT _vecX(u_long128 x) {
-    INT out32;
-    asm volatile("sll %0, %1, 0" : "=r"(out32) : "r"(x));
-    return out32;
-}
-static inline INT _vecY(u_long128 x) {
-    INT out32;
-    asm volatile("dsra32 %0, %1, 0" : "=r"(out32) : "r"(x));
-    return out32;
-}
-static inline ULONGLONG _vecHi(u_long128 x) {
-    ULONGLONG out64;
-    asm volatile("pcpyud %0, %1, $0" : "=r"(out64) : "r"(x));
-    return out64;
-}
-static inline INT _vecZ(u_long128 x) {
-    INT out32;
-    asm volatile("sll %0, %1, 0" : "=r"(out32) : "r"(_vecHi(x)));
-    return out32;
-}
 static INT __detectMCInitInit_Check(MC_DATA* pMCData, FLOAT fMDVal) {
     INT iRet;
     u_long128 zoneVec;
@@ -501,10 +481,10 @@ static INT __detectMCInitInit_Check(MC_DATA* pMCData, FLOAT fMDVal) {
         iRet = -1;
     } else {
         asm volatile("qmfc2.ni %0, $vf4" : "=r"(zoneVec));
-        iRet = _vecZ(zoneVec) * pMCData->xw;
-        iRet += _vecX(zoneVec);
+        iRet = _getZ(zoneVec) * pMCData->xw;
+        iRet += _getX(zoneVec);
         iRet *= pMCData->yw;
-        iRet += _vecY(zoneVec);
+        iRet += _getY(zoneVec);
         if (pMCData->tbl[iRet][0] == 0xFFFF) iRet = -1;
     }
     return iRet;

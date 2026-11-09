@@ -85,12 +85,9 @@ void CAtWaterPrim::makePkt() {
     eu = 0x2000 - su;
     ev = (SCREEN_HEIGHT << 4) - sv;
 
-    /* GIF tag (NREG 1, EOP, A+D) built with a volatile pcpyld: it also stops sched1 hoisting the later
-     * constants above the call; the packet is written through u_long* (not QWdata members), so the
-     * VRAM/SCREEN_HEIGHT loads stay ordered after the stores */
-    u_long128 tag;
-    __asm__ volatile("pcpyld %0, %2, %1" : "=r"(tag) : "r"((u_long)0x1000000000008000UL), "0"((u_long)0xE));
-    qp = (QWdata*)CPackMan::pkOpenGifTag(tag);
+    /* the packet is written through u_long* (not QWdata members), so the VRAM/SCREEN_HEIGHT loads stay ordered
+     * after the stores */
+    qp = (QWdata*)CPackMan::pkOpenGifTag(_makeQW(0x1000000000008000UL, 0xE));
 
     ((u_long*)qp)[0] = (u_long)(VRAM::_ZBUF_START / 32) | ((u_long)0x31 << 24) | ((u_long)1 << 32);
     ((u_long*)qp)[1] = 0x4F;

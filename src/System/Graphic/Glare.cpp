@@ -150,20 +150,14 @@ FIX4 CGlarePrim::calcZ() {
     return 0x0FFFFC00;
 }
 
-static inline void _setQW(QWdata* qp, u_long data, u_long addr) {
-    u_long128 out128;
-    __asm__ volatile("pcpyld %0, %1, %0" : "=r"(out128) : "r"(addr), "0"(data));
-    *(volatile u_long128*)qp = out128;
-}
-
 static QWdata* setTspriteNoSlice(QWdata* qp, FIX4 ofsx, FIX4 ofsy, FIX4 u0, FIX4 v0, FIX4 u1, FIX4 v1) {
-    _setQW(qp, (u_long)u0 | ((u_long)v0 << 16), 3);
+    *(u_long128*)qp = _makeQW((u_long)u0 | ((u_long)v0 << 16), 3);
     qp++;
-    _setQW(qp, (u_long)(ofsx + 0x7000) | ((u_long)(((0x800 - SCREEN_HEIGHT / 2) << 4) + ofsy) << 16), 4);
+    *(u_long128*)qp = _makeQW((u_long)(ofsx + 0x7000) | ((u_long)(((0x800 - SCREEN_HEIGHT / 2) << 4) + ofsy) << 16), 4);
     qp++;
-    _setQW(qp, (u_long)u1 | ((u_long)v1 << 16), 3);
+    *(u_long128*)qp = _makeQW((u_long)u1 | ((u_long)v1 << 16), 3);
     qp++;
-    _setQW(qp, (u_long)(ofsx + 0x8000) | ((u_long)(ofsy + 0x8000) << 16), 4);
+    *(u_long128*)qp = _makeQW((u_long)(ofsx + 0x8000) | ((u_long)(ofsy + 0x8000) << 16), 4);
     qp++;
     return qp;
 }
@@ -185,11 +179,7 @@ void CGlarePrim::makePkt() {
 
     if (iAlpha <= 0) return;
 #line 312
-    /* MATCH: the GIF tag as AtWater/DeFocus build it (pcpyld, an MMI instruction; the original's constants carry
-     * Gprim.h:969 line markers, an inline of the original Gprim.h that our Gprim.h does not have) */
-    u_long128 tag;
-    __asm__ volatile("pcpyld %0, %2, %1" : "=r"(tag) : "r"((u_long)0x1000000000008000UL), "0"((u_long)0xE));
-    qp = (QWdata*)CPackMan::pkOpenGifTag(tag);
+    qp = (QWdata*)CPackMan::pkOpenGifTag(_makeQW(0x1000000000008000UL, 0xE));
 
     ((u_long*)qp)[0] = (u_long)((VRAM::_ZBUF_START / 32) | 0x31000000) | 0x100000000UL;
     ((u_long*)qp)[1] = 0x4F; qp++;

@@ -132,18 +132,6 @@ void FTOI0Vector(IVECTOR& outVec, const FVECTOR& inVec);
 
 static void _setPcrtcMode_BlendBG(sceGsDispEnv& inEnv);
 
-static inline u_long _upper(u_long128 q) {
-    u_long r;
-    __asm__ volatile("pcpyud %0, %1, $0" : "=r"(r) : "r"(q));
-    return r;
-}
-
-static inline u_long128 _pack(u_long lo, u_long hi) {
-    u_long128 r;
-    __asm__ volatile("pcpyld %0, %2, %1" : "=r"(r) : "r"(lo), "r"(hi));
-    return r;
-}
-
 /* The file's statics, in the original's .bss order */
 namespace {
 u_long128 s_pPktBufVif1[2][36992] __attribute__((aligned(64)));
@@ -460,50 +448,50 @@ void CPackMan::beginScene() {
     sceVif1PkAddCode(s_pPktVif1, 0x20000000);
     sceVif1PkAddCode(s_pPktVif1, 0x05000000);
     _pkOpenDirectCode(0);
-    u_long128* qp = _pkOpenGifTag(_pack(0x1000800000008000, 0xe));
+    u_long128* qp = _pkOpenGifTag(_makeQW(0x1000800000008000, 0xe));
     UINT nCount;
     ULONGLONG* pSrc = (ULONGLONG*)pDraw1;
     for (nCount = 16; nCount != 0; nCount -= 2, pSrc += 2) {
-        *qp++ = _pack(pSrc[0], pSrc[1]);
+        *qp++ = _makeQW(pSrc[0], pSrc[1]);
     }
-    *qp++ = _pack(0, 0x4a);
-    *qp++ = _pack(0, 0x4b);
-    *qp++ = _pack(0, 0x49);
-    *qp++ = _pack(0, 0x22);
-    *qp++ = _pack(0x8000008000, 0x3b);
+    *qp++ = _makeQW(0, 0x4a);
+    *qp++ = _makeQW(0, 0x4b);
+    *qp++ = _makeQW(0, 0x49);
+    *qp++ = _makeQW(0, 0x22);
+    *qp++ = _makeQW(0x8000008000, 0x3b);
     IVECTOR& colFog = CWorldEnv::getFogColor();
     if (pClear) {
         *(u_long*)&pClear->rgbaq = colFog.x | ((u_long)colFog.y << 8) | ((u_long)colFog.z << 16) | 0x3f80000000000000;
-        *qp++ = _pack(*(u_long*)&pClear->testa, 0x47);
-        *qp++ = _pack(*(u_long*)&pClear->prim, 0);
-        *qp++ = _pack(*(u_long*)&pClear->rgbaq, 1);
+        *qp++ = _makeQW(*(u_long*)&pClear->testa, 0x47);
+        *qp++ = _makeQW(*(u_long*)&pClear->prim, 0);
+        *qp++ = _makeQW(*(u_long*)&pClear->rgbaq, 1);
         UINT x0 = pClear->xyz2a.X;
         INT y0 = pClear->xyz2a.Y;
         UINT xmax = pClear->xyz2b.X;
         INT y1 = pClear->xyz2b.Y;
         UINT x1 = x0 + 0x400;
         for (; x1 <= xmax; x1 = x0 + 0x400) {
-            *qp++ = _pack((u_long)x0 | ((u_long)y0 << 16), 5);
-            *qp++ = _pack((u_long)x1 | ((u_long)y1 << 16), 5);
+            *qp++ = _makeQW((u_long)x0 | ((u_long)y0 << 16), 5);
+            *qp++ = _makeQW((u_long)x1 | ((u_long)y1 << 16), 5);
             x0 = x1;
         }
         if (x0 < xmax) {
-            *qp++ = _pack((u_long)x0 | ((u_long)y0 << 16), 5);
-            *qp++ = _pack((u_long)xmax | ((u_long)y1 << 16), 5);
+            *qp++ = _makeQW((u_long)x0 | ((u_long)y0 << 16), 5);
+            *qp++ = _makeQW((u_long)xmax | ((u_long)y1 << 16), 5);
         }
-        *qp++ = _pack(*(u_long*)&pClear->testb, 0x47);
+        *qp++ = _makeQW(*(u_long*)&pClear->testb, 0x47);
     }
     if (s_nDrawMode == 1 || s_nDrawMode == 3) qp = _makePkt_StillScreen(qp);
-    *qp++ = _pack(5, 8);
-    *qp++ = _pack(0x44, 0x42);
-    *qp++ = _pack(0x60, 0x14);
-    *qp++ = _pack(colFog.x | ((u_long)colFog.y << 8) | ((u_long)colFog.z << 16), 0x3d);
+    *qp++ = _makeQW(5, 8);
+    *qp++ = _makeQW(0x44, 0x42);
+    *qp++ = _makeQW(0x60, 0x14);
+    *qp++ = _makeQW(colFog.x | ((u_long)colFog.y << 8) | ((u_long)colFog.z << 16), 0x3d);
     for (nCount = 16, pSrc = (ULONGLONG*)pDraw2; nCount != 0; nCount -= 2, pSrc += 2) {
-        *qp++ = _pack(pSrc[0], pSrc[1]);
+        *qp++ = _makeQW(pSrc[0], pSrc[1]);
     }
-    *qp++ = _pack(0x60, 0x15);
-    *qp++ = _pack(s_SysGpuRegs2._nCLAMP, 9);
-    *qp++ = _pack(s_SysGpuRegs2._nFBA, 0x4b);
+    *qp++ = _makeQW(0x60, 0x15);
+    *qp++ = _makeQW(s_SysGpuRegs2._nCLAMP, 9);
+    *qp++ = _makeQW(s_SysGpuRegs2._nFBA, 0x4b);
     _pkCloseGifTag(qp);
     _pkCloseDirectCode();
     s_SysGpuRegs2._nTEST = *(u_long*)&pDraw2->test2;
@@ -555,12 +543,12 @@ u_long128* CPackMan::initBGPacket(INT nInIdx) {
     _checkDmaTag();
     sceVif1PkCnt(s_pPktVif1, 0);
     _pkOpenDirectCode(0);
-    QWdata* qp = (QWdata*)_pkOpenGifTag(_pack(0x1000800000008000, 0xe));
-    ((u_long128*)qp)[0] = _pack(s_DefaultGpuRegs1._nTEST, 0x47);
-    ((u_long128*)qp)[1] = _pack(s_DefaultGpuRegs2._nTEST, 0x48);
-    ((u_long128*)qp)[2] = _pack(s_DefaultGpuRegs1._nZBUF, 0x4e);
-    ((u_long128*)qp)[3] = _pack(s_DefaultGpuRegs2._nZBUF, 0x4f);
-    ((u_long128*)qp)[4] = _pack(0, 8);
+    QWdata* qp = (QWdata*)_pkOpenGifTag(_makeQW(0x1000800000008000, 0xe));
+    ((u_long128*)qp)[0] = _makeQW(s_DefaultGpuRegs1._nTEST, 0x47);
+    ((u_long128*)qp)[1] = _makeQW(s_DefaultGpuRegs2._nTEST, 0x48);
+    ((u_long128*)qp)[2] = _makeQW(s_DefaultGpuRegs1._nZBUF, 0x4e);
+    ((u_long128*)qp)[3] = _makeQW(s_DefaultGpuRegs2._nZBUF, 0x4f);
+    ((u_long128*)qp)[4] = _makeQW(0, 8);
     _pkCloseGifTag(qp + 5);
     _pkCloseDirectCode();
     changeLayer(0);
@@ -578,12 +566,12 @@ void CPackMan::terminateBGPacket() {
     sceVif1PkCnt(s_pPktVif1, 0);
     sceVif1PkAddCode(s_pPktVif1, 0x13000000);
     _pkOpenDirectCode(0);
-    QWdata* qp = (QWdata*)_pkOpenGifTag(_pack(0x1000800000008000, 0xe));
-    ((u_long128*)qp)[0] = _pack(s_DefaultGpuRegs1._nTEST, 0x47);
-    ((u_long128*)qp)[1] = _pack(s_DefaultGpuRegs2._nTEST, 0x48);
-    ((u_long128*)qp)[2] = _pack(s_DefaultGpuRegs1._nZBUF, 0x4e);
-    ((u_long128*)qp)[3] = _pack(s_DefaultGpuRegs2._nZBUF, 0x4f);
-    ((u_long128*)qp)[4] = _pack(5, 8);
+    QWdata* qp = (QWdata*)_pkOpenGifTag(_makeQW(0x1000800000008000, 0xe));
+    ((u_long128*)qp)[0] = _makeQW(s_DefaultGpuRegs1._nTEST, 0x47);
+    ((u_long128*)qp)[1] = _makeQW(s_DefaultGpuRegs2._nTEST, 0x48);
+    ((u_long128*)qp)[2] = _makeQW(s_DefaultGpuRegs1._nZBUF, 0x4e);
+    ((u_long128*)qp)[3] = _makeQW(s_DefaultGpuRegs2._nZBUF, 0x4f);
+    ((u_long128*)qp)[4] = _makeQW(5, 8);
     _pkCloseGifTag(qp + 5);
     _pkCloseDirectCode();
     _checkDmaTag();
@@ -648,12 +636,12 @@ void CPackMan::initFGPacket() {
     _checkDmaTag();
     sceVif1PkCnt(s_pPktVif1, 0);
     _pkOpenDirectCode(0);
-    QWdata* qp = (QWdata*)_pkOpenGifTag(_pack(0x1000800000008000, 0xe));
-    ((u_long128*)qp)[0] = _pack(s_DefaultGpuRegs1._nTEST, 0x47);
-    ((u_long128*)qp)[1] = _pack(s_DefaultGpuRegs2._nTEST, 0x48);
-    ((u_long128*)qp)[2] = _pack(s_DefaultGpuRegs1._nZBUF, 0x4e);
-    ((u_long128*)qp)[3] = _pack(s_DefaultGpuRegs2._nZBUF, 0x4f);
-    ((u_long128*)qp)[4] = _pack(5, 8);
+    QWdata* qp = (QWdata*)_pkOpenGifTag(_makeQW(0x1000800000008000, 0xe));
+    ((u_long128*)qp)[0] = _makeQW(s_DefaultGpuRegs1._nTEST, 0x47);
+    ((u_long128*)qp)[1] = _makeQW(s_DefaultGpuRegs2._nTEST, 0x48);
+    ((u_long128*)qp)[2] = _makeQW(s_DefaultGpuRegs1._nZBUF, 0x4e);
+    ((u_long128*)qp)[3] = _makeQW(s_DefaultGpuRegs2._nZBUF, 0x4f);
+    ((u_long128*)qp)[4] = _makeQW(5, 8);
     _pkCloseGifTag(qp + 5);
     _pkCloseDirectCode();
     changeLayer(0);
@@ -669,12 +657,12 @@ void CPackMan::terminateFGPacket() {
     sceVif1PkCnt(s_pPktVif1, 0);
     sceVif1PkAddCode(s_pPktVif1, 0x13000000);
     _pkOpenDirectCode(0);
-    QWdata* qp = (QWdata*)_pkOpenGifTag(_pack(0x1000800000008000, 0xe));
-    ((u_long128*)qp)[0] = _pack(s_DefaultGpuRegs1._nTEST, 0x47);
-    ((u_long128*)qp)[1] = _pack(s_DefaultGpuRegs2._nTEST, 0x48);
-    ((u_long128*)qp)[2] = _pack(s_DefaultGpuRegs1._nZBUF, 0x4e);
-    ((u_long128*)qp)[3] = _pack(s_DefaultGpuRegs2._nZBUF, 0x4f);
-    ((u_long128*)qp)[4] = _pack(5, 8);
+    QWdata* qp = (QWdata*)_pkOpenGifTag(_makeQW(0x1000800000008000, 0xe));
+    ((u_long128*)qp)[0] = _makeQW(s_DefaultGpuRegs1._nTEST, 0x47);
+    ((u_long128*)qp)[1] = _makeQW(s_DefaultGpuRegs2._nTEST, 0x48);
+    ((u_long128*)qp)[2] = _makeQW(s_DefaultGpuRegs1._nZBUF, 0x4e);
+    ((u_long128*)qp)[3] = _makeQW(s_DefaultGpuRegs2._nZBUF, 0x4f);
+    ((u_long128*)qp)[4] = _makeQW(5, 8);
     _pkCloseGifTag(qp + 5);
     _pkCloseDirectCode();
     _checkDmaTag();
@@ -708,28 +696,28 @@ static void _makePkt_SaveScreen() {
     sceVif1PkAddCode(s_pPktVif1, 0x20000000);
     sceVif1PkAddCode(s_pPktVif1, 0x05000000);
     _pkOpenDirectCode(0);
-    u_long128* qp = _pkOpenGifTag(_pack(0x1000800000008000, 0xe));
-    *qp++ = _pack((VRAM::_TEX_PREFIX_START / 32) | 0x80000, 0x4c);
-    *qp++ = _pack((VRAM::_ZBUF_START / 32) | 0x31000000 | ((u_long)1 << 32), 0x4e);
-    *qp++ = _pack(0x30000, 0x47);
-    *qp++ = _pack(1, 0x14);
-    *qp++ = _pack(VRAM::_FRAME0_START | 0x28020000 | 0x2000000280000000, 6);
-    *qp++ = _pack(0x80808080, 1);
-    *qp++ = _pack(5, 8);
-    *qp++ = _pack(0x116, 0);
+    u_long128* qp = _pkOpenGifTag(_makeQW(0x1000800000008000, 0xe));
+    *qp++ = _makeQW((VRAM::_TEX_PREFIX_START / 32) | 0x80000, 0x4c);
+    *qp++ = _makeQW((VRAM::_ZBUF_START / 32) | 0x31000000 | ((u_long)1 << 32), 0x4e);
+    *qp++ = _makeQW(0x30000, 0x47);
+    *qp++ = _makeQW(1, 0x14);
+    *qp++ = _makeQW(VRAM::_FRAME0_START | 0x28020000 | 0x2000000280000000, 6);
+    *qp++ = _makeQW(0x80808080, 1);
+    *qp++ = _makeQW(5, 8);
+    *qp++ = _makeQW(0x116, 0);
     for (INT i = 0; i < 16; i++) {
         INT v = i + 1;
-        *qp++ = _pack((i * 32) | ((u_long)(v * 32 - 1) << 16) | ((u_long)(SCREEN_HEIGHT - 1) << 48), 0x40);
-        *qp++ = _pack(0x80008, 3);
-        *qp++ = _pack(((u_long)(0x8000 - (SCREEN_HEIGHT >> 1) * 16) << 16) | 0x7000, 5);
-        *qp++ = _pack(((u_long)(UINT)(SCREEN_HEIGHT * 16 + 8) << 16) | 0x2008, 3);
-        *qp++ = _pack(((u_long)((SCREEN_HEIGHT >> 1) * 16 + 0x8000) << 16) | 0x9000, 5);
+        *qp++ = _makeQW((i * 32) | ((u_long)(v * 32 - 1) << 16) | ((u_long)(SCREEN_HEIGHT - 1) << 48), 0x40);
+        *qp++ = _makeQW(0x80008, 3);
+        *qp++ = _makeQW(((u_long)(0x8000 - (SCREEN_HEIGHT >> 1) * 16) << 16) | 0x7000, 5);
+        *qp++ = _makeQW(((u_long)(UINT)(SCREEN_HEIGHT * 16 + 8) << 16) | 0x2008, 3);
+        *qp++ = _makeQW(((u_long)((SCREEN_HEIGHT >> 1) * 16 + 0x8000) << 16) | 0x9000, 5);
     }
-    *qp++ = _pack((VRAM::_FRAME0_START / 32) | 0x80000, 0x4c);
-    *qp++ = _pack((VRAM::_ZBUF_START / 32) | 0x31000000, 0x4e);
-    *qp++ = _pack(((u_long)(SCREEN_HEIGHT - 1) << 48) | 0x1ff0000, 0x40);
-    *qp++ = _pack(CPackMan::getDefaultTEST(), 0x47);
-    *qp++ = _pack(0x61, 0x14);
+    *qp++ = _makeQW((VRAM::_FRAME0_START / 32) | 0x80000, 0x4c);
+    *qp++ = _makeQW((VRAM::_ZBUF_START / 32) | 0x31000000, 0x4e);
+    *qp++ = _makeQW(((u_long)(SCREEN_HEIGHT - 1) << 48) | 0x1ff0000, 0x40);
+    *qp++ = _makeQW(CPackMan::getDefaultTEST(), 0x47);
+    *qp++ = _makeQW(0x61, 0x14);
     _pkCloseGifTag(qp);
     _pkCloseDirectCode();
     _checkDmaTag();
@@ -747,25 +735,25 @@ static u_long128* _makePkt_StillScreen(u_long128* qp) {
         ScaleVector(vCol, *pColor, 128.0f);
         FTOI0Vector(ivCol, vCol);
         u_long128 iCol = *(u_long128*)&ivCol;
-        __asm__("ppach %0, $0, %1\n\tppacb %0, $0, %0" : "=r"(nCol) : "r"(iCol));
+        nCol = _vecToCol(iCol);
     }
-    *qp++ = _pack(0x30000, 0x47);
-    *qp++ = _pack((VRAM::_ZBUF_START / 32) | 0x31000000, 0x4e);
-    *qp++ = _pack(1, 0x14);
-    *qp++ = _pack(VRAM::_TEX_PREFIX_START | 0x28020000 | 0x2000000280000000, 6);
-    *qp++ = _pack(nCol, 1);
-    *qp++ = _pack(5, 8);
-    *qp++ = _pack(0x116, 0);
+    *qp++ = _makeQW(0x30000, 0x47);
+    *qp++ = _makeQW((VRAM::_ZBUF_START / 32) | 0x31000000, 0x4e);
+    *qp++ = _makeQW(1, 0x14);
+    *qp++ = _makeQW(VRAM::_TEX_PREFIX_START | 0x28020000 | 0x2000000280000000, 6);
+    *qp++ = _makeQW(nCol, 1);
+    *qp++ = _makeQW(5, 8);
+    *qp++ = _makeQW(0x116, 0);
     for (INT i = 0; i < 16; i++) {
         INT v = i + 1;
-        *qp++ = _pack((i * 32) | ((u_long)(v * 32 - 1) << 16) | ((u_long)(SCREEN_HEIGHT - 1) << 48), 0x40);
-        *qp++ = _pack(0x80008, 3);
-        *qp++ = _pack(((u_long)(0x8000 - (SCREEN_HEIGHT >> 1) * 16) << 16) | 0x7000, 5);
-        *qp++ = _pack(((u_long)(UINT)(SCREEN_HEIGHT * 16 + 8) << 16) | 0x2008, 3);
-        *qp++ = _pack(((u_long)((SCREEN_HEIGHT >> 1) * 16 + 0x8000) << 16) | 0x9000, 5);
+        *qp++ = _makeQW((i * 32) | ((u_long)(v * 32 - 1) << 16) | ((u_long)(SCREEN_HEIGHT - 1) << 48), 0x40);
+        *qp++ = _makeQW(0x80008, 3);
+        *qp++ = _makeQW(((u_long)(0x8000 - (SCREEN_HEIGHT >> 1) * 16) << 16) | 0x7000, 5);
+        *qp++ = _makeQW(((u_long)(UINT)(SCREEN_HEIGHT * 16 + 8) << 16) | 0x2008, 3);
+        *qp++ = _makeQW(((u_long)((SCREEN_HEIGHT >> 1) * 16 + 0x8000) << 16) | 0x9000, 5);
     }
-    *qp++ = _pack(CPackMan::getDefaultTEST(), 0x47);
-    *qp++ = _pack(((u_long)(SCREEN_HEIGHT - 1) << 48) | 0x1ff0000, 0x40);
+    *qp++ = _makeQW(CPackMan::getDefaultTEST(), 0x47);
+    *qp++ = _makeQW(((u_long)(SCREEN_HEIGHT - 1) << 48) | 0x1ff0000, 0x40);
     return qp;
 }
 static void _setPcrtcMode_FSAA(sceGsDispEnv& inEnv) {
@@ -939,35 +927,35 @@ static void _initFramePacket(INT transKind) {
     sceVif1PkCnt(pPkt, 0);
     sceVif1PkAddCode(pPkt, 0x13000000);
     sceVif1PkOpenDirectCode(pPkt, 0);
-    sceVif1PkOpenGifTag(pPkt, _pack(0x1000800000008000, 0xe));
+    sceVif1PkOpenGifTag(pPkt, _makeQW(0x1000800000008000, 0xe));
     u_long128* qp = (u_long128*)pPkt->pCurrent;
-    qp[0] = _pack(0x30000, 0x47);
-    qp[1] = _pack((VRAM::_ZBUF_START / 32) | 0x31000000 | ((u_long)1 << 32), 0x4e);
+    qp[0] = _makeQW(0x30000, 0x47);
+    qp[1] = _makeQW((VRAM::_ZBUF_START / 32) | 0x31000000 | ((u_long)1 << 32), 0x4e);
     u_long nFbw = CMainApp::isPAL() ? 0x1080000 : 0x1080000;
     qp += 2;
-    qp[0] = _pack((VRAM::_FRAME1_START / 32) | nFbw, 0x4c);
-    qp[1] = _pack(0x44, 0x42);
-    qp[2] = _pack(0x61, 0x14);
-    qp[3] = _pack(VRAM::_FRAME0_START | 0x24020000 | 0x2000000240000000, 6);
-    qp[4] = _pack((INT)0x80808080, 1);
-    qp[5] = _pack(((u_long)(SCREEN_HEIGHT - 1) << 34) | 0x7fc00a, 8);
-    qp[6] = _pack(0x116, 0);
+    qp[0] = _makeQW((VRAM::_FRAME1_START / 32) | nFbw, 0x4c);
+    qp[1] = _makeQW(0x44, 0x42);
+    qp[2] = _makeQW(0x61, 0x14);
+    qp[3] = _makeQW(VRAM::_FRAME0_START | 0x24020000 | 0x2000000240000000, 6);
+    qp[4] = _makeQW((INT)0x80808080, 1);
+    qp[5] = _makeQW(((u_long)(SCREEN_HEIGHT - 1) << 34) | 0x7fc00a, 8);
+    qp[6] = _makeQW(0x116, 0);
     qp += 7;
     for (INT i = 0; i < 16; i++) {
         INT v = i + 1;
-        qp[0] = _pack((i * 32) | ((u_long)(v * 32 - 1) << 16) | ((u_long)(DISP_HEIGHT - 1) << 48), 0x40);
-        qp[1] = _pack(0x80008, 3);
+        qp[0] = _makeQW((i * 32) | ((u_long)(v * 32 - 1) << 16) | ((u_long)(DISP_HEIGHT - 1) << 48), 0x40);
+        qp[1] = _makeQW(0x80008, 3);
         /* MATCH: constants in locals - kept unfolded (X and Z ORed separately) and hoisted in the original order */
         INT ofs = 0x8000;
         u_long x0 = 0x7000;
         ULONGLONG z = (u_long)0xfffff << 32;
-        qp[2] = _pack(((u_long)((-(DISP_HEIGHT / 2) + 32) * 16 + ofs) << 16) | x0 | z, 5);
-        qp[3] = _pack(((u_long)(UINT)(SCREEN_HEIGHT * 16 + 8) << 16) | 0x2008, 3);
+        qp[2] = _makeQW(((u_long)((-(DISP_HEIGHT / 2) + 32) * 16 + ofs) << 16) | x0 | z, 5);
+        qp[3] = _makeQW(((u_long)(UINT)(SCREEN_HEIGHT * 16 + 8) << 16) | 0x2008, 3);
         u_long x1 = 0x9000;
-        qp[4] = _pack(((u_long)((DISP_HEIGHT / 2 + 32) * 16 + ofs) << 16) | x1 | z, 5);
+        qp[4] = _makeQW(((u_long)((DISP_HEIGHT / 2 + 32) * 16 + ofs) << 16) | x1 | z, 5);
         qp += 5;
     }
-    *qp++ = _pack((VRAM::_ZBUF_START / 32) | 0x31000000, 0x4e);
+    *qp++ = _makeQW((VRAM::_ZBUF_START / 32) | 0x31000000, 0x4e);
     pPkt->pCurrent = (u_int*)qp;
     sceVif1PkCloseGifTag(pPkt);
     sceVif1PkCloseDirectCode(pPkt);
@@ -988,70 +976,70 @@ static void _initFramePacketForMovie(INT nAlpha) {
     sceVif1PkCnt(pPkt, 0);
     sceVif1PkAddCode(pPkt, 0x13000000);
     sceVif1PkOpenDirectCode(pPkt, 0);
-    sceVif1PkOpenGifTag(pPkt, _pack(0x1000800000008000, 0xe));
+    sceVif1PkOpenGifTag(pPkt, _makeQW(0x1000800000008000, 0xe));
     u_long128* qp = (u_long128*)pPkt->pCurrent;
-    qp[0] = _pack(0x30000, 0x47);
-    qp[1] = _pack((VRAM::_ZBUF_START / 32) | 0x31000000 | ((u_long)1 << 32), 0x4e);
-    qp[2] = _pack((VRAM::_FRAME1_START / 32) | 0x1080000, 0x4c);
-    qp[3] = _pack(0x44, 0x42);
-    qp[4] = _pack(0x61, 0x14);
-    qp[5] = _pack(5, 8);
-    qp[6] = _pack(0, 0x4a);
+    qp[0] = _makeQW(0x30000, 0x47);
+    qp[1] = _makeQW((VRAM::_ZBUF_START / 32) | 0x31000000 | ((u_long)1 << 32), 0x4e);
+    qp[2] = _makeQW((VRAM::_FRAME1_START / 32) | 0x1080000, 0x4c);
+    qp[3] = _makeQW(0x44, 0x42);
+    qp[4] = _makeQW(0x61, 0x14);
+    qp[5] = _makeQW(5, 8);
+    qp[6] = _makeQW(0, 0x4a);
     qp += 7;
     ULONGLONG x = *(u_long*)&s_DBuf.clear0.prim;
-    qp[0] = _pack(x, 0);
+    qp[0] = _makeQW(x, 0);
     ULONGLONG x2 = *(u_long*)&s_DBuf.clear0.rgbaq;
-    qp[1] = _pack(x2, 1);
+    qp[1] = _makeQW(x2, 1);
     qp += 2;
     for (INT i = 0; i < 16; i++) {
         INT v = i + 1;
-        qp[0] = _pack((i * 32) | ((u_long)(v * 32 - 1) << 16) | ((u_long)(DISP_HEIGHT - 1) << 48), 0x40);
+        qp[0] = _makeQW((i * 32) | ((u_long)(v * 32 - 1) << 16) | ((u_long)(DISP_HEIGHT - 1) << 48), 0x40);
         INT ofs = 0x8000;
         u_long x0 = 0x7000;
         ULONGLONG z = (u_long)0xfffff << 32;
         u_long x1 = 0x9000;
-        qp[1] = _pack(((u_long)((-(DISP_HEIGHT / 2) + 32) * 16 + ofs) << 16) | x0 | z, 5);
-        qp[2] = _pack(((u_long)((-(INT)(nDstH / 2) + 32) * 16 + ofs) << 16) | x1 | z, 5);
-        qp[3] = _pack(((u_long)(((INT)(nDstH / 2) + 32) * 16 + ofs) << 16) | x0 | z, 5);
-        qp[4] = _pack(((u_long)((DISP_HEIGHT / 2 + 32) * 16 + ofs) << 16) | x1 | z, 5);
+        qp[1] = _makeQW(((u_long)((-(DISP_HEIGHT / 2) + 32) * 16 + ofs) << 16) | x0 | z, 5);
+        qp[2] = _makeQW(((u_long)((-(INT)(nDstH / 2) + 32) * 16 + ofs) << 16) | x1 | z, 5);
+        qp[3] = _makeQW(((u_long)(((INT)(nDstH / 2) + 32) * 16 + ofs) << 16) | x0 | z, 5);
+        qp[4] = _makeQW(((u_long)((DISP_HEIGHT / 2 + 32) * 16 + ofs) << 16) | x1 | z, 5);
         qp += 5;
     }
-    qp[0] = _pack(VRAM::_TEX_PREFIX_START | ((u_long)(NMSVIDEO_MAX_WIDTH / 64) << 14) | 0x20000006a8000000, 6);
+    qp[0] = _makeQW(VRAM::_TEX_PREFIX_START | ((u_long)(NMSVIDEO_MAX_WIDTH / 64) << 14) | 0x20000006a8000000, 6);
     u_long a = nAlpha & 0xff;
-    qp[1] = _pack(a | (a << 8) | (a << 16) | 0x80000000, 1);
-    qp[2] = _pack(0x116, 0);
+    qp[1] = _makeQW(a | (a << 8) | (a << 16) | 0x80000000, 1);
+    qp[2] = _makeQW(0x116, 0);
     qp += 3;
     INT hw = nDstW / 2;
     INT nhw = -hw; /* MATCH: the negation in its own local keeps negu before the shift (no CSE with hw * 16) */
     for (INT i = 0; i < 16; i++) {
         INT v = i + 1;
-        qp[0] = _pack((i * 32) | ((u_long)(v * 32 - 1) << 16) | ((u_long)(DISP_HEIGHT - 1) << 48), 0x40);
-        qp[1] = _pack(0x80008, 3);
+        qp[0] = _makeQW((i * 32) | ((u_long)(v * 32 - 1) << 16) | ((u_long)(DISP_HEIGHT - 1) << 48), 0x40);
+        qp[1] = _makeQW(0x80008, 3);
         INT ofs = 0x8000;
         ULONGLONG z = (u_long)0xfffff << 32;
-        qp[2] = _pack((u_long)(nhw * 16 + ofs) | ((u_long)((-(INT)(nDstH / 2) + 32) * 16 + ofs) << 16) | z, 5);
-        qp[3] = _pack((u_long)(UINT)((nSrcW - 1) * 16 + 8) | ((u_long)(UINT)(nSrcH * 16 + 8) << 16), 3);
-        qp[4] = _pack((u_long)(hw * 16 + ofs) | ((u_long)(((INT)(nDstH / 2) + 32) * 16 + ofs) << 16) | z, 5);
+        qp[2] = _makeQW((u_long)(nhw * 16 + ofs) | ((u_long)((-(INT)(nDstH / 2) + 32) * 16 + ofs) << 16) | z, 5);
+        qp[3] = _makeQW((u_long)(UINT)((nSrcW - 1) * 16 + 8) | ((u_long)(UINT)(nSrcH * 16 + 8) << 16), 3);
+        qp[4] = _makeQW((u_long)(hw * 16 + ofs) | ((u_long)(((INT)(nDstH / 2) + 32) * 16 + ofs) << 16) | z, 5);
         qp += 5;
     }
-    qp[0] = _pack(0x3000d, 0x47);
-    qp[1] = _pack(VRAM::_FRAME0_START | 0x28020000 | 0x2000000680000000, 6);
-    qp[2] = _pack(0x116, 0);
+    qp[0] = _makeQW(0x3000d, 0x47);
+    qp[1] = _makeQW(VRAM::_FRAME0_START | 0x28020000 | 0x2000000680000000, 6);
+    qp[2] = _makeQW(0x116, 0);
     qp += 3;
     for (INT i = 0; i < 16; i++) {
         INT v = i + 1;
-        qp[0] = _pack((i * 32) | ((u_long)(v * 32 - 1) << 16) | ((u_long)(DISP_HEIGHT - 1) << 48), 0x40);
-        qp[1] = _pack(0x80008, 3);
+        qp[0] = _makeQW((i * 32) | ((u_long)(v * 32 - 1) << 16) | ((u_long)(DISP_HEIGHT - 1) << 48), 0x40);
+        qp[1] = _makeQW(0x80008, 3);
         INT ofs = 0x8000;
         u_long x0 = 0x7000;
         ULONGLONG z = (u_long)0xfffff << 32;
-        qp[2] = _pack(((u_long)((-(DISP_HEIGHT >> 1) + 32) * 16 + ofs) << 16) | x0 | z, 5);
-        qp[3] = _pack(((u_long)(UINT)(SCREEN_HEIGHT * 16 + 8) << 16) | 0x2008, 3);
+        qp[2] = _makeQW(((u_long)((-(DISP_HEIGHT >> 1) + 32) * 16 + ofs) << 16) | x0 | z, 5);
+        qp[3] = _makeQW(((u_long)(UINT)(SCREEN_HEIGHT * 16 + 8) << 16) | 0x2008, 3);
         u_long x1 = 0x9000;
-        qp[4] = _pack(((u_long)(((DISP_HEIGHT >> 1) + 32) * 16 + ofs) << 16) | x1 | z, 5);
+        qp[4] = _makeQW(((u_long)(((DISP_HEIGHT >> 1) + 32) * 16 + ofs) << 16) | x1 | z, 5);
         qp += 5;
     }
-    *qp++ = _pack((VRAM::_ZBUF_START / 32) | 0x31000000, 0x4e);
+    *qp++ = _makeQW((VRAM::_ZBUF_START / 32) | 0x31000000, 0x4e);
     pPkt->pCurrent = (u_int*)qp;
     sceVif1PkCloseGifTag(pPkt);
     sceVif1PkCloseDirectCode(pPkt);
@@ -1068,95 +1056,95 @@ static void _initFrameEffPacket(INT transKind, INT in_Xofs, INT in_Yofs, INT in_
     sceVif1PkCnt(pPkt, 0);
     sceVif1PkAddCode(pPkt, 0x13000000);
     sceVif1PkOpenDirectCode(pPkt, 0);
-    sceVif1PkOpenGifTag(pPkt, _pack(0x1000800000008000, 0xe));
+    sceVif1PkOpenGifTag(pPkt, _makeQW(0x1000800000008000, 0xe));
     u_long128* qp = (u_long128*)pPkt->pCurrent;
-    qp[0] = _pack(0x30000, 0x47);
-    qp[1] = _pack((VRAM::_ZBUF_START / 32) | 0x31000000 | ((u_long)1 << 32), 0x4e);
+    qp[0] = _makeQW(0x30000, 0x47);
+    qp[1] = _makeQW((VRAM::_ZBUF_START / 32) | 0x31000000 | ((u_long)1 << 32), 0x4e);
     qp += 2;
     switch (transKind) {
     case 1:
-        qp[0] = _pack((VRAM::_FRAME0_START / 32) | 0x80000, 0x4c);
-        qp[1] = _pack(0x44, 0x42);
-        qp[2] = _pack(1, 0x14);
-        qp[3] = _pack(VRAM::_FRAME1_START | 0x28120000 | 0x2000000280000000, 6);
-        qp[4] = _pack(0x156, 0);
-        qp[5] = _pack(0x60808080, 1);
+        qp[0] = _makeQW((VRAM::_FRAME0_START / 32) | 0x80000, 0x4c);
+        qp[1] = _makeQW(0x44, 0x42);
+        qp[2] = _makeQW(1, 0x14);
+        qp[3] = _makeQW(VRAM::_FRAME1_START | 0x28120000 | 0x2000000280000000, 6);
+        qp[4] = _makeQW(0x156, 0);
+        qp[5] = _makeQW(0x60808080, 1);
         qp += 6;
         for (INT i = 0; i < 16; i++) {
             INT v = i + 1;
-            qp[0] = _pack((i * 32) | ((u_long)(v * 32 - 1) << 16) | ((u_long)(SCREEN_HEIGHT - 1) << 48), 0x40);
-            qp[1] = _pack(0x80008, 3);
+            qp[0] = _makeQW((i * 32) | ((u_long)(v * 32 - 1) << 16) | ((u_long)(SCREEN_HEIGHT - 1) << 48), 0x40);
+            qp[1] = _makeQW(0x80008, 3);
             INT ofs = 0x8000;
             u_long x0 = 0x7000;
             ULONGLONG z = (u_long)0xfffff << 32;
-            qp[2] = _pack(((u_long)(ofs - (SCREEN_HEIGHT / 2) * 16) << 16) | x0 | z, 5);
-            qp[3] = _pack(((u_long)(UINT)(DISP_HEIGHT * 16 + 8) << 16) | 0x2008, 3);
+            qp[2] = _makeQW(((u_long)(ofs - (SCREEN_HEIGHT / 2) * 16) << 16) | x0 | z, 5);
+            qp[3] = _makeQW(((u_long)(UINT)(DISP_HEIGHT * 16 + 8) << 16) | 0x2008, 3);
             u_long x1 = 0x9000;
-            qp[4] = _pack(((u_long)((SCREEN_HEIGHT / 2) * 16 + ofs) << 16) | x1 | z, 5);
+            qp[4] = _makeQW(((u_long)((SCREEN_HEIGHT / 2) * 16 + ofs) << 16) | x1 | z, 5);
             qp += 5;
         }
         break;
     case 2:
-        qp[0] = _pack((VRAM::_FRAME0_START / 32) | 0x80000, 0x4c);
-        qp[1] = _pack(0x44, 0x42);
-        qp[2] = _pack(1, 0x14);
-        qp[3] = _pack(VRAM::_FRAME1_START | 0x28120000 | 0x2000000280000000, 6);
-        qp[4] = _pack(0x156, 0);
-        qp[5] = _pack(0x40808080, 1);
+        qp[0] = _makeQW((VRAM::_FRAME0_START / 32) | 0x80000, 0x4c);
+        qp[1] = _makeQW(0x44, 0x42);
+        qp[2] = _makeQW(1, 0x14);
+        qp[3] = _makeQW(VRAM::_FRAME1_START | 0x28120000 | 0x2000000280000000, 6);
+        qp[4] = _makeQW(0x156, 0);
+        qp[5] = _makeQW(0x40808080, 1);
         qp += 6;
         {
             INT h = (12 + 0x200) / 2; /* case 3 with offsets 12: x0 from h, not a constant, keeps X first in the OR (cse) */
             INT nh = -h;
             for (INT i = 0; i < 16; i++) {
                 INT v = i + 1;
-                qp[0] = _pack((i * 32) | ((u_long)(v * 32 - 1) << 16) | ((u_long)(SCREEN_HEIGHT - 1) << 48), 0x40);
-                qp[1] = _pack(0x80008, 3);
+                qp[0] = _makeQW((i * 32) | ((u_long)(v * 32 - 1) << 16) | ((u_long)(SCREEN_HEIGHT - 1) << 48), 0x40);
+                qp[1] = _makeQW(0x80008, 3);
                 INT ofs = 0x8000;
                 u_long x0 = nh * 16 + ofs;
                 ULONGLONG z = (u_long)0xfffff << 32;
-                qp[2] = _pack(x0 | ((u_long)(ofs - ((SCREEN_HEIGHT + 12) / 2) * 16) << 16) | z, 5);
-                qp[3] = _pack(((u_long)(UINT)(DISP_HEIGHT * 16 + 8) << 16) | 0x2008, 3);
+                qp[2] = _makeQW(x0 | ((u_long)(ofs - ((SCREEN_HEIGHT + 12) / 2) * 16) << 16) | z, 5);
+                qp[3] = _makeQW(((u_long)(UINT)(DISP_HEIGHT * 16 + 8) << 16) | 0x2008, 3);
                 u_long x1 = h * 16 + ofs;
-                qp[4] = _pack(x1 | ((u_long)(((SCREEN_HEIGHT + 12) / 2) * 16 + ofs) << 16) | z, 5);
+                qp[4] = _makeQW(x1 | ((u_long)(((SCREEN_HEIGHT + 12) / 2) * 16 + ofs) << 16) | z, 5);
                 qp += 5;
             }
         }
         break;
     case 3:
-        qp[0] = _pack((VRAM::_FRAME0_START / 32) | 0x80000, 0x4c);
-        qp[1] = _pack(0x44, 0x42);
-        qp[2] = _pack(1, 0x14);
-        qp[3] = _pack(VRAM::_FRAME1_START | 0x28120000 | 0x2000000280000000, 6);
-        qp[4] = _pack(0x156, 0);
-        qp[5] = _pack(((u_long)in_Alpha << 24) | 0x808080, 1);
+        qp[0] = _makeQW((VRAM::_FRAME0_START / 32) | 0x80000, 0x4c);
+        qp[1] = _makeQW(0x44, 0x42);
+        qp[2] = _makeQW(1, 0x14);
+        qp[3] = _makeQW(VRAM::_FRAME1_START | 0x28120000 | 0x2000000280000000, 6);
+        qp[4] = _makeQW(0x156, 0);
+        qp[5] = _makeQW(((u_long)in_Alpha << 24) | 0x808080, 1);
         qp += 6;
         {
             INT h = (in_Xofs + 0x200) / 2;
             INT nh = -h;
             for (INT i = 0; i < 16; i++) {
                 INT v = i + 1;
-                qp[0] = _pack((i * 32) | ((u_long)(v * 32 - 1) << 16) | ((u_long)(SCREEN_HEIGHT - 1) << 48), 0x40);
-                qp[1] = _pack(0x80008, 3);
+                qp[0] = _makeQW((i * 32) | ((u_long)(v * 32 - 1) << 16) | ((u_long)(SCREEN_HEIGHT - 1) << 48), 0x40);
+                qp[1] = _makeQW(0x80008, 3);
                 INT ofs = 0x8000;
                 u_long x0 = nh * 16 + ofs;
                 u_long x1 = h * 16 + ofs;
                 ULONGLONG z = (u_long)0xfffff << 32;
-                qp[2] = _pack(x0 | ((u_long)(ofs - ((SCREEN_HEIGHT + in_Yofs) / 2) * 16) << 16) | z, 5);
-                qp[3] = _pack(((u_long)(UINT)(DISP_HEIGHT * 16 + 8) << 16) | 0x2008, 3);
-                qp[4] = _pack(x1 | ((u_long)(((SCREEN_HEIGHT + in_Yofs) / 2) * 16 + ofs) << 16) | z, 5);
+                qp[2] = _makeQW(x0 | ((u_long)(ofs - ((SCREEN_HEIGHT + in_Yofs) / 2) * 16) << 16) | z, 5);
+                qp[3] = _makeQW(((u_long)(UINT)(DISP_HEIGHT * 16 + 8) << 16) | 0x2008, 3);
+                qp[4] = _makeQW(x1 | ((u_long)(((SCREEN_HEIGHT + in_Yofs) / 2) * 16 + ofs) << 16) | z, 5);
                 qp += 5;
             }
         }
         break;
     }
-    qp[0] = _pack((VRAM::_FRAME1_START / 32) | 0x1080000, 0x4c);
-    qp[1] = _pack(0x44, 0x42);
-    qp[2] = _pack(0x61, 0x14);
-    qp[3] = _pack(VRAM::_FRAME0_START | 0x28020000 | 0x2000000280000000, 6);
-    qp[4] = _pack((INT)0x80808080, 1);
-    qp[5] = _pack(5, 8);
+    qp[0] = _makeQW((VRAM::_FRAME1_START / 32) | 0x1080000, 0x4c);
+    qp[1] = _makeQW(0x44, 0x42);
+    qp[2] = _makeQW(0x61, 0x14);
+    qp[3] = _makeQW(VRAM::_FRAME0_START | 0x28020000 | 0x2000000280000000, 6);
+    qp[4] = _makeQW((INT)0x80808080, 1);
+    qp[5] = _makeQW(5, 8);
     qp += 6;
-    *qp++ = _pack((VRAM::_ZBUF_START / 32) | 0x31000000, 0x4e);
+    *qp++ = _makeQW((VRAM::_ZBUF_START / 32) | 0x31000000, 0x4e);
     pPkt->pCurrent = (u_int*)qp;
     sceVif1PkCloseGifTag(pPkt);
     sceVif1PkCloseDirectCode(pPkt);
@@ -1166,10 +1154,10 @@ static void _initFrameEffPacket(INT transKind, INT in_Xofs, INT in_Yofs, INT in_
     if (intr) EIntr();
 }
 void CPackMan::enableZWrite(BOOL inEnable, INT inAddr) {
-    QWdata* qp = (QWdata*)_pkOpenGifTag(_pack(0x1000800000008000, 0xe));
+    QWdata* qp = (QWdata*)_pkOpenGifTag(_makeQW(0x1000800000008000, 0xe));
     u_long nZbuf = (VRAM::_ZBUF_START / 32) | 0x31000000;
     if (inEnable != 1) nZbuf |= (u_long)1 << 32;
-    *(u_long128*)qp = _pack(nZbuf, inAddr);
+    *(u_long128*)qp = _makeQW(nZbuf, inAddr);
     qp++;
     _pkCloseGifTag(qp);
 }
@@ -1262,9 +1250,7 @@ void sceVif1PkRefe(pacVif1Packet* pPacket, u_long128* pRef, u_int size, u_int op
     sceVif1PkTerminate(pPacket);
     u_int tag = flag | size;
     u_int addr = (u_int)pRef & 0x8fffffff;
-    u_long128 q, t;
-    __asm__ volatile("pextlw %0, %2, %3\n\tpextlw %1, %4, %5\n\tpextlw %0, %1, %0" : "=&r"(q), "=&r"(t) : "r"(opt1), "r"(tag), "r"(opt2), "r"(addr));
-    *(u_long128*)pPacket->pCurrent = q;
+    *(u_long128*)pPacket->pCurrent = _packWord(tag, addr, opt1, opt2);
     pPacket->pCurrent += 4;
 }
 void sceVif1PkCnt(pacVif1Packet* pPacket, u_int flag) {
@@ -1284,9 +1270,7 @@ void sceVif1PkRef(pacVif1Packet* pPacket, u_long128* pRef, u_int size, u_int opt
     size |= 0x30000000;
     u_int tag = flag | size;
     u_int addr = (u_int)pRef & 0x8fffffff;
-    u_long128 q, t;
-    __asm__ volatile("pextlw %0, %2, %3\n\tpextlw %1, %4, %5\n\tpextlw %0, %1, %0" : "=&r"(q), "=&r"(t) : "r"(opt1), "r"(tag), "r"(opt2), "r"(addr));
-    *(u_long128*)pPacket->pCurrent = q;
+    *(u_long128*)pPacket->pCurrent = _packWord(tag, addr, opt1, opt2);
     pPacket->pCurrent += 4;
 }
 void sceVif1PkRefs(pacVif1Packet* pPacket, u_long128* pRef, u_int size, u_int opt1, u_int opt2, u_int flag) {
@@ -1294,9 +1278,7 @@ void sceVif1PkRefs(pacVif1Packet* pPacket, u_long128* pRef, u_int size, u_int op
     size |= 0x40000000;
     u_int tag = flag | size;
     u_int addr = (u_int)pRef & 0x8fffffff;
-    u_long128 q, t;
-    __asm__ volatile("pextlw %0, %2, %3\n\tpextlw %1, %4, %5\n\tpextlw %0, %1, %0" : "=&r"(q), "=&r"(t) : "r"(opt1), "r"(tag), "r"(opt2), "r"(addr));
-    *(u_long128*)pPacket->pCurrent = q;
+    *(u_long128*)pPacket->pCurrent = _packWord(tag, addr, opt1, opt2);
     pPacket->pCurrent += 4;
 }
 void sceVif1PkCall(pacVif1Packet* pPacket, u_long128* pCall, u_int flag) {
@@ -1404,7 +1386,7 @@ void sceVif1PkOpenGifTag(pacVif1Packet* pPacket, u_long128 tag) {
 }
 void sceVif1PkCloseGifTag(pacVif1Packet* pPacket) {
     u_long128 tag = pPacket->lGifTag.ul128;
-    u_long hi = _upper(tag);
+    u_long hi = _getHi64(tag);
     u_long lo = (u_long)tag;
     u_long flg = (lo >> 58) & 3;
     u_int n = (u_long*)pPacket->pCurrent - pPacket->pGifTag - 2;
@@ -1414,7 +1396,7 @@ void sceVif1PkCloseGifTag(pacVif1Packet* pPacket) {
         if (!nreg) nreg = 16;
         n = (n + nreg - 1) / nreg;
     }
-    *(u_long128*)pPacket->pGifTag = _pack(lo + n, hi);
+    *(u_long128*)pPacket->pGifTag = _makeQW(lo + n, hi);
     pPacket->pGifTag = NULL;
     if ((u_int)pPacket->pCurrent & 8) pPacket->pCurrent += 2;
 }
@@ -1484,7 +1466,7 @@ void sceVif1PkAddUpkData64N(pacVif1Packet* pPacket, u_long* pData, u_int count) 
 void sceVif1PkAddUpkData128(pacVif1Packet* pPacket, u_long128 data) {
     u_int* p = pPacket->pCurrent;
     u_long lo = (u_long)data;
-    u_long hi = _upper(data);
+    u_long hi = _getHi64(data);
     p[0] = lo;
     p[1] = lo >> 32;
     p[2] = hi;
@@ -1497,7 +1479,7 @@ void sceVif1PkAddUpkData128N(pacVif1Packet* pPacket, u_long128* pData, u_int cou
     while (count--) {
         u_long128 d = *pData++;
         u_long lo = (u_long)d;
-        u_long hi = _upper(d);
+        u_long hi = _getHi64(d);
         p[0] = lo;
         p[1] = lo >> 32;
         p[2] = hi;
@@ -1538,7 +1520,7 @@ void sceVif1PkAddGsPackedN(pacVif1Packet* pPacket, u_long128* pData, u_int count
 }
 void sceVif1PkAddGsAD(pacVif1Packet* pPacket, u_int addr, u_long data) {
     u_long128* p = (u_long128*)pPacket->pCurrent;
-    *p = _pack(data, addr);
+    *p = _makeQW(data, addr);
     pPacket->pCurrent = (u_int*)(p + 1);
 }
 void sceVif1PkRefLoadImage(pacVif1Packet* pPacket, u_short bp, u_char psm, u_short bw, u_long128* image, u_int size, u_int x, u_int y,
@@ -1553,11 +1535,11 @@ void sceVif1PkRefLoadImage(pacVif1Packet* pPacket, u_short bp, u_char psm, u_sho
     ULONGLONG* p64 = (ULONGLONG*)pPacket->pCurrent;
     p64[0] = 0x5100000500000000;
     QWdata* pQw = (QWdata*)(p64 + 1);
-    ((u_long128*)pQw)[0] = _pack(0x1000000000000004, 0xe);
-    ((u_long128*)pQw)[1] = _pack(((u_long)bp << 32) | ((u_long)bw << 48) | ((u_long)psm << 56), 0x50);
-    ((u_long128*)pQw)[2] = _pack(((u_long)x << 32) | ((u_long)y << 48), 0x51);
-    ((u_long128*)pQw)[3] = _pack((u_long)w | ((u_long)h << 32), 0x52);
-    ((u_long128*)pQw)[4] = _pack(0, 0x53);
+    ((u_long128*)pQw)[0] = _makeQW(0x1000000000000004, 0xe);
+    ((u_long128*)pQw)[1] = _makeQW(((u_long)bp << 32) | ((u_long)bw << 48) | ((u_long)psm << 56), 0x50);
+    ((u_long128*)pQw)[2] = _makeQW(((u_long)x << 32) | ((u_long)y << 48), 0x51);
+    ((u_long128*)pQw)[3] = _makeQW((u_long)w | ((u_long)h << 32), 0x52);
+    ((u_long128*)pQw)[4] = _makeQW(0, 0x53);
     pPacket->pCurrent = (u_int*)(pQw + 5);
     while (size) {
         u_int n = size > 0x7fff ? 0x7fff : size;
@@ -1565,7 +1547,7 @@ void sceVif1PkRefLoadImage(pacVif1Packet* pPacket, u_short bp, u_char psm, u_sho
         p64 = (ULONGLONG*)pPacket->pCurrent;
         p64[0] = 0x5100000100000000;
         pQw = (QWdata*)(p64 + 1);
-        ((u_long128*)pQw)[0] = _pack((u_long)n | 0x0800000000000000, 0);
+        ((u_long128*)pQw)[0] = _makeQW((u_long)n | 0x0800000000000000, 0);
         pPacket->pCurrent = (u_int*)(pQw + 1);
         sceVif1PkRef(pPacket, image, n, 0, n | 0x51000000, 0);
         size -= n;
@@ -1575,7 +1557,7 @@ void sceVif1PkRefLoadImage(pacVif1Packet* pPacket, u_short bp, u_char psm, u_sho
     p64 = (ULONGLONG*)pPacket->pCurrent;
     p64[0] = 0x5100000200000000;
     pQw = (QWdata*)(p64 + 1);
-    ((u_long128*)pQw)[0] = _pack(0x1000000000008001, 0xe);
+    ((u_long128*)pQw)[0] = _makeQW(0x1000000000008001, 0xe);
     pQw[1].ul64[1] = 0x3f;
     pPacket->pCurrent = (u_int*)(pQw + 2);
 }

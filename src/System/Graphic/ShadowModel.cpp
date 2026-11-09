@@ -38,33 +38,7 @@ void sceVu0InversMatrix(float m0[4][4], float m1[4][4]);
 
 #include "System/Graphic/PackMan.h"
 
-
-
-
-
-
-
 extern INT SCREEN_HEIGHT;
-
-/* one qword of an A+D packet (data, register address) */
-static inline void _setAD(void* qp, u_long data, u_long addr) {
-    u_long128 out128;
-    __asm__ volatile("pcpyld %0, %1, %0" : "=r"(out128) : "r"(addr), "0"(data));
-    *(u_long128*)qp = out128;
-}
-
-static inline void _setADnv(void* qp, u_long data, u_long addr) {
-    u_long128 out128;
-    __asm__("pcpyld %0, %1, %0" : "=r"(out128) : "r"(addr), "0"(data));
-    *(u_long128*)qp = out128;
-}
-
-/* the same for a constant value: tied to the output, a constant is first zero-extended to 128 bits (por) */
-static inline void _setADConst(void* qp, u_long data, u_long addr) {
-    u_long128 out128;
-    __asm__ volatile("pcpyld %0, %2, %1" : "=r"(out128) : "r"(data), "r"(addr));
-    *(u_long128*)qp = out128;
-}
 
 union PRIMIVECTOR {
     struct {
@@ -221,10 +195,8 @@ void CShadowModelMan::updateShadowMatrix(const FVECTOR& vMax, const FVECTOR& vMi
 
 void CShadowModelMan::drawBefore() {
     QWdata* qp;
-    u_long128 tag;
     CModel::setSendCtrl(4);
-    __asm__ volatile("pcpyld %0, %2, %1" : "=r"(tag) : "r"((u_long)0x1000000000008000UL), "0"((u_long)0xE));
-    qp = (QWdata*)CPackMan::pkOpenGifTag(tag);
+    qp = (QWdata*)CPackMan::pkOpenGifTag(_makeQW(0x1000000000008000UL, 0xE));
     ((u_long*)qp)[0] = (u_long)(VRAM::_TEX_AREA_START / 32) | ((u_long)(sdw_SCREEN_WIDTH / 64) << 16);
     ((u_long*)qp)[1] = 0x4C;
     qp++;
@@ -240,19 +212,19 @@ void CShadowModelMan::drawBefore() {
     ((u_long*)qp)[0] = ((u_long)(sdw_SCREEN_WIDTH - 1) << 16) | ((u_long)(sdw_SCREEN_HEIGHT - 1) << 48);
     ((u_long*)qp)[1] = 0x40;
     qp++;
-    _setADConst(&qp[0], 6, 0);
-    _setADConst(&qp[1], 0, 1);
+    *(u_long128*)&qp[0] = _makeQW(6, 0);
+    *(u_long128*)&qp[1] = _makeQW(0, 1);
     if (DebugWork::g_dw.shadow.iDispArea) {
-        _setADConst(&qp[1], 0x60000080, 1);
+        *(u_long128*)&qp[1] = _makeQW(0x60000080, 1);
     }
     qp += 2;
     INT j = 0; /* MATCH: a second biv only for j * 64 + 63: its giv steps at the end of the body, i early */
     for (INT i = 0; i < sdw_SCREEN_WIDTH / 64;) {
         u_long d = (u_long)(i * 64) | ((u_long)(j * 64 + 63) << 16) | ((u_long)(sdw_SCREEN_HEIGHT - 1) << 48);
         i++;
-        _setAD(&qp[0], d, 0x40);
-        _setAD(&qp[1], (u_long)(0x8000 - ((sdw_SCREEN_WIDTH / 2) << 4)) | ((u_long)(0x8000 - ((sdw_SCREEN_HEIGHT / 2) << 4)) << 16), 5);
-        _setAD(&qp[2], (u_long)(0x8000 + ((sdw_SCREEN_WIDTH / 2) << 4)) | ((u_long)(0x8000 + ((sdw_SCREEN_HEIGHT / 2) << 4)) << 16), 5);
+        *(u_long128*)&qp[0] = _makeQW(d, 0x40);
+        *(u_long128*)&qp[1] = _makeQW((u_long)(0x8000 - ((sdw_SCREEN_WIDTH / 2) << 4)) | ((u_long)(0x8000 - ((sdw_SCREEN_HEIGHT / 2) << 4)) << 16), 5);
+        *(u_long128*)&qp[2] = _makeQW((u_long)(0x8000 + ((sdw_SCREEN_WIDTH / 2) << 4)) | ((u_long)(0x8000 + ((sdw_SCREEN_HEIGHT / 2) << 4)) << 16), 5);
         qp += 3;
         j++;
     }
@@ -336,9 +308,7 @@ static QWdata* setSdwTSprite32(QWdata* qp, FIX4 plsx, FIX4 plsy, UINT z, FLOAT f
     if (qp) {
         CPackMan::pkCloseGifTag(qp);
     }
-    u_long128 tag;
-    __asm__ volatile("pcpyld %0, %2, %1" : "=r"(tag) : "r"((u_long)cnt | 0x4400000000000000UL), "r"((u_long)0x4343));
-    pul64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(tag);
+    pul64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(_makeQW((u_long)cnt | 0x4400000000000000UL, 0x4343));
     for (i = 0; i < cnt; i++) {
         pul64[0] = uv[0].ul64;
         pul64[1] = pv[0].ul64;
@@ -352,25 +322,22 @@ static QWdata* setSdwTSprite32(QWdata* qp, FIX4 plsx, FIX4 plsy, UINT z, FLOAT f
     }
     CPackMan::pkCloseGifTagManual((UINT*)pul64);
     if (qp) {
-        __asm__ volatile("pcpyld %0, %2, %1" : "=r"(tag) : "r"((u_long)0x1000000000000000UL), "0"((u_long)0xE));
-        qp = (QWdata*)CPackMan::pkOpenGifTag(tag);
+        qp = (QWdata*)CPackMan::pkOpenGifTag(_makeQW(0x1000000000000000UL, 0xE));
     }
     return qp;
 }
 void CShadowModelMan::drawAfter() {
     QWdata* qp;
     static int cnt = 1;
-    u_long128 tag;
-    __asm__ volatile("pcpyld %0, %2, %1" : "=r"(tag) : "r"((u_long)0x1000000000008000UL), "0"((u_long)0xE));
-    qp = (QWdata*)CPackMan::pkOpenGifTag(tag);
-    _setADConst(&qp[0], 0x30000, 0x47);
-    _setADConst(&qp[1], 5, 8);
-    _setADConst(&qp[2], 0, 0x3F);
-    _setADConst(&qp[3], 0x61, 0x14);
-    _setAD(&qp[4], m_lTex0, 6);
-    _setADConst(&qp[5], 0x156, 0);
-    _setADConst(&qp[6], 0x80000000A8UL, 0x42);
-    _setADConst(&qp[7], 0x80808080, 1);
+    qp = (QWdata*)CPackMan::pkOpenGifTag(_makeQW(0x1000000000008000UL, 0xE));
+    *(u_long128*)&qp[0] = _makeQW(0x30000, 0x47);
+    *(u_long128*)&qp[1] = _makeQW(5, 8);
+    *(u_long128*)&qp[2] = _makeQW(0, 0x3F);
+    *(u_long128*)&qp[3] = _makeQW(0x61, 0x14);
+    *(u_long128*)&qp[4] = _makeQW(m_lTex0, 6);
+    *(u_long128*)&qp[5] = _makeQW(0x156, 0);
+    *(u_long128*)&qp[6] = _makeQW(0x80000000A8UL, 0x42);
+    *(u_long128*)&qp[7] = _makeQW(0x80808080, 1);
     CPackMan::pkCloseGifTag(&qp[8]);
     if (dbgCheckUser(NAKAMICH)) {
         if (dbgButtonDown(NAKAMICH, 0x10, 1)) {
@@ -387,15 +354,14 @@ void CShadowModelMan::drawAfter() {
     for (int i = 0; i < cnt; i++) {
         setSdwTSprite32(NULL, -16, -16, 0, 1.0f);
     }
-    __asm__ volatile("pcpyld %0, %2, %1" : "=r"(tag) : "r"((u_long)0x1000000000008000UL), "0"((u_long)0xE));
-    qp = (QWdata*)CPackMan::pkOpenGifTag(tag);
-    _setADConst(&qp[0], 2, 0);
-    _setADConst(&qp[1], 0, 1);
-    _setAD(&qp[2], (u_long)(0x8000 + (-(sdw_SCREEN_WIDTH / 2) << 4)) | ((u_long)(0x8000 + ((sdw_SCREEN_HEIGHT / 2 - 1) << 4)) << 16), 5);
-    _setAD(&qp[3], (u_long)(0x8000 - ((sdw_SCREEN_WIDTH / 2) << 4)) | ((u_long)(0x8000 - ((sdw_SCREEN_HEIGHT / 2) << 4)) << 16), 5);
-    _setAD(&qp[4], (u_long)(0x8000 + ((sdw_SCREEN_WIDTH / 2 - 1) << 4)) | ((u_long)(0x8000 - ((sdw_SCREEN_HEIGHT / 2) << 4)) << 16), 5);
-    _setAD(&qp[5], (u_long)(0x8000 + ((sdw_SCREEN_WIDTH / 2 - 1) << 4)) | ((u_long)(0x8000 + ((sdw_SCREEN_HEIGHT / 2 - 1) << 4)) << 16), 5);
-    _setAD(&qp[6], (u_long)(0x8000 - ((sdw_SCREEN_WIDTH / 2) << 4)) | ((u_long)(0x8000 + ((sdw_SCREEN_HEIGHT / 2 - 1) << 4)) << 16), 5);
+    qp = (QWdata*)CPackMan::pkOpenGifTag(_makeQW(0x1000000000008000UL, 0xE));
+    *(u_long128*)&qp[0] = _makeQW(2, 0);
+    *(u_long128*)&qp[1] = _makeQW(0, 1);
+    *(u_long128*)&qp[2] = _makeQW((u_long)(0x8000 + (-(sdw_SCREEN_WIDTH / 2) << 4)) | ((u_long)(0x8000 + ((sdw_SCREEN_HEIGHT / 2 - 1) << 4)) << 16), 5);
+    *(u_long128*)&qp[3] = _makeQW((u_long)(0x8000 - ((sdw_SCREEN_WIDTH / 2) << 4)) | ((u_long)(0x8000 - ((sdw_SCREEN_HEIGHT / 2) << 4)) << 16), 5);
+    *(u_long128*)&qp[4] = _makeQW((u_long)(0x8000 + ((sdw_SCREEN_WIDTH / 2 - 1) << 4)) | ((u_long)(0x8000 - ((sdw_SCREEN_HEIGHT / 2) << 4)) << 16), 5);
+    *(u_long128*)&qp[5] = _makeQW((u_long)(0x8000 + ((sdw_SCREEN_WIDTH / 2 - 1) << 4)) | ((u_long)(0x8000 + ((sdw_SCREEN_HEIGHT / 2 - 1) << 4)) << 16), 5);
+    *(u_long128*)&qp[6] = _makeQW((u_long)(0x8000 - ((sdw_SCREEN_WIDTH / 2) << 4)) | ((u_long)(0x8000 + ((sdw_SCREEN_HEIGHT / 2 - 1) << 4)) << 16), 5);
     qp += 7;
     ((u_long*)qp)[0] = (u_long)(VRAM::_FRAME0_START / 32) | 0x80000;
     ((u_long*)qp)[1] = 0x4C;

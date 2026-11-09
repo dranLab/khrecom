@@ -1,5 +1,5 @@
 
-#pragma implementation "GprimFull.h" /* MATCH: the Gprim weak tail from C (user-approved pragma mechanism) */
+
 #define GPRIM_H_PATH "c:/KHCOM/MainApp/System/Graphic/Gprim.h" /* MATCH: this unit names Gprim.h so (header default "System/Graphic/Gprim.h") */
 
 #include "khtypes.h"
@@ -35,51 +35,6 @@ QWdata* _makePkt_TriangleStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* p
 QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Back);
 QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* pCrd, BOOL Back);
 #define _prefetch(p, ofs) __asm__ volatile("pref 0, %1(%0)" : : "r"(p), "i"(ofs))
-static inline u_long128 _colToVec(const G_RGBA& col) {
-    UINT iCol = col.col;
-    u_long128 ivCol;
-    __asm__ volatile("pextlb %0, $0, %1\n"
-            "pextlh %0, $0, %0\n"
-            : "=r"(ivCol)
-            : "r"(iCol));
-    return ivCol;
-}
-static inline ULONGLONG _vecToXYZ(u_long128 inIVec) {
-    ULONGLONG outVec64;
-    __asm__ volatile("pexcw %0, %1\n"
-                     "pexch $8, %1\n"
-                     "dsra32 %0, %0, 4\n"
-                     "pextlw %0, %0, $8\n"
-                     : "=&r"(outVec64)
-                     : "r"(inIVec)
-                     : "$8");
-    return outVec64;
-}
-static inline ULONGLONG _vecToXYZ(const IVECTOR& v) { return _vecToXYZ(v._q); }
-static inline u_long128 _screenClamp(const FVECTOR& inFVec) {
-    u_long128 outVec128;
-    u_long128 tmp;
-    __asm__ volatile("lqc2 $vf4, 0x0(%2)\n"
-                     "lui %0, 0x4500\n"
-                     "lui %1, 0x457f\n"
-                     "ori %1, %1, 0xf000\n"
-                     "pextlw %0, %1, %0\n"
-                     "pextlw %0, %0, %0\n"
-                     "qmtc2.ni %0, $vf5\n"
-                     "vadd.xy $vf4, $vf4, $vf5\n"
-                     "vmaxz.xy $vf4, $vf4, $vf0z\n"
-                     "vminiz.xy $vf4, $vf4, $vf5z\n"
-                     "vftoi4.xyz $vf4, $vf4\n"
-                     "qmfc2.ni %0, $vf4\n"
-                     : "=r"(outVec128), "=&r"(tmp)
-                     : "r"(&inFVec));
-    return outVec128;
-}
-static inline u_long128 _gifTag(u_long tag, u_long regs) {
-    u_long128 giftag;
-    __asm__ volatile("pcpyld %0, %1, %2" : "=r"(giftag) : "r"(regs), "r"(tag));
-    return giftag;
-}
 static inline u_long _gsXYZ(FIX4 x, FIX4 y, FIX4 z) {
     return (u_long)(x + 0x8000) | ((u_long)(y + 0x8000) << 16) | ((u_long)(z >> 4) << 32);
 }
@@ -132,28 +87,6 @@ static inline u_long128 _calcSTQW(ULONGLONG inSTQ, FLOAT fW) {
                      : "r"(inSTQ), "f"(fW));
     return iRet;
 }
-/* MATCH: the output is 64-bit and _hiToFloat takes u_long128: the por in _getW is that conversion, not an asm. */
-static inline ULONGLONG _getHi64(u_long128 x) {
-    ULONGLONG out;
-    __asm__ volatile("pcpyud %0, %1, $0" : "=r"(out) : "r"(x));
-    return out;
-}
-static inline FLOAT _hiToFloat(u_long128 x) {
-    FLOAT outf;
-    ULONGLONG tmp;
-    __asm__ volatile("dsra32 %1, %2, 0\n"
-                     "mtc1 %1, %0\n"
-                     : "=f"(outf), "=&r"(tmp)
-                     : "r"(x));
-    return outf;
-}
-static inline INT _toInt(ULONGLONG x) {
-    INT tmp;
-    __asm__ volatile("sll %0, %1, 0" : "=r"(tmp) : "r"(x));
-    return tmp;
-}
-static inline FLOAT _getW(u_long128 x) { return _hiToFloat(_getHi64(x)); }
-static inline INT _getZ(u_long128 x) { return _toInt(_getHi64(x)); }
 INT BackClip(const FVECTOR* in_fV, INT iDirL);
 FLOAT getPrimGetaZ(INT iz, const FVECTOR& Vert, const FMATRIX* pWMat, FLOAT fGeta);
 static inline void _getTmpTexArea(INT nID, UINT& nTexPos, UINT& nClutPos) { /* PARTIAL: VramDef.h */
@@ -164,11 +97,6 @@ static inline void _getTmpTexArea(INT nID, UINT& nTexPos, UINT& nClutPos) { /* P
         nTexPos = VRAM::_TEX_TMP2_START;
         nClutPos = VRAM::_CLUT_TMP2_START;
     }
-}
-static inline u_long128 _AD(u_long addr, u_long data) {
-    u_long128 out128;
-    __asm__ volatile("pcpyld %0, %2, %1" : "=r"(out128) : "r"(data), "r"(addr));
-    return out128;
 }
 TexInfo* CGTexPrim::m_pTexCache = NULL;
 INT CGTexPrim::m_nTmpTexArea = 1;
@@ -315,24 +243,24 @@ void CZFill::makePkt() {
     INT i;
     INT x;
 
-    qp = (QWdata*)CPackMan::pkOpenGifTag(_gifTag(0x1000000000008000UL, 0xE));
+    qp = (QWdata*)CPackMan::pkOpenGifTag(_makeQW(0x1000000000008000UL, 0xE));
 
-    qp[0].ul128 = _AD(0x48, 0x32001);
-    qp[1].ul128 = _AD(0x4F, (_ref(VRAM::_ZBUF_START) / 32) | 0x31000000);
+    qp[0].ul128 = _makeQW(0x32001, 0x48);
+    qp[1].ul128 = _makeQW((_ref(VRAM::_ZBUF_START) / 32) | 0x31000000, 0x4F);
     u_long prim = 0x206; /* MATCH: 0x206 set before the shared zero of the PRIM/PRMODE pair */
-    qp[2].ul128 = _AD(0, prim);
-    qp[3].ul128 = _AD(1, 0);
+    qp[2].ul128 = _makeQW(prim, 0);
+    qp[3].ul128 = _makeQW(0, 1);
     qp += 4;
 
     /* MATCH: x is its own biv (step at the loop end), i++ inside the SCISSOR expression */
     for (i = 0, x = 63; i < 8; qp += 3, x += 64) {
-        qp[0].ul128 = _AD(0x41, (u_long)(i++ * 64) | ((u_long)x << 16) | ((u_long)(_ref(SCREEN_HEIGHT) - 1) << 48));
-        qp[1].ul128 = _AD(5, _gsXYZz(-0x1000, -((_ref(SCREEN_HEIGHT) / 2) << 4), m_nZ));
-        qp[2].ul128 = _AD(5, _gsXYZz(0x1000, (_ref(SCREEN_HEIGHT) / 2) << 4, m_nZ));
+        qp[0].ul128 = _makeQW((u_long)(i++ * 64) | ((u_long)x << 16) | ((u_long)(_ref(SCREEN_HEIGHT) - 1) << 48), 0x41);
+        qp[1].ul128 = _makeQW(_gsXYZz(-0x1000, -((_ref(SCREEN_HEIGHT) / 2) << 4), m_nZ), 5);
+        qp[2].ul128 = _makeQW(_gsXYZz(0x1000, (_ref(SCREEN_HEIGHT) / 2) << 4, m_nZ), 5);
     }
-    qp[0].ul128 = _AD(0x48, CPackMan::getDefault_TEST_2());
-    qp[1].ul128 = _AD(0x4F, CPackMan::getDefault_ZBUF_2());
-    qp[2].ul128 = _AD(0x41, CPackMan::getDefault_SCISSOR_2());
+    qp[0].ul128 = _makeQW(CPackMan::getDefault_TEST_2(), 0x48);
+    qp[1].ul128 = _makeQW(CPackMan::getDefault_ZBUF_2(), 0x4F);
+    qp[2].ul128 = _makeQW(CPackMan::getDefault_SCISSOR_2(), 0x41);
 
     CPackMan::pkCloseGifTag(&qp[3]);
 }
@@ -401,12 +329,12 @@ void CPolyGT4ST::makePkt() {
     }
     tex = setTexture();
     if (isTexNearest()) {
-        qp = (QWdata*)CPackMan::pkOpenGifTag(_gifTag(0x1000000000008000UL, 0xE));
-        qp[0].ul128 = _AD(0x15, 1);
+        qp = (QWdata*)CPackMan::pkOpenGifTag(_makeQW(0x1000000000008000UL, 0xE));
+        qp[0].ul128 = _makeQW(1, 0x15);
         CPackMan::pkCloseGifTag(&qp[1]);
     }
 
-    p64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(_gifTag(0xE400000000008001UL, 0x41241241241270UL));
+    p64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(_makeQW(0xE400000000008001UL, 0x41241241241270UL));
     p64[0] = (u_long)0x21C | ((u_long)isSemiTrans() << 6);
     p64[1] = tex;
 
@@ -429,8 +357,8 @@ void CPolyGT4ST::makePkt() {
     CPackMan::pkCloseGifTagManual((UINT*)&p64[14]);
 
     if (isTexNearest()) {
-        qp = (QWdata*)CPackMan::pkOpenGifTag(_gifTag(0x1000000000008000UL, 0xE));
-        qp[0].ul128 = _AD(0x15, 0x61);
+        qp = (QWdata*)CPackMan::pkOpenGifTag(_makeQW(0x1000000000008000UL, 0xE));
+        qp[0].ul128 = _makeQW(0x61, 0x15);
         CPackMan::pkCloseGifTag(&qp[1]);
     }
 }
@@ -602,15 +530,15 @@ void CCPrim::makePkt() {
         iEnvChange |= 8;
     }
     if (iEnvChange) {
-        pQw = (QWdata*)CPackMan::pkOpenGifTagManual(_gifTag((u_long)(iEnvChange >> 12) | 0x1000000000000000UL, 0xE));
-        if (iEnvChange & 1) (pQw++)->ul128 = _AD(0x48, m_TEST);
-        if (iEnvChange & 2) (pQw++)->ul128 = _AD(0x9, m_CLAMP);
-        if (iEnvChange & 4) (pQw++)->ul128 = _AD(0x41, m_SCISSOR);
-        if (iEnvChange & 8) (pQw++)->ul128 = _AD(0x43, ((u_long)m_ALPHA << 16) | m_ALPHA);
+        pQw = (QWdata*)CPackMan::pkOpenGifTagManual(_makeQW((u_long)(iEnvChange >> 12) | 0x1000000000000000UL, 0xE));
+        if (iEnvChange & 1) (pQw++)->ul128 = _makeQW(m_TEST, 0x48);
+        if (iEnvChange & 2) (pQw++)->ul128 = _makeQW(m_CLAMP, 0x9);
+        if (iEnvChange & 4) (pQw++)->ul128 = _makeQW(m_SCISSOR, 0x41);
+        if (iEnvChange & 8) (pQw++)->ul128 = _makeQW(((u_long)m_ALPHA << 16) | m_ALPHA, 0x43);
         CPackMan::pkCloseGifTagManual((UINT*)pQw);
     }
 
-    p64 = (ULONGLONG*)CPackMan::pkOpenGifTag(_gifTag(0x1400000000000000UL, 0));
+    p64 = (ULONGLONG*)CPackMan::pkOpenGifTag(_makeQW(0x1400000000000000UL, 0));
     {
         ULONGLONG abe = (u_long)isSemiTrans() << 6;
         ULONGLONG prim = m_PRIM & 0xCF;
@@ -619,7 +547,7 @@ void CCPrim::makePkt() {
     }
     CPackMan::pkCloseGifTag(&p64[1]);
 
-    p64 = (ULONGLONG*)CPackMan::pkOpenGifTag(_gifTag(0x2400000000008000UL, 0x41));
+    p64 = (ULONGLONG*)CPackMan::pkOpenGifTag(_makeQW(0x2400000000008000UL, 0x41));
     INT i;
     for (i = m_iMax, pV = m_V; i > 0; i--, pV++) {
         _prefetch(pV, 0x10);
@@ -633,11 +561,11 @@ void CCPrim::makePkt() {
 
     if (iEnvChange) {
         pQw = (QWdata*)CPackMan::pkOpenGifTagManual(
-            _gifTag((u_long)((iEnvChange >> 12) | 0x8000) | 0x1000000000000000UL, 0xE));
-        if (iEnvChange & 1) (pQw++)->ul128 = _AD(0x48, CPackMan::getDefault_TEST_2());
-        if (iEnvChange & 2) (pQw++)->ul128 = _AD(0x9, CPackMan::getDefault_CLAMP_2());
-        if (iEnvChange & 4) (pQw++)->ul128 = _AD(0x41, CPackMan::getDefault_SCISSOR_2());
-        if (iEnvChange & 8) (pQw++)->ul128 = _AD(0x43, CPackMan::getDefault_ALPHA_2());
+            _makeQW((u_long)((iEnvChange >> 12) | 0x8000) | 0x1000000000000000UL, 0xE));
+        if (iEnvChange & 1) (pQw++)->ul128 = _makeQW(CPackMan::getDefault_TEST_2(), 0x48);
+        if (iEnvChange & 2) (pQw++)->ul128 = _makeQW(CPackMan::getDefault_CLAMP_2(), 0x9);
+        if (iEnvChange & 4) (pQw++)->ul128 = _makeQW(CPackMan::getDefault_SCISSOR_2(), 0x41);
+        if (iEnvChange & 8) (pQw++)->ul128 = _makeQW(CPackMan::getDefault_ALPHA_2(), 0x43);
         CPackMan::pkCloseGifTagManual((UINT*)pQw);
     }
 }
@@ -673,15 +601,15 @@ void CTPrim::makePkt() {
         iEnvChange |= 8;
     }
     if (iEnvChange) {
-        pQw = (QWdata*)CPackMan::pkOpenGifTagManual(_gifTag((u_long)(iEnvChange >> 12) | 0x1000000000000000UL, 0xE));
-        if (iEnvChange & 1) (pQw++)->ul128 = _AD(0x48, m_TEST);
-        if (iEnvChange & 2) (pQw++)->ul128 = _AD(0x9, m_CLAMP);
-        if (iEnvChange & 4) (pQw++)->ul128 = _AD(0x41, m_SCISSOR);
-        if (iEnvChange & 8) (pQw++)->ul128 = _AD(0x43, ((u_long)m_ALPHA << 16) | m_ALPHA);
+        pQw = (QWdata*)CPackMan::pkOpenGifTagManual(_makeQW((u_long)(iEnvChange >> 12) | 0x1000000000000000UL, 0xE));
+        if (iEnvChange & 1) (pQw++)->ul128 = _makeQW(m_TEST, 0x48);
+        if (iEnvChange & 2) (pQw++)->ul128 = _makeQW(m_CLAMP, 0x9);
+        if (iEnvChange & 4) (pQw++)->ul128 = _makeQW(m_SCISSOR, 0x41);
+        if (iEnvChange & 8) (pQw++)->ul128 = _makeQW(((u_long)m_ALPHA << 16) | m_ALPHA, 0x43);
         CPackMan::pkCloseGifTagManual((UINT*)pQw);
     }
 
-    p64 = (ULONGLONG*)CPackMan::pkOpenGifTag(_gifTag(0x2400000000000000UL, 7));
+    p64 = (ULONGLONG*)CPackMan::pkOpenGifTag(_makeQW(0x2400000000000000UL, 7));
     p64[0] = tex;
     {
         ULONGLONG abe = (u_long)isSemiTrans() << 6;
@@ -691,7 +619,7 @@ void CTPrim::makePkt() {
     }
     CPackMan::pkCloseGifTag(&p64[2]);
 
-    p64 = (ULONGLONG*)CPackMan::pkOpenGifTag(_gifTag(0x3400000000008000UL, 0x412));
+    p64 = (ULONGLONG*)CPackMan::pkOpenGifTag(_makeQW(0x3400000000008000UL, 0x412));
     INT i;
     for (i = m_iMax, pV = m_V; i > 0; i--, pV++) {
         _prefetch(pV, 0x20);
@@ -706,11 +634,11 @@ void CTPrim::makePkt() {
 
     if (iEnvChange) {
         pQw = (QWdata*)CPackMan::pkOpenGifTagManual(
-            _gifTag((u_long)((iEnvChange >> 12) | 0x8000) | 0x1000000000000000UL, 0xE));
-        if (iEnvChange & 1) (pQw++)->ul128 = _AD(0x48, CPackMan::getDefault_TEST_2());
-        if (iEnvChange & 2) (pQw++)->ul128 = _AD(0x9, CPackMan::getDefault_CLAMP_2());
-        if (iEnvChange & 4) (pQw++)->ul128 = _AD(0x41, CPackMan::getDefault_SCISSOR_2());
-        if (iEnvChange & 8) (pQw++)->ul128 = _AD(0x43, CPackMan::getDefault_ALPHA_2());
+            _makeQW((u_long)((iEnvChange >> 12) | 0x8000) | 0x1000000000000000UL, 0xE));
+        if (iEnvChange & 1) (pQw++)->ul128 = _makeQW(CPackMan::getDefault_TEST_2(), 0x48);
+        if (iEnvChange & 2) (pQw++)->ul128 = _makeQW(CPackMan::getDefault_CLAMP_2(), 0x9);
+        if (iEnvChange & 4) (pQw++)->ul128 = _makeQW(CPackMan::getDefault_SCISSOR_2(), 0x41);
+        if (iEnvChange & 8) (pQw++)->ul128 = _makeQW(CPackMan::getDefault_ALPHA_2(), 0x43);
         CPackMan::pkCloseGifTagManual((UINT*)pQw);
     }
 }
@@ -936,25 +864,25 @@ FIX4 C3DPolyFT4::calcZ() {
 void C3DPolyFT4::makePkt() {
     ULONGLONG* p64;
     ULONGLONG tex = setTexture();
-    p64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(_gifTag(0xE400000000008001UL, 0x42142142142170UL));
+    p64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(_makeQW(0xE400000000008001UL, 0x42142142142170UL));
     p64[0] = (u_long)0x214 | ((u_long)isSemiTrans() << 6);
     p64[1] = tex;
 
     p64[2] = (u_long)m_C0.col | ((u_long)p0.w << 32);
     p64[3] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S0, *(FLOAT*)&p0.w);
-    p64[4] = _vecToXYZ(p0);
+    p64[4] = _vecToXYZ(p0._q);
 
     p64[5] = (u_long)m_C0.col | ((u_long)p1.w << 32);
     p64[6] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S1, *(FLOAT*)&p1.w);
-    p64[7] = _vecToXYZ(p1);
+    p64[7] = _vecToXYZ(p1._q);
 
     p64[8] = (u_long)m_C0.col | ((u_long)p2.w << 32);
     p64[9] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S2, *(FLOAT*)&p2.w);
-    p64[10] = _vecToXYZ(p2);
+    p64[10] = _vecToXYZ(p2._q);
 
     p64[11] = (u_long)m_C0.col | ((u_long)p3.w << 32);
     p64[12] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S3, *(FLOAT*)&p3.w);
-    p64[13] = _vecToXYZ(p3);
+    p64[13] = _vecToXYZ(p3._q);
 
     CPackMan::pkCloseGifTagManual((UINT*)&p64[14]);
 }
@@ -986,25 +914,25 @@ FIX4 C3DPolyGT4::calcZ() {
 void C3DPolyGT4::makePkt() {
     ULONGLONG* p64;
     ULONGLONG tex = setTexture();
-    p64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(_gifTag(0xE400000000008001UL, 0x42142142142170UL));
+    p64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(_makeQW(0xE400000000008001UL, 0x42142142142170UL));
     p64[0] = (u_long)0x21C | ((u_long)isSemiTrans() << 6);
     p64[1] = tex;
 
     p64[2] = (u_long)m_C0.col | ((u_long)p0.w << 32);
     p64[3] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S0, *(FLOAT*)&p0.w);
-    p64[4] = _vecToXYZ(p0);
+    p64[4] = _vecToXYZ(p0._q);
 
     p64[5] = (u_long)m_C1.col | ((u_long)p1.w << 32);
     p64[6] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S1, *(FLOAT*)&p1.w);
-    p64[7] = _vecToXYZ(p1);
+    p64[7] = _vecToXYZ(p1._q);
 
     p64[8] = (u_long)m_C2.col | ((u_long)p2.w << 32);
     p64[9] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S2, *(FLOAT*)&p2.w);
-    p64[10] = _vecToXYZ(p2);
+    p64[10] = _vecToXYZ(p2._q);
 
     p64[11] = (u_long)m_C3.col | ((u_long)p3.w << 32);
     p64[12] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S3, *(FLOAT*)&p3.w);
-    p64[13] = _vecToXYZ(p3);
+    p64[13] = _vecToXYZ(p3._q);
 
     CPackMan::pkCloseGifTagManual((UINT*)&p64[14]);
 }
@@ -1036,21 +964,21 @@ FIX4 C3DPolyFT3::calcZ() {
 void C3DPolyFT3::makePkt() {
     ULONGLONG* p64;
     ULONGLONG tex = setTexture();
-    p64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(_gifTag(0xB400000000008001UL, 0x42142142170UL));
+    p64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(_makeQW(0xB400000000008001UL, 0x42142142170UL));
     p64[0] = (u_long)0x213 | ((u_long)isSemiTrans() << 6);
     p64[1] = tex;
 
     p64[2] = (u_long)m_C0.col | ((u_long)p0.w << 32);
     p64[3] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S0, *(FLOAT*)&p0.w);
-    p64[4] = _vecToXYZ(p0);
+    p64[4] = _vecToXYZ(p0._q);
 
     p64[5] = (u_long)m_C0.col | ((u_long)p1.w << 32);
     p64[6] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S1, *(FLOAT*)&p1.w);
-    p64[7] = _vecToXYZ(p1);
+    p64[7] = _vecToXYZ(p1._q);
 
     p64[8] = (u_long)m_C0.col | ((u_long)p2.w << 32);
     p64[9] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S2, *(FLOAT*)&p2.w);
-    p64[10] = _vecToXYZ(p2);
+    p64[10] = _vecToXYZ(p2._q);
 
     CPackMan::pkCloseGifTagManual((UINT*)&p64[11]);
 }
@@ -1082,21 +1010,21 @@ FIX4 C3DPolyGT3::calcZ() {
 void C3DPolyGT3::makePkt() {
     ULONGLONG* p64;
     ULONGLONG tex = setTexture();
-    p64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(_gifTag(0xB400000000008001UL, 0x42142142170UL));
+    p64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(_makeQW(0xB400000000008001UL, 0x42142142170UL));
     p64[0] = (u_long)0x21B | ((u_long)isSemiTrans() << 6);
     p64[1] = tex;
 
     p64[2] = (u_long)m_C0.col | ((u_long)p0.w << 32);
     p64[3] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S0, *(FLOAT*)&p0.w);
-    p64[4] = _vecToXYZ(p0);
+    p64[4] = _vecToXYZ(p0._q);
 
     p64[5] = (u_long)m_C1.col | ((u_long)p1.w << 32);
     p64[6] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S1, *(FLOAT*)&p1.w);
-    p64[7] = _vecToXYZ(p1);
+    p64[7] = _vecToXYZ(p1._q);
 
     p64[8] = (u_long)m_C2.col | ((u_long)p2.w << 32);
     p64[9] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S2, *(FLOAT*)&p2.w);
-    p64[10] = _vecToXYZ(p2);
+    p64[10] = _vecToXYZ(p2._q);
 
     CPackMan::pkCloseGifTagManual((UINT*)&p64[11]);
 }
@@ -1630,16 +1558,16 @@ FIX4 C3DPolyG4::calcZ() {
 }
 void C3DPolyG4::makePkt() {
     ULONGLONG* p64;
-    p64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(_gifTag(0x9400000000008001UL, 0x414141410UL));
+    p64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(_makeQW(0x9400000000008001UL, 0x414141410UL));
     p64[0] = (u_long)0x20C | ((u_long)isSemiTrans() << 6);
     p64[1] = m_C0.col;
-    p64[2] = _vecToXYZ(p0);
+    p64[2] = _vecToXYZ(p0._q);
     p64[3] = m_C1.col;
-    p64[4] = _vecToXYZ(p1);
+    p64[4] = _vecToXYZ(p1._q);
     p64[5] = m_C2.col;
-    p64[6] = _vecToXYZ(p2);
+    p64[6] = _vecToXYZ(p2._q);
     p64[7] = m_C3.col;
-    p64[8] = _vecToXYZ(p3);
+    p64[8] = _vecToXYZ(p3._q);
     CPackMan::pkCloseGifTagManual((UINT*)&p64[9]);
 }
 FIX4 C3DPolyG3::calcZ() {
@@ -1668,14 +1596,14 @@ FIX4 C3DPolyG3::calcZ() {
 }
 void C3DPolyG3::makePkt() {
     ULONGLONG* p64;
-    p64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(_gifTag(0x7400000000008001UL, 0x4141410));
+    p64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(_makeQW(0x7400000000008001UL, 0x4141410));
     p64[0] = (u_long)0x20C | ((u_long)isSemiTrans() << 6);
     p64[1] = m_C0.col;
-    p64[2] = _vecToXYZ(p0);
+    p64[2] = _vecToXYZ(p0._q);
     p64[3] = m_C1.col;
-    p64[4] = _vecToXYZ(p1);
+    p64[4] = _vecToXYZ(p1._q);
     p64[5] = m_C2.col;
-    p64[6] = _vecToXYZ(p2);
+    p64[6] = _vecToXYZ(p2._q);
     CPackMan::pkCloseGifTagManual((UINT*)&p64[7]);
 }
 FIX4 C3DLine::calcZ() {
@@ -1696,9 +1624,9 @@ void C3DLine::makePkt() {
     CPackMan::pkOpenGifTag(giftag.ul128);
     CPackMan::pkAddGsData((u_long)0x209 | ((u_long)isSemiTrans() << 6));
     CPackMan::pkAddGsData(m_C0.col);
-    CPackMan::pkAddGsData(_vecToXYZ(p0));
+    CPackMan::pkAddGsData(_vecToXYZ(p0._q));
     CPackMan::pkAddGsData(m_C1.col);
-    CPackMan::pkAddGsData(_vecToXYZ(p1));
+    CPackMan::pkAddGsData(_vecToXYZ(p1._q));
     CPackMan::pkCloseGifTag();
 }
 FIX4 C3DLineCoord2::calcZ() {
@@ -1722,9 +1650,9 @@ void C3DLineCoord2::makePkt() {
     CPackMan::pkOpenGifTag(giftag.ul128);
     CPackMan::pkAddGsData((u_long)0x209 | ((u_long)isSemiTrans() << 6));
     CPackMan::pkAddGsData(m_C0.col);
-    CPackMan::pkAddGsData(_vecToXYZ(p0));
+    CPackMan::pkAddGsData(_vecToXYZ(p0._q));
     CPackMan::pkAddGsData(m_C1.col);
-    CPackMan::pkAddGsData(_vecToXYZ(p1));
+    CPackMan::pkAddGsData(_vecToXYZ(p1._q));
     CPackMan::pkCloseGifTag();
 }
 FIX4 C3DLines::calcZ() {
@@ -1764,9 +1692,9 @@ void C3DLines::makePkt() {
         }
         CPackMan::pkAddGsData((u_long)0x209 | ((u_long)isSemiTrans() << 6));
         CPackMan::pkAddGsData(it->C0.col);
-        CPackMan::pkAddGsData(_vecToXYZ(it->p0));
+        CPackMan::pkAddGsData(_vecToXYZ(it->p0._q));
         CPackMan::pkAddGsData(it->C1.col);
-        CPackMan::pkAddGsData(_vecToXYZ(it->p1));
+        CPackMan::pkAddGsData(_vecToXYZ(it->p1._q));
     }
     CPackMan::pkCloseGifTag();
 }
@@ -1791,11 +1719,11 @@ ULONGLONG* _makePkt_TexLine(ULONGLONG* p64, G_STRIP* it, G_STRIP* end) {
         iW = *(UINT*)&fW0;
         p64[0] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[0].S, iW);
         p64[1] = it[0].C.col | ((ULONGLONG)iW << 32);
-        p64[2] = _vecToXYZ(p[0]);
+        p64[2] = _vecToXYZ(p[0]._q);
         iW = *(UINT*)&fW1;
         p64[3] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[1].S, iW);
         p64[4] = it[1].C.col | ((ULONGLONG)iW << 32);
-        p64[5] = _vecToXYZ(p[1]);
+        p64[5] = _vecToXYZ(p[1]._q);
         it += 2;
         p64 += 6;
     }
@@ -1831,11 +1759,11 @@ ULONGLONG* _makePkt_TexLine(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, CCoord* p
         iW = *(UINT*)&fW0;
         p64[0] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[0].S, iW);
         p64[1] = it[0].C.col | ((ULONGLONG)iW << 32);
-        p64[2] = _vecToXYZ(p[0]);
+        p64[2] = _vecToXYZ(p[0]._q);
         iW = *(UINT*)&fW1;
         p64[3] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[1].S, iW);
         p64[4] = it[1].C.col | ((ULONGLONG)iW << 32);
-        p64[5] = _vecToXYZ(p[1]);
+        p64[5] = _vecToXYZ(p[1]._q);
         it += 2;
         p64 += 6;
     }
@@ -1868,15 +1796,15 @@ ULONGLONG* _makePkt_TexTriangle(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, BOOL 
                 iW = *(UINT*)&fW0;
                 p64[0] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[0].S, iW);
                 p64[1] = it[0].C.col | ((ULONGLONG)iW << 32);
-                p64[2] = _vecToXYZ(p[0]);
+                p64[2] = _vecToXYZ(p[0]._q);
                 iW = *(UINT*)&fW1;
                 p64[3] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[1].S, iW);
                 p64[4] = it[1].C.col | ((ULONGLONG)iW << 32);
-                p64[5] = _vecToXYZ(p[1]);
+                p64[5] = _vecToXYZ(p[1]._q);
                 iW = *(UINT*)&fW2;
                 p64[6] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[2].S, iW);
                 p64[7] = it[2].C.col | ((ULONGLONG)iW << 32);
-                p64[8] = _vecToXYZ(p[2]);
+                p64[8] = _vecToXYZ(p[2]._q);
                 it += 3;
                 p64 += 9;
             }
@@ -1909,15 +1837,15 @@ ULONGLONG* _makePkt_TexTriangle(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, BOOL 
                 iW = *(UINT*)&fW0;
                 p64[0] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[0].S, iW);
                 p64[1] = it[0].C.col | ((ULONGLONG)iW << 32);
-                p64[2] = _vecToXYZ(p[0]);
+                p64[2] = _vecToXYZ(p[0]._q);
                 iW = *(UINT*)&fW1;
                 p64[3] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[1].S, iW);
                 p64[4] = it[1].C.col | ((ULONGLONG)iW << 32);
-                p64[5] = _vecToXYZ(p[1]);
+                p64[5] = _vecToXYZ(p[1]._q);
                 iW = *(UINT*)&fW2;
                 p64[6] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[2].S, iW);
                 p64[7] = it[2].C.col | ((ULONGLONG)iW << 32);
-                p64[8] = _vecToXYZ(p[2]);
+                p64[8] = _vecToXYZ(p[2]._q);
                 it += 3;
                 p64 += 9;
             }
@@ -1966,15 +1894,15 @@ ULONGLONG* _makePkt_TexTriangle(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, CCoor
                 iW = *(UINT*)&fW0;
                 p64[0] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[0].S, iW);
                 p64[1] = it[0].C.col | ((ULONGLONG)iW << 32);
-                p64[2] = _vecToXYZ(p[0]);
+                p64[2] = _vecToXYZ(p[0]._q);
                 iW = *(UINT*)&fW1;
                 p64[3] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[1].S, iW);
                 p64[4] = it[1].C.col | ((ULONGLONG)iW << 32);
-                p64[5] = _vecToXYZ(p[1]);
+                p64[5] = _vecToXYZ(p[1]._q);
                 iW = *(UINT*)&fW2;
                 p64[6] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[2].S, iW);
                 p64[7] = it[2].C.col | ((ULONGLONG)iW << 32);
-                p64[8] = _vecToXYZ(p[2]);
+                p64[8] = _vecToXYZ(p[2]._q);
                 it += 3;
                 p64 += 9;
             }
@@ -2019,15 +1947,15 @@ ULONGLONG* _makePkt_TexTriangle(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, CCoor
                 iW = *(UINT*)&fW0;
                 p64[0] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[0].S, iW);
                 p64[1] = it[0].C.col | ((ULONGLONG)iW << 32);
-                p64[2] = _vecToXYZ(p[0]);
+                p64[2] = _vecToXYZ(p[0]._q);
                 iW = *(UINT*)&fW1;
                 p64[3] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[1].S, iW);
                 p64[4] = it[1].C.col | ((ULONGLONG)iW << 32);
-                p64[5] = _vecToXYZ(p[1]);
+                p64[5] = _vecToXYZ(p[1]._q);
                 iW = *(UINT*)&fW2;
                 p64[6] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[2].S, iW);
                 p64[7] = it[2].C.col | ((ULONGLONG)iW << 32);
-                p64[8] = _vecToXYZ(p[2]);
+                p64[8] = _vecToXYZ(p[2]._q);
                 it += 3;
                 p64 += 9;
             }
@@ -2051,9 +1979,9 @@ ULONGLONG* _makePkt_Line(ULONGLONG* p64, G_STRIP* it, G_STRIP* end) {
             continue;
         }
         p64[0] = it[0].C.col;
-        p64[1] = _vecToXYZ(p[0]);
+        p64[1] = _vecToXYZ(p[0]._q);
         p64[2] = it[1].C.col;
-        p64[3] = _vecToXYZ(p[1]);
+        p64[3] = _vecToXYZ(p[1]._q);
         it += 2;
         p64 += 4;
     }
@@ -2084,9 +2012,9 @@ ULONGLONG* _makePkt_Line(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, CCoord* pCrd
             continue;
         }
         p64[0] = it[0].C.col;
-        p64[1] = _vecToXYZ(p[0]);
+        p64[1] = _vecToXYZ(p[0]._q);
         p64[2] = it[1].C.col;
-        p64[3] = _vecToXYZ(p[1]);
+        p64[3] = _vecToXYZ(p[1]._q);
         it += 2;
         p64 += 4;
     }
@@ -2113,11 +2041,11 @@ ULONGLONG* _makePkt_Triangle(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, BOOL Bac
                 it += 3;
             } else {
                 p64[0] = it[0].C.col;
-                p64[1] = _vecToXYZ(p[0]);
+                p64[1] = _vecToXYZ(p[0]._q);
                 p64[2] = it[1].C.col;
-                p64[3] = _vecToXYZ(p[1]);
+                p64[3] = _vecToXYZ(p[1]._q);
                 p64[4] = it[2].C.col;
-                p64[5] = _vecToXYZ(p[2]);
+                p64[5] = _vecToXYZ(p[2]._q);
                 it += 3;
                 p64 += 6;
             }
@@ -2145,11 +2073,11 @@ ULONGLONG* _makePkt_Triangle(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, BOOL Bac
                 it += 3;
             } else {
                 p64[0] = it[0].C.col;
-                p64[1] = _vecToXYZ(p[0]);
+                p64[1] = _vecToXYZ(p[0]._q);
                 p64[2] = it[1].C.col;
-                p64[3] = _vecToXYZ(p[1]);
+                p64[3] = _vecToXYZ(p[1]._q);
                 p64[4] = it[2].C.col;
-                p64[5] = _vecToXYZ(p[2]);
+                p64[5] = _vecToXYZ(p[2]._q);
                 it += 3;
                 p64 += 6;
             }
@@ -2192,11 +2120,11 @@ ULONGLONG* _makePkt_Triangle(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, CCoord* 
                 it += 3;
             } else {
                 p64[0] = it[0].C.col;
-                p64[1] = _vecToXYZ(p[0]);
+                p64[1] = _vecToXYZ(p[0]._q);
                 p64[2] = it[1].C.col;
-                p64[3] = _vecToXYZ(p[1]);
+                p64[3] = _vecToXYZ(p[1]._q);
                 p64[4] = it[2].C.col;
-                p64[5] = _vecToXYZ(p[2]);
+                p64[5] = _vecToXYZ(p[2]._q);
                 it += 3;
                 p64 += 6;
             }
@@ -2236,11 +2164,11 @@ ULONGLONG* _makePkt_Triangle(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, CCoord* 
                 it += 3;
             } else {
                 p64[0] = it[0].C.col;
-                p64[1] = _vecToXYZ(p[0]);
+                p64[1] = _vecToXYZ(p[0]._q);
                 p64[2] = it[1].C.col;
-                p64[3] = _vecToXYZ(p[1]);
+                p64[3] = _vecToXYZ(p[1]._q);
                 p64[4] = it[2].C.col;
-                p64[5] = _vecToXYZ(p[2]);
+                p64[5] = _vecToXYZ(p[2]._q);
                 it += 3;
                 p64 += 6;
             }
@@ -2267,7 +2195,7 @@ QWdata* _makePkt_TexLineStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end) {
             fg >>= 1;
         }
         _setSTQ(*(FVECTOR*)&pQw[0], *(ULONGLONG*)&it->S, fW);
-        pQw[1].ul128 = _colToVec(it->C);
+        pQw[1].ul128 = _colToVec(it->C.col);
         pQw[2].ul128 = p._q;
     }
     return pQw;
@@ -2297,7 +2225,7 @@ QWdata* _makePkt_TexLineStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* pC
             fg >>= 1;
         }
         _setSTQ(*(FVECTOR*)&pQw[0], *(ULONGLONG*)&it->S, fW);
-        pQw[1].ul128 = _colToVec(it->C);
+        pQw[1].ul128 = _colToVec(it->C.col);
         pQw[2].ul128 = p._q;
     }
     return pQw;
@@ -2323,7 +2251,7 @@ QWdata* _makePkt_TexTriangleStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL B
                 fg >>= 1;
             }
             _setSTQ(*(FVECTOR*)&pQw[0], *(ULONGLONG*)&it->S, fW);
-            pQw[1].ul128 = _colToVec(it->C);
+            pQw[1].ul128 = _colToVec(it->C.col);
             pQw[2].ul128 = p._q;
         }
         return pQw;
@@ -2350,7 +2278,7 @@ QWdata* _makePkt_TexTriangleStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL B
                 iDirL ^= 1;
             }
             _setSTQ(*(FVECTOR*)&pQw[0], *(ULONGLONG*)&it->S, fW);
-            pQw[1].ul128 = _colToVec(it->C);
+            pQw[1].ul128 = _colToVec(it->C.col);
             pQw[2].ul128 = p._q;
         }
     }
@@ -2383,7 +2311,7 @@ QWdata* _makePkt_TexTriangleStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord
                 fg >>= 1;
             }
             _setSTQ(*(FVECTOR*)&pQw[0], *(ULONGLONG*)&it->S, fW);
-            pQw[1].ul128 = _colToVec(it->C);
+            pQw[1].ul128 = _colToVec(it->C.col);
             pQw[2].ul128 = p._q;
         }
         return pQw;
@@ -2414,7 +2342,7 @@ QWdata* _makePkt_TexTriangleStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord
                 iDirL ^= 1;
             }
             _setSTQ(*(FVECTOR*)&pQw[0], *(ULONGLONG*)&it->S, fW);
-            pQw[1].ul128 = _colToVec(it->C);
+            pQw[1].ul128 = _colToVec(it->C.col);
             pQw[2].ul128 = p._q;
         }
     }
@@ -2454,7 +2382,7 @@ QWdata* _makePkt_TexTriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Bac
                 fg >>= 1;
             }
             _setSTQ(*(FVECTOR*)&pQw[0], *(ULONGLONG*)&it->S, fW);
-            pQw[1].ul128 = _colToVec(it->C);
+            pQw[1].ul128 = _colToVec(it->C.col);
             pQw[2].ul128 = p._q;
             it++;
             pQw += 3;
@@ -2499,7 +2427,7 @@ QWdata* _makePkt_TexTriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Bac
                 iDir = 2;
             }
             _setSTQ(*(FVECTOR*)&pQw[0], *(ULONGLONG*)&it->S, fW);
-            pQw[1].ul128 = _colToVec(it->C);
+            pQw[1].ul128 = _colToVec(it->C.col);
             pQw[2].ul128 = p._q;
             it++;
             pQw += 3;
@@ -2548,7 +2476,7 @@ QWdata* _makePkt_TexTriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* 
                 fg >>= 1;
             }
             _setSTQ(*(FVECTOR*)&pQw[0], *(ULONGLONG*)&it->S, fW);
-            pQw[1].ul128 = _colToVec(it->C);
+            pQw[1].ul128 = _colToVec(it->C.col);
             pQw[2].ul128 = p._q;
             it++;
             pQw += 3;
@@ -2597,7 +2525,7 @@ QWdata* _makePkt_TexTriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* 
                 iDir = 2;
             }
             _setSTQ(*(FVECTOR*)&pQw[0], *(ULONGLONG*)&it->S, fW);
-            pQw[1].ul128 = _colToVec(it->C);
+            pQw[1].ul128 = _colToVec(it->C.col);
             pQw[2].ul128 = p._q;
             it++;
             pQw += 3;
@@ -2624,7 +2552,7 @@ QWdata* _makePkt_LineStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end) {
         } else {
             fg >>= 1;
         }
-        pQw[0].ul128 = _colToVec(it->C);
+        pQw[0].ul128 = _colToVec(it->C.col);
         pQw[1].ul128 = p._q;
     }
     return pQw;
@@ -2652,7 +2580,7 @@ QWdata* _makePkt_LineStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* pCrd)
         } else {
             fg >>= 1;
         }
-        pQw[0].ul128 = _colToVec(it->C);
+        pQw[0].ul128 = _colToVec(it->C.col);
         pQw[1].ul128 = p._q;
     }
     return pQw;
@@ -2676,7 +2604,7 @@ QWdata* _makePkt_TriangleStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Back
             } else {
                 fg >>= 1;
             }
-            pQw[0].ul128 = _colToVec(it->C);
+            pQw[0].ul128 = _colToVec(it->C.col);
             pQw[1].ul128 = p._q;
         }
         return pQw;
@@ -2702,7 +2630,7 @@ QWdata* _makePkt_TriangleStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Back
                 vDir[1] = vDir[2];
                 iDirL ^= 1;
             }
-            pQw[0].ul128 = _colToVec(it->C);
+            pQw[0].ul128 = _colToVec(it->C.col);
             pQw[1].ul128 = p._q;
         }
     }
@@ -2733,7 +2661,7 @@ QWdata* _makePkt_TriangleStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* p
             } else {
                 fg >>= 1;
             }
-            pQw[0].ul128 = _colToVec(it->C);
+            pQw[0].ul128 = _colToVec(it->C.col);
             pQw[1].ul128 = p._q;
         }
         return pQw;
@@ -2763,7 +2691,7 @@ QWdata* _makePkt_TriangleStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* p
                 vDir[1] = vDir[2];
                 iDirL ^= 1;
             }
-            pQw[0].ul128 = _colToVec(it->C);
+            pQw[0].ul128 = _colToVec(it->C.col);
             pQw[1].ul128 = p._q;
         }
     }
@@ -2801,7 +2729,7 @@ QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Back) 
             } else {
                 fg >>= 1;
             }
-            pQw[0].ul128 = _colToVec(it->C);
+            pQw[0].ul128 = _colToVec(it->C.col);
             pQw[1].ul128 = p._q;
             it++;
             pQw += 2;
@@ -2846,7 +2774,7 @@ QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Back) 
                 vDir[1] = vDir[2];
                 iDir = 2;
             }
-            pQw[0].ul128 = _colToVec(it->C);
+            pQw[0].ul128 = _colToVec(it->C.col);
             pQw[1].ul128 = p._q;
             it++;
             pQw += 2;
@@ -2893,7 +2821,7 @@ QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* pCr
             } else {
                 fg >>= 1;
             }
-            pQw[0].ul128 = _colToVec(it->C);
+            pQw[0].ul128 = _colToVec(it->C.col);
             pQw[1].ul128 = p._q;
             it++;
             pQw += 2;
@@ -2941,7 +2869,7 @@ QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* pCr
                 vDir[1] = vDir[2];
                 iDir = 2;
             }
-            pQw[0].ul128 = _colToVec(it->C);
+            pQw[0].ul128 = _colToVec(it->C.col);
             pQw[1].ul128 = p._q;
             it++;
             pQw += 2;
@@ -3032,10 +2960,8 @@ void C3DStripBase::makePkt() {
         return;
     }
     pQwTop = (QWdata*)CPackMan::pkGetCurrentPointer();
-    pQw = (QWdata*)CPackMan::pkOpenGifTag(_gifTag(
-        (((u_long)m_nType | ((u_long)isShading() << 3) | ((u_long)isSemiTrans() << 6) | (u_long)0x200) << 47) |
-            0x2000400000008000UL,
-        0x41));
+    pQw = (QWdata*)CPackMan::pkOpenGifTag(_makeQW((((u_long)m_nType | ((u_long)isShading() << 3) | ((u_long)isSemiTrans() << 6) | (u_long)0x200) << 47) |
+            0x2000400000008000UL, 0x41));
     _setGeta(m_fGetaZ);
     pQwPkt = pQw;
     pQw = makePktSub(pQwPkt);
@@ -3097,15 +3023,13 @@ void C3DTexStripBase::makePkt() {
     }
     tex = setTexture();
     pQwTop = (QWdata*)CPackMan::pkGetCurrentPointer();
-    p64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(_gifTag(0x1400000000000001UL, 0x7));
+    p64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(_makeQW(0x1400000000000001UL, 0x7));
     p64[0] = tex;
     CPackMan::pkCloseGifTagManual((UINT*)&p64[1]);
-    pQw = (QWdata*)CPackMan::pkOpenGifTag(_gifTag(
-        (((u_long)m_nType | ((u_long)isShading() << 3) | ((u_long)1 << 4) | ((u_long)isSemiTrans() << 6) |
+    pQw = (QWdata*)CPackMan::pkOpenGifTag(_makeQW((((u_long)m_nType | ((u_long)isShading() << 3) | ((u_long)1 << 4) | ((u_long)isSemiTrans() << 6) |
           (u_long)0x200)
          << 47) |
-            0x3000400000008000UL,
-        0x412));
+            0x3000400000008000UL, 0x412));
     _setGeta(m_fGetaZ);
     pQwPkt = pQw;
     pQw = makePktSub(pQwPkt);
@@ -3291,11 +3215,11 @@ void C3DCPrim::makePkt() {
         iEnvChange |= 0x10;
     }
     if (iEnvChange) {
-        pQw = (QWdata*)CPackMan::pkOpenGifTagManual(_gifTag((u_long)(iEnvChange >> 12) | 0x1000000000000000UL, 0xE));
-        if (iEnvChange & 1) (pQw++)->ul128 = _AD(0x48, m_TEST);
-        if (iEnvChange & 2) (pQw++)->ul128 = _AD(0x9, m_CLAMP);
-        if (iEnvChange & 4) (pQw++)->ul128 = _AD(0x41, m_SCISSOR);
-        if (iEnvChange & 8) (pQw++)->ul128 = _AD(0x43, ((u_long)m_ALPHA << 16) | m_ALPHA);
+        pQw = (QWdata*)CPackMan::pkOpenGifTagManual(_makeQW((u_long)(iEnvChange >> 12) | 0x1000000000000000UL, 0xE));
+        if (iEnvChange & 1) (pQw++)->ul128 = _makeQW(m_TEST, 0x48);
+        if (iEnvChange & 2) (pQw++)->ul128 = _makeQW(m_CLAMP, 0x9);
+        if (iEnvChange & 4) (pQw++)->ul128 = _makeQW(m_SCISSOR, 0x41);
+        if (iEnvChange & 8) (pQw++)->ul128 = _makeQW(((u_long)m_ALPHA << 16) | m_ALPHA, 0x43);
         if (iEnvChange & 0x10) {
             ULONGLONG ZMSK = (ULONGLONG)(m_ZBUF & 0xF0000000) << 2;
             ULONGLONG ZBUF = m_ZBUF & 0x0FFFFFFF;
@@ -3306,7 +3230,7 @@ void C3DCPrim::makePkt() {
             } else {
                 x = ZBUF | ZMSK;
             }
-            (pQw++)->ul128 = _AD(0x4F, x);
+            (pQw++)->ul128 = _makeQW(x, 0x4F);
         }
         CPackMan::pkCloseGifTagManual((UINT*)pQw);
     }
@@ -3317,12 +3241,12 @@ void C3DCPrim::makePkt() {
         lPrim = ((u_long)isSemiTrans() << 6) | x;
     }
     if (m_PackReglist[m_PRIM & 7]) {
-        p64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(_gifTag(0x1400000000000001UL, 0));
+        p64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(_makeQW(0x1400000000000001UL, 0));
         p64[0] = lPrim;
         CPackMan::pkCloseGifTagManual((UINT*)&p64[1]);
-        pQw = (QWdata*)CPackMan::pkOpenGifTag(_gifTag(0x2400000000008000UL, 0x41));
+        pQw = (QWdata*)CPackMan::pkOpenGifTag(_makeQW(0x2400000000008000UL, 0x41));
     } else {
-        pQw = (QWdata*)CPackMan::pkOpenGifTag(_gifTag((lPrim << 47) | 0x2000400000008000UL, 0x41));
+        pQw = (QWdata*)CPackMan::pkOpenGifTag(_makeQW((lPrim << 47) | 0x2000400000008000UL, 0x41));
     }
 
     _setGeta(m_fGetaZ);
@@ -3336,12 +3260,12 @@ void C3DCPrim::makePkt() {
         CPackMan::pkCloseGifTag(pQw);
         if (iEnvChange) {
             pQw = (QWdata*)CPackMan::pkOpenGifTagManual(
-                _gifTag((u_long)((iEnvChange >> 12) | 0x8000) | 0x1000000000000000UL, 0xE));
-            if (iEnvChange & 1) (pQw++)->ul128 = _AD(0x48, CPackMan::getDefault_TEST_2());
-            if (iEnvChange & 2) (pQw++)->ul128 = _AD(0x9, CPackMan::getDefault_CLAMP_2());
-            if (iEnvChange & 4) (pQw++)->ul128 = _AD(0x41, CPackMan::getDefault_SCISSOR_2());
-            if (iEnvChange & 8) (pQw++)->ul128 = _AD(0x43, CPackMan::getDefault_ALPHA_2());
-            if (iEnvChange & 0x10) (pQw++)->ul128 = _AD(0x4F, CPackMan::getDefault_ZBUF_2());
+                _makeQW((u_long)((iEnvChange >> 12) | 0x8000) | 0x1000000000000000UL, 0xE));
+            if (iEnvChange & 1) (pQw++)->ul128 = _makeQW(CPackMan::getDefault_TEST_2(), 0x48);
+            if (iEnvChange & 2) (pQw++)->ul128 = _makeQW(CPackMan::getDefault_CLAMP_2(), 0x9);
+            if (iEnvChange & 4) (pQw++)->ul128 = _makeQW(CPackMan::getDefault_SCISSOR_2(), 0x41);
+            if (iEnvChange & 8) (pQw++)->ul128 = _makeQW(CPackMan::getDefault_ALPHA_2(), 0x43);
+            if (iEnvChange & 0x10) (pQw++)->ul128 = _makeQW(CPackMan::getDefault_ZBUF_2(), 0x4F);
             CPackMan::pkCloseGifTagManual((UINT*)pQw);
         }
     } else {
@@ -3460,11 +3384,11 @@ void C3DTPrim::makePkt() {
         iEnvChange |= 0x10;
     }
     if (iEnvChange) {
-        pQw = (QWdata*)CPackMan::pkOpenGifTagManual(_gifTag((u_long)(iEnvChange >> 12) | 0x1000000000000000UL, 0xE));
-        if (iEnvChange & 1) (pQw++)->ul128 = _AD(0x48, m_TEST);
-        if (iEnvChange & 2) (pQw++)->ul128 = _AD(0x9, m_CLAMP);
-        if (iEnvChange & 4) (pQw++)->ul128 = _AD(0x41, m_SCISSOR);
-        if (iEnvChange & 8) (pQw++)->ul128 = _AD(0x43, ((u_long)m_ALPHA << 16) | m_ALPHA);
+        pQw = (QWdata*)CPackMan::pkOpenGifTagManual(_makeQW((u_long)(iEnvChange >> 12) | 0x1000000000000000UL, 0xE));
+        if (iEnvChange & 1) (pQw++)->ul128 = _makeQW(m_TEST, 0x48);
+        if (iEnvChange & 2) (pQw++)->ul128 = _makeQW(m_CLAMP, 0x9);
+        if (iEnvChange & 4) (pQw++)->ul128 = _makeQW(m_SCISSOR, 0x41);
+        if (iEnvChange & 8) (pQw++)->ul128 = _makeQW(((u_long)m_ALPHA << 16) | m_ALPHA, 0x43);
         if (iEnvChange & 0x10) {
             ULONGLONG ZMSK = (ULONGLONG)(m_ZBUF & 0xF0000000) << 2;
             ULONGLONG ZBUF = m_ZBUF & 0x0FFFFFFF;
@@ -3475,7 +3399,7 @@ void C3DTPrim::makePkt() {
             } else {
                 x = ZBUF | ZMSK;
             }
-            (pQw++)->ul128 = _AD(0x4F, x);
+            (pQw++)->ul128 = _makeQW(x, 0x4F);
         }
         CPackMan::pkCloseGifTagManual((UINT*)pQw);
     }
@@ -3486,16 +3410,16 @@ void C3DTPrim::makePkt() {
         lPrim = ((u_long)isSemiTrans() << 6) | x;
     }
     if (m_PackReglist[m_PRIM & 7]) {
-        p64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(_gifTag(0x2400000000000001UL, 0x7));
+        p64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(_makeQW(0x2400000000000001UL, 0x7));
         p64[0] = lTex0;
         p64[1] = lPrim;
         CPackMan::pkCloseGifTagManual((UINT*)&p64[2]);
-        pQw = (QWdata*)CPackMan::pkOpenGifTag(_gifTag(0x3400000000008000UL, 0x412));
+        pQw = (QWdata*)CPackMan::pkOpenGifTag(_makeQW(0x3400000000008000UL, 0x412));
     } else {
-        p64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(_gifTag(0x1400000000000001UL, 0x7));
+        p64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(_makeQW(0x1400000000000001UL, 0x7));
         p64[0] = lTex0;
         CPackMan::pkCloseGifTagManual((UINT*)&p64[1]);
-        pQw = (QWdata*)CPackMan::pkOpenGifTag(_gifTag((lPrim << 47) | 0x3000400000008000UL, 0x412));
+        pQw = (QWdata*)CPackMan::pkOpenGifTag(_makeQW((lPrim << 47) | 0x3000400000008000UL, 0x412));
     }
 
     _setGeta(m_fGetaZ);
@@ -3509,12 +3433,12 @@ void C3DTPrim::makePkt() {
         CPackMan::pkCloseGifTag(pQw);
         if (iEnvChange) {
             pQw = (QWdata*)CPackMan::pkOpenGifTagManual(
-                _gifTag((u_long)((iEnvChange >> 12) | 0x8000) | 0x1000000000000000UL, 0xE));
-            if (iEnvChange & 1) (pQw++)->ul128 = _AD(0x48, CPackMan::getDefault_TEST_2());
-            if (iEnvChange & 2) (pQw++)->ul128 = _AD(0x9, CPackMan::getDefault_CLAMP_2());
-            if (iEnvChange & 4) (pQw++)->ul128 = _AD(0x41, CPackMan::getDefault_SCISSOR_2());
-            if (iEnvChange & 8) (pQw++)->ul128 = _AD(0x43, CPackMan::getDefault_ALPHA_2());
-            if (iEnvChange & 0x10) (pQw++)->ul128 = _AD(0x4F, CPackMan::getDefault_ZBUF_2());
+                _makeQW((u_long)((iEnvChange >> 12) | 0x8000) | 0x1000000000000000UL, 0xE));
+            if (iEnvChange & 1) (pQw++)->ul128 = _makeQW(CPackMan::getDefault_TEST_2(), 0x48);
+            if (iEnvChange & 2) (pQw++)->ul128 = _makeQW(CPackMan::getDefault_CLAMP_2(), 0x9);
+            if (iEnvChange & 4) (pQw++)->ul128 = _makeQW(CPackMan::getDefault_SCISSOR_2(), 0x41);
+            if (iEnvChange & 8) (pQw++)->ul128 = _makeQW(CPackMan::getDefault_ALPHA_2(), 0x43);
+            if (iEnvChange & 0x10) (pQw++)->ul128 = _makeQW(CPackMan::getDefault_ZBUF_2(), 0x4F);
             CPackMan::pkCloseGifTagManual((UINT*)pQw);
         }
     } else {

@@ -27,24 +27,6 @@ void FTOI0Vector(IVECTOR& outVec, const FVECTOR& inVec);
 void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
 void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 
-static inline u_long128 _colToVec(UINT iCol) {
-    u_long128 ivCol;
-    __asm__ volatile("pextlb %0, $0, %1\n"
-            "pextlh %0, $0, %0\n"
-            : "=r"(ivCol)
-            : "r"(iCol));
-    return ivCol;
-}
-
-static inline UINT _vecToCol(u_long128 iCol) {
-    UINT ivCol;
-    __asm__ volatile("ppach %0, $0, %1\n"
-            "ppacb %0, $0, %0\n"
-            : "=r"(ivCol)
-            : "r"(iCol));
-    return ivCol;
-}
-
 #include "System/Graphic/TexInfo.h"
 
 

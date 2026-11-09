@@ -483,39 +483,6 @@ static inline void _ftoi4(IVECTOR& iVec, const FVECTOR& fVec) {
                  : "r"(&iVec), "r"(&fVec)
                  : "memory");
 }
-static inline u_long128 _colToVec(UINT iCol) {
-    u_long128 ivCol;
-    __asm__ volatile("pextlb %0, $0, %1\n"
-                     "pextlh %0, $0, %0\n"
-                     : "=r"(ivCol)
-                     : "r"(iCol));
-    return ivCol;
-}
-static inline UINT _vecToCol(u_long128 iCol) {
-    UINT ivCol;
-    __asm__ volatile("ppach %0, $0, %1\n"
-                     "ppacb %0, $0, %0\n"
-                     : "=r"(ivCol)
-                     : "r"(iCol));
-    return ivCol;
-}
-/* MATCH: one asm statement, as in the original (all seven instructions carry one line marker, Gprim.h:821, here and
- * in FrecFont's makePkt), including the 0xFF load: C can't place it there. A TImode `tmp = 0xFF` adds `por zero`, a
- * constant operand ("0"/"r"(0xFF), u_long locals) is hoisted out of the vertex loop, a hard-register local puts the
- * li in place but moves the iMul/product registers (5 lines). tmp is tied to ivCol: that keeps ivCol in v1 and the
- * product in a0 as in the original. */
-static inline u_long128 _mulCol(u_long128 ivCol, u_long128 iMul) {
-    u_long128 tmp;
-    __asm__ volatile("pmulth %1, %0, %2\n"
-                     "addiu %0, $0, 0xff\n"
-                     "pextlw %0, %0, %0\n"
-                     "pcpyld %0, %0, %0\n"
-                     "psrlw %1, %1, 7\n"
-                     "pcgtw %0, %1, %0\n"
-                     "por %0, %1, %0\n"
-                     : "=r"(tmp), "=r"(ivCol) : "r"(iMul), "0"(ivCol));
-    return tmp;
-}
 void C2DSprObj::move() {
     FVECTOR fVec;
     IVECTOR iVec;
