@@ -334,17 +334,24 @@ static void channel_conv_joint(At3Work *w)
     }
 }
 
-/* Parked: first draft (2026-11-07), 334 of 457 lines, 80 bytes short; the butterfly stage has its structure (registers renamed: w, half, step); the window loop
-   keeps fewer values on the stack than the original (5 spills at 0x18-0x2C) and the band copy's tail is not interleaved with its setup;
-   decomp-permuter 2 x 20 min: d >> shift in a local (-23), the rest loop-note hacks: the frame is 16 bytes larger (one more spill); the
-   prologue through the shift search follows the original (movn abs, the shift loop from 12) apart from registers */
+/* Parked: 2 of 457 lines (2026-11-09): the whole image matches except two loads in the window loop's last block: ours
+   issues a_wind[mi] first (into v0, the product's register) and ((short *)ov)[1] second (a2), the original ov[1] first
+   into v0. In sched1 the a_wind load kills its base register (reg weight 0) and wins the tie; ov[1]*a_wind[mi] keeps
+   v0 for ov[1] but issues a_wind first too (4 lines); the product in a separate variable live elsewhere (max) gives the
+   original order but puts the product in that variable's register. Tried: shapes from the original's register reuse
+   (step = the abs temp, p = odd-band source / butterfly pointer / window base, i = every counter and the butterfly's k,
+   the window's t1 reused for out), memcpy of two recomputed member addresses ((src|dst)&7 test), indexed loops (givs),
+   hi before lo (andi first), t1/t0 loads before mx[i]/cc[i] (giv order), const mx/cc/ca (rodata tables), n = step*2
+   inside the half loop (65 insns: loop.c moves n*4 only in its second pass, so n >> 1 is spilled as in the original),
+   w + 2 == p, ov as a pointer after the second if; forms of the last two statements, ternaries, do-while(0) barriers,
+   decomp-permuter 3x 20 min */
 #if 0
 typedef struct {
     int v[4];
 } At3Tbl4;
-extern unsigned short cc[];
-extern short ca[];
-extern int mx[];
+extern const unsigned short cc[];
+extern const short ca[];
+extern const int mx[];
 extern int coefpost[];
 void imdct_sub(int *a, int *b, int n);
 void imdct_ch(int *a, int *b, int *coef, int *tbl);
@@ -353,75 +360,63 @@ void imdct_ch2(int *a, int *b, int *coef, int *tbl);
 int imdct(char *ch, int band, int gain)
 {
     At3Tbl4 tbl = {{0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF}};
-    int *src;
     int *w = ((At3Chan *)ch)->spec + band * 256;
-    int i, max, shift, step, half, k, n;
+    int i, max, shift, step, half, n;
     int *p;
-    At3Band *b;
-    int *s;
 
     if (band & 1) {
-        int *q = ((At3Chan *)ch)->spec + band * 256 + 127;
-        int *d;
-        src = w;
+        p = w;
         w = ((At3Chan *)ch)->spec;
-        d = w;
         for (i = 0; i < 128; i++) {
-            d[0] = q[128] - *src++;
-            d[128] = *q--;
-            d++;
+            w[i] = p[255 - i] - p[i];
+            w[i + 128] = p[127 - i];
         }
     } else {
-        int *q;
         w = ((At3Chan *)ch)->spec + band * 256;
-        q = ((At3Chan *)ch)->spec + band * 256 + 255;
-        src = w;
-        for (i = 127; i >= 0; i--) {
-            *src = *src - *q--;
-            src++;
+        for (i = 0; i < 128; i++) {
+            w[i] = w[i] - w[255 - i];
         }
     }
     max = 0;
-    for (i = 127, p = w; i >= 0; i--, p++) {
-        int x = p[128];
-        int y = p[0];
-        int d, a;
+    for (i = 0; i < 128; i++) {
+        int x = w[i + 128];
+        int y = w[i];
+        int d;
         x += (((x >> 15) * 0x6A0A) >> 1) + (((x & 0x7FFF) * 0x6A0A) >> 16);
         d = y - x;
         y = y + x;
-        a = d;
-        p[128] = d;
-        if (a < 0) a = -a;
-        p[0] = y;
-        if (max < a) max = a;
-        a = y;
-        if (a < 0) a = -a;
-        if (max < a) max = a;
+        w[i + 128] = d;
+        step = d;
+        if (step < 0) step = -step;
+        w[i] = y;
+        if (max < step) max = step;
+        step = y;
+        if (step < 0) step = -step;
+        if (max < step) max = step;
     }
     if (max == 0) return 1;
     shift = 12;
     while (shift >= 2 && max >= (1 << (29 - shift))) shift--;
-    for (i = 255, p = w; i >= 0; i--, p++) *p <<= shift;
+    for (i = 0; i < 256; i++) w[i] <<= shift;
     step = 64;
     do {
-        n = step * 2;
         half = step / 2;
         do {
-            k = n;
+            n = step * 2;
+            i = n;
             p = w;
-            if (k >= 5) {
-                imdct_sub(p, p + n - 4, k);
-                p += step;
+            if (i >= 5) {
+                imdct_sub(p, p + n - 4, i);
+                p += n >> 1;
             } else {
-                int *q = p + k;
                 do {
-                    p[0] = (p[0] - q[-1]) >> 1;
-                    p[1] = (p[1] - q[-2]) >> 1;
-                    k -= 4;
+                    p[0] = (p[0] - p[i - 1]) >> 1;
+                    p[1] = (p[1] - p[i - 2]) >> 1;
+                    i -= 4;
                     p += 2;
-                } while (k > 0);
+                } while (i > 0);
             }
-            if (p == w + 2) {
+            if (w + 2 == p) {
                 imdct_ch2(w + step, w, &coefpost[0x2FC + half * 4], tbl.v);
                 w = p;
             } else {
@@ -436,39 +431,30 @@ int imdct(char *ch, int band, int gain)
         step >>= 1;
         w -= 256;
     } while (step != 1);
-    b = &((At3Band *)ch)[band];
-    memcpy(b, &b->save, 0xB8);
-    s = b->spec;
-    {
-        int sh = gain + shift;
-        int sh1 = sh - 1;
-        unsigned short *c = &cc[127];
-        int *m = &mx[127];
-        int *v = w + 254;
-        for (i = 127; i >= 0; i--) {
-            int t1 = v[1];
-            int t0 = v[0];
-            int ci = *c--;
-            int mi = *m--;
-            int r, d, e, lo, hi, out, ds;
-            int *ov;
-            r = ci * (t1 >> 16) + ((ci * ((t1 >> 1) & 0x7FFF)) >> 15);
-            v -= 2;
-            d = (t0 - t1) >> 1;
-            e = d - r;
-            d = d + r;
-            lo = (e & 0x7FFF) * ca[mi + 128];
-            hi = (e >> 15) * ca[mi + 128];
-            ov = &s[mi + 256];
-            out = 0;
-            if (sh1 < 20) out = (hi >> (sh - 4)) + (lo >> (sh + 11));
-            ds = d >> shift;
-            s[127 - mi] = ((*ov >> 1) - a_wind[mi] * out) >> 3;
-            if (sh1 < 15) out = (hi << (15 - sh1)) + (lo >> sh1);
-            else out = (hi >> (sh - 16)) + (lo >> sh1);
-            s[mi + 128] = out + ((((short *)ov)[1] * a_wind[mi]) >> 3);
-            *ov = (d << (15 - shift)) + ds * ca[mi];
-        }
+    memcpy(&((At3Band *)ch)[band].hdr, &((At3Band *)ch)[band].save, 0xB8);
+    p = ((At3Band *)ch)[band].spec;
+    gain = gain + shift - 1;
+    for (i = 127; i >= 0; i--) {
+        int t0 = w[i * 2];
+        int t1 = w[i * 2 + 1];
+        int mi = mx[i];
+        int ci = cc[i];
+        int r, d, e, lo, hi;
+        int *ov;
+        r = ci * (t1 >> 16) + ((ci * ((t1 >> 1) & 0x7FFF)) >> 15);
+        d = (t0 - t1) >> 1;
+        e = d - r;
+        d = d + r;
+        hi = (e >> 15) * ca[mi + 128];
+        lo = (e & 0x7FFF) * ca[mi + 128];
+        t1 = 0;
+        if (gain < 20) t1 = (hi >> (gain - 3)) + (lo >> (gain + 12));
+        p[127 - mi] = ((p[mi + 256] >> 1) - a_wind[mi] * t1) >> 3;
+        if (gain < 15) t1 = (hi << (15 - gain)) + (lo >> gain);
+        else t1 = (hi >> (gain - 15)) + (lo >> gain);
+        ov = (int *)(mi * 4 + (int)p) + 256;
+        p[mi + 128] = t1 + ((a_wind[mi] * ((short *)ov)[1]) >> 3);
+        *ov = (d << (15 - shift)) + (d >> shift) * ca[mi];
     }
     return 0;
 }
