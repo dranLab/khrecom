@@ -137,7 +137,7 @@ public:
         m_vLook.w = 1.0f;
     }
     const FVECTOR* getLook() const {
-        return m_vLook.w == 0.0f ? NULL : &m_vLook;
+        if (m_vLook.w == 0.0f) return NULL; return &m_vLook; /* two returns, not a ternary: the original's labels end a cse block in DeFocus's _makePkt* */
     }
 
 protected:
