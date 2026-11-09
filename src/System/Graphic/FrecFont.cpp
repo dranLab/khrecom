@@ -690,9 +690,8 @@ INT CFrecFont::getDispSize(G_XY& outSize, const CFntM2& prim, G_XY* pLineSize, I
     }
     INT nLine = 1;
     INT nChar = 0;
-    FIX4 xOld = 0;
-    FIX4 xMax = 0;
-    FIX4 x = 0;
+    FIX4 x, xMax, xOld;
+    x = xMax = xOld = 0;
     FIX4 w = prim.m_Size;
     FIX4 h = w;
     INT nBaseSize = font._nFontSize;
@@ -704,33 +703,17 @@ INT CFrecFont::getDispSize(G_XY& outSize, const CFntM2& prim, G_XY* pLineSize, I
         pLs->x = 0x80000000;
     }
     BOOL bHalfSpaceExt = !(nStyle & 0x9000);
+    USHORT nSJIS;
     while (*pStr) {
-        USHORT c = *pStr++;
-        USHORT nSJIS;
-        if (c < 0x80) {
-            if (c <= 0x20) {
-                switch (c) {
+        USHORT nH = *pStr++;
+        if (nH < 0x80) {
+            if (nH <= 0x20) {
+                switch (nH) {
                 case 9:
-                    {
-                        FIX4 ww = prim.m_Size;
-                        FIX4 sp = space.x;
-                        if (!bHalfSpaceExt) {
-                            x += ((ww >> 1) + sp) << 2;
-                        } else {
-                            x += (ww / 2 + sp) << 2;
-                        }
-                    }
+                    _addHalfSpace(x, prim.m_Size, space.x, bHalfSpaceExt, 4);
                     break;
                 case 0x20:
-                    {
-                        FIX4 ww = prim.m_Size;
-                        FIX4 sp = space.x;
-                        if (!bHalfSpaceExt) {
-                            x += (ww >> 1) - (ww >> 3) + sp;
-                        } else {
-                            x += (ww >> 1) - (ww >> 3) + sp;
-                        }
-                    }
+                    _addSpace(x, prim.m_Size, space.x, bHalfSpaceExt);
                     break;
                 case 10:
                     if (xMax < x) xMax = x;
@@ -747,40 +730,37 @@ INT CFrecFont::getDispSize(G_XY& outSize, const CFntM2& prim, G_XY* pLineSize, I
                 continue;
             } else {
                 if (bDebugMode) w = h >> 1;
-                nSJIS = c;
+                nSJIS = nH;
             }
         } else {
-            USHORT c2 = *pStr;
-            if (c2) pStr++;
-            if (c >= 0xF9) {
-                switch (c2) {
+            USHORT nL = *pStr;
+            if (nL) pStr++;
+            if (nH >= 0xF9) {
+                switch (nL) {
                 case 0x40:
                     x = xOld;
                     break;
                 case 0x42:
-                    {
-                        FIX4 t = x - 2;
-                        x = t - space.x;
-                    }
+                    x -= 2 + space.x;
                     break;
                 case 0x43:
                 case 0x44:
                 case 0x45:
-                    x += 0x10 << (c2 - 0x43);
+                    x += 0x10 << (nL - 0x43);
                     break;
                 default:
-                    if (c2 >= 0x80) {
-                        if (c2 < 0x98) x += 0x200;
-                        else if (c2 < 0xA0) x += 0x280;
+                    if (nL >= 0x80) {
+                        if (nL < 0x98) x += 0x200;
+                        else if (nL < 0xA0) x += 0x280;
                         else x += 0x180;
                     }
                     break;
                 }
                 continue;
             }
-            nSJIS = (c << 8) | c2;
+            nSJIS = (nH << 8) | nL;
             if (nSJIS == 0x8140) {
-                x += ((prim.m_Size >> 1) + space.x) << 1;
+                _addHalfSpace(x, prim.m_Size, space.x, FALSE, 2);
                 continue;
             }
             if (bDebugMode) w = h;
@@ -793,10 +773,7 @@ INT CFrecFont::getDispSize(G_XY& outSize, const CFntM2& prim, G_XY* pLineSize, I
         } else {
             USHORT nPPW = font._pFontWidthTbl[nCode];
             if (nPPW < nBaseSize) nPPW++;
-            FIX4 xNew;
-            if (bIsBaseW) xNew = x + (nPPW << 4);
-            else xNew = x + nPPW * w / nBaseSize;
-            x = xNew;
+            x = bIsBaseW ? x + (nPPW << 4) : x + nPPW * w / nBaseSize;
         }
         nChar++;
         x += space.x;
@@ -823,12 +800,10 @@ INT CFrecFont::getDispSize(G_XY& outSize, const CFntM2& prim, G_XY* pLineSize, I
                 pLineSize[i].y = 0;
                 break;
             case 6:
-            case 7: {
-                FIX4 hv = pLineSize[i].y >> 1;
-                pLineSize[i].x = -hv;
-                pLineSize[i].y = hv;
+            case 7:
+                pLineSize[i].y >>= 1;
+                pLineSize[i].x = -pLineSize[i].y;
                 break;
-            }
             }
         }
     }
