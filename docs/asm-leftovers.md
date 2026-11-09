@@ -20,14 +20,13 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 
 | unit | functions left | instr left | parked | data from asm |
 |---|---:|---:|---:|---|
-| `Game/Player/PlayerDRiku` | 1 | 3473 | 1 |  |
 | `Game/Map` | 2 | 1952 | 2 |  |
 | `Form/Menu/Camp` | 2 | 1778 | 2 |  |
 | `System/Graphic/Effect/libppp/draw/shape` | 2 | 1771 | 2 |  |
-| `System/Graphic/Model` | 2 | 1000 | 2 |  |
 | `System/Graphic/Effect/libppp/keProg/KeTh` | 1 | 685 | 1 |  |
 | `System/Graphic/FrecFont` | 1 | 656 | 1 |  |
 | `System/Graphic/HermitePathCamera` | 1 | 632 | 1 |  |
+| `System/Graphic/Model` | 1 | 412 | 1 |  |
 | `System/Graphic/DispList` | 1 | 245 | 1 |  |
 | `System/Math3D` | 1 | 234 | 1 |  |
 | `Game/Enemy/HumanBoss` | 1 | 181 | 1 |  |
@@ -50,8 +49,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `System/Graphic/DispList` | `_drawOT__19CDispListShadowDrawR5OTtag` | 245 | 59 of 289 lines (2026-11-09): only loop.c on the draw loop over pBuf[j] (line 940) differs: the original keeps `li 12; mult` in the loop, ours strength-reduces it to a pointer, so the registers shift (ours spills i, the original keeps i in s6 and spills hHnd; s6/s7/s8 renamed throughout). … |
 | `System/Graphic/FrecFont` | `makePkt__9CFrecFontR6CFntM2` | 656 | 343 of 749 lines (2026-11-09: 338 before the A+D qwords and _setRGBAQ went to Gprim.h's _makeQW) - the draft has the original's structure (all locals in stack slots, contiguous MMI colour sequences as volatile in-place asm, control-code switch, outline/shadow passes), but the spill slots differ: … |
 | `System/Graphic/HermitePathCamera` | `updatePos__18CHermitePathCameraR7FVECTORT1fi` | 632 | 88 of 723 lines - same structure; left: the case-2 fStep lives in f12 in the original (ours f2), the hoisted addresses of the BG-check and learp blocks get swapped s-registers (&m_vWPos s0, &vAdd s0 / &OldPos s1 in the original), the mInv address is kept in a register here and recomputed there. … |
-| `System/Graphic/Model` | `_disp0_SetPacket__6CModelUiPA3_CiiUliPUl` | 588 | 93 of 655 lines (2026-11-08): the block tree equals the original's .mdebug except before pack #1 (original: a CModel inline, x invisible, y visible, x loaded after y) and the colour-matrix getter (original has no block there but the getter's addiu shape). Still differs: this in s4 / iFlags&2 in … |
-| `System/Graphic/Model` | `makePkt__5CBBox` | 412 | 108 of 458 lines (2026-11-08), register allocation: structure matches (8-corner RotTransPers loop with min/max and W range, colour checks, four line-strip GIF packets), but the original keeps this in s4, &m_C0 in s1 and different caller-saved temporaries spilled around RotTransPers; ours also … |
+| `System/Graphic/Model` | `makePkt__5CBBox` | 412 | 18 of 448 lines (2026-11-09): only the spill slots of PRE's hoisted addresses (sp+256..280: this+52, sp+208, sp+64, sp+80, x+1, this+32, this+36 in the original's order): gcse bucket count 185, the original needs 189 = 376-379 insns at gcse (ours 367); the nine empty asms at the end match it … |
 | `System/Graphic/WorldEnv` | `initialize__9CWorldEnv` | 128 | 0-8 of 177 lines (2026-11-08): this draft is the original source. Compiled with the original's own anonymous-namespace name (c:/KHCOM/MainApp/System/Graphic/WorldEnv.cpp + suffix UPaaaa = pid 2588, via a rewritten .ii line marker and a chosen pid) it matches every time; our build names the … |
 | `System/Graphic/Effect/libppp/draw/shape` | `pppVu1ShapeDraw` | 133 | 4 of 143 lines (2026-11-08): `or a0,a1,a0` (the call argument) issues before `addiu t6,a1,32` instead of after tag 2's next store, and tag 3's `sb t4,3(t6)` comes after its p[1] store instead of first. With tag 3 written id/next/qwc like the others its stores match, but t3/t4 swap: local-alloc … |
 | `System/Graphic/Effect/libppp/draw/shape` | `op_shape_draw` | 1638 | 5 of 1680 lines (2026-11-08): only the join after the six loops differs, registers of three block-local values: the original has `move a0,t1` (the $9 read), `li v1,32`, `andi v0,a1,0x800`, ours `move v1,t1`, `li v0,32`, `andi a0,a1,0x800`. They are the block's only 3 local quantities, so … |
@@ -60,12 +58,11 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `System/RcfCD` | `_startCdRead__Fii` | 41 | 4-8 lines, varying between identical builds (the draft above is the C) - the hoisted lui's of the s_n*_R statics get s5/s6 in an order that changes per compiler run (gcse PRE hash order, memory gcse-pre-hash-order); store orders tried (all worse). Kept asm because the result is not reproducible. |
 | `Game/Map` | `init__4CMapii` | 1046 | 87 of 1193 lines, same size - the bbox loop's &b (ApplyMatrix output) is hoisted into s2 here, the original recomputes it per iteration, which shifts the saved registers of xmin/xmax/zmin/zmax and the division block; for/do/ while/goto loop shapes, by-value apply inline and a 10 min permuter run … |
 | `Game/Map` | `disp__4CMap` | 906 | 709 of 1308 lines, 44 bytes short - structure as the original (debug clamp, shader modes, group selection by player position, pipelined kick/resultCheckBBox display via group table or grid, sky polygons). The 44 bytes: the original keeps two copies of the "flush the last model" block (group and … |
-| `Game/Player/PlayerDRiku` | `exeStockSkill__Q22PL12CPlayerDRiku` | 3473 | 108 of 3890 lines (2026-11-07), same size: cross-jumped tails differ (ours merges the 0x683 setAnimSkillEx+setPlayerFlag(0x100000) tail into 0x6xx's copy, the original keeps 0x683's whole and merges the later copy into the setAnimRsrcEx tail at 2525); the sched2 order around global float loads in … |
 | `Game/Enemy/HumanBoss` | `setupAct__10CHumanBoss` | 181 | 18 of 205 lines (2026-11-08, third try: unchanged; mechanism found, no honest source for it): one cause left. Diagnostic: a `long m = -1;` as the loop body's first statement with the normal arm storing m gives 8 lines and exactly the original's preheader (li s2,-1 / li s5,1 / li s4,-1, one hoisted … |
 | `Form/Menu/Camp` | `setTechWin__5CCampi` | 551 | 36 of 617 lines, same size (2026-11-08; drop the data block after the INCLUDE_ASM to build the draft): s-register roles in the sleight-list loop and one store order. The original increments nTechSelectTop in place before getName (s6, delay slot) and keeps i + 1 in s7 (i in s4, reused for … |
 | `Form/Menu/Camp` | `setMapCardWin__5CCampi` | 1227 | 23 of 1407 lines (2026-11-08; drop the data block after the INCLUDE_ASM to build the draft): only the spill slots of seven PRE-hoisted values differ (orig 0x74 &m_pMCInfoNumFnt, 0x78 &m_nMapKind, 0x7c i + 1, 0x80 nKind - 161, 0x84 &m_pMCCard, 0x88 &m_pMCFnt, 0x8c &m_pMCInfoNumCtrl; ours 0x74 … |
 
-Totals: 18 functions (12887 instructions) in 14 units, 18 of them parked; 1 units take a data section from assembly.
+Totals: 16 functions (8826 instructions) in 13 units, 16 of them parked; 1 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->
