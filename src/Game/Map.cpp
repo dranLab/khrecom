@@ -326,10 +326,15 @@ static inline void _rotMatrixX(FMATRIX& m, const TDEG& a) {
     rx.m[2][1] = -s;
     m = _mulMatrix(m, rx);
 }
-/* Parked: 87 of 1193 lines, same size - the bbox loop's &b (ApplyMatrix output) is hoisted into s2 here, the original
-   recomputes it per iteration, which shifts the saved registers of xmin/xmax/zmin/zmax and the division block; for/do/
-   while/goto loop shapes, by-value apply inline and a 10 min permuter run (12.9k candidates) keep it. Worked: by-value
-   _mulMatrix, _getAZFTbl inline, angles by const TDEG&, vec in its own scope, min/max init before v[], zero-store order. */
+/* Parked: 82 of 1190 lines, same size (2026-11-09) - only xmin/xmax/zmin/zmax's registers and the division block's
+   schedule differ: the original keeps xmax's quotient apart (mflo v1; move s6,v1: cse kept the variable canonical, so
+   xmax dies twice and goes to global-alloc, s6 after the fptodp temps s3-s5), ours lets cse replace xmax by the
+   quotient (local-alloc ties them: xmin s2, xmax s1, zmax s3). make_regs_eqv keeps the variable only when it is
+   referenced outside the cse path (from the qq loop's end to the else label), not visible in the original's code.
+   Worked: ApplyMatrix through the Coord.h-style by-value inline (line markers Coord.h:634-635; 87 -> 82), by-value
+   _mulMatrix, _getAZFTbl inline, angles by const TDEG&, vec in its own scope, min/max init before v[], zero-store
+   order. Tried: division block in line order / per-coordinate / one-line forms, xmax if/ternary/compare forms, int
+   declarations before the floats, v[] in its own block; earlier for/do/while/goto loop shapes, 10 min permuter. */
 #if 0
 void CMap::init(BOOL bUseMapUnit, BOOL bTexClampRepeat) {
     INT nModelCount = 0;
@@ -484,10 +489,7 @@ void CMap::init(BOOL bUseMapUnit, BOOL bTexClampRepeat) {
             }
         }
         for (int qq = 0; qq < 4; qq++) {
-            FVECTOR p;
-            FVECTOR b;
-            ApplyMatrix(b, Crd(i + 1).m_Local, v[qq]);
-            p = b;
+            FVECTOR p = _applyMatrix(Crd(i + 1).m_Local, v[qq]);
             if (p.x < xminf) xminf = p.x;
             if (xmaxf < p.x) xmaxf = p.x;
             if (p.z < zminf) zminf = p.z;
