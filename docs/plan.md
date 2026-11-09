@@ -467,6 +467,7 @@ header split the original didn't have, or make a class a template to hide its st
 | Draft lacks a ref local, or "registers only" around asm helpers | `ref-locals-reveal-shape`, `ti-di-conversion-is-por` |
 | global-alloc near-tie, code-less lines in the line markers | ppp-eidrawshipoly-unit-lessons (statements inside an empty do-while(0) count refs one loop level deeper) |
 | Near-tie in global-alloc, or combine/reorg folds an insn | `empty-asm-live-length` (empty asm: +1 live length, blocks stealing; with an operand, a second use) |
+| `move rN,sp` and a stack local loaded through rN only after a join | nested-function-static-chain (a GNU nested function's static chain) |
 | Temp in s3/t8, giv stepping far from its biv | `asm-temp-odd-register` |
 | `bne; nop` where the original has `bnel` into the loop | a volatile load at the target: reorg never steals it (`_threadReadProc`) |
 | several fields "look volatile", reloads after one store (Sony libs) | union-store-alias-zero |
