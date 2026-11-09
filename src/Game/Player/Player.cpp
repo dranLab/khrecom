@@ -8105,7 +8105,6 @@ char* szPlayerCard[67] = {
 extern "C" int sprintf(char*, const char*, ...); extern "C" unsigned int strlen(const char*); extern "C" char* strncpy(char*, const char*, unsigned int);
 CPlayerDebug::CPlayerDebug(CTask* pParent) : CTask(pParent, 0x4000) {
     INT i;
-    UINT nRA;
     m_pWin = NULL;
     sprintf(m_szBuf[0], " ");
     sprintf(m_szBuf[1], " ");

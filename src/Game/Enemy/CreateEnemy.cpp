@@ -399,15 +399,15 @@ __asm__(
     ".weak _vt$20CBossUrsulaTentacle4$4CFSM\n_vt$20CBossUrsulaTentacle4$4CFSM = 0\n"
 );
 
-/* Debug allocation: com_malloc_d gets the message "<file>(<line>)" and whatever $ra holds here. */
-#define NEW_D(p, T, line, args)                                                 \
-    {                                                                           \
-        char* msg = __FILE__ "(" #line ")";                                     \
-        UINT nRA;                                                               \
-        __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA));                      \
-        p = (T*)com_malloc_d(sizeof(T), msg, nRA);                              \
-        if (p != NULL) p = new (p) T args;                                      \
-    }
+
+
+
+
+
+
+
+
+
 
 CEntity* CEntityFactory::createEnemy(INT inRsrcID, CTask* inParent, void* inExtraInfo) {
     CTask* parent;
@@ -422,214 +422,214 @@ CEntity* CEntityFactory::createEnemy(INT inRsrcID, CTask* inParent, void* inExtr
 
     switch (inRsrcID) {
     case 1: case 32:
-        NEW_D(enemy, CEnemyShadow, 127, (parent));
+        enemy = new (__FILE__ "(127)") CEnemyShadow(parent);
         break;
     case 2:
-        NEW_D(enemy, CEnemySoldier, 131, (parent));
+        enemy = new (__FILE__ "(131)") CEnemySoldier(parent);
         break;
     case 3:
-        NEW_D(enemy, CEnemyRednocturne, 135, (parent));
+        enemy = new (__FILE__ "(135)") CEnemyRednocturne(parent);
         break;
     case 4:
-        NEW_D(enemy, CEnemyBluerhapsody, 139, (parent));
+        enemy = new (__FILE__ "(139)") CEnemyBluerhapsody(parent);
         break;
     case 5:
-        NEW_D(enemy, CEnemyYellowopera, 143, (parent));
+        enemy = new (__FILE__ "(143)") CEnemyYellowopera(parent);
         break;
     case 6:
-        NEW_D(enemy, CEnemyGreenrequiem, 147, (parent));
+        enemy = new (__FILE__ "(147)") CEnemyGreenrequiem(parent);
         break;
     case 7:
-        NEW_D(enemy, CEnemyPowerwild, 151, (parent));
+        enemy = new (__FILE__ "(151)") CEnemyPowerwild(parent);
         break;
     case 8:
-        NEW_D(enemy, CEnemyBouncywild, 155, (parent));
+        enemy = new (__FILE__ "(155)") CEnemyBouncywild(parent);
         break;
     case 9:
-        NEW_D(enemy, CEnemyLargebody, 159, (parent));
+        enemy = new (__FILE__ "(159)") CEnemyLargebody(parent);
         break;
     case 10:
-        NEW_D(enemy, CEnemyFatbandit, 163, (parent));
+        enemy = new (__FILE__ "(163)") CEnemyFatbandit(parent);
         break;
     case 11:
-        NEW_D(enemy, CEnemyBandit, 167, (parent));
+        enemy = new (__FILE__ "(167)") CEnemyBandit(parent);
         break;
     case 12:
-        NEW_D(enemy, CEnemyWightnight, 171, (parent));
+        enemy = new (__FILE__ "(171)") CEnemyWightnight(parent);
         break;
     case 13:
-        NEW_D(enemy, CEnemyGargoyle, 175, (parent));
+        enemy = new (__FILE__ "(175)") CEnemyGargoyle(parent);
         break;
     case 14: case 33:
-        NEW_D(enemy, CEnemySearchghost, 180, (parent));
+        enemy = new (__FILE__ "(180)") CEnemySearchghost(parent);
         break;
     case 15:
-        NEW_D(enemy, CEnemyAirsoldier, 184, (parent));
+        enemy = new (__FILE__ "(184)") CEnemyAirsoldier(parent);
         break;
     case 16: case 34:
-        NEW_D(enemy, CEnemyWhitemushroom, 189, (parent));
+        enemy = new (__FILE__ "(189)") CEnemyWhitemushroom(parent);
         break;
     case 17: case 35:
-        NEW_D(enemy, CEnemyBlackfungus, 194, (parent));
+        enemy = new (__FILE__ "(194)") CEnemyBlackfungus(parent);
         break;
     case 18:
-        NEW_D(enemy, CEnemySeaneon, 198, (parent));
+        enemy = new (__FILE__ "(198)") CEnemySeaneon(parent);
         break;
     case 19:
-        NEW_D(enemy, CEnemyScrewdiver, 202, (parent));
+        enemy = new (__FILE__ "(202)") CEnemyScrewdiver(parent);
         break;
     case 20:
-        NEW_D(enemy, CEnemyAquatank, 206, (parent));
+        enemy = new (__FILE__ "(206)") CEnemyAquatank(parent);
         break;
     case 21:
-        NEW_D(enemy, CEnemyPirate, 210, (parent));
+        enemy = new (__FILE__ "(210)") CEnemyPirate(parent);
         break;
     case 22:
-        NEW_D(enemy, CEnemyAirpirate, 214, (parent));
+        enemy = new (__FILE__ "(214)") CEnemyAirpirate(parent);
         break;
     case 23:
-        NEW_D(enemy, CEnemyDarkball, 218, (parent));
+        enemy = new (__FILE__ "(218)") CEnemyDarkball(parent);
         break;
     case 24:
-        NEW_D(enemy, CEnemyWyvern, 222, (parent));
+        enemy = new (__FILE__ "(222)") CEnemyWyvern(parent);
         break;
     case 25:
-        NEW_D(enemy, CEnemyWizard, 226, (parent));
+        enemy = new (__FILE__ "(226)") CEnemyWizard(parent);
         break;
     case 26:
-        NEW_D(enemy, CEnemyDefender, 230, (parent));
+        enemy = new (__FILE__ "(230)") CEnemyDefender(parent);
         break;
     case 27:
-        NEW_D(enemy, CEnemyNeoshadow, 234, (parent));
+        enemy = new (__FILE__ "(234)") CEnemyNeoshadow(parent);
         break;
     case 28:
-        NEW_D(enemy, CEnemyBarrelspider, 238, (parent));
+        enemy = new (__FILE__ "(238)") CEnemyBarrelspider(parent);
         break;
     case 29:
-        NEW_D(enemy, CEnemyTornadostep, 242, (parent));
+        enemy = new (__FILE__ "(242)") CEnemyTornadostep(parent);
         break;
     case 30:
-        NEW_D(enemy, CEnemyLoudness, 246, (parent));
+        enemy = new (__FILE__ "(246)") CEnemyLoudness(parent);
         break;
     case 31: case 36:
-        NEW_D(enemy, CEnemyCreapplant, 251, (parent));
+        enemy = new (__FILE__ "(251)") CEnemyCreapplant(parent);
         break;
     case 37:
-        NEW_D(enemy, CEnemy100AcreBB_Beehive, 256, (parent));
+        enemy = new (__FILE__ "(256)") CEnemy100AcreBB_Beehive(parent);
         break;
     case 38:
-        NEW_D(enemy, CEnemy100AcreBB_Bee, 260, (parent));
+        enemy = new (__FILE__ "(260)") CEnemy100AcreBB_Bee(parent);
         break;
     case 100:
-        NEW_D(enemy, CTutorialHood, 265, (parent));
+        enemy = new (__FILE__ "(265)") CTutorialHood(parent);
         break;
     case 101:
-        NEW_D(enemy, CTutorialLeon, 269, (parent));
+        enemy = new (__FILE__ "(269)") CTutorialLeon(parent);
         break;
     case 102:
-        NEW_D(enemy, CBossGuardarmor, 274, (parent));
+        enemy = new (__FILE__ "(274)") CBossGuardarmor(parent);
         break;
     case 106:
-        NEW_D(enemy, CBossCloud, 278, (parent));
+        enemy = new (__FILE__ "(278)") CBossCloud(parent);
         break;
     case 107:
-        NEW_D(enemy, CBossHades, 282, (parent));
+        enemy = new (__FILE__ "(282)") CBossHades(parent);
         break;
     case 110:
-        NEW_D(enemy, CEnemyOverlay110, 286, (parent));
+        enemy = new (__FILE__ "(286)") CEnemyOverlay110(parent);
         break;
     case 112:
-        NEW_D(enemy, CEnemyOverlay112, 290, (parent));
+        enemy = new (__FILE__ "(290)") CEnemyOverlay112(parent);
         break;
     case 114:
-        NEW_D(enemy, CBossVexen, 294, (parent));
+        enemy = new (__FILE__ "(294)") CBossVexen(parent);
         break;
     case 116:
-        NEW_D(enemy, CBossRiku, 298, (parent));
+        enemy = new (__FILE__ "(298)") CBossRiku(parent);
         break;
     case 117:
-        NEW_D(enemy, CBossLarxene, 302, (parent));
+        enemy = new (__FILE__ "(302)") CBossLarxene(parent);
         break;
     case 118:
-        NEW_D(enemy, CBossAxel, 306, (parent));
+        enemy = new (__FILE__ "(306)") CBossAxel(parent);
         break;
     case 105:
-        NEW_D(enemy, CEnemyOverlay105, 310, (parent));
+        enemy = new (__FILE__ "(310)") CEnemyOverlay105(parent);
         break;
     case 108:
-        NEW_D(enemy, CEnemyOverlay108, 314, (parent));
+        enemy = new (__FILE__ "(314)") CEnemyOverlay108(parent);
         break;
     case 125:
-        NEW_D(enemy, CEnemyOverlay125, 317, (parent));
+        enemy = new (__FILE__ "(317)") CEnemyOverlay125(parent);
         break;
     case 126:
-        NEW_D(enemy, CEnemyOverlay126, 320, (parent));
+        enemy = new (__FILE__ "(320)") CEnemyOverlay126(parent);
         break;
     case 109:
-        NEW_D(enemy, CEnemyOverlay109, 324, (parent));
+        enemy = new (__FILE__ "(324)") CEnemyOverlay109(parent);
         break;
     case 209:
-        NEW_D(enemy, CEnemyOverlay209, 327, (parent));
+        enemy = new (__FILE__ "(327)") CEnemyOverlay209(parent);
         break;
     case 111:
-        NEW_D(enemy, CBossUrsula, 331, (parent));
+        enemy = new (__FILE__ "(331)") CBossUrsula(parent);
         break;
     case 201:
-        NEW_D(enemy, CBossUrsulaTentacle1, 334, (parent));
+        enemy = new (__FILE__ "(334)") CBossUrsulaTentacle1(parent);
         break;
     case 202:
-        NEW_D(enemy, CBossUrsulaTentacle2, 337, (parent));
+        enemy = new (__FILE__ "(337)") CBossUrsulaTentacle2(parent);
         break;
     case 203:
-        NEW_D(enemy, CBossUrsulaTentacle3, 340, (parent));
+        enemy = new (__FILE__ "(340)") CBossUrsulaTentacle3(parent);
         break;
     case 204:
-        NEW_D(enemy, CBossUrsulaTentacle4, 343, (parent));
+        enemy = new (__FILE__ "(343)") CBossUrsulaTentacle4(parent);
         break;
     case 113:
-        NEW_D(enemy, CEnemyOverlay113, 347, (parent));
+        enemy = new (__FILE__ "(347)") CEnemyOverlay113(parent);
         break;
     case 115:
-        NEW_D(enemy, CEnemyOverlay115, 351, (parent));
+        enemy = new (__FILE__ "(351)") CEnemyOverlay115(parent);
         break;
     case 120:
-        NEW_D(enemy, CBossMarluxia2, 355, (parent));
+        enemy = new (__FILE__ "(355)") CBossMarluxia2(parent);
         break;
     case 135:
-        NEW_D(enemy, CBossMarluxia2Funnel, 358, (parent));
+        enemy = new (__FILE__ "(358)") CBossMarluxia2Funnel(parent);
         break;
     case 136: case 137:
-        NEW_D(enemy, CBossMarluxia2Scythe, 362, (parent));
+        enemy = new (__FILE__ "(362)") CBossMarluxia2Scythe(parent);
         break;
     case 132:
-        NEW_D(enemy, CBossMarluxia3, 366, (parent));
+        enemy = new (__FILE__ "(366)") CBossMarluxia3(parent);
         break;
     case 138:
-        NEW_D(enemy, CBossMarluxia3Specter, 369, (parent));
+        enemy = new (__FILE__ "(369)") CBossMarluxia3Specter(parent);
         break;
     case 119:
-        NEW_D(enemy, CBossMarluxia, 373, (parent));
+        enemy = new (__FILE__ "(373)") CBossMarluxia(parent);
         break;
     case 121:
-        NEW_D(enemy, CBossLexaeus, 377, (parent));
+        enemy = new (__FILE__ "(377)") CBossLexaeus(parent);
         break;
     case 124:
-        NEW_D(enemy, CBossZexion, 381, (parent));
+        enemy = new (__FILE__ "(381)") CBossZexion(parent);
         break;
     case 133:
-        NEW_D(enemy, CBossZexionBook, 384, (parent));
+        enemy = new (__FILE__ "(384)") CBossZexionBook(parent);
         break;
     case 122:
-        NEW_D(enemy, CEnemyOverlay122, 388, (parent));
+        enemy = new (__FILE__ "(388)") CEnemyOverlay122(parent);
         break;
     case 103:
-        NEW_D(enemy, CEnemySpadesoldier, 393, (parent));
+        enemy = new (__FILE__ "(393)") CEnemySpadesoldier(parent);
         break;
     case 104:
-        NEW_D(enemy, CEnemyHeartsoldier, 397, (parent));
+        enemy = new (__FILE__ "(397)") CEnemyHeartsoldier(parent);
         break;
     default:
-        NEW_D(enemy, CSampleEnemy, 401, (parent));
+        enemy = new (__FILE__ "(401)") CSampleEnemy(parent);
         break;
     }
 
@@ -652,19 +652,19 @@ CEntity* CEntityFactory::createMapEnemy(const OBJ_INFO& inObjInfo, CTask* inPare
 
     switch (inObjInfo.sID) {
     case 1: case 27: case 32: case 302:
-        NEW_D(enemy, CMapEnemyShadow, 440, (parent));
+        enemy = new (__FILE__ "(440)") CMapEnemyShadow(parent);
         break;
     case 2: case 7: case 9: case 10: case 26: case 30:
-        NEW_D(enemy, CMapEnemyGround, 449, (parent));
+        enemy = new (__FILE__ "(449)") CMapEnemyGround(parent);
         break;
     case 16: case 17: case 34: case 35:
-        NEW_D(enemy, CMapEnemyMushroom, 456, (parent));
+        enemy = new (__FILE__ "(456)") CMapEnemyMushroom(parent);
         break;
     case 13: case 14: case 20: case 23: case 24: case 33:
-        NEW_D(enemy, CMapEnemyAir, 469, (parent));
+        enemy = new (__FILE__ "(469)") CMapEnemyAir(parent);
         break;
     default:
-        NEW_D(enemy, CMapEnemy, 473, (parent));
+        enemy = new (__FILE__ "(473)") CMapEnemy(parent);
         break;
     }
 
