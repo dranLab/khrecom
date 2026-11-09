@@ -857,6 +857,17 @@ inline FIX4 CTPrim::calcZ() {
 
 
 
+/* The original's colour inlines at 774-782 and 792-800 (.mdebug: the colour word loaded at 774, pextlb/pextlh at 780;
+ * the qword loaded at 792, ppach/ppacb at 798; ref locals iCol/ivCol as here). Their names are ours. */
+inline u_long128 _colToVec(UINT iCol) {
+    u_long128 ivCol;
+
+
+
+
+    __asm__ volatile("pextlb %0, $0, %1\n\tpextlh %0, $0, %0" : "=r"(ivCol) : "r"(iCol));
+    return ivCol;
+}
 
 
 
@@ -866,26 +877,15 @@ inline FIX4 CTPrim::calcZ() {
 
 
 
+inline UINT _vecToCol(u_long128 iCol) {
+    UINT ivCol;
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    __asm__ volatile("ppach %0, $0, %1\n\tppacb %0, $0, %0" : "=r"(ivCol) : "r"(iCol));
+    return ivCol;
+}
 
 
 

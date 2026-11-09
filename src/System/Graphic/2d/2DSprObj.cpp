@@ -483,22 +483,6 @@ static inline void _ftoi4(IVECTOR& iVec, const FVECTOR& fVec) {
                  : "r"(&iVec), "r"(&fVec)
                  : "memory");
 }
-static inline u_long128 _colToVec(UINT iCol) {
-    u_long128 ivCol;
-    __asm__ volatile("pextlb %0, $0, %1\n"
-                     "pextlh %0, $0, %0\n"
-                     : "=r"(ivCol)
-                     : "r"(iCol));
-    return ivCol;
-}
-static inline UINT _vecToCol(u_long128 iCol) {
-    UINT ivCol;
-    __asm__ volatile("ppach %0, $0, %1\n"
-                     "ppacb %0, $0, %0\n"
-                     : "=r"(ivCol)
-                     : "r"(iCol));
-    return ivCol;
-}
 /* MATCH: one asm statement, as in the original (all seven instructions carry one line marker, Gprim.h:821, here and
  * in FrecFont's makePkt), including the 0xFF load: C can't place it there. A TImode `tmp = 0xFF` adds `por zero`, a
  * constant operand ("0"/"r"(0xFF), u_long locals) is hoisted out of the vertex loop, a hard-register local puts the

@@ -735,7 +735,7 @@ static u_long128* _makePkt_StillScreen(u_long128* qp) {
         ScaleVector(vCol, *pColor, 128.0f);
         FTOI0Vector(ivCol, vCol);
         u_long128 iCol = *(u_long128*)&ivCol;
-        __asm__("ppach %0, $0, %1\n\tppacb %0, $0, %0" : "=r"(nCol) : "r"(iCol));
+        nCol = _vecToCol(iCol);
     }
     *qp++ = _makeQW(0x30000, 0x47);
     *qp++ = _makeQW((VRAM::_ZBUF_START / 32) | 0x31000000, 0x4e);

@@ -35,15 +35,6 @@ QWdata* _makePkt_TriangleStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* p
 QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Back);
 QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* pCrd, BOOL Back);
 #define _prefetch(p, ofs) __asm__ volatile("pref 0, %1(%0)" : : "r"(p), "i"(ofs))
-static inline u_long128 _colToVec(const G_RGBA& col) {
-    UINT iCol = col.col;
-    u_long128 ivCol;
-    __asm__ volatile("pextlb %0, $0, %1\n"
-            "pextlh %0, $0, %0\n"
-            : "=r"(ivCol)
-            : "r"(iCol));
-    return ivCol;
-}
 static inline ULONGLONG _vecToXYZ(u_long128 inIVec) {
     ULONGLONG outVec64;
     __asm__ volatile("pexcw %0, %1\n"
@@ -2235,7 +2226,7 @@ QWdata* _makePkt_TexLineStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end) {
             fg >>= 1;
         }
         _setSTQ(*(FVECTOR*)&pQw[0], *(ULONGLONG*)&it->S, fW);
-        pQw[1].ul128 = _colToVec(it->C);
+        pQw[1].ul128 = _colToVec(it->C.col);
         pQw[2].ul128 = p._q;
     }
     return pQw;
@@ -2265,7 +2256,7 @@ QWdata* _makePkt_TexLineStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* pC
             fg >>= 1;
         }
         _setSTQ(*(FVECTOR*)&pQw[0], *(ULONGLONG*)&it->S, fW);
-        pQw[1].ul128 = _colToVec(it->C);
+        pQw[1].ul128 = _colToVec(it->C.col);
         pQw[2].ul128 = p._q;
     }
     return pQw;
@@ -2291,7 +2282,7 @@ QWdata* _makePkt_TexTriangleStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL B
                 fg >>= 1;
             }
             _setSTQ(*(FVECTOR*)&pQw[0], *(ULONGLONG*)&it->S, fW);
-            pQw[1].ul128 = _colToVec(it->C);
+            pQw[1].ul128 = _colToVec(it->C.col);
             pQw[2].ul128 = p._q;
         }
         return pQw;
@@ -2318,7 +2309,7 @@ QWdata* _makePkt_TexTriangleStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL B
                 iDirL ^= 1;
             }
             _setSTQ(*(FVECTOR*)&pQw[0], *(ULONGLONG*)&it->S, fW);
-            pQw[1].ul128 = _colToVec(it->C);
+            pQw[1].ul128 = _colToVec(it->C.col);
             pQw[2].ul128 = p._q;
         }
     }
@@ -2351,7 +2342,7 @@ QWdata* _makePkt_TexTriangleStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord
                 fg >>= 1;
             }
             _setSTQ(*(FVECTOR*)&pQw[0], *(ULONGLONG*)&it->S, fW);
-            pQw[1].ul128 = _colToVec(it->C);
+            pQw[1].ul128 = _colToVec(it->C.col);
             pQw[2].ul128 = p._q;
         }
         return pQw;
@@ -2382,7 +2373,7 @@ QWdata* _makePkt_TexTriangleStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord
                 iDirL ^= 1;
             }
             _setSTQ(*(FVECTOR*)&pQw[0], *(ULONGLONG*)&it->S, fW);
-            pQw[1].ul128 = _colToVec(it->C);
+            pQw[1].ul128 = _colToVec(it->C.col);
             pQw[2].ul128 = p._q;
         }
     }
@@ -2422,7 +2413,7 @@ QWdata* _makePkt_TexTriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Bac
                 fg >>= 1;
             }
             _setSTQ(*(FVECTOR*)&pQw[0], *(ULONGLONG*)&it->S, fW);
-            pQw[1].ul128 = _colToVec(it->C);
+            pQw[1].ul128 = _colToVec(it->C.col);
             pQw[2].ul128 = p._q;
             it++;
             pQw += 3;
@@ -2467,7 +2458,7 @@ QWdata* _makePkt_TexTriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Bac
                 iDir = 2;
             }
             _setSTQ(*(FVECTOR*)&pQw[0], *(ULONGLONG*)&it->S, fW);
-            pQw[1].ul128 = _colToVec(it->C);
+            pQw[1].ul128 = _colToVec(it->C.col);
             pQw[2].ul128 = p._q;
             it++;
             pQw += 3;
@@ -2516,7 +2507,7 @@ QWdata* _makePkt_TexTriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* 
                 fg >>= 1;
             }
             _setSTQ(*(FVECTOR*)&pQw[0], *(ULONGLONG*)&it->S, fW);
-            pQw[1].ul128 = _colToVec(it->C);
+            pQw[1].ul128 = _colToVec(it->C.col);
             pQw[2].ul128 = p._q;
             it++;
             pQw += 3;
@@ -2565,7 +2556,7 @@ QWdata* _makePkt_TexTriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* 
                 iDir = 2;
             }
             _setSTQ(*(FVECTOR*)&pQw[0], *(ULONGLONG*)&it->S, fW);
-            pQw[1].ul128 = _colToVec(it->C);
+            pQw[1].ul128 = _colToVec(it->C.col);
             pQw[2].ul128 = p._q;
             it++;
             pQw += 3;
@@ -2592,7 +2583,7 @@ QWdata* _makePkt_LineStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end) {
         } else {
             fg >>= 1;
         }
-        pQw[0].ul128 = _colToVec(it->C);
+        pQw[0].ul128 = _colToVec(it->C.col);
         pQw[1].ul128 = p._q;
     }
     return pQw;
@@ -2620,7 +2611,7 @@ QWdata* _makePkt_LineStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* pCrd)
         } else {
             fg >>= 1;
         }
-        pQw[0].ul128 = _colToVec(it->C);
+        pQw[0].ul128 = _colToVec(it->C.col);
         pQw[1].ul128 = p._q;
     }
     return pQw;
@@ -2644,7 +2635,7 @@ QWdata* _makePkt_TriangleStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Back
             } else {
                 fg >>= 1;
             }
-            pQw[0].ul128 = _colToVec(it->C);
+            pQw[0].ul128 = _colToVec(it->C.col);
             pQw[1].ul128 = p._q;
         }
         return pQw;
@@ -2670,7 +2661,7 @@ QWdata* _makePkt_TriangleStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Back
                 vDir[1] = vDir[2];
                 iDirL ^= 1;
             }
-            pQw[0].ul128 = _colToVec(it->C);
+            pQw[0].ul128 = _colToVec(it->C.col);
             pQw[1].ul128 = p._q;
         }
     }
@@ -2701,7 +2692,7 @@ QWdata* _makePkt_TriangleStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* p
             } else {
                 fg >>= 1;
             }
-            pQw[0].ul128 = _colToVec(it->C);
+            pQw[0].ul128 = _colToVec(it->C.col);
             pQw[1].ul128 = p._q;
         }
         return pQw;
@@ -2731,7 +2722,7 @@ QWdata* _makePkt_TriangleStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* p
                 vDir[1] = vDir[2];
                 iDirL ^= 1;
             }
-            pQw[0].ul128 = _colToVec(it->C);
+            pQw[0].ul128 = _colToVec(it->C.col);
             pQw[1].ul128 = p._q;
         }
     }
@@ -2769,7 +2760,7 @@ QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Back) 
             } else {
                 fg >>= 1;
             }
-            pQw[0].ul128 = _colToVec(it->C);
+            pQw[0].ul128 = _colToVec(it->C.col);
             pQw[1].ul128 = p._q;
             it++;
             pQw += 2;
@@ -2814,7 +2805,7 @@ QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Back) 
                 vDir[1] = vDir[2];
                 iDir = 2;
             }
-            pQw[0].ul128 = _colToVec(it->C);
+            pQw[0].ul128 = _colToVec(it->C.col);
             pQw[1].ul128 = p._q;
             it++;
             pQw += 2;
@@ -2861,7 +2852,7 @@ QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* pCr
             } else {
                 fg >>= 1;
             }
-            pQw[0].ul128 = _colToVec(it->C);
+            pQw[0].ul128 = _colToVec(it->C.col);
             pQw[1].ul128 = p._q;
             it++;
             pQw += 2;
@@ -2909,7 +2900,7 @@ QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* pCr
                 vDir[1] = vDir[2];
                 iDir = 2;
             }
-            pQw[0].ul128 = _colToVec(it->C);
+            pQw[0].ul128 = _colToVec(it->C.col);
             pQw[1].ul128 = p._q;
             it++;
             pQw += 2;
