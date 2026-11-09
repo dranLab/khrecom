@@ -372,10 +372,16 @@ log in `build/progress/cleanup-<name>.md`; merge with the `--summary` deltas; ad
 
 **Queue state (2026-11-07):** the R1 "gate" items are feature macros a unit defines before the include. Dropping each
 one's `#define`s and rebuilding: ENTITY_H_SETFLAG_DIRECT, MODELDATA_H_TEXINFO_CTOR, GAME_COLLISION_COLLOBJ_H (CollUtil)
-and VECTOR_H_SET_CALL all change the image, so they stay. The global operators are done (cleanup/heapman-operators, 2026-11-07): System/HeapMan.h has RET_ADDR (inline
-asm: __builtin_return_address reloads ra), new, delete, delete[], new(size_t, char*), new[] and placement new, all
-throw(); the sites are `new (__FILE__ "(N)") T` (Camp's setWorldmap keeps the emulated form, MATCH), the local copies
-and the KH_PLACEMENT_NEW_DEFINED gate are gone. MapEnemy.h, SceneInfo.h, CollUtilA.h and Coord.h list gate users
+and VECTOR_H_SET_CALL all change the image, so they stay. The global operators are done (cleanup/heapman-operators, 2026-11-07): System/HeapMan.h has new, delete, delete[], new(size_t, char*), new[] and placement new, all
+throw(); new(size_t, char*)/new[] read ra into a function-level `UINT nRA` by inline asm (__builtin_return_address
+reloads ra), the ref's form (cleanup/heapman-nra, 2026-11-09: RET_ADDR is gone, 73 direct com_malloc_d calls became
+new-expressions by their HeapMan.h:153/159 line labels). The sites are `new (__FILE__ "(N)") T` (Camp's setWorldmap
+keeps an emulated `new (operator new(sizeof(T), __FILE__ "(N)")) T`, MATCH); the local copies and the
+KH_PLACEMENT_NEW_DEFINED gate are gone. Open (needs the user, matched-C edits): about 20 files keep their own
+`daddu %0, $31` copies (JiminyMemo, the NEW_D macros of CreateGimmick/CreateEnemy/CreateBullet/Movie, singleton
+instance()s in AtelBlur/AtelFog/AtelCrossFade/ChatMan/CameraMan/2DMan/TitleReportDllStarter .h, LinkedBuf.h,
+PathCamera, GimmickWarpPoint, AtelTutorial, MovieScript, MapUnit.h, SaveLoadCtrl.h): new-expressions in the original
+by the same evidence. MapEnemy.h, SceneInfo.h, CollUtilA.h and Coord.h list gate users
 without a feature macro. Game/Collision/CollObj.h is done (2026-11-08): CollUtilF's stand-ins went once
 _checkLadderUp calls an inline `initForMap()` (m_fgStatus = 0) after the constructor (flow drops the ctor's dead store).
 

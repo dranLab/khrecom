@@ -155,12 +155,13 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-08 | cleanup/Game-Collision-CollObj-initForMap: CollUtilF on the header's collision classes, `initForMap()` inline (m_fgStatus = 0) called in _checkLadderUp (user decision) | 184 | 8 | 0 | 673 (0) | 1035 |
 | 2026-11-08 | cleanup/libgraph-types (with TexUtil's 4 drafts): libgraph types in PackMan.h (ref form) and include/sdk/libgraph.h; PackMan.cpp/TexUtil.cpp/libppp headers on them | 184 | 8 | 0 | 673 (0) | 1040 |
 | 2026-11-08 | cleanup/Game-Enemy-BattleEnemy.h: CBattleEnemy as the ref class (STOP_DAMAGE/MES_CARD_INFO types, ref access), unit gate and state-template mechanism dropped, accessor vs direct member per the original's .mdebug block tree (user decision) | 162 | 8 | 0 | 663 (0) | 1033 |
+| 2026-11-09 | cleanup/heapman-nra: System/HeapMan.h new/new[] with the ref's function-level UINT nRA; 73 debug allocations in 29 files as new-expressions (HeapMan.h:153/159 line labels; 14 block trees now equal the original's, 89 closer), RET_ADDR and three local copies gone (user decision) | 162 | 8 | 0 | 663 (0) | 1041 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 162 (134 in 44 headers, 28 in 15 .cpp); MATCH: 1040
+PARTIAL: 162 (134 in 44 headers, 28 in 15 .cpp); MATCH: 1041
   by category: method 30, data member 9, type 13, fwd decl 2, #include 13, changed in place 42, padding 2, gate 5, guessed 9, header-level 23, stand-in 10, other 4
 stand-ins: 8 foreign in 5 files (6 names), 166 unattributed, 181 own
 duplicate class names across headers: 0
