@@ -330,7 +330,7 @@ BOOL CAttachCard::initCard_() {
 #line 162
     ASSERT(orgMdl);
 #line 164
-    MODELDATA* d = m_pCardModel = (MODELDATA*)com_malloc_d(sizeof(MODELDATA), __FILE__ "(164)", RET_ADDR());
+    MODELDATA* d = m_pCardModel = new (__FILE__ "(164)") MODELDATA;
     if (!d) return FALSE;
     ((u_long128*)d)[0] = ((u_long128*)orgMdl)[0];
     ((u_long128*)d)[1] = ((u_long128*)orgMdl)[1];
@@ -348,7 +348,7 @@ BOOL CAttachCard::initCard_() {
         dataSize2 >>= 4;
     }
 #line 191
-    MODELTAG* newMdl = (MODELTAG*)com_malloc_d((dataSize1 + dataSize2) * sizeof(MODELTAG), __FILE__ "(191)", RET_ADDR());
+    MODELTAG* newMdl = new (__FILE__ "(191)") MODELTAG[dataSize1 + dataSize2];
     if (!newMdl) return FALSE;
     memcpy(newMdl, orgMdl->m_pData, (dataSize1 + dataSize2) * sizeof(MODELTAG));
     if (orgMdl->m_pData) m_pCardModel->m_pData = newMdl;

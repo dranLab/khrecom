@@ -156,7 +156,7 @@ void CFriendPan::beginStateAction3() {
     setTimer(m_pAtkData->MOVE_END_FRAME * 1000);
     m_nLogCount = 0;
     m_nLogCountMax = m_pAtkData->WORK0;
-    m_pTrgLog = (TIMEQ*)com_malloc_d(m_nLogCountMax * sizeof(TIMEQ), __FILE__ "(268)", RET_ADDR());
+    m_pTrgLog = new (__FILE__ "(268)") TIMEQ[m_nLogCountMax];
     if (!m_pTrgLog) AssertApp(__FILE__, __LINE__, "m_pTrgLog", 0);
     for (i = 0; i < m_nLogCountMax; i++) {
         m_pTrgLog[i] = getTimer() + m_pAtkData->TRG_FRAME * 100;

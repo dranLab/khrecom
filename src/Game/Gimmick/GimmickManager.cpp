@@ -612,16 +612,16 @@ BOOL CGimmickManager::LoadWorldResrc() {
         SHORT* p = (SHORT*)cmnGimData->getRsrcData();
         p = (SHORT*)((BYTE*)p + 6);
         if ((m_NomalCardDropProbNum = *p++) != 0) {
-            m_pNomalCardDropProbTable = (GimmickEveryCardProb*)com_malloc_d(
-                m_NomalCardDropProbNum * sizeof(GimmickEveryCardProb), __FILE__ "(602)", RET_ADDR());
+            m_pNomalCardDropProbTable = new (__FILE__ "(602)")
+                GimmickEveryCardProb[m_NomalCardDropProbNum];
             for (int i = 0; i < m_NomalCardDropProbNum; i++) {
                 m_pNomalCardDropProbTable[i].CardID = *p++;
                 m_pNomalCardDropProbTable[i].Prob = *p++;
             }
         }
         if ((m_TreasureCardDropProbNum = *p++) != 0) {
-            m_pTreasureCardDropProbTable = (GimmickEveryCardProb*)com_malloc_d(
-                m_TreasureCardDropProbNum * sizeof(GimmickEveryCardProb), __FILE__ "(614)", RET_ADDR());
+            m_pTreasureCardDropProbTable = new (__FILE__ "(614)")
+                GimmickEveryCardProb[m_TreasureCardDropProbNum];
             for (int i = 0; i < m_TreasureCardDropProbNum; i++) {
                 m_pTreasureCardDropProbTable[i].CardID = *p++;
                 m_pTreasureCardDropProbTable[i].Prob = *p++;
@@ -634,7 +634,7 @@ BOOL CGimmickManager::LoadWorldResrc() {
     if (cmnGimData != NULL) {
         SHORT* p = (SHORT*)cmnGimData->getRsrcData();
         m_WorldGimNum = *p++;
-        m_pGimParam = (GimParam*)com_malloc_d(m_WorldGimNum * sizeof(GimParam), __FILE__ "(642)", RET_ADDR());
+        m_pGimParam = new (__FILE__ "(642)") GimParam[m_WorldGimNum];
         for (int i = 0; i < m_WorldGimNum; i++) {
             GimParam info;
             info.GimID = *p;
@@ -692,8 +692,8 @@ BOOL CGimmickManager::LoadWorldResrcMapCard() {
     p = (SHORT*)cmnGimData->getRsrcData();
     p = (SHORT*)((BYTE*)p + 6);
     if ((m_MapCardProb.ProbNum = *p++) != 0) {
-        m_MapCardProb.pProb = (GimmickEveryCardProb*)com_malloc_d(
-            m_MapCardProb.ProbNum * sizeof(GimmickEveryCardProb), __FILE__ "(737)", RET_ADDR());
+        m_MapCardProb.pProb = new (__FILE__ "(737)")
+            GimmickEveryCardProb[m_MapCardProb.ProbNum];
         for (int i = 0; i < m_MapCardProb.ProbNum; i++) {
             m_MapCardProb.pProb[i].CardID = *p++;
             m_MapCardProb.pProb[i].Prob = *p++;
@@ -714,8 +714,8 @@ BOOL CGimmickManager::LoadFloorPrizeDropTable() {
     BYTE* pB = cmnGimData->getRsrcData();
     m_GPrizeTableNum = *pB++;
     m_RPrizeTableNum = *pB++;
-    m_pGBallDropTable = (BallDropTable*)com_malloc_d(m_GPrizeTableNum * sizeof(BallDropTable), __FILE__ "(783)", RET_ADDR());
-    m_pRBallDropTable = (BallDropTable*)com_malloc_d(m_RPrizeTableNum * sizeof(BallDropTable), __FILE__ "(784)", RET_ADDR());
+    m_pGBallDropTable = new (__FILE__ "(783)") BallDropTable[m_GPrizeTableNum];
+    m_pRBallDropTable = new (__FILE__ "(784)") BallDropTable[m_RPrizeTableNum];
     for (int i = 0; i < m_GPrizeTableNum; i++) {
         for (int j = 0; j < 6; j++) {
             m_pGBallDropTable[i].type[j] = *pB++;
