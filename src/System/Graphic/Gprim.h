@@ -56,37 +56,11 @@ union ALPHA {
     BYTE getAlphaValue() const { return alphaValue; }
     void setAlphaValue(/* parameters unknown */);
 };
-/* moved to System/Vector.h (QWdata: khtypes.h) */
-#line 137
 union G_LAYER {
     INT _nInfo;
     struct {
         USHORT _nID;
         USHORT _nDepth;
-    };
-};
-
-union FVERTEX {
-    FVECTOR fP;
-    IVECTOR iP;
-    struct {
-        int iPad[3];
-        G_RGBA C;
-    };
-};
-
-struct FTVERTEX {
-    union {
-        FVECTOR fT;
-        IVECTOR iT;
-    };
-    union {
-        FVECTOR fP;
-        IVECTOR iP;
-        struct {
-            int iPad[3];
-            G_RGBA C;
-        };
     };
 };
 
@@ -150,14 +124,9 @@ public:
     void copyAttribute(/* parameters unknown */);
 };
 
-/* The types above and up to the #pragma interface further down are outside it (their inline functions are not
- * emitted in Gprim.o). */
-
 typedef SHORT TDEG;
 class CCoord;
 class CCoords;
-/* moved to System/Vector.h (QWdata: khtypes.h) */
-#line 245
 struct G_LINE {
     FVECTOR P0;
     FVECTOR P1;
@@ -181,31 +150,13 @@ typedef CVector<G_STRIP> G_STRIP_VECTOR;
 extern "C" void sceVu0ITOF4Vector(FVECTOR& v0, IVECTOR& v1);
 extern "C" void sceVu0FTOI4Vector(IVECTOR& v0, FVECTOR& v1);
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
-class C2DRot {
-protected:
-    FMATRIX m_Matrix;
-    FLOAT m_fRot;
-    G_XYZ m_Center;
 
-public:
-    void setCenter(/* parameters unknown */);
-    G_XYZ& getCenter(/* parameters unknown */);
-    void setRot(/* parameters unknown */);
-    FLOAT getRot(/* parameters unknown */);
-    void calcVert(IVECTOR& iv) {
-        FVECTOR v;
-        sceVu0ITOF4Vector(v, iv);
-        ApplyMatrix(v, m_Matrix, v);
-        sceVu0FTOI4Vector(iv, v);
-    }
-};
-
-/* The classes of System/Graphic/Gprim: Gprim.cpp has the matching #pragma implementation, so every class from
- * here on gets its vtable and all its inline functions emitted there, as in the original object (in class
- * definition order). The types above stay outside it (their inlines and vtables are emitted elsewhere). */
-#pragma interface /* MATCH: the inline functions and vtables only in Gprim.o, as in the originals */
-/* create()'s "#line N GPRIM_H_PATH" (the original's assert path and line) is followed by a #line back to this file:
- * gcc applies the interface/implementation pragmas by file name, so the classes after it would otherwise lose them. */
+/* The classes of System/Graphic/Gprim. Their vtables and out-of-line inline functions come out in Gprim.o, the
+ * object with their first non-inline virtual functions. From here on the line numbers are the original's (its
+ * .mdebug: CGPrim::initAttribute at 76, CCPrim::create's allocation at 613, CTPrim's at 684, C3DTPrim's
+ * constructor at 1906); the blank runs keep them. The types above (ALPHA, CDrawable, G_LINE, ...) sit elsewhere
+ * in the original (the ref has CDrawable in DispList.h; no code of Gprim.h is below line 76), hence the #line. */
+#line 72
 class CGPrim : public CDrawable {
 protected:
     UINT m_nAttribute;
@@ -251,6 +202,30 @@ public:
     virtual FIX4 calcZ() { return 0; }
 };
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 class CGTexPrim : public CGPrim {
 protected:
     TexInfo* m_pTexInfo;
@@ -276,6 +251,24 @@ public:
     }
     static void setTmpTexAreaForAllPrims(INT nArea) { m_nTmpTexArea = nArea; }
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 class CGTexPrim2D : public CGPrim {
 protected:
@@ -322,6 +315,15 @@ public:
     }
 };
 
+
+
+
+
+
+
+
+
+
 class CScissoring : public CGPrim {
 public:
     G_XY m_P0;
@@ -335,6 +337,44 @@ private:
     virtual void makePkt();
 };
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 class CZFill : public CGPrim {
 public:
     INT m_nZ;
@@ -345,6 +385,13 @@ public:
 private:
     virtual void makePkt();
 };
+
+
+
+
+
+
+
 
 class CTile : public CGPrim {
 public:
@@ -358,6 +405,15 @@ private:
     virtual FIX4 calcZ() { return m_P0.z; }
     virtual void makePkt();
 };
+
+
+
+
+
+
+
+
+
 
 class CSprt : public CGTexPrim {
 public:
@@ -382,6 +438,19 @@ private:
     virtual FIX4 calcZ() { return m_P0.z; }
     virtual void makePkt();
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 class CPolyGT4 : public CGTexPrim {
 public:
@@ -409,6 +478,7 @@ private:
     virtual void makePkt();
 };
 
+
 class CPolyGT4ST : public CGTexPrim2D {
 public:
     G_XY m_P0;
@@ -430,6 +500,13 @@ private:
     virtual void makePkt();
 };
 
+
+
+
+
+
+
+
 class CLineF2 : public CGPrim {
 public:
     G_XYZ m_P0;
@@ -442,6 +519,8 @@ private:
     virtual FIX4 calcZ() { return (UINT)(m_P0.z + m_P1.z) >> 1; }
     virtual void makePkt();
 };
+
+
 
 class CPolyG4 : public CGPrim {
 public:
@@ -461,6 +540,12 @@ private:
     virtual void makePkt();
 };
 
+
+
+
+
+
+
 class CCircle : public CGPrim {
 public:
     G_XYZ m_P0;
@@ -476,11 +561,84 @@ protected:
     virtual void makePkt();
 };
 
+
+
+
+
 class CScreenColoredMask : public CTile {
 public:
     CScreenColoredMask();
     virtual ~CScreenColoredMask() {}
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class C2DRot {
+protected:
+    FMATRIX m_Matrix;
+    FLOAT m_fRot;
+    G_XYZ m_Center;
+
+public:
+    void setCenter(/* parameters unknown */);
+    G_XYZ& getCenter(/* parameters unknown */);
+    void setRot(/* parameters unknown */);
+    FLOAT getRot(/* parameters unknown */);
+    void calcVert(IVECTOR& iv) {
+        FVECTOR v;
+        sceVu0ITOF4Vector(v, iv);
+        ApplyMatrix(v, m_Matrix, v);
+        sceVu0FTOI4Vector(iv, v);
+    }
+};
+
+
+
+
+
 
 
 
@@ -493,6 +651,34 @@ private:
 public:
     virtual UINT getPacketSize() const { return CGTexPrim::getPacketSize() + 7; }
 };
+
+union FVERTEX {
+    FVECTOR fP;
+    IVECTOR iP;
+    struct {
+        int iPad[3];
+        G_RGBA C;
+    };
+};
+
+struct FTVERTEX {
+    union {
+        FVECTOR fT;
+        IVECTOR iT;
+    };
+    union {
+        FVECTOR fP;
+        IVECTOR iP;
+        struct {
+            int iPad[3];
+            G_RGBA C;
+        };
+    };
+};
+
+
+
+
 
 class CCPrim : public CGPrim {
 private:
@@ -514,8 +700,8 @@ public:
 #line 613 GPRIM_H_PATH
         m_V = (FVERTEX*)com_malloc_d(iVertexNum * sizeof(FVERTEX), __FILE__ "(613)", (UINT)-1);
         if (!m_V) AssertApp(__FILE__, __LINE__, "m_V", 0);
-#line 518 "src/System/Graphic/Gprim.h"
     }
+
     void remove() {
         if (m_V) com_free(m_V);
         m_V = NULL;
@@ -546,6 +732,25 @@ inline FIX4 CCPrim::calcZ() {
     return 0;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 class CTPrim : public CGTexPrim {
 private:
     UINT m_PRIM;
@@ -566,8 +771,8 @@ public:
 #line 684 GPRIM_H_PATH
         m_V = (FTVERTEX*)com_malloc_d(iVertexNum * sizeof(FTVERTEX), __FILE__ "(684)", (UINT)-1);
         if (!m_V) AssertApp(__FILE__, __LINE__, "m_V", 0);
-#line 570 "src/System/Graphic/Gprim.h"
     }
+
     void remove() {
         if (m_V) com_free(m_V);
         m_V = NULL;
@@ -601,6 +806,357 @@ inline FIX4 CTPrim::calcZ() {
     return 0;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 class C3DTile : public CGPrim {
 protected:
     IVECTOR p0;
@@ -622,6 +1178,20 @@ private:
     virtual FIX4 calcZ();
     virtual void makePkt();
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 class C3DSprt : public CGTexPrim {
 protected:
@@ -651,6 +1221,14 @@ private:
     virtual void makePkt();
 };
 
+
+
+
+
+
+
+
+
 class C3DRotSprt : public C3DSprt {
 protected:
     IVECTOR p10;
@@ -665,6 +1243,13 @@ private:
     virtual FIX4 calcZ();
     virtual void makePkt();
 };
+
+
+
+
+
+
+
 
 class C3DPolyFT4 : public CGTexPrim {
 protected:
@@ -697,6 +1282,8 @@ private:
     virtual FIX4 calcZ();
     virtual void makePkt();
 };
+
+
 
 class C3DPolyGT4 : public CGTexPrim {
 protected:
@@ -736,6 +1323,14 @@ private:
     virtual void makePkt();
 };
 
+
+
+
+
+
+
+
+
 class C3DPolyFT3 : public CGTexPrim {
 protected:
     IVECTOR p0;
@@ -763,6 +1358,12 @@ private:
     virtual FIX4 calcZ();
     virtual void makePkt();
 };
+
+
+
+
+
+
 
 class C3DPolyGT3 : public CGTexPrim {
 protected:
@@ -796,6 +1397,12 @@ private:
     virtual void makePkt();
 };
 
+
+
+
+
+
+
 class C3DLine : public CGPrim {
 protected:
     IVECTOR p0;
@@ -813,6 +1420,10 @@ private:
     virtual FIX4 calcZ();
     virtual void makePkt();
 };
+
+
+
+
 
 class C3DLineCoord2 : public CGPrim {
 protected:
@@ -833,6 +1444,11 @@ private:
     virtual void makePkt();
 };
 
+
+
+
+
+
 class C3DLines : public CGPrim {
 public:
     CCoord* m_pCrd;
@@ -843,6 +1459,7 @@ private:
     virtual FIX4 calcZ();
     virtual void makePkt();
 };
+
 
 class C3DPolyG4 : public CGPrim {
 protected:
@@ -868,6 +1485,8 @@ private:
     virtual void makePkt();
 };
 
+
+
 class C3DPolyG3 : public CGPrim {
 protected:
     IVECTOR p0;
@@ -888,6 +1507,23 @@ private:
     virtual FIX4 calcZ();
     virtual void makePkt();
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 class C3DCircle : public CGPrim {
     friend class C3DPointLight2;
@@ -910,6 +1546,14 @@ protected:
     virtual void makePkt();
 };
 
+
+
+
+
+
+
+
+
 class C3DPointLight : public C3DCircle {
 public:
     FLOAT m_R00;
@@ -920,6 +1564,14 @@ public:
 private:
     virtual void makePkt();
 };
+
+
+
+
+
+
+
+
 
 class C3DPointLight2 : public CGPrim {
 protected:
@@ -937,6 +1589,28 @@ private:
     virtual void makePkt();
     BOOL _makePktSub(INT nIdx);
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 class C3DStripBase : public CGPrim {
 public:
@@ -960,6 +1634,10 @@ private:
     virtual void makePkt();
     virtual QWdata* makePktSub(QWdata* pQw) = 0;
 };
+
+
+
+
 
 class C3DTexStripBase : public CGTexPrim {
 public:
@@ -987,28 +1665,215 @@ private:
     virtual QWdata* makePktSub(QWdata* pQw) = 0;
 };
 
-#define GPRIM_STRIP_CLASS(NAME, BASE, TYPE, SET, GET, PTR, MEMBER)                                                 \
-    class NAME : public BASE {                                                                                     \
-    public:                                                                                                        \
-        NAME() { m_nType = TYPE; }                                                                                 \
-        void SET(PTR* p) { MEMBER = p; }                                                                           \
-        PTR* GET() { return MEMBER; }                                                                              \
-    private:                                                                                                       \
-        virtual QWdata* makePktSub(QWdata* pQw);                                                                   \
-    }
-GPRIM_STRIP_CLASS(C3DLineStrip, C3DStripBase, 2, setCoord, getCoord, CCoord, m_pCrd);
-GPRIM_STRIP_CLASS(C3DLineStripCoord, C3DStripBase, 2, setObject, getObject, CCoords, m_pObj);
-GPRIM_STRIP_CLASS(C3DLineTStrip, C3DTexStripBase, 2, setCoord, getCoord, CCoord, m_pCrd);
-GPRIM_STRIP_CLASS(C3DLineTStripCoord, C3DTexStripBase, 2, setObject, getObject, CCoords, m_pObj);
-GPRIM_STRIP_CLASS(C3DPolyStrip, C3DStripBase, 4, setCoord, getCoord, CCoord, m_pCrd);
-GPRIM_STRIP_CLASS(C3DPolyStripCoord, C3DStripBase, 4, setObject, getObject, CCoords, m_pObj);
-GPRIM_STRIP_CLASS(C3DPolyTStrip, C3DTexStripBase, 4, setCoord, getCoord, CCoord, m_pCrd);
-GPRIM_STRIP_CLASS(C3DPolyTStripCoord, C3DTexStripBase, 4, setObject, getObject, CCoords, m_pObj);
-GPRIM_STRIP_CLASS(C3DPolyFan, C3DStripBase, 5, setCoord, getCoord, CCoord, m_pCrd);
-GPRIM_STRIP_CLASS(C3DPolyFanCoord, C3DStripBase, 5, setObject, getObject, CCoords, m_pObj);
-GPRIM_STRIP_CLASS(C3DPolyTFan, C3DTexStripBase, 5, setCoord, getCoord, CCoord, m_pCrd);
-GPRIM_STRIP_CLASS(C3DPolyTFanCoord, C3DTexStripBase, 5, setObject, getObject, CCoords, m_pObj);
-#undef GPRIM_STRIP_CLASS
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class C3DLineStrip : public C3DStripBase {
+public:
+    C3DLineStrip() { m_nType = 2; }
+    void setCoord(CCoord* p) { m_pCrd = p; }
+    CCoord* getCoord() { return m_pCrd; }
+
+private:
+    virtual QWdata* makePktSub(QWdata* pQw);
+};
+
+
+
+
+
+
+class C3DLineStripCoord : public C3DStripBase {
+public:
+    C3DLineStripCoord() { m_nType = 2; }
+    void setObject(CCoords* p) { m_pObj = p; }
+    CCoords* getObject() { return m_pObj; }
+
+private:
+    virtual QWdata* makePktSub(QWdata* pQw);
+};
+
+
+
+
+
+
+class C3DLineTStrip : public C3DTexStripBase {
+public:
+    C3DLineTStrip() { m_nType = 2; }
+    void setCoord(CCoord* p) { m_pCrd = p; }
+    CCoord* getCoord() { return m_pCrd; }
+
+private:
+    virtual QWdata* makePktSub(QWdata* pQw);
+};
+
+
+
+
+
+
+class C3DLineTStripCoord : public C3DTexStripBase {
+public:
+    C3DLineTStripCoord() { m_nType = 2; }
+    void setObject(CCoords* p) { m_pObj = p; }
+    CCoords* getObject() { return m_pObj; }
+
+private:
+    virtual QWdata* makePktSub(QWdata* pQw);
+};
+
+
+
+
+
+
+class C3DPolyStrip : public C3DStripBase {
+public:
+    C3DPolyStrip() { m_nType = 4; }
+    void setCoord(CCoord* p) { m_pCrd = p; }
+    CCoord* getCoord() { return m_pCrd; }
+
+private:
+    virtual QWdata* makePktSub(QWdata* pQw);
+};
+
+
+
+
+
+
+class C3DPolyStripCoord : public C3DStripBase {
+public:
+    C3DPolyStripCoord() { m_nType = 4; }
+    void setObject(CCoords* p) { m_pObj = p; }
+    CCoords* getObject() { return m_pObj; }
+
+private:
+    virtual QWdata* makePktSub(QWdata* pQw);
+};
+
+
+
+
+
+
+class C3DPolyTStrip : public C3DTexStripBase {
+public:
+    C3DPolyTStrip() { m_nType = 4; }
+    void setCoord(CCoord* p) { m_pCrd = p; }
+    CCoord* getCoord() { return m_pCrd; }
+
+private:
+    virtual QWdata* makePktSub(QWdata* pQw);
+};
+
+
+
+
+
+
+class C3DPolyTStripCoord : public C3DTexStripBase {
+public:
+    C3DPolyTStripCoord() { m_nType = 4; }
+    void setObject(CCoords* p) { m_pObj = p; }
+    CCoords* getObject() { return m_pObj; }
+
+private:
+    virtual QWdata* makePktSub(QWdata* pQw);
+};
+
+
+
+
+
+
+class C3DPolyFan : public C3DStripBase {
+public:
+    C3DPolyFan() { m_nType = 5; }
+    void setCoord(CCoord* p) { m_pCrd = p; }
+    CCoord* getCoord() { return m_pCrd; }
+
+private:
+    virtual QWdata* makePktSub(QWdata* pQw);
+};
+
+
+
+
+
+
+class C3DPolyFanCoord : public C3DStripBase {
+public:
+    C3DPolyFanCoord() { m_nType = 5; }
+    void setObject(CCoords* p) { m_pObj = p; }
+    CCoords* getObject() { return m_pObj; }
+
+private:
+    virtual QWdata* makePktSub(QWdata* pQw);
+};
+
+
+
+
+
+
+class C3DPolyTFan : public C3DTexStripBase {
+public:
+    C3DPolyTFan() { m_nType = 5; }
+    void setCoord(CCoord* p) { m_pCrd = p; }
+    CCoord* getCoord() { return m_pCrd; }
+
+private:
+    virtual QWdata* makePktSub(QWdata* pQw);
+};
+
+
+
+
+
+
+class C3DPolyTFanCoord : public C3DTexStripBase {
+public:
+    C3DPolyTFanCoord() { m_nType = 5; }
+    void setObject(CCoords* p) { m_pObj = p; }
+    CCoords* getObject() { return m_pObj; }
+
+private:
+    virtual QWdata* makePktSub(QWdata* pQw);
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 class C3DCPrim : public CGPrim {
 private:
@@ -1072,6 +1937,40 @@ private:
     QWdata* makePkt_TriangleStrip1(QWdata* pQw);
     QWdata* makePkt_TriangleFan1(QWdata* pQw);
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 class C3DTPrim : public CGTexPrim {
 private:
