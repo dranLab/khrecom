@@ -121,9 +121,12 @@ shows a draft's diff after you switch its `#if 0` to `#if 1` (the permuters swit
   blocks, so local-alloc can't tie it to the product); raw trxreg for the TRXREG write = `sp->trxreg.RRW` read
   again (gcse removes the load, not the and); `int` GsGetIMR/GsPutIMR; `rest` before `qwc`; the byte copy through
   a `{u_long128; u_char[16]}` union (sp + i operand order).
-- **graphdev_checkModelVersion** (`sceGsSetDefDispEnv`, ~100 lines): structure matches (if/else if chain, not
-  switch; DX = dx*magh + ((long)off[0] + 636) through a `long` temp); left: the original computes DY and
-  off[0]+636 before magh and ORs the DISPLAY fields in another order. String kept by an unused static inline.
+- **graphdev_checkModelVersion** (`sceGsSetDefDispEnv` parked at 21, 2026-11-09; was 96): the 16 extra bytes were a
+  function-level `magh` (a global pseudo: the quotient never tied to it, a `move` after each mflo); magh/sy/sx are
+  block-local in the interlaced arms, function-level in the non-interlaced ones; `magh * w`; the DISPLAY OR order
+  M|V|H|X|Y|W (unique best of all 120; Sony's own X|Y|M|V|W|H gives 127); dispfb psm before fbw. Left: in both
+  non-interlaced blocks the original issues `h - 1` between the div and the off[0] load (sx/DY a1/v1 swapped): an
+  extra dependence in its RTL, not reproduced. On 991111-01 the cross-jump runs after sched2; `-fsched-verbose-9`.
 - **csc** (matched 2026-11-07, data from source): both "register swaps" were source shape: `*D_STAT = 8;
   EnableDmac(3);` on one line (as moves the volatile store into the jal slot), the `do { } while (0)` around exactly
   the `DIntr() ... if (oldei) EIntr();` critical section, and qwc (`mbnum * 0x40`) in its own local next to rgb.
@@ -182,7 +185,7 @@ Sorted by unit, then size. `instr`: instructions in the original.
 | unit | function | instr | status | what differs |
 |---|---|---:|---|---|
 | `lib/nodebug/snDebugInit` | `snTeq` | 26 | hand-written | trap handler |
-| `lib/graphdev_checkModelVersion` | `sceGsSetDefDispEnv` | 221 | parked | matches except register order in the DISPLAY computation (orig: DY and off[0] + 636 first). |
+| `lib/graphdev_checkModelVersion` | `sceGsSetDefDispEnv` | 221 | parked | 21 of 232 lines (2026-11-09): only the two non-interlaced blocks differ (NTSC falls into PAL's tail): the original issues h - 1 between the div and the off[0] load (ours loads off[0], off[1] first: their priority 10/9 beats h - 1's 7 in sched2, so in the original the loads cannot have been ready … |
 | `lib/mpc` | `_getRef0` | 290 | parked | same structure and size as the original; register allocation differs (the original keeps y in s1, n in t9 and spills avg << 2) |
 | `lib/mpc` | `_rix_111` | 72 | hand-written | MMI reference-copy routines (_rix_*: luminance, _ri0_*: chrominance) |
 | `lib/mpc` | `_ri0_111` | 69 | hand-written | MMI reference-copy routines (_rix_*: luminance, _ri0_*: chrominance) |
