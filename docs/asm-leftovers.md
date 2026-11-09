@@ -27,7 +27,6 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `Game/Map` | 2 | 1952 | 2 |  |
 | `Form/Menu/Camp` | 2 | 1778 | 2 |  |
 | `System/Graphic/Effect/libppp/draw/shape` | 2 | 1771 | 2 |  |
-| `System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly` | 2 | 1495 | 2 |  |
 | `System/Graphic/DeFocus` | 2 | 1014 | 2 |  |
 | `System/Graphic/Model` | 2 | 1000 | 2 |  |
 | `System/Graphic/Effect/libppp/keProg/KeTh` | 1 | 685 | 1 |  |
@@ -39,7 +38,6 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `System/Graphic/Effect/libppp/partMng` | 1 | 292 | 1 |  |
 | `System/Graphic/DispList` | 1 | 245 | 1 |  |
 | `System/Math3D` | 1 | 234 | 1 |  |
-| `System/Graphic/ModelMan` | 1 | 204 | 1 |  |
 | `Game/Enemy/HumanBoss` | 1 | 181 | 1 |  |
 | `System/Graphic/WorldEnv` | 1 | 128 | 1 |  |
 | `System/Rcf` | 1 | 111 | 1 |  |
@@ -64,13 +62,10 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `System/Graphic/HermitePathCamera` | `updatePos__18CHermitePathCameraR7FVECTORT1fi` | 632 | 88 of 723 lines - same structure; left: the case-2 fStep lives in f12 in the original (ours f2), the hoisted addresses of the BG-check and learp blocks get swapped s-registers (&m_vWPos s0, &vAdd s0 / &OldPos s1 in the original), the mInv address is kept in a register here and recomputed there. … |
 | `System/Graphic/Model` | `_disp0_SetPacket__6CModelUiPA3_CiiUliPUl` | 588 | 93 of 655 lines (2026-11-08): the block tree equals the original's .mdebug except before pack #1 (original: a CModel inline, x invisible, y visible, x loaded after y) and the colour-matrix getter (original has no block there but the getter's addiu shape). Still differs: this in s4 / iFlags&2 in … |
 | `System/Graphic/Model` | `makePkt__5CBBox` | 412 | 108 of 458 lines (2026-11-08), register allocation: structure matches (8-corner RotTransPers loop with min/max and W range, colour checks, four line-strip GIF packets), but the original keeps this in s4, &m_C0 in s1 and different caller-saved temporaries spilled around RotTransPers; ours also … |
-| `System/Graphic/ModelMan` | `setupDrawEnv__9CModelMan` | 204 | 58 of 242 lines (65 with vFogParam.set inlined) - FVECTOR::setCall gives the original's set call, but the frame is 16 bytes larger (an extra saved register s3 for &wv_i) and the fog/matrix constant block is scheduled differently. |
 | `System/Graphic/WorldEnv` | `initialize__9CWorldEnv` | 128 | 0-8 of 177 lines (2026-11-08): this draft is the original source. Compiled with the original's own anonymous-namespace name (c:/KHCOM/MainApp/System/Graphic/WorldEnv.cpp + suffix UPaaaa = pid 2588, via a rewritten .ii line marker and a chosen pid) it matches every time; our build names the … |
 | `System/Graphic/Effect/libppp/partMng` | `vramcache` | 292 | (comment) Register allocation: the original keeps abBlock (the VLA's address) on the stack and the assert's string addresses in s5/s6; here abBlock gets s7 and bUseBlockNum s3, so the file name's %hi lives in t0 (saved around the call, 16 more bytes of frame). The return blocks are also laid out … |
 | `System/Graphic/Effect/libppp/draw/shape` | `pppVu1ShapeDraw` | 133 | 4 of 143 lines (2026-11-08): `or a0,a1,a0` (the call argument) issues before `addiu t6,a1,32` instead of after tag 2's next store, and tag 3's `sb t4,3(t6)` comes after its p[1] store instead of first. With tag 3 written id/next/qwc like the others its stores match, but t3/t4 swap: local-alloc … |
 | `System/Graphic/Effect/libppp/draw/shape` | `op_shape_draw` | 1638 | 5 of 1680 lines (2026-11-08): only the join after the six loops differs, registers of three block-local values: the original has `move a0,t1` (the $9 read), `li v1,32`, `andi v0,a1,0x800`, ours `move v1,t1`, `li v0,32`, `andi a0,a1,0x800`. They are the block's only 3 local quantities, so … |
-| `System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly` | `drawShipoly` | 795 | 13 of 812 lines (2026-11-09): only the s1/a1 FP registers differ (ours $f6/$f5, original $f5/$f6): global-alloc priority (int)(4*24/185) = 5189 for s1 is below a1's 3*12/69 = 5217 (a0 5294 above both); a1 = alpha1 before a0 = alpha0 gives the registers (6 lines, but the movs issue in the wrong … |
-| `System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly` | `pppEiDrawDrawShipoly` | 700 | 2 of 743 lines (2026-11-09): only the Type!=0 copy loop's preheader: ours issues li a2,-1 before lui a1,0x7000 (the original after it, both after the 1.0f): the -1 of the if-converted n < 0 test (made by the first jump pass) is a pass-1 movable, and loop.c emits the strength-reduced giv init after … |
 | `System/Graphic/Effect/libppp/keProg/KeTh` | `KeThBP_Update` | 685 | (comment) Best attempt: same code apart from register allocation (the original has flg in s7, pTp in fp and &vf._06 in s6; this gets fp/s6/s7) and the order of a few spill slots (preStep - rootStep, &vf._07, &vf._08, flg & 0x120, &pRP->InVec), which shifts scheduling around them. |
 | `System/Graphic/Effect/libppp/keProg/pppKeShpTail3` | `pppKeShpTail3Draw` | 514 |  |
 | `System/Graphic/Effect/libppp/keProg/pppKeShpTail3X` | `pppKeShpTail3XDraw` | 532 |  |
@@ -85,7 +80,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Form/Menu/Camp` | `setMapCardWin__5CCampi` | 1227 | 23 of 1407 lines (2026-11-08; drop the data block after the INCLUDE_ASM to build the draft): only the spill slots of seven PRE-hoisted values differ (orig 0x74 &m_pMCInfoNumFnt, 0x78 &m_nMapKind, 0x7c i + 1, 0x80 nKind - 161, 0x84 &m_pMCCard, 0x88 &m_pMCFnt, 0x8c &m_pMCInfoNumCtrl; ours 0x74 … |
 | `Form/Menu/RoomCreation` | `menuMain__13CRoomCreation` | 1995 | (comment) menuMain: 78 of 2211 lines, 8 bytes short (92 and 0x50 short before _NORMA_PIECES, 2026-11-07): the by-value NormaSrc arguments are written out now; left: case 0's registers (v1 + s7 where the original keeps a0, s4/s6/s8 from there). To enable this draft, also drop the data block after … |
 
-Totals: 28 functions (19453 instructions) in 22 units, 28 of them parked; 1 units take a data section from assembly.
+Totals: 25 functions (17754 instructions) in 20 units, 25 of them parked; 1 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->
