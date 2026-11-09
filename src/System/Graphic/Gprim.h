@@ -958,12 +958,6 @@ inline UINT _vecToCol(u_long128 iCol) {
  * ULONGLONG outVec64 at 879, $t0 as scratch): x, y, z of an IVECTOR to a GS XYZ word. Its name is ours. */
 inline ULONGLONG _vecToXYZ(u_long128 inIVec) {
     ULONGLONG outVec64;
-
-
-
-
-
-
     __asm__ volatile("pexcw %0, %1\n"
                      "pexch $8, %1\n"
                      "dsra32 %0, %0, 4\n"
@@ -1007,6 +1001,13 @@ inline ULONGLONG _vecToXYZ(u_long128 inIVec) {
 
 
 
+/* The original's inline at 920 (.mdebug: lui 1.0f and two pextlw, all at 920): the qword (1, 1, 1, 1); name ours.
+ * MATCH: the lui in the asm (a constant operand is scheduled to the top of CModel's constructor) */
+inline u_long128 _oneVector() {
+    u_long128 out128;
+    __asm__ volatile("lui %0, 0x3f80\n\tpextlw %0, %0, %0\n\tpextlw %0, %0, %0" : "=r"(out128));
+    return out128;
+}
 
 
 
@@ -1039,21 +1040,20 @@ inline ULONGLONG _vecToXYZ(u_long128 inIVec) {
 
 
 
+/* The original's inline at 957-966 (.mdebug: INT x, y, z, w set up at 957, locals tmp and out128, the three pextlw
+ * at 964): the qword (x, y, z, w). Its name is ours. */
+inline u_long128 _packWord(INT x, INT y, INT z, INT w) {
+    u_long128 out128;
+    u_long128 tmp;
 
 
 
-
-
-
-
-
-
-
-
-
-/* The original's inline at 969-975 (.mdebug: parameters x, z set up at 969, local out128, the pcpyld at 973; inlined
- * 371 times in 11 units): a qword from x (low) and z (high doubleword), GIF tags and A+D data. Its name is not in the
- * debug info, _makeQW is ours. MATCH: asm volatile (plain, equal tags are merged in Gprim's makePkt functions) */
+    __asm__ volatile("pextlw %0, %3, %2\n\tpextlw %1, %5, %4\n\tpextlw %0, %1, %0"
+                     : "=&r"(out128), "=r"(tmp) : "r"(x), "r"(z), "r"(y), "r"(w));
+    return out128;
+}
+/* The original's inline at 969-975 (.mdebug: x, z set up at 969, out128, pcpyld at 973; 371 uses in 11 units): x low, z
+ * high doubleword (GIF tags, A+D). Name ours. MATCH: asm volatile (plain: equal tags merge in Gprim's makePkt) */
 inline u_long128 _makeQW(ULONGLONG x, ULONGLONG z) {
     u_long128 out128;
 

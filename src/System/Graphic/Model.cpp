@@ -148,15 +148,6 @@ static SHADERDESC g_ShaderDescTbl[11] = {
     { 0xFFFF, 0xFFFF },
 };
 CShader* createDummyShader() { return NULL; }
-/* MATCH: the colour scale (1, 1, 1, 1) is built in a GPR (lui 1.0f, two pextlw) and stored with one sq */
-static inline u_long128 _oneVector() {
-    u_long128 ret;
-    __asm__ volatile("lui %0, 0x3f80\n"
-                     "pextlw %0, %0, %0\n"
-                     "pextlw %0, %0, %0\n"
-                     : "=r"(ret));
-    return ret;
-}
 CModel::CModel(const MODELDATA* pData) {
     m_pData = pData;
     _ZeroInitializer = 0;
@@ -983,17 +974,6 @@ void CModel::disp0_SetMicroCode(u_long128* pMProg) {
 }
 void CModel::_disp0_SetTexture(INT nFlag, u_long* pTag) {
     if (!(nFlag & 6)) sendTexture(pTag);
-}
-/* the original's inline helpers (.mdebug: tmp/out128 in the pack blocks, out64 and a u_long128 x in the hi64 blocks) */
-static inline u_long128 _packWord(INT x, INT y, INT z, INT w) {
-    u_long128 out128;
-    u_long128 tmp;
-    __asm__ volatile("pextlw %0, %3, %2\n"
-                     "pextlw %1, %5, %4\n"
-                     "pextlw %0, %1, %0\n"
-                     : "=&r"(out128), "=r"(tmp)
-                     : "r"(x), "r"(z), "r"(y), "r"(w));
-    return out128;
 }
 /* Parked: 93 of 655 lines (2026-11-08): the block tree equals the original's .mdebug except before pack #1 (original: a CModel inline, x invisible, y visible, x loaded after y) and the colour-matrix getter (original has no block there but the getter's addiu shape). Still differs: this in s4 / iFlags&2 in s5, the original swaps them (global alloc: this 47 refs/504 insns = 0.4663 beats the bone-loop addr giv 9/58 = 0.4655; one more insn in this's range would flip it), the semikind arm (original copies m_Mode to a1 for the switch compares), y's u16 ? u16 : 0x92 (ours branches, original li+movz), GIF tag store order, the no-light zero stores, two loop-align nops (+8 bytes, one insn out of phase). Tried: the .mdebug locals/blocks (149 -> 93: rawMode = pData[1][3], for-scoped i, tex0Buf in the else-if, t0/t1 + a $3 clobber, plain casts for the lo halves, then-block i/j, offset block, iSize < N ? iSize : N), memcpy for the light rows, calc(BOOL) defined after CLightUnit (isCalc inlined), getMode(), (version & 0xFFFF), ?: / != 0 / INT / USHORT forms for y. Earlier: permuter 20 min on the old draft (no gain). */
 #if 0

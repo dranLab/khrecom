@@ -1250,9 +1250,7 @@ void sceVif1PkRefe(pacVif1Packet* pPacket, u_long128* pRef, u_int size, u_int op
     sceVif1PkTerminate(pPacket);
     u_int tag = flag | size;
     u_int addr = (u_int)pRef & 0x8fffffff;
-    u_long128 q, t;
-    __asm__ volatile("pextlw %0, %2, %3\n\tpextlw %1, %4, %5\n\tpextlw %0, %1, %0" : "=&r"(q), "=&r"(t) : "r"(opt1), "r"(tag), "r"(opt2), "r"(addr));
-    *(u_long128*)pPacket->pCurrent = q;
+    *(u_long128*)pPacket->pCurrent = _packWord(tag, addr, opt1, opt2);
     pPacket->pCurrent += 4;
 }
 void sceVif1PkCnt(pacVif1Packet* pPacket, u_int flag) {
@@ -1272,9 +1270,7 @@ void sceVif1PkRef(pacVif1Packet* pPacket, u_long128* pRef, u_int size, u_int opt
     size |= 0x30000000;
     u_int tag = flag | size;
     u_int addr = (u_int)pRef & 0x8fffffff;
-    u_long128 q, t;
-    __asm__ volatile("pextlw %0, %2, %3\n\tpextlw %1, %4, %5\n\tpextlw %0, %1, %0" : "=&r"(q), "=&r"(t) : "r"(opt1), "r"(tag), "r"(opt2), "r"(addr));
-    *(u_long128*)pPacket->pCurrent = q;
+    *(u_long128*)pPacket->pCurrent = _packWord(tag, addr, opt1, opt2);
     pPacket->pCurrent += 4;
 }
 void sceVif1PkRefs(pacVif1Packet* pPacket, u_long128* pRef, u_int size, u_int opt1, u_int opt2, u_int flag) {
@@ -1282,9 +1278,7 @@ void sceVif1PkRefs(pacVif1Packet* pPacket, u_long128* pRef, u_int size, u_int op
     size |= 0x40000000;
     u_int tag = flag | size;
     u_int addr = (u_int)pRef & 0x8fffffff;
-    u_long128 q, t;
-    __asm__ volatile("pextlw %0, %2, %3\n\tpextlw %1, %4, %5\n\tpextlw %0, %1, %0" : "=&r"(q), "=&r"(t) : "r"(opt1), "r"(tag), "r"(opt2), "r"(addr));
-    *(u_long128*)pPacket->pCurrent = q;
+    *(u_long128*)pPacket->pCurrent = _packWord(tag, addr, opt1, opt2);
     pPacket->pCurrent += 4;
 }
 void sceVif1PkCall(pacVif1Packet* pPacket, u_long128* pCall, u_int flag) {
