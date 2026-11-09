@@ -232,7 +232,7 @@ void pppStartVu1ShapeProg(int fog) {
 }
 
 
-/* Parked: 4 of 143 lines (2026-11-08): `or a0,a1,a0` (the call argument) issues before `addiu t6,a1,32` instead of after
+/* Parked: 4 of 143 lines (2026-11-09): `or a0,a1,a0` (the call argument) issues before `addiu t6,a1,32` instead of after
    tag 2's next store, and tag 3's `sb t4,3(t6)` comes after its p[1] store instead of first. With tag 3 written
    id/next/qwc like the others its stores match, but t3/t4 swap: local-alloc (QTY_CMP_PRI on the sched1 order) ranks
    the 0x70 constant (2 refs over 18 insns) above the -16 mask (3 refs over 29), 0x70 takes t3, the mask avoids it
@@ -244,6 +244,14 @@ void pppStartVu1ShapeProg(int fog) {
    an anti/output dependence on that sb, or a hidden ALU insn at t23 depending on `addiu t6,a1,32` (e.g. a no-op write
    of a1 removed after sched2). No call form gives one: via i (a0 in .mdebug), pkt, sp reassigned, dspa, pkt - 3,
    &sp[0], each with tag 3 id-first and next/qwc/id (4 or 11 lines).
+   2026-11-09: such hidden insns exist: an in-place sign extension (extendsidi2 a0 <- a0) or a same-register move prints
+   as nothing and survives sched2 (jump2 runs after sched2; tested on small cases), but every form that makes one here
+   (long casts of sp, of the three `| 0x80000000` operands or the argument; unprototyped long argument) splits the
+   shared `lui a0,0x8000` (26-36 lines), and one writing a1 would feed sp's later SI uses (tag 2/3 qwc, tag 3 pkt).
+   do {} while (0) at the code-less lines 383-392, 398-401, 412-413, 417-418: loop notes are scheduling barriers in
+   both schedulers (45-59). Also tried: i = 0x80000000 as the shared constant (i is a0 in .mdebug; 38-40),
+   spaPktSize >>= 4 at 386 (39), spPktSize in two statements (11), spaPktSize from dspa - dspa0 (53), tag 3
+   next/id/qwc (11).
    2026-11-08 shape from the evidence, all neutral: y in its block (.mdebug { y { } }), spa = source / dspa = dest
    (.mdebug registers), spPktSize in qwords on its line (line markers put the sra at 400).
    tried: tag field orders (all 120 per tag 0-3, tags 0-2 also with tag 3 id-first), six call-argument forms,
