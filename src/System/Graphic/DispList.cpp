@@ -730,7 +730,7 @@ void CDispListShadowDraw::_drawOT(OTtag& inOT) {
     if (!pSMModelFirst) return;
     CDrawable* pPrim = inOT._pHeadPrim;
     INT nEntryNum = getEntryCount();
-    SHADOWMODELBUF* pSdwBuf = (SHADOWMODELBUF*)com_malloc_d(nEntryNum * sizeof(SHADOWMODELBUF), __FILE__ "(895)", RET_ADDR());
+    SHADOWMODELBUF* pSdwBuf = new (__FILE__ "(895)") SHADOWMODELBUF[nEntryNum];
 #line 896
     ASSERT(pSdwBuf);
     BOOL bFirst = TRUE;

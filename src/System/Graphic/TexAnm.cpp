@@ -10,8 +10,8 @@
 extern "C" int strcasecmp(const char* s1, const char* s2);
 extern "C" int rand();
 
-/* non-volatile: the size load may be scheduled before it (CModelTexAnm::setup) */
-#define RET_ADDR_NV() ({ UINT nRA; __asm__("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
+
+
 
 #include "System/Graphic/TexInfo.h"
 
@@ -116,7 +116,7 @@ void CTexAnm::setup(const TEXANM_DATA& inData, INT nAnmGroupNum) {
                   m_pData->szDstTexName);
             m_pData = NULL;
         } else {
-            m_pClut = (u_long128*)com_malloc_d(m_nClutQSize * 0x100, __FILE__ "(96)", RET_ADDR());
+            m_pClut = new (__FILE__ "(96)") u_long128[m_nClutQSize * 16];
             if (!m_pClut) AssertApp(__FILE__, __LINE__, "m_pClut", 0);
         }
     }
@@ -294,9 +294,9 @@ void CModelTexAnm::setup(CTexAnm* pATbl, INT nANum, TexInfoStub* pTTbl, INT nTNu
     _dispose();
     m_nTexAnmNum = getTexAnmCount(pATbl, nANum, pTTbl, nTNum);
     if (m_nTexAnmNum <= 0) return;
-    m_pTexAnm = (CTexAnm**)com_malloc_d(m_nTexAnmNum * sizeof(CTexAnm*), __FILE__ "(400)", RET_ADDR());
+    m_pTexAnm = new (__FILE__ "(400)") CTexAnm*[m_nTexAnmNum];
     if (!m_pTexAnm) AssertApp(__FILE__, __LINE__, "m_pTexAnm", 0);
-    m_pID = (UBYTE*)com_malloc_d(m_nTexAnmNum, __FILE__ "(402)", RET_ADDR_NV());
+    m_pID = new (__FILE__ "(402)") UBYTE[m_nTexAnmNum];
     if (!m_pID) AssertApp(__FILE__, __LINE__, "m_pID", 0);
     nCount = 0;
     for (INT i = 0; i < nTNum; i++) {

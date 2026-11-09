@@ -173,7 +173,7 @@ void CTextWnd::createWindowCTD(UINT ctdID, CPointI* pPos, CPointI* pCyobiPos, UI
             if (m_pTmpText) delete m_pTmpText;
             m_pTmpText = NULL;
 #line 183
-            m_pTmpText = (CHAR*)com_malloc_d(textLen + 1, __FILE__ "(183)", RET_ADDR());
+            m_pTmpText = new (__FILE__ "(183)") CHAR[textLen + 1];
             strcpy(m_pTmpText, pText);
             CHAR* pT = m_pTmpText;
             INT fgOK = FALSE;
@@ -791,7 +791,7 @@ void CText::init(CPointI& pos, CSizeI& size, const CHAR* pText, INT delay, UINT 
     m_pFnt->setSpace(fontSpace.m_w << 4, fontSpace.m_h << 4);
     m_lines = m_pFnt->getSize(m_textSize, NULL, NULL);
 #line 1425
-    m_pLineSize = (G_XY*)com_malloc_d(m_lines * sizeof(G_XY), __FILE__ "(1425)", RET_ADDR());
+    m_pLineSize = new (__FILE__ "(1425)") G_XY[m_lines];
     m_pFnt->getSize(m_textSize, m_pLineSize, &m_chars);
     if ((fontStyle & 7) >= 5) m_pFnt->setLineXYPtr(m_pLineSize);
     m_pFnt->getCharSize(m_charSize);
@@ -820,7 +820,7 @@ void CText::changeTextSub(const CHAR* pText) {
     if (m_pLineSize) delete m_pLineSize;
     m_pLineSize = NULL;
 #line 1482
-    m_pLineSize = (G_XY*)com_malloc_d(m_lines * sizeof(G_XY), __FILE__ "(1482)", RET_ADDR());
+    m_pLineSize = new (__FILE__ "(1482)") G_XY[m_lines];
     m_pFnt->getSize(m_textSize, m_pLineSize, &m_chars);
     if ((m_pFnt->m_Style & 7) >= 5) {
         m_pFnt->setLineXYPtr(m_pLineSize);
@@ -890,8 +890,8 @@ void CText::setCharFadeInDelay(FLOAT fCharFadeInDelay) {
             if (m_pAlphaTblF) delete m_pAlphaTblF;
             m_pAlphaTblF = NULL;
 #line 1574
-            m_pAlphaTbl = (BYTE*)com_malloc_d(len, __FILE__ "(1574)", RET_ADDR());
-            m_pAlphaTblF = (FLOAT*)com_malloc_d(len * sizeof(FLOAT), __FILE__ "(1575)", RET_ADDR());
+            m_pAlphaTbl = new (__FILE__ "(1574)") BYTE[len];
+            m_pAlphaTblF = new (__FILE__ "(1575)") FLOAT[len];
             for (INT i = 0; i < len; i++) {
                 m_pAlphaTbl[i] = 0;
                 m_pAlphaTblF[i] = 0.0f;

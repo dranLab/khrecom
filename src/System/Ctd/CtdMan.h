@@ -44,8 +44,6 @@ struct CtdBlock {
 class CCtdList;
 class CCtdMan;
 
-inline void* operator new(size_t, CCtdMan* p) throw() { return p; }
-#define CTDMAN_RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 #line 20 CTDMAN_H_PATH
 class CCtdMan {
@@ -62,7 +60,7 @@ public:
     static CCtdMan& initialize() {
 #line 38
         if (m_pInstance != NULL) AssertApp(__FILE__, __LINE__, "__null == m_pInstance", 0);
-        m_pInstance = new ((CCtdMan*)com_malloc_d(sizeof(CCtdMan), __FILE__ "(39)", CTDMAN_RET_ADDR())) CCtdMan;
+        m_pInstance = new (__FILE__ "(39)") CCtdMan;
         if (!m_pInstance) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
         m_pInstance->setup();
         return *m_pInstance;

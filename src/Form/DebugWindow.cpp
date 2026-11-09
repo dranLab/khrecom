@@ -244,7 +244,7 @@ void CDebugWindow::init(const DEBUG_WINDOW_TBL& data) {
     }
     if (bCurX) {
 #line 269
-        m_pWinCurX = (DEBUG_WINDOW_LINE_CURX*)com_malloc_d(m_iCurMax * sizeof(DEBUG_WINDOW_LINE_CURX), __FILE__ "(269)", RET_ADDR());
+        m_pWinCurX = new (__FILE__ "(269)") DEBUG_WINDOW_LINE_CURX[m_iCurMax];
         ASSERT(m_pWinCurX);
         for (i = 0; i < m_iCurMax; i++) {
             m_pWinCurX[i].iCurX = -1;

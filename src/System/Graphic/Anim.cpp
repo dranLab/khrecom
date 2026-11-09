@@ -170,11 +170,10 @@ CAnim::~CAnim() {
     _dispose();
 }
 void CAnim::_create(INT nSklNum) {
-    size_t size = nSklNum * sizeof(QUATERNION_DT);
 #line 227
-    m_pQuatHokan = (QUATERNION_DT*)com_malloc_d(size, __FILE__ "(227)", RET_ADDR());
-    m_pQuatNow = (QUATERNION_DT*)com_malloc_d(size, __FILE__ "(228)", RET_ADDR());
-    m_pFixQuat = (QUATERNION_DT*)com_malloc_d(size, __FILE__ "(229)", RET_ADDR());
+    m_pQuatHokan = new (__FILE__ "(227)") QUATERNION_DT[nSklNum];
+    m_pQuatNow = new (__FILE__ "(228)") QUATERNION_DT[nSklNum];
+    m_pFixQuat = new (__FILE__ "(229)") QUATERNION_DT[nSklNum];
 }
 void CAnim::_dispose() {
     if (m_pQuatHokan) delete[] m_pQuatHokan;

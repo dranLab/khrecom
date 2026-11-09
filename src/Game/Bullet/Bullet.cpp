@@ -210,7 +210,7 @@ BOOL CBullet::setup(const BULLET_PARAM& inParam) {
     if (inParam.pExtraEffectTbl) {
         m_iExtraEffectHandleNum = inParam.iExtraEffectNum;
         m_pExtraEffectHandle =
-            (HANDLE*)com_malloc_d(inParam.iExtraEffectNum * sizeof(HANDLE), __FILE__ "(233)", RET_ADDR());
+            new (__FILE__ "(233)") HANDLE[inParam.iExtraEffectNum];
         if (!m_pExtraEffectHandle) {
             return FALSE;
         }

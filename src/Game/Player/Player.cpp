@@ -922,7 +922,7 @@ void CPlayer::makeRevolver() {
             INT max = CCard::getCurrentDeckMax();
             INT sc = CCard::getCurrentShortCut();
             if (dbgCheckUser(KKIKUCHI) && sc == -1) sc = DebugWork::g_dw.player.iTemp;
-            deck = (CARD*)com_malloc_d((max + 1) * sizeof(CARD), __FILE__ "(1172)", RET_ADDR());
+            deck = new (__FILE__ "(1172)") CARD[max + 1];
             for (INT i = 0; i < max; i++) {
                 deck[i] = pDeck[i];
                 if (deck[i].m_nCategory1 == 7) deck[i].m_nNumber = -1;

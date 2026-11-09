@@ -23,8 +23,8 @@ CMenu::CMenu(CTask* p, INT fgUseCardArray) : CTask(p, 0x4000) {
     m_nCardKindMax = 0;
     m_fgPadDisable = 0;
     if (fgUseCardArray >= 0) {
-        m_nCardKind10 = (unsigned char(*)[10])com_malloc_d(298 * 10, __FILE__ "(27)", RET_ADDR());
-        m_nCardKind = (USHORT*)com_malloc_d(298 * sizeof(USHORT), __FILE__ "(28)", RET_ADDR());
+        m_nCardKind10 = new (__FILE__ "(27)") unsigned char[298][10];
+        m_nCardKind = new (__FILE__ "(28)") USHORT[298];
         initCardData(fgUseCardArray);
     } else {
         m_nCardKind = NULL;

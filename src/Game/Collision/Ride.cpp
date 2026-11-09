@@ -108,14 +108,14 @@ void CRideModel::init(void* pOCDData, CTask* pBFObj) {
     m_pOCDWork = NULL;
     CCollUtil::initializeData(pOCDData, &m_MCDInfo);
 #line 124
-    m_pMatIOld = (FMATRIX*)com_malloc_d((u_long)(UINT)(m_MCDInfo.iChipSuu + 1) * sizeof(FMATRIX), __FILE__ "(124)", RET_ADDR());
+    m_pMatIOld = new (__FILE__ "(124)") FMATRIX[m_MCDInfo.iChipSuu + 1];
     ASSERT(m_pMatIOld);
     sceVu0InversMatrix(*m_pMatIOld, *lMat);
     m_fBSRadius2 = 0;
     m_MCDInfo.pMatrixIOld = m_pMatIOld;
     if (m_MCDInfo.iChipSuu > 0) {
 #line 131
-        m_pOCDWork = (OCD_WORK*)com_malloc_d(m_MCDInfo.iChipSuu, __FILE__ "(131)", RET_ADDR());
+        m_pOCDWork = new (__FILE__ "(131)") OCD_WORK[m_MCDInfo.iChipSuu];
         FMATRIX* pPartsMat = m_pMatIOld + 1;
         MC_CHIP* pChip = m_MCDInfo.pMCChip;
         for (INT i = 0; i < m_MCDInfo.iChipSuu; i++, pPartsMat++, pChip++) {

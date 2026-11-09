@@ -5396,8 +5396,9 @@ INT CCamp::setConfigWin(INT nSetCmd) {
     return ret;
 }
 
-/* MATCH: the emulated debug new (com_malloc_d + placement new) here: new (__FILE__ "(N)") T moves one spill
-   slot (112 -> 116); the other sites of the unit have the original form */
+/* MATCH: the emulated debug new (an explicit operator new(size_t, char*) call + placement new) here: the original's
+   new (__FILE__ "(N)") T (its .mdebug: HeapMan.h 150-153, no placement new) swaps two spill slots (112/116, also
+   with HeapMan.h's function-level nRA of 2026-11-09); the other sites of the unit have the original form */
 INT CCamp::setWorldmap(INT nSetCmd) {
     static LPCTSTR pSeqName = "worldmap:00";
     static LPCTSTR pSeqName2 = "world_icon:00";
@@ -5437,11 +5438,11 @@ INT CCamp::setWorldmap(INT nSetCmd) {
         m_nSubStep = 0;
         if (!m_pWMNormaCtrl) {
             /* stored through a reference: in the original the next pSeqName load waits for this store */
-            _ref(m_pWMMoveCtrl) = new (com_malloc_d(sizeof(C2DSeqCtrl), __FILE__ "(6575)", RET_ADDR())) C2DSeqCtrl;
+            _ref(m_pWMMoveCtrl) = new (operator new(sizeof(C2DSeqCtrl), __FILE__ "(6575)")) C2DSeqCtrl;
             m_pWMMoveCtrl->addSeq(pSeqName, 0x4B);
             m_pWMMoveCtrl->enableColorCtrl(TRUE);
             m_nRoomCurrent = CSceneInfo::getCurrentRoomID() - 1;
-            m_pWMNormaCtrl = new (com_malloc_d(sizeof(C2DSeqCtrl), __FILE__ "(6580)", RET_ADDR())) C2DSeqCtrl;
+            m_pWMNormaCtrl = new (operator new(sizeof(C2DSeqCtrl), __FILE__ "(6580)")) C2DSeqCtrl;
             vec._q = 0;
             m_pWMNormaCtrl->setCol(vec);
             m_pWMNormaCtrl->setLayer(0xD);
@@ -5451,20 +5452,20 @@ INT CCamp::setWorldmap(INT nSetCmd) {
             m_pWMNormaCtrl->setLocalPos(vec);
             vec.init();
             if (!m_bPooWorld) {
-                m_pWMExplaneCtrl = new (com_malloc_d(sizeof(C2DSeqCtrl), __FILE__ "(6602)", RET_ADDR())) C2DSeqCtrl;
+                m_pWMExplaneCtrl = new (operator new(sizeof(C2DSeqCtrl), __FILE__ "(6602)")) C2DSeqCtrl;
                 m_pWMExplaneCtrl->setLayer(0xF);
                 m_pWMExplaneCtrl->addSeq(m_pSeqName, 0xB8);
                 m_pWMExplaneCtrl->setPos(vec);
                 m_pWMExplaneCtrl->enableColorCtrl(TRUE);
-                m_pWMExplaneFnt = new (com_malloc_d(sizeof(C2DFnt), __FILE__ "(6607)", RET_ADDR())) C2DFnt(0, 0, &rgba, 0xE, pStrButton, 0x40);
+                m_pWMExplaneFnt = new (operator new(sizeof(C2DFnt), __FILE__ "(6607)")) C2DFnt(0, 0, &rgba, 0xE, pStrButton, 0x40);
                 m_pWMExplaneCtrl->addFntShift(m_pSeqName, m_pWMExplaneFnt, 0.0f, 1.0f);
             }
-            m_pWMCardCtrl = new (com_malloc_d(sizeof(C2DSeqCtrl), __FILE__ "(6612)", RET_ADDR())) C2DSeqCtrl;
+            m_pWMCardCtrl = new (operator new(sizeof(C2DSeqCtrl), __FILE__ "(6612)")) C2DSeqCtrl;
             m_pWMCardCtrl->setLayer(0xE);
             m_pWMCardCtrl->addSeq(pSeqName, 0x27);
             m_pWMCardCtrl->addSeq(pSeqName2, (m_bPooWorld && (CGameWork::getInt(0, 0x23) & 0x40)) ? 1 : 0);
             m_pWMCardCtrl->setPos(vec);
-            m_pWMFloorCtrl = new (com_malloc_d(sizeof(C2DSeqCtrl), __FILE__ "(6618)", RET_ADDR())) C2DSeqCtrl;
+            m_pWMFloorCtrl = new (operator new(sizeof(C2DSeqCtrl), __FILE__ "(6618)")) C2DSeqCtrl;
             m_pWMFloorCtrl->setLayer(0xE);
             m_pWMFloorCtrl->addSeq(pSeqName, 0x24);
             m_pWMFloorCtrl->setPos(vec);
@@ -5594,7 +5595,7 @@ INT CCamp::setWorldmap(INT nSetCmd) {
             for (INT i = 0; i < pFloorLayout->_nRoomCount; i++, pRoomSrcInfo++) {
                 INT nSearch;
                 pRoomInfo = CSceneInfo::getRoomInfo(pRoomSrcInfo->_nID);
-                p2DSeqCtrl = m_pRoomCtrl[i] = new (com_malloc_d(sizeof(C2DSeqCtrl), __FILE__ "(6755)", RET_ADDR())) C2DSeqCtrl;
+                p2DSeqCtrl = m_pRoomCtrl[i] = new (operator new(sizeof(C2DSeqCtrl), __FILE__ "(6755)")) C2DSeqCtrl;
                 p2DSeqCtrl->setParent(m_pWMMoveCtrl);
                 p2DSeqCtrl->setLayer(0xC);
                 p2DSeqCtrl->enableColorCtrl(TRUE);
@@ -5682,7 +5683,7 @@ INT CCamp::setWorldmap(INT nSetCmd) {
                         p2DSeqCtrl->enableDisp(3, FALSE);
                     }
                 }
-                p2DSeqCtrl = m_pWayCtrl[i] = new (com_malloc_d(sizeof(C2DSeqCtrl), __FILE__ "(6874)", RET_ADDR())) C2DSeqCtrl(1);
+                p2DSeqCtrl = m_pWayCtrl[i] = new (operator new(sizeof(C2DSeqCtrl), __FILE__ "(6874)")) C2DSeqCtrl(1);
                 p2DSeqCtrl->setParent(m_pWMMoveCtrl);
                 p2DSeqCtrl->setLayer(0xB);
                 p2DSeqCtrl->enableColorCtrl(TRUE);
@@ -5706,13 +5707,13 @@ INT CCamp::setWorldmap(INT nSetCmd) {
                 cardID = pRoomInfo->getRoomNameCardID();
                 if (cardID == 0xB8 || cardID == 0xB6) {
                     C2DCard* p2DCard;
-                    p2DSeqCtrl = m_pShopAndSaveCtrl[nCard] = new (com_malloc_d(sizeof(C2DSeqCtrl), __FILE__ "(6898)", RET_ADDR())) C2DSeqCtrl;
+                    p2DSeqCtrl = m_pShopAndSaveCtrl[nCard] = new (operator new(sizeof(C2DSeqCtrl), __FILE__ "(6898)")) C2DSeqCtrl;
                     p2DSeqCtrl->setParent(m_pWMMoveCtrl);
                     p2DSeqCtrl->setLocalPos(vec2);
                     p2DSeqCtrl->addSeq(pSeqName, cardID == 0xB8 ? 0x53 : 0x55);
                     p2DSeqCtrl->enableDisp(FALSE);
                     _setCardNK(card, cardID, -1);
-                    p2DCard = m_pShopAndSave[nCard++] = new (com_malloc_d(sizeof(C2DCard), __FILE__ "(6905)", RET_ADDR())) C2DCard;
+                    p2DCard = m_pShopAndSave[nCard++] = new (operator new(sizeof(C2DCard), __FILE__ "(6905)")) C2DCard;
                     p2DCard->setParent(p2DSeqCtrl);
                     p2DCard->setLayer(0xC);
                     p2DCard->create(card);
@@ -5720,7 +5721,7 @@ INT CCamp::setWorldmap(INT nSetCmd) {
                 }
             }
             m_fRoomCurrentTimer = 0.0f;
-            m_pMapCursorCtrl = new (com_malloc_d(sizeof(C2DSeqCtrl), __FILE__ "(6914)", RET_ADDR())) C2DSeqCtrl;
+            m_pMapCursorCtrl = new (operator new(sizeof(C2DSeqCtrl), __FILE__ "(6914)")) C2DSeqCtrl;
             m_pMapCursorCtrl->setLayer(0xD);
             m_pMapCursorCtrl->setParent(m_pWMMoveCtrl);
             vec = m_pRoomCtrl[m_nRoomCurrent]->m_seqControl.vPos;
@@ -5739,31 +5740,31 @@ INT CCamp::setWorldmap(INT nSetCmd) {
             m_vWMPosOld = m_vWMPosCurrent = m_vWMPosCurrent0 = m_vWMPosTarget;
             m_pMapCursorCtrl->addSeqShift(m_pSeqName, 0x12, -12.0f, -13.0f);
             m_pMapCursorCtrl->enableDisp(FALSE);
-            m_pMapGuideCtrl = new (com_malloc_d(sizeof(C2DSeqCtrl), __FILE__ "(6934)", RET_ADDR())) C2DSeqCtrl;
+            m_pMapGuideCtrl = new (operator new(sizeof(C2DSeqCtrl), __FILE__ "(6934)")) C2DSeqCtrl;
             m_pMapGuideCtrl->setLayer(0xD);
             m_pMapGuideCtrl->setParent(m_pWMMoveCtrl);
             m_pMapGuideCtrl->addSeqShift(m_pSeqName, 0xB7, 4.0f, -20.0f);
             m_pMapGuideCtrl->setLocalPos(vec);
             m_pMapGuideCtrl->enableDisp(FALSE);
-            m_pCurrentRoomPosCtrl = new (com_malloc_d(sizeof(C2DSeqCtrl), __FILE__ "(6940)", RET_ADDR())) C2DSeqCtrl(1);
+            m_pCurrentRoomPosCtrl = new (operator new(sizeof(C2DSeqCtrl), __FILE__ "(6940)")) C2DSeqCtrl(1);
             m_pCurrentRoomPosCtrl->setLayer(0xD);
             m_pCurrentRoomPosCtrl->setParent(m_pWMMoveCtrl);
             m_pCurrentRoomPosCtrl->setLocalPos(vec);
             vec.init();
             pRoomInfo = CSceneInfo::getRoomInfo(m_roomMap[m_nRoomSelect]);
             cardID = pRoomInfo->getRoomNameCardID();
-            m_pWMRoomNameCtrl = new (com_malloc_d(sizeof(C2DSeqCtrl), __FILE__ "(6948)", RET_ADDR())) C2DSeqCtrl;
+            m_pWMRoomNameCtrl = new (operator new(sizeof(C2DSeqCtrl), __FILE__ "(6948)")) C2DSeqCtrl;
             m_pWMRoomNameCtrl->setLayer(0xE);
             m_pWMRoomNameCtrl->addSeq(pSeqName, 0x34);
             m_pWMRoomNameCtrl->setPos(vec);
-            m_pWMRoomNameFnt = new (com_malloc_d(sizeof(C2DFnt), __FILE__ "(6953)", RET_ADDR())) C2DFnt(0, 0, &rgba, 0xF, NULL, 0x40);
+            m_pWMRoomNameFnt = new (operator new(sizeof(C2DFnt), __FILE__ "(6953)")) C2DFnt(0, 0, &rgba, 0xF, NULL, 0x40);
             m_pWMRoomNameCtrl->addFntShift(pSeqName, m_pWMRoomNameFnt, 0.0f, 7.0f);
             setWMRoomName(cardID, m_nRoomSelect, pRoomInfo, TRUE);
-            m_pWMNormaArrowCtrl = new (com_malloc_d(sizeof(C2DSeqCtrl), __FILE__ "(6958)", RET_ADDR())) C2DSeqCtrl;
+            m_pWMNormaArrowCtrl = new (operator new(sizeof(C2DSeqCtrl), __FILE__ "(6958)")) C2DSeqCtrl;
             m_pWMNormaArrowCtrl->setParent(m_pWMNormaCtrl);
             m_pWMNormaArrowCtrl->setLayer(0x10);
             for (INT i = 0; i < 4; i++) {
-                p2DSeqCtrl = m_pRoomNormaCtrl[i] = new (com_malloc_d(sizeof(C2DSeqCtrl), __FILE__ "(6962)", RET_ADDR())) C2DSeqCtrl;
+                p2DSeqCtrl = m_pRoomNormaCtrl[i] = new (operator new(sizeof(C2DSeqCtrl), __FILE__ "(6962)")) C2DSeqCtrl;
                 p2DSeqCtrl->setParent(m_pWMNormaCtrl);
                 p2DSeqCtrl->setLayer(0xD);
                 p2DSeqCtrl->addSeq(pSeqName, 0x3A);

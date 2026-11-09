@@ -914,7 +914,7 @@ BOOL CPrize::initCard_() {
 #line 1215
     ASSERT(orgMdl);
 #line 1217
-    MODELDATA* d = m_pCardModel = (MODELDATA*)com_malloc_d(sizeof(MODELDATA), __FILE__ "(1217)", RET_ADDR());
+    MODELDATA* d = m_pCardModel = new (__FILE__ "(1217)") MODELDATA;
     if (!d) return FALSE;
     ((u_long128*)d)[0] = ((u_long128*)orgMdl)[0];
     ((u_long128*)d)[1] = ((u_long128*)orgMdl)[1];
@@ -932,7 +932,7 @@ BOOL CPrize::initCard_() {
         dataSize2 >>= 4;
     }
 #line 1244
-    MODELTAG* newMdl = (MODELTAG*)com_malloc_d((dataSize1 + dataSize2) * sizeof(MODELTAG), __FILE__ "(1244)", RET_ADDR());
+    MODELTAG* newMdl = new (__FILE__ "(1244)") MODELTAG[dataSize1 + dataSize2];
     if (!newMdl) return FALSE;
     memcpy(newMdl, orgMdl->m_pData, (dataSize1 + dataSize2) * sizeof(MODELTAG));
     if (orgMdl->m_pData) m_pCardModel->m_pData = newMdl;

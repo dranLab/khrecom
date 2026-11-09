@@ -288,7 +288,7 @@ BOOL CAvatar::createRotateStruct() {
 }
 BOOL CAvatar::createScaleStruct() {
     if (m_pScaleStruct) return TRUE;
-    m_pScaleStruct = (AvatarScaleStruct*)com_malloc_d(sizeof(AvatarScaleStruct), __FILE__ "(494)", RET_ADDR());
+    m_pScaleStruct = new (__FILE__ "(494)") AvatarScaleStruct;
     if (!m_pScaleStruct) {
         TRACE(" ... Fail to create ScalingStructure\n");
         return FALSE;
@@ -298,7 +298,7 @@ BOOL CAvatar::createScaleStruct() {
 AvatarFadeStruct* CAvatar::createFadeStruct() {
     for (INT i = 0; i < 5; i++) {
         if (!m_pFadeStruct[i]) {
-            m_pFadeStruct[i] = (AvatarFadeStruct*)com_malloc_d(sizeof(AvatarFadeStruct), __FILE__ "(514)", RET_ADDR());
+            m_pFadeStruct[i] = new (__FILE__ "(514)") AvatarFadeStruct;
             if (!m_pFadeStruct[i]) {
                 TRACE(" ... Fail to create FadeStructure\n");
                 return NULL;
@@ -975,7 +975,7 @@ INT CAvatar::onAvatarAttachEffect(INT nCmd, void* pParam, INT nID) {
 INT CAvatar::onAvatarSetLookPosition(INT nCmd, void* pParam, INT nID) {
     AvatarSetLook* p = (AvatarSetLook*)pParam;
     FVECTOR v = _crdWorldPos(getAtel().getVSM()->getAvatar(p->TargetID)->Crd(0));
-    if (!m_pLookStruct) m_pLookStruct = (AvatarLookStruct*)com_malloc_d(sizeof(AvatarLookStruct), __FILE__ "(2058)", RET_ADDR());
+    if (!m_pLookStruct) m_pLookStruct = new (__FILE__ "(2058)") AvatarLookStruct;
     m_pLookStruct->_nTargetID = p->TargetID;
     m_pLookStruct->_fOffsetY = p->OffsetY;
     v.y += p->OffsetY;
@@ -985,7 +985,7 @@ INT CAvatar::onAvatarSetLookPosition(INT nCmd, void* pParam, INT nID) {
 INT CAvatar::onAvatarSetLookUpdatePosition(INT nCmd, void* pParam, INT nID) {
     AvatarSetLook* p = (AvatarSetLook*)pParam;
     FVECTOR v = _crdWorldPos(getAtel().getVSM()->getAvatar(p->TargetID)->Crd(0));
-    if (!m_pLookStruct) m_pLookStruct = (AvatarLookStruct*)com_malloc_d(sizeof(AvatarLookStruct), __FILE__ "(2079)", RET_ADDR());
+    if (!m_pLookStruct) m_pLookStruct = new (__FILE__ "(2079)") AvatarLookStruct;
     m_pLookStruct->_nTargetID = p->TargetID;
     m_pLookStruct->_fOffsetY = p->OffsetY;
     v.y += p->OffsetY;
