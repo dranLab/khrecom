@@ -190,9 +190,6 @@ extern const char blanks[PADSIZE] __asm__("blanks.12");
 extern const char zeroes[PADSIZE] __asm__("zeroes.13");
 #endif
 
-#ifdef VFPRINTF_R_ASM
-VFPRINTF_R_ASM
-#else
 #ifdef INTEGER_ONLY
 int _vfiprintf_r(struct _reent *data, FILE *fp, const char *fmt0, va_list ap)
 #else
@@ -382,10 +379,13 @@ int _vfprintf_r(struct _reent *data, FILE *fp, const char *fmt0, va_list ap)
             if (ch == 'g' || ch == 'G') {
                 double e;
 
-                if (_double == 0)
+                if (_double != 0) {
+                    e = _double;
+                    if (_double < 0)
+                        e = 0 - _double;
+                    e = sn_log10(e);
+                } else
                     e = 1.0;
-                else
-                    e = sn_log10(_double < 0 ? 0 - _double : _double);
                 if (e < -4.0 || e >= (double)prec)
                     ch = ch == 'g' ? 'e' : 'E';
                 else
@@ -608,4 +608,3 @@ done:
     return (ret);
     /* NOTREACHED */
 }
-#endif /* VFPRINTF_R_ASM */
