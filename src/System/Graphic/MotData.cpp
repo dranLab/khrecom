@@ -128,7 +128,7 @@ void CMotData::DecodeBin(const BYTE* inBuf) {
     pSiz = (const INT*)p;
     p += ttl * sizeof(INT);
 #line 195
-    m_pCmp = (CMPFIX*)com_malloc_d(ttl * sizeof(CMPFIX), __FILE__ "(195)", RET_ADDR());
+    m_pCmp = new (__FILE__ "(195)") CMPFIX[ttl];
     ASSERT(m_pCmp);
 
     pCmp = NULL;
@@ -148,7 +148,7 @@ void CMotData::DecodeBin(const BYTE* inBuf) {
         ASSERT(pCmp);
     }
     if (nDataByteSize > 0) {
-        m_pCmpData = (BYTE*)com_malloc_d(nDataByteSize, __FILE__ "(215)", RET_ADDR());
+        m_pCmpData = new (__FILE__ "(215)") BYTE[nDataByteSize];
         ASSERT(m_pCmpData);
     }
 

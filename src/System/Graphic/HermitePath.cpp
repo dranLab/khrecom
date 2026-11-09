@@ -91,8 +91,8 @@ BOOL CHermitePath::_allocateMem(INT inNum) {
     }
     if (bAlloc) {
         _deleteMem();
-        m_pPathData = (UNIT_DATA*)com_malloc_d(inNum * sizeof(UNIT_DATA), __FILE__ "(126)", RET_ADDR());
-        m_pRollData = (FLOAT*)com_malloc_d(inNum * sizeof(FLOAT), __FILE__ "(127)", RET_ADDR());
+        m_pPathData = new (__FILE__ "(126)") UNIT_DATA[inNum];
+        m_pRollData = new (__FILE__ "(127)") FLOAT[inNum];
 #line 128
         ASSERT((m_pPathData)&&(m_pRollData));
         m_iBufSize = inNum;

@@ -84,7 +84,7 @@ void CCtdMan::disposeData(void* pDtHead) {
     INT listSize = m_pCtdList->getListSize();
     if (listSize != 0) {
 #line 103
-        CCtd** pCtdList = (CCtd**)com_malloc_d(listSize * sizeof(CCtd*), __FILE__ "(103)", RET_ADDR());
+        CCtd** pCtdList = new (__FILE__ "(103)") CCtd*[listSize];
         INT i = 0;
         for (CCtd *pCtd = m_pCtdList->getHead(), *__pn = pCtd ? pCtd->getNext() : NULL; pCtd != NULL;
              pCtd = __pn, __pn = __pn ? __pn->getNext() : NULL) {

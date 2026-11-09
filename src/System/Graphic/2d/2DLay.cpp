@@ -79,7 +79,7 @@ BOOL C2DLay::init(void* pLad, const CHAR* pBaseName) {
     if (!p) return FALSE;
     *p = '\0';
 
-    m_pSeqHandle = (HANDLE*)com_malloc_d(m_nSequenceUnitMax * sizeof(HANDLE), __FILE__ "(63)", RET_ADDR());
+    m_pSeqHandle = new (__FILE__ "(63)") HANDLE[m_nSequenceUnitMax];
     for (i = 0; i < m_nSequenceUnitMax; i++) {
         void* pData = (CHAR*)pLad + m_pLaySequenceUnit[i].ofs;
         sprintf(szSeqName, "%s:%02d", szName, i);

@@ -64,7 +64,7 @@ C2DLayObj::~C2DLayObj() {
 HANDLE C2DLayObj::create(HANDLE handle, UINT nScreen, LAY_SCREEN* pLayScreen, HANDLE* pSeqHandle) {
     UINT i;
     m_nSeqObj = nScreen;
-    m_pSeqObjHandle = (HANDLE*)com_malloc_d(nScreen * sizeof(HANDLE), __FILE__ "(65)", RET_ADDR());
+    m_pSeqObjHandle = new (__FILE__ "(65)") HANDLE[nScreen];
     for (i = 0; i < nScreen; i++, pLayScreen++) {
         C2DBase* p2DBase = C2DMan::getBase(pSeqHandle[pLayScreen->sequence_unit]);
         if (p2DBase) {

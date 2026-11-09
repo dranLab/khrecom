@@ -435,7 +435,7 @@ void CModelMan::drawDispListSemi() {
             INT i = 0;
             CPackMan::initSemiPacket();
 #line 622
-            pSemiList = (SEMI_PACKET_LIST*)com_malloc_d(nSemiListNum * sizeof(SEMI_PACKET_LIST), __FILE__ "(622)", RET_ADDR());
+            pSemiList = new (__FILE__ "(622)") SEMI_PACKET_LIST[nSemiListNum];
             ASSERT(pSemiList);
             if (nSemiListSemiNum > 0) {
                 i = ((CDispListSemiSingleSort*)s_pDispListTbl[4])->draw(pSemiList);
