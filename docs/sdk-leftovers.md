@@ -49,6 +49,10 @@ shows a draft's diff after you switch its `#if 0` to `#if 1` (the permuters swit
 
 - A constant in a variable set before the stores it should precede (`_getAllRefs`'s `2`, `at3dec_proc`'s `0xF8`).
 - An early `if (x < 0) return x;` instead of an `if` around the success path (`scePad2CreateSocket`).
+- Registers rotated across a whole large function can come from one local block: `_vfprintf_r` (1069 insns, 122
+  lines "flags/ch/base swapped") matched with one change, the %g exponent test as `if (_double != 0) { e = _double;
+  if (_double < 0) e = 0 - _double; e = sn_log10(e); } else e = 1.0;` (a soft-float ternary had routed a temporary
+  through v0 and changed global-alloc's order). Read the non-register lines of a diff first (2026-11-09).
 - A word-extraction macro (fdlibm's `EXTRACT_WORDS`/`GET_HIGH_WORD`) instead of a union: its `do { } while (0)` is a
   sched1 barrier with no code that lengthens live ranges (a parameter spilled in the original, operands one register
   off at entry); `goto done` exits keep a loop unrotated (a constant then hoisted); `if ((v = expr) < c) break;` fixed a
@@ -121,9 +125,12 @@ shows a draft's diff after you switch its `#if 0` to `#if 1` (the permuters swit
   blocks, so local-alloc can't tie it to the product); raw trxreg for the TRXREG write = `sp->trxreg.RRW` read
   again (gcse removes the load, not the and); `int` GsGetIMR/GsPutIMR; `rest` before `qwc`; the byte copy through
   a `{u_long128; u_char[16]}` union (sp + i operand order).
-- **graphdev_checkModelVersion** (`sceGsSetDefDispEnv`, ~100 lines): structure matches (if/else if chain, not
-  switch; DX = dx*magh + ((long)off[0] + 636) through a `long` temp); left: the original computes DY and
-  off[0]+636 before magh and ORs the DISPLAY fields in another order. String kept by an unused static inline.
+- **graphdev_checkModelVersion** (`sceGsSetDefDispEnv` parked at 21, 2026-11-09; was 96): the 16 extra bytes were a
+  function-level `magh` (a global pseudo: the quotient never tied to it, a `move` after each mflo); magh/sy/sx are
+  block-local in the interlaced arms, function-level in the non-interlaced ones; `magh * w`; the DISPLAY OR order
+  M|V|H|X|Y|W (unique best of all 120; Sony's own X|Y|M|V|W|H gives 127); dispfb psm before fbw. Left: in both
+  non-interlaced blocks the original issues `h - 1` between the div and the off[0] load (sx/DY a1/v1 swapped): an
+  extra dependence in its RTL, not reproduced. On 991111-01 the cross-jump runs after sched2; `-fsched-verbose-9`.
 - **csc** (matched 2026-11-07, data from source): both "register swaps" were source shape: `*D_STAT = 8;
   EnableDmac(3);` on one line (as moves the volatile store into the jal slot), the `do { } while (0)` around exactly
   the `DIntr() ... if (oldei) EIntr();` critical section, and qwc (`mbnum * 0x40`) in its own local next to rgb.
@@ -182,7 +189,7 @@ Sorted by unit, then size. `instr`: instructions in the original.
 | unit | function | instr | status | what differs |
 |---|---|---:|---|---|
 | `lib/nodebug/snDebugInit` | `snTeq` | 26 | hand-written | trap handler |
-| `lib/graphdev_checkModelVersion` | `sceGsSetDefDispEnv` | 221 | parked | matches except register order in the DISPLAY computation (orig: DY and off[0] + 636 first). |
+| `lib/graphdev_checkModelVersion` | `sceGsSetDefDispEnv` | 221 | parked | 21 of 232 lines (2026-11-09): only the two non-interlaced blocks differ (NTSC falls into PAL's tail): the original issues h - 1 between the div and the off[0] load (ours loads off[0], off[1] first: their priority 10/9 beats h - 1's 7 in sched2, so in the original the loads cannot have been ready … |
 | `lib/mpc` | `_getRef0` | 290 | parked | same structure and size as the original; register allocation differs (the original keeps y in s1, n in t9 and spills avg << 2) |
 | `lib/mpc` | `_rix_111` | 72 | hand-written | MMI reference-copy routines (_rix_*: luminance, _ri0_*: chrominance) |
 | `lib/mpc` | `_ri0_111` | 69 | hand-written | MMI reference-copy routines (_rix_*: luminance, _ri0_*: chrominance) |
@@ -212,7 +219,6 @@ Sorted by unit, then size. `instr`: instructions in the original.
 | `lib/nodebug/__errno` | `strlen` | 81 | hand-written | MMI string routines (128-bit loads and compares) |
 | `lib/nodebug/__errno` | `strcat` | 76 | hand-written | MMI string routines (128-bit loads and compares) |
 | `lib/nodebug/__errno` | `strcpy` | 70 | hand-written | MMI string routines (128-bit loads and compares) |
-| `lib/nodebug/strround` | `_vfprintf_r` | 1041 | not attempted |  |
 | `lib/nodebug/_setlocale_r` | `memchr` | 59 | hand-written | MMI (128-bit compares) |
 | `lib/kprintf2` | `_sceSnprintf` | 837 | parked | 2 of 853 lines, same size (2026-11-07): only the nop between c.eq.s and bc1f in the %f case (gcc writes "#nop"; the original's assembler inserted it at the ".set noreorder" before bc1f). The 991111/991111-01 ee/bin/as (GNU as 2.9-ee-991111) gives exactly that nop and the whole function matches, … |
 
@@ -223,7 +229,7 @@ Not listed in the unit's `// SOURCE DATA:` line.
 | unit | sections |
 |---|---|
 
-Totals: 16 units without a source file (1 with code); 8 units with INCLUDE_ASM functions: 7 parked, 1 not attempted, 26 hand-written; 0 units take a data section from assembly.
+Totals: 16 units without a source file (1 with code); 7 units with INCLUDE_ASM functions: 7 parked, 0 not attempted, 26 hand-written; 0 units take a data section from assembly.
 
 Generated by `tools/leftovers.py lib`.
 <!-- leftovers:lib:end -->

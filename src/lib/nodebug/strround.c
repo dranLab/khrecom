@@ -1,6 +1,5 @@
 /* newlib libc/stdio/vfprintf.c (floating point), SN Systems version: SN's float formatting (strround, strrev,
    itoa, fftoa) and digit grouping (add_separators) */
-#include "include_asm.h"
 #include "stdio_local.h"
 #include "lib/src/newlib/libm/fdlibm.h"
 
@@ -233,42 +232,7 @@ void _vfflush(FILE *fp)
 
 #define VFWRITE_CUMULATIVE_WRITTEN "cumulative_written.21"
 #define VFWRITE_PCH_POINTER "pch_pointer.22"
-/* _vfprintf_r: only register allocation differs (flags/ch/base); kept asm with its .rodata */
-#define VFPRINTF_R_ASM                                                                                 \
-    __asm__(".rdata\n.align 4\n"                                                                       \
-            "blanks.29:\n.ascii \"                \"\n"                                                 \
-            "zeroes.30:\n.ascii \"0000000000000000\"\n"                                                 \
-            ".text\n");                                                                                \
-    static inline void _vfprintf_r_strings(const char **s)                                            \
-    {                                                                                                  \
-        s[0] = "0123456789abcdef";                                                                     \
-        s[1] = "(null)";                                                                               \
-        s[2] = "0123456789ABCDEF";                                                                     \
-        s[3] = "bug in vfprintf: bad base";                                                            \
-    }                                                                                                  \
-    INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/nodebug/strround", _vfprintf_r);
 #include "vfprintf.h"
-__asm__(".rdata\n.align 4\njtbl_004FE710:\n"
-        ".word .L0037EE44\n.word .L0037F498\n.word .L0037F498\n.word .L0037EE5C\n.word .L0037F498\n"
-        ".word .L0037F498\n.word .L0037F498\n.word .L0037EE64\n.word .L0037F498\n.word .L0037F498\n"
-        ".word .L0037EE6C\n.word .L0037EE8C\n.word .L0037F498\n.word .L0037EE84\n.word .L0037EE98\n"
-        ".word .L0037F498\n.word .L0037EF0C\n.word .L0037EF14\n.word .L0037EF14\n.word .L0037EF14\n"
-        ".word .L0037EF14\n.word .L0037EF14\n.word .L0037EF14\n.word .L0037EF14\n.word .L0037EF14\n"
-        ".word .L0037EF14\n.word .L0037F498\n.word .L0037F498\n.word .L0037F498\n.word .L0037F498\n"
-        ".word .L0037F498\n.word .L0037F498\n.word .L0037F498\n.word .L0037F498\n.word .L0037F498\n"
-        ".word .L0037F498\n.word .L0037EFA0\n.word .L0037EFF4\n.word .L0037F498\n.word .L0037EFF4\n"
-        ".word .L0037F498\n.word .L0037F498\n.word .L0037F498\n.word .L0037F498\n.word .L0037EF48\n"
-        ".word .L0037F498\n.word .L0037F498\n.word .L0037F188\n.word .L0037F498\n.word .L0037F498\n"
-        ".word .L0037F498\n.word .L0037F498\n.word .L0037F498\n.word .L0037F254\n.word .L0037F498\n"
-        ".word .L0037F498\n.word .L0037F298\n.word .L0037F498\n.word .L0037F498\n.word .L0037F498\n"
-        ".word .L0037F498\n.word .L0037F498\n.word .L0037F498\n.word .L0037F498\n.word .L0037F498\n"
-        ".word .L0037F498\n.word .L0037F498\n.word .L0037EF74\n.word .L0037EFA4\n.word .L0037EFF4\n"
-        ".word .L0037EFF4\n.word .L0037EFF4\n.word .L0037EF50\n.word .L0037EFA4\n.word .L0037F498\n"
-        ".word .L0037F498\n.word .L0037EF58\n.word .L0037F498\n.word .L0037F120\n.word .L0037F18C\n"
-        ".word .L0037F1CC\n.word .L0037EF6C\n.word .L0037F498\n.word .L0037F1F0\n.word .L0037F498\n"
-        ".word .L0037F258\n.word .L0037F498\n.word .L0037F498\n.word .L0037F2A4\n"
-        ".text\n");
-
 
 /* insert ',' between groups of 3 integer digits; the result goes to buf */
 char *add_separators(char *buf, char *cp, char *end, int *size)
