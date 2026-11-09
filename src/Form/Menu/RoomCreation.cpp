@@ -799,79 +799,20 @@ void CRoomCreation::main() {
         break;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/RoomCreation", menuMain__13CRoomCreation);
-// menuMain's string literals, jump table and statics, for its INCLUDE_ASM; remove with it.
-asm(".section .rodata\n"
-    ".align 3\n"
-    ".word 0x02030506\n"
-    ".word 0x00000004\n"
-    ".align 3\n"
-    ".globl D_004EF9A0\n"
-    "D_004EF9A0:\n"
-    ".word 0x685447F9\n"
-    ".word 0x61632065\n"
-    ".word 0x20736472\n"
-    ".word 0x20756F79\n"
-    ".word 0x20656573\n"
-    ".word 0x6C616873\n"
-    ".word 0x6562206C\n"
-    ".word 0x65687420\n"
-    ".word 0x79656B20\n"
-    ".word 0xF4815C81\n"
-    ".word 0\n"
-    ".word 0\n"
-    ".align 3\n"
-    ".asciz \"c:/KHCOM/MainApp/Form/Menu/RoomCreation.cpp(602)\"\n"
-    ".align 3\n"
-    ".asciz \"c:/KHCOM/MainApp/Form/Menu/RoomCreation.cpp(618)\"\n"
-    ".align 3\n"
-    ".asciz \"c:/KHCOM/MainApp/Form/Menu/RoomCreation.cpp(623)\"\n"
-    ".align 3\n"
-    ".asciz \"c:/KHCOM/MainApp/Form/Menu/RoomCreation.cpp(647)\"\n"
-    ".align 3\n"
-    ".asciz \"c:/KHCOM/MainApp/Form/Menu/RoomCreation.cpp(657)\"\n"
-    ".align 3\n"
-    ".asciz \"c:/KHCOM/MainApp/Form/Menu/RoomCreation.cpp(667)\"\n"
-    ".align 3\n"
-    ".asciz \"c:/KHCOM/MainApp/Form/Menu/RoomCreation.cpp(676)\"\n"
-    ".align 3\n"
-    ".asciz \"c:/KHCOM/MainApp/Form/Menu/RoomCreation.cpp(682)\"\n"
-    ".align 3\n"
-    ".asciz \"c:/KHCOM/MainApp/Form/Menu/RoomCreation.cpp(691)\"\n"
-    ".align 3\n"
-    ".asciz \"c:/KHCOM/MainApp/Form/Menu/RoomCreation.cpp(696)\"\n"
-    ".align 3\n"
-    ".asciz \"c:/KHCOM/MainApp/Form/Menu/RoomCreation.cpp(707)\"\n"
-    ".align 3\n"
-    ".asciz \"c:/KHCOM/MainApp/Form/Menu/RoomCreation.cpp(712)\"\n"
-    ".align 3\n"
-    ".asciz \"c:/KHCOM/MainApp/Form/Menu/RoomCreation.cpp(736)\"\n"
-    ".align 3\n"
-    ".asciz \"c:/KHCOM/MainApp/Form/Menu/RoomCreation.cpp(746)\"\n"
-    ".align 3\n"
-    ".asciz \"fgExist > 0\"\n"
-    ".align 3\n"
-    ".word .L00341DB0\n"
-    ".word .L00342790\n"
-    ".word .L00342864\n"
-    ".word .L00343100\n"
-    ".word .L00343188\n"
-    ".word .L00343190\n"
-    ".word .L0034394C\n"
-    ".word .L00343958\n"
-    ".section .data\n"
-    ".align 2\n"
-    "scrollBarSeqTbl.4930:\n"
-    ".short 105, 102, 108\n"
-    ".align 2\n"
-    "pKeyStr.4931:\n"
-    ".word D_004EF9A0\n"
-    ".previous\n");
-
-/* menuMain: 78 of 2211 lines, 8 bytes short (92 and 0x50 short before _NORMA_PIECES, 2026-11-07): the by-value NormaSrc
- * arguments are written out now; left: case 0's registers (v1 + s7 where the original keeps a0, s4/s6/s8 from there). To enable
- * this draft, also drop the data block after its INCLUDE_ASM. */
-#if 0
+/* MATCH: _NORMA_PIECES (System/Graphic/2d/2DCard.h) with every piece in the register the original uses at the replaceNorma
+   call (lo a0, number a3, color a1, top v1; the createNorma call keeps lo in v0): the pointer argument then takes v0
+   and the argument loads of getNormaOperation issue a0 first. */
+#define _NORMA_PIECES_A0(t) ({ \
+    register ULONGLONG lo asm("$4") = (USHORT)(t)._nOp; \
+    register ULONGLONG num asm("$7") = (USHORT)(t)._nNumber; \
+    register ULONGLONG hi asm("$5") = (USHORT)(t)._nColor; \
+    lo <<= 16; \
+    register ULONGLONG top asm("$3") = (USHORT)(t).__nDummy; \
+    lo |= num; \
+    hi <<= 32; \
+    hi |= lo; \
+    top <<= 48; \
+    top | hi; })
 INT CRoomCreation::menuMain() {
     CARD card;
     FVECTOR vec;
@@ -905,8 +846,8 @@ INT CRoomCreation::menuMain() {
             CGameWork::setByte(1, 0x140, 4);
         }
         fWidth = m_nNorma < 4 ? 44.0f : 34.0f;
+        vec.set(256.0f - fWidth * (m_nNorma - 1), SCREEN_HEIGHT / 2 - 22, 0.0f, 1.0f);
         nNorma = m_nNorma - 1;
-        vec.set(256.0f - fWidth * nNorma, SCREEN_HEIGHT / 2 - 22, 0.0f, 1.0f);
         for (INT i = nNorma; i >= 0; i--) {
 #line 618
             C2DSeqCtrl* pCtrl = m_pCardNormaCtrl[i] = new (__FILE__ "(618)") C2DSeqCtrl;
@@ -1114,38 +1055,29 @@ INT CRoomCreation::menuMain() {
             m_pCursorCtrl = NULL;
             m_nMenuStep = 7;
         } else if (_isButtonRpt(0x802000, 0) && m_nCardSelectMax) {
-            INT nOld = m_nCardSelect;
             m_nCardSelect++;
-            if (m_nCardSelect % 6 && m_nCardSelect < m_nCardSelectMax) {
-                fgCursorMove = TRUE;
-            } else {
-                m_nCardSelect = nOld;
-                if (!m_buttonTrg) break;
-                if (nOld % 6 == 0) break;
-                m_nCardSelect = nOld - nOld % 6;
-                fgCursorMove = TRUE;
+            if (m_nCardSelect % 6 == 0 || m_nCardSelect >= m_nCardSelectMax) {
+                m_nCardSelect--;
+                if (!m_buttonTrg || m_nCardSelect % 6 == 0) break;
+                m_nCardSelect -= m_nCardSelect % 6;
             }
+            fgCursorMove = TRUE;
         } else if (_isButtonRpt(0x408000, 0) && m_nCardSelectMax) {
-            INT nOld = m_nCardSelect;
             m_nCardSelect--;
-            if (m_nCardSelect >= 0 && m_nCardSelect % 6 != 5) {
-                fgCursorMove = TRUE;
-            } else {
-                m_nCardSelect = nOld;
-                if (!m_buttonTrg) break;
-                if (nOld == m_nCardSelectMax - 1) break;
-                m_nCardSelect = nOld + 5;
+            if (m_nCardSelect < 0 || m_nCardSelect % 6 == 5) {
+                m_nCardSelect++;
+                if (!m_buttonTrg || m_nCardSelectMax - m_nCardSelect == 1) break;
+                m_nCardSelect += 5;
                 if (m_nCardSelect >= m_nCardSelectMax) {
                     m_nCardSelect = m_nCardSelectMax - 1;
                 }
-                fgCursorMove = TRUE;
             }
+            fgCursorMove = TRUE;
         } else if (_isButtonRpt(0x204000, 0) && m_nCardSelectMax) {
             if (m_nCardSelect / 6 < (m_nCardSelectMax - 1) / 6) {
                 m_nCardSelect += 6;
             } else {
-                if (!m_buttonTrg) break;
-                if (m_nCardSelectMax < 7) break;
+                if (!m_buttonTrg || m_nCardSelectMax < 7) break;
                 m_nCardSelect = m_nCardSelect % 6;
             }
             fgCursorMove = TRUE;
@@ -1153,13 +1085,11 @@ INT CRoomCreation::menuMain() {
                 m_nCardSelect = m_nCardSelectMax - 1;
             }
         } else if (_isButtonRpt(0x101000, 0) && m_nCardSelectMax) {
-            INT nOld = m_nCardSelect;
             m_nCardSelect -= 6;
             if (m_nCardSelect < 0) {
-                m_nCardSelect = nOld;
-                if (!m_buttonTrg) break;
-                if (m_nCardSelectMax < 7) break;
-                m_nCardSelect = (m_nCardSelectMax - 1) / 6 * 6 + nOld % 6;
+                m_nCardSelect += 6;
+                if (!m_buttonTrg || m_nCardSelectMax < 7) break;
+                m_nCardSelect = (m_nCardSelectMax - 1) / 6 * 6 + m_nCardSelect % 6;
                 if (m_nCardSelect >= m_nCardSelectMax) {
                     m_nCardSelect = m_nCardSelectMax - 1;
                 }
@@ -1248,7 +1178,7 @@ INT CRoomCreation::menuMain() {
                     normaSrc._nOp = m_pDoorInfo->getNormaOperation(m_idxNorma);
                     {
                         RCNORMA::NormaSrc t = normaSrc;
-                        _replaceNormaRaw(m_pCardNorma[m_nNorma - 1], _NORMA_PIECES(t), 0);
+                        _replaceNormaRaw(m_pCardNorma[m_nNorma - 1], _NORMA_PIECES_A0(t), 0);
                     }
                 }
                 m_pExplainFnt[1]->setText(getNormaInfo());
@@ -1402,7 +1332,6 @@ INT CRoomCreation::menuMain() {
     moveCursor();
     return 0;
 }
-#endif
 #line 1206
 void CRoomCreation::initInfoNum(FVECTOR& vec) {
     FVECTOR vec2;
