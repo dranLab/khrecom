@@ -11,7 +11,7 @@
 #include "System/Graphic/WorldEnv.h"
 #include "System/HeapMan.h"
 #include "System/Debug.h"
-#include "include_asm.h"
+
 
 
 
@@ -205,6 +205,9 @@ void CModelMan::reset() {
                  : "r"(&vMax), "r"(&vMin));
 }
 
+// the original's inline wrapper (Coord.h:613 in its line markers): its parameters take the addresses, so the
+// caller keeps no register copy of &wv_i
+static inline void _inversMatrix(FMATRIX& m0, const FMATRIX& m1) { sceVu0InversMatrix(m0, m1); }
 static inline void _unitMatrix(FMATRIX& m) {
     asm volatile("vmr32.xyzw $vf1, $vf0\n"
                  "sqc2 $vf0, 0x30(%0)\n"
@@ -230,9 +233,6 @@ static inline FVECTOR _applyMatrix(const FMATRIX& m, const FVECTOR& v) {
     return b;
 }
 
-/* Parked: 58 of 242 lines (65 with vFogParam.set inlined) - FVECTOR::setCall gives the original's set call, but the frame
- * is 16 bytes larger (an extra saved register s3 for &wv_i) and the fog/matrix constant block is scheduled differently. */
-#if 0
 void CModelMan::setupDrawEnv() {
     FMATRIX& matWS = CWorldEnv::getWorldScreenMatrix();
     CShadowModelMan::updateMatrix();
@@ -263,7 +263,7 @@ void CModelMan::setupDrawEnv() {
     FMATRIX ws_i;
     FMATRIX& matWV = CWorldEnv::getWorldViewMatrix();
     FMATRIX& matVS = CWorldEnv::getViewScreenMatrix();
-    sceVu0InversMatrix(wv_i, matWV);
+    _inversMatrix(wv_i, matWV);
     _unitMatrix(vs_i);
     vs_i.m[0][0] = 1.0f / matVS.m[0][0];
     vs_i.m[3][0] = -matVS.m[2][0] / matVS.m[0][0];
@@ -274,49 +274,15 @@ void CModelMan::setupDrawEnv() {
     vs_i.m[2][3] = 1.0f / matVS.m[3][2];
     vs_i.m[3][3] = -matVS.m[2][2] / matVS.m[3][2];
     ws_i = _mulMatrix(wv_i, vs_i);
-    {
-        FLOAT farZ = CWorldEnv::getDispFar();
-        const FLOAT XDISPMAX = 2304.0f;
-        const FLOAT XDISPMIN = 1792.0f;
-        const FLOAT YDISPMAX = 2240.0f;
-        const FLOAT YDISPMIN = 1856.0f;
-        const FLOAT ZBUFMAX = 16777000.0f;
-        FVECTOR v[8];
-        v[0].x = XDISPMAX;
-        v[0].y = YDISPMAX;
-        v[0].z = ZBUFMAX;
-        v[0].w = 1.0f;
-        v[1].x = XDISPMIN;
-        v[1].y = YDISPMAX;
-        v[1].z = ZBUFMAX;
-        v[1].w = 1.0f;
-        v[2].x = XDISPMAX;
-        v[2].y = YDISPMIN;
-        v[2].z = ZBUFMAX;
-        v[2].w = 1.0f;
-        v[3].x = XDISPMIN;
-        v[3].y = YDISPMIN;
-        v[3].z = ZBUFMAX;
-        v[3].w = 1.0f;
-        v[4].x = XDISPMAX * farZ;
-        v[4].y = YDISPMAX * farZ;
-        v[4].z = farZ;
-        v[4].w = farZ;
-        v[5].x = XDISPMIN * farZ;
-        v[5].y = YDISPMAX * farZ;
-        v[5].z = farZ;
-        v[5].w = farZ;
-        v[6].x = XDISPMAX * farZ;
-        v[6].y = YDISPMIN * farZ;
-        v[6].z = farZ;
-        v[6].w = farZ;
-        v[7].x = XDISPMIN * farZ;
-        v[7].y = YDISPMIN * farZ;
-        v[7].z = farZ;
-        v[7].w = farZ;
-        for (INT i = 0; i < 8; i++) {
-            g_tmpView[i] = _applyMatrix(ws_i, v[i]);
-        }
+    FLOAT farZ = CWorldEnv::getDispFar();
+    FLOAT XDISPMAX = 2304.0f;
+    FLOAT XDISPMIN = 1792.0f;
+    FLOAT YDISPMAX = 2240.0f;
+    FLOAT YDISPMIN = 1856.0f;
+    FLOAT ZBUFMAX = 16777000.0f;
+    FVECTOR v[8] = {{XDISPMAX, YDISPMAX, ZBUFMAX, 1.0f}, {XDISPMIN, YDISPMAX, ZBUFMAX, 1.0f}, {XDISPMAX, YDISPMIN, ZBUFMAX, 1.0f}, {XDISPMIN, YDISPMIN, ZBUFMAX, 1.0f}, {XDISPMAX * farZ, YDISPMAX * farZ, farZ, farZ}, {XDISPMIN * farZ, YDISPMAX * farZ, farZ, farZ}, {XDISPMAX * farZ, YDISPMIN * farZ, farZ, farZ}, {XDISPMIN * farZ, YDISPMIN * farZ, farZ, farZ}};
+    for (int i = 0; i < 8; i++) {
+        g_tmpView[i] = _applyMatrix(ws_i, v[i]);
     }
     asm volatile("lqc2 $vf1, 0x0(%0)\n"
                  "lqc2 $vf2, 0x10(%0)\n"
@@ -338,8 +304,6 @@ void CModelMan::setupDrawEnv() {
                  :
                  : "r"(g_tmpView));
 }
-#endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/ModelMan", setupDrawEnv__9CModelMan);
 
 void CModelMan::setupDrawMode(INT nInAlphaMode) {
     QWdata giftag;
