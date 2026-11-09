@@ -84,9 +84,7 @@ static inline UINT _upKind(INT inType0, INT inType1) {
 }
 
 static inline FLOAT _limitPI(FLOAT r) {
-    if (r < -3.1415927f) r += 6.2831855f;
-    else if (r > 3.1415927f) r -= 6.2831855f;
-    return r;
+    return (r < -3.1415927f) ? r + 6.2831855f : (r > 3.1415927f) ? r - 6.2831855f : r;
 }
 
 static inline INT _getNowCamMode() {
@@ -1286,10 +1284,6 @@ void CPlayerRiku::exeFriend() {
     }
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerRiku", setMagic__Q22PL11CPlayerRikuiii);
-
-/* Best attempt (same structure): BULLET_PARAM field stores and the attack-power loads are scheduled differently. */
-#if 0
 void CPlayerRiku::setMagic(INT inState, INT inCardID, INT inSkillID) {
     FVECTOR pos;
     FVECTOR rot;
@@ -1305,8 +1299,8 @@ void CPlayerRiku::setMagic(INT inState, INT inCardID, INT inSkillID) {
             param.AtkAttr = m_AtkAttr;
             param.iAttackPoint = m_iAttackPower;
             param.fSpeed = 0.4f;
-            param.fShiftY = 2.0f;
             param.fCollRadius = 2.0f;
+            param.fShiftY = 2.0f;
             param.vPos = m_vMarkPos;
             m_pCollMap->setType(COLL_TYPE_SPHERE);
             m_pCollMap->enableSliding(0);
@@ -1320,38 +1314,38 @@ void CPlayerRiku::setMagic(INT inState, INT inCardID, INT inSkillID) {
                 param.vPos.y += 8.0f;
             }
             m_vJumpStartPos = param.vPos;
-            m_hEffCast = setEffect(g_szDpxImpals, 2, &m_vJumpStartPos, NULL, 0.0f);
+            m_hEffCast = setEffect(_ref(g_szDpxImpals), 2, &m_vJumpStartPos, NULL, 0.0f);
             param.vRot = getRot();
             param.vRot.x = -1.5707964f;
-            param.uiFlag = 0x20003;
             param.pEffectTbl = g_EffTbl_Skill[52];
-            param.tqFadeTime = 600;
-            param.fScale = 1.0f;
             param.tqCollAtkTime = 600;
             param.tqHomingTime = 600;
+            param.tqFadeTime = 600;
+            param.fScale = 1.0f;
+            param.uiFlag = 0x20003;
             CEntityFactory::getInstance()->createBullet(param, this);
         } else {
             setQuake(10.0f, 0.25f, 50);
-            m_uiAttackID = 0xaf;
-            m_pAtkData = &g_AttackDataList[0xaf];
-            m_iAttackPower = m_iAP * CardBattle::g_pStockSkillList[m_iStockSkill].POWER[3] / 100;
+            _ref(m_uiAttackID) = 0xaf;
+            _ref(m_pAtkData) = &g_AttackDataList[m_uiAttackID];
+            _ref(m_iAttackPower) = getAP() * CardBattle::g_pStockSkillList[m_iStockSkill].POWER[3] / 100;
             _ref(m_AtkKind) = (ATK_KIND)3;
             _ref(m_AtkAttr) = (ATK_ATTR)CardBattle::g_pStockSkillList[m_iStockSkill].ATTR;
             UINT up = _upKind(CardBattle::g_pStockSkillList[m_iStockSkill].UP_TYPE0,
                               CardBattle::g_pStockSkillList[m_iStockSkill].UP_TYPE1);
             calcEnchant_AttackPoint(m_iAttackPower, m_AtkKind, m_AtkAttr, up);
             param.init(1, 3);
+            param.CollKind = COLL_KIND_PSHOT;
             param.AtkKind = m_AtkKind;
             param.AtkAttr = m_AtkAttr;
-            param.CollKind = COLL_KIND_PSHOT;
-            param.pEffectTbl = g_EffTbl_Skill[53];
             param.iAttackPoint = m_iAttackPower;
+            param.fSpeed = 0.0f;
+            param.pEffectTbl = g_EffTbl_Skill[53];
             param.uiFlag = 0x30002;
             param.CollType = COLL_TYPE_CIRCLE;
             param.tqCollAtkTime = 3000;
             param.fChangeRadius = 0.15f;
             param.fCollOffsetY = 0.4f;
-            param.fSpeed = 0.0f;
             param.fCollRadius = 0.0f;
             getWeaponTopPos(param.vPos);
             m_pCollMap->setType(COLL_TYPE_SPHERE);
@@ -1376,9 +1370,9 @@ void CPlayerRiku::setMagic(INT inState, INT inCardID, INT inSkillID) {
         param.AtkKind = m_AtkKind;
         param.AtkAttr = m_AtkAttr;
         param.iAttackPoint = m_iAttackPower;
-        param.fShiftY = 1.0f;
         param.fSpeed = 0.0f;
         param.fCollRadius = 1.0f;
+        param.fShiftY = 1.0f;
         param.vPos = m_vAppearPos;
         m_pCollMap->setType(COLL_TYPE_SPHERE);
         m_pCollMap->enableSliding(0);
@@ -1392,10 +1386,10 @@ void CPlayerRiku::setMagic(INT inState, INT inCardID, INT inSkillID) {
             param.vPos.y += 4.0f;
         }
         param.vRot = getRot();
-        param.tqCollAtkTime = 1000;
-        param.uiFlag = 0x20002;
         param.pEffectTbl = g_EffTbl_Skill[62];
+        param.tqCollAtkTime = 1000;
         param.fScale = 1.5f;
+        param.uiFlag = 0x20002;
         pBullet = (CBullet*)CEntityFactory::getInstance()->createBullet(param, this);
         if (pBullet) pBullet->setAttackID(m_pWeapon->getCollAttackID());
         break;
@@ -1403,17 +1397,17 @@ void CPlayerRiku::setMagic(INT inState, INT inCardID, INT inSkillID) {
         getWeaponTopPos(pos);
         param.init(2, 3);
         param.CollKind = COLL_KIND_PSHOT;
-        param.iAttackPoint = m_iAttackPower;
+        param.uiFlag = 0x21008140;
         param.AtkKind = m_AtkKind;
         param.AtkAttr = m_AtkAttr;
-        param.uiFlag = 0x21008140;
+        param.iAttackPoint = m_iAttackPower;
         param.fSpeed = m_pAtkData->MAX_SPEED * 0.01f;
-        param.tqHomingTime = 9000;
         param.fMaxDist = m_pAtkData->WORK0;
+        param.tqHomingTime = 9000;
         param.fHomingRadius = m_pAtkData->RADIUS;
-        param.vPos = pos;
         param.fHomingRate = m_pAtkData->WORK1;
         param.tqFadeTime = 1000;
+        param.vPos = pos;
         param.vRot = getRot();
         param.vRot.y = _limitPI(calcDirection(pos));
         param.pEffectTbl = g_EffTbl_Skill[m_pAtkData->EFFECT];
@@ -1430,7 +1424,6 @@ void CPlayerRiku::setMagic(INT inState, INT inCardID, INT inSkillID) {
         break;
     }
 }
-#endif
 
 } // namespace PL
 
