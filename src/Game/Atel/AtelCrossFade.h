@@ -42,7 +42,7 @@ public:
         TRACE("CAtelCrossFade::initialize\n");
 #line 110 ATELCROSSFADE_H_PATH
         if (!(__null == m_pInstance)) AssertApp(__FILE__, __LINE__, "__null == m_pInstance", 0);
-        m_pInstance = new (com_malloc_d(sizeof(CAtelCrossFade), __FILE__ "(111)", ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; }))) CAtelCrossFade(pParent);
+        m_pInstance = new (__FILE__ "(111)") CAtelCrossFade(pParent);
 #line 112
         if (!(m_pInstance)) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
     }

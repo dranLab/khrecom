@@ -37,7 +37,7 @@ public:
 #line 45 CHATMAN_H_PATH
     static CChatMan& initialize() {
         if (!(__null == m_pInstance)) AssertApp(__FILE__, __LINE__, "__null == m_pInstance", 0);
-        m_pInstance = new (com_malloc_d(sizeof(CChatMan), __FILE__ "(47)", ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; }))) CChatMan;
+        m_pInstance = new (__FILE__ "(47)") CChatMan;
         if (!(m_pInstance)) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
         m_pInstance->setup();
         return *m_pInstance;

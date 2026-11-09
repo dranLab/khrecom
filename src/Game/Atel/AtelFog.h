@@ -60,7 +60,7 @@ public:
         if (m_pInstance) return;
         TRACE("CAtelFog::initialize\n");
         if (!(__null == m_pInstance)) AssertApp(__FILE__, __LINE__, "__null == m_pInstance", 0);
-        m_pInstance = new (com_malloc_d(sizeof(CAtelFog), __FILE__ "(111)", ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; }))) CAtelFog(pParent);
+        m_pInstance = new (__FILE__ "(111)") CAtelFog(pParent);
         if (!(m_pInstance)) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
     }
     static void finalize() {

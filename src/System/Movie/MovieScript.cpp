@@ -192,13 +192,8 @@ CHAR* CMovieScript::getFileName(const CHAR* pszPath) {
 }
 
 void MovieScriptUnit::open(CTask& parent, const MovieScriptData& src) {
-    char* msg = __FILE__ "(268)";
     m_pSrc = (MovieScriptData*)&src;
-    UINT nRA;
-    __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA));
-    CTextWnd* p = (CTextWnd*)com_malloc_d(sizeof(CTextWnd), msg, nRA);
-    if (p != 0) p = new (p) CTextWnd(parent, 0);
-    m_pWnd = p;
+    m_pWnd = new (__FILE__ "(268)") CTextWnd(parent, 0);
 #line 269
     if (!m_pWnd) AssertApp(__FILE__, __LINE__, "m_pWnd", 0);
     m_pWnd->setWndStyle(5);

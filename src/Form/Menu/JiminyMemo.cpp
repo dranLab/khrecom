@@ -2008,9 +2008,9 @@ INT CMemo2DLayout::setup(const CHAR* inSeqName, const CHAR* inFileName, const IN
     m_pLayoutNoTbl = (INT*)com_malloc_d(sizeof(INT) * 3, __FILE__ "(2877)", -1);
     for (INT i = 0; i < 3; i++) m_pLayoutNoTbl[i] = inLayNoTbl[i];
     m_iSeqNum = inSeqNum;
-    size_t size = sizeof(LayoutDataParam) * inSeqNum;
-    m_pSeqNoTbl = (LayoutDataParam*)com_malloc_d(size, __FILE__ "(2881)",
-                                                 ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; }));
+    m_pSeqNoTbl = new (__FILE__ "(2881)") LayoutDataParam[inSeqNum];
+
+
     if (m_pSeqNoTbl) {
         for (INT i = 0; i < m_iSeqNum; i++) {
             m_pSeqNoTbl[i].In = inSeqNoTbl[i].In;
@@ -2050,9 +2050,9 @@ void CMemo2DLayout::initialize() {
             pSeq->enableColorCtrl(TRUE);
             pSeqParent = pSeq;
         } else if (pSeqParent) {
-            D2::C2DFnt* pFnt = new (com_malloc_d(sizeof(D2::C2DFnt), __FILE__ "(2945)",
-                                                 ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })))
+            D2::C2DFnt* pFnt = new (__FILE__ "(2945)")
                 D2::C2DFnt(0, 0, NULL, 15, CCtdMan::getText(m_pSeqNoTbl[i].CTCode), 0x40);
+
             if (pFnt) {
                 m_pSeqFntArray[i] = pFnt;
                 pSeqParent->addFntShift(m_pLayoutName, pFnt, m_pSeqNoTbl[i].XPosi, m_pSeqNoTbl[i].YPosi);
@@ -2093,9 +2093,9 @@ void CMemo2DLayout::destroyLayer() {
 D2::C2DSeqCtrl* CMemo2DLayout::createSequence(INT inSeqNo, INT inLayer) {
 #line 3011
     if (!(inSeqNo < 32)) AssertApp(__FILE__, __LINE__, "inSeqNo < SEQCTRL_MAX", 0);
-    D2::C2DSeqCtrl* pSeq = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(3017)",
-                                             ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })))
+    D2::C2DSeqCtrl* pSeq = new (__FILE__ "(3017)")
         D2::C2DSeqCtrl;
+
     if (pSeq) {
         pSeq->setLayer(inLayer);
         m_pSeqCtrlArray[inSeqNo] = pSeq;
@@ -2307,9 +2307,9 @@ void CMemo2DCursor::setup(CursorDataParam& inParam) {
     if (inParam.posiNum > 0) {
         if (inParam.posiTbl) {
             m_iPosiNum = inParam.posiNum;
-            m_pPosiTbl = (CursorPosition*)com_malloc_d(
-                sizeof(CursorPosition) * m_iPosiNum, __FILE__ "(3348)",
-                ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; }));
+            m_pPosiTbl = new (__FILE__ "(3348)") CursorPosition[m_iPosiNum];
+
+
             for (INT i = 0; i < m_iPosiNum; i++) m_pPosiTbl[i].copy(inParam.posiTbl[i]);
         } else {
             m_iPosiNum = 0;
@@ -2858,9 +2858,9 @@ inline void _roPh13() { /* MATCH: placeholder: an inline function's strings, in 
 CMemo2DSequence* CJiminyMemo::createSequence(const INT* inSeqData, INT inLayer, INT inLayoutNo, INT inLayoutSeqNo,
                                              CMemo2DSequence* inParent) {
     FVECTOR posi;
-    CMemo2DSequence* pSeq = new (com_malloc_d(sizeof(CMemo2DSequence), __FILE__ "(4170)",
-                                              ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })))
+    CMemo2DSequence* pSeq = new (__FILE__ "(4170)")
         CMemo2DSequence;
+
     if (pSeq) {
         pSeq->setup(m_pLadName, inSeqData, inLayer);
         D2::C2DMan::getLayPosition(m_pLadFileName, inLayoutNo, inLayoutSeqNo, posi, 0);
@@ -2877,9 +2877,9 @@ CMemo2DSequence* CJiminyMemo::createSequence(const INT* inSeqData, INT inLayer, 
 CMemo2DSequence* CJiminyMemo::createSequence(INT inSeqNo, INT inLayer, INT inLayoutNo, INT inLayoutSeqNo,
                                              CMemo2DSequence* inParent) {
     FVECTOR posi;
-    CMemo2DSequence* pSeq = new (com_malloc_d(sizeof(CMemo2DSequence), __FILE__ "(4194)",
-                                              ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })))
+    CMemo2DSequence* pSeq = new (__FILE__ "(4194)")
         CMemo2DSequence;
+
     if (pSeq) {
         pSeq->setup(m_pLadName, inSeqNo, inLayer);
         D2::C2DMan::getLayPosition(m_pLadFileName, inLayoutNo, inLayoutSeqNo, posi, 0);
@@ -2902,9 +2902,9 @@ INT CJiminyMemo::createListSequence(CMemo2DSequence* inList, INT inLayer, INT in
     G_RGBA fontRGB;
     if (!inList || !inFontSeq || !inFont) return FALSE;
     fontRGB.col = inFontCol;
-    pListFont = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(4228)",
-                                  ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })))
+    pListFont = new (__FILE__ "(4228)")
         D2::C2DSeqCtrl;
+
     if (pListFont) {
         *inFontSeq = pListFont;
         pListFont->setLayer(inLayer);
@@ -2913,9 +2913,9 @@ INT CJiminyMemo::createListSequence(CMemo2DSequence* inList, INT inLayer, INT in
         pListFont->addSeq(m_pLadName, 0x24);
         D2::C2DMan::getLayPosition(m_pLadFileName, inLayoutNo, inLayoutSeqNo, posi, 0);
         pListFont->setLocalPos(posi);
-        pFnt = new (com_malloc_d(sizeof(D2::C2DFnt), __FILE__ "(4240)",
-                                 ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })))
+        pFnt = new (__FILE__ "(4240)")
             D2::C2DFnt(0, 0, &fontRGB, inFontSize, inStr, inFontStyle);
+
         if (pFnt) {
             *inFont = pFnt;
             pListFont->addFnt(m_pLadName, pFnt);
@@ -3024,9 +3024,9 @@ CMemo2DCursor* CJiminyMemo::createCollectionCursorSequence(const INT* inSeqTbl, 
                                                            FLOAT inScale, CMemo2DSequence* inParent) {
     CMemo2DCursor* pCur;
     CursorDataParam param;
-    pCur = new (com_malloc_d(sizeof(CMemo2DCursor), __FILE__ "(4411)",
-                             ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })))
+    pCur = new (__FILE__ "(4411)")
         CMemo2DCursor(getHandle());
+
     if (pCur) {
         CursorPosition* cpTbl = (CursorPosition*)com_malloc_d(sizeof(CursorPosition) * (inListNum + 2),
                                                               __FILE__ "(4413)", -1);
@@ -3080,9 +3080,9 @@ CMemo2DCursor* CJiminyMemo::createCursorSequence(const INT* inSeqTbl, INT inLayo
     FVECTOR posi0;
     FVECTOR posi1;
     FVECTOR interval;
-    pCur = new (com_malloc_d(sizeof(CMemo2DCursor), __FILE__ "(4472)",
-                             ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })))
+    pCur = new (__FILE__ "(4472)")
         CMemo2DCursor(getHandle());
+
     if (pCur) {
         CursorPosition* cpTbl = (CursorPosition*)com_malloc_d(sizeof(CursorPosition) * (inListNum + 2),
                                                               __FILE__ "(4474)", -1);
@@ -3122,9 +3122,9 @@ void CJiminyMemo::createMarkSequence(INT inMarkSeq, INT inNum, INT inLayoutNo, I
     INT i;
     if (!inArray) return;
     for (i = 0; i < inNum; i++) {
-        pMark = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(4520)",
-                                  ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })))
+        pMark = new (__FILE__ "(4520)")
             D2::C2DSeqCtrl;
+
         if (pMark) {
             if (inArray) inArray[i] = pMark;
             if (inParent) pMark->setParent(inParent);
@@ -6653,9 +6653,9 @@ INT CJiminyMemo::contentCharaView_ModelView() {
                 work(0x3C4) = (INT)pDusty;
                 pDusty->setInState(0);
             }
-            pObj = new (com_malloc_d(sizeof(CMemo3DObj), __FILE__ "(9474)",
-                                     ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })))
+            pObj = new (__FILE__ "(9474)")
                 CMemo3DObj(this, groupId, rsrcId, 0x12, FALSE);
+
             if (pObj) {
                 FVECTOR posi;
                 work(0x3C0) = pObj->getHandle();

@@ -53,13 +53,8 @@ void CAtelTutorial::main() {
 CAtelCardSeq::CAtelCardSeq(CTask* pParent, INT in_type, INT in_posX, INT in_posY) : CTask(pParent, 0x8000) {
     TRACE("CAtelCardSeq Create\n");
     char* mesfile = "message.sqd";
-    char* msg = __FILE__ "(80)";
     m_pSeqArrow = NULL;
-    UINT nRA;
-    __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA));
-    D2::C2DSeqCtrl* p = (D2::C2DSeqCtrl*)com_malloc_d(sizeof(D2::C2DSeqCtrl), msg, nRA);
-    if (p != NULL) p = new (p) D2::C2DSeqCtrl;
-    m_pSeqArrow = p;
+    m_pSeqArrow = new (__FILE__ "(80)") D2::C2DSeqCtrl;
     if (m_pSeqArrow != NULL) {
         switch (in_type) {
         case 0:
