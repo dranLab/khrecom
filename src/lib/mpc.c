@@ -256,9 +256,6 @@ static int _motionComp0(_sceMpegDecoder *d, int mbaddr, int dct_type, int mbtype
     return 1;
 }
 
-/* Parked: same structure and size as the original; register allocation differs (the original keeps y in s1, n in t9 and
-   spills avg << 2) */
-#if 0
 /* sets up the copies of one reference block: luminance (_rix_*) and chrominance (_ri0_*) */
 static void _getRef0(_sceMpegDecoder *d, _sceMpegPicture *pic, int sel, int dblk, int yblk, int h, int x, int y,
                      int mvx, int mvy, int fld, int avg)
@@ -271,11 +268,11 @@ static void _getRef0(_sceMpegDecoder *d, _sceMpegPicture *pic, int sel, int dblk
     int ly;
     int mbx;
     int mby;
-    int cx;
-    int cy;
     int cbx;
     int cby;
     int cyb;
+    int cmy; /* MATCH: declared before cmx: equal global-alloc priority, the lower pseudo gets the register first */
+    int ch;
     int cmx;
     int hx;
     int hy;
@@ -285,6 +282,7 @@ static void _getRef0(_sceMpegDecoder *d, _sceMpegPicture *pic, int sel, int dblk
     unsigned char *src0;
     unsigned char *src1;
     unsigned char *base;
+    unsigned char *p;
 
     n = d->spr[d->x820].count;
     dst = d->x830;
@@ -301,13 +299,13 @@ static void _getRef0(_sceMpegDecoder *d, _sceMpegPicture *pic, int sel, int dblk
     mby = ly >> 4;
     src0 = (unsigned char *)pic->buf + (mbx * pic->mbh + mby) * 0x180;
     src1 = (unsigned char *)pic->buf + (mbx * pic->mbh + mby + pic->mbh) * 0x180;
-    d->spr[d->x820].addr0[n] = src0;
-    d->spr[d->x820].addr1[n] = src1;
-    ra->dst = dst + (dblk + yblk) * 32;
-    ra->shift = lx - (mbx << 4);
+    ly -= mby << 4;
     hx = mvx & 1;
     hy = mvy & 1;
-    ly -= mby << 4;
+    d->spr[d->x820].addr0[n] = src0;
+    d->spr[d->x820].addr1[n] = src1;
+    ra->shift = lx - (mbx << 4);
+    ra->dst = dst + (dblk + yblk) * 32;
     if (hy) {
         if (ly + (h << fld) < 16) {
             ra->count = h;
@@ -337,60 +335,62 @@ static void _getRef0(_sceMpegDecoder *d, _sceMpegPicture *pic, int sel, int dblk
         ra->src1 = src1 + ly * 16;
     }
     ra->stride = 16 << fld;
-    li = (avg << 2) | (hx << 1);
-    li |= hy;
+    li = (avg << 2) | (hx << 1) | hy;
     cmx = mvx / 2;
-    mvy /= 2;
-    h >>= 1;
+    cmy = mvy / 2;
+    ch = h >> 1;
     cyb = yblk >> 1;
-    cx = (cmx >> 1) + (x >> 1);
-    if (fld) { cy = (mvy >> 1) * 2 + ((y >> 1) + (cyb + sel)); } else { cy = (mvy >> 1) + ((y >> 1) + (cyb + sel)); }
-    cbx = cx >> 3;
-    cby = cy >> 3;
-    ra0->dst = dst + (dblk + cyb) * 16 + 0x200;
-    ra0->shift = cx - (cbx << 3);
+    lx = (cmx >> 1) + (x >> 1);
+    if (fld) {
+        ly = (cmy >> 1) * 2 + ((y >> 1) + (cyb + sel));
+    } else {
+        ly = (cmy >> 1) + ((y >> 1) + (cyb + sel));
+    }
+    cbx = lx >> 3;
+    cby = ly >> 3;
+    ly -= cby << 3;
     hx = cmx & 1;
-    hy = mvy & 1;
-    cy -= cby << 3;
+    hy = cmy & 1;
+    ra0->shift = lx - (cbx << 3);
+    ra0->dst = dst + 0x200 + (dblk + cyb) * 16;
     if (hy) {
-        if (cy + (h << fld) < 8) {
-            ra0->count = h;
+        if (ly + (ch << fld) < 8) {
+            ra0->count = ch;
             ra0->count2 = 0;
         } else {
-            c = (8 >> fld) - (cy >> fld) - 1;
+            c = (8 >> fld) - (ly >> fld) - 1;
             ra0->count = c;
-            ra0->count2 = h - c;
+            ra0->count2 = ch - c;
         }
     } else {
-        if (cy + (h << fld) > 8) {
-            c = (8 >> fld) - (cy >> fld);
+        if (ly + (ch << fld) > 8) {
+            c = (8 >> fld) - (ly >> fld);
             ra0->count = c;
-            ra0->count2 = h - c;
+            ra0->count2 = ch - c;
         } else {
-            ra0->count = h;
+            ra0->count = ch;
             ra0->count2 = 0;
         }
     }
     off = ((cbx - mbx) * 2 + (cby - mby)) * 0x180;
-    base += off;
+    p = base + off;
     if (d->buffType == 0) {
-        ra0->src0 = base + (cy * 8 + 0x100);
-        ra0->src1 = base + (cy * 8 + 0x400);
+        ra0->src0 = p + (ly * 8 + 0x100);
+        ra0->src1 = p + (ly * 8 + 0x400);
     } else {
-        if ((unsigned int)(off + ({ cy * 8 + 0x100; })) <= 0x300) {
-            ra0->src0 = src0 + off + ({ cy * 8 + 0x100; });
+        /* MATCH: the row offset as a statement expression: fold would merge its 0x100 into the compare */
+        if ((unsigned int)(off + ({ ly * 8 + 0x100; })) <= 0x300) {
+            ra0->src0 = src0 + off + (ly * 8 + 0x100);
         } else {
-            ra0->src0 = src1 + off + ({ cy * 8 + 0x100; }) - 0x300;
+            ra0->src0 = src1 + off + (ly * 8 + 0x100) - 0x300;
         }
-        ra0->src1 = src1 + off + ({ cy * 8 + 0x100; });
+        ra0->src1 = src1 + off + (ly * 8 + 0x100);
     }
     ra0->stride = 8 << fld;
     d->spr[d->x820].rix[n] = _rix[li];
     d->spr[d->x820].ri0[n] = _ri0[(avg << 2) | (hx << 1) | hy];
     d->spr[d->x820].count++;
 }
-#endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/mpc", _getRef0);
 
 
 static void _doMC(_sceMpegDecoder *d, int idx)
