@@ -954,25 +954,25 @@ inline UINT _vecToCol(u_long128 iCol) {
 
 
 
+/* The original's inline at 871-881 (.mdebug: the u_long128 inIVec loaded at 871, pexcw/pexch/dsra32/pextlw into
+ * ULONGLONG outVec64 at 879, $t0 as scratch): x, y, z of an IVECTOR to a GS XYZ word. Its name is ours. */
+inline ULONGLONG _vecToXYZ(u_long128 inIVec) {
+    ULONGLONG outVec64;
 
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+    __asm__ volatile("pexcw %0, %1\n"
+                     "pexch $8, %1\n"
+                     "dsra32 %0, %0, 4\n"
+                     "pextlw %0, %0, $8\n"
+                     : "=&r"(outVec64)
+                     : "r"(inIVec)
+                     : "$8");
+    return outVec64;
+}
 
 
 

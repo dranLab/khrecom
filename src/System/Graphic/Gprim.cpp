@@ -35,18 +35,6 @@ QWdata* _makePkt_TriangleStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* p
 QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Back);
 QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* pCrd, BOOL Back);
 #define _prefetch(p, ofs) __asm__ volatile("pref 0, %1(%0)" : : "r"(p), "i"(ofs))
-static inline ULONGLONG _vecToXYZ(u_long128 inIVec) {
-    ULONGLONG outVec64;
-    __asm__ volatile("pexcw %0, %1\n"
-                     "pexch $8, %1\n"
-                     "dsra32 %0, %0, 4\n"
-                     "pextlw %0, %0, $8\n"
-                     : "=&r"(outVec64)
-                     : "r"(inIVec)
-                     : "$8");
-    return outVec64;
-}
-static inline ULONGLONG _vecToXYZ(const IVECTOR& v) { return _vecToXYZ(v._q); }
 static inline u_long128 _screenClamp(const FVECTOR& inFVec) {
     u_long128 outVec128;
     u_long128 tmp;
@@ -901,19 +889,19 @@ void C3DPolyFT4::makePkt() {
 
     p64[2] = (u_long)m_C0.col | ((u_long)p0.w << 32);
     p64[3] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S0, *(FLOAT*)&p0.w);
-    p64[4] = _vecToXYZ(p0);
+    p64[4] = _vecToXYZ(p0._q);
 
     p64[5] = (u_long)m_C0.col | ((u_long)p1.w << 32);
     p64[6] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S1, *(FLOAT*)&p1.w);
-    p64[7] = _vecToXYZ(p1);
+    p64[7] = _vecToXYZ(p1._q);
 
     p64[8] = (u_long)m_C0.col | ((u_long)p2.w << 32);
     p64[9] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S2, *(FLOAT*)&p2.w);
-    p64[10] = _vecToXYZ(p2);
+    p64[10] = _vecToXYZ(p2._q);
 
     p64[11] = (u_long)m_C0.col | ((u_long)p3.w << 32);
     p64[12] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S3, *(FLOAT*)&p3.w);
-    p64[13] = _vecToXYZ(p3);
+    p64[13] = _vecToXYZ(p3._q);
 
     CPackMan::pkCloseGifTagManual((UINT*)&p64[14]);
 }
@@ -951,19 +939,19 @@ void C3DPolyGT4::makePkt() {
 
     p64[2] = (u_long)m_C0.col | ((u_long)p0.w << 32);
     p64[3] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S0, *(FLOAT*)&p0.w);
-    p64[4] = _vecToXYZ(p0);
+    p64[4] = _vecToXYZ(p0._q);
 
     p64[5] = (u_long)m_C1.col | ((u_long)p1.w << 32);
     p64[6] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S1, *(FLOAT*)&p1.w);
-    p64[7] = _vecToXYZ(p1);
+    p64[7] = _vecToXYZ(p1._q);
 
     p64[8] = (u_long)m_C2.col | ((u_long)p2.w << 32);
     p64[9] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S2, *(FLOAT*)&p2.w);
-    p64[10] = _vecToXYZ(p2);
+    p64[10] = _vecToXYZ(p2._q);
 
     p64[11] = (u_long)m_C3.col | ((u_long)p3.w << 32);
     p64[12] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S3, *(FLOAT*)&p3.w);
-    p64[13] = _vecToXYZ(p3);
+    p64[13] = _vecToXYZ(p3._q);
 
     CPackMan::pkCloseGifTagManual((UINT*)&p64[14]);
 }
@@ -1001,15 +989,15 @@ void C3DPolyFT3::makePkt() {
 
     p64[2] = (u_long)m_C0.col | ((u_long)p0.w << 32);
     p64[3] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S0, *(FLOAT*)&p0.w);
-    p64[4] = _vecToXYZ(p0);
+    p64[4] = _vecToXYZ(p0._q);
 
     p64[5] = (u_long)m_C0.col | ((u_long)p1.w << 32);
     p64[6] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S1, *(FLOAT*)&p1.w);
-    p64[7] = _vecToXYZ(p1);
+    p64[7] = _vecToXYZ(p1._q);
 
     p64[8] = (u_long)m_C0.col | ((u_long)p2.w << 32);
     p64[9] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S2, *(FLOAT*)&p2.w);
-    p64[10] = _vecToXYZ(p2);
+    p64[10] = _vecToXYZ(p2._q);
 
     CPackMan::pkCloseGifTagManual((UINT*)&p64[11]);
 }
@@ -1047,15 +1035,15 @@ void C3DPolyGT3::makePkt() {
 
     p64[2] = (u_long)m_C0.col | ((u_long)p0.w << 32);
     p64[3] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S0, *(FLOAT*)&p0.w);
-    p64[4] = _vecToXYZ(p0);
+    p64[4] = _vecToXYZ(p0._q);
 
     p64[5] = (u_long)m_C1.col | ((u_long)p1.w << 32);
     p64[6] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S1, *(FLOAT*)&p1.w);
-    p64[7] = _vecToXYZ(p1);
+    p64[7] = _vecToXYZ(p1._q);
 
     p64[8] = (u_long)m_C2.col | ((u_long)p2.w << 32);
     p64[9] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S2, *(FLOAT*)&p2.w);
-    p64[10] = _vecToXYZ(p2);
+    p64[10] = _vecToXYZ(p2._q);
 
     CPackMan::pkCloseGifTagManual((UINT*)&p64[11]);
 }
@@ -1592,13 +1580,13 @@ void C3DPolyG4::makePkt() {
     p64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(_makeQW(0x9400000000008001UL, 0x414141410UL));
     p64[0] = (u_long)0x20C | ((u_long)isSemiTrans() << 6);
     p64[1] = m_C0.col;
-    p64[2] = _vecToXYZ(p0);
+    p64[2] = _vecToXYZ(p0._q);
     p64[3] = m_C1.col;
-    p64[4] = _vecToXYZ(p1);
+    p64[4] = _vecToXYZ(p1._q);
     p64[5] = m_C2.col;
-    p64[6] = _vecToXYZ(p2);
+    p64[6] = _vecToXYZ(p2._q);
     p64[7] = m_C3.col;
-    p64[8] = _vecToXYZ(p3);
+    p64[8] = _vecToXYZ(p3._q);
     CPackMan::pkCloseGifTagManual((UINT*)&p64[9]);
 }
 FIX4 C3DPolyG3::calcZ() {
@@ -1630,11 +1618,11 @@ void C3DPolyG3::makePkt() {
     p64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(_makeQW(0x7400000000008001UL, 0x4141410));
     p64[0] = (u_long)0x20C | ((u_long)isSemiTrans() << 6);
     p64[1] = m_C0.col;
-    p64[2] = _vecToXYZ(p0);
+    p64[2] = _vecToXYZ(p0._q);
     p64[3] = m_C1.col;
-    p64[4] = _vecToXYZ(p1);
+    p64[4] = _vecToXYZ(p1._q);
     p64[5] = m_C2.col;
-    p64[6] = _vecToXYZ(p2);
+    p64[6] = _vecToXYZ(p2._q);
     CPackMan::pkCloseGifTagManual((UINT*)&p64[7]);
 }
 FIX4 C3DLine::calcZ() {
@@ -1655,9 +1643,9 @@ void C3DLine::makePkt() {
     CPackMan::pkOpenGifTag(giftag.ul128);
     CPackMan::pkAddGsData((u_long)0x209 | ((u_long)isSemiTrans() << 6));
     CPackMan::pkAddGsData(m_C0.col);
-    CPackMan::pkAddGsData(_vecToXYZ(p0));
+    CPackMan::pkAddGsData(_vecToXYZ(p0._q));
     CPackMan::pkAddGsData(m_C1.col);
-    CPackMan::pkAddGsData(_vecToXYZ(p1));
+    CPackMan::pkAddGsData(_vecToXYZ(p1._q));
     CPackMan::pkCloseGifTag();
 }
 FIX4 C3DLineCoord2::calcZ() {
@@ -1681,9 +1669,9 @@ void C3DLineCoord2::makePkt() {
     CPackMan::pkOpenGifTag(giftag.ul128);
     CPackMan::pkAddGsData((u_long)0x209 | ((u_long)isSemiTrans() << 6));
     CPackMan::pkAddGsData(m_C0.col);
-    CPackMan::pkAddGsData(_vecToXYZ(p0));
+    CPackMan::pkAddGsData(_vecToXYZ(p0._q));
     CPackMan::pkAddGsData(m_C1.col);
-    CPackMan::pkAddGsData(_vecToXYZ(p1));
+    CPackMan::pkAddGsData(_vecToXYZ(p1._q));
     CPackMan::pkCloseGifTag();
 }
 FIX4 C3DLines::calcZ() {
@@ -1723,9 +1711,9 @@ void C3DLines::makePkt() {
         }
         CPackMan::pkAddGsData((u_long)0x209 | ((u_long)isSemiTrans() << 6));
         CPackMan::pkAddGsData(it->C0.col);
-        CPackMan::pkAddGsData(_vecToXYZ(it->p0));
+        CPackMan::pkAddGsData(_vecToXYZ(it->p0._q));
         CPackMan::pkAddGsData(it->C1.col);
-        CPackMan::pkAddGsData(_vecToXYZ(it->p1));
+        CPackMan::pkAddGsData(_vecToXYZ(it->p1._q));
     }
     CPackMan::pkCloseGifTag();
 }
@@ -1750,11 +1738,11 @@ ULONGLONG* _makePkt_TexLine(ULONGLONG* p64, G_STRIP* it, G_STRIP* end) {
         iW = *(UINT*)&fW0;
         p64[0] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[0].S, iW);
         p64[1] = it[0].C.col | ((ULONGLONG)iW << 32);
-        p64[2] = _vecToXYZ(p[0]);
+        p64[2] = _vecToXYZ(p[0]._q);
         iW = *(UINT*)&fW1;
         p64[3] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[1].S, iW);
         p64[4] = it[1].C.col | ((ULONGLONG)iW << 32);
-        p64[5] = _vecToXYZ(p[1]);
+        p64[5] = _vecToXYZ(p[1]._q);
         it += 2;
         p64 += 6;
     }
@@ -1790,11 +1778,11 @@ ULONGLONG* _makePkt_TexLine(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, CCoord* p
         iW = *(UINT*)&fW0;
         p64[0] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[0].S, iW);
         p64[1] = it[0].C.col | ((ULONGLONG)iW << 32);
-        p64[2] = _vecToXYZ(p[0]);
+        p64[2] = _vecToXYZ(p[0]._q);
         iW = *(UINT*)&fW1;
         p64[3] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[1].S, iW);
         p64[4] = it[1].C.col | ((ULONGLONG)iW << 32);
-        p64[5] = _vecToXYZ(p[1]);
+        p64[5] = _vecToXYZ(p[1]._q);
         it += 2;
         p64 += 6;
     }
@@ -1827,15 +1815,15 @@ ULONGLONG* _makePkt_TexTriangle(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, BOOL 
                 iW = *(UINT*)&fW0;
                 p64[0] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[0].S, iW);
                 p64[1] = it[0].C.col | ((ULONGLONG)iW << 32);
-                p64[2] = _vecToXYZ(p[0]);
+                p64[2] = _vecToXYZ(p[0]._q);
                 iW = *(UINT*)&fW1;
                 p64[3] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[1].S, iW);
                 p64[4] = it[1].C.col | ((ULONGLONG)iW << 32);
-                p64[5] = _vecToXYZ(p[1]);
+                p64[5] = _vecToXYZ(p[1]._q);
                 iW = *(UINT*)&fW2;
                 p64[6] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[2].S, iW);
                 p64[7] = it[2].C.col | ((ULONGLONG)iW << 32);
-                p64[8] = _vecToXYZ(p[2]);
+                p64[8] = _vecToXYZ(p[2]._q);
                 it += 3;
                 p64 += 9;
             }
@@ -1868,15 +1856,15 @@ ULONGLONG* _makePkt_TexTriangle(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, BOOL 
                 iW = *(UINT*)&fW0;
                 p64[0] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[0].S, iW);
                 p64[1] = it[0].C.col | ((ULONGLONG)iW << 32);
-                p64[2] = _vecToXYZ(p[0]);
+                p64[2] = _vecToXYZ(p[0]._q);
                 iW = *(UINT*)&fW1;
                 p64[3] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[1].S, iW);
                 p64[4] = it[1].C.col | ((ULONGLONG)iW << 32);
-                p64[5] = _vecToXYZ(p[1]);
+                p64[5] = _vecToXYZ(p[1]._q);
                 iW = *(UINT*)&fW2;
                 p64[6] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[2].S, iW);
                 p64[7] = it[2].C.col | ((ULONGLONG)iW << 32);
-                p64[8] = _vecToXYZ(p[2]);
+                p64[8] = _vecToXYZ(p[2]._q);
                 it += 3;
                 p64 += 9;
             }
@@ -1925,15 +1913,15 @@ ULONGLONG* _makePkt_TexTriangle(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, CCoor
                 iW = *(UINT*)&fW0;
                 p64[0] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[0].S, iW);
                 p64[1] = it[0].C.col | ((ULONGLONG)iW << 32);
-                p64[2] = _vecToXYZ(p[0]);
+                p64[2] = _vecToXYZ(p[0]._q);
                 iW = *(UINT*)&fW1;
                 p64[3] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[1].S, iW);
                 p64[4] = it[1].C.col | ((ULONGLONG)iW << 32);
-                p64[5] = _vecToXYZ(p[1]);
+                p64[5] = _vecToXYZ(p[1]._q);
                 iW = *(UINT*)&fW2;
                 p64[6] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[2].S, iW);
                 p64[7] = it[2].C.col | ((ULONGLONG)iW << 32);
-                p64[8] = _vecToXYZ(p[2]);
+                p64[8] = _vecToXYZ(p[2]._q);
                 it += 3;
                 p64 += 9;
             }
@@ -1978,15 +1966,15 @@ ULONGLONG* _makePkt_TexTriangle(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, CCoor
                 iW = *(UINT*)&fW0;
                 p64[0] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[0].S, iW);
                 p64[1] = it[0].C.col | ((ULONGLONG)iW << 32);
-                p64[2] = _vecToXYZ(p[0]);
+                p64[2] = _vecToXYZ(p[0]._q);
                 iW = *(UINT*)&fW1;
                 p64[3] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[1].S, iW);
                 p64[4] = it[1].C.col | ((ULONGLONG)iW << 32);
-                p64[5] = _vecToXYZ(p[1]);
+                p64[5] = _vecToXYZ(p[1]._q);
                 iW = *(UINT*)&fW2;
                 p64[6] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[2].S, iW);
                 p64[7] = it[2].C.col | ((ULONGLONG)iW << 32);
-                p64[8] = _vecToXYZ(p[2]);
+                p64[8] = _vecToXYZ(p[2]._q);
                 it += 3;
                 p64 += 9;
             }
@@ -2010,9 +1998,9 @@ ULONGLONG* _makePkt_Line(ULONGLONG* p64, G_STRIP* it, G_STRIP* end) {
             continue;
         }
         p64[0] = it[0].C.col;
-        p64[1] = _vecToXYZ(p[0]);
+        p64[1] = _vecToXYZ(p[0]._q);
         p64[2] = it[1].C.col;
-        p64[3] = _vecToXYZ(p[1]);
+        p64[3] = _vecToXYZ(p[1]._q);
         it += 2;
         p64 += 4;
     }
@@ -2043,9 +2031,9 @@ ULONGLONG* _makePkt_Line(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, CCoord* pCrd
             continue;
         }
         p64[0] = it[0].C.col;
-        p64[1] = _vecToXYZ(p[0]);
+        p64[1] = _vecToXYZ(p[0]._q);
         p64[2] = it[1].C.col;
-        p64[3] = _vecToXYZ(p[1]);
+        p64[3] = _vecToXYZ(p[1]._q);
         it += 2;
         p64 += 4;
     }
@@ -2072,11 +2060,11 @@ ULONGLONG* _makePkt_Triangle(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, BOOL Bac
                 it += 3;
             } else {
                 p64[0] = it[0].C.col;
-                p64[1] = _vecToXYZ(p[0]);
+                p64[1] = _vecToXYZ(p[0]._q);
                 p64[2] = it[1].C.col;
-                p64[3] = _vecToXYZ(p[1]);
+                p64[3] = _vecToXYZ(p[1]._q);
                 p64[4] = it[2].C.col;
-                p64[5] = _vecToXYZ(p[2]);
+                p64[5] = _vecToXYZ(p[2]._q);
                 it += 3;
                 p64 += 6;
             }
@@ -2104,11 +2092,11 @@ ULONGLONG* _makePkt_Triangle(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, BOOL Bac
                 it += 3;
             } else {
                 p64[0] = it[0].C.col;
-                p64[1] = _vecToXYZ(p[0]);
+                p64[1] = _vecToXYZ(p[0]._q);
                 p64[2] = it[1].C.col;
-                p64[3] = _vecToXYZ(p[1]);
+                p64[3] = _vecToXYZ(p[1]._q);
                 p64[4] = it[2].C.col;
-                p64[5] = _vecToXYZ(p[2]);
+                p64[5] = _vecToXYZ(p[2]._q);
                 it += 3;
                 p64 += 6;
             }
@@ -2151,11 +2139,11 @@ ULONGLONG* _makePkt_Triangle(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, CCoord* 
                 it += 3;
             } else {
                 p64[0] = it[0].C.col;
-                p64[1] = _vecToXYZ(p[0]);
+                p64[1] = _vecToXYZ(p[0]._q);
                 p64[2] = it[1].C.col;
-                p64[3] = _vecToXYZ(p[1]);
+                p64[3] = _vecToXYZ(p[1]._q);
                 p64[4] = it[2].C.col;
-                p64[5] = _vecToXYZ(p[2]);
+                p64[5] = _vecToXYZ(p[2]._q);
                 it += 3;
                 p64 += 6;
             }
@@ -2195,11 +2183,11 @@ ULONGLONG* _makePkt_Triangle(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, CCoord* 
                 it += 3;
             } else {
                 p64[0] = it[0].C.col;
-                p64[1] = _vecToXYZ(p[0]);
+                p64[1] = _vecToXYZ(p[0]._q);
                 p64[2] = it[1].C.col;
-                p64[3] = _vecToXYZ(p[1]);
+                p64[3] = _vecToXYZ(p[1]._q);
                 p64[4] = it[2].C.col;
-                p64[5] = _vecToXYZ(p[2]);
+                p64[5] = _vecToXYZ(p[2]._q);
                 it += 3;
                 p64 += 6;
             }
