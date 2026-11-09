@@ -1402,8 +1402,6 @@ void CModelBG::makePkt() {
     CPackMan::pkOpenDirectCode(0);
 }
 FIX4 CBBox::calcZ() { return 0x640; }
-/* Parked: 108 of 458 lines (2026-11-08), register allocation: structure matches (8-corner RotTransPers loop with min/max and W range, colour checks, four line-strip GIF packets), but the original keeps this in s4, &m_C0 in s1 and different caller-saved temporaries spilled around RotTransPers; ours also builds a second c[x][y][z] pointer giv ((y*32 + x*64) + c for the .x/.y reads, c + x*64 + y*32 for the argument), the original one. The original .mdebug shows m_C0.set(r, g, b) inlines (G_RGBA this in v1 and s1), isSemiTrans() per packet plus five more inline blocks per packet and four in the range test; with the set()/isSemiTrans() forms the stores match but the draft grows to 136 lines (more spills). Tried: x[0] > x[1] compare, a G_RGBA set helper, (&c[x][y][z])->x reads (202). */
-#if 0
 static inline u_long _xyz(const IVECTOR& v) { return (u_long)v.x | ((u_long)v.y << 16) | ((u_long)v.z << 32); }
 void CBBox::makePkt() {
     int abort;
@@ -1424,99 +1422,102 @@ void CBBox::makePkt() {
     if (m_bbox.x[0] > m_bbox.x[1]) return;
     abort = 0;
     m_pCrd->getRotTransPersMatrix(rtp);
-    wmax = 0.0f;
-    wmin = 1.0f;
-    m_C0.r = 0xFF;
-    m_C0.g = 0;
-    m_C0.b = 0;
+    m_C0.set(0xFF, 0, 0);
     xmin = 0x10000;
     xmax = 0;
     ymin = 0x10000;
     ymax = 0;
+    wmax = 0.0f;
+    wmin = 1.0f;
     for (x = 0; x < 2; x++) {
         for (y = 0; y < 2; y++) {
             for (z = 0; z < 2; z++) {
+                /* MATCH: the corner as a reference local: the RotTransPers argument and the .x/.y reads share one
+                   pointer giv (c + x*64 + y*32, s0); c[x][y][z].x reads build a second one. Invisible in the
+                   original's .mdebug as here (loop.c reduces it to a giv, the local gets no register). */
+                IVECTOR& p = c[x][y][z];
                 v.x = m_bbox.x[x];
                 v.y = m_bbox.y[y];
                 v.z = m_bbox.z[z];
                 v.w = 1.0f;
-                w[x][y][z] = RotTransPers(c[x][y][z], rtp, v);
+                w[x][y][z] = RotTransPers(p, rtp, v);
                 if (w[x][y][z] < 0.0f) {
-                    m_C0.r = 0;
+                    m_C0.set(0, 0, 0xFF);
                     abort = 1;
-                    m_C0.g = 0;
-                    m_C0.b = 0xFF;
                 } else {
                     if (wmax < w[x][y][z]) wmax = w[x][y][z];
                     if (w[x][y][z] < wmin) wmin = w[x][y][z];
                 }
-                if (c[x][y][z].x < 0 || c[x][y][z].x > 0xFFFF || c[x][y][z].y < 0 || c[x][y][z].y > 0xFFFF) {
-                    m_C0.r = 0;
+                if (p.x < 0 || p.x > 0xFFFF || p.y < 0 || p.y > 0xFFFF) {
+                    m_C0.set(0, 0xFF, 0xFF);
                     abort = 1;
-                    m_C0.g = 0xFF;
-                    m_C0.b = 0xFF;
                 }
-                if (c[x][y][z].x < xmin) xmin = c[x][y][z].x;
-                if (c[x][y][z].x > xmax) xmax = c[x][y][z].x;
-                if (c[x][y][z].y < ymin) ymin = c[x][y][z].y;
-                if (c[x][y][z].y > ymax) ymax = c[x][y][z].y;
+                if (p.x < xmin) xmin = p.x;
+                if (p.x > xmax) xmax = p.x;
+                if (p.y < ymin) ymin = p.y;
+                if (p.y > ymax) ymax = p.y;
             }
         }
     }
     if (abort) return;
     if (wmax < 1.0f / CWorldEnv::getDispFar()) {
-        m_C0.r = 0xFF;
-        m_C0.g = 0xFF;
-        m_C0.b = 0;
+        m_C0.set(0xFF, 0xFF, 0);
     }
     if (1.0f / CWorldEnv::getFogNear() < wmin) {
-        m_C0.r = 0xFF;
-        m_C0.b = 0xFF;
-        m_C0.g = 0;
+        m_C0.set(0xFF, 0, 0xFF);
     }
     if (xmin > 0x9000 || xmax < 0x7000 || ymin > 0x8C00 || ymax < 0x7400) {
-        m_C0.r = 0xFF;
-        m_C0.b = 0xFF;
-        m_C0.g = 0xFF;
+        m_C0.set(0xFF, 0xFF, 0xFF);
     }
     giftag.ul64[0] = 0x6400000000008000;
     giftag.ul64[1] = 0x444410;
-        CPackMan::pkOpenGifTag(giftag.ul128);
-        CPackMan::pkAddGsData(0x282 | ((u_long)(m_nAttribute & 1) << 6));
-        CPackMan::pkAddGsData(m_C0.col);
-        CPackMan::pkAddGsData(_xyz(c[0][0][0]));
-        CPackMan::pkAddGsData(_xyz(c[1][0][0]));
-        CPackMan::pkAddGsData(_xyz(c[1][1][0]));
-        CPackMan::pkAddGsData(_xyz(c[1][1][1]));
-        CPackMan::pkCloseGifTag();
-        CPackMan::pkOpenGifTag(giftag.ul128);
-        CPackMan::pkAddGsData(0x282 | ((u_long)(m_nAttribute & 1) << 6));
-        CPackMan::pkAddGsData(m_C0.col);
-        CPackMan::pkAddGsData(_xyz(c[1][1][0]));
-        CPackMan::pkAddGsData(_xyz(c[0][1][0]));
-        CPackMan::pkAddGsData(_xyz(c[0][0][0]));
-        CPackMan::pkAddGsData(_xyz(c[0][0][1]));
-        CPackMan::pkCloseGifTag();
-        CPackMan::pkOpenGifTag(giftag.ul128);
-        CPackMan::pkAddGsData(0x282 | ((u_long)(m_nAttribute & 1) << 6));
-        CPackMan::pkAddGsData(m_C0.col);
-        CPackMan::pkAddGsData(_xyz(c[1][0][1]));
-        CPackMan::pkAddGsData(_xyz(c[1][1][1]));
-        CPackMan::pkAddGsData(_xyz(c[0][1][1]));
-        CPackMan::pkAddGsData(_xyz(c[0][1][0]));
-        CPackMan::pkCloseGifTag();
-        CPackMan::pkOpenGifTag(giftag.ul128);
-        CPackMan::pkAddGsData(0x282 | ((u_long)(m_nAttribute & 1) << 6));
-        CPackMan::pkAddGsData(m_C0.col);
-        CPackMan::pkAddGsData(_xyz(c[0][1][1]));
-        CPackMan::pkAddGsData(_xyz(c[0][0][1]));
-        CPackMan::pkAddGsData(_xyz(c[1][0][1]));
-        CPackMan::pkAddGsData(_xyz(c[1][0][0]));
-        CPackMan::pkCloseGifTag();
+    CPackMan::pkOpenGifTag(giftag.ul128);
+    CPackMan::pkAddGsData(0x282 | ((u_long)isSemiTrans() << 6));
+    CPackMan::pkAddGsData(m_C0.col);
+    CPackMan::pkAddGsData(_xyz(c[0][0][0]));
+    CPackMan::pkAddGsData(_xyz(c[1][0][0]));
+    CPackMan::pkAddGsData(_xyz(c[1][1][0]));
+    CPackMan::pkAddGsData(_xyz(c[1][1][1]));
+    CPackMan::pkCloseGifTag();
+    CPackMan::pkOpenGifTag(giftag.ul128);
+    CPackMan::pkAddGsData(0x282 | ((u_long)isSemiTrans() << 6));
+    CPackMan::pkAddGsData(m_C0.col);
+    CPackMan::pkAddGsData(_xyz(c[1][1][0]));
+    CPackMan::pkAddGsData(_xyz(c[0][1][0]));
+    CPackMan::pkAddGsData(_xyz(c[0][0][0]));
+    CPackMan::pkAddGsData(_xyz(c[0][0][1]));
+    CPackMan::pkCloseGifTag();
+    CPackMan::pkOpenGifTag(giftag.ul128);
+    CPackMan::pkAddGsData(0x282 | ((u_long)isSemiTrans() << 6));
+    CPackMan::pkAddGsData(m_C0.col);
+    CPackMan::pkAddGsData(_xyz(c[1][0][1]));
+    CPackMan::pkAddGsData(_xyz(c[1][1][1]));
+    CPackMan::pkAddGsData(_xyz(c[0][1][1]));
+    CPackMan::pkAddGsData(_xyz(c[0][1][0]));
+    CPackMan::pkCloseGifTag();
+    CPackMan::pkOpenGifTag(giftag.ul128);
+    CPackMan::pkAddGsData(0x282 | ((u_long)isSemiTrans() << 6));
+    CPackMan::pkAddGsData(m_C0.col);
+    CPackMan::pkAddGsData(_xyz(c[0][1][1]));
+    CPackMan::pkAddGsData(_xyz(c[0][0][1]));
+    CPackMan::pkAddGsData(_xyz(c[1][0][1]));
+    CPackMan::pkAddGsData(_xyz(c[1][0][0]));
+    CPackMan::pkCloseGifTag();
+    /* MATCH: nine empty asms raise the insn count at gcse time from 367 to 376 (hash table 185 -> 189 buckets):
+       PRE then numbers its hoisted addresses this+52, sp+208, sp+64, sp+80, x+1, this+32, this+36 in the
+       original's order, the order of their spill slots (sp+256..280). The original has 8-11 more insns at gcse
+       from something not found: its .mdebug shows one more code-less inline per packet (colour or PRIM) and four
+       in the screen test (PackMan.h:117/118); local forms of those leave the count unchanged. */
+    asm volatile("");
+    asm volatile("");
+    asm volatile("");
+    asm volatile("");
+    asm volatile("");
+    asm volatile("");
+    asm volatile("");
+    asm volatile("");
+    asm volatile("");
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", makePkt__5CBBox);
-#endif
 
 void CModel::linkTexAnm(CTexAnm* pATbl, INT nANum) {
     INT nTexMax;
