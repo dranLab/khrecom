@@ -2,6 +2,7 @@
    itoa, fftoa) and digit grouping (add_separators) */
 #include "include_asm.h"
 #include "stdio_local.h"
+#include "lib/src/newlib/libm/fdlibm.h"
 
 extern double sn_floor(double);
 extern double sn_fmod(double, double);
@@ -72,27 +73,21 @@ char *itoa(int value, char *s, int base)
 
 static char fbuf[168] __attribute__((aligned(8)));
 
-/* Parked: fftoa: register allocation still differs (x, exp, n, ... one s-register off) */
-#if 0
 /* x as a string of fmt 'e', 'E' or 'f' with prec digits after the point; strip removes trailing zeros;
    the sign goes to *signp (or the string) */
 char *fftoa(double x, int prec, char fmt, int strip, char *signp)
 {
-    union {
-        double d;
-        unsigned long l;
-    } u;
     unsigned int hx, lx, e, mant, sign;
     char *p;
     int n, d, exp, len, ndig, i, pos;
     double ip, eps;
 
-    u.d = x;
-    hx = u.l >> 32;
-    lx = u.l;
+    /* MATCH: fdlibm's EXTRACT_WORDS; its do { } while (0) keeps the parameter copies ahead of the word split
+       (sched1), which frees a0-a2 for it and makes fmt lose its register to len + 1 */
+    EXTRACT_WORDS(hx, lx, x);
+    mant = hx & 0xfffff;
     e = hx >> 20;
     sign = e & 0x800;
-    mant = hx & 0xfffff;
     e &= 0x7ff;
     if (e == 0x7ff) {
         if (mant == 0 && lx == 0) {
@@ -126,14 +121,14 @@ char *fftoa(double x, int prec, char fmt, int strip, char *signp)
         while (n < 163) {
             d = sn_fmod(ip, 10.0);
             p[n++] = d + '0';
-            ip = (ip - d) * 0.1;
-            if (ip < 1.0)
+            if ((ip = (ip - d) * 0.1) < 1.0)
                 break;
         }
-        for (i = 0, len = n - 1; i < len; i++, len--) {
-            char c = p[i];
-            p[i] = p[len];
-            p[len] = c;
+        /* MATCH: d counts up (s0, the digit's register) and i down; n is the shift loop's counter below */
+        for (d = 0, i = n - 1; d < i; d++, i--) {
+            char c = p[d];
+            p[d] = p[i];
+            p[i] = c;
         }
     }
     exp = n;
@@ -165,7 +160,7 @@ char *fftoa(double x, int prec, char fmt, int strip, char *signp)
     else
         len = ndig + 1;
 
-    /* the fraction digits */
+    /* the fraction digits; MATCH: goto exits, a break would let expand_end_loop rotate the loop */
     eps = 5.551115123125783e-17;
     while (1) {
         x = x * 10.0;
@@ -173,13 +168,14 @@ char *fftoa(double x, int prec, char fmt, int strip, char *signp)
         x = x - d;
         eps = eps * 10.0;
         if (n >= len)
-            break;
+            goto done;
         if (x < eps)
-            break;
+            goto done;
         if (x > 1.0 - eps)
-            break;
+            goto done;
         p[n++] = d + '0';
     }
+done:
     if (x >= 0.5)
         d++;
     p[n++] = d + '0';
@@ -192,9 +188,11 @@ char *fftoa(double x, int prec, char fmt, int strip, char *signp)
     }
 
     if (prec != 0) {
-        pos = fmt == 'f' ? (exp > 0 ? exp : 1) : 1;
-        for (i = len; pos < i; i--)
-            p[i] = p[i - 1];
+        pos = 1;
+        if (fmt == 'f' && exp > 0)
+            pos = exp;
+        for (n = len; pos < n; n--)
+            p[n] = p[n - 1];
         p[pos] = '.';
     } else
         len--;
@@ -224,16 +222,6 @@ char *fftoa(double x, int prec, char fmt, int strip, char *signp)
     } else
         p[len + 1] = 0;
     return fbuf;
-}
-#endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/nodebug/strround", fftoa);
-
-/* keeps fftoa's strings in this object's .rodata while the function is asm */
-static inline void fftoa_strings(const char **s)
-{
-    s[0] = "-Inf";
-    s[1] = "Inf";
-    s[2] = "NaN";
 }
 
 static int _vfwrite(int fd, const char *buf, unsigned int n, int flush);
