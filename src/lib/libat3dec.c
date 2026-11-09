@@ -334,16 +334,17 @@ static void channel_conv_joint(At3Work *w)
     }
 }
 
-/* Parked: 4 of 457 lines (2026-11-09): the whole image matches except one swap in the window loop's last block: ours loads
-   a_wind[mi] (lh a2, 0(s2)) before ((short *)ov)[1] (lh v0, 2(t7)), the original the other way round (sched1: the a_wind load
-   kills its base register, reg weight 0, so it issues first; a product held in a separate variable that is live elsewhere,
-   e.g. max, gives the original order but puts the product in a3); tried: shapes from the original's register reuse
+/* Parked: 2 of 457 lines (2026-11-09): the whole image matches except two loads in the window loop's last block: ours
+   issues a_wind[mi] first (into v0, the product's register) and ((short *)ov)[1] second (a2), the original ov[1] first
+   into v0. In sched1 the a_wind load kills its base register (reg weight 0) and wins the tie; ov[1]*a_wind[mi] keeps
+   v0 for ov[1] but issues a_wind first too (4 lines); the product in a separate variable live elsewhere (max) gives the
+   original order but puts the product in that variable's register. Tried: shapes from the original's register reuse
    (step = the abs temp, p = odd-band source / butterfly pointer / window base, i = every counter and the butterfly's k,
    the window's t1 reused for out), memcpy of two recomputed member addresses ((src|dst)&7 test), indexed loops (givs),
-   hi before lo (andi first), t1/t0 loads before mx[i]/cc[i] (giv order), const mx/cc/ca (rodata tables; the mx step then
-   issues early), n = step * 2 inside the half loop (65 insns: loop.c moves n * 4 only in its second pass, so n >> 1 is
-   spilled as in the original), w + 2 == p, a pointer for ov after the second if; operand orders of the last two statements,
-   ternaries, decomp-permuter 2 x 20 min */
+   hi before lo (andi first), t1/t0 loads before mx[i]/cc[i] (giv order), const mx/cc/ca (rodata tables), n = step*2
+   inside the half loop (65 insns: loop.c moves n*4 only in its second pass, so n >> 1 is spilled as in the original),
+   w + 2 == p, ov as a pointer after the second if; forms of the last two statements, ternaries, do-while(0) barriers,
+   decomp-permuter 3x 20 min */
 #if 0
 typedef struct {
     int v[4];
@@ -452,7 +453,7 @@ int imdct(char *ch, int band, int gain)
         if (gain < 15) t1 = (hi << (15 - gain)) + (lo >> gain);
         else t1 = (hi >> (gain - 15)) + (lo >> gain);
         ov = (int *)(mi * 4 + (int)p) + 256;
-        p[mi + 128] = t1 + ((((short *)ov)[1] * a_wind[mi]) >> 3);
+        p[mi + 128] = t1 + ((a_wind[mi] * ((short *)ov)[1]) >> 3);
         *ov = (d << (15 - shift)) + (d >> shift) * ca[mi];
     }
     return 0;
