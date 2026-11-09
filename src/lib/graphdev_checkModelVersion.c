@@ -71,12 +71,15 @@ asm(".text\n"
     "\t.set reorder\n"
     "\t.end _GetGsDxDyOffset\n");
 
-/* Parked: 25 of 228 lines (2026-11-09): only the two non-interlaced blocks differ (NTSC falls into PAL's tail): the original issues h - 1 before the off[0]/off[1] loads (prio 7 vs 10 in our sched2: as if the loads were not ready at t=2) and allocates DY v1, sx a1, DH a3, dx*magh a2 (ours a1, a0, a2, a3); interlaced, DTV480P, dispfb and size match. Levers that got here from 96: magh/sy/sx block-local per arm (no move after mflo, sx dies into DX), magh * w, the DISPLAY OR order M|V|H|X|Y|W (120 orders searched), psm before fbw in dispfb, DTV off[0] + 232 + dx * 2; tried: statement order of magh/sy/sx/dh in the non-interlaced blocks (all equal), a dh local */
+/* Parked: 21 of 232 lines (2026-11-09): only the two non-interlaced blocks differ (NTSC falls into PAL's tail): the original issues h - 1 between the div and the off[0] load (ours loads off[0], off[1] first: their priority 10/9 beats h - 1's 7 in sched2, so in the original the loads cannot have been ready at t=2) and has sx in a1, DY in v1 (ours v1, a1). Levers that got here from 96: magh/sy/sx block-local in the interlaced arms (no move after mflo, sx dies into DX) but function-level in the non-interlaced ones (DH a3, products a2/a0), magh * w, the DISPLAY OR order M|V|H|X|Y|W (120 orders searched), psm before fbw in dispfb, DTV off[0] + 232 + dx * 2; tried: statement and declaration order of magh/sy/sx/dh, a dh local, scalars dx1/dy1/dx2/dy2 for off[], sy long */
 #if 0
 void sceGsSetDefDispEnv(sceGsDispEnv *disp, short psm, short w, short h, short dx, short dy)
 {
     sceGsGParam *gp = sceGsGetGParam();
     int off[4];
+    int maghn;
+    int syn;
+    long sxn;
 
     if (!(gp->sceGsOutMode == SCE_GS_NTSC || gp->sceGsOutMode == SCE_GS_PAL) && checkModelVersion()) {
         _GetGsDxDyOffset(gp->sceGsOutMode, &off[0], &off[1], &off[2], &off[3]);
@@ -105,11 +108,11 @@ void sceGsSetDefDispEnv(sceGsDispEnv *disp, short psm, short w, short h, short d
             disp->display = SCE_GS_SET_DISPLAY((dx * magh + sx) & 0xfff, sy,
                                                magh - 1, 0, magh * w - 1, gp->sceGsFFMode ? h * 2 - 1 : h - 1);
         } else {
-            int magh = (w + 0x9ff) / w;
-            int sy = (dy + off[1] + 0x19) & 0xfff;
-            long sx = (long)off[0] + 0x27c;
-            disp->display = SCE_GS_SET_DISPLAY((dx * magh + sx) & 0xfff, sy,
-                                               magh - 1, 0, magh * w - 1, h - 1);
+            maghn = (w + 0x9ff) / w;
+            syn = (dy + off[1] + 0x19) & 0xfff;
+            sxn = (long)off[0] + 0x27c;
+            disp->display = SCE_GS_SET_DISPLAY((dx * maghn + sxn) & 0xfff, syn,
+                                               maghn - 1, 0, maghn * w - 1, h - 1);
         }
     } else if (gp->sceGsOutMode == SCE_GS_PAL) {
         if (gp->sceGsInterMode == 1) {
@@ -119,11 +122,11 @@ void sceGsSetDefDispEnv(sceGsDispEnv *disp, short psm, short w, short h, short d
             disp->display = SCE_GS_SET_DISPLAY((dx * magh + sx) & 0xfff, sy,
                                                magh - 1, 0, magh * w - 1, gp->sceGsFFMode ? h * 2 - 1 : h - 1);
         } else {
-            int magh = (w + 0x9ff) / w;
-            int sy = (dy + off[1] + 0x24) & 0xfff;
-            long sx = (long)off[0] + 0x290;
-            disp->display = SCE_GS_SET_DISPLAY((dx * magh + sx) & 0xfff, sy,
-                                               magh - 1, 0, magh * w - 1, h - 1);
+            maghn = (w + 0x9ff) / w;
+            syn = (dy + off[1] + 0x24) & 0xfff;
+            sxn = (long)off[0] + 0x290;
+            disp->display = SCE_GS_SET_DISPLAY((dx * maghn + sxn) & 0xfff, syn,
+                                               maghn - 1, 0, maghn * w - 1, h - 1);
         }
     } else if (gp->sceGsOutMode == SCE_GS_DTV480P) {
         disp->display = SCE_GS_SET_DISPLAY(((720 - w) / 2 * 2 + (long)off[0] + 232 + dx * 2) & 0xfff,
