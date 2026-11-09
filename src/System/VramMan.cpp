@@ -364,7 +364,7 @@ void CVramMan::releaseClut(UINT nPos, INT nType) {
 #line 359
 static _MallocUnit* _createUnit(UINT nStartPos, UINT nSize, _MallocUnit* pPrev, _MallocUnit* pNext) {
     _MallocUnit* pUnit;
-    pUnit = (_MallocUnit*)com_malloc_d(sizeof(_MallocUnit), __FILE__ "(361)", RET_ADDR());
+    pUnit = new (__FILE__ "(361)") _MallocUnit;
     if (!pUnit) AssertApp(__FILE__, __LINE__, "pUnit", 0);
     pUnit->_nStartPos = nStartPos;
     pUnit->_nEndPos = nStartPos + nSize;

@@ -97,7 +97,7 @@ void CPathVector::_init(const FVECTOR* pPath, INT iPathMax, BOOL bAlloc) {
         if (iPathMax <= 0) m_iVecMax = 1;
         m_iVecMemMax = m_iVecMax + 8;
 #line 94
-        m_pVec = (FVECTOR*)com_malloc_d(m_iVecMemMax * sizeof(FVECTOR), __FILE__ "(94)", RET_ADDR());
+        m_pVec = new (__FILE__ "(94)") FVECTOR[m_iVecMemMax];
         ASSERT(m_pVec);
         if (pPath) {
             memcpy(m_pVec, pPath, m_iVecMax * sizeof(FVECTOR));
@@ -634,7 +634,7 @@ void CPathVector::setPathParam(PATH_PARAM& sParam) {
 }
 void CPathVector::__addPathAlloc(FVECTOR*& pVec, INT iVecMax, INT iVecMemMax) {
 #line 1098
-    FVECTOR* p = (FVECTOR*)com_malloc_d(iVecMemMax * sizeof(FVECTOR), __FILE__ "(1098)", RET_ADDR());
+    FVECTOR* p = new (__FILE__ "(1098)") FVECTOR[iVecMemMax];
     memcpy(p, pVec, iVecMax * sizeof(FVECTOR));
     if (pVec) com_free(pVec);
     pVec = p;
@@ -655,7 +655,7 @@ BOOL CPathVector::addPath(INT iNum) {
             if (m_iVecMemMax < m_iVecMax + 1) {
                 m_iVecMemMax += 8;
 #line 1121
-                FVECTOR* p = (FVECTOR*)com_malloc_d(m_iVecMemMax * sizeof(FVECTOR), __FILE__ "(1121)", RET_ADDR());
+                FVECTOR* p = new (__FILE__ "(1121)") FVECTOR[m_iVecMemMax];
                 memcpy(p, m_pVec, m_iVecMax * sizeof(FVECTOR));
                 if (m_pVec) com_free(m_pVec);
                 m_pVec = p;

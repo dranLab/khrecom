@@ -489,7 +489,7 @@ BOOL CRcf::_launchReadThread(ULONG nData, INT nType) {
     if (!s_bThreadEnable) {
         return FALSE;
     }
-    ra = RET_ADDR();
+    __asm__ volatile("daddu %0, $31, $0" : "=r"(ra)); /* MATCH: inline asm, __builtin_return_address(0) reloads ra */
     if (!_isReadThreadSleeping()) {
         TRACE_COL(_TTY_PURPLE, "!!!!!!!!! ERROR READ THREAD Activation !!!!!!!!! %x\n", ra);
         return FALSE;
