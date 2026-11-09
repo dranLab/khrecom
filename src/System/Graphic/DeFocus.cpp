@@ -305,7 +305,7 @@ static inline void _setADq(QWdata* qp, u_long data, u_long addr) {
     qp->ul64[1] = addr;
     qp->ul64[0] = data;
 }
-/* Parked: 83 of 596 lines, same size - structure, branches and calls as the original (debug near/far override,
+/* Parked: 82 of 596 lines (2026-11-09, the A+D qwords via Gprim.h's _makeQW), 4 bytes short - structure, branches and calls as the original (debug near/far override,
  * auto near/far from the look distance, FRAME/TEST/ALPHA/PRIM A+D blocks with debug colours, sprites, defaults
  * restore). Left: scheduling inside the A+D blocks (store pair order, the _FRAME0_START load ahead of the first
  * stores in ours) and a copy of the g_dw.sys pointer. Address-first stores in _setADq helped (93->83); permuter
@@ -452,9 +452,9 @@ void CDeFocusPrim::_makePktDeFocus() {
         }
     }
     qp = (QWdata*)CPackMan::pkOpenGifTag(_makeQW(0x1000000000008000UL, 0xE));
-    &qp[0]->ul128 = _makeQW(CPackMan::getDefault_ALPHA_2(), 0x43);
-    &qp[1]->ul128 = _makeQW(CPackMan::getDefault_TEST_2(), 0x48);
-    &qp[2]->ul128 = _makeQW(0x60, 0x15);
+    qp[0].ul128 = _makeQW(CPackMan::getDefault_ALPHA_2(), 0x43);
+    qp[1].ul128 = _makeQW(CPackMan::getDefault_TEST_2(), 0x48);
+    qp[2].ul128 = _makeQW(0x60, 0x15);
     CPackMan::pkCloseGifTag(qp + 3);
     m_fFar = BAK_Far;
     m_fNear = BAK_Near;
@@ -464,7 +464,7 @@ void CDeFocusPrim::_makePktDeFocus() {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/DeFocus", _makePktDeFocus__12CDeFocusPrim);
 #endif
 void CBlurPrim::makePkt() { _makePktBlur(); }
-/* Parked: 97 of 586 lines, 4 bytes long - structure as the original (debug override, camera-distance Z or
+/* Parked: 96 of 586 lines (2026-11-09, via _makeQW), same size - structure as the original (debug override, camera-distance Z or
  * 0xFFFF28, A+D header, 6-kind switch of set_tsprite32 patterns, defaults restore). Left: `this` and iZ swap
  * s2/s3 (most lines), the Bak_ registers (original spills the colour, keeps the rate in fp) and the store order
  * of the {1|0x61, 0x15} pairs between cases. hill.py on the Bak_ copies, permuter 7 min: no real gain. */
@@ -597,9 +597,9 @@ void CBlurPrim::_makePktBlur() {
         break;
     }
     qp = (QWdata*)CPackMan::pkOpenGifTag(_makeQW(0x1000000000008000UL, 0xE));
-    &qp[0]->ul128 = _makeQW(CPackMan::getDefault_ALPHA_2(), 0x43);
-    &qp[1]->ul128 = _makeQW(CPackMan::getDefault_TEST_2(), 0x48);
-    &qp[2]->ul128 = _makeQW(0x60, 0x15);
+    qp[0].ul128 = _makeQW(CPackMan::getDefault_ALPHA_2(), 0x43);
+    qp[1].ul128 = _makeQW(CPackMan::getDefault_TEST_2(), 0x48);
+    qp[2].ul128 = _makeQW(0x60, 0x15);
     CPackMan::pkCloseGifTag(qp + 3);
 end:
     m_iAlpha = Bak_iBlurAlpha;

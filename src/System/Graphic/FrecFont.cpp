@@ -356,7 +356,7 @@ void _makeFontPkt(const _FontInfo& font, USHORT nCode, FIX4 x, FIX4 y, FIX4 w, F
     }
 }
 
-/* Parked: 331 of 749 lines - the draft has the original's structure (all locals in stack slots, contiguous MMI colour
+/* Parked: 343 of 749 lines (2026-11-09: 338 before the A+D qwords and _setRGBAQ went to Gprim.h's _makeQW) - the draft has the original's structure (all locals in stack slots, contiguous MMI colour
  * sequences as volatile in-place asm, control-code switch, outline/shadow passes), but the spill slots differ: the
  * original's G_RGBA locals colExt/colBak/colSave get their (16-aligned) slots right after font, ours after nChar, so
  * every later offset and the register choices shift. tried: declaration order (ref order, all at the top, the three

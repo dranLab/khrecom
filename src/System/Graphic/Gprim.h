@@ -1061,8 +1061,8 @@ inline u_long128 _makeQW(ULONGLONG x, ULONGLONG z) {
     __asm__ volatile("pcpyld %0, %2, %1" : "=r"(out128) : "r"(x), "r"(z));
     return out128;
 }
-/* The original's element inlines at 978-1055 (.mdebug: the pcpyud at 982, sll at 992, dsra32 at 1001, sll at 1011,
- * dsra32/mtc1 at 1044, the por at 1055; locals x, out64, out32, outf, tmp). Their names are ours. */
+/* The original's element inlines at 978-1055 (.mdebug: pcpyud 982, sll 992, dsra32 1001, sll 1011, dsra32/mtc1 1044,
+ * por 1055; locals x, out64, out32, outf, tmp); names ours. MATCH: sll/dsra32 as asm (C casts add insns: tested) */
 inline ULONGLONG _getHi64(u_long128 x) {
     ULONGLONG out64;
 
