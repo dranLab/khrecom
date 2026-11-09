@@ -700,11 +700,21 @@ static BOOL chackBBOX(const FVECTOR& vMax, const FVECTOR& vMin, const FVECTOR& v
     if (vMin.z > vSMMax.z) return FALSE;
     return TRUE;
 }
-/* Parked: 62 of 291 lines, 4 bytes long - logic matches (CShadowModel::getSize inline). Left: the original does
- * not strength-reduce the draw loop over pBuf[j] (li 12 + mult every iteration), which frees an s-register: it keeps
- * i in s6 and spills hHnd, ours spills i. Tried: hHnd as a function-level local or read via pBuf->hHnd, pSdwBuf[i++],
- * j++ in both paths (for/while, 74), if (pSdw) {...} j++ (62); goto/while forms earlier (2026-10-19). The draft
- * declares CShadowMapModel (ref: lost+found.h, owner unknown) and Math3D::VectorMaxMinXYZ itself. */
+/* Parked: 59 of 289 lines (2026-11-09): only loop.c on the draw loop over pBuf[j] (line 940) differs: the original
+ * keeps `li 12; mult` in the loop, ours strength-reduces it to a pointer, so the registers shift (ours spills i, the
+ * original keeps i in s6 and spills hHnd; s6/s7/s8 renamed throughout). Mechanism (tested with -dL): the constant-12
+ * movable is "not desirable" once that loop has more than about 61 real insns at loop time (threshold measured: 60
+ * moved, 66 not), and then the mult is no giv and stays, exactly the original's code; ours has 28. So the original's
+ * loop held about 35 more RTL insns at loop time that later passes deleted; what source made them is unknown (lines
+ * 942-943, 945-950 and 952-954 keep no code). Shape from the .mdebug block tree and the line markers (this draft
+ * follows them): i/j/bFirst function-level, the outer loop's body block at depth 1 (while), the then-block of
+ * `if (pBuf[j].pModel)` holds a local .mdebug omits (a `CShadowModel&` reproduces the block, a pointer local would be
+ * listed), the map loop as nested ifs with one _getNextDrawable at the end (966/967/968 separate lines). Codegen-neutral
+ * differences left: getHandle's inline block sits directly in the if (pSMPModel) body (a `HANDLE x = getHandle();`
+ * local reproduces it), CDrawable::getNextDrawable is an inline at Drawable.h:398, CShadowMapModel's setHandle/getHandle
+ * are ShadowModel.h:276/277, HeapMan's delete[] has one more block level. Tried: while/goto/two j++ (layout changes),
+ * inline index helper, pointer local, j = 0 / nDispNum = 0 placement, earlier hHnd placement, pSdwBuf[i++]; the draft
+ * declares CShadowMapModel and Math3D::VectorMaxMinXYZ itself. */
 #if 0
 class CShadowMapModel : public CFadeModel {
     HANDLE m_hHnd;
@@ -716,85 +726,94 @@ public:
 };
 namespace Math3D { void VectorMaxMinXYZ(FVECTOR& inoutMax, FVECTOR& inoutMin, const FVECTOR& inMax, const FVECTOR& inMin); }
 void CDispListShadowDraw::_drawOT(OTtag& inOT) {
-    CDispListBase* pListSmp = CModelMan::getDispList(8);
+    CDispListBase* pListSmp;
+    CShadowMapModel* pSMModelFirst;
+    CDrawable* pPrim;
+    INT nEntryNum;
+    SHADOWMODELBUF* pSdwBuf;
+    INT i;
+    INT j;
+    BOOL bFirst;
+    pListSmp = CModelMan::getDispList(8);
     if (!pListSmp) return;
     if (!pListSmp->getEntryCount()) return;
-    CShadowMapModel* pSMModelFirst = (CShadowMapModel*)pListSmp->getHeadPrim(0);
+    pSMModelFirst = (CShadowMapModel*)pListSmp->getHeadPrim(0);
     if (!pSMModelFirst) return;
-    CDrawable* pPrim = inOT._pHeadPrim;
-    INT nEntryNum = getEntryCount();
-    SHADOWMODELBUF* pSdwBuf = new (__FILE__ "(895)") SHADOWMODELBUF[nEntryNum];
+    pPrim = inOT._pHeadPrim;
+    nEntryNum = getEntryCount();
+    pSdwBuf = new (__FILE__ "(895)") SHADOWMODELBUF[nEntryNum];
 #line 896
     ASSERT(pSdwBuf);
-    BOOL bFirst = TRUE;
-    INT i = 0;
+    bFirst = TRUE;
+    i = 0;
     while (pPrim) {
         pSdwBuf[i].pModel = (CShadowModel*)pPrim;
         i++;
-        pPrim = pPrim->m_pNext;
+        pPrim = _getNextDrawable(*pPrim);
     }
 #line 907
     ASSERT(! (i != nEntryNum));
     sortCShadowModel(pSdwBuf, nEntryNum);
-    for (i = 0; i < nEntryNum;) {
-        INT j;
+    i = 0;
+    while (i < nEntryNum) {
         SHADOWMODELBUF* pBuf = &pSdwBuf[i];
-        HANDLE hHnd = pBuf->hHnd;
         INT nNum = pBuf->nNum;
+        HANDLE hHnd = pBuf->hHnd;
         INT nDispNum = 0;
         FVECTOR v[2];
-        FVECTOR vSMMax;
-        FVECTOR vSMMin;
-        vSMMax.set(-1.7014118e+38f, -1.7014118e+38f, -1.7014118e+38f);
-        vSMMin.set(1.7014118e+38f, 1.7014118e+38f, 1.7014118e+38f);
+        FVECTOR vMax;
+        FVECTOR vMin;
+        vMax.set(-1.7014118e+38f, -1.7014118e+38f, -1.7014118e+38f);
+        vMin.set(1.7014118e+38f, 1.7014118e+38f, 1.7014118e+38f);
         for (j = 0; j < nNum; j++) {
             if (pBuf[j].pModel) {
                 nDispNum++;
                 pBuf[j].pModel->getParentModel()->getWorldBBox(v[0], v[1]);
-                Math3D::VectorMaxMinXYZ(vSMMax, vSMMin, v[0], v[1]);
+                Math3D::VectorMaxMinXYZ(vMax, vMin, v[0], v[1]);
             }
         }
         i += nNum;
-        if (nDispNum <= 0) continue;
-        CShadowModelMan::updateShadowMatrix(vSMMax, vSMMin, pBuf->pModel ? pBuf->pModel->getSize() : 0);
-        nDispNum = 0;
-        CShadowModelMan::drawBefore();
-        for (j = 0; j < nNum; j++) {
-            CShadowModel* pSdw = pBuf[j].pModel;
-            if (!pSdw) continue;
-            if (CPackMan::isOverFlow(pSdw->getPacketSize())) break;
-            nDispNum++;
-            _draw(*pSdw);
+        if (nDispNum > 0) {
+            CShadowModelMan::updateShadowMatrix(vMax, vMin, pBuf->pModel ? pBuf->pModel->getSize() : 0);
+            nDispNum = 0;
+            CShadowModelMan::drawBefore();
+            for (j = 0; j < nNum; j++) {
+                if (pBuf[j].pModel) {
+                    CShadowModel& rSdw = *pBuf[j].pModel;
+                    if (CPackMan::isOverFlow(rSdw.getPacketSize())) break;
+                    nDispNum++;
+                    _draw(rSdw);
+                }
+            }
+            CShadowModelMan::drawAfter();
+            if (nDispNum > 0) {
+                FVECTOR vSMMax;
+                FVECTOR vSMMin;
+                CShadowMapModel* pSMModel = pSMModelFirst;
+                while (pSMModel) {
+                    CModel* pSMPModel = pSMModel->getParentModel();
+                    if (pSMPModel) {
+                        if (bFirst) {
+                            if (!pSMPModel->isMap()) {
+                                pSMModel->setHandle(getCShadowModelCoordsHandle(pSMPModel));
+                            }
+                        }
+                        if (pSMModel->getHandle() != hHnd || hHnd == 0) {
+                            pSMPModel->getWorldBBox(vSMMax, vSMMin);
+                            if (chackBBOX(vMax, vMin, vSMMax, vSMMin)) {
+                                if (CPackMan::isOverFlow(pSMModel->getPacketSize())) break;
+                                pSMModel = (CShadowMapModel*)_draw(*pSMModel);
+                                continue;
+                            }
+                        }
+                    }
+                    pSMModel = (CShadowMapModel*)_getNextDrawable(*pSMModel);
+                }
+                bFirst = FALSE;
+            }
         }
-        CShadowModelMan::drawAfter();
-        if (nDispNum <= 0) continue;
-        CShadowMapModel* pSMModel = pSMModelFirst;
-        while (pSMModel) {
-            CModel* pSMPModel = pSMModel->getParentModel();
-            if (!pSMPModel) {
-                pSMModel = (CShadowMapModel*)pSMModel->m_pNext;
-                continue;
-            }
-            if (bFirst && !pSMPModel->isMap()) {
-                pSMModel->setHandle(getCShadowModelCoordsHandle(pSMPModel));
-            }
-            if (pSMModel->getHandle() == hHnd && hHnd != 0) {
-                pSMModel = (CShadowMapModel*)pSMModel->m_pNext;
-                continue;
-            }
-            FVECTOR vMax;
-            FVECTOR vMin;
-            pSMPModel->getWorldBBox(vMax, vMin);
-            if (!chackBBOX(vSMMax, vSMMin, vMax, vMin)) {
-                pSMModel = (CShadowMapModel*)pSMModel->m_pNext;
-                continue;
-            }
-            if (CPackMan::isOverFlow(pSMModel->getPacketSize())) break;
-            pSMModel = (CShadowMapModel*)_draw(*pSMModel);
-        }
-        bFirst = FALSE;
     }
-    if (pSdwBuf) com_free(pSdwBuf);
+    if (pSdwBuf) delete[] pSdwBuf;
 }
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/DispList", _drawOT__19CDispListShadowDrawR5OTtag);
