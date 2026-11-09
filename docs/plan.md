@@ -495,8 +495,14 @@ Keep output small: one function's assembly at a time; `funcdiff` without `--full
 - Anything destructive (resetting branches, deleting drafts someone else wrote).
 - Header cleanup: a partition fix that reaches more than about 20 includers or moves a type against the ref
   owner; string evidence that contradicts the ref; a new kind of mechanism; completion that needs changes to
-  matched C beyond ref type corrections; unifying `Gprim.h` and `GprimFull.h`; a new opt-out macro more than
+  matched C beyond ref type corrections; a new opt-out macro more than
   about 5 units need; no net decrease of stand-ins plus PARTIAL markers after 3 consecutive units.
+- **Done (cleanup/gprim-unify, merged 2026-11-09, user decision):** one System/Graphic/Gprim.h on the original's
+  line layout from CGPrim on (`#line 72` before it; GprimFull.h and the #pragma interface/implementation pair gone: the
+  image doesn't need them), the original's free MMI/VU0 inlines at 752-1055 (names ours, bodies and lines from the
+  .mdebug: _makeQW at 969, _getHi64/_getX.._getW, _colToVec/_vecToCol, _vecToXYZ, _oneVector, _packWord, _screenClamp,
+  _mulCol), 37 unit-local stand-ins replaced. Next: CDrawable/ALPHA/G_LAYER belong to DispList.h per the ref (DispList.h
+  includes Gprim.h: a type move), FrecFont's parked makePkt can use _colToVec/_mulCol/_vecToCol, Gprim.h:827 unplaced.
 - **Done (cleanup/vector-types, merged 2026-11-07):** F_UL, G_XY, G_XYZ, G_RGBA, G_UV,
   G_ST at the end of System/Vector.h and the C++ QWdata after khtypes.h's u_int128 (the original's .mdebug type order,
   against the ref's placement; user decision). The former `D2MAN_H_PATH`/`RSRCDATA_H_FULL` entry is settled (checked 2026-11-07): RSRCDATA_H_FULL was dropped

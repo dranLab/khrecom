@@ -157,19 +157,20 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-08 | cleanup/Game-Enemy-BattleEnemy.h: CBattleEnemy as the ref class (STOP_DAMAGE/MES_CARD_INFO types, ref access), unit gate and state-template mechanism dropped, accessor vs direct member per the original's .mdebug block tree (user decision) | 162 | 8 | 0 | 663 (0) | 1033 |
 | 2026-11-09 | cleanup/heapman-nra: System/HeapMan.h new/new[] with the ref's function-level UINT nRA; 73 debug allocations in 29 files as new-expressions (HeapMan.h:153/159 line labels; 14 block trees now equal the original's, 89 closer), RET_ADDR and three local copies gone (user decision) | 162 | 8 | 0 | 663 (0) | 1041 |
 | 2026-11-09 | cleanup/heapman-ra-copies: the last local return-address asm copies in 20 files as new-expressions (JiminyMemo new[] x2, the rest new; 44 block trees closer, 0 further; CreateBullet's ending in the original's block shape) (user decision) | 162 | 8 | 0 | 663 (0) | 1041 |
+| 2026-11-09 | cleanup/gprim-unify: one Gprim.h on the original's line layout (GprimFull.h and the pragma pair gone), the original's free MMI/VU0 inlines at 752-1055, 37 stand-ins in 16 files replaced; 3 block trees now equal (user decision) | 162 | 8 | 0 | 662 (0) | 1039 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 162 (134 in 44 headers, 28 in 15 .cpp); MATCH: 1041
+PARTIAL: 162 (134 in 44 headers, 28 in 15 .cpp); MATCH: 1039
   by category: method 30, data member 9, type 13, fwd decl 2, #include 13, changed in place 42, padding 2, gate 5, guessed 9, header-level 23, stand-in 10, other 4
 stand-ins: 8 foreign in 5 files (6 names), 166 unattributed, 181 own
 duplicate class names across headers: 0
 padding: 2 arrays, 0 accessors
-mechanisms: 663 sites (0 untagged); #line: 1240
+mechanisms: 662 sites (0 untagged); #line: 1237
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 1165, superset 16, partial 1, gated 3, missing 6, unattributed 8
+classes: complete 1177, superset 16, partial 1, gated 3, missing 6, unattributed 8
 ```
 
 ## Queue (top 20)
@@ -250,7 +251,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/Effect/libppp/eiProg/pppChrYSclXYZMatrix.h` | 0 | 1/1/0/0 | 1 |
 | `System/Graphic/Effect/libppp/keProg/pppKeTh.h` | 0 | 6/0/1/0 | 1 |
 | `System/Graphic/Effect/libppp/pppPart.h` | 25 | 21/0/0/0 | 216 |
-| `System/Graphic/Gprim.h` | 1 | 9/0/0/0 | 232 |
+| `System/Graphic/Gprim.h` | 1 | 56/0/0/0 | 232 |
 | `System/Graphic/Model.h` | 2 | 8/0/0/0 | 70 |
 | `System/Graphic/Str.h` | 1 | 0/0/0/0 | 141 |
 | `System/Graphic/TexInfo.h` | 1 | 2/0/0/0 | 235 |
@@ -374,6 +375,7 @@ or `untagged`.
 | placeholder | `_modelAssertZero*` | 1 | 1 | placeholder: an inline function's strings, in the original .rodata order |
 | placeholder | `_modelCreate*` | 1 | 1 | placeholder: an inline function's strings, in the original .rodata order |
 | placeholder | `_monstroEventBattleEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
+| placeholder | `_oneVector*` | 1 | 1 | the lui in the asm (a constant operand is scheduled to the top of CModel's constructor) |
 | placeholder | `_premiumPrizeMessage*` | 12 | 12 | Placeholders for an unknown header's inline functions (prize messages) that come next in .rodata. |
 | placeholder | `_roPh*` | 1 | 1 | placeholder: an inline function's strings, in the original .rodata order |
 | placeholder | `_roPh0a*` | 1 | 1 | placeholder: an inline function's strings, in the original .rodata order |
@@ -382,8 +384,6 @@ or `untagged`.
 | placeholder | `_saveLoadCtrlAlloc*` | 1 | 1 | placeholder: an inline function's strings, in the original .rodata order |
 | placeholder | `_statusEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
 | placeholder | `_vsmeMotionName*` | 1 | 1 | Placeholder: .rodata has "e123_062" after Anim.h's strings (from an unidentified header, as in Game/Enemy/CreateEnemy). |
-| pragma | `#pragma implementation` | 1 | 1 | the Gprim weak tail from C (user-approved pragma mechanism) |
-| pragma | `#pragma interface` | 1 | 1 | the inline functions and vtables only in Gprim.o, as in the originals |
 | unit gate | `EFFECT_CPP` | 1 | 1 | effect.cpp includes effect_inl.h itself after Coord.h (weak order) and owns the placeholder strings; without it the link fails |
 | unit gate | `FORM_MENU_JIMINYMEMO_CPP` | 1 | 1 | unit gate (its header gives this unit its own parts); without it the unit compiles only against its full header (tested 2026-11-02) |
 | unit gate | `FORM_MENU_SAVELOADCTRL_CPP` | 1 | 1 | unit gate (its header gives this unit its own parts); without it the link fails (inlines this unit must emit) (tested 2026-11-02) |
