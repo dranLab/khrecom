@@ -1516,10 +1516,19 @@ BOOL Math3D::HitPillarBall(const FVECTOR& m, const FVECTOR& n, const FVECTOR& c,
     return HitLineBall(m, n, c, mnr + cr);
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Math3D", InvMatrix__6Math3DR7FMATRIXRC7FMATRIX);
+/* Parked: 90 of 248 lines (2026-11-09): the outer loop of the elimination hoists 1e-8/-1e-8 (lui/ori/mtc1 into
+ * $f5/$f4) in loop pass 2 (-dL: 118 real insns; the original keeps them in the loop, so it had 123-125 there), which
+ * shifts every register after it (&c in s1 instead of a3, i in t0, k-part temps) and turns bnezl into bnez.
+ * Found: the original .mdebug tree has ONE function-level i (t1) and no blocks in the k part (this draft's
+ * `for (INT i` are not the original's), tmp in the `if (pibot != i)` block, only two fabs inlines (the pivot
+ * search keeps |a[j][i]| in a local .mdebug omits: fAbs here), and a two-level unit-matrix inline (Coord.h:910 ->
+ * vu0.h:391). With the shared i the 1e-8 stay inside (pass 2: 125 insns) but loop pass 1 strength-reduces i (147
+ * lines): gcse PRE leaves `i++` as is because lcm.c compute_isoinout calls it isolated (the k part recomputes i+1 on
+ * every path); the original's `i = t3` copy needs an exit path before the k part's first i+1 at gcse time (a
+ * non-constant k start shows it: insn redundant, no biv). asm volatile abs.s for _fabsf (Entity/SummonCloud form):
+ * 85. tried: block-tree shapes, fabs forms, swap order, unit-matrix chain, -dL/-dG dumps; no permuter (not a near
+ * miss) */
 #if 0
-/* Same code apart from register allocation: gcc hoists the 1e-8 constants and a "li 20" out of the outer loop
- * (the original keeps them inside), which moves &c into s1. */
 void Math3D::InvMatrix(FMATRIX& outMat, const FMATRIX& inMat) {
     FMATRIX a;
     FMATRIX c;
@@ -1528,7 +1537,6 @@ void Math3D::InvMatrix(FMATRIX& outMat, const FMATRIX& inMat) {
     INT k;
     INT pibot;
     FLOAT fMax;
-    FLOAT tmp;
 
     a = inMat;
     _unitMatrix(c);
@@ -1536,19 +1544,21 @@ void Math3D::InvMatrix(FMATRIX& outMat, const FMATRIX& inMat) {
         fMax = _fabsf(a.m[i][i]);
         pibot = i;
         for (j = i + 1; j < 4; j++) {
-            if (_fabsf(a.m[j][i]) > fMax) {
-                fMax = _fabsf(a.m[j][i]);
+            FLOAT fAbs = _fabsf(a.m[j][i]);
+            if (fAbs > fMax) {
+                fMax = fAbs;
                 pibot = j;
             }
         }
         if (pibot != i) {
+            FLOAT tmp;
             for (j = 0; j < 4; j++) {
                 tmp = a.m[pibot][j];
                 a.m[pibot][j] = a.m[i][j];
                 a.m[i][j] = tmp;
-                tmp = c.m[i][j];
-                c.m[i][j] = c.m[pibot][j];
-                c.m[pibot][j] = tmp;
+                tmp = c.m[pibot][j];
+                c.m[pibot][j] = c.m[i][j];
+                c.m[i][j] = tmp;
             }
         }
         if (a.m[i][i] == 0.0f) {
@@ -1578,7 +1588,8 @@ void Math3D::InvMatrix(FMATRIX& outMat, const FMATRIX& inMat) {
     }
     outMat = c;
 }
-
+#else
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Math3D", InvMatrix__6Math3DR7FMATRIXRC7FMATRIX);
 #endif
 BOOL Math3D::checkMaxMinOutsideXYZ(const FVECTOR& v, const FVECTOR& vMax, const FVECTOR& vMin) {
     INT iRet;
