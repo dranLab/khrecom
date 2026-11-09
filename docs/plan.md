@@ -439,6 +439,7 @@ header split the original didn't have, or make a class a template to hide its st
 | delay slot of a call and the v0/v1 pair after it | void-callee-v0 |
 | spill slots / regs of hoisted `this+off` addresses | gcse-bucket-count-lever, gcse-pre-hash-order |
 | registers swapped, same instructions | scheduling-mismatch-techniques, global-alloc-priority-lreg, local-alloc-three-quantities, asm-barrier-death-note-levers, loop-const-merge-and-load-order, asymmetric-giv-overloads, gcse-pre-hash-order |
+| a hoisted constant issued before a loop pointer's init (ours), after it (original) | ppp-eidrawshipoly-unit-lessons (the base was a pointer variable, invisible in the .mdebug, not a cast literal) |
 | preheader hoist order, constant hoisted only in ours | loop-two-pass-hoist-threshold, preheader-giv-init-order, loop-hoist-lifetime-store-order, pathdata-unit-lessons (where an index variable is assigned in the surrounding if/else) |
 | the original repeats a test that cse folds in ours | duplicate-test-masked-form |
 | a hoisted constant is a copy of a variable initialised to it | volatile-asm-cse-flush (`asm volatile("" : : "i"(0))` after the init) |
@@ -464,7 +465,9 @@ header split the original didn't have, or make a class a template to hide its st
 | return type / getter form changes code | ref-return-types-matter, entity-unit-lessons |
 | VU0 / GS packets / u128 | vu0-asm-function-conversion, ppp-keshptail-patterns, gs-packet-u128-patterns, sp-address-inline-wrappers, volatile-asm-cse-flush |
 | Draft lacks a ref local, or "registers only" around asm helpers | `ref-locals-reveal-shape`, `ti-di-conversion-is-por` |
+| global-alloc near-tie, code-less lines in the line markers | ppp-eidrawshipoly-unit-lessons (statements inside an empty do-while(0) count refs one loop level deeper) |
 | Near-tie in global-alloc, or combine/reorg folds an insn | `empty-asm-live-length` (empty asm: +1 live length, blocks stealing; with an operand, a second use) |
+| `move rN,sp` and a stack local loaded through rN only after a join | nested-function-static-chain (a GNU nested function's static chain) |
 | Temp in s3/t8, giv stepping far from its biv | `asm-temp-odd-register` |
 | `bne; nop` where the original has `bnel` into the loop | a volatile load at the target: reorg never steals it (`_threadReadProc`) |
 | several fields "look volatile", reloads after one store (Sony libs) | union-store-alias-zero |

@@ -7,8 +7,6 @@ the closest result. Revisit after the units with few leftovers are done; lessons
 |---|---|---|
 | System/Sound/driver/sddrv_ee | `.bss` from asm | `static STR_DATA_CHK str_data_ee[6]` (the ref's only static) is 0x60 of the 0x110 bytes; with it alone everything after moves by 0x80. The rest is unknown. |
 | System/Graphic/WorldEnv (also System/Rcf `finalize`, RcfCD `_startCdRead`, `_parseRCF_EntryFile`) | `initialize` | The C is the original's: it matches in about 1 of 6 builds. gcse PRE's hash of anonymous-namespace symbols is taken over the name's characters; ours contain `src_System_Graphic_WorldEnv.cpp` plus a pid-derived random suffix, the original `c__KHCOM_MainApp_System_Graphic_WorldEnv.cppUPaaaa`. Compiling with the original path as the main input name and the suffix `UPaaaa` (pid fixed) matches initialize (2026-11-08, worktree experiment). Needs a build change: deferred by the user 2026-11-08 (later session; scripts in build/gd/). |
-| System/Graphic/Effect/libppp/keProg/pppKeShpTail3 | `pppKeShpTail3Draw` | 37 lines, all in one region: between the ScreenMatrix copy and the CMat asm the original addresses the stack-resident `pw` through `$a3` (`move a3,sp`, a copy of the soft frame pointer = &mat0). A dummy `mat0` pointer reproduces the copy, but CSE keeps the fixed frame register canonical, so `pw` never uses it. Near-match (with hacks) in the source. ~45 min (plus hill climbs and random mutation search). |
-| System/Graphic/Effect/libppp/keProg/pppKeShpTail3X | `pppKeShpTail3XDraw` | Same as pppKeShpTail3Draw: 37 lines, only `pw` addressed through `$a3` (copy of the soft frame pointer) between the ScreenMatrix copy and the CMat asm. Other compiler versions don't match either. ~45 min (shared with Tail3, plus a random mutation search). |
 
 ## Inventory of the game units
 
@@ -27,15 +25,12 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `Game/Map` | 2 | 1952 | 2 |  |
 | `Form/Menu/Camp` | 2 | 1778 | 2 |  |
 | `System/Graphic/Effect/libppp/draw/shape` | 2 | 1771 | 2 |  |
-| `System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly` | 2 | 1495 | 2 |  |
 | `System/Graphic/DeFocus` | 2 | 1014 | 2 |  |
 | `System/Graphic/Model` | 2 | 1000 | 2 |  |
 | `System/Graphic/Effect/libppp/keProg/KeTh` | 1 | 685 | 1 |  |
 | `System/Graphic/FrecFont` | 1 | 656 | 1 |  |
 | `System/Graphic/HermitePathCamera` | 1 | 632 | 1 |  |
-| `System/Graphic/Effect/libppp/keProg/pppKeShpTail3X` | 1 | 532 | 1 |  |
 | `Game/Player/PlayerRiku` | 1 | 520 | 1 |  |
-| `System/Graphic/Effect/libppp/keProg/pppKeShpTail3` | 1 | 514 | 1 |  |
 | `System/Graphic/Effect/libppp/partMng` | 1 | 292 | 1 |  |
 | `System/Graphic/DispList` | 1 | 245 | 1 |  |
 | `System/Math3D` | 1 | 234 | 1 |  |
@@ -67,11 +62,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `System/Graphic/Effect/libppp/partMng` | `vramcache` | 292 | (comment) Register allocation: the original keeps abBlock (the VLA's address) on the stack and the assert's string addresses in s5/s6; here abBlock gets s7 and bUseBlockNum s3, so the file name's %hi lives in t0 (saved around the call, 16 more bytes of frame). The return blocks are also laid out … |
 | `System/Graphic/Effect/libppp/draw/shape` | `pppVu1ShapeDraw` | 133 | 4 of 143 lines (2026-11-08): `or a0,a1,a0` (the call argument) issues before `addiu t6,a1,32` instead of after tag 2's next store, and tag 3's `sb t4,3(t6)` comes after its p[1] store instead of first. With tag 3 written id/next/qwc like the others its stores match, but t3/t4 swap: local-alloc … |
 | `System/Graphic/Effect/libppp/draw/shape` | `op_shape_draw` | 1638 | 5 of 1680 lines (2026-11-08): only the join after the six loops differs, registers of three block-local values: the original has `move a0,t1` (the $9 read), `li v1,32`, `andi v0,a1,0x800`, ours `move v1,t1`, `li v0,32`, `andi a0,a1,0x800`. They are the block's only 3 local quantities, so … |
-| `System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly` | `drawShipoly` | 795 | 13 of 812 lines (2026-11-09): only the s1/a1 FP registers differ (ours $f6/$f5, original $f5/$f6): global-alloc priority (int)(4*24/185) = 5189 for s1 is below a1's 3*12/69 = 5217 (a0 5294 above both); a1 = alpha1 before a0 = alpha0 gives the registers (6 lines, but the movs issue in the wrong … |
-| `System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly` | `pppEiDrawDrawShipoly` | 700 | 2 of 743 lines (2026-11-09): only the Type!=0 copy loop's preheader: ours issues li a2,-1 before lui a1,0x7000 (the original after it, both after the 1.0f): the -1 of the if-converted n < 0 test (made by the first jump pass) is a pass-1 movable, and loop.c emits the strength-reduced giv init after … |
 | `System/Graphic/Effect/libppp/keProg/KeTh` | `KeThBP_Update` | 685 | (comment) Best attempt: same code apart from register allocation (the original has flg in s7, pTp in fp and &vf._06 in s6; this gets fp/s6/s7) and the order of a few spill slots (preStep - rootStep, &vf._07, &vf._08, flg & 0x120, &pRP->InVec), which shifts scheduling around them. |
-| `System/Graphic/Effect/libppp/keProg/pppKeShpTail3` | `pppKeShpTail3Draw` | 514 |  |
-| `System/Graphic/Effect/libppp/keProg/pppKeShpTail3X` | `pppKeShpTail3XDraw` | 532 |  |
 | `System/Rcf` | `finalize__4CRcf` | 111 | 0 or 6 of 153 lines (2026-11-07), random per compile (matched 4 of 6 rebuilds): s_nRcfMapCount/s_nRcfSceneCount's hoisted %hi pseudos tie in global-alloc priority (3 refs / 120 insns each), the tie goes to the lower pseudo, and PRE numbers them in expression-hash bucket order; the SYMBOL_REF hash … |
 | `System/RcfCD` | `_startCdRead__Fii` | 41 | 4-8 lines, varying between identical builds (the draft above is the C) - the hoisted lui's of the s_n*_R statics get s5/s6 in an order that changes per compiler run (gcse PRE hash order, memory gcse-pre-hash-order); store orders tried (all worse). Kept asm because the result is not reproducible. |
 | `Game/Map` | `init__4CMapii` | 1046 | 87 of 1193 lines, same size - the bbox loop's &b (ApplyMatrix output) is hoisted into s2 here, the original recomputes it per iteration, which shifts the saved registers of xmin/xmax/zmin/zmax and the division block; for/do/ while/goto loop shapes, by-value apply inline and a 10 min permuter run … |
@@ -83,7 +74,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Form/Menu/Camp` | `setMapCardWin__5CCampi` | 1227 | 23 of 1407 lines (2026-11-08; drop the data block after the INCLUDE_ASM to build the draft): only the spill slots of seven PRE-hoisted values differ (orig 0x74 &m_pMCInfoNumFnt, 0x78 &m_nMapKind, 0x7c i + 1, 0x80 nKind - 161, 0x84 &m_pMCCard, 0x88 &m_pMCFnt, 0x8c &m_pMCInfoNumCtrl; ours 0x74 … |
 | `Form/Menu/RoomCreation` | `menuMain__13CRoomCreation` | 1995 | (comment) menuMain: 78 of 2211 lines, 8 bytes short (92 and 0x50 short before _NORMA_PIECES, 2026-11-07): the by-value NormaSrc arguments are written out now; left: case 0's registers (v1 + s7 where the original keeps a0, s4/s6/s8 from there). To enable this draft, also drop the data block after … |
 
-Totals: 27 functions (19249 instructions) in 21 units, 27 of them parked; 1 units take a data section from assembly.
+Totals: 23 functions (16708 instructions) in 18 units, 23 of them parked; 1 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->
