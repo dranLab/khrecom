@@ -5,7 +5,6 @@
 #include "System/Graphic/Effect/libppp/draw/md.h"
 #include "System/Graphic/Effect/libppp/draw/md0_p3f.h"
 #include "System/Debug.h"
-#include "include_asm.h"
 
 enum {
     DRAWSHIPOLY_MATRIX = 0,
@@ -520,8 +519,6 @@ static void get_st(PEiDrawShipoly *param, float *s_min, float *s_max, float *t_m
     *t_max = tmax - 0.01f;
 }
 
-/* Parked: 13 of 812 lines (2026-11-09): only the s1/a1 FP registers differ (ours $f6/$f5, original $f5/$f6): global-alloc priority (int)(4*24/185) = 5189 for s1 is below a1's 3*12/69 = 5217 (a0 5294 above both); a1 = alpha1 before a0 = alpha0 gives the registers (6 lines, but the movs issue in the wrong order and the line markers have a0 on 726, a1 on 727); one empty asm in the j loop gives them too but adds 2 to the live length of gradation_del/gradation_add, whose (int) priorities tie (2*4/1012 = 79 = 2*4/1010), and swaps those two; found 2026-11-09: InterVector clobbers "$2" (58 -> 15), s0 = s inside both TexRepeat arms (lines 688/698 carry no code: the copy sits in the branch delay slot), do {} while (0) before the Fade test (lines 704-705; s1 += issues before the Fade lbu), get_st before s = 0.0f and poly_num before s_add (line markers); tried: ternary forms of s, do {} while (0) at the other line gaps of the i/j loops, decomp-permuter 15 min after its TImode fix (base 78; best 54 by an invented pointer copy for the 2nd clip, 34 in the real source: a filler local, not taken); earlier: the RotTransPersClip inline, the .mdebug block tree, rate/linevw forms, c0/c1, TexDir and Fade orders, tools/permuter.py 15 min */
-#if 0
 void drawShipoly(pppModelSt *mdl, PEiDrawShipoly *p, VEiDrawShipoly *val, VColor *col, sceVu0FVECTOR (*linev)[256]) {
     int poly_num;
     float s_add;
@@ -749,9 +746,12 @@ void drawShipoly(pppModelSt *mdl, PEiDrawShipoly *p, VEiDrawShipoly *val, VColor
                     s = s1 - s_max + s_min;
                 }
             }
-            s0 += val->TexScrollS;
-            s1 += val->TexScrollS;
+            /* MATCH: the scroll adds inside a do-while(0) (a macro's form; the original's lines 704-705 carry no code):
+               flow weights their refs by the loop notes' depth, so s1 (26 refs) is allocated before a1 ($f5/$f6),
+               and the notes keep s1 += before the Fade test's lbu */
             do {
+                s0 += val->TexScrollS;
+                s1 += val->TexScrollS;
             } while (0);
             if (p->Fade) {
                 fade = 0.0f;
@@ -865,11 +865,6 @@ void drawShipoly(pppModelSt *mdl, PEiDrawShipoly *p, VEiDrawShipoly *val, VColor
         }
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly", drawShipoly);
-/* drawShipoly's jump table (jtbl_00469F70) while the function is assembly */
-__asm__(".rdata\n.align 3\n.word .L00182DCC\n.word .L00182DE0\n.word .L00182DF4\n.word .L00182E08\n.word .L00182E1C\n.text\n");
-#endif
 void drawDistShipoly(PEiDrawShipoly *p, VEiDrawShipoly *val, VColor *col, sceVu0FVECTOR (*linev)[256]) {
     int poly_num;
     float gradation;
