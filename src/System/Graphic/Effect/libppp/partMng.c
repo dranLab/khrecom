@@ -5,7 +5,6 @@
 #include "System/MainApp.h"
 #include "System/Debug.h"
 #include "pppfunctbl.h"
-#include "include_asm.h"
 
 int sprintf(char *buf, const char *fmt, ...);
 int sceDmaSync(sceDmaChan *d, int mode, int timeout);
@@ -1190,23 +1189,10 @@ static void vramcachemng_clear(VRAMCACHE_MNG *pVcacheMng) {
         vramcache_clear(&pVcacheMng->aVramCacheClut[i]);
     }
 }
-/* vramcache's string literals, for its INCLUDE_ASM (the linker provides their labels); remove with it. */
-asm(".section .rodata\n"
-    ".align 3\n.asciz \"nBlockMax <= BLOCK_MAX\"\n"
-    ".align 3\n.asciz \"((void *)0) != pchDpd\"\n"
-    ".align 3\n.asciz \"0 <= nParId && nParId < 64\"\n"
-    ".align 3\n.asciz \"(pVcache->chBlockStart+j) < BLOCK_MAX\"\n"
-    ".align 3\n.asciz \"0 <= nStartBlock\"\n"
-    ".align 3\n.asciz \"Not find VRAMCACHE!\"\n"
-    ".align 3\n.asciz \"!(\\\"Not find VRAMCACHE!\\\")\"\n"
-    ".align 3\n.asciz \"0\"\n.previous");
-int vramcache(VRAMCACHE *paVcache, int nBlockMax, pppMngSt *pMng, u_char bUseBlockNum);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/partMng", vramcache);
 
-/* Register allocation: the original keeps abBlock (the VLA's address) on the stack and the assert's string
-   addresses in s5/s6; here abBlock gets s7 and bUseBlockNum s3, so the file name's %hi lives in t0 (saved around
-   the call, 16 more bytes of frame). The return blocks are also laid out in another order. */
-#if 0
+/* abBlock is a VLA in the original (.mdebug: its address in a stack slot) of a constant size: a const int local, which
+   gcc leaves out of .mdebug once its reads are folded. The loops' pVcache locals that loop.c strength-reduces away are
+   the blocks without variables in the original's .mdebug block tree. */
 static int vramcache(VRAMCACHE *paVcache, int nBlockMax, pppMngSt *pMng, u_char bUseBlockNum) {
     const int BLOCK_MAX = 40;
     u_char abBlock[BLOCK_MAX];
@@ -1214,17 +1200,16 @@ static int vramcache(VRAMCACHE *paVcache, int nBlockMax, pppMngSt *pMng, u_char 
     int nParId = pMng->bDpdId;
     int i;
     int j;
-    VRAMCACHE *pVcache;
-    int nEmptyCt;
-    int nStartBlock;
 
 #line 2031
     ASSERTS(nBlockMax <= BLOCK_MAX, "nBlockMax <= BLOCK_MAX");
     ASSERTS(((void *)0) != pchDpd, "((void *)0) != pchDpd");
     ASSERTS(0 <= nParId && nParId < 64, "0 <= nParId && nParId < 64");
     for (i = 0; i < nBlockMax; i++) {
-        pVcache = &paVcache[i];
-        if (pVcache->bBoolUse && pchDpd == pVcache->pchDpd) {
+        VRAMCACHE *pVcache = &paVcache[i];
+
+        if (pVcache->bBoolUse
+            && pchDpd == pVcache->pchDpd) {
             if ((pVcache->unDpdId >> nParId) & 1) {
                 return -1;
             }
@@ -1232,7 +1217,7 @@ static int vramcache(VRAMCACHE *paVcache, int nBlockMax, pppMngSt *pMng, u_char 
             return pVcache->chBlockStart;
         }
     }
-    for (i = BLOCK_MAX - 1; i >= 0; i--) {
+    for (i = 0; i < BLOCK_MAX; i++) {
         abBlock[i] = 0;
     }
     for (i = 0; i < nBlockMax; i++) {
@@ -1246,45 +1231,49 @@ static int vramcache(VRAMCACHE *paVcache, int nBlockMax, pppMngSt *pMng, u_char 
             }
         }
     }
-    nEmptyCt = 0;
-    nStartBlock = -1;
-    for (i = 0; i < nBlockMax; i++) {
-        if (abBlock[i]) {
-            nEmptyCt = 0;
-        } else {
-            nEmptyCt++;
-            if (nEmptyCt == bUseBlockNum) {
-                nStartBlock = i - (bUseBlockNum - 1);
-#line 2078
-                ASSERTS(0 <= nStartBlock, "0 <= nStartBlock");
-                break;
-            }
-        }
-    }
-    if (nStartBlock > 0) {
+    {
+        int nEmptyCt = 0;
+        int nStartBlock = -1;
+
         for (i = 0; i < nBlockMax; i++) {
-            pVcache = &paVcache[i];
-            if (!pVcache->bBoolUse) {
-                pVcache->bBoolUse = 1;
-                pVcache->unDpdId = (u_long)1 << nParId;
-                pVcache->pchDpd = pchDpd;
-                pVcache->chBlockNum = bUseBlockNum;
-                pVcache->chBlockStart = nStartBlock;
-                return nStartBlock;
+            if (abBlock[i]) {
+                nEmptyCt = 0;
+            } else {
+                nEmptyCt++;
+                if (nEmptyCt == bUseBlockNum) {
+                    nStartBlock = i + 1 - bUseBlockNum;
+#line 2078
+                    ASSERTS(0 <= nStartBlock, "0 <= nStartBlock");
+                    break;
+                }
             }
         }
+        if (nStartBlock > 0) {
+            for (i = 0; i < nBlockMax; i++) {
+                VRAMCACHE *pVcache = &paVcache[i];
+
+                if (!pVcache->bBoolUse) {
+                    pVcache->pchDpd = pchDpd;
+                    pVcache->unDpdId = (u_long)1 << nParId;
+                    pVcache->chBlockStart = nStartBlock;
+                    pVcache->chBlockNum = bUseBlockNum;
+                    pVcache->bBoolUse = 1;
+                    return nStartBlock;
+                }
+            }
 #line 2101
-        ASSERTS(!("Not find VRAMCACHE!"), "!(\"Not find VRAMCACHE!\")");
+            ASSERTS(!("Not find VRAMCACHE!"), "!(\"Not find VRAMCACHE!\")");
+        }
     }
     {
         VRAMCACHE *pVcacheTarget = NULL;
         int nDif = -1;
-        VRAMCACHE *pVcache;
 
         for (i = 0; i < nBlockMax; i++) {
-            pVcache = &paVcache[i];
+            VRAMCACHE *pVcache = &paVcache[i];
+
             if (pVcache->bBoolUse) {
-                if (pVcache->chBlockNum == bUseBlockNum) {
+                if (bUseBlockNum == pVcache->chBlockNum) {
                     pVcache->pchDpd = pchDpd;
                     pVcache->unDpdId = (u_long)1 << nParId;
                     return pVcache->chBlockStart;
@@ -1299,34 +1288,34 @@ static int vramcache(VRAMCACHE *paVcache, int nBlockMax, pppMngSt *pMng, u_char 
         }
         if (pVcacheTarget != NULL) {
             pVcacheTarget->pchDpd = pchDpd;
-            pVcacheTarget->chBlockNum = bUseBlockNum;
             pVcacheTarget->unDpdId = (u_long)1 << nParId;
+            pVcacheTarget->chBlockNum = bUseBlockNum;
             return pVcacheTarget->chBlockStart;
         }
-        for (i = 0; i < nBlockMax; i++) {
-            pVcache = &paVcache[i];
-            if (pVcache->bBoolUse && pVcache->chBlockStart < bUseBlockNum) {
-                vramcache_clear(pVcache);
-            }
+    }
+    for (i = 0; i < nBlockMax; i++) {
+        VRAMCACHE *pVcache = &paVcache[i];
+
+        if (pVcache->bBoolUse && pVcache->chBlockStart < bUseBlockNum) {
+            vramcache_clear(pVcache);
         }
-        for (i = 0; i < nBlockMax; i++) {
-            pVcache = &paVcache[i];
-            if (!pVcache->bBoolUse) {
-                pVcache->bBoolUse = 1;
-                pVcache->unDpdId = (u_long)1 << nParId;
-                pVcache->pchDpd = pchDpd;
-                pVcache->chBlockNum = bUseBlockNum;
-                pVcache->chBlockStart = 0;
-                return 0;
-            }
+    }
+    for (i = 0; i < nBlockMax; i++) {
+        VRAMCACHE *pVcache = &paVcache[i];
+
+        if (!pVcache->bBoolUse) {
+            pVcache->pchDpd = pchDpd;
+            pVcache->unDpdId = (u_long)1 << nParId;
+            pVcache->chBlockStart = 0;
+            pVcache->chBlockNum = bUseBlockNum;
+            pVcache->bBoolUse = 1;
+            return 0;
         }
     }
 #line 2169
     ASSERTS(0, "0");
     return -1;
 }
-
-#endif
 
 static void vramcache_texture(VRAMCACHE_MNG *pVcacheMng, pppMngSt *pMng) {
     int nStartBlock = vramcache(pVcacheMng->aVramCacheTex, 12, pMng, pMng->bTexVramBlock);

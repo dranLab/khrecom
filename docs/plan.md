@@ -473,6 +473,7 @@ header split the original didn't have, or make a class a template to hide its st
 | a global load hoisted above union-member stores in ours | defocus-unit-lessons (`((u_long*)qp)[i]` stores, not `qp->ul64[i]`) |
 | a register copy (`move aX,sY`) of an earlier value used in one block only | defocus-unit-lessons (a cse block boundary: an inline with two returns instead of a ternary) |
 | `this` and a local swap saved registers, a shared restore tail | defocus-unit-lessons (restore written out at each exit; cross-jumping merges it back) |
+| the original's loop counts down (bgez), ours up, or a giv reduced only in the original | loop-reversal-forces-giv (an up-counting source loop that loop.c reversed) |
 | Temp in s3/t8, giv stepping far from its biv | `asm-temp-odd-register` |
 | `bne; nop` where the original has `bnel` into the loop | a volatile load at the target: reorg never steals it (`_threadReadProc`) |
 | several fields "look volatile", reloads after one store (Sony libs) | union-store-alias-zero |
