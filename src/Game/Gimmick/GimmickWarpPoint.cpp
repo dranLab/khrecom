@@ -97,11 +97,7 @@ void CGimmickWarpPoint::stateMain() {
             g_pPlayer->getPlayerState() == WALK || g_pPlayer->getPlayerState() == RUN) {
             m_reqFlag = 1;
             CGameWork::setFlag(1, 5, TRUE);
-            char* msg = __FILE__ "(190)";
-            UINT nRA;
-            __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA));
-            CWorldWarp* p = (CWorldWarp*)com_malloc_d(sizeof(CWorldWarp), msg, nRA);
-            if (p != NULL) p = new (p) CWorldWarp(CTaskMan::getSysTask(1), FALSE);
+            new (__FILE__ "(190)") CWorldWarp(CTaskMan::getSysTask(1), FALSE);
         }
     }
 }

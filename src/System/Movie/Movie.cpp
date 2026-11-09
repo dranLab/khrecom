@@ -67,14 +67,14 @@ void CMovie::disposeScriptRsrc() {
     CMovieScript::disposeRsrc();
 }
 
-#define NEW_D(p, T, args)                                                       \
-    {                                                                           \
-        char* msg = __FILE__ "(148)";                                           \
-        UINT nRA;                                                               \
-        __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA));                      \
-        p = (T*)com_malloc_d(sizeof(T), msg, nRA);                              \
-        if (p != NULL) p = new (p) T args;                                      \
-    }
+
+
+
+
+
+
+
+
 
 #line 136
 static BOOL _openMovie(const CHAR* pszFile, BOOL bForDebug) {
@@ -89,9 +89,9 @@ static BOOL _openMovie(const CHAR* pszFile, BOOL bForDebug) {
     CTask* pParent = CTaskMan::getSysTask(14);
     CMoviePlayerBase* p;
     if (bFileOK) {
-        NEW_D(p, CMoviePlayer, (pParent, bForDebug));
+        p = new (__FILE__ "(148)") CMoviePlayer(pParent, bForDebug);
     } else {
-        NEW_D(p, CMoviePlayerDummy, (pParent));
+        p = new (__FILE__ "(148)") CMoviePlayerDummy(pParent);
     }
     if (!p) AssertApp(__FILE__, __LINE__, "p", 0);
     /* volatile: keeps the store ahead of the vtable load (the original schedules it there) */

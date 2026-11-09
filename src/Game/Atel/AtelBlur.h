@@ -41,7 +41,7 @@ public:
         TRACE("CAtelBlur::initialize\n");
 #line 80 ATELBLUR_H_PATH
         if (!(__null == m_pInstance)) AssertApp(__FILE__, __LINE__, "__null == m_pInstance", 0);
-        m_pInstance = new (com_malloc_d(sizeof(CAtelBlur), __FILE__ "(81)", ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; }))) CAtelBlur(pParent);
+        m_pInstance = new (__FILE__ "(81)") CAtelBlur(pParent);
 #line 82
         if (!(m_pInstance)) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
     }

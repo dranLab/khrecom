@@ -377,11 +377,9 @@ throw(); new(size_t, char*)/new[] read ra into a function-level `UINT nRA` by in
 reloads ra), the ref's form (cleanup/heapman-nra, 2026-11-09: RET_ADDR is gone, 73 direct com_malloc_d calls became
 new-expressions by their HeapMan.h:153/159 line labels). The sites are `new (__FILE__ "(N)") T` (Camp's setWorldmap
 keeps an emulated `new (operator new(sizeof(T), __FILE__ "(N)")) T`, MATCH); the local copies and the
-KH_PLACEMENT_NEW_DEFINED gate are gone. Open (needs the user, matched-C edits): about 20 files keep their own
-`daddu %0, $31` copies (JiminyMemo, the NEW_D macros of CreateGimmick/CreateEnemy/CreateBullet/Movie, singleton
-instance()s in AtelBlur/AtelFog/AtelCrossFade/ChatMan/CameraMan/2DMan/TitleReportDllStarter .h, LinkedBuf.h,
-PathCamera, GimmickWarpPoint, AtelTutorial, MovieScript, MapUnit.h, SaveLoadCtrl.h): new-expressions in the original
-by the same evidence. MapEnemy.h, SceneInfo.h, CollUtilA.h and Coord.h list gate users
+KH_PLACEMENT_NEW_DEFINED gate are gone. The last local `daddu $31` copies (JiminyMemo, the NEW_D macros, singleton instance()s, LinkedBuf.h, MapUnit.h,
+...) became new-expressions too (cleanup/heapman-ra-copies, 2026-11-09, user decision); only Rcf's _launchReadThread
+keeps its asm (the original's ra is a register variable there). MapEnemy.h, SceneInfo.h, CollUtilA.h and Coord.h list gate users
 without a feature macro. Game/Collision/CollObj.h is done (2026-11-08): CollUtilF's stand-ins went once
 _checkLadderUp calls an inline `initForMap()` (m_fgStatus = 0) after the constructor (flow drops the ctor's dead store).
 

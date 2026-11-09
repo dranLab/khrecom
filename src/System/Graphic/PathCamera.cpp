@@ -63,14 +63,7 @@ INT CPathCamera::init(const CHAR* inCamName, BOOL enableDataRoll, BOOL fgTarget,
     m_pRoll = m_pCamData->roll;
     m_pRseq = m_pCamData->rseq;
     deleteCamera();
-    {
-        char* msg = __FILE__ "(71)";
-        UINT nRA;
-        __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA));
-        CCamera* p = (CCamera*)com_malloc_d(sizeof(CCamera), msg, nRA);
-        if (p != NULL) p = new (p) CCamera(this, inCamPri);
-        m_pCamera = p;
-    }
+    m_pCamera = new (__FILE__ "(71)") CCamera(this, inCamPri);
     m_pCamera->setPriority(0x8000);
     m_fRate = 1.0f;
     m_next = 0;
@@ -101,14 +94,7 @@ void CPathCamera::initBGCheck(BOOL fgTransparency) {
         delete m_pCollMapCamera;
     }
     m_pCollMapCamera = NULL;
-    {
-        char* msg = __FILE__ "(127)";
-        UINT nRA;
-        __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA));
-        CCollMapCamera* p = (CCollMapCamera*)com_malloc_d(sizeof(CCollMapCamera), msg, nRA);
-        if (p != NULL) p = new (p) CCollMapCamera;
-        m_pCollMapCamera = p;
-    }
+    m_pCollMapCamera = new (__FILE__ "(127)") CCollMapCamera;
 }
 
 void CPathCamera::stopBGCheck() {
