@@ -334,24 +334,6 @@ asm(".section .rodata\n.align 3\n.asciz \"c:/KHCOM/MainApp/System/Graphic/Effect
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/draw/shape", pppVu1ShapeDraw);
 #endif
 
-/* Parked: 5 of 1680 lines (2026-11-08): only the join after the six loops differs, registers of three block-local
-   values: the original has `move a0,t1` (the $9 read), `li v1,32`, `andi v0,a1,0x800`, ours `move v1,t1`, `li v0,32`,
-   `andi a0,a1,0x800`. They are the block's only 3 local quantities, so local-alloc takes them in birth order
-   (memory local-alloc-three-quantities): ours sched1 order is lhu, li 32, move, zext, and, movn. The original reads $9
-   on line 2049 before `iFog` (line 2059), but with that order the asm issues before the `lhu` and the `b` slots after
-   the loops stay empty (13 lines); iFog first gives the right order and only this swap.
-   2026-11-08 from the line markers and the .mdebug block tree (18 -> 5, size now right): ref locals (nWord =
-   *(word *)(spr - 8), nWord / 0x3000 as its own statement in the first branch; nWord2 = the qword count; iFog; sp/spa
-   at function level), spr_get with the ref's local w (sceGsSyncPath at the call site), the OT-add inlines and the DMA
-   kick with operands instead of pinned locals, the DMA tag stores and `sync` as C statements (lines 2117-2119).
-   The asm is the original's own (plan item 4): .set noreorder with hand-filled delay slots split across statements,
-   trapping addi/add/dadd, `bne $zero,...`, the 4-nop VIF1 wait. Still hard-coded: $17 (sh) in the loops (an "r"(sh)
-   operand adds six uses of sh and global-alloc swaps s0/s1: 55 lines; "r"(shi) is neutral and kept) and the $9
-   sprite count, read by `move %0, $9` after the loops (as an output operand of the loops: 52-58 lines, spa/spritec
-   swap a1/t1).
-   tried: iFog forms (ternary, if/else, braces), asm volatile, spritec output with "=r"/"=&r" and a $9 pin;
-   tools/permuter.py 15 min on this form (40488 candidates, none better) */
-#if 0
 #define SCE_GIF_SET_TAG(nloop, eop, pre, prim, flg, nreg)                                                \
     ((u_long)(nloop) | ((u_long)(eop) << 15) | ((u_long)(pre) << 46) | ((u_long)(prim) << 47) |       \
      ((u_long)(flg) << 58) | ((u_long)(nreg) << 60))
@@ -1750,8 +1732,10 @@ void *op_shape_draw(OSHAPE_VU1 *sh, OSHAPE_IN *shi, int nPacketSize) {
             }
         }
     }
+    /* MATCH: the $9 read clobbers "$2", "$3" (the loops' scratch registers): local-alloc then keeps v0/v1 away from
+       its output (a0), and the join's three local values get the original's v0/v1/a0 */
+    __asm__("move %0, $9" : "=r"(spritec) : : "$2", "$3");
     iFog = 0; if (shi->flag & 0x800) iFog = 0x20;
-    __asm__("move %0, $9" : "=r"(spritec));
     if (spritec != 0) {
         if (shi->flag & 0x10) {
             if (shi->flag & 0x80) {
@@ -1847,9 +1831,6 @@ void *op_shape_draw(OSHAPE_VU1 *sh, OSHAPE_IN *shi, int nPacketSize) {
         return (void *)*(word *)&shi->packet;
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/draw/shape", op_shape_draw);
-#endif
 
 void *pppGetVu1DrawSpad0(void) {
     return (void *)0x70001A00;
