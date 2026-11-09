@@ -98,7 +98,7 @@ inline void CEffectLight::close() {
     }
 }
 
-class CLightUnit {
+class CLightUnit { friend class CModel; /* MATCH: CModel::_disp0_SetPacket calls the protected _calc() (the ref cannot show friends) */
 protected:
     FMATRIX m_Light;
     FMATRIX m_Color;
@@ -123,8 +123,8 @@ public:
         _calc(ctr);
     }
     void calc() { m_iFlags &= ~1; }
-    /* MATCH: types.h lists a second calc() without parameters: the BOOL is a guess, the body is what Model inlines;
-       defined after the class, so that isCalc() is inlined into it (Model has no weak isCalc) */
+    /* types.h lists a second calc() without parameters: the BOOL and the body are a guess (no caller left since
+       2026-11-09: Model's _disp0_SetPacket tests isCalc() and calls _calc() itself, as its .mdebug shows) */
     void calc(BOOL bInCheck);
     BOOL isCalc() { return m_iFlags & 1; }
     void setAmbient(const FVECTOR& in_color);
