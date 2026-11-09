@@ -6,7 +6,7 @@
 #include "System/MainApp.h"
 #include "System/HeapMan.h"
 
-#define POOLLIST_RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
+
 
 /* Fixed-size pool of list entries T (with pPrev/pNext links), kept in a doubly linked list between two sentinels. */
 template <class T>
@@ -51,8 +51,8 @@ protected:
     void init(INT inSize) {
         INT i;
         m_iSize = inSize;
-        m_pListTbl = (T*)com_malloc_d(inSize * sizeof(T), __FILE__ "(62)", POOLLIST_RET_ADDR());
-        m_ppListPtrTbl = (T**)com_malloc_d(inSize * sizeof(T*), __FILE__ "(63)", POOLLIST_RET_ADDR());
+        m_pListTbl = new (__FILE__ "(62)") T[inSize];
+        m_ppListPtrTbl = new (__FILE__ "(63)") T*[inSize];
         if (!m_pListTbl) AssertApp(__FILE__, __LINE__, "m_pListTbl", 0);
         if (!m_ppListPtrTbl) AssertApp(__FILE__, __LINE__, "m_ppListPtrTbl", 0);
         for (i = 0; i < inSize; i++) {
