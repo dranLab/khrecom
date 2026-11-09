@@ -156,6 +156,7 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-08 | cleanup/libgraph-types (with TexUtil's 4 drafts): libgraph types in PackMan.h (ref form) and include/sdk/libgraph.h; PackMan.cpp/TexUtil.cpp/libppp headers on them | 184 | 8 | 0 | 673 (0) | 1040 |
 | 2026-11-08 | cleanup/Game-Enemy-BattleEnemy.h: CBattleEnemy as the ref class (STOP_DAMAGE/MES_CARD_INFO types, ref access), unit gate and state-template mechanism dropped, accessor vs direct member per the original's .mdebug block tree (user decision) | 162 | 8 | 0 | 663 (0) | 1033 |
 | 2026-11-09 | cleanup/heapman-nra: System/HeapMan.h new/new[] with the ref's function-level UINT nRA; 73 debug allocations in 29 files as new-expressions (HeapMan.h:153/159 line labels; 14 block trees now equal the original's, 89 closer), RET_ADDR and three local copies gone (user decision) | 162 | 8 | 0 | 663 (0) | 1041 |
+| 2026-11-09 | cleanup/heapman-ra-copies: the last local return-address asm copies in 20 files as new-expressions (JiminyMemo new[] x2, the rest new; 44 block trees closer, 0 further; CreateBullet's ending in the original's block shape) (user decision) | 162 | 8 | 0 | 663 (0) | 1041 |
 
 <!-- partials:start -->
 ## Summary
