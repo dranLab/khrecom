@@ -440,6 +440,8 @@ header split the original didn't have, or make a class a template to hide its st
 | spill slots / regs of hoisted `this+off` addresses | gcse-bucket-count-lever, gcse-pre-hash-order |
 | registers swapped, same instructions | scheduling-mismatch-techniques, global-alloc-priority-lreg, local-alloc-three-quantities, asm-barrier-death-note-levers, loop-const-merge-and-load-order, asymmetric-giv-overloads, gcse-pre-hash-order |
 | a hoisted constant issued before a loop pointer's init (ours), after it (original) | ppp-eidrawshipoly-unit-lessons (the base was a pointer variable, invisible in the .mdebug, not a cast literal) |
+| a different value spilled out of a loop than in the original; loop.c dump says "savings 1 not desirable" | libat3dec-unit-lessons (loop.c move threshold: one insn more in the loop body delays the hoist to pass 2) |
+| the same callee-saved register used by distant regions of a large function | libat3dec-unit-lessons (one C variable in several roles) |
 | preheader hoist order, constant hoisted only in ours | loop-two-pass-hoist-threshold, preheader-giv-init-order, loop-hoist-lifetime-store-order, pathdata-unit-lessons (where an index variable is assigned in the surrounding if/else) |
 | the original repeats a test that cse folds in ours | duplicate-test-masked-form |
 | a hoisted constant is a copy of a variable initialised to it | volatile-asm-cse-flush (`asm volatile("" : : "i"(0))` after the init) |
