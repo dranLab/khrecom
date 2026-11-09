@@ -127,28 +127,6 @@ static inline u_long128 _calcSTQW(ULONGLONG inSTQ, FLOAT fW) {
                      : "r"(inSTQ), "f"(fW));
     return iRet;
 }
-/* MATCH: the output is 64-bit and _hiToFloat takes u_long128: the por in _getW is that conversion, not an asm. */
-static inline ULONGLONG _getHi64(u_long128 x) {
-    ULONGLONG out;
-    __asm__ volatile("pcpyud %0, %1, $0" : "=r"(out) : "r"(x));
-    return out;
-}
-static inline FLOAT _hiToFloat(u_long128 x) {
-    FLOAT outf;
-    ULONGLONG tmp;
-    __asm__ volatile("dsra32 %1, %2, 0\n"
-                     "mtc1 %1, %0\n"
-                     : "=f"(outf), "=&r"(tmp)
-                     : "r"(x));
-    return outf;
-}
-static inline INT _toInt(ULONGLONG x) {
-    INT tmp;
-    __asm__ volatile("sll %0, %1, 0" : "=r"(tmp) : "r"(x));
-    return tmp;
-}
-static inline FLOAT _getW(u_long128 x) { return _hiToFloat(_getHi64(x)); }
-static inline INT _getZ(u_long128 x) { return _toInt(_getHi64(x)); }
 INT BackClip(const FVECTOR* in_fV, INT iDirL);
 FLOAT getPrimGetaZ(INT iz, const FVECTOR& Vert, const FMATRIX* pWMat, FLOAT fGeta);
 static inline void _getTmpTexArea(INT nID, UINT& nTexPos, UINT& nClutPos) { /* PARTIAL: VramDef.h */

@@ -132,12 +132,6 @@ void FTOI0Vector(IVECTOR& outVec, const FVECTOR& inVec);
 
 static void _setPcrtcMode_BlendBG(sceGsDispEnv& inEnv);
 
-static inline u_long _upper(u_long128 q) {
-    u_long r;
-    __asm__ volatile("pcpyud %0, %1, $0" : "=r"(r) : "r"(q));
-    return r;
-}
-
 /* The file's statics, in the original's .bss order */
 namespace {
 u_long128 s_pPktBufVif1[2][36992] __attribute__((aligned(64)));
@@ -1398,7 +1392,7 @@ void sceVif1PkOpenGifTag(pacVif1Packet* pPacket, u_long128 tag) {
 }
 void sceVif1PkCloseGifTag(pacVif1Packet* pPacket) {
     u_long128 tag = pPacket->lGifTag.ul128;
-    u_long hi = _upper(tag);
+    u_long hi = _getHi64(tag);
     u_long lo = (u_long)tag;
     u_long flg = (lo >> 58) & 3;
     u_int n = (u_long*)pPacket->pCurrent - pPacket->pGifTag - 2;
@@ -1478,7 +1472,7 @@ void sceVif1PkAddUpkData64N(pacVif1Packet* pPacket, u_long* pData, u_int count) 
 void sceVif1PkAddUpkData128(pacVif1Packet* pPacket, u_long128 data) {
     u_int* p = pPacket->pCurrent;
     u_long lo = (u_long)data;
-    u_long hi = _upper(data);
+    u_long hi = _getHi64(data);
     p[0] = lo;
     p[1] = lo >> 32;
     p[2] = hi;
@@ -1491,7 +1485,7 @@ void sceVif1PkAddUpkData128N(pacVif1Packet* pPacket, u_long128* pData, u_int cou
     while (count--) {
         u_long128 d = *pData++;
         u_long lo = (u_long)d;
-        u_long hi = _upper(d);
+        u_long hi = _getHi64(d);
         p[0] = lo;
         p[1] = lo >> 32;
         p[2] = hi;

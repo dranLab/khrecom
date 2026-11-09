@@ -1061,22 +1061,44 @@ inline u_long128 _makeQW(ULONGLONG x, ULONGLONG z) {
     __asm__ volatile("pcpyld %0, %2, %1" : "=r"(out128) : "r"(x), "r"(z));
     return out128;
 }
+/* The original's element inlines at 978-1055 (.mdebug: the pcpyud at 982, sll at 992, dsra32 at 1001, sll at 1011,
+ * dsra32/mtc1 at 1044, the por at 1055; locals x, out64, out32, outf, tmp). Their names are ours. */
+inline ULONGLONG _getHi64(u_long128 x) {
+    ULONGLONG out64;
 
 
+    __asm__ volatile("pcpyud %0, %1, $0" : "=r"(out64) : "r"(x));
+    return out64;
+}
 
 
 
+inline INT _getX(u_long128 x) {
+    INT out32;
 
 
+    __asm__ volatile("sll %0, %1, 0" : "=r"(out32) : "r"(x));
+    return out32;
+}
 
 
+inline INT _getY(u_long128 x) {
+    INT out32;
 
 
+    __asm__ volatile("dsra32 %0, %1, 0" : "=r"(out32) : "r"(x));
+    return out32;
+}
 
 
 
+inline INT _getZ(u_long128 x) {
+    INT out32;
 
 
+    __asm__ volatile("sll %0, %1, 0" : "=r"(out32) : "r"(_getHi64(x)));
+    return out32;
+}
 
 
 
@@ -1102,46 +1124,24 @@ inline u_long128 _makeQW(ULONGLONG x, ULONGLONG z) {
 
 
 
+inline FLOAT _hiToFloat(u_long128 x) {
+    FLOAT outf;
+    INT tmp;
 
 
+    __asm__ volatile("dsra32 %1, %2, 0\n\tmtc1 %1, %0" : "=f"(outf), "=&r"(tmp) : "r"(x));
+    return outf;
+}
 
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+inline FLOAT _getW(u_long128 x) {
+    /* the 64-bit high half goes in as u_long128: a por, as in the original */
+    return _hiToFloat(_getHi64(x));
+}
 
 
 

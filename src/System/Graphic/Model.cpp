@@ -995,11 +995,6 @@ static inline u_long128 _packWord(INT x, INT y, INT z, INT w) {
                      : "r"(x), "r"(z), "r"(y), "r"(w));
     return out128;
 }
-static inline ULONGLONG _hi64(u_long128 x) {
-    ULONGLONG out64;
-    __asm__ volatile("pcpyud %0, %1, $0" : "=r"(out64) : "r"(x));
-    return out64;
-}
 /* Parked: 93 of 655 lines (2026-11-08): the block tree equals the original's .mdebug except before pack #1 (original: a CModel inline, x invisible, y visible, x loaded after y) and the colour-matrix getter (original has no block there but the getter's addiu shape). Still differs: this in s4 / iFlags&2 in s5, the original swaps them (global alloc: this 47 refs/504 insns = 0.4663 beats the bone-loop addr giv 9/58 = 0.4655; one more insn in this's range would flip it), the semikind arm (original copies m_Mode to a1 for the switch compares), y's u16 ? u16 : 0x92 (ours branches, original li+movz), GIF tag store order, the no-light zero stores, two loop-align nops (+8 bytes, one insn out of phase). Tried: the .mdebug locals/blocks (149 -> 93: rawMode = pData[1][3], for-scoped i, tex0Buf in the else-if, t0/t1 + a $3 clobber, plain casts for the lo halves, then-block i/j, offset block, iSize < N ? iSize : N), memcpy for the light rows, calc(BOOL) defined after CLightUnit (isCalc inlined), getMode(), (version & 0xFFFF), ?: / != 0 / INT / USHORT forms for y. Earlier: permuter 20 min on the old draft (no gain). */
 #if 0
 void CModel::_disp0_SetPacket(UINT nMode, const int (*pData)[4], INT semikind, u_long nInTest, INT iFlags, u_long* tex0) {
@@ -1130,10 +1125,10 @@ void CModel::_disp0_SetPacket(UINT nMode, const int (*pData)[4], INT semikind, u
     pQw++;
     qOBLM = _packWord((INT)m_pCrds, m_BoneStart, (INT)m_pLightUnit, nMode);
     MODEL_SEND_CACHE& sModelCache = CModelMan::getModelCacheRef();
-    if (sModelCache.lOBLM_L != (u_long)qOBLM || sModelCache.lOBLM_H != _hi64(qOBLM) ||
-        ((u_long*)&sModelCache.ivPP)[0] != (u_long)qPP || ((u_long*)&sModelCache.ivPP)[1] != _hi64(qPP) ||
+    if (sModelCache.lOBLM_L != (u_long)qOBLM || sModelCache.lOBLM_H != _getHi64(qOBLM) ||
+        ((u_long*)&sModelCache.ivPP)[0] != (u_long)qPP || ((u_long*)&sModelCache.ivPP)[1] != _getHi64(qPP) ||
         ((u_long*)&sModelCache.fvColorScale)[0] != *(u_long*)&qColorScale ||
-        ((u_long*)&sModelCache.fvColorScale)[1] != _hi64(qColorScale) || (m_iSendFlg & 0x800)) {
+        ((u_long*)&sModelCache.fvColorScale)[1] != _getHi64(qColorScale) || (m_iSendFlg & 0x800)) {
         INT boneNum;
         INT boneSize;
         INT w;
