@@ -62,15 +62,6 @@ extern INT SCREEN_HEIGHT;
 void RotTransPersClipW(IVECTOR& iVec, const FVECTOR& fVec);
 void ITOF4Vector(FVECTOR& fVec, const IVECTOR& iVec);
 
-static inline void _loadRotTransPersMatrix(const FMATRIX& m) {
-    asm volatile("vsub.xyzw $vf3, $vf0, $vf0\n"
-                 "lqc2 $vf4, 0x0(%0)\n"
-                 "lqc2 $vf5, 0x10(%0)\n"
-                 "lqc2 $vf6, 0x20(%0)\n"
-                 "lqc2 $vf7, 0x30(%0)\n"
-                 :
-                 : "r"(&m));
-}
 
 void ITOF0Vector(FVECTOR& fVec, const IVECTOR& iVec);
 void AddVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
@@ -400,11 +391,11 @@ void C2DSprObj::_main(TIMEQ qTime) {
         if (!m_status.base_disable) InterVector2(m_vPos, m_vBase[1], m_vBase[0], fRate);
         if (!m_status.ofs_disable) InterVector2(m_vOfs, m_vOffset[1], m_vOffset[0], fRate);
         if (!m_status.rotate_disable) {
-            sceVu0InterVector((float*)&m_vRot, (float*)&m_vRotate[1], (float*)&m_vRotate[0], fRate);
+            InterVector(m_vRot, m_vRotate[1], m_vRotate[0], fRate);
             Math3D::LimitPIVector(m_vRot);
         }
         if (!m_status.scale_disable) InterVector2(m_vScl, m_vScale[1], m_vScale[0], fRate);
-        if (!m_status.color_disable) sceVu0InterVector((float*)&m_vCol, (float*)&m_vColor[1], (float*)&m_vColor[0], fRate);
+        if (!m_status.color_disable) InterVector(m_vCol, m_vColor[1], m_vColor[0], fRate);
         if (!m_status.sway_disable) {
             InterVector2(m_vSwy, m_vSway[1], m_vSway[0], fRate);
             if (!m_status.sway_lag) {
@@ -495,7 +486,7 @@ void C2DSprObj::move() {
     _unitMatrixVu0(mat);
     mat.m[0][0] = m_vScl.x;
     mat.m[1][1] = m_vScl.y;
-    sceVu0RotMatrix(mat.m, mat.m, m_vRot.v);
+    RotMatrix(mat, mat, m_vRot);
     AddVector2(fVec, m_vPos, m_vSwy);
     mat.v[3] = fVec;
     _unitMatrixVu0(mat2);
@@ -558,7 +549,7 @@ void C2DSprObj::move() {
         if (mat.m[0][0] != 1.0f || mat.m[1][1] != 1.0f || mat.m[2][2] != 1.0f) setBilinear(TRUE);
     }
     ScaleVector(vCol, vCol, 128.0f);
-    sceVu0ClampVector(vCol.v, vCol.v, 0.0f, 255.0f);
+    ClampVector(vCol, vCol, 0.0f, 255.0f);
     FTOI0Vector(*(IVECTOR*)&lCol, vCol);
     bBilinear = isBilinear();
     if (m_Flg & 8) {
@@ -612,7 +603,7 @@ INT C2DSprObj::_disp() {
     if (!m_fgDisp) return 0;
     if (m_fgRotTransPers >= 0) {
         if (m_fgRotTransPers == 0) {
-            _loadRotTransPersMatrix(CWorldEnv::getWorldScreenMatrix());
+            SetRotTransPersMatrix(CWorldEnv::getWorldScreenMatrix());
             RotTransPersClipW(iVec, m_pSeqControl->vPos);
             if (iVec.w != 0 || iVec.x < 0x5000 || iVec.x > 0xb000 || iVec.y < 0x5000 || iVec.y > 0xb000) {
                 m_pSeqControl->fg3D = -1;

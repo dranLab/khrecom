@@ -306,11 +306,11 @@ void CEffectMan::_setCoord(CEffect* pEff, INT nCNum, const CCoord* pParent, cons
     } else {
         _unitMatrixVu0(*pLocal);
         if (pvRot) {
-            sceVu0RotMatrixX(pLocal->m, pLocal->m, pvRot->x);
-            sceVu0RotMatrixY(pLocal->m, pLocal->m, pvRot->y);
-            sceVu0RotMatrixZ(pLocal->m, pLocal->m, pvRot->z);
+            RotMatrixX(*pLocal, *pLocal, pvRot->x);
+            RotMatrixY(*pLocal, *pLocal, pvRot->y);
+            RotMatrixZ(*pLocal, *pLocal, pvRot->z);
         }
-        if (pvPos) sceVu0TransMatrix(pLocal->m, pLocal->m, (float*)pvPos->v);
+        if (pvPos) TransMatrix(*pLocal, *pLocal, *pvPos);
     }
     crd.m_Flag = 1;
     crd.fix();
@@ -816,7 +816,7 @@ void CEffectMan::_calc(FLOAT fFrameRate, const FMATRIX& mWV, const FMATRIX& mVS,
     }
     if (!pPos || !pLook) {
         applySignWorldViewMatrix(mCam, mWV);
-        sceVu0InversMatrix(mCam.m, mCam.m);
+        InversMatrix(mCam, mCam);
     }
     if (!pPos) {
         vPosTmp = mCam.v[3];
