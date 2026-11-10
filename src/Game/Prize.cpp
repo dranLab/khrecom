@@ -899,8 +899,8 @@ BOOL CPrize::initCard_() {
     char texName[16];
     CCard::getCardTexInfo(card, texName, texST);
     G_ST st[4];
-    st[0].s = texST.x;
-    st[0].t = texST.y;
+    st[0].set(texST.x, texST.y);
+
     st[1].s = texST.z;
     st[1].t = texST.y;
     st[2].s = texST.x;

@@ -149,8 +149,8 @@ static void _createWindow() {
     s_pSysWindowCtrl->changeLayer(25);
     rgba.col = 0x80707070;
     pFnt = new (__FILE__ "(220)") D2::C2DFnt(0, 0, &rgba, 15, s_szSysMessage, 0x46);
-    pFnt->m_Space.x = 0;
-    pFnt->m_Space.y = 0x30;
+    pFnt->m_Space.set(0, 0x30);
+
     s_szSysMessage[0] = '\0';
     s_pSysWindowCtrl->addFntShift(s_pszSysWndSeq, pFnt, 0.0f, -8.0f);
     s_pSysWindowCtrl->addSeqShift(s_pszSysWndSeq, 0, -150.0f, -36.0f);

@@ -40,18 +40,18 @@ void CKisEnemy::stateMain() {
     if (m_pMove->getPos().z < 0.5f) {
         switch (m_iStep) {
         case 0:
-            vec.x = 0.0f;
-            vec.y = 0.01f;
-            vec.z = 0.0f;
-            vec.w = 0.0f;
+            vec.set(0.0f, 0.01f, 0.0f, 0.0f);
+
+
+
             m_pMove->setVel(vec);
             if (m_pMove->getPos().y > 2.0f) m_iStep++;
             break;
         case 1:
-            vec.x = 0.0f;
-            vec.y = -0.01f;
-            vec.z = 0.0f;
-            vec.w = 0.0f;
+            vec.set(0.0f, -0.01f, 0.0f, 0.0f);
+
+
+
             m_pMove->setVel(vec);
             if (m_pMove->getPos().y < 1.0f) m_iStep--;
             break;
@@ -68,18 +68,18 @@ void CKisEnemy::stateMain() {
     } else {
         switch (m_iStep) {
         case 0:
-            vec.x = 0.05f;
-            vec.y = 0.02f;
-            vec.z = 0.0f;
-            vec.w = 0.0f;
+            vec.set(0.05f, 0.02f, 0.0f, 0.0f);
+
+
+
             m_pMove->setVel(vec);
             if (m_pMove->getPos().y > 3.0f) m_iStep++;
             break;
         case 1:
-            vec.x = -0.05f;
-            vec.y = -0.02f;
-            vec.z = 0.0f;
-            vec.w = 0.0f;
+            vec.set(-0.05f, -0.02f, 0.0f, 0.0f);
+
+
+
             m_pMove->setVel(vec);
             if (m_pMove->getPos().y < 1.0f) m_iStep--;
             break;

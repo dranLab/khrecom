@@ -381,7 +381,7 @@ INT CAvatar::onSetNearClip(INT nCmd, void* pParam, INT nID) {
 }
 INT CAvatar::onSetPosistion(INT nCmd, void* pParam, INT nID) {
     if (!isAvatarMoving()) setAvatarState(0x30, FALSE);
-    FVECTOR v = *(FVECTOR*)pParam;
+    FVECTOR v; v.set(*(FVECTOR*)pParam);
     setPos(v);
     warp(getPos());
     if (m_pMove->isGravity()) m_pMove->land(5.0f, 1.0f, FALSE);
@@ -468,7 +468,7 @@ void CAvatar::calcAvatarMoveSpeed(FVECTOR& vOut) {
         FVECTOR v;
         FMATRIX m;
         _unitMatrixVu0(m);
-        v._q = 0;
+        v.zero();
         v.z = getAvatarSpeed();
         RotMatrix(m, m, getRot());
         ApplyMatrix(vOut, m, v);
@@ -480,14 +480,14 @@ void CAvatar::calcAvatarMoveSpeed(FVECTOR& vOut) {
         FVECTOR v;
         _unitMatrixVu0(m);
         RotMatrixY(m, m, getAvatarDirY2Target(NULL, NULL));
-        v._q = 0;
+        v.zero();
         v.z = getAvatarSpeed();
         ApplyMatrix(vOut, m, v);
         vOut.w = 0.0f;
         break;
     }
     default:
-        vOut._q = 0;
+        vOut.zero();
         break;
     }
 }
@@ -617,7 +617,7 @@ INT CAvatar::onRotate(INT nCmd, void* pParam, INT nID) {
     case 0:
     case 5:
     case 6:
-        vRot = p->_vTarget;
+        vRot.set(p->_vTarget);
         break;
     case 9:
     case 10:
@@ -631,12 +631,12 @@ INT CAvatar::onRotate(INT nCmd, void* pParam, INT nID) {
         break;
     }
     case 3:
-        vTargetPos = p->_vTarget;
+        vTargetPos.set(p->_vTarget);
         bPos2Rot = TRUE;
         break;
     }
     if (bPos2Rot) {
-        vRot._q = 0;
+        vRot.zero();
         vRot.y = getAvatarDirY2Target(&vTargetPos, NULL);
     }
     if (bShortest) {
@@ -948,7 +948,7 @@ INT CAvatar::onAvatarStart(INT nCmd, void* pParam, INT nID) {
 INT CAvatar::onAvatarAttach(INT nCmd, void* pParam, INT nID) {
     CAvatar* pTarget = getAtel().getVSM()->getAvatar(nID);
     CCoord& crd = Crd(0);
-    *(CCoord**)((BYTE*)&crd + 0x4c) = &pTarget->Crd(pTarget->getBoneIndex((const CHAR*)pParam, 0));
+    crd.setParent(&pTarget->Crd(pTarget->getBoneIndex((const CHAR*)pParam, 0)));
     return -1;
 }
 INT CAvatar::onAvatarAttachEffect(INT nCmd, void* pParam, INT nID) {

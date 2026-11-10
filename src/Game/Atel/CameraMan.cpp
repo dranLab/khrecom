@@ -161,8 +161,8 @@ void CCameraMan::main() {
         ICamera* pCam = pDt->m_pCamera;
         FVECTOR vec;
         FVECTOR objTrans;
-        if (pDt->m_kind == 5) objTrans = pDt->m_pTargetObj->Crd(0).getWorldMatrix().getTrans();
-        if (pDt->m_kind < 2) objTrans = pDt->m_pTargetObj->Crd(0).getWorldMatrix().getTrans();
+        if (pDt->m_kind == 5) objTrans = pDt->m_pTargetObj->Crd(0).getWorldMatrix().getTransRef();
+        if (pDt->m_kind < 2) objTrans = pDt->m_pTargetObj->Crd(0).getWorldMatrix().getTransRef();
         switch (pDt->m_kind) {
         case 1:
             if (pDt->m_changeKind == 16) {
@@ -216,7 +216,7 @@ void CCameraMan::main() {
                     _unitMatrixVu0(mat0);
                     RotMatrixX(mat0, mat0, vec1.x);
                     RotMatrixY(mat0, mat0, vec1.y);
-                    mat0.v[3] = pDt->m_currentTargetPos;
+                    mat0.setTrans(pDt->m_currentTargetPos);
                     vec0.set(0.0f, 0.0f, vec1.z);
                     ApplyMatrix(vec0, mat0, vec0);
                     pDt->m_currentCameraPos = vec0;
@@ -612,7 +612,7 @@ INT CCameraMan::onChangeCamTarget(INT nCmd, void* pParam, INT nID) {
         FLOAT f = lenMid.z / mid.z;
         if (m_pActiveCameraDt->m_fMidFrame < f) m_pActiveCameraDt->m_fMidFrame = f;
     }
-    m_pActiveCameraDt->m_camStEdSpeed._q = 0;
+    m_pActiveCameraDt->m_camStEdSpeed.zero();
     m_pActiveCameraDt->m_fFrameCnt = 0.0f;
     return 1;
 }

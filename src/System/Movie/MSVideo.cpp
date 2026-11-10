@@ -71,7 +71,7 @@ extern INT SCREEN_HEIGHT;
 
 
 
-/* The original's position setter converts y and z at RTL level (constants loaded as unsigned: lui/ori for -256). */
+/* The original calls G_XYZ::set (Coord.h:245) and converts y and z at RTL level (constants loaded as unsigned: lui/ori for -256); our set() loads -256 signed. */
 static inline void _setXYZ(G_XYZ& xyz, FIX4 _x, UINT _y, UINT _z) {
     xyz.x = _x;
     xyz.y = _y;

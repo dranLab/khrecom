@@ -170,7 +170,7 @@ void Movement::CalcPlaneMatrix(FMATRIX& outMat, const FVECTOR& inNormal, const F
     outMat.v[0] = vecRight;
     outMat.v[1] = vecUp;
     outMat.v[2] = inNormal;
-    outMat.v[3] = inPos;
+    outMat.setTrans(inPos);
 }
 
 CMovement::CMovement(CEntity* inOwner) {
@@ -199,7 +199,7 @@ CMovement::CMovement(CEntity* inOwner) {
     m_vRot._q = qZero;
     m_vVel._q = qZero;
     ro._q = qOne;
-    m_vLastHitPos._q = 0;
+    m_vLastHitPos._q = 0; /* the original: init() (Coord.h:729) here and in the next stores; init() changes the store order */
     m_vHitBackVel._q = 0;
     m_qQuat._q = 0;
     m_vLastHitPos.w = 1.0f;

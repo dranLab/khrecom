@@ -218,10 +218,10 @@ void CGimmickSearchLaserCircle::stateMain() {
             FVECTOR v;
             FVECTOR v2;
             FMATRIX m;
-            v.x = 0.0f;
-            v.y = 0.0f;
-            v.z = 3.0f;
-            v.w = 1.0f;
+            v.set(0.0f, 0.0f, 3.0f, 1.0f);
+
+
+
             UnitMatrix(m);
             RotMatrixY(m, m, (RND::genrand_int31() % 360 - 180) * 0.017453292f);
             ApplyMatrix(v, m, v);

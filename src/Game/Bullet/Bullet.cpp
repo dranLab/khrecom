@@ -546,10 +546,10 @@ HANDLE CBullet::makeEffect(INT inID) {
         vecUp.y = 1.0f;
         normal = m_pMove->getDetectNormal();
         if (-1e-05f < normal.x && normal.x < 1e-05f && -1e-05f < normal.z && normal.z < 1e-05f) {
-            vecRight.x = -normal.y;
-            vecRight.y = 0.0f;
-            vecRight.z = 0.0f;
-            vecRight.w = 0.0f;
+            vecRight.set(-normal.y, 0.0f, 0.0f, 0.0f);
+
+
+
         } else {
             OuterProduct(vecRight, vecUp, normal);
         }
@@ -568,7 +568,7 @@ HANDLE CBullet::makeEffect(INT inID) {
         ScaleVector(normal, normal, -(m_pMove->getRadius() - 0.001f));
         AddVectorXYZ(pos, pos, normal);
         pos.w = 1.0f;
-        m.v[3] = pos;
+        m.setTrans(pos);
         hEffect = setEffect(info->pEffectName, info->iNo, &m, 0.0f);
         if (infoEx && infoEx->pEffectName) {
             setEffect(infoEx->pEffectName, infoEx->iNo, &m, 0.0f);
@@ -586,7 +586,7 @@ HANDLE CBullet::makeEffect(INT inID) {
             MulMatrix(m, m, mat);
         }
         pos.w = 1.0f;
-        m.v[3] = pos;
+        m.setTrans(pos);
         hEffect = setEffect(info->pEffectName, info->iNo, &m, 0.0f);
         if (infoEx && infoEx->pEffectName) {
             setEffect(infoEx->pEffectName, infoEx->iNo, &m, 0.0f);
@@ -648,10 +648,10 @@ void CBullet::updateShadow() {
         vecUp.y = 1.0f;
         normal = *coll->getDetectNormal();
         if (-1e-05f < normal.x && normal.x < 1e-05f && -1e-05f < normal.z && normal.z < 1e-05f) {
-            vecRight.x = normal.y;
-            vecRight.y = 0.0f;
-            vecRight.z = 0.0f;
-            vecRight.w = 0.0f;
+            vecRight.set(normal.y, 0.0f, 0.0f, 0.0f);
+
+
+
         } else {
             OuterProduct(vecRight, vecUp, normal);
         }
@@ -669,7 +669,7 @@ void CBullet::updateShadow() {
         ScaleVector(normal, normal, -0.005f);
         AddVectorXYZ(pos, *coll->getOutPos(), normal);
         pos.w = 1.0f;
-        m.v[3] = pos;
+        m.setTrans(pos);
         effect->getCoords()->Crd(0).getLocalMatrix() = m;
         effect->getCoords()->Crd(0).touch();
     }

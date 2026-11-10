@@ -223,7 +223,7 @@ void CMotData::_GetQuaternionDt(QUATERNION_DT& outDt, INT inSkl, FLOAT inFrame) 
     if (DoScaleAnime()) {
         outDt.vScale.set(val[6], val[7], val[8]);
     } else {
-        outDt.vScale = ONE_VECTOR;
+        outDt.vScale.set(ONE_VECTOR);
     }
 }
 

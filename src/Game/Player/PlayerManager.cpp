@@ -530,8 +530,8 @@ void CPlayerManager::procPlayerDead() {
             m_pPathCamera = NULL;
             pPlayer->getPlayerCamera()->setFlag(0, 0x20);
         } else {
-            FVECTOR pos;
-            pos.init();
+            FVECTOR pos = {0.0f, 0.0f, 0.0f, 1.0f};
+
             pPlayer->warp(pos);
             FVECTOR rot = pPlayer->getRot();
             rot.y = -1.5707964f;

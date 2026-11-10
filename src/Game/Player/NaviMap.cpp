@@ -302,9 +302,9 @@ static inline void _unitMatrixVu0(FMATRIX& m) {
                  : "memory");
 }
 
-static inline void _unitVectorVu0(FVECTOR& v) {
-    asm volatile("sqc2 $vf0, 0x0(%0)" : : "r"(&v) : "memory");
-}
+
+
+
 
 static inline FLOAT _deg2rad(FLOAT r) { return r * 3.1415927f / 180.0f; }
 
@@ -367,7 +367,7 @@ void CNaviMap::_initialize() {
     m_hBack = 0;
     m_hFront = 0;
     m_pRoomName = NULL;
-    _unitVectorVu0(m_vPos);
+    m_vPos.init0();
     m_fDeg = 0.0f;
     m_fRotOfs = 0.0f;
     INT worldID = CSceneInfo::getCurrentWorldID(0);
@@ -593,14 +593,14 @@ void CNaviMap::main() {
         }
         RotMatrixY(crd.m_Local, crd.m_Local, rot.y);
         RotMatrixX(crd.m_Local, crd.m_Local, rot.x);
-        crd.m_Local.v[3] = m_vPos;
+        crd.m_Local.setTrans(m_vPos);
         crd.touch();
         if (m_nModelCount >= 22) {
             CCoord& crd1 = Crd(1);
             _unitMatrixVu0(crd1.m_Local);
             rot.y = _roundRot(g_pPlayer->getRot().y - 0.7853982f + m_fRotOfs);
             RotMatrixY(crd1.m_Local, crd1.m_Local, rot.y);
-            crd1.m_Local.v[3] = m_vPos;
+            crd1.m_Local.setTrans(m_vPos);
             Crd(1).touch();
         }
     }
@@ -697,8 +697,8 @@ void CNaviMap::initRoomName(const CHAR* inFile, UINT inIdxSeq) {
         return;
     }
     C2DSeqCtrl* pSeq = m_pRoomName;
-    FVECTOR pos;
-    pos.init();
+    FVECTOR pos = {0.0f, 0.0f, 0.0f, 1.0f};
+
     pSeq->destroy();
     pSeq->setLayer(2);
     pSeq->addSeq((LPCTSTR)inFile, 0, inIdxSeq);

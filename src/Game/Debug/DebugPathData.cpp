@@ -118,7 +118,7 @@ CHermitePathMoveS::CHermitePathMoveS(CTask* p, const CPathVector* pVec) : CTask(
                  :
                  : "r"(&Crd(0).m_Local)
                  : "memory");
-    Crd(0).m_Flag = 1;
+    Crd(0).touch();
     m_DDPathCamArrow.getCoord().setParent(&Crd(0));
     m_vRot.init0();
     m_vRot.w = 5.0f;
@@ -144,8 +144,8 @@ void CHermitePathMoveS::main() {
     m_vRot.z = m_HPath.getNowRoll();
     m_vRot.w = 5.0f;
     m_DDPathCamArrow.setCoord(NULL, &m_vRot);
-    Crd(0).m_Local.v[3] = vPos;
-    Crd(0).m_Flag = 1;
+    Crd(0).m_Local.setTrans(vPos);
+    Crd(0).touch();
 }
 void CHermitePathMoveS::disp() { m_DDPathCamArrow.disp(); }
 INT debugWinPathEndOneCall(CDebugWindow* pWin, INT iMes, INT iParam) {
@@ -535,8 +535,8 @@ BOOL debugWinPathEditPosCamGround(CDebugWindow* pObj, INT inY, INT inParam) {
                 FVECTOR vo;
                 CPointCollision cColl;
                 vPos.w = 1.0f;
-                v1 = vPos;
-                v2 = vPos;
+                v1.set(vPos);
+                v2.set(vPos);
                 v1.y += 0.5f;
                 v2.y -= 10.0f;
                 cColl.setStartPos(v1);
@@ -1185,7 +1185,7 @@ BOOL CDebugPathData::isEnd() {
 void CDebugPathData::entryCam() {
     CDebugPathData* p = getInstance();
     FVECTOR vPos;
-    asm volatile("sqc2 $vf0, 0x0(%0)" : : "r"(&vPos) : "memory");
+    vPos.init0();
     p->m_pDCam = new (__FILE__ "(2054)") CNakCamera(p, 1, 0x100, &vPos, 0.0f, (void**)&p->m_pDCam);
 }
 CNakCamera* CDebugPathData::getCam() { return getInstance()->m_pDCam; }
@@ -1313,7 +1313,7 @@ extern "C" char D_00487570[];
 extern "C" char D_00487590[];
 extern "C" char D_004875B0[];
 extern "C" char D_004875D0[];
-static inline void _zeroVec(FVECTOR& v) { asm volatile("sqc2 $vf0, 0x0(%0)" : : "r"(&v) : "memory"); }
+
 BOOL CDebugPathData::savePath(const CHAR* pName) {
     CDebugPathData* p = getInstance();
     INT iFD;
@@ -1361,7 +1361,7 @@ BOOL CDebugPathData::savePath(const CHAR* pName) {
             return FALSE;
         }
         TRACE(D_004874A0, i);
-        _zeroVec(vPath);
+        vPath.init0();
         TRACE(D_004874C0, sVecParam.iVecNum);
         TRACE(D_004874D8, i);
         for (INT j = 0; j < sVecParam.iVecNum; j++) {

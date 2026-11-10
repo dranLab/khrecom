@@ -154,15 +154,15 @@ void InterVector2(FVECTOR& v0, const FVECTOR2& v1, const FVECTOR2& v2, float t) 
 }
 C2DSprObj::C2DSprObj(SeqControl* pSeqControl, const TexInfo* pTexInfo) {
     m_pSprPrim = NULL;
-    m_vRot._q = 0;
+    m_vRot.zero();
     m_nPoly = 0;
     m_fgDisp = 0;
     m_Flg = 0;
-    m_vPos._u64 = 0;
-    m_vOfs._u64 = 0;
-    m_vSwy._u64 = 0;
-    m_vScl.x = 1.0f;
-    m_vScl.y = 1.0f;
+    m_vPos.init0();
+    m_vOfs.init0();
+    m_vSwy.init0();
+    m_vScl.set(1.0f, 1.0f);
+
     m_vCol.set(1.0f, 1.0f, 1.0f, 1.0f);
     m_pSeqControl = pSeqControl;
     m_pTexInfo = pTexInfo;
@@ -224,14 +224,14 @@ void C2DSprObj::initSprite(INT inNum, SPR_GROUP* pSprGroupe, SPR_PARTS* pSprPart
         m_pScissoring->setLayerFG(nLayerFG);
         m_pScissoring->setSemiTrans(ALPHA_BLEND);
     }
-    pSprPrim->polyGT4.m_P0.x = 0;
-    pSprPrim->polyGT4.m_P0.y = 0;
-    pSprPrim->polyGT4.m_P1.x = 0;
-    pSprPrim->polyGT4.m_P1.y = 0;
-    pSprPrim->polyGT4.m_P2.x = 0;
-    pSprPrim->polyGT4.m_P2.y = 0;
-    pSprPrim->polyGT4.m_P3.x = 0;
-    pSprPrim->polyGT4.m_P3.y = 0;
+    pSprPrim->polyGT4.m_P0.set(0, 0);
+
+    pSprPrim->polyGT4.m_P1.set(0, 0);
+
+    pSprPrim->polyGT4.m_P2.set(0, 0);
+
+    pSprPrim->polyGT4.m_P3.set(0, 0);
+
     pSprPrim->polyGT4.m_C0.col = 0;
     pSprPrim->polyGT4.m_C1.col = 0;
     pSprPrim->polyGT4.m_C2.col = 0;
@@ -488,10 +488,10 @@ void C2DSprObj::move() {
     mat.m[1][1] = m_vScl.y;
     RotMatrix(mat, mat, m_vRot);
     AddVector2(fVec, m_vPos, m_vSwy);
-    mat.v[3] = fVec;
+    mat.setTrans(fVec);
     _unitMatrixVu0(mat2);
     *(FVECTOR2*)&fVec = m_vOfs;
-    mat2.v[3] = fVec;
+    mat2.setTrans(fVec);
     MulMatrix(mat, mat, mat2);
     vCol = m_vCol;
     if (m_pSeqControl) {

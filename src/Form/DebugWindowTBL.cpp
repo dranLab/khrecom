@@ -57,9 +57,9 @@ static INT _HEAP_SIZE = 0x2000000 - 0x40000 - _HEAP_START;
 
 
 
-static inline void _unitVectorVu0(FVECTOR& v) {
-    asm volatile("sqc2 $vf0, 0x0(%0)" : : "r"(&v));
-}
+
+
+
 
 /* Other units' classes, as far as this file uses them. */
 #include "System/Graphic/ShadowModel.h"
@@ -2826,10 +2826,10 @@ static BOOL debugWinDispBrightLineCall(CDebugWindow* pObj, INT iLineY, INT inPar
     if (inParam & 0x10) {
         FVECTOR vColor;
         FLOAT _x = DebugWork::g_dw.sys.m_fMapBright;
-        vColor.x = _x;
-        vColor.y = _x;
-        vColor.z = _x;
-        vColor.w = 1.0f;
+        vColor.set(_x, _x, _x, 1.0f);
+
+
+
         CSceneEnv::setColor((ObjType::eObjBit)0xF88, 0.0f, vColor, NULL, 3);
     }
     return TRUE;
@@ -3104,7 +3104,7 @@ static BOOL DebugCameraOn(CDebugWindow* pObj, INT inY, INT inParam) {
             CTask* pR = CTaskMan::getSysTask(0);
             if (pR) {
                 FVECTOR vPos;
-                _unitVectorVu0(vPos);
+                vPos.init0();
                 vPos.y += 1.0f;
                 if (!pM) {
                     pM = pR;

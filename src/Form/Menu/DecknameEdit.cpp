@@ -44,9 +44,9 @@ template <class T> void LIMIT_RANGE(T& a, T min, T max) {
 
 static inline void _setColor(CFntM2* p, const G_RGBA& c) { p->m_C0 = c; }
 
-static inline void _unitVectorVu0(FVECTOR& v) {
-    asm volatile("sqc2 $vf0, 0x0(%0)" : : "r"(&v));
-}
+
+
+
 
 namespace DECKNAME_EDIT {
 typedef struct {
@@ -728,7 +728,7 @@ void CDnEditBase::_init(INT inSw, C2DSeqCtrl* inpParentSeq) {
 #line 1209
     ASSERT(m_pSeq);
     m_pSeq->setLayer(16);
-    _unitVectorVu0(m_fvBasePos);
+    m_fvBasePos.init0();
     if (inpParentSeq) {
         fvPos.set(256.0f, SCREEN_HEIGHT >> 1, 0.0f, 1.0f);
         m_pSeq->setPos(fvPos);
@@ -895,7 +895,7 @@ void CDnEditNameCursor::_initialize() {
 void CDnEditNameCursor::setCurPos(FLOAT inX) {
     FVECTOR fvPos;
 
-    _unitVectorVu0(fvPos);
+    fvPos.init0();
     getLayPos(fvPos, 6, NULL, -1);
     fvPos.x += inX + -6.0f;
     m_pSeq->setPos(fvPos);
@@ -1106,8 +1106,8 @@ CDnEditCursor2::~CDnEditCursor2() {}
 void CDnEditCursor2::_initialize() {
     setBasePos2(3, NULL, -1);
     m_pSeq->addSeq(_pszSeqName, 0x12);
-    _unitVectorVu0(m_fvPos);
-    _unitVectorVu0(m_fvTargetPos);
+    m_fvPos.init0();
+    m_fvTargetPos.init0();
     setCurPos(0, 0);
 }
 

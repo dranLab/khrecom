@@ -19,80 +19,41 @@ union FVECTOR {
     u_long128 _q;
     unsigned long _ul[2];
     unsigned int _ui[4];
-    void init0() { asm volatile("sqc2 $vf0, 0x0(%0)" : : "r"(this)); }
-    void init();
+    /* init0 is defined in the class on the original's lines (line markers: 87 the argument, 91 the sqc2); the
+     * other inlines are defined after the classes, on the original's lines (652-904) */
+#line 87
+    void init0() {
+
+
+        asm volatile("sqc2 $vf0, 0x0(%0)"
+                     : : "r"(this));
+    }
+    void init(FLOAT inW = 1.0f); /* the parameter: Camera init clears w through it (line 729 stores 0) */
 #ifdef VECTOR_H_SET_CALL /* MATCH: setCall is defined before set, so it keeps a call (ModelMan calls FVECTOR::set out of line) */
     void setCall(FLOAT inX, FLOAT inY, FLOAT inZ, FLOAT inW) { set(inX, inY, inZ, inW); }
 #endif
     void set(FLOAT inX, FLOAT inY, FLOAT inZ, FLOAT inW = 1.0f);
+    void set(const FVECTOR& inV);
+    void set(const _FVECTOR& inV);
     void setAll(FLOAT f);
     void setAllXYZ(FLOAT f) { x = y = z = f; }
-    void zero(/* parameters unknown */);
+    void zero();
     void addRot(const FVECTOR& vInSrc);
-    BOOL operator==(const FVECTOR& inV) const { return _ul[0] == inV._ul[0] && _ul[1] == inV._ul[1]; }
+    BOOL operator==(const FVECTOR& inV) const;
     BOOL operator!=(const FVECTOR& inV) const;
-    void operator+=(const FVECTOR& in) {
-        const float(&inV)[4] = in.v; /* MATCH: through the array (System/Graphic/LightUnit's betaShade) */
-        x += inV[0];
-        y += inV[1];
-        z += inV[2];
-        w += inV[3];
-    }
-    void operator-=(const FVECTOR& inV) {
-        x -= inV.x;
-        y -= inV.y;
-        z -= inV.z;
-        w -= inV.w;
-    }
-    void operator*=(FLOAT f) {
-        x *= f;
-        y *= f;
-        z *= f;
-        w *= f;
-    }
-    FVECTOR operator+(const FVECTOR& inV) const {
-        FVECTOR vec = *this;
-        vec.x += inV.x;
-        vec.y += inV.y;
-        vec.z += inV.z;
-        vec.w += inV.w;
-        return vec;
-    }
-    FVECTOR operator-(const FVECTOR& inV) const {
-        FVECTOR vec = *this;
-        vec.x -= inV.x;
-        vec.y -= inV.y;
-        vec.z -= inV.z;
-        vec.w -= inV.w;
-        return vec;
-    }
-    FVECTOR operator-() const {
-        FVECTOR vec = *this;
-        vec.x = -vec.x;
-        vec.y = -vec.y;
-        vec.z = -vec.z;
-        vec.w = -vec.w;
-        return vec;
-    }
-    FVECTOR operator*(FLOAT f) const {
-        FVECTOR vec = *this;
-        vec.x *= f;
-        vec.y *= f;
-        vec.z *= f;
-        vec.w *= f;
-        return vec;
-    }
-    FVECTOR operator*(const FVECTOR& inV) const {
-        FVECTOR vec = *this;
-        vec.x *= inV.x;
-        vec.y *= inV.y;
-        vec.z *= inV.z;
-        vec.w *= inV.w;
-        return vec;
-    }
-    operator _FVECTOR*() { return &v; }
-    operator const _FVECTOR*() const { return &v; }
-    operator _FVECTOR&() const { return *(_FVECTOR*)&v; }
+    void operator+=(const FVECTOR& inV);
+    void operator+=(const _FVECTOR& inV);
+    void operator-=(const FVECTOR& inV);
+    void operator*=(const FVECTOR& inV);
+    void operator*=(FLOAT f);
+    FVECTOR operator+(const FVECTOR& inV) const;
+    FVECTOR operator-(const FVECTOR& inV) const;
+    FVECTOR operator-() const;
+    FVECTOR operator*(const FVECTOR& inV) const;
+    FVECTOR operator*(FLOAT f) const;
+    operator _FVECTOR*();
+    operator const _FVECTOR*() const;
+    operator _FVECTOR&() const;
 };
 
 typedef int _IVECTOR[4] __attribute__((aligned(16)));
@@ -108,6 +69,7 @@ union IVECTOR {
     unsigned long _ul[2];
     void init(/* parameters unknown */);
     void set(INT _x, INT _y, INT _z, INT _w);
+    void set(const IVECTOR& inV);
     void setAll(/* parameters unknown */);
     void setAllXYZ(/* parameters unknown */);
     BOOL operator==(const IVECTOR& inV) const;
@@ -146,18 +108,36 @@ union FMATRIX {
         FLOAT w;
     };
     void init(/* parameters unknown */);
-    void initWithScale(/* parameters unknown */);
+    void initWithScale(const FVECTOR& vScale);
     void initC3(/* parameters unknown */);
     void initTrans(/* parameters unknown */);
-    FVECTOR& getTrans() { return v[3]; }
-    FVECTOR& getTransRef(/* parameters unknown */);
+    /* on the original's lines (line markers: getTrans 158, getTransRef 159/160, setTrans 161) */
+#line 158
+    FVECTOR getTrans() const { return v[3]; }
+    FVECTOR& getTransRef() { return v[3]; }
+    const FVECTOR& getTransRef() const { return v[3]; }
     void setTrans(const FVECTOR& vecIn) { v[3] = vecIn; }
+    void set(const _FMATRIX& inM);
     void set(/* parameters unknown */);
+    BOOL operator==(const FMATRIX& inM) const;
     BOOL operator!=(const FMATRIX& inM) const;
-    BOOL operator==(const FMATRIX& inM) const { return v[0] == inM.v[0] && v[1] == inM.v[1] && v[2] == inM.v[2] && v[3] == inM.v[3]; }
-    operator _FMATRIX*() { return &m; }
-    operator const _FMATRIX*() const { return &m; }
-    operator _FMATRIX&() const { return *(_FMATRIX*)&m; }
+    operator _FMATRIX*();
+    operator const _FMATRIX*() const;
+    operator _FMATRIX&() const;
+};
+
+union FVECTOR2 {
+    float v[2];
+    struct {
+        FLOAT x;
+        FLOAT y;
+    };
+    ULONGLONG _u64;
+    LONGLONG _s64;
+    /* on the original's lines (line markers: set 200, init0 201) */
+#line 200
+    void set(FLOAT fX, FLOAT fY) { x = fX; y = fY; }
+    void init0() { _u64 = 0; }
 };
 
 /* The basic graphics types: in every original that has FVECTOR (274) they come right after the vector types and
@@ -183,7 +163,7 @@ struct G_XYZ {
 #line 245
     void set(FIX4 _x, FIX4 _y, FIX4 _z) { x = _x; y = _y; z = _z; }
     void set(FIX4 _x, FIX4 _y) { x = _x; y = _y; }
-    void bufferZ(/* parameters unknown */);
+    UINT bufferZ() { return z; }
 };
 
 struct G_RGBA {
@@ -368,12 +348,13 @@ inline FMATRIX MulMatrix(const FMATRIX& m0, const FMATRIX& m1) {
     return b;
 }
 
-/* The vector inlines with a place in the original's line markers, defined after the classes as there (IVECTOR::set
- * at 679 sits between FVECTOR's addRot 654-673 and init 729): addRot 654-673, IVECTOR::set 679, init 729, set 730,
- * setAll 733, FVECTOR::operator!= 754-756, FMATRIX::operator!= 952. */
+/* The vector and matrix inlines with a place in the original's line markers, defined after the classes as there
+ * (IVECTOR::set at 679 sits between FVECTOR's addRot 654-673 and init 729). The compound assignments open 9 lines
+ * apart with their body 4 lines below (766/770, 775/779, 784/788, 802/806, 820/824), the binary operators 10 apart
+ * (830: the copy at 835, the compound assignment at 836, the return at 837; 850, 870, 890). */
 #line 652
-inline void FVECTOR::addRot(const FVECTOR& vInSrc) {
-    FVECTOR& vOut = *this;
+inline void _addRot(FVECTOR& vOut, const FVECTOR& vInSrc)
+{
     FLOAT fPI = 3.1415927f;
     INT nFlag;
 
@@ -390,23 +371,135 @@ inline void FVECTOR::addRot(const FVECTOR& vInSrc) {
                      "sqc2 $vf1, 0x0(%1)\n"
                      "vnop\n"
                      "cfc2.ni %0, $vi18\n"
-                     : "=r"(nFlag) : "r"(this), "r"(&vInSrc), "r"(fPI) : "memory");
+                     : "=r"(nFlag) : "r"(&vOut), "r"(&vInSrc), "r"(fPI) : "memory");
 
     if (nFlag & 0x3f) roundPI(vOut, nFlag);
 }
 #line 679
 inline void IVECTOR::set(INT _x, INT _y, INT _z, INT _w) { x = _x; y = _y; z = _z; w = _w; }
-#line 729
-inline void FVECTOR::init() { _q = 0; w = 1.0f; }
+inline void IVECTOR::set(const IVECTOR& inV) { *this = inV; }
+#line 728
+inline void FVECTOR::zero() { _q = 0; }
+inline void FVECTOR::init(FLOAT inW) { _q = 0; w = inW; }
 inline void FVECTOR::set(FLOAT inX, FLOAT inY, FLOAT inZ, FLOAT inW) { x = inX; y = inY; z = inZ; w = inW; }
-#line 733
+inline void FVECTOR::set(const FVECTOR& inV) { *this = inV; }
+inline void FVECTOR::set(const _FVECTOR& inV) { *this = *(const FVECTOR*)inV; }
 inline void FVECTOR::setAll(FLOAT f) { x = y = z = w = f; }
+#line 736
+inline void FVECTOR::addRot(const FVECTOR& vInSrc) { _addRot(*this, vInSrc); }
+#line 746
+inline BOOL FVECTOR::operator==(const FVECTOR& inV) const { return _ul[0] == inV._ul[0] && _ul[1] == inV._ul[1]; }
 #line 754
 inline BOOL FVECTOR::operator!=(const FVECTOR& inV) const {
     return _ul[0] != inV._ul[0] || _ul[1] != inV._ul[1];
 }
-#line 952
+#line 766
+inline void FVECTOR::operator+=(const FVECTOR& inV) {
+
+
+
+    x += inV.x; y += inV.y; z += inV.z; w += inV.w;
+}
+#line 775
+inline void FVECTOR::operator+=(const _FVECTOR& inV) {
+
+
+
+    x += inV[0]; y += inV[1]; z += inV[2]; w += inV[3];
+}
+#line 784
+inline void FVECTOR::operator-=(const FVECTOR& inV) {
+
+
+
+    x -= inV.x; y -= inV.y; z -= inV.z; w -= inV.w;
+}
+#line 802
+inline void FVECTOR::operator*=(const FVECTOR& inV) {
+
+
+
+    x *= inV.x; y *= inV.y; z *= inV.z; w *= inV.w;
+}
+#line 820
+inline void FVECTOR::operator*=(FLOAT f) {
+
+
+
+    x *= f; y *= f; z *= f; w *= f;
+}
+#line 830
+inline FVECTOR FVECTOR::operator+(const FVECTOR& inV) const {
+
+
+
+
+    FVECTOR vec = *this;
+    vec += inV;
+    return vec;
+}
+#line 850
+inline FVECTOR FVECTOR::operator-(const FVECTOR& inV) const {
+
+
+
+
+    FVECTOR vec = *this;
+    vec -= inV;
+    return vec;
+}
+#line 870
+inline FVECTOR FVECTOR::operator*(const FVECTOR& inV) const {
+
+
+
+
+    FVECTOR vec = *this;
+    vec *= inV;
+    return vec;
+}
+#line 890
+inline FVECTOR FVECTOR::operator*(FLOAT f) const {
+
+
+
+
+    FVECTOR vec = *this;
+    vec *= f;
+    return vec;
+}
+#line 900
+inline FVECTOR operator*(FLOAT f, const FVECTOR& inV) { FVECTOR vec = inV; vec *= f; return vec; }
+inline FVECTOR FVECTOR::operator-() const { return -1.0f * *this; }
+#line 902
+inline FVECTOR::operator _FVECTOR*() { return &v; }
+inline FVECTOR::operator const _FVECTOR*() const { return &v; }
+inline FVECTOR::operator _FVECTOR&() const { return *(_FVECTOR*)&v; }
+#line 919
+inline void FMATRIX::initWithScale(const FVECTOR& vScale) {
+    /* MATCH: the scale diagonal as one asm on fixed registers with only input operands (outputs or C stores make
+     * gcc reload the scale's owner afterwards: Entity updateCoord) */
+
+    asm volatile("lq $5, 0x0(%0)\n"
+                 "pextuw $2, $5, $0\n"
+                 "pextlw $4, $0, $2\n"
+                 "pextlw $2, $0, $5\n"
+                 "pextuw $3, $2, $0\n"
+                 "pcpyld $2, $0, $2\n"
+                 "sq $2, 0x0(%1)\n"
+                 "sq $3, 0x10(%1)\n"
+                 "sq $4, 0x20(%1)\n"
+                 "sqc2 $vf0, 0x30(%1)"
+                 : : "r"(&vScale), "r"(this) : "$2", "$3", "$4", "$5");
+}
+#line 949
+inline void FMATRIX::set(const _FMATRIX& inM) { v[0].set(inM[0]); v[1].set(inM[1]); v[2].set(inM[2]); v[3].set(inM[3]); }
+#line 951
+inline BOOL FMATRIX::operator==(const FMATRIX& inM) const { return v[0] == inM.v[0] && v[1] == inM.v[1] && v[2] == inM.v[2] && v[3] == inM.v[3]; }
 inline BOOL FMATRIX::operator!=(const FMATRIX& inM) const { return v[0] != inM.v[0] || v[1] != inM.v[1] || v[2] != inM.v[2] || v[3] != inM.v[3]; }
+inline FMATRIX::operator _FMATRIX*() { return &m; }
+inline FMATRIX::operator const _FMATRIX*() const { return &m; }
+inline FMATRIX::operator _FMATRIX&() const { return *(_FMATRIX*)&m; }
 
 /* MATCH: CCoord is in System/Coord.h, not in Camera.h as the ref says: the original's line markers put its
  * constructor at Coord.h:1009-1016 and its accessors at Coord.h:1043-1072 (user decision 2026-11-10). */
@@ -460,7 +553,8 @@ public:
         }
     }
     void updateLocal(/* parameters unknown */);
-    void setTrans(/* parameters unknown */);
+#line 1032
+    void setTrans(const FVECTOR& vecIn) { m_Local.v[3] = vecIn; }
     void updateTrans(/* parameters unknown */);
 #line 1043
     CCoord* getParent() { return m_pParent; }

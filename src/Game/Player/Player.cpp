@@ -123,12 +123,12 @@ static inline FLOAT _limitPI2(FLOAT d) {
     return r;
 }
 void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
-static inline void _addAssign(FVECTOR& a, const FVECTOR& b) {
-    a.x += b.x;
-    a.y += b.y;
-    a.z += b.z;
-    a.w += b.w;
-}
+
+
+
+
+
+
 
 
 #include "System/RsrcDB.h"
@@ -1136,7 +1136,7 @@ void CPlayer::updateBodyCollPos() {
     m_vHeadPos.y = _y;
     m_vHeadPos.z = _z;
     top.set(_x, _y, _z);
-    FLOAT y = (Crd(m_iBoneLFoot).getWorldMatrix().getTrans().y + Crd(m_iBoneRFoot).getWorldMatrix().getTrans().y) * 0.5f;
+    FLOAT y = (Crd(m_iBoneLFoot).getWorldMatrix().getTransRef().y + Crd(m_iBoneRFoot).getWorldMatrix().getTransRef().y) * 0.5f;
     bottom.set(m_vCenterPos.x, y, m_vCenterPos.z);
     m_collBody.setTopPos(top);
     m_collBody.setBottomPos(bottom);
@@ -1405,10 +1405,10 @@ void CPlayer::stateField() {
         UnitMatrix(mat);
         RotMatrixY(mat, mat, dir);
         ApplyMatrix(vec, mat, vec);
-        pos.x = pos.x + vec.x;
-        pos.y = pos.y + vec.y;
-        pos.z = pos.z + vec.z;
-        pos.w = pos.w + vec.w;
+        pos += vec;
+
+
+
         m_pMove->setPos(pos);
         m_pMove->setOldPos(pos);
         vec.init();
@@ -1587,10 +1587,10 @@ void CPlayer::stateBattle() {
         UnitMatrix(mat);
         RotMatrixY(mat, mat, dir);
         ApplyMatrix(vec, mat, vec);
-        pos.x = pos.x + vec.x;
-        pos.y = pos.y + vec.y;
-        pos.z = pos.z + vec.z;
-        pos.w = pos.w + vec.w;
+        pos += vec;
+
+
+
         m_pMove->setPos(pos);
         m_pMove->setOldPos(pos);
         vec.init();
@@ -2460,15 +2460,15 @@ void CPlayer::exeWall() {
     m_fJumpSpdY = vel.y;
     m_pMove->setVel(vel);
 }
-/* FVECTOR::operator-(const FVECTOR&) of the original (ref locals: FVECTOR* this, FVECTOR vec). */
-static inline FVECTOR _subVec(const FVECTOR& a, const FVECTOR& inV) {
-    FVECTOR vec = a;
-    vec.x -= inV.x;
-    vec.y -= inV.y;
-    vec.z -= inV.z;
-    vec.w -= inV.w;
-    return vec;
-}
+
+
+
+
+
+
+
+
+
 INT CPlayer::chkLadderStepNow(BOOL inAir) {
     const FVECTOR* pos;
     const FVECTOR* nor;
@@ -2480,7 +2480,7 @@ INT CPlayer::chkLadderStepNow(BOOL inAir) {
     pos = m_pMove->getLadderPos();
     nor = m_pMove->getLadderNormal();
     if (!pos || !nor) return -1;
-    dif = _subVec(*pos, getPos());
+    dif = (*pos - getPos());
     dif.y = 0.0f;
     dif.w = 1.0f;
     if (Math3D::VectorLength(dif) > 0.75f) return -1;
@@ -3056,7 +3056,7 @@ BOOL CPlayer::chkHang() {
     RotMatrixY(m, m, dir);
     ApplyMatrixXYZ(ofs, m, ofs);
     ApplyMatrixXYZ(pos, m, PL::HANG_HAND_LOCAL_OFS);
-    _addAssign(pos, getPos());
+    pos += getPos();
     pos.y = m_vCenterPos.y + 0.05f + vel.y;
     FVECTOR vStart = {{ pos.x, pos.y, pos.z, 1.0f }};
     FVECTOR vEnd = {{ pos.x + ofs.x, pos.y + ofs.y, pos.z + ofs.z, 1.0f }};
@@ -4803,7 +4803,7 @@ void CPlayer::procAttackMove(TIMEQ inNowFrame, FLOAT inRadius, FLOAT inMaxSpeed,
         vec.y = 0.0f;
         m_fDistXZ = _sqrtf(InnerProduct(vec, vec));
         FLOAT d = Movement::Homing(m_fDir, atan2f(dir.x, dir.z), inRate, m_fFrameRate);
-        vec.y = d;
+        vec.y = d; /* the original: FVECTOR::set (Coord.h:730); set() here gives other store order */
         vec.x = 0.0f;
         vec.z = 0.0f;
         vec.w = 1.0f;
@@ -5768,7 +5768,7 @@ void CPlayer::exeDead() {
         FVECTOR rot;
         setPlayerFlag(1, 0);
         clearSpeed();
-        pos.init();
+        pos.init(); /* the original: a brace init on the declaration line; that form changes the code here */
         warp(pos);
         rot = getRot();
         rot.y = -1.5707964f;
@@ -6059,8 +6059,8 @@ void CPlayer::setConfuse(INT inFlag, TIMEQ inTime) {
         m_tqConfuse = tq;
         m_uiConditionFlag = uiCond | 8;
         m_uiPadFlag = uiPad | 4;
-        FVECTOR pos;
-        pos.set(0.0f, 0.65f, 0.0f);
+        FVECTOR pos = {0.0f, 0.65f, 0.0f, 1.0f};
+
         m_hEffBad = attachEffect(PL::g_szDpxAbnormal, 2, &Crd(m_iBoneCenter), &pos, NULL, 0.0f);
         CEffect* effect = CEffectMan::getEffect(m_hEffBad);
         if (effect) effect->m_iFlag |= 4;
@@ -6256,7 +6256,7 @@ void CPlayer::setCure(INT inID, INT inPow) {
     FVECTOR pos;
     INT no = inID - 14;
     if (inID == 0x33) no = 0;
-    pos.set(0.0f, 0.85f, 0.0f);
+    pos.set(0.0f, 0.85f, 0.0f); /* the original: a brace init (stores on the declaration line); that form swaps $f0/$f1 here */
     CEffect* effect = CEffectMan::getEffect(attachEffect(PL::g_EffTbl_Skill[inID][1].pEffectName, no, &Crd(0), &pos, NULL, 0.0f));
     if (effect) effect->m_iFlag |= 4;
     addHP(inPow, 0, 1);
@@ -6266,8 +6266,8 @@ void CPlayer::setCastEffect(const CHAR* inName, INT inNo, CCoord* inCrd, FVECTOR
     if (inOfs) {
         pos = *inOfs;
     } else {
-        pos._q = 0;
-        pos.w = 1.0f;
+        pos.init();
+
     }
     m_hEffCast = attachEffect(inName, inNo, inCrd, &pos, NULL, 0.0f);
     CEffect* effect = CEffectMan::getEffect(m_hEffCast);
@@ -6471,8 +6471,8 @@ void CPlayer::exeEscape() {
     }
 }
 void CPlayer::setBGFade(FLOAT inRate, FLOAT inTime, INT inFlag) {
-    FVECTOR v;
-    v.set(inRate, inRate, inRate, 1.0f);
+    FVECTOR v = {inRate, inRate, inRate, 1.0f};
+
     setBGFade(v, inTime, inFlag);
 }
 void CPlayer::setBGFade(FVECTOR& inColor, FLOAT inFrame, INT inFlag) {
@@ -6528,8 +6528,8 @@ INT CPlayer::exeWarp(INT inSet) {
 void CPlayer::setBanish(INT inFlag) {
     if (!inFlag) {
         setConditionFlag(0, 0x40);
-        FVECTOR vColor;
-        vColor.set(1.0f, 1.0f, 1.0f);
+        FVECTOR vColor = {1.0f, 1.0f, 1.0f, 1.0f};
+
         CSceneEnv::setColor((ObjType::eObjBit)2, 30.0f, vColor, NULL, 2);
     } else {
         setConditionFlag(0x40, 0);
@@ -6539,8 +6539,8 @@ void CPlayer::setBanish(INT inFlag) {
 }
 void CPlayer::exeBanish() {
     if (isConditionFlag(0x40)) {
-        FVECTOR vColor;
-        vColor.set(1.0f, 1.0f, 1.0f, 0.5f);
+        FVECTOR vColor = {1.0f, 1.0f, 1.0f, 0.5f};
+
         vColor.w = (cosf((FLOAT)m_tqBanish * 0.0006f) + 1.0f) * 0.5f * 0.85f + 0.1f;
         CSceneEnv::setColor((ObjType::eObjBit)2, 0.0f, vColor, NULL, 2);
         m_tqBanish += m_tqFrameRate;
@@ -6844,8 +6844,8 @@ void CPlayer::setEffAttack(INT inNum, const CHAR* inName, INT inNo, INT inBone, 
     if (inOfs) {
         pos = *inOfs;
     } else {
-        pos._q = 0;
-        pos.w = 1.0f;
+        pos.init();
+
     }
     m_hEffAttack[inNum] = attachEffect(inName, inNo, &Crd(inBone), &pos, NULL, 0.0f);
     CEffect* effect = CEffectMan::getEffect(m_hEffAttack[inNum]);
@@ -6861,9 +6861,9 @@ void CPlayer::updateSpotLight(HANDLE inHandle) {
         RotMatrixY(m, m, atan2f(n.x, n.z));
         FVECTOR pos = getPos();
         pos.w = 1.0f;
-        m.v[3] = pos;
+        m.setTrans(pos);
         effect->getCoords()->getLocalMatrix(0) = m;
-        effect->getCoords()->Crd(0).m_Flag = 1;
+        effect->getCoords()->Crd(0).touch();
     }
 }
 __asm__(".rdata\n");

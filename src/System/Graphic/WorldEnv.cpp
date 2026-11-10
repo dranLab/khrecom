@@ -236,10 +236,10 @@ static void _makeViewClipMatrix() {
 }
 
 void CWorldEnv::setFogParam(FLOAT fNear, FLOAT fFar, FLOAT fMax, FLOAT fMin) {
-    _vecFogParam.x = fNear;
-    _vecFogParam.y = fFar;
-    _vecFogParam.z = (fMin - fMax) / (fFar - fNear);
-    _vecFogParam.w = (fMax - fMin) * fFar / (fFar - fNear) + fMin;
+    _vecFogParam.set(fNear, fFar, (fMin - fMax) / (fFar - fNear), (fMax - fMin) * fFar / (fFar - fNear) + fMin);
+
+
+
     CEffectMan::setFogRange(fNear, fFar);
     CEffectMan::setFogClamp((INT)fMin, (INT)fMax);
 }
@@ -251,10 +251,10 @@ FLOAT CWorldEnv::getFogNear() { return _vecFogParam.x; }
 FLOAT CWorldEnv::getFogFar() { return _vecFogParam.y; }
 
 void CWorldEnv::setFogColor(INT r, INT g, INT b) {
-    _ivecFogColor.x = r;
-    _ivecFogColor.y = g;
-    _ivecFogColor.z = b;
-    _ivecFogColor.w = 0;
+    _ivecFogColor.set(r, g, b, 0);
+
+
+
 }
 
 IVECTOR& CWorldEnv::getFogColor() {
@@ -285,7 +285,7 @@ void CWorldEnv::setDefScreenZ(FLOAT z) { _fDefScreenZ = z; }
 
 FLOAT CWorldEnv::getDefScreenZ() { return _fDefScreenZ; }
 
-void CWorldEnv::getViewVector(FVECTOR& vecOut) { vecOut = _vecViewDir; }
+void CWorldEnv::getViewVector(FVECTOR& vecOut) { vecOut.set(_vecViewDir); }
 
 const FVECTOR& CWorldEnv::getViewVector() { return _vecViewDir; }
 

@@ -36,11 +36,11 @@ public:
         m_vOffset.x = fX;
         m_vOffset.y = fY;
     }
-    void setPos(const FVECTOR& vPos) { Crd(0).m_Local.setTrans(vPos); }
+    void setPos(const FVECTOR& vPos) { Crd(0).setTrans(vPos); }
     void setPos(FLOAT fX, FLOAT fY, FLOAT fZ) {
-        FVECTOR vPos;
-        vPos.set(fX, fY, fZ);
+        FVECTOR vPos = {fX, fY, fZ, 1.0f};
         setPos(vPos);
+
     }
     FMATRIX& getLocalMat() { return Crd(0).getLocalMatrix(); }
     void setLocalMat(const FMATRIX& mat) { Crd(0).setLocal(mat); }

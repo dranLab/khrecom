@@ -503,7 +503,7 @@ void CWorldSelect::main() {
         if (m_fgLoadRCF && !CRcf::isCompleteLoadRCF(2, 6)) {
             return;
         }
-        vColor._q = 0;
+        vColor.zero();
         CSceneEnv::setColor((ObjType::eObjBit)m_iObjType, 10.0f, vColor, NULL, 0);
         m_nStep++;
         break;
@@ -691,7 +691,7 @@ INT CWorldSelect::menuMain() {
     sprintf(pIconSeqNameTmp, "wselect:%02d", iconSeqNameNoTbl[m_nWorld[m_nSelect]]);
     switch (m_nMenuStep) {
     case 0:
-        m_rotCircle._q = 0;
+        m_rotCircle.zero();
         m_rotCircle.x = 1.0471976f;
         vec2.y = 0.0f;
         m_nRotOne = 360 / m_nSelectMax;
@@ -863,7 +863,7 @@ INT CWorldSelect::menuMain() {
     }
     FMATRIX mat;
     _unitMatrixVu0(mat);
-    vec2._q = 0;
+    vec2.zero();
     vec2.y = m_rotCircle.z;
     RotMatrix(mat, mat, m_rotCircle);
     for (INT i = 0; i < m_nSelectMax; i++) {

@@ -517,8 +517,8 @@ void CEntity::endStateProc() {
 }
 void CEntity::clearSpeed() {
     if (m_pMove) {
-        FVECTOR v;
-        v.init();
+        FVECTOR v = {0.0f, 0.0f, 0.0f, 1.0f};
+
         m_pMove->setVel(v);
     }
 }
@@ -637,8 +637,8 @@ BOOL CEntity::entityVisibleAxisY(const CEntity* inEntity, FLOAT inAngle) {
 void CEntity::positionFix(const FVECTOR& inPos, FLOAT inDir) {
     setPos(inPos);
     setOldPos(inPos);
-    FVECTOR vRot;
-    vRot.set(0.0f, inDir, 0.0f);
+    FVECTOR vRot = {0.0f, inDir, 0.0f, 1.0f};
+
     setRot(vRot);
     updateCoord();
     coordFix();
@@ -655,19 +655,19 @@ void CEntity::positionFix(const FVECTOR& inPos, const FVECTOR& inRot) {
 void CEntity::updateCoord() {
     if (!(m_pMove)) AssertApp(__FILE__, 1286, "m_pMove", 0);
     FMATRIX& m = Crd(0).m_Local;
-    /* MATCH: the scale diagonal as one asm on fixed registers with only input operands (outputs or C stores make
-     * gcc reload m_pMove afterwards) */
-    asm volatile("lq $5, 0x0(%0)\n"
-                 "pextuw $2, $5, $0\n"
-                 "pextlw $4, $0, $2\n"
-                 "pextlw $2, $0, $5\n"
-                 "pextuw $3, $2, $0\n"
-                 "pcpyld $2, $0, $2\n"
-                 "sq $2, 0x0(%1)\n"
-                 "sq $3, 0x10(%1)\n"
-                 "sq $4, 0x20(%1)\n"
-                 "sqc2 $vf0, 0x30(%1)"
-                 : : "r"(&m_pMove->getScl()), "r"(&m) : "$2", "$3", "$4", "$5");
+    m.initWithScale(m_pMove->getScl());
+
+
+
+
+
+
+
+
+
+
+
+
     if (m_pMove->isQuaternion()) {
         FMATRIX mat;
         Quaternion::QuaternionToMatrix(mat, m_pMove->getQuaternion());
@@ -711,8 +711,8 @@ void CEntity::updateCoord() {
     }
     FVECTOR pos = getPos();
     pos.w = 1.0f;
-    m.v[3] = pos;
-    Crd(0).m_Flag = 1;
+    m.setTrans(pos);
+    Crd(0).touch();
 }
 void CEntity::coordFix() {
     INT n = getCoordNum();
@@ -947,8 +947,8 @@ void CEntity::updateBadStatusEffect(HANDLE inHandle) {
     ApplyMatrix(ofs, *(FMATRIX*)((BYTE*)&Crd(other->BadStatusPos.iBoneIndex) + 0x90), ofs);
     FVECTOR pos = *(FVECTOR*)((BYTE*)&Crd(other->BadStatusPos.iBoneIndex) + 0xc0);
     pos.y += Math3D::PointToPointDistance(ofs, pos);
-    effect->Crd(0).m_Local.v[3] = pos;
-    effect->Crd(0).m_Flag = 1;
+    effect->Crd(0).m_Local.setTrans(pos);
+    effect->Crd(0).touch();
 }
 void CEntity::setDamageNumber(const FVECTOR& inPos, INT inDamage) {
     if (!DebugWork::g_dw.sys.m_iDagameNumber) return;

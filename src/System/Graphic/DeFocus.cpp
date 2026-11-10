@@ -248,14 +248,14 @@ QWdata* set_tsprite32(QWdata* qp, FIX4 plsx, FIX4 plsy, UINT z, INT ScrW, INT Sc
     pv[0].y += (0x800 - SCREEN_HEIGHT / 2) << 4;
     pv[1].x = pv[0].x + (32 << 4) - ofsXP;
     pv[1].y = pv[0].y + (ScrH << 4);
-    ivUVRect.y = uvH << 4;
-    ivUVPosUL.x = 0;
-    ivUVPosUL.y = 0;
-    ivUVPosUL.z = 0;
-    ivUVPosUL.w = 0;
-    ivUVRect.x = nStep;
-    ivUVRect.z = 0;
-    ivUVRect.w = 0;
+    ivUVPosUL.set(0, 0, 0, 0);
+    ivUVRect.set(nStep, uvH << 4, 0, 0);
+
+
+
+
+
+
     uv[0].x = ivUVPosUL.x;
     uv[0].y = ivUVPosUL.y;
     if (ofsXM) {
@@ -315,7 +315,7 @@ void CDeFocusPrim::_makePktDeFocus() {
     pCam = CWorldEnv::getActiveCamera();
     if (!pCam) return;
     if (!pCam->getLook()) return;
-    vPos = ((CCoord&)pCam->Crd(0)).getWorldMatrix().getTrans();
+    vPos = ((CCoord&)pCam->Crd(0)).getWorldMatrix().getTransRef();
     vLook = *pCam->getLook();
     SubVectorXYZ(vN, vLook, vPos);
     Normalize(vN, vN);
@@ -496,7 +496,7 @@ void CBlurPrim::_makePktBlur() {
             m_iAlpha = Bak_iBlurAlpha;
             return;
         }
-        vCam = ((CCoord&)pCam->Crd(0)).getWorldMatrix().getTrans();
+        vCam = ((CCoord&)pCam->Crd(0)).getWorldMatrix().getTransRef();
         vLook = *pCam->getLook();
         SubVectorXYZ(vN, vLook, vCam);
         Normalize(vN, vN);

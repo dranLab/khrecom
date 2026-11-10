@@ -230,10 +230,10 @@ void CScissoring::setRect(G_XY& p0, G_XY& p1) {
 void CScissoring::setDefault() {
     G_XY p0;
     G_XY p1;
-    p0.x = 0;
-    p0.y = 0;
-    p1.x = 511;
-    p1.y = SCREEN_HEIGHT - 1;
+    p0.set(0, 0);
+
+    p1.set(511, SCREEN_HEIGHT - 1);
+
     setRect(p0, p1);
 }
 static inline u_long _gsXYZz(INT x, INT y, const FIX4& z) {
@@ -478,10 +478,10 @@ static BOOL __isRect(const FVECTOR& v, const FVECTOR* vRect) {
     FVECTOR __CCTPrim_vDefRect;
     INT iRet;
     if (vRect == NULL) {
-        __CCTPrim_vDefRect.x = -256.0f;
-        __CCTPrim_vDefRect.y = -SCREEN_HEIGHT / 2;
-        __CCTPrim_vDefRect.z = 512.0f;
-        __CCTPrim_vDefRect.w = SCREEN_HEIGHT;
+        __CCTPrim_vDefRect.set(-256.0f, -SCREEN_HEIGHT / 2, 512.0f, SCREEN_HEIGHT);
+
+
+
         vRect = &__CCTPrim_vDefRect;
     }
     __asm__ volatile(

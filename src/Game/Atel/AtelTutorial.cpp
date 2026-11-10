@@ -68,10 +68,10 @@ CAtelCardSeq::CAtelCardSeq(CTask* pParent, INT in_type, INT in_posX, INT in_posY
             break;
         }
         FVECTOR v;
-        v.x = in_posX;
-        v.y = in_posY;
-        v.z = 0.0f;
-        v.w = 1.0f;
+        v.set(in_posX, in_posY, 0.0f, 1.0f);
+
+
+
         m_pSeqArrow->setLocalPos(v);
     } else {
         TRACE("\x92\x76\x96\xbd\x93\x49\x82\xc8\x83\x47\x83\x89\x81\x5b\x81\x46\x83\x60\x83\x85\x81\x5b\x83\x67\x83\x8a\x83\x41\x83\x8b CAtelCardSeq\n");

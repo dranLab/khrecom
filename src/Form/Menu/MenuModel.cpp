@@ -38,8 +38,8 @@ static inline void _unitMatrixVu0(FMATRIX& m) {
                  : "memory");
 }
 
-static inline void _setParent(CCoord& crd, CCoord* pParent) { crd.m_pParent = pParent; }
-static inline void _touch(CCoord& crd) { crd.m_Flag = 1; }
+
+
 
 CMenuModel::CMenuModel(CTask* p, INT nRsrcID, CCoord* pParentCoord, INT iPosX, INT iPosY) : CTask(p, 0x4000) {
     m_nRsrcID = nRsrcID;
@@ -82,7 +82,7 @@ CMenuModel::CMenuModel(CTask* p, INT nRsrcID, CCoord* pParentCoord, INT iPosX, I
         m_pModels[i].linkTexAnm(m_pTexAnm, m_nTexAnmNum);
         m_pModels[i].m_nFlag |= 0x20;
         if (m_pParentCoord) {
-            _setParent(m_pModels[i].getCrd(0), m_pParentCoord);
+            m_pModels[i].getCrd(0).setParent(m_pParentCoord);
         }
     }
 #line 77
@@ -104,7 +104,7 @@ CMenuModel::CMenuModel(CTask* p, INT nRsrcID, CCoord* pParentCoord, INT iPosX, I
     m_PosScreen.x = iPosX;
     m_PosScreen.y = iPosY;
     changeLocalWS();
-    _touch(crd);
+    crd.touch();
 }
 
 CMenuModel::~CMenuModel() {
@@ -178,7 +178,7 @@ void CMenuModel::changeLocalWS() {
     FMATRIX mWV;
     _unitMatrixVu0(mWV);
     RotMatrixY(mWV, mWV, 3.1415927f);
-    mWV.v[3] = m_vPosWSC;
+    mWV.setTrans(m_vPosWSC);
     InversMatrix(mWV, mWV);
     mWV.m[0][0] = -mWV.m[0][0];
     mWV.m[1][0] = -mWV.m[1][0];
@@ -221,7 +221,7 @@ void CMenuModel::setPosScreen(INT iPosX, INT iPosY) {
     m_PosScreen.x = iPosX;
     m_PosScreen.y = iPosY;
     changeLocalWS();
-    _touch(crd);
+    crd.touch();
 }
 
 void CMenuModel::setScale(FLOAT fScale) {
@@ -236,7 +236,7 @@ void CMenuModel::setScale(FLOAT fScale) {
     crd.m_Local.m[3][1] = m_vPos.y;
     crd.m_Local.m[3][2] = m_vPos.z;
     changeLocalWS();
-    _touch(crd);
+    crd.touch();
 }
 
 void CMenuModel::setSpeed(FLOAT fSpeed) {

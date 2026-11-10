@@ -106,7 +106,7 @@ INT CCollMapCamera::collideMapTrueCamera(INT fgContinue) {
                 FMATRIX** pMat = CCollUtil::instance().m_pSemiTransMat;
                 INT stSuu = CCollUtil::instance().m_SemiTransMatIdx;
                 for (INT i = 0; i < stSuu; i++) {
-                    FVECTOR& vTrans = pMat[i]->getTrans();
+                    FVECTOR& vTrans = pMat[i]->getTransRef();
                     INT fgExist = 0;
                     SJ_FOREACH(CMCSemiModel, pEntry, *m_pSemiModelList) {
                         if (vTrans == pEntry->center) {

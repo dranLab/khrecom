@@ -47,23 +47,23 @@ CFnt* _pfntPAD;
 CTile* _pgptPAD;
 }
 
-static inline void _setXYZ(G_XYZ& p, FIX4 x, FIX4 y, FIX4 z) {
-    p.set(x, y, z);
-}
+
+
+
 
 static inline void _setFntPos(CFntM2* p, INT x, INT y) {
-    _setXYZ(p->m_P0, (x / 2) << 4, y << 4, 0xFFFF28 << 4);
+    p->m_P0.set((x / 2) << 4, y << 4, 0xFFFF28 << 4);
 }
 
 static inline void _setFntXY(CFntM2* p, INT x, INT y) {
-    _setXYZ(p->m_P0, x << 4, y << 4, 0xFFFF28 << 4);
+    p->m_P0.set(x << 4, y << 4, 0xFFFF28 << 4);
 }
 
-static inline void _setColor(G_RGBA& c, UBYTE r, UBYTE g, UBYTE b) {
-    c.r = r;
-    c.g = g;
-    c.b = b;
-}
+
+
+
+
+
 
 void CDebugProcInfo::initialize() {
     INT i;
@@ -80,7 +80,7 @@ void CDebugProcInfo::initialize() {
                 _setFntPos(pStr, i * 70 - 140, _ref(SCREEN_HEIGHT) / 2 - 24);
             }
             pStr->setStyle(1);
-            _setColor(pStr->m_C0, 0x60, 0x60, 0);
+            pStr->m_C0.set(0x60, 0x60, 0);
             pStr->setLayerFG(24);
         }
     }
@@ -97,7 +97,7 @@ void CDebugProcInfo::initialize() {
     _ref(_pfntASM)->setText(_szASM);
     _setFntXY(_ref(_pfntASM), 240, 24 - _ref(SCREEN_HEIGHT) / 2);
     _ref(_pfntASM)->setStyle(1);
-    _setColor(_ref(_pfntASM)->m_C0, 0x60, 0x60, 0);
+    _ref(_pfntASM)->m_C0.set(0x60, 0x60, 0);
     _ref(_pfntASM)->setLayerFG(24);
     _ref(_pfntASM)->m_Size = 12 << 4;
     _ref(_pfntASM)->m_Space.y = 32;
@@ -113,7 +113,7 @@ void CDebugProcInfo::initialize() {
     _ref(_pfntPAD)->setText(_szPAD);
     _setFntXY(_ref(_pfntPAD), -46, 24 - _ref(SCREEN_HEIGHT) / 2);
     _ref(_pfntPAD)->setStyle(2);
-    _setColor(_ref(_pfntPAD)->m_C0, 0x60, 0x60, 0);
+    _ref(_pfntPAD)->m_C0.set(0x60, 0x60, 0);
     _ref(_pfntPAD)->setLayerFG(24);
     _ref(_pfntPAD)->m_Size = 12 << 4;
 
@@ -182,10 +182,10 @@ void CDebugProcInfo::dispProcInfo() {
         INT nTotal = CPackMan::getPkTotalSize();
         sprintf(_szASM, "F:%02d W:%02d S:%04d R:%02d M:%04d\nPkt:%04Xqw / %04Xqw %10d", nFloor, nArea, nScene,
                 nRoom, nMap, nUse, nTotal, CMainApp::getMainCount() / 50);
-        _setXYZ(_pgptASM->m_P1, 244 << 4, (42 - SCREEN_HEIGHT / 2) << 4, 0xFFFF28 << 4);
+        _pgptASM->m_P1.set(244 << 4, (42 - SCREEN_HEIGHT / 2) << 4, 0xFFFF28 << 4);
     } else {
         sprintf(_szASM, "F:%02d W:%02d S:%04d R:%02d M:%04d\n", nFloor, nArea, nScene, nRoom, nMap);
-        _setXYZ(_pgptASM->m_P1, 244 << 4, (26 - SCREEN_HEIGHT / 2) << 4, 0xFFFF28 << 4);
+        _pgptASM->m_P1.set(244 << 4, (26 - SCREEN_HEIGHT / 2) << 4, 0xFFFF28 << 4);
     }
     _pgptASM->disp();
     if (_pfntASM) _pfntASM->disp();
@@ -195,7 +195,7 @@ void CDebugProcInfo::changeProcCounterColor(BYTE r, BYTE g, BYTE b) {
     INT i;
     for (i = 0; i < 10; i++) {
         CFnt* pStr = _pStr[i];
-        if (pStr) _setColor(pStr->m_C0, r, g, b);
+        if (pStr) pStr->m_C0.set(r, g, b);
     }
 }
 

@@ -29,7 +29,7 @@ static inline void _unitMatrixVu0(FMATRIX& m) {
                  : "memory");
 }
 
-static inline void _zeroVectorVu0(FVECTOR& v) { asm volatile("sqc2 $vf0, 0x0(%0)" : : "r"(&v) : "memory"); }
+
 
 void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
 void SubVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2); void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
@@ -140,7 +140,7 @@ void CPathVector::_init(const FVECTOR* pPath, INT iPathMax, BOOL bAlloc) {
     }
     CCoord* pCrd = &m_DDXYZCoord;
     _unitMatrixVu0(pCrd->m_Local);
-    pCrd->m_Flag = 1;
+    pCrd->touch();
     m_DDXYZLines.setCoord(&m_DDXYZCoord);
     Line.Term = 0;
     for (INT i = 0; i <= 40; i++) {
@@ -322,7 +322,7 @@ void CPathVector::getNearPath(FVECTOR& outvN, float* outfDis, float* outfT, int*
     fNearT = 0.0f;
     fNearDis = 1.7014118e+38f;
     fChkNearDis = 1.7014118e+38f;
-    _zeroVectorVu0(vNearNv);
+    vNearNv.init0();
     /* MATCH: an asm with an operand and no clobber ends cse's equivalences (fNearT = 0.0f), so the hoisted 0.0f
        compare constant gets its own mtc1 zero instead of a copy of fNearT */
     __asm__ volatile("" : : "i"(0));
@@ -1017,13 +1017,13 @@ void CDbgCube::init(CCoord* pCrd) {
     if (pCrd) m_gpPolyStrip.setCoord(pCrd);
     else m_gpPolyStrip.setCoord(&m_Coord);
     _unitMatrixVu0(m_Coord.m_Local);
-    m_Coord.m_Flag = 1;
+    m_Coord.touch();
 }
 
 void CDbgCube::setCoord(FVECTOR* pvPos, FVECTOR* pvRot) {
     FVECTOR vPos;
     if (!pvPos) {
-        _zeroVectorVu0(vPos);
+        vPos.init0();
     } else {
         vPos = *pvPos;
     }
@@ -1037,11 +1037,11 @@ void CDbgCube::setCoord(FVECTOR* pvPos, FVECTOR* pvRot) {
         ScaleVectorXYZ(m_Coord.m_Local.v[1], m_Coord.m_Local.v[1], pvRot->w);
         ScaleVectorXYZ(m_Coord.m_Local.v[2], m_Coord.m_Local.v[2], pvRot->w);
     }
-    m_Coord.m_Local.v[3] = vPos;
+    m_Coord.m_Local.setTrans(vPos);
 }
 
 void CDbgCube::disp() {
-    m_Coord.m_Flag = 1;
+    m_Coord.touch();
     m_Coord.fix(CMainApp::getTickCount());
     m_gpPolyStrip.CGPrim::disp();
 }
@@ -1072,7 +1072,7 @@ void CDbgArrow::init(CCoord* pCrd) {
     if (pCrd) m_gpPolyStrip.setCoord(pCrd);
     else m_gpPolyStrip.setCoord(&m_Coord);
     _unitMatrixVu0(m_Coord.m_Local);
-    m_Coord.m_Flag = 1;
+    m_Coord.touch();
 }
 void CDbgArrow::setCoord(FVECTOR* pvPos, FVECTOR* pvRot) {
     FVECTOR vPos;
@@ -1080,7 +1080,7 @@ void CDbgArrow::setCoord(FVECTOR* pvPos, FVECTOR* pvRot) {
     QUATERNION q;
     FVECTOR vAxis;
     if (!pvPos) {
-        _zeroVectorVu0(vPos);
+        vPos.init0();
     } else {
         vPos = *pvPos;
     }
@@ -1100,10 +1100,10 @@ void CDbgArrow::setCoord(FVECTOR* pvPos, FVECTOR* pvRot) {
         ScaleVectorXYZ(m_Coord.m_Local.v[1], m_Coord.m_Local.v[1], pvRot->w);
         ScaleVectorXYZ(m_Coord.m_Local.v[2], m_Coord.m_Local.v[2], pvRot->w);
     }
-    m_Coord.m_Local.v[3] = vPos;
+    m_Coord.m_Local.setTrans(vPos);
 }
 void CDbgArrow::disp() {
-    m_Coord.m_Flag = 1;
+    m_Coord.touch();
     m_Coord.fix(CMainApp::getTickCount());
     m_gpPolyStrip.CGPrim::disp();
 }

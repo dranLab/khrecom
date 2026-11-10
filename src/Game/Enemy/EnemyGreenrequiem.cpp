@@ -137,8 +137,8 @@ void CEnemyGreenrequiem::recover_() {
     CBattleEnemy* target = (CBattleEnemy*)CTaskMan::getTask(m_hCureTarget);
     if (!target) return;
     FVECTOR pos;
-    pos._q = 0;
-    pos.w = 1.0f;
+    pos.init();
+
     INT no = 7;
     switch ((UINT)target->getID() % 10000) {
     case 3:

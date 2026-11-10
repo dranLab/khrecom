@@ -1640,7 +1640,7 @@ CEntity* CGimmickManager::getGimClassEntityFirst(INT in_ClassType) {
 BOOL CGimmickManager::getSavePointPos(FVECTOR& outPos) {
     CGimmickSavePoint* pSave = (CGimmickSavePoint*)getGimClassEntityFirst(0x2004);
     if (pSave != NULL) {
-        outPos = pSave->getPos();
+        outPos.set(pSave->getPos());
         return TRUE;
     }
     return FALSE;

@@ -63,10 +63,10 @@ static inline void _setFntLayer(C2DFnt* p, USHORT nID, USHORT nDepth) {
     ((USHORT*)p)[9] = nDepth;
 }
 
-static inline void _initPos(FVECTOR& v) {
-    v._q = 0;
-    v.w = 1.0f;
-}
+
+
+
+
 
 CPause::CPause(CTask* p, INT nPauseKind) : CMenu(p, -1) {
     m_pLadName = "pause.lad";
@@ -159,7 +159,7 @@ void CPause::main() {
         m_nStep = 2;
         break;
     case 2:
-        _initPos(pos);
+        pos.init();
         m_pScreenCtrl = new (__FILE__ "(197)") C2DSeqCtrl;
         m_pScreenCtrl->setLayer(12);
         m_pScreenCtrl->setPos(pos);

@@ -98,16 +98,16 @@ void CGameOver::main() {
 
     switch (m_nStep) {
     case 0:
-        vColor._q = 0;
+        vColor.zero();
         _setColor((ObjType::eObjBit)iObjType, 1.0f, vColor);
         CSceneEnv::setStop((ObjType::eObjBit)iObjType);
-        vPos._q = 0;
-        vPos.w = 1.0f;
+        vPos.init();
+
         m_pScreenCtrl = new (__FILE__ "(115)") C2DSeqCtrl;
         m_pScreenCtrl->setLayer(13);
         m_pScreenCtrl->addSeq(pSeqName, 3);
         m_pScreenCtrl->setPos(vPos);
-        vColor._q = 0;
+        vColor.zero();
         vPos.y = m_bHeartless ? 0.0f : 56.0f;
         rgba.col = 0x80707070;
         m_pSelectCtrl[0] = new (__FILE__ "(124)") C2DSeqCtrl;

@@ -87,9 +87,9 @@ void CFriendPluto::beginStateAction1() {
     m_uiAttackID = g_PlutoSkillID[m_uiLevel];
     m_pAtkData = &PL::g_AttackDataList[m_uiAttackID];
     calcDiscovery();
-    FVECTOR& aim = m_vAimPos;
-    aim._q = 0;
-    aim.w = 1.0f;
+    m_vAimPos.init();
+
+
     m_fRotDir = Math3D::LimitPI(RND::genrand_real1() * 360.0f * 0.017453292f);
     m_fDist = m_pAtkData->RADIUS * 0.1f;
     calcCirclePos(m_vAimPos, m_fDist, m_fRotDir);

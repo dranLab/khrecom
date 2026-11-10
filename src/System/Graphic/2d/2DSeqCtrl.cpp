@@ -48,17 +48,17 @@ static inline void _unitMatrix(FMATRIX& m) {
                  : "memory");
 }
 
-static inline void _unitVector(FVECTOR& v) {
-    asm volatile("sqc2 $vf0, 0x0(%0)" : : "r"(&v));
-}
+
+
+
 
 /* FVECTOR::set as the original orders its stores (name unknown) */
-static inline void _set(FVECTOR& v, FLOAT _x, FLOAT _y, FLOAT _z, FLOAT _w) {
-    v.w = _w;
-    v.z = _z;
-    v.y = _y;
-    v.x = _x;
-}
+
+
+
+
+
+
 
 /* SeqControl's inline constructor (original name unknown) */
 static inline void _initSeqControl(SeqControl& sc) {
@@ -70,12 +70,12 @@ static inline void _initSeqControl(SeqControl& sc) {
     sc.fgFntScale = 0;
     sc.fgBilinear = 0;
     sc.fgColor = 0;
-    _set(sc.parentColor, 1.0f, 1.0f, 1.0f, 1.0f);
-    _set(sc.controlColor, 1.0f, 1.0f, 1.0f, 1.0f);
-    _unitVector(sc.vPos);
+    sc.parentColor.setAll(1.0f);
+    sc.controlColor.setAll(1.0f);
+    sc.vPos.init0();
     sc.vScl.set(1.0f, 1.0f, 1.0f, 0.0f);
-    sc.vRot._q = 0;
-    _set(sc.vCol, 1.0f, 1.0f, 1.0f, 1.0f);
+    sc.vRot.zero();
+    sc.vCol.setAll(1.0f);
 }
 
 C2DSeqCtrl::C2DSeqCtrl() {
@@ -358,19 +358,19 @@ void C2DSeqCtrl::setMatrix() {
     mat.m[1][1] = m_seqControl.vScl.y;
     mat.m[2][2] = m_seqControl.vScl.z;
     RotMatrix(m_seqControl.matrix, mat, m_seqControl.vRot);
-    m_seqControl.matrix.v[3] = m_seqControl.vPos;
+    m_seqControl.matrix.setTrans(m_seqControl.vPos);
 }
 
 void C2DSeqCtrl::setPos(FVECTOR& vPos) {
     m_seqControl.vPos.x = vPos.x - 256.0f;
     m_seqControl.vPos.y = vPos.y - _ref(SCREEN_HEIGHT) / 2;
-    m_seqControl.matrix.v[3] = m_seqControl.vPos;
+    m_seqControl.matrix.setTrans(m_seqControl.vPos);
 }
 
 void C2DSeqCtrl::setLocalPos(FVECTOR& vPos) {
     m_seqControl.vPos.x = vPos.x;
     m_seqControl.vPos.y = vPos.y;
-    m_seqControl.matrix.v[3] = m_seqControl.vPos;
+    m_seqControl.matrix.setTrans(m_seqControl.vPos);
 }
 
 void C2DSeqCtrl::set3DPos(FVECTOR& vPos) {
@@ -397,12 +397,12 @@ void C2DSeqCtrl::setCol(FVECTOR& vCol) { m_seqControl.vCol = vCol; }
 
 void C2DSeqCtrl::addPosX(FLOAT fPosX) {
     m_seqControl.vPos.x += fPosX;
-    m_seqControl.matrix.v[3] = m_seqControl.vPos;
+    m_seqControl.matrix.setTrans(m_seqControl.vPos);
 }
 
 void C2DSeqCtrl::addPosY(FLOAT fPosY) {
     m_seqControl.vPos.y += fPosY;
-    m_seqControl.matrix.v[3] = m_seqControl.vPos;
+    m_seqControl.matrix.setTrans(m_seqControl.vPos);
 }
 
 void C2DSeqCtrl::addRotX(FLOAT fRotX) {

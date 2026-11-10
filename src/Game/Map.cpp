@@ -138,14 +138,14 @@ void LIGHTDATA::set(const ALF_DATA* pData) {
 }
 void RotMatrixZ(FMATRIX& out, FMATRIX& in) {
     FMATRIX tmp = in;
-    tmp.m[0][0] = -tmp.m[0][0];
-    tmp.m[0][1] = -tmp.m[0][1];
-    tmp.m[0][2] = -tmp.m[0][2];
-    tmp.m[0][3] = -tmp.m[0][3];
-    tmp.m[1][0] = -tmp.m[1][0];
-    tmp.m[1][1] = -tmp.m[1][1];
-    tmp.m[1][2] = -tmp.m[1][2];
-    tmp.m[1][3] = -tmp.m[1][3];
+    tmp.v[0] *= -1.0f;
+
+
+
+    tmp.v[1] *= -1.0f;
+
+
+
     out = tmp;
 }
 INT CMap::_checkEffId(ZONEPARTS* parts, BOOL bUseMapUnit) {
@@ -787,7 +787,7 @@ void CMap::main() {
 void setTransparency(const CCoord& crd, CModel& model) {
     if (!CCollMapCamera::m_pSemiModelList) return;
     FLOAT fAlpha = model.getAlphaScale();
-    FVECTOR ctr = crd.m_World.v[3];
+    FVECTOR ctr = crd.m_World.getTrans();
     SJ_FOREACH(CMCSemiModel, pEntry, *CCollMapCamera::m_pSemiModelList) {
         float dx = pEntry->center.x - ctr.x;
         if (dx < 0.0f) dx = -dx;
@@ -1123,13 +1123,13 @@ CSky::CSky(CTask* pInParent, void* pAZF, ZONEDATA* pZone) : CTaskSecondary(pInPa
     addCoord(m_modelSuu + 1);
     CCoord& crd = Crd(0);
     _unitMatrixVu0(crd.m_Local);
-    crd.m_Flag = 1;
+    crd.touch();
     USHORT nLayer = 3;
     for (INT i = 0; i < m_modelSuu; i++) {
         CModelBG& model = m_pModel[i];
         ZONEPARTS* pZoneparts = &pZone->parts[i];
         m_pRot[i].set(0.0f, 0.0f, 0.0f, 0.0f);
-        m_pRotShift[i]._q = 0;
+        m_pRotShift[i].zero();
         if (pZoneparts->rot.x) {
             FVECTOR& v = *(FVECTOR*)((i << 4) + (INT)m_pRotShift); // MATCH: offset + base (addu s0,s1,s0); &m_pRotShift[i] adds base first
             v.x = sinf(Math3D::LimitPI(pZoneparts->rot.x * 0.01f * 0.017453292f)) * 0.1f;
@@ -1151,7 +1151,7 @@ CSky::CSky(CTask* pInParent, void* pAZF, ZONEDATA* pZone) : CTaskSecondary(pInPa
         if (!d) AssertApp(D_00480CE8, 1846, D_00480D08, 0);
         _unitMatrixVu0(Crd(i + 1).m_Local);
         Crd(i + 1).m_pParent = &Crd(0);
-        Crd(i + 1).m_Flag = 1;
+        Crd(i + 1).touch();
         model.assign(this, d, i + 1);
         if (model.getSemiModel()) model.getSemiModel()->setTestFlag(0x3360D);
         if (nLayer < 9) nLayer += 2;
@@ -1177,7 +1177,7 @@ void CSky::main() {
         ScaleVector(vAddRot, (*(FVECTOR*)(ofs + (INT)m_pRotShift)), fRate);
         (*(FVECTOR*)(ofs + (INT)m_pRot)).addRot(vAddRot);
         sceVu0UnitMatrix(lMat.m);
-        sceVu0RotMatrix(Crd(i + 1).m_Local.m, lMat.m, ((FVECTOR*)(ofs + (INT)m_pRot))->v);
+        sceVu0RotMatrix(Crd(i + 1).m_Local.m, lMat.m, *(FVECTOR*)(ofs + (INT)m_pRot));
     }
 }
 void MulVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
@@ -1187,7 +1187,7 @@ void CSky::disp() {
     if (DebugWork::g_dw.sys.m_iSkyDisp < 0) return;
     CCamera* pCamera = CWorldEnv::getActiveCamera();
     if (!pCamera) return;
-    Crd(0).m_Local.v[3] = pCamera->Crd(0).m_World.v[3];
+    Crd(0).m_Local.setTrans(pCamera->Crd(0).m_World.v[3]);
     adjustCoord();
     FVECTOR vColor;
     FVECTOR* pSceneColor = CSceneEnv::getTypeColor((ObjType::eObjType)0xC);

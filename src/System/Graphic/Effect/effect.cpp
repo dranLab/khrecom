@@ -294,13 +294,13 @@ void CEffect::_updateSE() {
     if (!m_hSe && m_nSeID > 0 && !isWaiting()) {
         INT nVol;
         *(volatile INT*)&nVol = -1; // MATCH: volatile store: the original issues it before the m_pCrds load
-        INT nPan = CSound::getPanAndVol(Crd(0).getWorldPos(), nVol);
+        INT nPan = CSound::getPanAndVol(Crd(0).getWorldMatrix().getTrans(), nVol);
         m_hSe = CSound::playSE(m_nSeID, nVol, nPan);
     }
     if (m_hSe && m_nSeID > 0) {
         if (CSound::isSEPlaying(m_hSe, m_nSeID)) {
             INT nVol = -1;
-            INT nPan = CSound::getPanAndVol(Crd(0).getWorldPos(), nVol);
+            INT nPan = CSound::getPanAndVol(Crd(0).getWorldMatrix().getTrans(), nVol);
             CSound::setSEPanAndVol(m_hSe, m_nSeID, nPan, nVol, 1);
         }
     }
@@ -470,8 +470,8 @@ void CEffect::detachCoord() {
         setAttachFlag(FALSE);
         for (INT i = 0; i < getCoordNum(); i++) {
             CCoord& crd = Crd(i);
-            if (crd.m_pParent) {
-                crd.m_pParent = NULL;
+            if (crd.getParent()) {
+                crd.setParent(NULL);
                 if (isAttachNoRot()) {
                     crd.getLocalMatrix().v[3] = crd.getWorldMatrix().v[3];
                 } else {
@@ -639,7 +639,7 @@ void CEffect::setReferenceCoordPos(INT nNum) {
     if (getCoordNum() < nNum) return;
     if (!m_pVecLst) return;
     for (INT i = 0; i < nNum; i++) {
-        m_pVecLst[i] = Crd(i).getWorldPos();
+        m_pVecLst[i] = Crd(i).getWorldMatrix().getTrans();
     }
     setReferencePos(m_pVecLst, nNum);
 }

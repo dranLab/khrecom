@@ -488,25 +488,25 @@ BOOL CBodyCollision::collideBody(FVECTOR* outPos, FVECTOR* outNormal, FVECTOR* o
             if (body->collideBody(targetType) & 1) {
                 switch (body->getType()) {
                 case COLL_TYPE_SPHERE:
-                    diff = m_pOwner->Crd(bcp->BoneOffset[0].iBoneIndex).getWorldMatrix().getTrans();
+                    diff = m_pOwner->Crd(bcp->BoneOffset[0].iBoneIndex).getWorldMatrix().getTransRef();
                     break;
                 case COLL_TYPE_COLUMN:
                 case COLL_TYPE_COLUMNR:
-                    AddVectorXYZ(diff, m_pOwner->Crd(bcp->BoneOffset[0].iBoneIndex).getWorldMatrix().getTrans(),
-                                 m_pOwner->Crd(bcp->BoneOffset[1].iBoneIndex).getWorldMatrix().getTrans());
+                    AddVectorXYZ(diff, m_pOwner->Crd(bcp->BoneOffset[0].iBoneIndex).getWorldMatrix().getTransRef(),
+                                 m_pOwner->Crd(bcp->BoneOffset[1].iBoneIndex).getWorldMatrix().getTransRef());
                     ScaleVectorXYZ(diff, diff, 0.5f);
                     break;
                 }
                 if (outPos) {
                     SubVectorXYZ(diff, *body->getOutPos(), diff);
-                    AddVectorXYZ(*outPos, m_pOwner->Crd(0).getWorldMatrix().getTrans(), diff);
+                    AddVectorXYZ(*outPos, m_pOwner->Crd(0).getWorldMatrix().getTransRef(), diff);
                 }
                 if (outNormal) {
                     *outNormal = *body->getDetectNormal();
                 }
                 if (outDetectPos) {
                     SubVectorXYZ(diff, *body->getDetectPos(), diff);
-                    AddVectorXYZ(*outDetectPos, m_pOwner->Crd(0).getWorldMatrix().getTrans(), diff);
+                    AddVectorXYZ(*outDetectPos, m_pOwner->Crd(0).getWorldMatrix().getTransRef(), diff);
                 }
                 return TRUE;
             }
@@ -598,14 +598,14 @@ BOOL CBodyCollision::collideBody_(FVECTOR* outPos, FVECTOR* outNormal, FVECTOR* 
                 ApplyMatrix(diff, m_pOwner->Crd(offset.iBoneIndex).getWorldMatrix(), diff);
                 if (outPos) {
                     SubVectorXYZ(diff, *body->getOutPos(), diff);
-                    AddVectorXYZ(*outPos, m_pOwner->Crd(0).getWorldMatrix().getTrans(), diff);
+                    AddVectorXYZ(*outPos, m_pOwner->Crd(0).getWorldMatrix().getTransRef(), diff);
                 }
                 if (outNormal) {
                     *outNormal = *body->getDetectNormal();
                 }
                 if (outDetectPos) {
                     SubVectorXYZ(diff, *body->getDetectPos(), diff);
-                    AddVectorXYZ(*outDetectPos, m_pOwner->Crd(0).getWorldMatrix().getTrans(), diff);
+                    AddVectorXYZ(*outDetectPos, m_pOwner->Crd(0).getWorldMatrix().getTransRef(), diff);
                 }
                 return TRUE;
             }

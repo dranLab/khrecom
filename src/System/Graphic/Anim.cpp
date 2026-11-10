@@ -61,21 +61,21 @@ MODELDATA* AMFfromMDL(INT nGrpID, INT index);
 
 extern FVECTOR ONE_VECTOR;
 extern "C" float atan2f(float y, float x);
-static inline FVECTOR _subVector(const FVECTOR& v0, const FVECTOR& v1) {
-    FVECTOR vec = v0;
-    vec.x -= v1.x;
-    vec.y -= v1.y;
-    vec.z -= v1.z;
-    vec.w -= v1.w;
-    return vec;
-}
 
-static inline void _addVector(FVECTOR& v0, const FVECTOR& v1) {
-    v0.x += v1.x;
-    v0.y += v1.y;
-    v0.z += v1.z;
-    v0.w += v1.w;
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 static inline FLOAT _limitRot(FLOAT r) {
     return (r < -3.1415927f) ? r + 6.2831855f : (r > 3.1415927f) ? r - 6.2831855f : r; // MATCH: one ternary (the if/return form keeps the sum in another FP register)
@@ -85,10 +85,10 @@ static inline FLOAT _limitRot(FLOAT r) {
 
 
 static inline void _setOne(FVECTOR& v) {
-    v.x = 1.0f;
-    v.y = 1.0f;
-    v.z = 1.0f;
-    v.w = 1.0f;
+    v.set(1.0f, 1.0f, 1.0f, 1.0f);
+
+
+
 }
 
 static inline FLOAT _sqrtf(FLOAT x) {
@@ -302,8 +302,8 @@ void CAnim::save_hokan_by_mtx() {
         CCoord& crd = m_pCrds->Crd(i);
         crd.getScale(vScale);
         Quaternion::MatrixToQuaternion(q0->vQuatRotate, crd.getLocalMatrix());
-        FVECTOR vTrans = crd.getLocalMatrix().v[3];
-        q0->vTrans = vTrans;
+        FVECTOR vTrans = crd.getLocalMatrix().getTrans();
+        q0->vTrans.set(vTrans);
         q0->vScale.set(vScale.x, vScale.y, vScale.z);
     }
 }
@@ -483,7 +483,7 @@ void CAnim::setup(ANIMID id, TIMEQ tq) {
                     quat0.vScale.set(md->GetCmpData(6, i, 0.0f), md->GetCmpData(7, i, 0.0f),
                                      md->GetCmpData(8, i, 0.0f));
                 } else {
-                    quat0.vScale = ONE_VECTOR;
+                    quat0.vScale.set(ONE_VECTOR);
                 }
             }
         }
@@ -504,7 +504,7 @@ void CAnim::_setupRootMove(BOOL inRootMove, BOOL bContinue) {
         q0 = m_pQuatNow;
         q0->vQuatRotate.init();
         q0->vTrans.init();
-        q0->vScale = ONE_VECTOR;
+        q0->vScale.set(ONE_VECTOR);
         q1 = m_pQuatHokan;
         *q1 = *q0;
         m_BufRootMtx = m_pCrds->Crd(0).getLocalMatrix();
@@ -692,8 +692,8 @@ void CAnim::_setUpdate(int nSkl, TIMEQ tqFr, BOOL bClipped) {
                 *pQuat = *pQuatHokan;
             } else {
                 Quaternion::QuaternionSlerp(pQuat->vQuatRotate, pQuat->vQuatRotate, pQuatHokan->vQuatRotate, racio);
-                pQuat->vTrans = pQuat->vTrans + (pQuatHokan->vTrans - pQuat->vTrans) * racio;
-                pQuat->vScale = pQuat->vScale + (pQuatHokan->vScale - pQuat->vScale) * racio;
+                pQuat->vTrans = pQuat->vTrans + racio * (pQuatHokan->vTrans - pQuat->vTrans);
+                pQuat->vScale = pQuat->vScale + racio * (pQuatHokan->vScale - pQuat->vScale);
                 Quaternion::QuaternionToMatrix(crd.getLocalMatrix(), pQuat->vQuatRotate, pQuat->vTrans);
                 vScale = pQuat->vScale;
             }
@@ -718,7 +718,7 @@ void CAnim::_exeRootMove() {
         return;
     }
     CCoord& crd = m_pCrds->Crd(0);
-    trs1 = crd.getLocalMatrix().v[3];
+    trs1 = crd.getLocalMatrix().v[3]; /* the original: getTrans() (Coord.h:158) here and for trs0; our by-value getTrans adds a stack copy */
     rot1 = -atan2f(crd.getLocalMatrix().m[0][2], crd.getLocalMatrix().m[0][0]);
     rot0 = -atan2f(m_BufRootMtx.m[0][2], m_BufRootMtx.m[0][0]);
     trs0 = m_BufRootMtx.v[3];
@@ -732,7 +732,7 @@ void CAnim::_exeRootMove() {
         m_vRootMoveRot.init();
         m_vRootMovePreRot.y = rot1;
     }
-    trs2 = _subVector(trs1, m_vRootMovePreTrs);
+    trs2 = (trs1 - m_vRootMovePreTrs);
     rot2 = rot0 + (rot1 - m_vRootMovePreRot.y);
     m_vRootMoveRot.y = _limitRot(rot2);
     FMATRIX tmp0;
@@ -740,7 +740,7 @@ void CAnim::_exeRootMove() {
     UnitMatrix(tmp0);
     RotMatrixY(tmp1, tmp0, _limitRot(rot0 - m_vRootMovePreRot.y));
     ApplyMatrix(m_vRootMoveTrs, tmp1, trs2);
-    _addVector(m_vRootMoveTrs, trs0);
+    m_vRootMoveTrs += trs0;
     m_vRootMovePreTrs = trs1;
     m_vRootMovePreRot.y = rot1;
     crd.getLocalMatrix() = m_BufRootMtx;
@@ -935,7 +935,7 @@ void CAnim::_updateLookPosition(FLOAT fR) {
     RotMatrixZ(mMat, mMat, fvAng.x);
     RotMatrixX(mMat, mMat, fvAng.y);
     MulMatrix(crd.getLocalMatrix(), crd.getLocalMatrix(), mMat);
-    crdRoot.m_Flag = 1;
+    crdRoot.touch();
 }
 BOOL CAnim::createLegIK(FLOAT fFootLen, FLOAT fToesLen) {
     if (m_pModelData && !m_pLegIK) {

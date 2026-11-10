@@ -47,9 +47,9 @@ static inline void _unitMatrix(FMATRIX& m) {
                  : "r"(&m));
 }
 
-static inline void _unitVec(FVECTOR& v) {
-    asm volatile("sqc2 $vf0, 0x0(%0)" : : "r"(&v));
-}
+
+
+
 
 static inline FLOAT _sqrtf(FLOAT x) {
     FLOAT ret;
@@ -102,7 +102,7 @@ void CCollDisp::init() {
         UINT uiCol = i < 20 ? 0x8000C000 : 0x800808FF;
         G_STRIP* pLine = m_pLines[i].m_V;
         for (INT j = 0; j < 76; j++, pLine++) {
-            _unitVec(pLine->P);
+            pLine->P.init0();
             pLine->C.col = uiCol;
             pLine->Bone = 0;
             pLine->Term = 1;
@@ -111,14 +111,14 @@ void CCollDisp::init() {
 }
 
 void CCollDisp::main() {
-    _unitVec(m_fvLookPos);
+    m_fvLookPos.init0();
     if (CWorldEnv::getActiveCamera() && CWorldEnv::getActiveCamera()->getLook()) {
         m_fvLookPos = *CWorldEnv::getActiveCamera()->getLook();
     }
     if (!(DebugWork::g_dw.collision.uiFlag & 4)) {
         CTask* pPlayer = getSysTask(3);
         if (pPlayer && pPlayer->getCoordNum() && !CGameWork::getFlag(1, 0)) {
-            m_fvLookPos = pPlayer->Crd(0).getWorldPos();
+            m_fvLookPos = pPlayer->Crd(0).getWorldMatrix().getTrans();
         }
     }
     if (m_fgMapZoneDisp) {
@@ -256,7 +256,7 @@ void CCollDisp::setBBMatrix(CCoord* inpCrd, const FVECTOR& inrefPos, FLOAT infSh
     } else {
         _unitMatrix(refMat);
     }
-    refMat.v[3] = pos;
+    refMat.setTrans(pos);
     refMat.v[3].w = 1.0f;
     inpCrd->recalcWorldMatrix();
 }
@@ -273,7 +273,7 @@ FLOAT CCollDisp::setColmMatrix(CCoord* inpCrd, const FVECTOR& refPos1, const FVE
         RotMatrixX(inpCrd->m_Local, inpCrd->m_Local, rx);
         RotMatrixY(inpCrd->m_Local, inpCrd->m_Local, ry);
     }
-    inpCrd->m_Local.v[3] = refPos1;
+    inpCrd->m_Local.setTrans(refPos1);
     inpCrd->m_Local.v[3].w = 1.0f;
     inpCrd->m_Local.v[3].y += infShiftY;
     inpCrd->recalcWorldMatrix();
@@ -483,7 +483,7 @@ void CCollDispMapZone::_makeModelPrim() {
         for (INT j = 0; j < nTotal; j++, pPrim++) {
             if (pPrim->kind == 0) {
                 for (INT kk = 0; kk < 4; kk++) {
-                    _unitVec(pLine[kk].P);
+                    pLine[kk].P.init0();
                     pLine[kk].C.col = m_uiLineCol;
                     pLine[kk].Term = 0;
                     pLine[kk].Bone = 0;
@@ -492,7 +492,7 @@ void CCollDispMapZone::_makeModelPrim() {
                 pLine += 4;
             } else {
                 for (INT kk = 0; kk < 5; kk++) {
-                    _unitVec(pLine[kk].P);
+                    pLine[kk].P.init0();
                     pLine[kk].C.col = m_uiLineCol;
                     pLine[kk].Term = 0;
                     pLine[kk].Bone = 0;
@@ -569,7 +569,7 @@ CCollRideModelDisp::CCollRideModelDisp(CTask* inBo, CRideModel* inRideModel, BOO
     _unitMatrix(Crd(0).m_Local);
     Crd(0).recalcWorldMatrix();
     _unitMatrix(Crd(1).m_Local);
-    Crd(1).m_pParent = &Crd(0);
+    Crd(1).setParent(&Crd(0));
     _makeModelPrim();
     if (inAutoUpdate) m_uiStateFlag |= 1;
 }
@@ -613,7 +613,7 @@ void CCollRideModelDisp::_makeModelPrim() {
         for (INT j = 0; j < nTotal; j++, pPrim++) {
             if (pPrim->kind == 0) {
                 for (INT kk = 0; kk < 4; kk++) {
-                    _unitVec(pLine[kk].P);
+                    pLine[kk].P.init0();
                     pLine[kk].C.col = m_uiLineCol;
                     pLine[kk].Term = 0;
                     pLine[kk].Bone = 0;
@@ -622,7 +622,7 @@ void CCollRideModelDisp::_makeModelPrim() {
                 pLine += 4;
             } else {
                 for (INT kk = 0; kk < 5; kk++) {
-                    _unitVec(pLine[kk].P);
+                    pLine[kk].P.init0();
                     pLine[kk].C.col = m_uiLineCol;
                     pLine[kk].Term = 0;
                     pLine[kk].Bone = 0;

@@ -42,12 +42,12 @@ static inline void _unitMatrix(FMATRIX& m) {
                      : "memory");
 }
 
-static inline void _scale(FVECTOR& v, FLOAT inF) {
-    v.x *= inF;
-    v.y *= inF;
-    v.z *= inF;
-    v.w *= inF;
-}
+
+
+
+
+
+
 
 #line 21
 MODELDATA* searchDefaultModel(const ZONEPARTS& parts) {
@@ -96,9 +96,9 @@ public:
             rz.m[1][0] = -rz.m[0][1];
             crd.m_Local = MulMatrix(crd.m_Local, rz);
         }
-        _scale(crd.m_Local.v[0], fr.scale[0]);
-        _scale(crd.m_Local.v[1], fr.scale[1]);
-        _scale(crd.m_Local.v[2], fr.scale[2]);
+        crd.m_Local.v[0] *= fr.scale[0];
+        crd.m_Local.v[1] *= fr.scale[1];
+        crd.m_Local.v[2] *= fr.scale[2];
         crd.m_Local.m[3][0] = fr.trans[0];
         crd.m_Local.m[3][1] = fr.trans[1];
         crd.m_Local.m[3][2] = fr.trans[2];

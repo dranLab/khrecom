@@ -54,7 +54,7 @@ public:
     CHermitePathCamera(CTask* p, const CPathVector* pPath, const CTask* pTarget, const CHermitePath* pHPath,
                        INT iType, const CTask* pParent);
     virtual ~CHermitePathCamera();
-    const FVECTOR& getCameraPos() const { return ((CCoord&)Crd(0)).getWorldMatrix().getTrans(); }
+    const FVECTOR& getCameraPos() const { return ((CCoord&)Crd(0)).getWorldMatrix().getTransRef(); }
     const FVECTOR* getTargetPos() const { return getLook(); }
     BOOL isEnd() const;
     void ignorePlaySpeed(BOOL bInFlag) { CTask::ignorePlaySpeed(bInFlag); }

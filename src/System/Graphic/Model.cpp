@@ -323,7 +323,7 @@ INT CModel::link(CCoords& crds) {
             nIdx = ((const BONELABEL*)m_pData->m_pBoneLabel)[i].m_ParentIndex;
             if (nIdx >= 0) crds.Crd(i).setParent(&crds.Crd(nIdx));
             crds.Crd(i).recalcWorldMatrix();
-            crds.Crd(i).m_Flag = 1;
+            crds.Crd(i).touch();
         }
     }
     if (m_pData->m_BoneIndex == 0) {
@@ -347,7 +347,7 @@ CCoord& CModel::getCrd(INT idx) {
 }
 INT CModel::getCoordNum() const {
     if (!(m_pCrds)) AssertApp(__FILE__, 737, "m_pCrds", 0);
-    return *(INT*)((BYTE*)m_pCrds + 4);
+    return m_pCrds->getCoordNum();
 }
 void CModel::setLocal(INT index) {
     if (!(m_pCrds != __null)) AssertApp(__FILE__, 743, "m_pCrds != __null", 0);
@@ -681,7 +681,7 @@ INT CModel::checkBBox() {
     m_BBoxFlag = ret;
     return ret;
 }
-void CModel::setColorScale(const FVECTOR& vColor) { getColorScale() = vColor; }
+void CModel::setColorScale(const FVECTOR& vColor) { getColorScale().set(vColor); }
 void CModel::setColorScale(FLOAT r, FLOAT g, FLOAT b, FLOAT a) { getColorScale().set(r, g, b, a); }
 void CModel::setAlphaScale(FLOAT inScale) { m_ColorScale.w = inScale; }
 void CModel::linksub() {

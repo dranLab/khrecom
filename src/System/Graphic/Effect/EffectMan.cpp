@@ -312,9 +312,9 @@ void CEffectMan::_setCoord(CEffect* pEff, INT nCNum, const CCoord* pParent, cons
         }
         if (pvPos) TransMatrix(*pLocal, *pLocal, *pvPos);
     }
-    crd.m_Flag = 1;
+    crd.touch();
     crd.fix();
-    crd.m_Flag = 1;
+    crd.touch();
 }
 HANDLE CEffectMan::setEffect(const CHAR* lpszInName, UINT nNo, ObjType::eObjType eType, const FVECTOR* pvPos, const FVECTOR* pvRot, FLOAT fWait) {
     EFFECT_DATA* pEffectData;
@@ -603,7 +603,7 @@ static inline u_long128 _rotTransPersVf4(const FVECTOR& v0) {
     return ret;
 }
 
-static inline void _setVf0(FVECTOR& v) { asm volatile("sqc2 $vf0, 0x0(%0)" : : "r"(&v) : "memory"); }
+
 
 static inline FLOAT _lengthVf4(const FVECTOR& v0) {
     INT iTmp;
@@ -777,7 +777,7 @@ BOOL CEffectMan::_updateCoord(CEffect* effect) {
     }
     MulVector(effect->_scale(), effect->m_vScale, s_vEffKhComScale);
     effect->_updateSE();
-    effect->Crd(0).m_Flag = 1;
+    effect->Crd(0).touch();
     return TRUE;
 }
 void CEffectMan::_updateColor(CEffect* effect) {
@@ -807,8 +807,8 @@ void CEffectMan::_calc(FLOAT fFrameRate, const FMATRIX& mWV, const FMATRIX& mVS,
     ObjType::eObjBit eStopBit;
     SLContainerT<CEffect>* pContainer;
 
-    asm volatile("sqc2 $vf0, 0x0(%0)" : : "r"(&vPosTmp));
-    asm volatile("sqc2 $vf0, 0x0(%0)" : : "r"(&vLookTmp));
+    vPosTmp.init0();
+    vLookTmp.init0();
     if (pCam) {
         pPos = &pCam->Crd(0).m_World.v[3];
         // MATCH: a ternary (with an if, pPos and pLook get each other's s-registers)
@@ -1168,10 +1168,10 @@ void CEffectMan::_setDebugBBOXLine(const FVECTOR* pV) {
     INT j;
     INT i;
 
-    Line.C.r = 0xFF;
-    Line.C.g = 0;
-    Line.C.b = 0;
-    Line.C.a = 0x80;
+    Line.C.set(0xFF, 0, 0, 0x80);
+
+
+
     for (i = 0; i < 2; i++) {
         for (j = 0; j < 8; j++) {
             Line.P = pV[idx[i][j]];

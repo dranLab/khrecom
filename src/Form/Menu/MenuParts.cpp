@@ -50,10 +50,10 @@ void CScrollBar::init(const CHAR* pSeqName, USHORT nLayer, USHORT* pSeqTbl, FVEC
         }
         pCtrl->setLocalPos(vPos);
         if (i == 1) {
-            vec.x = 1.0f;
-            vec.y = fBasicHeight * 0.01f;
-            vec.z = 1.0f;
-            vec.w = 0.0f;
+            vec.set(1.0f, fBasicHeight * 0.01f, 1.0f, 0.0f);
+
+
+
             pCtrl->setScl(vec);
         } else if (i == 2) {
             vec = vPos;

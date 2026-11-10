@@ -426,8 +426,8 @@ public:
     void setUVWH(USHORT u, USHORT v, USHORT w, USHORT h) {
         FIX4 _x = w << 4;
         FIX4 _y = h << 4;
-        m_P1.x = m_P0.x + _x;
-        m_P1.y = m_P0.y + _y;
+        m_P1.set(m_P0.x + _x, m_P0.y + _y);
+
         m_T0.set(u, v);
         m_T1.set(u + w, v + h);
     }
@@ -472,7 +472,7 @@ public:
     }
     virtual UINT getPacketSize() const { return CGTexPrim::getPacketSize() + 8; }
 private:
-    virtual FIX4 calcZ() { return (UINT)(m_P0.z + m_P1.z + m_P2.z + m_P3.z) >> 2; }
+    virtual FIX4 calcZ() { return (m_P0.bufferZ() + m_P1.bufferZ() + m_P2.bufferZ() + m_P3.bufferZ()) >> 2; }
     virtual void makePkt();
 };
 
@@ -514,7 +514,7 @@ public:
 
     virtual UINT getPacketSize() const { return 3; }
 private:
-    virtual FIX4 calcZ() { return (UINT)(m_P0.z + m_P1.z) >> 1; }
+    virtual FIX4 calcZ() { return (m_P0.bufferZ() + m_P1.bufferZ()) >> 1; }
     virtual void makePkt();
 };
 
@@ -534,7 +534,7 @@ public:
 
     virtual UINT getPacketSize() const { return 6; }
 private:
-    virtual FIX4 calcZ() { return (UINT)(m_P0.z + m_P1.z + m_P2.z + m_P3.z) >> 2; }
+    virtual FIX4 calcZ() { return (m_P0.bufferZ() + m_P1.bufferZ() + m_P2.bufferZ() + m_P3.bufferZ()) >> 2; }
     virtual void makePkt();
 };
 

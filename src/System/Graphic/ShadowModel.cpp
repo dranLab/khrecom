@@ -71,9 +71,9 @@ ULONGLONG CShadowModelMan::m_lTex0;
 FVECTOR CShadowModelMan::m_vParam;
 FVECTOR CShadowModelMan::m_vCamPos;
 
-static inline void _initVf0(FVECTOR& v) {
-    asm volatile("sqc2 $vf0, 0x0(%0)" : : "r"(&v));
-}
+
+
+
 
 template <class T> static inline T& _ref(T& v) {
     return v;
@@ -115,9 +115,9 @@ void CShadowModelMan::finalize() {}
 void CShadowModelMan::updateMatrix() {
     CCamera* pCamera = CWorldEnv::getActiveCamera();
     if (pCamera) {
-        m_vCamPos = pCamera->Crd(0).getWorldMatrix().getTrans();
+        m_vCamPos = pCamera->Crd(0).getWorldMatrix().getTransRef();
     } else {
-        _initVf0(m_vCamPos);
+        m_vCamPos.init0();
     }
 }
 
@@ -172,7 +172,7 @@ void CShadowModelMan::updateShadowMatrix(const FVECTOR& vMax, const FVECTOR& vMi
     vUp.w = 1.0f;
     SubVectorXYZ(vTmp, vLook, vEye);
     Normalize(vTmp, vTmp);
-    sceVu0CameraMatrix(mWorldView.m, vEye.v, vTmp.v, vUp.v);
+    sceVu0CameraMatrix(mWorldView, vEye.v, vTmp.v, vUp.v);
     fLenX = (vMax.x - vMin.x) * 0.5f;
     fLenY = orgMaxY - orgMinY;
     fLenZ = (vMax.z - vMin.z) * 0.5f;
@@ -265,28 +265,28 @@ static QWdata* setSdwTSprite32(QWdata* qp, FIX4 plsx, FIX4 plsy, UINT z, FLOAT f
     pv[1].y = pv[0].y + (sdw_SCREEN_HEIGHT << 4);
     if (fScale != 1.0f) {
         fRate = 1.0f / fScale;
-        fvUVPosUL.x = sdw_SCREEN_WIDTH / 2;
-        fvUVPosUL.y = sdw_SCREEN_HEIGHT / 2;
-        fvUVPosUL.z = 0.0f;
-        fvUVPosUL.w = 0.0f;
+        fvUVPosUL.set(sdw_SCREEN_WIDTH / 2, sdw_SCREEN_HEIGHT / 2, 0.0f, 0.0f);
+
+
+
         ScaleVector(fvUVPosUL, fvUVPosUL, 1.0f - fRate);
-        fvUVRect.x = sdw_SCREEN_WIDTH;
-        fvUVRect.y = sdw_SCREEN_HEIGHT;
-        fvUVRect.z = 0.0f;
-        fvUVRect.w = 0.0f;
+        fvUVRect.set(sdw_SCREEN_WIDTH, sdw_SCREEN_HEIGHT, 0.0f, 0.0f);
+
+
+
         ScaleVector(fvUVRect, fvUVRect, fRate);
         FTOI4Vector(ivUVPosUL, fvUVPosUL);
         fvUVRect.x *= 0.0625f;
         FTOI4Vector(ivUVRect, fvUVRect);
     } else {
-        ivUVRect.x = 32 << 4;
-        ivUVRect.y = sdw_SCREEN_HEIGHT << 4;
-        ivUVPosUL.x = 0;
-        ivUVPosUL.y = 0;
-        ivUVPosUL.z = 0;
-        ivUVPosUL.w = 0;
-        ivUVRect.z = 0;
-        ivUVRect.w = 0;
+        ivUVPosUL.set(0, 0, 0, 0);
+
+        ivUVRect.set(32 << 4, sdw_SCREEN_HEIGHT << 4, 0, 0);
+
+
+
+
+
     }
     iNextSize = ivUVRect.x;
     uv[0].x = ivUVPosUL.x;

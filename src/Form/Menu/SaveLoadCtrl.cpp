@@ -197,13 +197,13 @@ void C2DSeqLightMarkAgent::setPos(FVECTOR& vPos) {
     if ((m_nFlag & 1) == 0 || m_nMoveTime < 0 || getState() >= STATE_OUT) {
         m_pCtrl->setPos(vPos);
         if (m_nFlag & 1) {
-            m_vBasePos = vPos;
+            m_vBasePos.set(vPos);
             m_nMoveTime = 0;
         }
     } else {
         m_nMoveTime = 1500;
-        m_vTargetPos = vPos;
-        m_vBasePos = m_pCtrl->m_seqControl.vPos;
+        m_vTargetPos.set(vPos);
+        m_vBasePos.set(m_pCtrl->m_seqControl.vPos);
         m_vBasePos.x += 256.0f;
         m_vBasePos.y += _ref(SCREEN_HEIGHT) >> 1;
     }
@@ -266,7 +266,7 @@ void C2DSeqSelectable::setCaptionParam(const CHAR* pszText, INT nSize, const G_R
 
 void C2DSeqSelectable::getCursorPos(FVECTOR& vOut) const {
     if (m_pCtrl) {
-        vOut = m_pCtrl->m_seqControl.vPos;
+        vOut.set(m_pCtrl->m_seqControl.vPos);
         vOut.x += m_fptCursorOfs.x + 256.0f;
         vOut.y += m_fptCursorOfs.y + (_ref(SCREEN_HEIGHT) >> 1);
     }
@@ -274,7 +274,7 @@ void C2DSeqSelectable::getCursorPos(FVECTOR& vOut) const {
 
 void C2DSeqSelectable::getLightMarkPos(FVECTOR& vOut) const {
     if (m_pCtrl) {
-        vOut = m_pCtrl->m_seqControl.vPos;
+        vOut.set(m_pCtrl->m_seqControl.vPos);
         vOut.x += m_fptLightOfs.x + 256.0f;
         vOut.y += m_fptLightOfs.y + (_ref(SCREEN_HEIGHT) >> 1);
     }
@@ -352,15 +352,15 @@ void C2DSeqScrollbarCtrl::updateForm() {
 
     fBodySize = _round1(m_fMaxBodySize * m_fBodyRatio);
     fBodyScale = fBodySize / m_fBaseBodySize;
-    v.x = 1.0f;
-    v.y = fBodyScale;
-    v.z = 1.0f;
-    v.w = 0.0f;
+    v.set(1.0f, fBodyScale, 1.0f, 0.0f);
+
+
+
     m_pCtrls[1]->setScl(v);
     if (m_pCtrls[0]) {
         FLOAT fMovable = m_fMaxBodySize - fBodySize;
         FLOAT y = _round1(fMovable * m_fScrollPos);
-        v = m_pCtrls[0]->m_seqControl.vPos;
+        v.set(m_pCtrls[0]->m_seqControl.vPos);
         v.y = m_fBasePosY + y;
         m_pCtrls[0]->setLocalPos(v);
         m_pCtrls[1]->setLocalPos(v);

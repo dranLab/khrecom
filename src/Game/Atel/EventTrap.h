@@ -20,7 +20,7 @@ struct BoxTrapSrc {
 
     /* MATCH: member-wise copy as the original's CEventBox::setData does it (with the implicit one setData is 0x3c bytes instead of 0x58) */
     BoxTrapSrc& operator=(const BoxTrapSrc& inSrc) {
-        _vPos = inSrc._vPos;
+        _vPos.set(inSrc._vPos);
         _fWidth = inSrc._fWidth;
         _fDepth = inSrc._fDepth;
         _fHeight = inSrc._fHeight;

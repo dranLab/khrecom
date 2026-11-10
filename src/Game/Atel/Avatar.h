@@ -344,12 +344,12 @@ public:
     void setAvatarTargetScale(const FVECTOR& v) {
 #line 551 AVATAR_H_PATH
         if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);
-        m_pScaleStruct->_vTargetScale = v;
+        m_pScaleStruct->_vTargetScale.set(v);
     }
     void setAvatarScaleSpeed(const FVECTOR& v) {
 #line 553 AVATAR_H_PATH
         if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);
-        m_pScaleStruct->_vScaleSpeed = v;
+        m_pScaleStruct->_vScaleSpeed.set(v);
     }
     FVECTOR& getAvatarTargetScale() const {
 #line 560 AVATAR_H_PATH
@@ -389,7 +389,7 @@ public:
     void clearAvatarScaleSpeed() {
 #line 582 AVATAR_H_PATH
         if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);
-        m_pScaleStruct->_vScaleSpeed._q = 0;
+        m_pScaleStruct->_vScaleSpeed.zero();
     }
     void ScaleAvatarEnd();
     void cancelScaleAvatar();
@@ -409,17 +409,17 @@ public:
     void setAvatarStartRot(const FVECTOR& v) {
 #line 605 AVATAR_H_PATH
         if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);
-        m_pRotateStruct->_vStartRot = v;
+        m_pRotateStruct->_vStartRot.set(v);
     }
     void setAvatarTargetRot(const FVECTOR& v) {
 #line 607 AVATAR_H_PATH
         if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);
-        m_pRotateStruct->_vTargetRot = v;
+        m_pRotateStruct->_vTargetRot.set(v);
     }
     void setAvatarRotSpeed(const FVECTOR& v) {
 #line 609 AVATAR_H_PATH
         if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);
-        m_pRotateStruct->_vRotSpeed = v;
+        m_pRotateStruct->_vRotSpeed.set(v);
     }
     USHORT getAvatarRotType() const {
 #line 615 AVATAR_H_PATH
@@ -475,7 +475,7 @@ public:
     void clearAvatarRotSpeed() {
 #line 645 AVATAR_H_PATH
         if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);
-        m_pRotateStruct->_vRotSpeed._q = 0;
+        m_pRotateStruct->_vRotSpeed.zero();
     }
     void countAvatarRotTime(INT t) {
 #line 647 AVATAR_H_PATH
@@ -488,7 +488,7 @@ public:
     void setAvatarStartPos(const FVECTOR& v) {
 #line 659 AVATAR_H_PATH
         if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);
-        m_pMoveStruct->_vStartPos = v;
+        m_pMoveStruct->_vStartPos.set(v);
         m_pMoveStruct->_vStartPos.w = 1.0f;
     }
     FVECTOR& getAvatarStartPos() const {
@@ -506,7 +506,7 @@ public:
     void setAvatarTargetPos(const FVECTOR& v) {
 #line 674 AVATAR_H_PATH
         if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);
-        m_pMoveStruct->_vTargetPos = v;
+        m_pMoveStruct->_vTargetPos.set(v);
         m_pMoveStruct->_vTargetPos.w = 1.0f;
     }
     void clearAvatarMoveTimeCount() {

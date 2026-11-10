@@ -1104,12 +1104,12 @@ INT CCollUtil::distanceLine(FVECTOR* pP0, FVECTOR* pP1) {
                 m = m / _sqrtf(g);
                 ScaleVector(su, v, m);
             } else {
-                su._q = 0;
+                su.zero();
             }
             m = m * f1;
         } else {
             m = m_RadiusL;
-            su._q = 0;
+            su.zero();
         }
         Normalize(qs, m_vCkVec);
         ScaleVector(qs, qs, -m);

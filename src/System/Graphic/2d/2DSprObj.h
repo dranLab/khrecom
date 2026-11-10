@@ -6,20 +6,20 @@
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/2d/2DSeqObj.h"
 
-union FVECTOR2 {
-    float v[2];
-    struct {
-        FLOAT x;
-        FLOAT y;
-    };
-    ULONGLONG _u64;
-    LONGLONG _s64;
-    void set(FLOAT fX, FLOAT fY) {
-        x = fX;
-        y = fY;
-    }
-    void init0() { _u64 = 0; }
-};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 namespace D2 {
 

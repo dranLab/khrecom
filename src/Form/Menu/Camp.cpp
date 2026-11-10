@@ -5455,7 +5455,7 @@ INT CCamp::setWorldmap(INT nSetCmd) {
             m_pWMMoveCtrl->enableColorCtrl(TRUE);
             m_nRoomCurrent = CSceneInfo::getCurrentRoomID() - 1;
             m_pWMNormaCtrl = new (operator new(sizeof(C2DSeqCtrl), __FILE__ "(6580)")) C2DSeqCtrl;
-            vec._q = 0;
+            vec.zero();
             m_pWMNormaCtrl->setCol(vec);
             m_pWMNormaCtrl->setLayer(0xD);
             m_pWMNormaCtrl->setParent(m_pWMMoveCtrl);
@@ -6131,10 +6131,10 @@ INT CCamp::setMainCmd(INT nSetCmd, INT nMode) {
     if (nSetCmd == 0) {
         rgba.col = 0x80404040;
         if (!m_pMainCmdCtrl[0]) {
-            vec.x = 86.0f;
-            vec.y = 88.0f;
-            vec.w = 1.0f;
-            vec.z = 0.0f;
+            vec.set(86.0f, 88.0f, 0.0f, 1.0f);
+
+
+
             for (INT i = 0; i < m_nCurrentCmdMax; i++) {
                 p2DSeqCtrl = m_pMainCmdCtrl[i] = new (__FILE__ "(7430)") C2DSeqCtrl;
                 p2DSeqCtrl->setLayer(0xC);
@@ -6184,10 +6184,10 @@ INT CCamp::setMainCmdHist(INT nSetCmd, INT nMode) {
     case 1:
         rgba.col = 0x807C7C7C;
         if (!m_pMainCmdHistCtrl[nMode]) {
-            vec.x = 78.0f;
-            vec.y = 51.0f;
-            vec.w = 1.0f;
-            vec.z = 0.0f;
+            vec.set(78.0f, 51.0f, 0.0f, 1.0f);
+
+
+
             for (INT i = 0; i < 2; i++) {
                 p2DSeqCtrl = m_pMainCmdHistCtrl[i] = new (__FILE__ "(7499)") C2DSeqCtrl;
                 p2DSeqCtrl->setLayer(0xF);
@@ -6331,7 +6331,7 @@ INT CCamp::setStatusWin1(INT nSetCmd) {
             vec.x = !m_bPlayerKind ? -72.0f : 2.0f;
             register FLOAT fY asm("$f0") = 26.0f; /* MATCH: 26 in f0, 1 in f1 */
             pPlayerManager = PLM::CPlayerManager::getPLM();
-            FVECTOR* pVec = &vec;
+            FVECTOR* pVec = &vec; /* the ref's inline "FVECTOR *this": the original calls vec.set() (Coord.h:730); set() here changes the code */
             pVec->y = fY;
             pVec->w = 1.0f;
             pVec->z = 0.0f;
@@ -6408,10 +6408,10 @@ void CCamp::setCursor(INT nSelect, INT nMode) {
     FVECTOR vec;
 
     if (nSelect >= 0) {
-        vec.x = 48.0f;
-        vec.y = nSelect * 26.0f + 80.0f;
-        vec.z = 0.0f;
-        vec.w = 1.0f;
+        vec.set(48.0f, nSelect * 26.0f + 80.0f, 0.0f, 1.0f);
+
+
+
         m_pCursorCtrl->setPos(vec);
         m_pCursorCtrl->enableDisp(TRUE);
     } else {
@@ -6423,10 +6423,10 @@ void CCamp::setLight(INT nSelect, INT nMode) {
     FVECTOR vec;
 
     if (nSelect >= 0) {
-        vec.x = 150.0f;
-        vec.y = nSelect * 26.0f + 82.0f;
-        vec.z = 0.0f;
-        vec.w = 1.0f;
+        vec.set(150.0f, nSelect * 26.0f + 82.0f, 0.0f, 1.0f);
+
+
+
         m_vPosLightTarget = vec;
         if (nSelect == m_nMainCmdSel) {
             m_vPosLightCurrent = vec;
@@ -6457,10 +6457,10 @@ void CCamp::setCursor2(INT nSelect, INT nMode, BOOL bMapCard) {
         vec = ppCard[nSelect]->m_seqControl.vPos;
     } else if (nMode >= 5) {
         FLOAT x = nSelect ? nSelect * 24.0f + -30.0f : -56.0f;
-        vec.x = x;
-        vec.y = -70.0f;
-        vec.w = 1.0f;
-        vec.z = 0.0f;
+        vec.set(x, -70.0f, 0.0f, 1.0f);
+
+
+
     }
     switch (nMode) {
     case 0:
@@ -6564,10 +6564,10 @@ void CCamp::setCursor4(INT nSelect, INT nMode) {
         vec = m_pDeckDeckCard[nSelect]->m_seqControl.vPos;
     } else if (nMode >= 5) {
         FLOAT x = nSelect ? nSelect * 24.0f + -30.0f : -56.0f;
-        vec.x = x;
-        vec.y = -70.0f;
-        vec.w = 1.0f;
-        vec.z = 0.0f;
+        vec.set(x, -70.0f, 0.0f, 1.0f);
+
+
+
     }
     switch (nMode) {
     case 0:
