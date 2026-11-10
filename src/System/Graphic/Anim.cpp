@@ -718,7 +718,7 @@ void CAnim::_exeRootMove() {
         return;
     }
     CCoord& crd = m_pCrds->Crd(0);
-    trs1 = crd.getLocalMatrix().v[3];
+    trs1 = crd.getLocalMatrix().v[3]; /* the original: getTrans() (Coord.h:158) here and for trs0; our by-value getTrans adds a stack copy */
     rot1 = -atan2f(crd.getLocalMatrix().m[0][2], crd.getLocalMatrix().m[0][0]);
     rot0 = -atan2f(m_BufRootMtx.m[0][2], m_BufRootMtx.m[0][0]);
     trs0 = m_BufRootMtx.v[3];

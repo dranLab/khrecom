@@ -1120,7 +1120,7 @@ void CGameMain::playMovie() {
     case 0:
         if (!CGame::isFadeDone()) return;
         if (!CMovie::isCompleteSetupScript()) return;
-        m_ivFogColorBackup = CWorldEnv::getFogColor();
+        m_ivFogColorBackup.set(CWorldEnv::getFogColor());
         CWorldEnv::setFogColor(0, 0, 0);
         suspendTaskInGame(7);
         CSound::stopBGM(0);
