@@ -163,7 +163,7 @@ void CPadIO::initialize() {
     scePad2Init(0);
     s_bVibPause = FALSE;
     for (i = 0; i < PAD_MAX; i++) {
-        pPad = new (__FILE__ "(68)") CJoyPad2(i);
+        pPad = new KH_AT("(68)") CJoyPad2(i);
         ASSERT(pPad);
         s_pJoyPad[i] = pPad;
         pPad->init();

@@ -62,7 +62,7 @@ INT CPathCamera::init(const CHAR* inCamName, BOOL enableDataRoll, BOOL fgTarget,
     m_pRoll = m_pCamData->roll;
     m_pRseq = m_pCamData->rseq;
     deleteCamera();
-    m_pCamera = new (__FILE__ "(71)") CCamera(this, inCamPri);
+    m_pCamera = new KH_AT("(71)") CCamera(this, inCamPri);
     m_pCamera->setPriority(0x8000);
     m_fRate = 1.0f;
     m_next = 0;
@@ -93,7 +93,7 @@ void CPathCamera::initBGCheck(BOOL fgTransparency) {
         delete m_pCollMapCamera;
     }
     m_pCollMapCamera = NULL;
-    m_pCollMapCamera = new (__FILE__ "(127)") CCollMapCamera;
+    m_pCollMapCamera = new KH_AT("(127)") CCollMapCamera;
 }
 
 void CPathCamera::stopBGCheck() {

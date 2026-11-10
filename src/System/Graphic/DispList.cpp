@@ -750,7 +750,7 @@ void CDispListShadowDraw::_drawOT(OTtag& inOT) {
     if (!pSMModelFirst) return;
     pPrim = inOT._pHeadPrim;
     nEntryNum = getEntryCount();
-    pSdwBuf = new (__FILE__ "(895)") SHADOWMODELBUF[nEntryNum];
+    pSdwBuf = new KH_AT("(895)") SHADOWMODELBUF[nEntryNum];
 #line 896
     ASSERT(pSdwBuf);
     bFirst = TRUE;

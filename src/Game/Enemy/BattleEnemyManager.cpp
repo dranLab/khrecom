@@ -114,7 +114,7 @@ CBattleEnemyManager::CBattleEnemyManager(CTask* inParent) : CTask(inParent, 0x40
     CGameWork::setFlag(1, 2, FALSE);
     if (CMonstroEventBattle::isMonstroEventBattleScene()) {
 #line 76
-        CMonstroEventBattle* event = new (__FILE__ "(76)") CMonstroEventBattle(this);
+        CMonstroEventBattle* event = new KH_AT("(76)") CMonstroEventBattle(this);
         ASSERT(event);
         event->setup();
         m_hMonstroEventBattle = event->getHandle();
@@ -225,11 +225,11 @@ void CBattleEnemyManager::main() {
             endBattle_(1);
             if (isPremiumPrizeGet()) {
 #line 312
-                new (__FILE__ "(312)") CRoulette(this, 0);
+                new KH_AT("(312)") CRoulette(this, 0);
                 m_iStep = 5;
             } else if (isRoulettePrizeGet()) {
 #line 318
-                new (__FILE__ "(318)") CRoulette(this, 1);
+                new KH_AT("(318)") CRoulette(this, 1);
                 m_iStep = 6;
             } else {
                 exitBattle_();
@@ -241,7 +241,7 @@ void CBattleEnemyManager::main() {
         if (!CTaskMan::getSysTask(0x22)) {
             if (isRoulettePrizeGet()) {
 #line 336
-                new (__FILE__ "(336)") CRoulette(this, 1);
+                new KH_AT("(336)") CRoulette(this, 1);
                 m_iStep = 6;
             } else {
                 exitBattle_();

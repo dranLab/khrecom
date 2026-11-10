@@ -69,7 +69,7 @@ void CDebugProcInfo::initialize() {
     INT i;
     for (i = 0; i < 10; i++) {
         CFnt*& pStr = _pStr[i];
-        pStr = new (__FILE__ "(64)") CFnt;
+        pStr = new KH_AT("(64)") CFnt;
         if (pStr) {
             _szBuf[i][0] = 0;
             pStr->setText(_szBuf[i]);
@@ -86,14 +86,14 @@ void CDebugProcInfo::initialize() {
     }
     if (_pStr[4]) _pStr[4]->m_P0.x += 7 << 4;
 
-    _ref(_ptlCountBack) = new (__FILE__ "(84)") CTile;
+    _ref(_ptlCountBack) = new KH_AT("(84)") CTile;
     _ref(_ptlCountBack)->m_P0.set(-104 << 4, (_ref(SCREEN_HEIGHT) / 2 - 38) << 4);
     _ref(_ptlCountBack)->m_P1.set(78 << 4, (_ref(SCREEN_HEIGHT) / 2 - 8) << 4);
     _ref(_ptlCountBack)->m_C0.set(0, 0, 0, 0x50);
     _ref(_ptlCountBack)->setSemiTrans(ALPHA_BLEND);
     _ref(_ptlCountBack)->setLayerFG(24);
 
-    _ref(_pfntASM) = new (__FILE__ "(92)") CFnt;
+    _ref(_pfntASM) = new KH_AT("(92)") CFnt;
     _ref(_pfntASM)->setText(_szASM);
     _setFntXY(_ref(_pfntASM), 240, 24 - _ref(SCREEN_HEIGHT) / 2);
     _ref(_pfntASM)->setStyle(1);
@@ -102,14 +102,14 @@ void CDebugProcInfo::initialize() {
     _ref(_pfntASM)->m_Size = 12 << 4;
     _ref(_pfntASM)->m_Space.y = 32;
 
-    _ref(_pgptASM) = new (__FILE__ "(101)") CTile;
+    _ref(_pgptASM) = new KH_AT("(101)") CTile;
     _ref(_pgptASM)->m_C0.set(0, 0, 0, 0x50);
     _ref(_pgptASM)->setSemiTrans(ALPHA_BLEND);
     _ref(_pgptASM)->setLayerFG(24);
     _ref(_pgptASM)->m_P0.set(60 << 4, (10 - _ref(SCREEN_HEIGHT) / 2) << 4);
     _ref(_pgptASM)->m_P1.set(244 << 4, (24 - _ref(SCREEN_HEIGHT) / 2) << 4);
 
-    _ref(_pfntPAD) = new (__FILE__ "(109)") CFnt;
+    _ref(_pfntPAD) = new KH_AT("(109)") CFnt;
     _ref(_pfntPAD)->setText(_szPAD);
     _setFntXY(_ref(_pfntPAD), -46, 24 - _ref(SCREEN_HEIGHT) / 2);
     _ref(_pfntPAD)->setStyle(2);
@@ -117,7 +117,7 @@ void CDebugProcInfo::initialize() {
     _ref(_pfntPAD)->setLayerFG(24);
     _ref(_pfntPAD)->m_Size = 12 << 4;
 
-    _ref(_pgptPAD) = new (__FILE__ "(117)") CTile;
+    _ref(_pgptPAD) = new KH_AT("(117)") CTile;
     _ref(_pgptPAD)->m_C0.set(0, 0, 0, 0x50);
     _ref(_pgptPAD)->setSemiTrans(ALPHA_BLEND);
     _ref(_pgptPAD)->setLayerFG(24);

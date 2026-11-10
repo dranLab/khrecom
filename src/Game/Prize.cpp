@@ -121,7 +121,7 @@ BOOL CPrize::setup(const PRIZE_PARAM& inParam) {
     m_iNumber = inParam.iNumber;
     m_fSpeed = inParam.fSpeed;
 #line 157
-    m_pMove = new (__FILE__ "(157)") CMovement(this);
+    m_pMove = new KH_AT("(157)") CMovement(this);
     if (!m_pMove) return FALSE;
     addCoord(1);
     BOOL ret;
@@ -678,7 +678,7 @@ BOOL CPrize::initCard_() {
 #line 1215
     ASSERT(orgMdl);
 #line 1217
-    MODELDATA* d = m_pCardModel = new (__FILE__ "(1217)") MODELDATA;
+    MODELDATA* d = m_pCardModel = new KH_AT("(1217)") MODELDATA;
     if (!d) return FALSE;
     ((u_long128*)d)[0] = ((u_long128*)orgMdl)[0];
     ((u_long128*)d)[1] = ((u_long128*)orgMdl)[1];
@@ -696,7 +696,7 @@ BOOL CPrize::initCard_() {
         dataSize2 >>= 4;
     }
 #line 1244
-    MODELTAG* newMdl = new (__FILE__ "(1244)") MODELTAG[dataSize1 + dataSize2];
+    MODELTAG* newMdl = new KH_AT("(1244)") MODELTAG[dataSize1 + dataSize2];
     if (!newMdl) return FALSE;
     memcpy(newMdl, orgMdl->m_pData, (dataSize1 + dataSize2) * sizeof(MODELTAG));
     if (orgMdl->m_pData) m_pCardModel->m_pData = newMdl;
@@ -732,19 +732,19 @@ BOOL CPrize::initCard_() {
     }
     m_iModelCount = 1;
 #line 1320
-    m_pModels = new (__FILE__ "(1320)") CModel[m_iModelCount];
+    m_pModels = new KH_AT("(1320)") CModel[m_iModelCount];
     if (!m_pModels) return FALSE;
 #line 1324
-    m_pvModelColor = new (__FILE__ "(1324)") FVECTOR[m_iModelCount];
+    m_pvModelColor = new KH_AT("(1324)") FVECTOR[m_iModelCount];
     if (!m_pvModelColor) return FALSE;
     if (m_pCardModel->enableLight()) {
 #line 1331
-        m_pNLight = new (__FILE__ "(1331)") CLightUnit;
+        m_pNLight = new KH_AT("(1331)") CLightUnit;
         if (!m_pNLight) return FALSE;
     }
     if (m_pCardModel->enablePointLight()) {
 #line 1338
-        m_pGLight = new (__FILE__ "(1338)") CGimmickLightUnit;
+        m_pGLight = new KH_AT("(1338)") CGimmickLightUnit;
         if (!m_pGLight) return FALSE;
     }
     m_pModels->link(this, m_pCardModel);
@@ -777,15 +777,15 @@ BOOL CPrize::initReloadCard_() {
     pModelTbl = CRsrcDB::getRsrcMDL(groupID);
     if (!pModelTbl) return FALSE;
 #line 1402
-    m_pModels = new (__FILE__ "(1402)") CModel[m_iModelCount];
+    m_pModels = new KH_AT("(1402)") CModel[m_iModelCount];
     if (!m_pModels) return FALSE;
 #line 1406
-    m_pvModelColor = new (__FILE__ "(1406)") FVECTOR[m_iModelCount];
+    m_pvModelColor = new KH_AT("(1406)") FVECTOR[m_iModelCount];
     if (!m_pvModelColor) return FALSE;
     for (i = 0; i < m_iModelCount; i++) {
         if (pModelTbl[i]->enableLight()) {
 #line 1415
-            m_pNLight = new (__FILE__ "(1415)") CLightUnit;
+            m_pNLight = new KH_AT("(1415)") CLightUnit;
             if (!m_pNLight) return FALSE;
             break;
         }
@@ -793,7 +793,7 @@ BOOL CPrize::initReloadCard_() {
     for (i = 0; i < m_iModelCount; i++) {
         if (pModelTbl[i]->enablePointLight()) {
 #line 1426
-            m_pGLight = new (__FILE__ "(1426)") CGimmickLightUnit;
+            m_pGLight = new KH_AT("(1426)") CGimmickLightUnit;
             if (!m_pGLight) return FALSE;
             break;
         }

@@ -179,7 +179,7 @@ C2DSprObj::~C2DSprObj() {
 void C2DSprObj::init(UINT nSpr) {
     m_nPoly = nSpr;
 #line 154
-    m_pSprPrim = new (__FILE__ "(154)") SprPrim[nSpr];
+    m_pSprPrim = new KH_AT("(154)") SprPrim[nSpr];
     INT& rViewer = C2DMan::m_fg2DViewer;
     if (rViewer) m_pSeqControl = &C2DViewer::m_seqControl;
 }
@@ -220,7 +220,7 @@ void C2DSprObj::initSprite(INT inNum, SPR_GROUP* pSprGroupe, SPR_PARTS* pSprPart
     pSprPrim->polyGT4.m_T3.set(fU1, fV1);
     if (pSprParts->u0 == 0 && pSprParts->v0 == 0 && pSprParts->u1 == 0 && pSprParts->v1 == 0 && m_nPoly == 1) {
 #line 194
-        m_pScissoring = new (__FILE__ "(194)") CScissoring;
+        m_pScissoring = new KH_AT("(194)") CScissoring;
         m_pScissoring->setLayerFG(nLayerFG);
         m_pScissoring->setSemiTrans(ALPHA_BLEND);
     }

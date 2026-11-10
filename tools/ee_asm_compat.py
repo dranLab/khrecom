@@ -203,6 +203,61 @@ def drop_foreign_weak_data(lines: list[str], symbols_path: str, own_data: str) -
     return drop_data_definitions(lines, data_labels)
 
 
+LINKONCE = re.compile(r'^\t\.section\s+\.gnu\.linkonce\.[a-z]+\.(\S+?),')
+SECTION_DIRECTIVE = re.compile(r"^\t\.(?:section|text|data|rdata|sdata|bss|sbss)\b")
+
+
+def drop_foreign_linkonce(lines: list[str], symbols_path: str, linkonce: str) -> list[str]:
+    """Without -g (the retail build) gcc puts weak functions and vtables into .gnu.linkonce.{t,d}.<name> sections. The
+    original linker kept one copy of each, in link order: a copy whose original address (symbol file) lies outside
+    this unit's linkonce ranges (its <unit>.linkonce subsegments) was kept from another object, so it is removed
+    here (section and its .weak line); the references resolve to that copy. Copies the symbol file doesn't know stay."""
+    own = parse_ranges(linkonce)
+    names = {m.group(1) for line in lines if (m := LINKONCE.match(line))}
+    if not names:
+        return lines
+    addrs = symbol_addresses(symbols_path, names)
+    foreign = {n for n, a in addrs.items() if not any(lo <= a < hi for lo, hi in own)}
+    out, dropping = [], False
+    for line in lines:
+        m = LINKONCE.match(line)
+        if m:
+            dropping = m.group(1) in foreign
+            if dropping and out and out[-1] == f"\t.weak\t{m.group(1)}":
+                out.pop()
+            if dropping:
+                continue
+        elif dropping and SECTION_DIRECTIVE.match(line):
+            dropping = False
+        if not dropping:
+            out.append(line)
+    return out
+
+
+def drop_foreign_globals(lines: list[str], symbols_path: str, own_data: str) -> list[str]:
+    """Remove global data definitions (static members, globals) whose original address lies outside this object's
+    data from source: that data stays assembly (a version whose data don't come from this source, e.g. the retail
+    build with the beta's `// SOURCE DATA:`), which defines the symbol; objcopy would remove gcc's copy with its
+    section while the code still references it. Names the symbol file doesn't know are kept."""
+    own = parse_ranges(own_data)
+    globl = {m.group(1) for line in lines if (m := re.match(r"^\t\.globl\t(\S+)\s*$", line))}
+    objects = {m.group(1) for line in lines if (m := re.match(r"^\t\.type\t\s*([^,\s]+),\s*@object", line))}
+    globl &= objects  # data only: functions stay, whatever section tracking says
+    in_data, labels = False, set()
+    for line in lines:
+        if DATA_SECTION.match(line):
+            in_data = True
+        elif OTHER_SECTION.match(line):
+            in_data = False
+        elif in_data and line.endswith(":") and line[:-1] in globl:
+            labels.add(line[:-1])
+    if not labels:
+        return lines
+    addrs = symbol_addresses(symbols_path, labels)
+    foreign = {n for n, a in addrs.items() if not any(lo <= a < hi for lo, hi in own)}
+    return drop_data_definitions(lines, foreign)
+
+
 def drop_data_definitions(lines: list[str], data_labels: set[str]) -> list[str]:
     """Remove the definitions (label, .weak/.type/.size, alignment, data directives, .stabs) of these data labels: the
     references then resolve to the original copy."""
@@ -216,6 +271,8 @@ def drop_data_definitions(lines: list[str], data_labels: set[str]) -> list[str]:
                 continue
             dropping = False
         if (m := WEAK.match(line)) and m.group(1) in data_labels:
+            continue
+        if (m := re.match(r"^\t\.globl\t(\S+)\s*$", line)) and m.group(1) in data_labels:
             continue
         if (m := STABS_SYMBOL.match(line)) and m.group(1) in data_labels:
             continue  # debug info for a static: Ps2EeAs crashes on it once the symbol is undefined
@@ -345,6 +402,9 @@ def main() -> None:
     parser.add_argument("--source-root", help='original path prefix for "src/" in string literals')
     parser.add_argument("--unit-data", help='address ranges of all the unit\'s data, from source or not (as --own-data)')
     parser.add_argument("--own-data", help='address ranges of the data from source ("0xSTART-0xEND,..." or "none")')
+    parser.add_argument("--linkonce", help="address ranges of the unit's .gnu.linkonce code and data (its "
+                                           "<unit>.linkonce subsegments, \"0xSTART-0xEND,...\" or \"none\"): other copies "
+                                           "are removed")
     parser.add_argument("--asm-path", help="the building version's splat tree (asm/<VERSION>): INCLUDE_ASM paths "
                                            "asm/<any version>/nonmatchings/... are read from it")
     args = parser.parse_args()
@@ -367,6 +427,9 @@ def main() -> None:
     source_lines = text.splitlines()
     if args.symbols and args.own_data:
         source_lines = drop_foreign_weak_data(source_lines, args.symbols, args.own_data)
+        source_lines = drop_foreign_globals(source_lines, args.symbols, args.own_data)
+    if args.symbols and args.linkonce:
+        source_lines = drop_foreign_linkonce(source_lines, args.symbols, args.linkonce)
     if args.symbols and args.unit_data:
         source_lines = rename_local_statics(source_lines, args.symbols, args.unit_data, args.own_data)
     if args.assembler == "snas":

@@ -24,10 +24,10 @@ CEntity* CEntityFactory::createBullet(const BULLET_PARAM& inParam, CTask* inPare
 
 
     switch (inParam.iBulletID) {
-    case 1: bullet = new (__FILE__ "(34)") CBullet(parent);
+    case 1: bullet = new KH_AT("(34)") CBullet(parent);
         break;
     case 2:
-        bullet = new (__FILE__ "(37)") CHomingBullet(parent);
+        bullet = new KH_AT("(37)") CHomingBullet(parent);
         break;
     }
 

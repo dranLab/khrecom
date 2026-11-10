@@ -59,7 +59,7 @@ struct MCD_HEADER {
 CCollUtil* CCollUtil::m_pInstance = __null;
 
 CCollUtil::CCollUtil() {
-    m_pCheckColl = new (__FILE__ "(37)") CSphereCollision;
+    m_pCheckColl = new KH_AT("(37)") CSphereCollision;
     m_pCheckColl->m_Kind = COLL_KIND_PLAYER;
     m_pCheckColl->m_shiftY = 0.0f;
     m_pChipStatus = __null;
@@ -204,7 +204,7 @@ void CCollUtil::_backupChipStatus() {
     }
     if (m_pChipStatus) delete[] m_pChipStatus;
     m_pChipStatus = __null;
-    m_pChipStatus = new (__FILE__ "(211)") UINT[m_pMCDInfo->iChipSuu];
+    m_pChipStatus = new KH_AT("(211)") UINT[m_pMCDInfo->iChipSuu];
     for (i = 0, pChip = m_pMCDInfo->pMCChip; i < m_pMCDInfo->iChipSuu; i++, pChip++) {
         m_pChipStatus[i] = pChip->id;
     }

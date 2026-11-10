@@ -125,3 +125,44 @@ and matches (its `.rom` SHA-1 1c255c21…, the load image of the ELF 865450e0…
 fifth pairing pass (a unit's functions at one common offset: mpc's jump-table-only `_rix_*`, +32 functions).
 How and what changed in the tools: `docs/retail-plan.md`, Phase 1.
 
+
+## Phase 2 (2026-11-10): the pilot - go
+
+With the version switches in headers only (include/khversion.h, below), the 497 complete units compiled with
+`-DKH_RETAIL` match retail for ~94 % of their functions (tools/helpers/retail_try.py): 820/925 `debug`,
+1355/1439 `layout`, 112/194 `header`, 5679/5680 `same`. Pilot units Buf 14/14, TexCtrl 13/13, LevelUp 11/11 (and
+its data: one retail text change, "MAX HP" -> "Max HP"), WorldWarp 8/9, Fsm 12/15, CoordMan 13/15, FifoFpl 5/8.
+The first three now build from source in the retail image (the checksum holds).
+
+What the release configuration needs in the sources (all line-neutral: `__LINE__` is in the beta's strings):
+
+- `AssertApp`, `TRACE*`: macros that drop the call with its arguments (no strings); `com_*_d` -> `com_*`.
+  Declarations name them `(AssertApp)(...)`. An assert's condition then remains as an empty `if`: usually harmless,
+  but it can change gcc's block layout (FifoFpl isValidActiveBlockID): such an assert must vanish completely,
+  `KH_DEBUG(if (!(e)) AssertApp(...);)` or a unit-local `ASSERT` defined through `KH_DEBUG`.
+- `new (__FILE__ "(N)") T` -> `new KH_AT("(N)") T` (1,051 sites, mechanical), `operator new(n, __FILE__ "(N)")` ->
+  `operator new(n KH_ATARG("(N)"))` (17): the literal must not exist in retail (gcc emits it even when the inline
+  operator ignores it). Retail calls `operator new(size_t)` -> `com_malloc`; retail `new[]` likewise.
+- Debug-only members: `KH_DEBUG(member;)` (CTask::m_pszDebugInfo; CEntity's damage display, 0x1b0-0x1c8 -> the
+  class is 0x1b0, every derived class shifts 0x20), their uses `KH_DEBUG(statement)` per line.
+- Text the retail version changed: `KH_VER(beta, retail)`.
+- `DebugWork::g_dw` (the debug switches, 1,776 uses in 44 files): retail has no DebugWork; every function that reads
+  it differs or is gone (98 absent, 68 of the 225 `shape`/`calls`). Open (task: Phase 3).
+
+## Decisions (unattended run 2026-11-10/11)
+
+Taken without the user (who asked for exactly that); revisit as needed.
+
+1. Version macros live in include/khversion.h, included by khtypes.h (khtypes.h has no `__LINE__` use, so the extra
+   line there is harmless). Retail gets `-DKH_RETAIL` from its build.yaml cflags.
+2. Asserts stay as written in the sources; only where the leftover empty `if` changes the code is a site wrapped in
+   `KH_DEBUG(...)`. A mass rewrite of the 595 sites was not done (it buys little: ~90 % already match).
+3. `// SOURCE DATA:` is the reference version's; another version takes data from source only with its own marker,
+   `// SOURCE DATA SLUS_217.99_retail: ...`, appended after it (end of file, line-neutral).
+4. A unit compiled for retail always gives its .gnu.linkonce code and vtables from source (configure.py replaces its
+   `<unit>.linkonce` assembly objects); linkonce copies the original kept in another object are removed
+   (ee_asm_compat.py --linkonce).
+5. Exact data starts of compiled retail units come from their relocations (retail_try.py --record ->
+   config/SLUS_217.99_retail/unit_starts.txt, applied by split_version.py); a gap after a unit goes to the next one.
+6. Global data definitions outside a compiled object's data from source are removed (ee_asm_compat.py
+   drop_foreign_globals, objects only), like the existing weak-data rule: the assembly's copy defines them.

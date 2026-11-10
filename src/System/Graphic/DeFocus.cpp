@@ -19,7 +19,7 @@ CDeFocus* CDeFocus::m_pInstance = NULL;
 void CDeFocus::create(CTask* p) {
     if (!m_pInstance) {
 #line 28
-        m_pInstance = new (__FILE__ "(28)") CDeFocus(p);
+        m_pInstance = new KH_AT("(28)") CDeFocus(p);
         ASSERT(m_pInstance);
     }
 }

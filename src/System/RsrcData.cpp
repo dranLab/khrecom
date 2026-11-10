@@ -45,7 +45,7 @@ void* snDllGetFreeMemory(void* pDll);
 
 
 
-#define RSRC_ALLOC(line, n) operator new(n, __FILE__ "(" #line ")")
+#define RSRC_ALLOC(line, n) KH_DEBUG(operator new(n, __FILE__ "(" #line ")")) KH_RELEASE(operator new(n))
 #define _RSRC_STR(e) #e
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, _RSRC_STR(e), 0)
 
@@ -71,11 +71,11 @@ CRsrcData* CRsrcDataFactory::createRsrcData(const RsrcInfo& info, CBuf& data) {
     case 58:
     case 62:
 #line 79
-        pRsrc = new (__FILE__ "(79)") CRsrcData(info, data);
+        pRsrc = new KH_AT("(79)") CRsrcData(info, data);
         break;
     case 13:
 #line 82
-        pRsrc = new (__FILE__ "(82)") CRsrcData(info, data);
+        pRsrc = new KH_AT("(82)") CRsrcData(info, data);
         break;
     case 25:
         pRsrc = createRsrcFont(info, data);
@@ -86,99 +86,99 @@ CRsrcData* CRsrcDataFactory::createRsrcData(const RsrcInfo& info, CBuf& data) {
         break;
     case 3:
 #line 89
-        pRsrc = new (__FILE__ "(89)") CRsrcAAF(info, data);
+        pRsrc = new KH_AT("(89)") CRsrcAAF(info, data);
         break;
     case 4:
 #line 91
-        pRsrc = new (__FILE__ "(91)") CRsrcMCD(info, data);
+        pRsrc = new KH_AT("(91)") CRsrcMCD(info, data);
         break;
     case 6:
 #line 93
-        pRsrc = new (__FILE__ "(93)") CRsrcAMF(info, data);
+        pRsrc = new KH_AT("(93)") CRsrcAMF(info, data);
         break;
     case 8:
 #line 95
-        pRsrc = new (__FILE__ "(95)") CRsrcANM(info, data);
+        pRsrc = new KH_AT("(95)") CRsrcANM(info, data);
         break;
     case 29:
 #line 97
-        pRsrc = new (__FILE__ "(97)") CRsrcANN(info, data);
+        pRsrc = new KH_AT("(97)") CRsrcANN(info, data);
         break;
     case 9:
 #line 99
-        pRsrc = new (__FILE__ "(99)") CRsrcAZF(info, data);
+        pRsrc = new KH_AT("(99)") CRsrcAZF(info, data);
         break;
     case 11:
     case 42:
 #line 102
-        pRsrc = new (__FILE__ "(102)") CRsrcMDL(info, data);
+        pRsrc = new KH_AT("(102)") CRsrcMDL(info, data);
         break;
     case 28:
 #line 106
-        pRsrc = new (__FILE__ "(106)") CRsrcCAM(info, data);
+        pRsrc = new KH_AT("(106)") CRsrcCAM(info, data);
         break;
     case 31:
 #line 108
-        pRsrc = new (__FILE__ "(108)") CRsrcDLL(info, data);
+        pRsrc = new KH_AT("(108)") CRsrcDLL(info, data);
         break;
     case 39:
 #line 110
-        pRsrc = new (__FILE__ "(110)") CRsrcData(info, data);
+        pRsrc = new KH_AT("(110)") CRsrcData(info, data);
         break;
     case 40:
 #line 112
-        pRsrc = new (__FILE__ "(112)") CRsrcMEP(info, data);
+        pRsrc = new KH_AT("(112)") CRsrcMEP(info, data);
         break;
     case 45:
 #line 118
-        pRsrc = new (__FILE__ "(118)") CRsrcSND(info, data);
+        pRsrc = new KH_AT("(118)") CRsrcSND(info, data);
         break;
     case 47:
 #line 119
-        pRsrc = new (__FILE__ "(119)") CRsrcRSD(info, data);
+        pRsrc = new KH_AT("(119)") CRsrcRSD(info, data);
         break;
     case 48:
 #line 121
-        pRsrc = new (__FILE__ "(121)") CRsrcSES(info, data);
+        pRsrc = new KH_AT("(121)") CRsrcSES(info, data);
         break;
     case 51:
     case 52:
 #line 124
-        pRsrc = new (__FILE__ "(124)") CRsrcMMP(info, data);
+        pRsrc = new KH_AT("(124)") CRsrcMMP(info, data);
         break;
     case 54:
 #line 126
-        pRsrc = new (__FILE__ "(126)") CRsrcCTD(info, data);
+        pRsrc = new KH_AT("(126)") CRsrcCTD(info, data);
         break;
     case 53:
     case 61:
 #line 129
-        pRsrc = new (__FILE__ "(129)") CRsrcVSV(info, data);
+        pRsrc = new KH_AT("(129)") CRsrcVSV(info, data);
         break;
     case 56:
 #line 131
-        pRsrc = new (__FILE__ "(131)") CRsrcSPD(info, data);
+        pRsrc = new KH_AT("(131)") CRsrcSPD(info, data);
         break;
     case 59:
 #line 132
-        pRsrc = new (__FILE__ "(132)") CRsrcSQD(info, data);
+        pRsrc = new KH_AT("(132)") CRsrcSQD(info, data);
         break;
     case 60:
 #line 133
-        pRsrc = new (__FILE__ "(133)") CRsrcLAD(info, data);
+        pRsrc = new KH_AT("(133)") CRsrcLAD(info, data);
         break;
     case 5:
 #line 135
-        pRsrc = new (__FILE__ "(135)") CRsrcDPX(info, data);
+        pRsrc = new KH_AT("(135)") CRsrcDPX(info, data);
         break;
     case 24:
 #line 136
-        pRsrc = new (__FILE__ "(136)") CRsrcTXA(info, data);
+        pRsrc = new KH_AT("(136)") CRsrcTXA(info, data);
         break;
     case 22:
     case 41:
 #line 140
-        pRsrc = new (__FILE__ "(140)") CRsrcALF(info, data);
+        pRsrc = new KH_AT("(140)") CRsrcALF(info, data);
         break;
     }
     return pRsrc;
@@ -188,7 +188,7 @@ static CRsrcData* createRsrcTex(const RsrcInfo& info, CBuf& data) {
     RsrcInfo infoTmp(info);
     if (infoTmp._cOption & 0x30) infoTmp._nRsrcType |= 0x800;
 #line 154
-    CRsrcTex* pTex = new (__FILE__ "(154)") CRsrcTex(infoTmp, data);
+    CRsrcTex* pTex = new KH_AT("(154)") CRsrcTex(infoTmp, data);
     CRsrcData* pRsrc = pTex;
     if (!pTex->getTexInfo()) {
         delete pTex;
@@ -198,7 +198,7 @@ static CRsrcData* createRsrcTex(const RsrcInfo& info, CBuf& data) {
         infoTmp._cOption = 2;
         infoTmp._cParam = 3;
 #line 167
-        pRsrc = new (__FILE__ "(167)") CRsrcTex(infoTmp, pTmp);
+        pRsrc = new KH_AT("(167)") CRsrcTex(infoTmp, pTmp);
     }
     return pRsrc;
 }
@@ -264,7 +264,7 @@ BOOL CRsrcGroupTagList::hasTagOpt(INT nFlag) const {
 
 void CRsrcGroupTagList::addTag(INT nGrpID) {
 #line 280
-    CRsrcGroupTag* p = new (__FILE__ "(280)") CRsrcGroupTag(nGrpID);
+    CRsrcGroupTag* p = new KH_AT("(280)") CRsrcGroupTag(nGrpID);
     if (p) pushBack(*p);
 }
 
@@ -414,7 +414,7 @@ void CRsrcTex::_setupTexData(CBuf& data, INT nType, INT nOpt) {
     BOOL bImd = (getRsrcType() & 0x7f) == 0x10;
     INT nAllocType = getAllocType();
 #line 535
-    m_pTexInfo = new (__FILE__ "(535)") TexInfo;
+    m_pTexInfo = new KH_AT("(535)") TexInfo;
 #line 536
     ASSERT(m_pTexInfo);
     BOOL bResult;
@@ -437,7 +437,7 @@ void CRsrcTex::_setupTexData(CBuf& data, INT nType, INT nOpt) {
             break;
         case 3: {
     #line 576
-            pNewData = new (__FILE__ "(576)") CBuf;
+            pNewData = new KH_AT("(576)") CBuf;
             data.copyTo(*pNewData);
             m_pTexInfo->_nInfoType = 0;
             m_pTexInfo->_nType = nType;
@@ -469,15 +469,15 @@ void CRsrcTex::_setupTexData(CBuf& data, INT nType, INT nOpt) {
                 ULONGLONG* pSrc = m_pTexInfo->_ClutInfo._pImage;
                 ULONGLONG* p = pSrc;
     #line 616
-                m_pTexInfo->_pExtendInfo0 = new (__FILE__ "(616)") TexInfo;
+                m_pTexInfo->_pExtendInfo0 = new KH_AT("(616)") TexInfo;
                 _setupExTexData(m_pTexInfo->_pExtendInfo0, pSrc, p, extend_size, 1);
                 p = m_pTexInfo->_pExtendInfo0->_ClutInfo._pImage;
     #line 620
-                m_pTexInfo->_pExtendInfo1 = new (__FILE__ "(620)") TexInfo;
+                m_pTexInfo->_pExtendInfo1 = new KH_AT("(620)") TexInfo;
                 _setupExTexData(m_pTexInfo->_pExtendInfo1, pSrc, p, extend_size, 2);
                 p = m_pTexInfo->_pExtendInfo1->_ClutInfo._pImage;
     #line 624
-                m_pTexInfo->_pExtendInfo2 = new (__FILE__ "(624)") TexInfo;
+                m_pTexInfo->_pExtendInfo2 = new KH_AT("(624)") TexInfo;
                 _setupExTexData(m_pTexInfo->_pExtendInfo2, pSrc, p, extend_size, 3);
             }
             break;
@@ -725,7 +725,7 @@ void CRsrcANN::_setupANN() {
     BYTE* pBinSrc = pSrc + 4;
     BYTE* pMotSrc = pBinSrc + m_nCount * sizeof(MOTBIN);
 #line 1231
-    CBuf* pTmp = new (__FILE__ "(1231)") CBuf;
+    CBuf* pTmp = new KH_AT("(1231)") CBuf;
 #line 1232
     ASSERT(pTmp);
     pTmp->allocBuf(m_nCount * sizeof(CMotData*));
@@ -740,7 +740,7 @@ void CRsrcANN::_setupANN() {
     }
     if (nMotCnt > 0) {
 #line 1250
-        pCMot = new (__FILE__ "(1250)") CMotData[nMotCnt];
+        pCMot = new KH_AT("(1250)") CMotData[nMotCnt];
 #line 1251
         ASSERT(pCMot);
     }
@@ -916,7 +916,7 @@ void CRsrcALF::_setupALF() {
     nNewBytes += pAlf->spot_suu * 0x20;
     nNewBytes += 0x10;
 #line 1710
-    CBuf* pTmp = new (__FILE__ "(1710)") CBuf;
+    CBuf* pTmp = new KH_AT("(1710)") CBuf;
 #line 1711
     ASSERT(pTmp);
     pTmp->allocBuf(nNewBytes);

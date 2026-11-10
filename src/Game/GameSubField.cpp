@@ -293,17 +293,17 @@ void CGameSubField::setupTasks() {
         return;
     }
     CTask* pSysTask = CTaskMan::getSysTask(1);
-    CMap* pMap = new (__FILE__ "(382)") CMap(pSysTask, CRcf::getMapID(CSceneInfo::getCurrentAreaNum(), CSceneInfo::getCurrentSceneNum()));
+    CMap* pMap = new KH_AT("(382)") CMap(pSysTask, CRcf::getMapID(CSceneInfo::getCurrentAreaNum(), CSceneInfo::getCurrentSceneNum()));
     ASSERT(pMap);
     Message::CMessageManager::getInstance();
     LockOnManager::CLockOnManager::getInstance();
     CEntityFactory::getInstance();
-    CGimmickManager* pGimmickManager = new (__FILE__ "(395)") CGimmickManager(pSysTask);
+    CGimmickManager* pGimmickManager = new KH_AT("(395)") CGimmickManager(pSysTask);
     CMapEnemyManager* pMapEnemyManager = NULL;
     if ((USHORT)(CSceneInfo::getCurrentBattleSceneNum() - 1000) < 50) {
-        pMapEnemyManager = new (__FILE__ "(400)") CMapEnemyManager(pSysTask);
+        pMapEnemyManager = new KH_AT("(400)") CMapEnemyManager(pSysTask);
     }
-    new (__FILE__ "(403)") PLM::CPlayerManager(pSysTask);
+    new KH_AT("(403)") PLM::CPlayerManager(pSysTask);
     PLM::createPlayer(0, NULL, 0);
     pMap->init(1, 1);
     CShadowModelMan::setAutomatic();

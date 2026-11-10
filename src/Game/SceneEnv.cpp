@@ -84,7 +84,7 @@ void CSceneEnvTask::disp() {}
 
 #line 188
 void CSceneEnv::initialize(CTask* p) {
-    m_pCol = new (__FILE__ "(189)") CSceneEnvColor[CH_MAX];
+    m_pCol = new KH_AT("(189)") CSceneEnvColor[CH_MAX];
     if (!(m_pCol)) AssertApp(__FILE__, __LINE__, "m_pCol", 0);
     m_iStopBit = ObjType::OBJ_BIT_CLEAR;
     m_iStopBitReq = ObjType::OBJ_BIT_CLEAR;
@@ -92,7 +92,7 @@ void CSceneEnv::initialize(CTask* p) {
     m_iStopGaugeReq = 0;
     m_iStatus = 0;
     if (m_pTask == NULL) {
-        new (__FILE__ "(198)") CSceneEnvTask(p);
+        new KH_AT("(198)") CSceneEnvTask(p);
     }
 }
 

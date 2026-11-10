@@ -10,6 +10,12 @@
 #ifdef KH_RETAIL
 #define KH_DEBUG(x...)
 #define KH_RELEASE(x...) x
+/* `new KH_AT("(123)") T`: the beta's debug allocation new (__FILE__ "(123)") T, a plain new T in retail */
+#define KH_AT(line)
+/* KH_VER(beta, retail): an expression or text the retail version changed (e.g. "MAX HP" -> "Max HP") */
+#define KH_VER(beta, retail) retail
+/* operator new(size KH_ATARG("(123)")): the debug operator new's message argument */
+#define KH_ATARG(line)
 /* The debug calls vanish with their arguments (no strings); an assert's condition stays an expression statement
  * (dropped unless it has side effects). */
 #define AssertApp(file, line, msg, exp) ((void)0)
@@ -24,6 +30,9 @@
 #else
 #define KH_DEBUG(x...) x
 #define KH_RELEASE(x...)
+#define KH_AT(line) (__FILE__ line)
+#define KH_VER(beta, retail) beta
+#define KH_ATARG(line) , __FILE__ line
 #endif
 
 #endif /* KHVERSION_H */

@@ -49,7 +49,7 @@ public:
     static void create(CTask* p) {
         if (!_pInstance) {
 #line 79 "Game/Debug/DWTBGM.h"
-            _pInstance = new (__FILE__ "(79)") CDebugBGMChanger(p);
+            _pInstance = new KH_AT("(79)") CDebugBGMChanger(p);
         }
     }
     static void destroy() {
@@ -80,7 +80,7 @@ static BOOL DebugBGMchangeCB(CDebugWindow* pObj, INT inY, INT inParam) {
             nCount++;
         }
 #line 85 "Game/Debug/DWTBGM.h"
-        s_debugWinBGM_lines = new (__FILE__ "(85)") DEBUG_WINDOW_LINE[nCount + 2];
+        s_debugWinBGM_lines = new KH_AT("(85)") DEBUG_WINDOW_LINE[nCount + 2];
         s_debugWinBGM_lines[0] = (DEBUG_WINDOW_LINE){"BGM \x83X\x83g\x83" "b\x83v", &CDebugWindow::none, 1, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, _StopBGM, NULL};
         if (nCount > 0) {
             CRsrcData* pRsrc;

@@ -363,12 +363,12 @@ BOOL CEffect::start(const EFFECT_DATA& Data, UINT nNo, ObjType::eObjType eType, 
         m_nEffNo = nNo;
         setType(eType);
 #line 511
-        m_pCrds = new (__FILE__ "(511)") CCoords(CCoords::_PP_SECONDARY);
+        m_pCrds = new KH_AT("(511)") CCoords(CCoords::_PP_SECONDARY);
         if (m_pCrds && m_pCrds->addCoord(nCrdNum, NULL) && m_pCrds->setSysFix(TRUE, CCoords::_PP_SECONDARY)) {
             m_pCrds->touch();
             if (nCrdNum > 1) {
 #line 517
-                m_pVecLst = new (__FILE__ "(517)") FVECTOR[nCrdNum];
+                m_pVecLst = new KH_AT("(517)") FVECTOR[nCrdNum];
                 if (!m_pVecLst) goto end;
             }
             result = TRUE;
@@ -424,7 +424,7 @@ void CEffect::setLightCalc(BOOL bVal) {
         m_iFlag |= 0x20;
         if (!m_pNLight) {
 #line 629
-            m_pNLight = new (__FILE__ "(629)") CLightUnit;
+            m_pNLight = new KH_AT("(629)") CLightUnit;
             ASSERT(m_pNLight);
             if (m_pCrds) m_pNLight->setAnchor(&Crd(0), 0);
         }

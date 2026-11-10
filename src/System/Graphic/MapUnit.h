@@ -21,7 +21,7 @@ template <class T> CTask* NewClass(CTask* map, const ZONEPARTS& parts) {
 
 
 
-    return new (__FILE__ "(80)") T(map, parts);
+    return new KH_AT("(80)") T(map, parts);
 
 
 }

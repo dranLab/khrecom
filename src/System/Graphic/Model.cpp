@@ -710,7 +710,7 @@ void CModel::linksub() {
         }
     }
     if (m_Mode == 0x10 && !m_pFadeModel) {
-        m_pFadeModel = new (__FILE__ "(1781)") CShadowModel;
+        m_pFadeModel = new KH_AT("(1781)") CShadowModel;
         if (m_pFadeModel) {
             m_pFadeModel->link(this);
             m_pWSMat = &CShadowModelMan::getWorldScreenMatrix();
@@ -753,7 +753,7 @@ void CModel::setShadowMapModel() {
     }
     rawMode = m_pData->getRawMode();
     if (!(rawMode & 0x100000)) return;
-    m_pShadowMapModel = new (__FILE__ "(1909)") CShadowMapModel;
+    m_pShadowMapModel = new KH_AT("(1909)") CShadowMapModel;
     if (m_pShadowMapModel) {
         m_pShadowMapModel->link(this);
         m_ColorScale.w = 1.0f;
@@ -887,7 +887,7 @@ void CModel::dispImpl() {
                 }
             } else {
                 if (!m_pFadeModel) {
-                    m_pFadeModel = new (__FILE__ "(2262)") CFadeModel;
+                    m_pFadeModel = new KH_AT("(2262)") CFadeModel;
                     if (m_pFadeModel) {
                         INT id;
                         m_pFadeModel->link(this);
@@ -1248,7 +1248,7 @@ void CSemiModel::initSemiZModel() {
     mode = m_pModel->getMode();
     rawMode = m_pModel->getModelData()->getRawMode();
     if (MODELDATA::isCharacterAndMap(mode) && !(rawMode & 0x1200000) && !(getSemiTrans() == ALPHA_BLEND)) {
-        m_pSemiZ = new (__FILE__ "(3441)") CSemiZModel;
+        m_pSemiZ = new KH_AT("(3441)") CSemiZModel;
         if (m_pSemiZ) {
             m_pSemiZ->m_SemiDraw = m_SemiDraw;
             m_pSemiZ->m_pModel = m_pModel;
@@ -1517,7 +1517,7 @@ void CModel::linkTexAnm(CTexAnm* pATbl, INT nANum) {
     if (pATbl && nANum > 0) {
         nTexMax = m_TransTexCount;
         if (!m_pTexAnm && nTexMax > 0 && CModelTexAnm::getTexAnmCount(pATbl, nANum, (TexInfoStub*)m_TexInfo, nTexMax) > 0) {
-            m_pTexAnm = new (__FILE__ "(4066)") CModelTexAnm;
+            m_pTexAnm = new KH_AT("(4066)") CModelTexAnm;
             if (!(m_pTexAnm)) AssertApp(__FILE__, 4067, "m_pTexAnm", 0);
             m_pTexAnm->setup(pATbl, nANum, (TexInfoStub*)m_TexInfo, nTexMax);
         }
@@ -1532,7 +1532,7 @@ void CModel::setupUVScroll(INT bVal) {
         if ((m_TexInfo[i].m_pTex[0x55] & 0x80) || bVal) {
             m_nFlag |= 0x80;
             bVal = m_TransTexCount;
-            m_TexUV = new (__FILE__ "(4086)") _TEX_UV_OFFSET[bVal];
+            m_TexUV = new KH_AT("(4086)") _TEX_UV_OFFSET[bVal];
             m_nFlag |= 0x40;
             break;
         }

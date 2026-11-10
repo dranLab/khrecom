@@ -596,7 +596,7 @@ BOOL CEffectMotion::initialize_(EET_HEADER* inHeader) {
     }
     m_iEffMotCtrlCount = 32;
 #line 1248
-    m_pEffMotCtrl = new (__FILE__ "(1248)") CEffectMotionCtrl[32](this);
+    m_pEffMotCtrl = new KH_AT("(1248)") CEffectMotionCtrl[32](this);
     if (!m_pEffMotCtrl) {
         m_iEffMotCtrlCount = 0;
         m_iNowCtrlCount = 0;

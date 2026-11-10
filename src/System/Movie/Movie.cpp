@@ -89,9 +89,9 @@ static BOOL _openMovie(const CHAR* pszFile, BOOL bForDebug) {
     CTask* pParent = CTaskMan::getSysTask(14);
     CMoviePlayerBase* p;
     if (bFileOK) {
-        p = new (__FILE__ "(148)") CMoviePlayer(pParent, bForDebug);
+        p = new KH_AT("(148)") CMoviePlayer(pParent, bForDebug);
     } else {
-        p = new (__FILE__ "(148)") CMoviePlayerDummy(pParent);
+        p = new KH_AT("(148)") CMoviePlayerDummy(pParent);
     }
     if (!p) AssertApp(__FILE__, __LINE__, "p", 0);
     /* volatile: keeps the store ahead of the vtable load (the original schedules it there) */

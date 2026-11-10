@@ -382,7 +382,7 @@ void CMap::init(BOOL bUseMapUnit, BOOL bTexClampRepeat) {
     if (pTXAData) {
         m_nTexAnmNum = pTXAData->getDataNum();
         if (m_nTexAnmNum > 0) {
-            m_pTexAnm = new (__FILE__ "(576)") CTexAnm[m_nTexAnmNum];
+            m_pTexAnm = new KH_AT("(576)") CTexAnm[m_nTexAnmNum];
             for (INT i = 0; i < m_nTexAnmNum; i++) {
                 m_pTexAnm[i].setup(*pTXAData, i);
                 m_pTexAnm[i].setSeq(0);
@@ -392,7 +392,7 @@ void CMap::init(BOOL bUseMapUnit, BOOL bTexClampRepeat) {
 #line 588
     _exclusiveSetup(bUseMapUnit);
 #line 596
-    m_pModelTbl = new (__FILE__ "(596)") CMapModel[m_nModelMax];
+    m_pModelTbl = new KH_AT("(596)") CMapModel[m_nModelMax];
     if (bTexClampRepeat) {
         for (int i = 0; i < m_nModelMax; i++) {
             m_pModelTbl[i].setClampRepeat(TRUE);
@@ -402,12 +402,12 @@ void CMap::init(BOOL bUseMapUnit, BOOL bTexClampRepeat) {
 
     MODELDATA* d = (MODELDATA*)_getAZFData(pAZF, m_pZone->parts[m_pZone->skynum].modelIndex + 1);
     if (d->getRawMode() & 4) {
-        m_LightUnit = new (__FILE__ "(606)") CMapLightUnit[m_nModelMax];
+        m_LightUnit = new KH_AT("(606)") CMapLightUnit[m_nModelMax];
     }
 
 
     if (m_pZone->skynum) {
-        m_pSky = new (__FILE__ "(611)") CSky(this, pAZF, m_pZone);
+        m_pSky = new KH_AT("(611)") CSky(this, pAZF, m_pZone);
     }
 
 
@@ -1174,11 +1174,11 @@ CSky::CSky(CTask* pInParent, void* pAZF, ZONEDATA* pZone) : CTaskSecondary(pInPa
     setPriority((TASK_PRIORITY)0x8000);
 
     m_modelSuu = pZone->skynum;
-    m_pModel = new (__FILE__ "(1813)") CModelBG[m_modelSuu];
+    m_pModel = new KH_AT("(1813)") CModelBG[m_modelSuu];
 
 
-    m_pRot = new (__FILE__ "(1816)") FVECTOR[m_modelSuu];
-    m_pRotShift = new (__FILE__ "(1817)") FVECTOR[m_modelSuu];
+    m_pRot = new KH_AT("(1816)") FVECTOR[m_modelSuu];
+    m_pRotShift = new KH_AT("(1817)") FVECTOR[m_modelSuu];
 
     m_vColor.setAll(1.0f);
 

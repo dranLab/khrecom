@@ -143,7 +143,7 @@ void CEnemyHeartsoldier::beginStateDead() {
                 playSmallDamageSE();
             }
         }
-        demo = new (__FILE__ "(148)") CBossDeadDemo(this, 0);
+        demo = new KH_AT("(148)") CBossDeadDemo(this, 0);
         if (demo) {
             demo->setup(getHandle(), &Heartsoldier::g_vDeadDemoPlayerPos, -1);
         }

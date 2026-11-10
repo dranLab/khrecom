@@ -189,11 +189,11 @@ void CLevelUp::main() {
         if (m_nTechHelpKind == 0) {
             idx = m_bPlayerKind * 2 + m_bPlayerMode;
 #line 175
-            m_pMenuModel[0] = new (__FILE__ "(175)") CMenuModel(this, playerRsrcIDTbl[idx][0] + 10000, NULL, 120, 110);
+            m_pMenuModel[0] = new KH_AT("(175)") CMenuModel(this, playerRsrcIDTbl[idx][0] + 10000, NULL, 120, 110);
             m_pMenuModel[0]->changeAnim(31, FALSE);
             if (m_bPlayerKind == 0) {
 #line 180
-                m_pMenuModel[1] = new (__FILE__ "(180)") CMenuModel(this, playerRsrcIDTbl[idx][1] + 10000,
+                m_pMenuModel[1] = new KH_AT("(180)") CMenuModel(this, playerRsrcIDTbl[idx][1] + 10000,
                                                        m_pMenuModel[0]->getCoord(pBoneName), 120, 110);
                 m_pMenuModel[1]->changeAnim(31, FALSE);
             } else {
@@ -237,7 +237,7 @@ void CLevelUp::main() {
     case 2:
         m_hLay = C2DMan::create(m_pLadName, 3);
 #line 248
-        m_pExplaneCtrl = new (__FILE__ "(248)") C2DSeqCtrl;
+        m_pExplaneCtrl = new KH_AT("(248)") C2DSeqCtrl;
         m_pExplaneCtrl->setLayer(12);
         m_pExplaneCtrl->enableColorCtrl(TRUE);
         vec.set(26.0f, 368.0f, 0.0f, 1.0f);
@@ -248,7 +248,7 @@ void CLevelUp::main() {
         m_pExplaneCtrl->addSeq(m_pSeqName, 0x41);
         rgba.col = 0x807C7C7C;
 #line 256
-        m_pExplaneFnt = new (__FILE__ "(256)") C2DFnt(0, 0, &rgba, 0x11, pUpText, 0x40);
+        m_pExplaneFnt = new KH_AT("(256)") C2DFnt(0, 0, &rgba, 0x11, pUpText, 0x40);
         m_pExplaneFnt->setLayer(12, 0);
         m_pExplaneCtrl->addFnt(m_pSeqName, m_pExplaneFnt);
         m_nStatusLad = 0;
@@ -333,7 +333,7 @@ void CLevelUp::main() {
         if (setUpMsg(4)) m_nStep = 10;
         if (m_nStep != 8 && m_bPlayerKind == 0 && m_nSelect == 2) {
 #line 387
-            new (__FILE__ "(387)") CTechHelp(this, availableTechTbl[m_nAvailable[2]][1]);
+            new KH_AT("(387)") CTechHelp(this, availableTechTbl[m_nAvailable[2]][1]);
             m_nStep = 9;
         }
         break;
@@ -384,7 +384,7 @@ void CLevelUp::main() {
         if (ret) {
             if (CPadHandler::isTrgCANCEL() || CPadHandler::isTrgOK() || m_fTimer < 0.0f) {
 #line 457
-                new (__FILE__ "(457)") CTechHelp(this, m_nTechHelpKind);
+                new KH_AT("(457)") CTechHelp(this, m_nTechHelpKind);
                 m_nStep = 16;
             }
         }
@@ -407,16 +407,16 @@ void CLevelUp::main() {
 INT CLevelUp::setWinInfo(INT nSetCmd) {
     static char* infoTextTbl[2][5][3] = {
         {
-            { "MAX HP", "%4d", "%4d \xf9Y\x81\xa8\xf9R%4d" },
-            { "MAX CP", "%4d", "%4d \xf9Y\x81\xa8\xf9R%4d" },
+            { KH_VER("MAX HP", "Max HP"), "%4d", "%4d \xf9Y\x81\xa8\xf9R%4d" },
+            { KH_VER("MAX CP", "Max CP"), "%4d", "%4d \xf9Y\x81\xa8\xf9R%4d" },
             { "Sleights", "", "\xf9R%s" },
             { "EXP", "%d", "%d" },
             { "Next Level", "%d", "%d" },
         },
         {
-            { "MAX HP", "%4d", "%4d \xf9Y\x81\xa8\xf9R%4d" },
+            { KH_VER("MAX HP", "Max HP"), "%4d", "%4d \xf9Y\x81\xa8\xf9R%4d" },
             { "AP", "%4d", "%4d \xf9Y\x81\xa8\xf9R%4d" },
-            { "MAX DP", "%4d", "%4d \xf9Y\x81\xa8\xf9R%4d" },
+            { KH_VER("MAX DP", "Max DP"), "%4d", "%4d \xf9Y\x81\xa8\xf9R%4d" },
             { "EXP", "%d", "%d" },
             { "Next Level", "%d", "%d" },
         },
@@ -436,7 +436,7 @@ INT CLevelUp::setWinInfo(INT nSetCmd) {
     switch (nSetCmd) {
     case 0:
 #line 552
-        m_pWinInfoCtrl = new (__FILE__ "(552)") C2DSeqCtrl;
+        m_pWinInfoCtrl = new KH_AT("(552)") C2DSeqCtrl;
         m_pWinInfoCtrl->setLayer(12);
         m_pWinInfoCtrl->enableColorCtrl(TRUE);
         vec.set(390.0f, 286.0f, 0.0f);
@@ -447,29 +447,29 @@ INT CLevelUp::setWinInfo(INT nSetCmd) {
         for (INT i = 0; i < 5; i++) {
             C2DSeqCtrl* p2DSeqCtrl;
 #line 563
-            p2DSeqCtrl = m_pInfoCtrl[i] = new (__FILE__ "(563)") C2DSeqCtrl;
+            p2DSeqCtrl = m_pInfoCtrl[i] = new KH_AT("(563)") C2DSeqCtrl;
             p2DSeqCtrl->setLayer(13);
             p2DSeqCtrl->enableColorCtrl(TRUE);
             p2DSeqCtrl->addSeq(m_pSeqName, infoBaseSeqTbl[i]);
             p2DSeqCtrl->setParent(m_pWinInfoCtrl);
 #line 571
-            p2DSeqCtrl2 = m_pInfoFntCtrl[i][0] = new (__FILE__ "(571)") C2DSeqCtrl;
+            p2DSeqCtrl2 = m_pInfoFntCtrl[i][0] = new KH_AT("(571)") C2DSeqCtrl;
             p2DSeqCtrl2->setLayer(13);
             p2DSeqCtrl2->enableColorCtrl(TRUE);
             p2DSeqCtrl2->addSeq(m_pSeqName, infoFntLRSeqTbl[i][0]);
             p2DSeqCtrl2->setParent(p2DSeqCtrl);
 #line 577
-            p2DFnt = m_pInfoFnt[i][0] = new (__FILE__ "(577)") C2DFnt(0, 0, &rgba, 15, infoTextTbl[m_bPlayerKind][i][0], 0x240);
+            p2DFnt = m_pInfoFnt[i][0] = new KH_AT("(577)") C2DFnt(0, 0, &rgba, 15, infoTextTbl[m_bPlayerKind][i][0], 0x240);
             p2DFnt->setLayer(13, 0);
             p2DSeqCtrl2->addFnt(m_pSeqName, p2DFnt);
 #line 583
-            p2DSeqCtrl2 = m_pInfoFntCtrl[i][1] = new (__FILE__ "(583)") C2DSeqCtrl;
+            p2DSeqCtrl2 = m_pInfoFntCtrl[i][1] = new KH_AT("(583)") C2DSeqCtrl;
             p2DSeqCtrl2->setLayer(13);
             p2DSeqCtrl2->enableColorCtrl(TRUE);
             p2DSeqCtrl2->addSeq(m_pSeqName, infoFntLRSeqTbl[i][1]);
             p2DSeqCtrl2->setParent(p2DSeqCtrl);
 #line 589
-            p2DFnt = m_pInfoFnt[i][1] = new (__FILE__ "(589)") C2DFnt(0, 0, &rgba, i < 3 ? 15 : 14, NULL, 0x241);
+            p2DFnt = m_pInfoFnt[i][1] = new KH_AT("(589)") C2DFnt(0, 0, &rgba, i < 3 ? 15 : 14, NULL, 0x241);
             p2DFnt->setLayer(13, 0);
             p2DSeqCtrl2->addFnt(m_pSeqName, p2DFnt);
             pText = infoTextTbl[m_bPlayerKind][i][1];
@@ -495,7 +495,7 @@ INT CLevelUp::setWinInfo(INT nSetCmd) {
             }
         }
 #line 620
-        m_pInfoSelCtrl = new (__FILE__ "(620)") C2DSeqCtrl;
+        m_pInfoSelCtrl = new KH_AT("(620)") C2DSeqCtrl;
         m_pInfoSelCtrl->setLayer(12);
         m_pInfoSelCtrl->enableColorCtrl(TRUE);
         m_pInfoSelCtrl->addSeq(m_pSeqName, 0x21);
@@ -585,7 +585,7 @@ INT CLevelUp::setWinAb(INT nSetCmd) {
 
         for (INT i = 0; i < 3; i++) {
 #line 747
-            p2DSeqCtrl = m_pWinAbCtrl[i] = new (__FILE__ "(747)") C2DSeqCtrl;
+            p2DSeqCtrl = m_pWinAbCtrl[i] = new KH_AT("(747)") C2DSeqCtrl;
             p2DSeqCtrl->enableColorCtrl(TRUE);
             p2DSeqCtrl->setLayer(12);
             p2DSeqCtrl->setPos(vec);
@@ -598,11 +598,11 @@ INT CLevelUp::setWinAb(INT nSetCmd) {
             }
             vec.y += 94.0f;
 #line 759
-            p2DFnt = m_pWinAbFnt[i][0] = new (__FILE__ "(759)") C2DFnt(0, 0, &rgba, 17, abilityTextTbl[m_bPlayerKind][i][0], 0x240);
+            p2DFnt = m_pWinAbFnt[i][0] = new KH_AT("(759)") C2DFnt(0, 0, &rgba, 17, abilityTextTbl[m_bPlayerKind][i][0], 0x240);
             p2DFnt->setLayer(12, 0);
             p2DSeqCtrl->addFntShift(m_pSeqName, p2DFnt, 72.0f, 2.0f);
 #line 764
-            p2DFnt = m_pWinAbFnt[i][1] = new (__FILE__ "(764)") C2DFnt(0, 0, &rgba, 15, abilityTextTbl[m_bPlayerKind][i][1], 0x240);
+            p2DFnt = m_pWinAbFnt[i][1] = new KH_AT("(764)") C2DFnt(0, 0, &rgba, 15, abilityTextTbl[m_bPlayerKind][i][1], 0x240);
             p2DFnt->setLayer(12, 0);
             p2DSeqCtrl->addFntShift(m_pSeqName, p2DFnt, 50.0f, 37.0f);
         }
@@ -622,11 +622,11 @@ INT CLevelUp::setWinAb(INT nSetCmd) {
             }
             if (fgLastEnd >= 2) {
 #line 794
-                m_pCursorCtrl = new (__FILE__ "(794)") C2DSeqCtrl;
+                m_pCursorCtrl = new KH_AT("(794)") C2DSeqCtrl;
                 m_pCursorCtrl->setLayer(13);
                 m_pCursorCtrl->addSeq(m_pSeqName, 12);
 #line 797
-                m_pLightCtrl = new (__FILE__ "(797)") C2DSeqCtrl;
+                m_pLightCtrl = new KH_AT("(797)") C2DSeqCtrl;
                 m_pLightCtrl->setLayer(13);
                 m_pLightCtrl->addSeq(m_pSeqName, 16);
                 m_fgCursorMove = -1;
@@ -705,14 +705,14 @@ INT CLevelUp::setWinLvl(INT nSetCmd) {
 
         rgba.col = 0x807C7C7C;
 #line 912
-        m_pLevelCtrl = new (__FILE__ "(912)") C2DSeqCtrl;
+        m_pLevelCtrl = new KH_AT("(912)") C2DSeqCtrl;
         m_pLevelCtrl->setLayer(12);
         m_pLevelCtrl->enableColorCtrl(TRUE);
         m_pLevelCtrl->setPos(vec);
         m_pLevelCtrl->addSeq(m_pSeqName, 0x44);
         sprintf(pStaticBuf, pLevelStr, CStatus::getLV());
 #line 918
-        m_pLevelFnt = new (__FILE__ "(918)") C2DFnt(0, 0, &rgba, 15, pStaticBuf, 0x242);
+        m_pLevelFnt = new KH_AT("(918)") C2DFnt(0, 0, &rgba, 15, pStaticBuf, 0x242);
         m_pLevelFnt->setLayer(12, 0);
         m_pLevelCtrl->addFntShift(m_pSeqName, m_pLevelFnt, 0.0f, 8.0f);
         m_nStatusLvl = 0;
@@ -751,7 +751,7 @@ INT CLevelUp::setEffect(INT nSetCmd) {
 
 
 #line 975
-        m_pEffectCtrl = new (__FILE__ "(975)") C2DSeqCtrl;
+        m_pEffectCtrl = new KH_AT("(975)") C2DSeqCtrl;
         m_pEffectCtrl->setLayer(12);
         m_pEffectCtrl->setPos(vec);
         m_pEffectCtrl->addSeq(m_pSeqName, 0x38);
@@ -773,7 +773,7 @@ INT CLevelUp::setEffect(INT nSetCmd) {
         break;
     case 8:
 #line 1003
-        m_pUpEffectCtrl = new (__FILE__ "(1003)") C2DSeqCtrl;
+        m_pUpEffectCtrl = new KH_AT("(1003)") C2DSeqCtrl;
         m_pUpEffectCtrl->setLayer(15);
         vec.set(120.0f, 0.0f, 0.0f, 1.0f);
 
@@ -802,7 +802,7 @@ INT CLevelUp::setUpMsg(INT nSetCmd) {
     switch (nSetCmd) {
     case 0:
 #line 1041
-        m_pUpMsgCtrl = new (__FILE__ "(1041)") C2DSeqCtrl;
+        m_pUpMsgCtrl = new KH_AT("(1041)") C2DSeqCtrl;
         m_pUpMsgCtrl->setLayer(13);
         m_pUpMsgCtrl->enableColorCtrl(TRUE);
         if (m_nTechHelpKind == 0) {
@@ -823,7 +823,7 @@ INT CLevelUp::setUpMsg(INT nSetCmd) {
         }
         rgba.col = 0x807C7C7C;
 #line 1063
-        m_pUpMsgFnt = new (__FILE__ "(1063)") C2DFnt(0, 0, &rgba, 16, pStaticBuf, 0x242);
+        m_pUpMsgFnt = new KH_AT("(1063)") C2DFnt(0, 0, &rgba, 16, pStaticBuf, 0x242);
         m_pUpMsgFnt->setLayer(13, 0);
         m_pUpMsgFnt->setSpace(0, 0x40);
         m_pUpMsgCtrl->addFntShift(m_pSeqName, m_pUpMsgFnt, 0.0f, -12.0f);
@@ -881,3 +881,4 @@ void CLevelUp::moveCursor(FLOAT fFrameRate) {
     m_pLightCtrl->setPos(m_vPosLightCurrent);
 }
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .data .rodata .bss

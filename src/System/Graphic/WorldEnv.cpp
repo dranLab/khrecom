@@ -88,11 +88,11 @@ void CWorldEnv::initialize() {
     _nWorldScreenTQ = 0;
     _bMikeReady = FALSE;
 
-    _pFrustum = new (__FILE__ "(103)") CFrustum;
-    _pBBHelper = new (__FILE__ "(104)") CBillboardHelper;
+    _pFrustum = new KH_AT("(103)") CFrustum;
+    _pBBHelper = new KH_AT("(104)") CBillboardHelper;
 
 
-    _pEffLightMan = new (__FILE__ "(107)") CEffectLightMan;
+    _pEffLightMan = new KH_AT("(107)") CEffectLightMan;
 }
 #else
 /* MATCH: placeholder for initialize's .rodata (its allocation messages) */

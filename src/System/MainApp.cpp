@@ -581,7 +581,7 @@ static void _setupManagers() {
     CCoordMan::initialize();
     CModelMan::initialize();
     CTaskMan::initialize();
-    _pMasterFader = new (__FILE__ "(840)") CColorFader;
+    _pMasterFader = new KH_AT("(840)") CColorFader;
     CCollObj::collisionInit();
     MainAppSingletons::initCollUtil();
     CRsrcDB::initialize();
@@ -1336,7 +1336,7 @@ static void _disposeTraceOnScreen() {
 
 static void _initFntTbl() {
 #line 2334
-    s_pTrScrStrTbl = new (__FILE__ "(2334)") CFnt[24];
+    s_pTrScrStrTbl = new KH_AT("(2334)") CFnt[24];
     if (!(s_pTrScrStrTbl)) AssertApp(__FILE__, __LINE__, "s_pTrScrStrTbl", 0);
     for (UINT i = 0; i < 24; i++) {
         CFnt& f = s_pTrScrStrTbl[i];
@@ -1347,7 +1347,7 @@ static void _initFntTbl() {
         f.setLayerFG(25);
     }
 #line 2348
-    s_pTrScrZabu = new (__FILE__ "(2348)") CTile;
+    s_pTrScrZabu = new KH_AT("(2348)") CTile;
     s_pTrScrZabu->m_P0.set(-0xDC0, -0xAA0); // MATCH: the original reloads s_pTrScrZabu for each later statement (volatile reads)
     (*(CTile* volatile*)&s_pTrScrZabu)->m_P1.set(0xDC0, 0xAA0);
     (*(CTile* volatile*)&s_pTrScrZabu)->m_C0.set(1, 1, 1, 0x40);

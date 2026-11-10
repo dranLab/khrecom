@@ -177,6 +177,15 @@ def compiler_commands(compiler: str) -> tuple[str, str | None]:
 
 
 SOURCE_DATA = re.compile(r"^\s*(?://|#)\s*SOURCE DATA:\s*(.*?)\s*$", re.MULTILINE)
+
+
+def source_data_marker(version: str) -> re.Pattern:
+    """The data sections a source gives: `// SOURCE DATA: ...` for the reference version, `// SOURCE DATA <VERSION>:
+    ...` for another one (its data differ: no assert strings); without its own marker a unit's data stays that
+    version's assembly."""
+    if version == versions()[0]:
+        return SOURCE_DATA
+    return re.compile(rf"^\s*(?://|#)\s*SOURCE DATA {re.escape(version)}:\s*(.*?)\s*$", re.MULTILINE)
 SOURCE_SUFFIXES = (".c", ".cpp", ".s")
 
 
@@ -218,7 +227,7 @@ def source_config(splat_yaml: Path, opts: dict, build_cfg: dict) -> tuple[Path, 
         name = re.escape(unit)
         text, count = re.subn(rf"^(      - \[0x[0-9A-F]+, )(?:asm|c|cpp)(, {name}\])", rf"\g<1>{kind}\2", text,
                               flags=re.MULTILINE)
-        marker = SOURCE_DATA.search(path.read_text(encoding="latin-1"))
+        marker = source_data_marker(Path(opts["basename"]).name).search(path.read_text(encoding="latin-1"))
         sections = marker.group(1).split() if marker else []
         # A data-only unit (no code, e.g. libppp/draw/draw_w) may have a source too, if it gives its data from it.
         # A version with a `sources:` filter (not the reference) may lack the unit (debug code the retail ELF
@@ -408,6 +417,46 @@ def split_common(opts: dict) -> tuple[str, list[tuple[str, str, int]]] | None:
     lines = "".join(f"{line.group(1)}{p[0]}(.bss);\n" for p in pieces)
     ld_script.write_text(script[: line.start()] + lines + script[line.end():], encoding="utf-8")
     return obj, pieces
+
+
+LINKONCE = ".linkonce"  # tools/split_version.py: a unit's part of the .gnu.linkonce blocks (retail)
+
+
+def linkonce_from_source(opts: dict, by_object: dict) -> tuple[set[str], dict[str, str]]:
+    """A version built without -g (retail) has each object's weak functions and vtables in .gnu.linkonce sections,
+    linked after all .text / .data (tools/split_version.py: subsegments `<unit>.linkonce`). For a unit compiled from
+    source those come from its object: the linker script's lines of the `<unit>.linkonce` assembly objects take the
+    object's .gnu.linkonce.t.* / .gnu.linkonce.d.* sections instead. Returns (the assembly objects no longer linked,
+    unit -> its linkonce address ranges for ee_asm_compat.py --linkonce, "none" when it has none)."""
+    compiled = {}
+    for obj, entries in by_object.items():
+        if entries[0].src_paths[0].suffix in (".c", ".cpp", ".cc"):
+            compiled[entries[0].segment.name] = obj
+    ranges: dict[str, list[str]] = {}
+    replace: dict[str, str] = {}  # assembly object -> its new input line
+    for obj, entries in by_object.items():
+        name = entries[0].segment.name
+        if not name.endswith(LINKONCE) or name[: -len(LINKONCE)] not in compiled:
+            continue
+        unit = name[: -len(LINKONCE)]
+        for entry in entries:
+            section = TYPE_SECTION.get(entry.segment.type.lstrip("."))
+            if section in (".text", ".data") and section == entry.section_order_type and entry.segment.vram_start:
+                ranges.setdefault(unit, []).append(f"0x{entry.segment.vram_start:X}-0x{entry.segment.vram_end:X}")
+                kind = "t" if section == ".text" else "d"
+                replace[obj] = f"{compiled[unit]}(.gnu.linkonce.{kind}.*);"
+    if replace:
+        ld_script = ROOT / opts["ld_script_path"]
+        out = []
+        for line in ld_script.read_text(encoding="utf-8").splitlines():
+            m = re.match(r"^(\s*)(\S+\.o)\(([^)]*)\);$", line)
+            if m and m.group(2) in replace:
+                if m.group(3) in (".text*", ".data*"):
+                    out.append(m.group(1) + replace[m.group(2)])
+                continue  # the empty other sections of the assembly object
+            out.append(line)
+        ld_script.write_text("\n".join(out) + "\n", encoding="utf-8")
+    return set(replace), {u: ",".join(r) for u, r in ranges.items()} | {u: "none" for u in compiled if u not in ranges}
 
 
 def address_labels(opts: dict) -> dict[str, int]:
@@ -617,7 +666,10 @@ def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg
                 by_object.setdefault(entry.object_path.as_posix(), []).append(entry)
 
         unit_data = unit_data_ranges(split.linker_writer.entries)
-        objects = list(by_object)
+        linkonce_asm, linkonce = (set(), {}) if version == versions()[0] else linkonce_from_source(opts, by_object)
+        compiled_obj = {e[0].segment.name: o for o, e in by_object.items()
+                        if e[0].src_paths[0].suffix in (".c", ".cpp", ".cc")}
+        objects = [o for o in by_object if o not in linkonce_asm]
         compiled: dict[str, tuple[str, str]] = {}
         sndll = None  # (object, entries) of the SN DLL table, generated by tools/sndll.py (see below)
         common_obj, common_pieces = common or (None, [])
@@ -643,7 +695,7 @@ def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg
                     variables={"pieces": f"{build_dir}/common/pieces.txt",
                                "objects": f"{build_dir}/common/objects.txt"})
         for obj, entries in by_object.items():
-            if obj == common_obj:
+            if obj == common_obj or obj in linkonce_asm:
                 continue
             src = entries[0].src_paths[0].as_posix()
             suffix = entries[0].src_paths[0].suffix
@@ -670,6 +722,8 @@ def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg
                     # ($out is not expanded in a build's own variables: the paths are written out)
                     naming = {"name_labels": f"{sys.executable} tools/name_data_labels.py {obj} {obj}.labels"}
                     implicit += ["tools/name_data_labels.py", f"{obj}.labels"]
+                if unit in linkonce:
+                    tc["compat_extra"] = (tc["compat_extra"] + f" --linkonce {linkonce[unit]}").strip()
                 n.build(obj, "cc", src, variables={**align, **naming, "own_data": own_data_ranges(entries),
                                                  "unit_data": unit_data.get(unit, "none"),
                                                  **{k: v for k, v in tc.items() if v != default_tc[k]}},
@@ -695,6 +749,15 @@ def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg
             lines = []
             lines += [f"{piece} .bss 0x{addr:X}" for piece, _, addr in common_pieces]
             for other, other_entries in by_object.items():
+                if other in linkonce_asm:  # replaced by a compiled object's .gnu.linkonce sections:
+                    for entry in other_entries:
+                        section = TYPE_SECTION.get(entry.segment.type.lstrip("."))
+                        if section in (".text", ".data") and section == entry.section_order_type and \
+                                entry.segment.vram_start:
+                            src_obj = compiled_obj[entry.segment.name[: -len(LINKONCE)]]
+                            kind = "t" if section == ".text" else "d"
+                            lines.append(f"{src_obj} .gnu.linkonce.{kind}.* 0x{entry.segment.vram_start:X}")
+                    continue
                 if other in (obj, common_obj):
                     continue
                 for entry in other_entries:

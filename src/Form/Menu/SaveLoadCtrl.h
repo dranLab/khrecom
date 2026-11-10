@@ -408,7 +408,7 @@ inline C2DSeqScrollbarCtrl::C2DSeqScrollbarCtrl(CTask* pParent)
     for (INT i = 0; i < 3; i++) {
 
 
-        m_pParts[i] = new (__FILE__ "(310)") C2DSeqAgent(pParent);
+        m_pParts[i] = new KH_AT("(310)") C2DSeqAgent(pParent);
     }
 }
 

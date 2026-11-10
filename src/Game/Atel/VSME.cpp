@@ -3325,7 +3325,7 @@ INT CVSM::execExt3Code(INT op, eATEL_REQ_RET& ret) {
                     if (CGameWork::getByte(0, 0x61) == 3) break;
                     TRACE("\x83X\x83g\x83" "b\x83N\x8bZ\x8fK\x93\xbe:%d\n", param1.I);
                     CTechnic::addTechnic(param1.I);
-                    if (param2.I) new (__FILE__ "(2623)") CLevelUp(CTaskMan::getSysTask(1), param1.I);
+                    if (param2.I) new KH_AT("(2623)") CLevelUp(CTaskMan::getSysTask(1), param1.I);
                 }
                 break;
             case 8:
@@ -3353,7 +3353,7 @@ INT CVSM::execExt3Code(INT op, eATEL_REQ_RET& ret) {
                 CShadowModelMan::setAlphaDensity(param1.F);
                 break;
             case 16:
-                new (__FILE__ "(2672)") CAtelTutorial(CTaskMan::getSysTask(0x1A));
+                new KH_AT("(2672)") CAtelTutorial(CTaskMan::getSysTask(0x1A));
                 break;
             case 17:
                 m_S[m_SP].I = CSceneInfo::getCurrentFloorNumber();
@@ -3384,13 +3384,13 @@ INT CVSM::execExt3Code(INT op, eATEL_REQ_RET& ret) {
                 CShadowModelMan::setColorDensity(param1.F);
                 break;
             case 23:
-                m_pAtelCard = new (__FILE__ "(2713)") CAtelCardSeq(CTaskMan::getSysTask(0x1A), 0, param1.I, param2.I);
+                m_pAtelCard = new KH_AT("(2713)") CAtelCardSeq(CTaskMan::getSysTask(0x1A), 0, param1.I, param2.I);
                 break;
             case 24:
-                m_pAtelCard = new (__FILE__ "(2716)") CAtelCardSeq(CTaskMan::getSysTask(0x1A), 1, param1.I, param2.I);
+                m_pAtelCard = new KH_AT("(2716)") CAtelCardSeq(CTaskMan::getSysTask(0x1A), 1, param1.I, param2.I);
                 break;
             case 25:
-                m_pAtelCard = new (__FILE__ "(2719)") CAtelCardSeq(CTaskMan::getSysTask(0x1A), 2, param1.I, param2.I);
+                m_pAtelCard = new KH_AT("(2719)") CAtelCardSeq(CTaskMan::getSysTask(0x1A), 2, param1.I, param2.I);
                 break;
             case 26:
                 m_pAtelCard->out();
@@ -3564,7 +3564,7 @@ INT CVSM::execExt3Code(INT op, eATEL_REQ_RET& ret) {
                 break;
             }
             case 56:
-                new (__FILE__ "(3000)") CMoogleShopCore(CTaskMan::getSysTask(1));
+                new KH_AT("(3000)") CMoogleShopCore(CTaskMan::getSysTask(1));
                 break;
             case 57:
                 if (!CGameWork::getFlag(1, 0x33)) {
@@ -5786,7 +5786,7 @@ CActorDebug::CActorDebug(CTask* pParent) : CTask(pParent, 0x8000), m_pWindow(NUL
         ((CAtel*)pA)->getVSM()->getAvatarName(DebugWork::g_dw.event.iNpcID),
         0x90, -(SCREEN_HEIGHT >> 1) + 0x18, 7, 12, 14, 0, 6, DWTEvent::debugNpcInfoLine, NULL, NULL
     };
-    m_pWindow = new (__FILE__ "(6871)") CDebugWindow(this, debugActorInfo);
+    m_pWindow = new KH_AT("(6871)") CDebugWindow(this, debugActorInfo);
     m_pWindow->dispOn(0);
 }
 CActorDebug::~CActorDebug() {

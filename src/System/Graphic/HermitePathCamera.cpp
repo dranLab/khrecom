@@ -31,7 +31,7 @@ CHermitePathCamera::CHermitePathCamera(CTask* p, const FVECTOR* pPath, INT iPath
                                        const PATH_TARGET_PARAM& sTargetParam)
     : CCamera(p, -1) {
     m_iStatus = 1;
-    m_pPath = new (__FILE__ "(32)") CPathVector(pPath, iPathMax);
+    m_pPath = new KH_AT("(32)") CPathVector(pPath, iPathMax);
     ASSERT(m_pPath);
     _init(pTarget, sTargetParam);
 }
@@ -173,7 +173,7 @@ void CHermitePathCamera::_init(const CTask* pTarget, const PATH_TARGET_PARAM& sT
 
 #line 208
 void CHermitePathCamera::_setMyCamPath(const PATH_TARGET_PARAM& sTargetParam) {
-    m_pMyHPath = new (__FILE__ "(209)") CHermitePath;
+    m_pMyHPath = new KH_AT("(209)") CHermitePath;
     ASSERT(m_pMyHPath);
     m_pMyHPath->makePathFromPathVector(m_pPath);
     if (sTargetParam.sPDParam.iFlags & 1) {
@@ -533,7 +533,7 @@ void CHermitePathCamera::initBGCheck(BOOL fgTransparency) {
         m_iStatus &= ~4;
     }
     if (!m_pCollMapCamera) {
-        m_pCollMapCamera = new (__FILE__ "(734)") CCollMapCamera;
+        m_pCollMapCamera = new KH_AT("(734)") CCollMapCamera;
     }
 }
 

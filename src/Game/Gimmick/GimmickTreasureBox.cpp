@@ -250,7 +250,7 @@ void CGimmickTreasureBox::NormalMain() {
         setEntityFlag(0, 0x10000);
         g_pPlayer->cancelLockon();
         CSceneEnv::setStop((ObjType::eObjBit)(ObjType::OBJ_BIT_BULLET | ObjType::OBJ_BIT_ENEMY));
-        m_pPathCamera = new (__FILE__ "(486)") CPathCamera(this);
+        m_pPathCamera = new KH_AT("(486)") CPathCamera(this);
         CGameWork::setInt(1, 0xE2, -1);
         if (m_pPathCamera->init("test", TRUE, FALSE, 0x80)) {
             m_pPathCamera->initBGCheck(FALSE);
@@ -278,7 +278,7 @@ void CGimmickTreasureBox::NormalMain() {
             CSceneEnv::setStop((ObjType::eObjBit)(ObjType::OBJ_BIT_TRUE_ALL & ~(ObjType::OBJ_BIT_2D | ObjType::OBJ_BIT_FUKIDASI | ObjType::OBJ_BIT_GIMMICK)));
             if (prize.StockKind) {
                 CTechnic::addTechnic(prize.StockKind);
-                new (__FILE__ "(525)") CLevelUp(getSysTask(1), prize.StockKind);
+                new KH_AT("(525)") CLevelUp(getSysTask(1), prize.StockKind);
                 m_Step = 7;
                 CGameWork::setFlag(1, 5, TRUE);
             } else if (prize.Kind == 0) {
@@ -358,7 +358,7 @@ void CGimmickTreasureBox::EnemyMain() {
         setEntityFlag(0, 0x10000);
         g_pPlayer->cancelLockon();
         CSceneEnv::setStop((ObjType::eObjBit)(ObjType::OBJ_BIT_BULLET | ObjType::OBJ_BIT_ENEMY));
-        m_pPathCamera = new (__FILE__ "(675)") CPathCamera(this);
+        m_pPathCamera = new KH_AT("(675)") CPathCamera(this);
         CGameWork::setInt(1, 0xE2, -1);
         if (m_pPathCamera->init("test", TRUE, FALSE, 0x80)) {
             m_pPathCamera->initBGCheck(FALSE);

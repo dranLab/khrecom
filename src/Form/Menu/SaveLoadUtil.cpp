@@ -940,8 +940,8 @@ CMemocaDataEntries::CMemocaDataEntries(INT nEntryCount) {
     m_pSysDataCOM = NULL;
 #line 1461
     if (!(0 < nEntryCount)) AssertApp(__FILE__, __LINE__, "0 < nEntryCount", 0);
-    m_DataTbl = new (__FILE__ "(1462)") GameDataHeader[nEntryCount];
-    m_DataAttrTbl = new (__FILE__ "(1463)") GameDataAttr[nEntryCount];
+    m_DataTbl = new KH_AT("(1462)") GameDataHeader[nEntryCount];
+    m_DataAttrTbl = new KH_AT("(1463)") GameDataAttr[nEntryCount];
     clearAll();
 }
 

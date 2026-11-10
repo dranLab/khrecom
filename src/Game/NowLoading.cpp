@@ -79,7 +79,7 @@ INT CNowLoading::getMode() {
 void CNowLoading::start() {
     if (!s_pInstance) {
 #line 121
-        s_pInstance = new (__FILE__ "(121)")
+        s_pInstance = new KH_AT("(121)")
             CNowLoading(CTaskMan::getSysTask(0));
     }
     if (s_pInstance) {
@@ -140,7 +140,7 @@ void CNowLoading::disp() {
 void CNowLoading::setupSprite() {
     if (!m_pSprite) {
 #line 236
-        m_pSprite = new (__FILE__ "(236)") CSprt;
+        m_pSprite = new KH_AT("(236)") CSprt;
         if (!m_pSprite) AssertApp(__FILE__, __LINE__, "m_pSprite", 0);
     }
     m_nX = 208;

@@ -39,12 +39,12 @@ void CCollObj::init(COLL_KIND collKind, COLL_TYPE collType, HANDLE hTask, INT fg
     switch (collType) {
     case COLL_TYPE_POINT:
 #line 51
-        m_pCollision = new (__FILE__ "(51)") CPointCollision;
+        m_pCollision = new KH_AT("(51)") CPointCollision;
         break;
     case COLL_TYPE_SPHERE:
     case COLL_TYPE_CAPSULE: {
 #line 55
-        CSphereCollision* pSphere = new (__FILE__ "(55)") CSphereCollision;
+        CSphereCollision* pSphere = new KH_AT("(55)") CSphereCollision;
         m_pCollision = pSphere;
         if (collKind & 1) pSphere->m_shiftY = 0;
         break;
@@ -52,27 +52,27 @@ void CCollObj::init(COLL_KIND collKind, COLL_TYPE collType, HANDLE hTask, INT fg
     case COLL_TYPE_COLUMN:
     case COLL_TYPE_COLUMNR:
 #line 65
-        m_pCollision = new (__FILE__ "(65)") CColumnCollision;
+        m_pCollision = new KH_AT("(65)") CColumnCollision;
         break;
     case COLL_TYPE_POLY3:
 #line 71
-        m_pCollision = new (__FILE__ "(71)") CPoly3Collision;
+        m_pCollision = new KH_AT("(71)") CPoly3Collision;
         break;
     case COLL_TYPE_MODEL:
 #line 74
-        m_pCollision = new (__FILE__ "(74)") CModelCollision;
+        m_pCollision = new KH_AT("(74)") CModelCollision;
         break;
     case COLL_TYPE_ETC:
 #line 77
-        m_pCollision = new (__FILE__ "(77)") CEtcCollision;
+        m_pCollision = new KH_AT("(77)") CEtcCollision;
         break;
     case COLL_TYPE_CIRCLE:
 #line 80
-        m_pCollision = new (__FILE__ "(80)") CCircleCollision;
+        m_pCollision = new KH_AT("(80)") CCircleCollision;
         break;
     case COLL_TYPE_INFINITY:
 #line 83
-        m_pCollision = new (__FILE__ "(83)") CInfinityCollision;
+        m_pCollision = new KH_AT("(83)") CInfinityCollision;
         break;
     default:
         return;
@@ -172,13 +172,13 @@ void CCollObj::setShiftY(FLOAT inShiftY) {
 
 #line 215
 void CCollObj::collisionInit() {
-    m_pCollListP = new (__FILE__ "(216)") CCollisionList;
-    m_pCollListE = new (__FILE__ "(217)") CCollisionList;
-    m_pCollListI = new (__FILE__ "(218)") CCollisionList;
-    m_pCollListR = new (__FILE__ "(219)") CCollisionList;
-    m_pCollListR2 = new (__FILE__ "(220)") CCollisionList;
-    m_pCollListRC = new (__FILE__ "(221)") CCollisionList;
-    m_pCollListA = new (__FILE__ "(223)") CCollisionList;
+    m_pCollListP = new KH_AT("(216)") CCollisionList;
+    m_pCollListE = new KH_AT("(217)") CCollisionList;
+    m_pCollListI = new KH_AT("(218)") CCollisionList;
+    m_pCollListR = new KH_AT("(219)") CCollisionList;
+    m_pCollListR2 = new KH_AT("(220)") CCollisionList;
+    m_pCollListRC = new KH_AT("(221)") CCollisionList;
+    m_pCollListA = new KH_AT("(223)") CCollisionList;
 }
 
 void CCollObj::collisionDelete() {

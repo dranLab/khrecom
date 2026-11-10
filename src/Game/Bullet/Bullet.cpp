@@ -144,7 +144,7 @@ BOOL CBullet::setup(const BULLET_PARAM& inParam) {
     pos = inParam.vPos;
     m_uiFlag = inParam.uiFlag;
     if (inParam.iGroupID == 3) {
-        m_pMove = new (__FILE__ "(149)") CMovement(this);
+        m_pMove = new KH_AT("(149)") CMovement(this);
         if (!m_pMove) {
             return FALSE;
         }
@@ -195,7 +195,7 @@ BOOL CBullet::setup(const BULLET_PARAM& inParam) {
     if (inParam.pExtraEffectTbl) {
         m_iExtraEffectHandleNum = inParam.iExtraEffectNum;
         m_pExtraEffectHandle =
-            new (__FILE__ "(233)") HANDLE[inParam.iExtraEffectNum];
+            new KH_AT("(233)") HANDLE[inParam.iExtraEffectNum];
         if (!m_pExtraEffectHandle) {
             return FALSE;
         }
@@ -219,7 +219,7 @@ BOOL CBullet::setup(const BULLET_PARAM& inParam) {
         }
     }
     setTimer(inParam.tqHomingTime);
-    m_pAttack = new (__FILE__ "(279)") CCollAttack;
+    m_pAttack = new KH_AT("(279)") CCollAttack;
     if (!m_pAttack) {
         return FALSE;
     }
@@ -283,7 +283,7 @@ BOOL CBullet::setup(const BULLET_PARAM& inParam) {
         G_LINE line;
         FVECTOR ofs;
         FMATRIX m;
-        m_pCollLines = new (__FILE__ "(357)") C3DLines;
+        m_pCollLines = new KH_AT("(357)") C3DLines;
         if (!(m_pCollLines)) AssertApp(__FILE__, __LINE__, "m_pCollLines", 0);
         m_pCollLines->m_pCrd = &Crd(0);
         {
@@ -976,7 +976,7 @@ INT CHomingBullet::initExplode() {
     if (_collDispRef()) {
         FLOAT deltaRingAngle;
         G_LINE line;
-        m_pCollLines = new (__FILE__ "(1527)") C3DLines;
+        m_pCollLines = new KH_AT("(1527)") C3DLines;
         if (!(m_pCollLines)) AssertApp(__FILE__, __LINE__, "m_pCollLines", 0);
         m_pCollLines->m_pCrd = &Crd(0);
         {
@@ -1028,7 +1028,7 @@ void CHomingBullet::exeSpread() {
     if (_collDispRef()) {
         FLOAT deltaRingAngle;
         G_LINE line;
-        m_pCollLines = new (__FILE__ "(1593)") C3DLines;
+        m_pCollLines = new KH_AT("(1593)") C3DLines;
         if (!(m_pCollLines)) AssertApp(__FILE__, __LINE__, "m_pCollLines", 0);
         m_pCollLines->m_pCrd = &Crd(0);
         {

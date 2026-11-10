@@ -184,58 +184,58 @@ CTask* CMainTaskFactory::createMainTask(MAINTASK_ID nID, CTask* pParent) {
         return CTitleReportDllStarter::create(pParent, 0, 1);
 #line 64
     case MAINTASK_ID_GAME:
-        return new (__FILE__ "(65)") CGame(pParent);
+        return new KH_AT("(65)") CGame(pParent);
 #line 68
     case MAINTASK_ID_GAME_JF_HALLOWEEN:
-        return new (__FILE__ "(68)") CGame(pParent, 7);
+        return new KH_AT("(68)") CGame(pParent, 7);
     case MAINTASK_ID_GAME_TGS_NORMAL:
-        return new (__FILE__ "(69)") CGame(pParent, 5);
+        return new KH_AT("(69)") CGame(pParent, 5);
     case MAINTASK_ID_GAME_JF_VEXEN:
-        return new (__FILE__ "(70)") CGame(pParent, 8);
+        return new KH_AT("(70)") CGame(pParent, 8);
     case MAINTASK_ID_DEBUG_GAME:
-        return new (__FILE__ "(71)") CGame(pParent, 1);
+        return new KH_AT("(71)") CGame(pParent, 1);
     case MAINTASK_ID_DEBUG_MENU:
-        return (CTask*)new (__FILE__ "(73)") CDebugMenu(pParent);
+        return (CTask*)new KH_AT("(73)") CDebugMenu(pParent);
     case MAINTASK_ID_DEBUG_COLOR:
-        return (CTask*)new (__FILE__ "(75)") CColorCheck(pParent);
+        return (CTask*)new KH_AT("(75)") CColorCheck(pParent);
     case MAINTASK_ID_DEBUG_SCREEN:
-        return (CTask*)new (__FILE__ "(76)") CScreenCheck(pParent);
+        return (CTask*)new KH_AT("(76)") CScreenCheck(pParent);
     case MAINTASK_ID_DEBUG_KISIWADA:
-        return new (__FILE__ "(78)") CKishiwadaTest(pParent);
+        return new KH_AT("(78)") CKishiwadaTest(pParent);
     case MAINTASK_ID_DEBUG_KIKUCHI:
-        return new (__FILE__ "(79)") CKikuchiTest(pParent);
+        return new KH_AT("(79)") CKikuchiTest(pParent);
     case MAINTASK_ID_DEBUG_KOU:
-        return new (__FILE__ "(80)") CKouTest(pParent);
+        return new KH_AT("(80)") CKouTest(pParent);
     case MAINTASK_ID_DEBUG_GOTO:
-        return new (__FILE__ "(81)") CGotoTest(pParent);
+        return new KH_AT("(81)") CGotoTest(pParent);
     case MAINTASK_ID_DEBUG_NAKAMICHI:
-        return new (__FILE__ "(82)") CNakamichiTest(pParent);
+        return new KH_AT("(82)") CNakamichiTest(pParent);
     case MAINTASK_ID_DEBUG_MATSUOKA:
-        return new (__FILE__ "(83)") CMatsuokaTest(pParent);
+        return new KH_AT("(83)") CMatsuokaTest(pParent);
     case MAINTASK_ID_DEBUG_KATAOKA:
-        return new (__FILE__ "(84)") CKataokaTest(pParent);
+        return new KH_AT("(84)") CKataokaTest(pParent);
     case MAINTASK_ID_DEBUG_KAHARA:
-        return new (__FILE__ "(85)") CKaharaTest(pParent);
+        return new KH_AT("(85)") CKaharaTest(pParent);
     case MAINTASK_ID_DEBUG_NAKASHIMA:
-        return new (__FILE__ "(86)") CNakashimaTest(pParent);
+        return new KH_AT("(86)") CNakashimaTest(pParent);
     case MAINTASK_ID_DEBUG_COLLISIN_EDITOR:
-        return new (__FILE__ "(88)") CollisionEditor::CCollisionEditor(pParent);
+        return new KH_AT("(88)") CollisionEditor::CCollisionEditor(pParent);
     case MAINTASK_ID_DEBUG_SET_EDITOR:
-        return new (__FILE__ "(89)") SetEditor::CSetEditor(pParent);
+        return new KH_AT("(89)") SetEditor::CSetEditor(pParent);
     case MAINTASK_ID_DEBUG_ATTACH_EDITOR:
-        return new (__FILE__ "(91)") AttachEditor::CAttachEditor(pParent);
+        return new KH_AT("(91)") AttachEditor::CAttachEditor(pParent);
     case MAINTASK_ID_DEBUG_FONT_VIEWER:
-        return new (__FILE__ "(92)") CFontTest(pParent);
+        return new KH_AT("(92)") CFontTest(pParent);
     case MAINTASK_ID_MAPVIEWER:
-        return new (__FILE__ "(94)") CMapViewerMan(pParent);
+        return new KH_AT("(94)") CMapViewerMan(pParent);
     case MAINTASK_ID_MODELVIEWER:
-        return new (__FILE__ "(95)") CModelViewerMenu(pParent);
+        return new KH_AT("(95)") CModelViewerMenu(pParent);
     case MAINTASK_ID_EFFECTVIEWER:
-        return new (__FILE__ "(96)") CEffectViewer(pParent);
+        return new KH_AT("(96)") CEffectViewer(pParent);
     case MAINTASK_ID_2DVIEWER:
-        return new (__FILE__ "(97)") C2DViewer(pParent);
+        return new KH_AT("(97)") C2DViewer(pParent);
     case MAINTASK_ID_MOVIE_TEST:
-        return new (__FILE__ "(98)") CMovieTest(pParent);
+        return new KH_AT("(98)") CMovieTest(pParent);
     default:
         TRACE("\x8a\x59\x93\x96\x82\xb7\x82\xe9\x81\x75\x83\x81\x83\x43\x83\x93TASK\x81\x76\x82\xaa\x91\xb6\x8d\xdd\x82\xb5\x82\xdc\x82\xb9\x82\xf1\x81\x69 ID = %d \x81\x6a\n", nID);
         return NULL;

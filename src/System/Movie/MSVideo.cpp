@@ -149,7 +149,7 @@ BOOL CMoviePlayer::open(const CHAR* pszFile) {
     m_pdqPath3tagForTrans = (UINT*)com_memalign_d(64, 0x900, __FILE__ "(219)", (UINT)-1);
     if (!m_pdqPath3tagForTrans) goto error;
 #line 226
-    m_pScriptManager = new (__FILE__ "(226)") CMovieScript(*this);
+    m_pScriptManager = new KH_AT("(226)") CMovieScript(*this);
     if (!m_pScriptManager) goto error;
     m_pScriptManager->open(pszFile);
     sceMpegInit();
@@ -168,7 +168,7 @@ BOOL CMoviePlayer::open(const CHAR* pszFile) {
     m_nFlag |= 1;
     if (!m_pStream) {
 #line 258
-        m_pStream = new (__FILE__ "(258)") CMSStream;
+        m_pStream = new KH_AT("(258)") CMSStream;
         ASSERT(m_pStream);
     }
     if (!m_pStream->Open(pszFile, 0x4000)) {
@@ -270,7 +270,7 @@ void CMoviePlayer::pause(INT nFlag, BOOL bPause) {
             if (!m_hPauseSeq && !(m_nFlag & 0x80000000) && nFlag == 0x8000) {
                 CTask* p;
 #line 405
-                p = new (__FILE__ "(405)") CPause(this, 5);
+                p = new KH_AT("(405)") CPause(this, 5);
                 ASSERT(p);
                 m_hPauseSeq = p->getHandle();
             }
@@ -306,7 +306,7 @@ void CMoviePlayer::main() {
                 if (m_iMode & 2) {
                     if (!m_pFadeMask) {
 #line 462
-                        m_pFadeMask = new (__FILE__ "(462)") CFadeIOMask(*this, 10);
+                        m_pFadeMask = new KH_AT("(462)") CFadeIOMask(*this, 10);
                     }
                 } else if (m_pFadeMask) {
                     m_pFadeMask->out();
@@ -790,7 +790,7 @@ BOOL CMoviePlayerDummy::open(const CHAR* pszFile) {
 
     if (!m_pInfoPrim) {
 #line 1593
-        m_pInfoPrim = new (__FILE__ "(1593)") CStrPrim[2];
+        m_pInfoPrim = new KH_AT("(1593)") CStrPrim[2];
     }
     CStrPrim* pPrim = m_pInfoPrim;
     _setXYZ(pPrim->m_P0, 0, (UINT)-256, 0xFFFF280);

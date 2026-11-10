@@ -340,7 +340,7 @@ BOOL CCoords::addCoord(UINT nNum, CCoord* pParent) {
         return FALSE;
     }
 #line 480
-    m_pCrdArray = new (__FILE__ "(480)") CCoord[nNum];
+    m_pCrdArray = new KH_AT("(480)") CCoord[nNum];
     if (!m_pCrdArray) {
         TRACE("\x8cx\x8d\x90\x81" "FCoord\x82\xcc\x83\x81\x83\x82\x83\x8a\x8am\x95\xdb\x82\xaa\x8ds\x82\xa6\x82\xdc\x82\xb9\x82\xf1!!!!!!!!!!\n");
         return FALSE;

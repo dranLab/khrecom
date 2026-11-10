@@ -53,12 +53,21 @@ class Objects:
             obj, section, start = line.split()
             sections[obj][section] = int(start, 16)
         for obj, starts in sections.items():
-            sizes = self._sizes(obj)
+            sizes, aligns, order = self._sizes(obj)
             for section, start in starts.items():
+                if section.endswith(".*"):  # .gnu.linkonce.t.*: those sections in file order from start
+                    prefix, addr = section[:-1], start
+                    for name in order:
+                        if name.startswith(prefix) and sizes.get(name):
+                            addr = (addr + aligns[name] - 1) & -aligns[name]
+                            self.ranges.append((addr, addr + sizes[name], obj, name))
+                            addr += sizes[name]
+                    continue
                 if sizes.get(section):
                     self.ranges.append((start, start + sizes[section], obj, section))
-            self._symbols(obj, set(starts))
-            self._relocations(obj, set(starts), imports)
+            secs = {n for n in order if any(n == s or (s.endswith(".*") and n.startswith(s[:-1])) for s in starts)}
+            self._symbols(obj, secs)
+            self._relocations(obj, secs, imports)
         self.ranges.sort()
         self.starts = [r[0] for r in self.ranges]
 
@@ -66,13 +75,16 @@ class Objects:
     def _run(*args) -> str:
         return subprocess.run(args, capture_output=True, text=True, check=True).stdout
 
-    def _sizes(self, obj: str) -> dict[str, int]:
-        sizes = {}
+    def _sizes(self, obj: str) -> tuple[dict[str, int], dict[str, int], list[str]]:
+        """Section sizes, alignments and the sections in file order."""
+        sizes, aligns, order = {}, {}, []
         for line in self._run(f"{CROSS}readelf", "-SW", obj).splitlines():
             parts = line.replace("[ ", "[").split()
             if len(parts) > 6 and parts[0].startswith("[") and parts[1].startswith("."):
                 sizes[parts[1]] = int(parts[5], 16)
-        return sizes
+                aligns[parts[1]] = int(parts[-1]) or 1
+                order.append(parts[1])
+        return sizes, aligns, order
 
     def _symbols(self, obj: str, sections: set[str]) -> None:
         # nm can't tell the section of a symbol; readelf -s gives its section index, -S the names.
@@ -92,7 +104,7 @@ class Objects:
     def _relocations(self, obj: str, sections: set[str], imports: set[str]) -> None:
         current = None
         for line in self._run(f"{CROSS}readelf", "-rW", obj).splitlines():
-            m = re.match(r"Relocation section '\.rel(\.\w+)'", line)
+            m = re.match(r"Relocation section '\.rel(\.[^']+)'", line)
             if m:
                 current = m.group(1)
                 continue

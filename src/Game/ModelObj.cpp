@@ -50,7 +50,7 @@ BOOL CModelObj::initModelData0_setRsrc() {
 BOOL CModelObj::initModelData1_setModel() {
     m_iModelNum = m_iModelDataNum;
 #line 57
-    m_pModels = new (__FILE__ "(57)") CModel[m_iModelNum];
+    m_pModels = new KH_AT("(57)") CModel[m_iModelNum];
     ASSERT(m_pModels);
     for (INT i = 0; i < m_iModelNum; i++) {
         m_pModels[i].link(this, m_pModelData[i]);
@@ -64,14 +64,14 @@ BOOL CModelObj::initModelData2_setLight() {
         if (m_pModelData[i]->enablePointLight()) {
             if (!m_pGLight) {
 #line 75
-                m_pGLight = new (__FILE__ "(75)") CGimmickLightUnit;
+                m_pGLight = new KH_AT("(75)") CGimmickLightUnit;
                 ASSERT(m_pGLight);
             }
             m_pModels[i].setLightUnit(m_pGLight);
         } else if (m_pModelData[i]->enableLight()) {
             if (!m_pNLight) {
 #line 82
-                m_pNLight = new (__FILE__ "(82)") CLightUnit;
+                m_pNLight = new KH_AT("(82)") CLightUnit;
                 ASSERT(m_pNLight);
             }
             m_pModels[i].setLightUnit(m_pNLight);
@@ -124,7 +124,7 @@ void CModelObj::disp() {
     if (pSceneColor) {
         if (!m_pvColors) {
 #line 140
-            m_pvColors = new (__FILE__ "(140)") FVECTOR[m_iModelNum];
+            m_pvColors = new KH_AT("(140)") FVECTOR[m_iModelNum];
             ASSERT(m_pvColors);
         }
         for (INT i = 0; i < m_iModelNum; i++) {
@@ -173,7 +173,7 @@ BOOL CModelAnimObj::initAnimData() {
         return FALSE;
     }
 #line 234
-    m_pAnim = new (__FILE__ "(234)") CAnim;
+    m_pAnim = new KH_AT("(234)") CAnim;
     if (!m_pAnim) {
         return FALSE;
     }

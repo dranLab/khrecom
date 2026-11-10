@@ -48,7 +48,7 @@ template <class T> static inline T& _ref(T& v) { return v; }
 INT CJiminyMemoFlag::createTask(CTask* inParent, INT inMode) {
     if (s_pTask != NULL || s_hTask != 0) return -1;
 #line 61
-    CJiminyMemo* pMemo = new (__FILE__ "(61)") CJiminyMemo(inParent, inMode);
+    CJiminyMemo* pMemo = new KH_AT("(61)") CJiminyMemo(inParent, inMode);
     if (pMemo != NULL) {
         _ref(s_pTask) = pMemo;
         s_hTask = pMemo->getHandle();

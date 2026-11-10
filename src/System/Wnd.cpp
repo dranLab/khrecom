@@ -172,7 +172,7 @@ void CTextWnd::createWindowCTD(UINT ctdID, CPointI* pPos, CPointI* pCyobiPos, UI
             if (m_pTmpText) delete m_pTmpText;
             m_pTmpText = NULL;
 #line 183
-            m_pTmpText = new (__FILE__ "(183)") CHAR[textLen + 1];
+            m_pTmpText = new KH_AT("(183)") CHAR[textLen + 1];
             strcpy(m_pTmpText, pText);
             CHAR* pT = m_pTmpText;
             INT fgOK = FALSE;
@@ -247,7 +247,7 @@ void CTextWnd::initWindow(CPointI& pos, CSizeI& size, UINT wndColor, CPointI& cy
     if (m_pWnd) delete m_pWnd;
     m_pWnd = NULL;
 #line 307
-    m_pWnd = new (__FILE__ "(307)") CWnd(m_nLayerFG);
+    m_pWnd = new KH_AT("(307)") CWnd(m_nLayerFG);
     if (!fgImage) {
         m_pWnd->init(m_targetPos, size, wndColor, m_wndStyle, cyobiPos, cyobiStyle, cyobiPosX);
         if (!wndColor) enableWndDisp(FALSE);
@@ -259,7 +259,7 @@ void CTextWnd::setText(const CHAR* pText, UINT* pCtdID) {
     if (m_pText) delete m_pText;
     m_pText = NULL;
 #line 333
-    m_pText = new (__FILE__ "(333)") CText(m_nLayerFG);
+    m_pText = new KH_AT("(333)") CText(m_nLayerFG);
     CPointI pos = m_targetPos;
     CSizeI size = m_targetSize;
     m_pText->init(pos, size, pText, m_textDispDelay, m_textColor, m_fontSize, m_fontStyle, m_textOffset, m_fontSpace,
@@ -599,7 +599,7 @@ INT CWnd::setFukidasi(INT iCmd, TIMEQ timeq) {
         if (m_wndStyle < 5) {
             m_wndSeqNo = seqNoTbl[m_wndStyle];
 #line 1163
-            m_pFukiCtrl = new (__FILE__ "(1163)") D2::C2DSeqCtrl;
+            m_pFukiCtrl = new KH_AT("(1163)") D2::C2DSeqCtrl;
             m_pFukiCtrl->setLayer(m_nLayerFG);
             p2DSeqObj = m_pFukiCtrl->addSeq(sqdName, m_wndSeqNo);
             pos = getPosition();
@@ -779,7 +779,7 @@ void CText::init(CPointI& pos, CSizeI& size, const CHAR* pText, INT delay, UINT 
     if (m_pFnt) delete m_pFnt;
     m_pFnt = NULL;
 #line 1412
-    m_pFnt = new (__FILE__ "(1412)") CStrPrim;
+    m_pFnt = new KH_AT("(1412)") CStrPrim;
     m_pFnt->setLayerFG(m_nLayerFG);
     m_pFnt->enableWordReplace();
     m_pFnt->m_C0.col = fontColor;
@@ -790,7 +790,7 @@ void CText::init(CPointI& pos, CSizeI& size, const CHAR* pText, INT delay, UINT 
     m_pFnt->setSpace(fontSpace.m_w << 4, fontSpace.m_h << 4);
     m_lines = m_pFnt->getSize(m_textSize, NULL, NULL);
 #line 1425
-    m_pLineSize = new (__FILE__ "(1425)") G_XY[m_lines];
+    m_pLineSize = new KH_AT("(1425)") G_XY[m_lines];
     m_pFnt->getSize(m_textSize, m_pLineSize, &m_chars);
     if ((fontStyle & 7) >= 5) m_pFnt->setLineXYPtr(m_pLineSize);
     m_pFnt->getCharSize(m_charSize);
@@ -819,7 +819,7 @@ void CText::changeTextSub(const CHAR* pText) {
     if (m_pLineSize) delete m_pLineSize;
     m_pLineSize = NULL;
 #line 1482
-    m_pLineSize = new (__FILE__ "(1482)") G_XY[m_lines];
+    m_pLineSize = new KH_AT("(1482)") G_XY[m_lines];
     m_pFnt->getSize(m_textSize, m_pLineSize, &m_chars);
     if ((m_pFnt->m_Style & 7) >= 5) {
         m_pFnt->setLineXYPtr(m_pLineSize);
@@ -889,8 +889,8 @@ void CText::setCharFadeInDelay(FLOAT fCharFadeInDelay) {
             if (m_pAlphaTblF) delete m_pAlphaTblF;
             m_pAlphaTblF = NULL;
 #line 1574
-            m_pAlphaTbl = new (__FILE__ "(1574)") BYTE[len];
-            m_pAlphaTblF = new (__FILE__ "(1575)") FLOAT[len];
+            m_pAlphaTbl = new KH_AT("(1574)") BYTE[len];
+            m_pAlphaTblF = new KH_AT("(1575)") FLOAT[len];
             for (INT i = 0; i < len; i++) {
                 m_pAlphaTbl[i] = 0;
                 m_pAlphaTblF[i] = 0.0f;
@@ -1057,7 +1057,7 @@ void CText::_main(FLOAT frameRateF) {
     if (!isDispLineMax()) return;
     if (!m_pSelectCtrl) {
 #line 1818
-        m_pSelectCtrl = new (__FILE__ "(1818)") D2::C2DSeqCtrl;
+        m_pSelectCtrl = new KH_AT("(1818)") D2::C2DSeqCtrl;
         m_pSelectCtrl->setLayer(m_nLayerFG + 1);
         m_pSelectCtrl->addSeq("message.sqd", 1);
     }
@@ -1148,7 +1148,7 @@ void CImageWnd::init(CPointI& pos0, CSizeI& size0, CPointI& pos1, CSizeI& size1,
     USHORT h2;
     if (!m_pPolyGT4) {
 #line 2015
-        CPolyGT4* pPoly = new (__FILE__ "(2015)") CPolyGT4;
+        CPolyGT4* pPoly = new KH_AT("(2015)") CPolyGT4;
         pPoly->setLayerFG(m_nLayerFG);
         pPoly->setTPage(pTexName);
         TexInfo* pTexInfo = pPoly->getTPage();

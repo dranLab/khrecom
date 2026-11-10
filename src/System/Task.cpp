@@ -139,7 +139,7 @@ TIMEQ CTask::getDispFrameRate() const {
 void CTask::createCoords() {
     if (!m_pCrds || !isCoordManaged()) {
 #line 214
-        m_pCrds = new (__FILE__ "(214)") CCoords(isSecondaryObj() ? CCoords::_PP_SECONDARY : CCoords::_PP_PRIMARY);
+        m_pCrds = new KH_AT("(214)") CCoords(isSecondaryObj() ? CCoords::_PP_SECONDARY : CCoords::_PP_PRIMARY);
         ASSERT(m_pCrds);
         manageCoord(TRUE);
     }

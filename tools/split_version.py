@@ -16,6 +16,10 @@ Writes config/<VERSION>/<VERSION>.yaml (the beta's options and section layout, t
 config/<VERSION>/elf_symbol_addrs.txt (the names of this version's SN DLL table, plus the beta's names of the paired
 functions and data the table doesn't name). Run tools/version_map.py first.
 
+config/<VERSION>/unit_starts.txt (optional, `<unit> <.data|.rodata|.bss> 0x<address> [0x<size>]` per line) overrides
+a unit's data start with the exact one measured from its compiled object (tools/helpers/retail_try.py --record); with
+the size, the next unit starts at its end.
+
 Usage: .venv/bin/python tools/split_version.py SLUS_217.99_retail [--dry-run]
 """
 
@@ -192,6 +196,24 @@ def main() -> None:
     common = [o for b, o, n in dpairs if in_bsec(".bss", b) and unit_of(blocks[".bss"], b) == "common"]
     common_start = min(common)
     data_lines[".bss"] = [x for x in data_lines[".bss"] if x[0] < common_start] + [(common_start, "bss", "common")]
+    # exact starts measured from compiled units (tools/helpers/retail_try.py --record): config/<VERSION>/unit_starts.txt
+    starts_file = cfg / "unit_starts.txt"
+    if starts_file.exists():
+        for line in starts_file.read_text(encoding="utf-8").splitlines():
+            if not line.strip() or line.startswith("#"):
+                continue
+            unit, section, addr, *size = line.split()
+            addr = int(addr, 16)
+            t = section.lstrip(".")
+            rows = [x for x in data_lines[section] if x[2] != unit and x[0] != addr] + [(addr, t, unit)]
+            if size:  # the next unit starts where this one ends (the gap is its leading data or alignment)
+                end = addr + int(size[0], 16)
+                rows.sort()
+                k = next(i for i, x in enumerate(rows) if x[2] == unit)
+                if k + 1 < len(rows) and rows[k + 1][0] > end:
+                    rows[k + 1] = (end,) + rows[k + 1][1:]
+            data_lines[section] = rows
+            report["starts from unit_starts.txt"] += 1
     for s in (".data", ".rodata", ".bss"):
         rows = sorted(data_lines[s])
         if rows[0][0] != sec[s][0]:

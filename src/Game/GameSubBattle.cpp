@@ -312,19 +312,19 @@ void CGameSubBattle::preSetupTasks() {
 #line 350
 void CGameSubBattle::setupTasks() {
     CTask* pGame = CTaskMan::getSysTask(1);
-    CMap* pMap = new (__FILE__ "(352)") CMap(pGame, CRcf::getMapID(CSceneInfo::getCurrentAreaNum(), CSceneInfo::getCurrentSceneNum()));
+    CMap* pMap = new KH_AT("(352)") CMap(pGame, CRcf::getMapID(CSceneInfo::getCurrentAreaNum(), CSceneInfo::getCurrentSceneNum()));
     ASSERT(pMap);
     Message::CMessageManager::getInstance();
     LockOnManager::CLockOnManager::getInstance();
     CEntityFactory::getInstance();
-    new (__FILE__ "(365)") CGimmickManager(pGame);
+    new KH_AT("(365)") CGimmickManager(pGame);
     if (!CSceneInfo::isMinigameScene()) {
-        new (__FILE__ "(370)") CBattleEnemyManager(pGame);
-        new (__FILE__ "(373)") CBulletManager(pGame);
-        new (__FILE__ "(376)") PLM::CPlayerManager(pGame);
+        new KH_AT("(370)") CBattleEnemyManager(pGame);
+        new KH_AT("(373)") CBulletManager(pGame);
+        new KH_AT("(376)") PLM::CPlayerManager(pGame);
         PLM::createPlayer(0, NULL, 0);
     } else {
-        new (__FILE__ "(384)") CMinigameManager(pGame);
+        new KH_AT("(384)") CMinigameManager(pGame);
     }
     pMap->init(1, 1);
     CShadowModelMan::setAutomatic();
@@ -416,7 +416,7 @@ void CGameSubBattle::levelUp() {
         m_nStep++;
         break;
     case 1: {
-        CLevelUp* p = new (__FILE__ "(565)") CLevelUp(CTaskMan::getSysTask(1), 0);
+        CLevelUp* p = new KH_AT("(565)") CLevelUp(CTaskMan::getSysTask(1), 0);
         ASSERT(p);
         m_hLevelUp = p->getHandle();
         m_nStep++;
@@ -514,7 +514,7 @@ void CEncountEffectTask::main() {
         CGame::dispOffFadeMask();
         m_pCamera = CWorldEnv::getActiveCamera();
         if (!m_pCamera) {
-            m_pCamera = new (__FILE__ "(807)") CCamera(this, -1);
+            m_pCamera = new KH_AT("(807)") CCamera(this, -1);
         }
         if (CGame::isBlackBeforeEncount()) {
             m_pCamera->setProjectionDist(0.0f);
@@ -630,7 +630,7 @@ void CEncountEffect::initialize() {
 #line 924
 void CEncountEffect::start() {
     if (s_nEnEffSeq == _EESEQ_NOP) {
-        new (__FILE__ "(925)") CEncountEffectTask;
+        new KH_AT("(925)") CEncountEffectTask;
     }
 }
 

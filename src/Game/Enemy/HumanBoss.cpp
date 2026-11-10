@@ -266,7 +266,7 @@ void CHumanBoss::beginStateDead() {
     }
     setTexAnmSeq(0, HumanBoss::DeadEyeSeqName);
     setTexAnmSeq(1, HumanBoss::DeadLipSeqName);
-    demo = new (__FILE__ "(483)") CBossDeadDemo(this, 0);
+    demo = new KH_AT("(483)") CBossDeadDemo(this, 0);
     if (demo) {
         demo->setup(getHandle(), __null, -1);
     }
@@ -309,7 +309,7 @@ void CHumanBoss::setupCardRevolver() {
     cardNum += m_pEnemyParam->iEnemyCard;
     m_iTotalCardNum = cardNum;
 #line 537
-    deck = new (__FILE__ "(537)") CARD[cardNum];
+    deck = new KH_AT("(537)") CARD[cardNum];
     cards = deck;
 #line 539
     ASSERT(deck);
@@ -372,7 +372,7 @@ void CHumanBoss::setupCardRevolver() {
         deck[j] = v;
     }
 #line 622
-    m_pCardRevolver = new (__FILE__ "(622)") CardBattle::CCardRevolver(this, deck, 2, -1);
+    m_pCardRevolver = new KH_AT("(622)") CardBattle::CCardRevolver(this, deck, 2, -1);
 #line 623
     ASSERT(m_pCardRevolver);
     if (deck) delete[] deck;
@@ -424,7 +424,7 @@ void CHumanBoss::setupAct()
 
     if (m_iNormalActNum > 0)
     {
-        m_pNormalActs = new (__FILE__ "(674)") ACT_DATA[m_iNormalActNum];
+        m_pNormalActs = new KH_AT("(674)") ACT_DATA[m_iNormalActNum];
         ASSERT(m_pNormalActs);
         for (INT i = 0; i < m_iNormalActNum; i++)
         {
@@ -434,7 +434,7 @@ void CHumanBoss::setupAct()
 
     if (m_iStockNum > 0)
     {
-        m_pStockData = new (__FILE__ "(684)") ACT_DATA[m_iStockNum];
+        m_pStockData = new KH_AT("(684)") ACT_DATA[m_iStockNum];
         ASSERT(m_pStockData);
         for (INT i = 0; i < m_iStockNum; i++)
         {

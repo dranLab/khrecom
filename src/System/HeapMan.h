@@ -56,6 +56,6 @@ inline void* operator new[](size_t size, char* msg) throw() {
     KH_DEBUG(__asm__ volatile("daddu %0, $31, $0" : "=r"(nRA));)
     return com_malloc_d(size, msg, nRA);
 }
-inline void* operator new(size_t, void* p) throw() { return p; }
+inline void* operator new(size_t, void* p) throw() { return p; } KH_RELEASE(inline void* operator new[](size_t size) throw() { return com_malloc(size); })
 
 #endif /* SYSTEM_HEAPMAN_H */

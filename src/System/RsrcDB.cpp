@@ -131,15 +131,15 @@ static CRsrcList& _getRsrcList(UINT nRsrcType);
 
 void CRsrcDB::initialize() {
 #line 183
-    s_pRsrcSLCManager = new (__FILE__ "(183)") _CRsrcSLCManager;
+    s_pRsrcSLCManager = new KH_AT("(183)") _CRsrcSLCManager;
     for (INT i = 0; i < RCID_MAX; i++) {
 #line 185
-        s_pRsrcListTbl[i] = new (__FILE__ "(185)") CRsrcList(*s_pRsrcSLCManager);
+        s_pRsrcListTbl[i] = new KH_AT("(185)") CRsrcList(*s_pRsrcSLCManager);
     }
 #line 186
-    s_pTexExList = new (__FILE__ "(186)") CRsrcList(*s_pRsrcSLCManager);
+    s_pTexExList = new KH_AT("(186)") CRsrcList(*s_pRsrcSLCManager);
 #line 187
-    s_pExtIDList = new (__FILE__ "(187)") CExtIDList;
+    s_pExtIDList = new KH_AT("(187)") CExtIDList;
     s_pRsrcEnumerater = NULL;
     s_nSeekRsrcType = 0;
     s_nSeekGrpID = 0;
@@ -150,7 +150,7 @@ void CRsrcDB::initialize() {
     info._pszName = "dummy";
     info._bSceneManaged = FALSE;
 #line 204
-    CRsrcData* pRsrc = new (__FILE__ "(204)") CRsrcData(info);
+    CRsrcData* pRsrc = new KH_AT("(204)") CRsrcData(info);
     s_pRsrcListTbl[0]->pushBack(*pRsrc);
     pRsrc->setHandle(0);
 }
@@ -209,7 +209,7 @@ INT CRsrcDB::addRsrc_NoCheck(const RsrcInfo& info, CBuf& data, CRsrcData** ppOut
         {
             CBuf tmp;
 #line 312
-            pRsrc = new (__FILE__ "(312)") CRsrcData(infoTmp, tmp);
+            pRsrc = new KH_AT("(312)") CRsrcData(infoTmp, tmp);
         }
         bDeletable = TRUE;
         infoTmp._nRsrcType = nRsrcType;
@@ -218,7 +218,7 @@ INT CRsrcDB::addRsrc_NoCheck(const RsrcInfo& info, CBuf& data, CRsrcData** ppOut
         nRsrcType |= 0x400;
         infoTmp._nRsrcType = nRsrcType;
 #line 334
-        pRsrc = new (__FILE__ "(334)") CRsrcPackT<CRsrcDataDD>(infoTmp, data);
+        pRsrc = new KH_AT("(334)") CRsrcPackT<CRsrcDataDD>(infoTmp, data);
     done:
         nPkResult = addPackedRsrc(infoTmp, data, pRsrc, FALSE);
         break;
@@ -228,7 +228,7 @@ INT CRsrcDB::addRsrc_NoCheck(const RsrcInfo& info, CBuf& data, CRsrcData** ppOut
         nRsrcType |= 0x1000;
         infoTmp._nRsrcType = nRsrcType;
 #line 348
-        pRsrc = new (__FILE__ "(348)") CRsrcPackT<CRsrcData>(infoTmp, data);
+        pRsrc = new KH_AT("(348)") CRsrcPackT<CRsrcData>(infoTmp, data);
         nPkResult = addPackedRsrc(infoTmp, data, pRsrc, FALSE);
         break;
     case 7: {
@@ -250,20 +250,20 @@ INT CRsrcDB::addRsrc_NoCheck(const RsrcInfo& info, CBuf& data, CRsrcData** ppOut
     case 55:
     case 57:
 #line 377
-        pRsrc = new (__FILE__ "(377)") CRsrcPackT<CRsrcData>(info, data);
+        pRsrc = new KH_AT("(377)") CRsrcPackT<CRsrcData>(info, data);
         nPkResult = addPackedRsrc(info, data, pRsrc, FALSE);
         break;
     case 12:
     case 19:
 #line 387
-        pRsrc = new (__FILE__ "(387)") CRsrcPackT<CRsrcDataDD>(info, data);
+        pRsrc = new KH_AT("(387)") CRsrcPackT<CRsrcDataDD>(info, data);
         nPkResult = addPackedRsrc(info, data, pRsrc, FALSE);
         break;
     case 44: {
         {
             CBuf tmp;
 #line 400
-            pRsrc = new (__FILE__ "(400)") CRsrcData(info, tmp);
+            pRsrc = new KH_AT("(400)") CRsrcData(info, tmp);
         }
         bDeletable = TRUE;
         nPkResult = addPackedRsrc(info, data, pRsrc, FALSE);
@@ -271,7 +271,7 @@ INT CRsrcDB::addRsrc_NoCheck(const RsrcInfo& info, CBuf& data, CRsrcData** ppOut
     }
     case 17:
 #line 409
-        pRsrc = new (__FILE__ "(409)") CRsrcIMZ(info, data);
+        pRsrc = new KH_AT("(409)") CRsrcIMZ(info, data);
         nPkResult = addPackedRsrcIMZ(info, data, pRsrc);
         break;
     }
@@ -574,7 +574,7 @@ void CRsrcDB::addStreamInfo(const CHAR* pszFile, INT nGroupID, UINT nStartSect, 
     info._bSceneManaged = FALSE;
     if (getRsrc(nRsrcType, pszFile, NAME_CASE_SENSITIVE)) return;
 #line 964
-    CRsrcVSV* pRsrc = new (__FILE__ "(964)") CRsrcVSV(info, nStartSect, nSectSize);
+    CRsrcVSV* pRsrc = new KH_AT("(964)") CRsrcVSV(info, nStartSect, nSectSize);
     if (pRsrc) _getRsrcList(nRsrcType).pushBack(*pRsrc);
 }
 
@@ -582,7 +582,7 @@ void CRsrcDB::addRsrcType(const CHAR* pszExt, INT nID) {
     if (!pszExt || !*pszExt || nID <= 0) return;
     if (getRsrcType(pszExt) >= 0) return;
 #line 981
-    CExtID* pExt = new (__FILE__ "(981)") CExtID(pszExt, nID);
+    CExtID* pExt = new KH_AT("(981)") CExtID(pszExt, nID);
 #line 982
     ASSERT(s_pExtIDList);
     s_pExtIDList->pushBack(*pExt);

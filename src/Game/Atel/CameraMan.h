@@ -49,7 +49,7 @@ public:
         if (m_pInstance) return;
         TRACE("CCameraMan::initialize\n");
         if (!(__null == m_pInstance)) AssertApp(__FILE__, __LINE__, "__null == m_pInstance", 0);
-        m_pInstance = new (__FILE__ "(68)") CCameraMan(pParent);
+        m_pInstance = new KH_AT("(68)") CCameraMan(pParent);
         if (!(m_pInstance)) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
         m_pInstance->setup();
     }

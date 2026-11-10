@@ -44,7 +44,7 @@ void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 
 #line 20
 CRide::CRide() {
-    m_pRiderList = new (__FILE__ "(23)") CRiderList;
+    m_pRiderList = new KH_AT("(23)") CRiderList;
     m_fgOnLook = 0;
 }
 
@@ -104,14 +104,14 @@ void CRideModel::init(void* pOCDData, CTask* pBFObj) {
     m_pOCDWork = NULL;
     CCollUtil::initializeData(pOCDData, &m_MCDInfo);
 #line 124
-    m_pMatIOld = new (__FILE__ "(124)") FMATRIX[m_MCDInfo.iChipSuu + 1];
+    m_pMatIOld = new KH_AT("(124)") FMATRIX[m_MCDInfo.iChipSuu + 1];
     ASSERT(m_pMatIOld);
     InverseMatrix(*m_pMatIOld, *lMat);
     m_fBSRadius2 = 0;
     m_MCDInfo.pMatrixIOld = m_pMatIOld;
     if (m_MCDInfo.iChipSuu > 0) {
 #line 131
-        m_pOCDWork = new (__FILE__ "(131)") OCD_WORK[m_MCDInfo.iChipSuu];
+        m_pOCDWork = new KH_AT("(131)") OCD_WORK[m_MCDInfo.iChipSuu];
         FMATRIX* pPartsMat = m_pMatIOld + 1;
         MC_CHIP* pChip = m_MCDInfo.pMCChip;
         for (INT i = 0; i < m_MCDInfo.iChipSuu; i++, pPartsMat++, pChip++) {

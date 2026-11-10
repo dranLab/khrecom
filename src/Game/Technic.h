@@ -28,7 +28,7 @@ public:
 #line 36
     static CTechnic& initialize() {
         if (!(__null == m_pInstance)) AssertApp(__FILE__, __LINE__, "__null == m_pInstance", 0);
-        m_pInstance = new (__FILE__ "(38)") CTechnic;
+        m_pInstance = new KH_AT("(38)") CTechnic;
         return *m_pInstance;
     }
     static void finalize() {

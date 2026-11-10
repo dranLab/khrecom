@@ -24,7 +24,7 @@ CMessageManager::~CMessageManager() {
 #line 46
 CMessageManager& CMessageManager::getInstance() {
     if (m_pInstance == NULL) {
-        m_pInstance = new (__FILE__ "(48)") CMessageManager;
+        m_pInstance = new KH_AT("(48)") CMessageManager;
         if (!m_pInstance) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
     }
     return *m_pInstance;

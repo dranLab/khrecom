@@ -266,7 +266,7 @@ FLOAT CAvatar::getDirection() const { return 0.0f; }
 INT CAvatar::getTypeID() const { return 0x4000; }
 BOOL CAvatar::createMoveStruct() {
     if (m_pMoveStruct) return TRUE;
-    m_pMoveStruct = new (__FILE__ "(458)") AvatarMoveStruct;
+    m_pMoveStruct = new KH_AT("(458)") AvatarMoveStruct;
     if (!m_pMoveStruct) {
         TRACE(" ... Fail to create MoveStructure\n");
         return FALSE;
@@ -275,7 +275,7 @@ BOOL CAvatar::createMoveStruct() {
 }
 BOOL CAvatar::createRotateStruct() {
     if (m_pRotateStruct) return TRUE;
-    m_pRotateStruct = new (__FILE__ "(477)") AvatarRotateStruct;
+    m_pRotateStruct = new KH_AT("(477)") AvatarRotateStruct;
     if (!m_pRotateStruct) {
         TRACE(" ... Fail to create RotateStructure\n");
         return FALSE;
@@ -284,7 +284,7 @@ BOOL CAvatar::createRotateStruct() {
 }
 BOOL CAvatar::createScaleStruct() {
     if (m_pScaleStruct) return TRUE;
-    m_pScaleStruct = new (__FILE__ "(494)") AvatarScaleStruct;
+    m_pScaleStruct = new KH_AT("(494)") AvatarScaleStruct;
     if (!m_pScaleStruct) {
         TRACE(" ... Fail to create ScalingStructure\n");
         return FALSE;
@@ -294,7 +294,7 @@ BOOL CAvatar::createScaleStruct() {
 AvatarFadeStruct* CAvatar::createFadeStruct() {
     for (INT i = 0; i < 5; i++) {
         if (!m_pFadeStruct[i]) {
-            m_pFadeStruct[i] = new (__FILE__ "(514)") AvatarFadeStruct;
+            m_pFadeStruct[i] = new KH_AT("(514)") AvatarFadeStruct;
             if (!m_pFadeStruct[i]) {
                 TRACE(" ... Fail to create FadeStructure\n");
                 return NULL;
@@ -971,7 +971,7 @@ INT CAvatar::onAvatarAttachEffect(INT nCmd, void* pParam, INT nID) {
 INT CAvatar::onAvatarSetLookPosition(INT nCmd, void* pParam, INT nID) {
     AvatarSetLook* p = (AvatarSetLook*)pParam;
     FVECTOR v = _crdWorldPos(getAtel().getVSM()->getAvatar(p->TargetID)->Crd(0));
-    if (!m_pLookStruct) m_pLookStruct = new (__FILE__ "(2058)") AvatarLookStruct;
+    if (!m_pLookStruct) m_pLookStruct = new KH_AT("(2058)") AvatarLookStruct;
     m_pLookStruct->_nTargetID = p->TargetID;
     m_pLookStruct->_fOffsetY = p->OffsetY;
     v.y += p->OffsetY;
@@ -981,7 +981,7 @@ INT CAvatar::onAvatarSetLookPosition(INT nCmd, void* pParam, INT nID) {
 INT CAvatar::onAvatarSetLookUpdatePosition(INT nCmd, void* pParam, INT nID) {
     AvatarSetLook* p = (AvatarSetLook*)pParam;
     FVECTOR v = _crdWorldPos(getAtel().getVSM()->getAvatar(p->TargetID)->Crd(0));
-    if (!m_pLookStruct) m_pLookStruct = new (__FILE__ "(2079)") AvatarLookStruct;
+    if (!m_pLookStruct) m_pLookStruct = new KH_AT("(2079)") AvatarLookStruct;
     m_pLookStruct->_nTargetID = p->TargetID;
     m_pLookStruct->_fOffsetY = p->OffsetY;
     v.y += p->OffsetY;
@@ -1061,11 +1061,11 @@ AvatarMoveStruct::~AvatarMoveStruct() {
 }
 BOOL AvatarMoveStruct::setupPath(const CHAR* pszPath, USHORT nMotion) {
     delete _pPathData;
-    _pPathData = new (__FILE__ "(2268)") CPathData(pszPath);
+    _pPathData = new KH_AT("(2268)") CPathData(pszPath);
     _nMoveMotion = 0;
     if (_pPathData) {
         if (!_pHermiteHelper) {
-            _pHermiteHelper = new (__FILE__ "(2274)") CHermitePath;
+            _pHermiteHelper = new KH_AT("(2274)") CHermitePath;
             if (!_pHermiteHelper) goto end;
         }
         {

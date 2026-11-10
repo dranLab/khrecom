@@ -87,7 +87,7 @@ private:
 public:
     CVtransReq(const TexInfo& inTexInfo, CBuf& inSrc) : m_bTrans(FALSE) {
         m_TexInfo = inTexInfo;
-        m_pSrcData = new (__FILE__ "(43)") CBuf;
+        m_pSrcData = new KH_AT("(43)") CBuf;
         if (m_pSrcData) inSrc.copyTo(*m_pSrcData);
     }
     virtual ~CVtransReq() {
@@ -364,7 +364,7 @@ void CVramMan::releaseClut(UINT nPos, INT nType) {
 #line 359
 static _MallocUnit* _createUnit(UINT nStartPos, UINT nSize, _MallocUnit* pPrev, _MallocUnit* pNext) {
     _MallocUnit* pUnit;
-    pUnit = new (__FILE__ "(361)") _MallocUnit;
+    pUnit = new KH_AT("(361)") _MallocUnit;
     if (!pUnit) AssertApp(__FILE__, __LINE__, "pUnit", 0);
     pUnit->_nStartPos = nStartPos;
     pUnit->_nEndPos = nStartPos + nSize;
@@ -574,7 +574,7 @@ BOOL CVramMan::reqTransTex(const TexInfo& texInfo, CBuf& data) {
         (texInfo._TexInfo._pImage != NULL || texInfo._ClutInfo._pImage != NULL)) {
         WaitSema(s_nTransSema);
 #line 701
-        CVtransReq* pReq = new (__FILE__ "(701)") CVtransReq(texInfo, data);
+        CVtransReq* pReq = new KH_AT("(701)") CVtransReq(texInfo, data);
         if (pReq) {
             s_TransQueue.pushBack(*pReq);
             bResult = TRUE;

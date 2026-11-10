@@ -94,14 +94,14 @@ CAtel::~CAtel() {
 
 #line 97
 static inline CFadeIOMask* _newFader(INT nLayer) {
-    return new (__FILE__ "(98)") CFadeIOMask(*CTaskMan::getSysTask(0), nLayer);
+    return new KH_AT("(98)") CFadeIOMask(*CTaskMan::getSysTask(0), nLayer);
 }
 
 void CAtel::loadFromMem(const BYTE* pAddr) {
     if (!pAddr) return;
     if (!m_pVSM) {
 #line 106
-        m_pVSM = new (__FILE__ "(106)") CVSM(*this, 0);
+        m_pVSM = new KH_AT("(106)") CVSM(*this, 0);
 #line 107
         ASSERT(m_pVSM);
     }
@@ -232,13 +232,13 @@ BOOL CAtel::createAvatar(INT nRsrcID, Actor& act, INT flag) {
 
 CEntity* CAtel::createAvatar(INT inRsrcID, CTask* inParent) {
 #line 323
-    CAvatar* p = new (__FILE__ "(323)") CAvatar(inParent);
+    CAvatar* p = new KH_AT("(323)") CAvatar(inParent);
     return p ? AVATAR_ENTITY(p) : NULL;
 }
 
 BOOL CAtel::createEventTrap(const LineTrapSrc& src, Actor& act) {
 #line 331
-    CEventLine* p = new (__FILE__ "(331)") CEventLine;
+    CEventLine* p = new KH_AT("(331)") CEventLine;
     if (p) {
         p->setData(src);
         act._pEventTrap = p;
@@ -249,7 +249,7 @@ BOOL CAtel::createEventTrap(const LineTrapSrc& src, Actor& act) {
 
 BOOL CAtel::createEventTrap(const BoxTrapSrc& src, Actor& act) {
 #line 345
-    CEventBox* pBox = new (__FILE__ "(345)") CEventBox;
+    CEventBox* pBox = new KH_AT("(345)") CEventBox;
     if (pBox) {
         pBox->setData(src);
         act._pEventTrap = pBox;

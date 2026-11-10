@@ -384,7 +384,7 @@ private:
     void _disp0_SetPacket(UINT nMode, const int (*pData)[4], INT semikind, u_long nInTest, INT iFlags, u_long* tex0);
 protected:
     void disp0(INT semikind, u_long nInTest, INT iFlags);
-    virtual CSemiModel* createSemiModel() { return new (__FILE__ "(569)") CSemiModel; }
+    virtual CSemiModel* createSemiModel() { return new KH_AT("(569)") CSemiModel; }
     BOOL isManagedSemiModel() const { return m_nFlag & 1; }
     void manageSemiModel(BOOL bOn) {
         if (bOn) m_nFlag |= 1;

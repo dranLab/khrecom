@@ -1676,14 +1676,14 @@ void CMemo3DObj::main() {
             pModelTbl = CRsrcDB::getRsrcMDL(nID);
             if (pModelTbl) {
 #line 2485
-                m_pModels = new (__FILE__ "(2485)") CModel[m_iModelCount];
+                m_pModels = new KH_AT("(2485)") CModel[m_iModelCount];
 #line 2487
                 if (!m_pModels) AssertApp(__FILE__, __LINE__, "m_pModels", 0);
                 pTexAnimData = CRsrcDB::getRsrcTXA(nID);
                 if (pTexAnimData) {
                     m_iTexAnimNum = pTexAnimData->getDataNum();
                     if (m_iTexAnimNum > 0) {
-                        m_pTexAnim = new (__FILE__ "(2501)") CTexAnm[m_iTexAnimNum];
+                        m_pTexAnim = new KH_AT("(2501)") CTexAnm[m_iTexAnimNum];
                         for (INT i = 0; i < m_iTexAnimNum; i++) m_pTexAnim[i].setup(*pTexAnimData, i);
                     }
                 }
@@ -1694,7 +1694,7 @@ void CMemo3DObj::main() {
                     if (isLightOff()) m_pModels[i].setColorScale(0.0f, 0.0f, 0.0f, 0.0f);
                     if (m_pTexAnim) m_pModels[i].linkTexAnm(m_pTexAnim, m_iTexAnimNum);
                 }
-                m_pAnime = new (__FILE__ "(2525)") CAnim;
+                m_pAnime = new KH_AT("(2525)") CAnim;
 #line 2527
                 if (!m_pAnime) AssertApp(__FILE__, __LINE__, "m_pAnime", 0);
                 m_pAnime->link(this, nID);
@@ -1911,7 +1911,7 @@ INT CMemo2DLayout::setup(const CHAR* inSeqName, const CHAR* inFileName, const IN
     m_pLayoutNoTbl = (INT*)com_malloc_d(sizeof(INT) * 3, __FILE__ "(2877)", -1);
     for (INT i = 0; i < 3; i++) m_pLayoutNoTbl[i] = inLayNoTbl[i];
     m_iSeqNum = inSeqNum;
-    m_pSeqNoTbl = new (__FILE__ "(2881)") LayoutDataParam[inSeqNum];
+    m_pSeqNoTbl = new KH_AT("(2881)") LayoutDataParam[inSeqNum];
 
 
     if (m_pSeqNoTbl) {
@@ -1953,7 +1953,7 @@ void CMemo2DLayout::initialize() {
             pSeq->enableColorCtrl(TRUE);
             pSeqParent = pSeq;
         } else if (pSeqParent) {
-            D2::C2DFnt* pFnt = new (__FILE__ "(2945)")
+            D2::C2DFnt* pFnt = new KH_AT("(2945)")
                 D2::C2DFnt(0, 0, NULL, 15, CCtdMan::getText(m_pSeqNoTbl[i].CTCode), 0x40);
 
             if (pFnt) {
@@ -1996,7 +1996,7 @@ void CMemo2DLayout::destroyLayer() {
 D2::C2DSeqCtrl* CMemo2DLayout::createSequence(INT inSeqNo, INT inLayer) {
 #line 3011
     if (!(inSeqNo < 32)) AssertApp(__FILE__, __LINE__, "inSeqNo < SEQCTRL_MAX", 0);
-    D2::C2DSeqCtrl* pSeq = new (__FILE__ "(3017)")
+    D2::C2DSeqCtrl* pSeq = new KH_AT("(3017)")
         D2::C2DSeqCtrl;
 
     if (pSeq) {
@@ -2209,7 +2209,7 @@ void CMemo2DCursor::setup(CursorDataParam& inParam) {
     if (inParam.posiNum > 0) {
         if (inParam.posiTbl) {
             m_iPosiNum = inParam.posiNum;
-            m_pPosiTbl = new (__FILE__ "(3348)") CursorPosition[m_iPosiNum];
+            m_pPosiTbl = new KH_AT("(3348)") CursorPosition[m_iPosiNum];
 
 
             for (INT i = 0; i < m_iPosiNum; i++) m_pPosiTbl[i].copy(inParam.posiTbl[i]);
@@ -2611,7 +2611,7 @@ namespace Base {
 inline void CJiminyMemo::mainInit() {
     CMemo2DLayout* pLay;
     D2::C2DSeqCtrl* pMess;
-    pLay = new (__FILE__ "(3948)") CMemo2DLayout(this);
+    pLay = new KH_AT("(3948)") CMemo2DLayout(this);
     if (pLay) {
         D2::C2DSeqCtrl* pSeq;
         m_hLayout = pLay->getHandle();
@@ -2666,7 +2666,7 @@ inline void CJiminyMemo::mainInit() {
             pSeq->setLocalPos(posi);
         }
     }
-    pMess = new (__FILE__ "(4012)") D2::C2DSeqCtrl;
+    pMess = new KH_AT("(4012)") D2::C2DSeqCtrl;
     if (pMess) {
         D2::C2DFnt* pFnt;
         m_pMessSeq = pMess;
@@ -2674,7 +2674,7 @@ inline void CJiminyMemo::mainInit() {
         pMess->enableDisp(TRUE);
         pMess->addSeq(m_pLadName, 1);
         pMess->setPos((FVECTOR&)JiminyMemo::Base::TelopMessagePosition);
-        pFnt = new (__FILE__ "(4022)") D2::C2DFnt(0, 0, NULL, 0x10, JiminyMemo::Base::DefaultMessage, 0x40);
+        pFnt = new KH_AT("(4022)") D2::C2DFnt(0, 0, NULL, 0x10, JiminyMemo::Base::DefaultMessage, 0x40);
         if (pFnt) {
             m_pMessString = pFnt;
             pMess->addFnt(m_pLadName, pFnt);
@@ -2755,7 +2755,7 @@ inline void _roPh13() { /* MATCH: placeholder: an inline function's strings, in 
 CMemo2DSequence* CJiminyMemo::createSequence(const INT* inSeqData, INT inLayer, INT inLayoutNo, INT inLayoutSeqNo,
                                              CMemo2DSequence* inParent) {
     FVECTOR posi;
-    CMemo2DSequence* pSeq = new (__FILE__ "(4170)")
+    CMemo2DSequence* pSeq = new KH_AT("(4170)")
         CMemo2DSequence;
 
     if (pSeq) {
@@ -2774,7 +2774,7 @@ CMemo2DSequence* CJiminyMemo::createSequence(const INT* inSeqData, INT inLayer, 
 CMemo2DSequence* CJiminyMemo::createSequence(INT inSeqNo, INT inLayer, INT inLayoutNo, INT inLayoutSeqNo,
                                              CMemo2DSequence* inParent) {
     FVECTOR posi;
-    CMemo2DSequence* pSeq = new (__FILE__ "(4194)")
+    CMemo2DSequence* pSeq = new KH_AT("(4194)")
         CMemo2DSequence;
 
     if (pSeq) {
@@ -2799,7 +2799,7 @@ INT CJiminyMemo::createListSequence(CMemo2DSequence* inList, INT inLayer, INT in
     G_RGBA fontRGB;
     if (!inList || !inFontSeq || !inFont) return FALSE;
     fontRGB.col = inFontCol;
-    pListFont = new (__FILE__ "(4228)")
+    pListFont = new KH_AT("(4228)")
         D2::C2DSeqCtrl;
 
     if (pListFont) {
@@ -2810,7 +2810,7 @@ INT CJiminyMemo::createListSequence(CMemo2DSequence* inList, INT inLayer, INT in
         pListFont->addSeq(m_pLadName, 0x24);
         D2::C2DMan::getLayPosition(m_pLadFileName, inLayoutNo, inLayoutSeqNo, posi, 0);
         pListFont->setLocalPos(posi);
-        pFnt = new (__FILE__ "(4240)")
+        pFnt = new KH_AT("(4240)")
             D2::C2DFnt(0, 0, &fontRGB, inFontSize, inStr, inFontStyle);
 
         if (pFnt) {
@@ -2921,7 +2921,7 @@ CMemo2DCursor* CJiminyMemo::createCollectionCursorSequence(const INT* inSeqTbl, 
                                                            FLOAT inScale, CMemo2DSequence* inParent) {
     CMemo2DCursor* pCur;
     CursorDataParam param;
-    pCur = new (__FILE__ "(4411)")
+    pCur = new KH_AT("(4411)")
         CMemo2DCursor(getHandle());
 
     if (pCur) {
@@ -2977,7 +2977,7 @@ CMemo2DCursor* CJiminyMemo::createCursorSequence(const INT* inSeqTbl, INT inLayo
     FVECTOR posi0;
     FVECTOR posi1;
     FVECTOR interval;
-    pCur = new (__FILE__ "(4472)")
+    pCur = new KH_AT("(4472)")
         CMemo2DCursor(getHandle());
 
     if (pCur) {
@@ -3019,7 +3019,7 @@ void CJiminyMemo::createMarkSequence(INT inMarkSeq, INT inNum, INT inLayoutNo, I
     INT i;
     if (!inArray) return;
     for (i = 0; i < inNum; i++) {
-        pMark = new (__FILE__ "(4520)")
+        pMark = new KH_AT("(4520)")
             D2::C2DSeqCtrl;
 
         if (pMark) {
@@ -3489,12 +3489,12 @@ void CJiminyMemo::contentMenu() {
         m_ContentMenu.iCursorPosiNum = listNum;
         m_ContentMenu.iTelopNo = telopNo;
         m_ContentMenu.iStringNum = listNum + 1;
-        m_ContentMenu.pString = new (__FILE__ "(5252)") D2::C2DFnt*[m_ContentMenu.iStringNum];
+        m_ContentMenu.pString = new KH_AT("(5252)") D2::C2DFnt*[m_ContentMenu.iStringNum];
         if (m_ContentMenu.pString) {
             for (INT i = 0; i < m_ContentMenu.iStringNum; i++) m_ContentMenu.pString[i] = NULL;
         }
         m_ContentMenu.iSeqCtrlNum = m_ContentMenu.iStringNum + 10;
-        m_ContentMenu.pSeqCtrl = new (__FILE__ "(5258)") D2::C2DSeqCtrl*[m_ContentMenu.iSeqCtrlNum];
+        m_ContentMenu.pSeqCtrl = new KH_AT("(5258)") D2::C2DSeqCtrl*[m_ContentMenu.iSeqCtrlNum];
         if (m_ContentMenu.pSeqCtrl) {
             for (INT i = 0; i < m_ContentMenu.iSeqCtrlNum; i++) m_ContentMenu.pSeqCtrl[i] = NULL;
         }
@@ -3542,7 +3542,7 @@ void CJiminyMemo::contentMenu() {
         if (getContentTimer() <= 15.0f) {
             CMemo3DObj* pObj;
             setContentStep(31);
-            pObj = new (__FILE__ "(5350)")
+            pObj = new KH_AT("(5350)")
                 CMemo3DObj(this, JiminyMemo::getHostGroupId(), JiminyMemo::getHostRsrcId(), 0x12, FALSE);
             if (pObj) {
                 CMemo2DSequence* pTalk;
@@ -3550,7 +3550,7 @@ void CJiminyMemo::contentMenu() {
                 pObj->setPosition(JiminyMemo::Menu::JiminyPosi);
                 pObj->setRotateY(JiminyMemo::Menu::JiminyRotY);
                 pObj->setScale(8.0f);
-                pTalk = new (__FILE__ "(5359)") CMemo2DSequence;
+                pTalk = new KH_AT("(5359)") CMemo2DSequence;
                 if (pTalk) {
                     FVECTOR posi1;
                     FVECTOR posi0;
@@ -3566,7 +3566,7 @@ void CJiminyMemo::contentMenu() {
                     pTalk->setPosition();
                     no = m_ContentMenu.iCursorPosiNum;
                     fontRGB.col = 0x80000000;
-                    pFnt = new (__FILE__ "(5377)") D2::C2DFnt(0, 0, &fontRGB, 18, CCtdMan::getText(0x700206), 0x21002);
+                    pFnt = new KH_AT("(5377)") D2::C2DFnt(0, 0, &fontRGB, 18, CCtdMan::getText(0x700206), 0x21002);
                     if (pFnt) {
                         if (m_ContentMenu.pString) m_ContentMenu.pString[no] = pFnt;
                         D2::C2DMan::getLayPosition(m_pLadFileName, 1, 0, posi1, 0);
@@ -3711,13 +3711,13 @@ void CJiminyMemo::contentStory() {
         m_ContentStory.iCursorPosiNum = posiNum;
         m_ContentStory.iCTCodeOffset = ctNo;
         m_ContentStory.iStringNum = posiNum;
-        pString = new (__FILE__ "(5569)") D2::C2DFnt*[m_ContentStory.iStringNum];
+        pString = new KH_AT("(5569)") D2::C2DFnt*[m_ContentStory.iStringNum];
         if (pString) {
             for (INT i = 0; i < m_ContentStory.iStringNum; i++) pString[i] = NULL;
             m_ContentStory.pString = pString;
         }
         m_ContentStory.iSeqCtrlNum = m_ContentStory.iStringNum + listNum + 3;
-        pSeqCtrl = new (__FILE__ "(5576)") D2::C2DSeqCtrl*[m_ContentStory.iSeqCtrlNum];
+        pSeqCtrl = new KH_AT("(5576)") D2::C2DSeqCtrl*[m_ContentStory.iSeqCtrlNum];
         if (pSeqCtrl) {
             for (INT i = 0; i < m_ContentStory.iSeqCtrlNum; i++) pSeqCtrl[i] = NULL;
             m_ContentStory.pSeqCtrl = pSeqCtrl;
@@ -3938,13 +3938,13 @@ void CJiminyMemo::contentStoryView() {
         m_ContentStoryView.iAllStoryNum = storyNum;
         m_ContentStoryView.iPictureNo = pictureNo;
         m_ContentStoryView.iStringNum = 8;
-        pString = new (__FILE__ "(5890)") D2::C2DFnt*[m_ContentStoryView.iStringNum];
+        pString = new KH_AT("(5890)") D2::C2DFnt*[m_ContentStoryView.iStringNum];
         if (pString) {
             for (INT i = 0; i < m_ContentStoryView.iStringNum; i++) pString[i] = NULL;
             m_ContentStoryView.pString = pString;
         }
         m_ContentStoryView.iSeqCtrlNum = 11;
-        pSeqCtrl = new (__FILE__ "(5897)") D2::C2DSeqCtrl*[m_ContentStoryView.iSeqCtrlNum];
+        pSeqCtrl = new KH_AT("(5897)") D2::C2DSeqCtrl*[m_ContentStoryView.iSeqCtrlNum];
         if (pSeqCtrl) {
             for (INT i = 0; i < m_ContentStoryView.iSeqCtrlNum; i++) pSeqCtrl[i] = NULL;
             m_ContentStoryView.pSeqCtrl = pSeqCtrl;
@@ -3973,7 +3973,7 @@ void CJiminyMemo::contentStoryView() {
                 sprintf(m_ContentStoryView.pPictFileName, "%s.lad", JiminyMemo::StoryLadName[pictureNo]);
                 sprintf(m_ContentStoryView.pPictSeqName, "%s:00", JiminyMemo::StoryLadName[pictureNo]);
             }
-            D2::C2DSeqCtrl* pPictSeq = new (__FILE__ "(5949)") D2::C2DSeqCtrl;
+            D2::C2DSeqCtrl* pPictSeq = new KH_AT("(5949)") D2::C2DSeqCtrl;
             if (pPictSeq) {
                 *pSeqCtrl = pPictSeq;
                 m_ContentStoryView.pPictSeq = pPictSeq;
@@ -4191,13 +4191,13 @@ void CJiminyMemo::contentCollection() {
         m_ContentCollect.sCursorPosiY = currentStartNo / cursorLimitX;
         m_ContentCollect.fScale = defaultScale;
         m_ContentCollect.iStringNum = 6;
-        pString = new (__FILE__ "(6227)") D2::C2DFnt*[m_ContentCollect.iStringNum];
+        pString = new KH_AT("(6227)") D2::C2DFnt*[m_ContentCollect.iStringNum];
         if (pString) {
             for (INT i = 0; i < m_ContentCollect.iStringNum; i++) pString[i] = NULL;
             m_ContentCollect.pString = pString;
         }
         m_ContentCollect.iSeqCtrlNum = m_ContentCollect.iStringNum + 1;
-        pSeqCtrl = new (__FILE__ "(6234)") D2::C2DSeqCtrl*[m_ContentCollect.iSeqCtrlNum];
+        pSeqCtrl = new KH_AT("(6234)") D2::C2DSeqCtrl*[m_ContentCollect.iSeqCtrlNum];
         if (pSeqCtrl) {
             for (INT i = 0; i < m_ContentCollect.iSeqCtrlNum; i++) pSeqCtrl[i] = NULL;
             m_ContentCollect.pSeqCtrl = pSeqCtrl;
@@ -4214,7 +4214,7 @@ void CJiminyMemo::contentCollection() {
                                CCtdMan::getText(0x700601));
         }
         m_ContentCollect.iCardNum = allCardNum;
-        pCard = new (__FILE__ "(6280)") CMemo2DCard*[m_ContentCollect.iCardNum];
+        pCard = new KH_AT("(6280)") CMemo2DCard*[m_ContentCollect.iCardNum];
         if (pCard) {
             for (INT i = 0; i < m_ContentCollect.iCardNum; i++) pCard[i] = NULL;
             m_ContentCollect.pCard = pCard;
@@ -4225,7 +4225,7 @@ void CJiminyMemo::contentCollection() {
             for (INT kind = 0; kind < kindNum; kind++) {
                 for (INT i = 0; i < pCardNumTbl[kind]; i++) {
                     if (CJiminyMemoFlag::isContentOpen(eventFlagId + no)) {
-                        pCard[no] = new (__FILE__ "(6294)") CMemo2DCard(m_pLadName);
+                        pCard[no] = new KH_AT("(6294)") CMemo2DCard(m_pLadName);
                         if (pCard[no]) {
                             CARD card;
                             pCard[no]->setLayer(0xF);
@@ -4905,13 +4905,13 @@ void CJiminyMemo::contentCard() {
         m_ContentCard.iListNum = listNum;
         m_ContentCard.starCTNo = CTNo;
         m_ContentCard.iStringNum = posiNum;
-        pString = new (__FILE__ "(7187)") D2::C2DFnt*[m_ContentCard.iStringNum];
+        pString = new KH_AT("(7187)") D2::C2DFnt*[m_ContentCard.iStringNum];
         if (pString) {
             for (INT i = 0; i < m_ContentCard.iStringNum; i++) pString[i] = NULL;
             m_ContentCard.pString = pString;
         }
         m_ContentCard.iSeqCtrlNum = m_ContentCard.iStringNum + m_ContentCard.iListNum * 2 + 3;
-        pSeqCtrl = new (__FILE__ "(7194)") D2::C2DSeqCtrl*[m_ContentCard.iSeqCtrlNum];
+        pSeqCtrl = new KH_AT("(7194)") D2::C2DSeqCtrl*[m_ContentCard.iSeqCtrlNum];
         if (pSeqCtrl) {
             for (INT i = 0; i < m_ContentCard.iSeqCtrlNum; i++) pSeqCtrl[i] = NULL;
             m_ContentCard.pSeqCtrl = pSeqCtrl;
@@ -5171,13 +5171,13 @@ void CJiminyMemo::contentCardSelect() {
             m_ContentCardSelect.fScrollBarParListNum = 0.0f;
         }
         m_ContentCardSelect.iStringNum = m_ContentCardSelect.iCursorPosiNum;
-        pString = new (__FILE__ "(7546)") D2::C2DFnt*[m_ContentCardSelect.iStringNum];
+        pString = new KH_AT("(7546)") D2::C2DFnt*[m_ContentCardSelect.iStringNum];
         if (pString) {
             for (INT i = 0; i < m_ContentCardSelect.iStringNum; i++) pString[i] = NULL;
             m_ContentCardSelect.pString = pString;
         }
         m_ContentCardSelect.iSeqCtrlNum = m_ContentCardSelect.iStringNum + m_ContentCardSelect.iListNum + 3;
-        pSeqCtrl = new (__FILE__ "(7553)") D2::C2DSeqCtrl*[m_ContentCardSelect.iSeqCtrlNum];
+        pSeqCtrl = new KH_AT("(7553)") D2::C2DSeqCtrl*[m_ContentCardSelect.iSeqCtrlNum];
         if (pSeqCtrl) {
             for (INT i = 0; i < m_ContentCardSelect.iSeqCtrlNum; i++) pSeqCtrl[i] = NULL;
             m_ContentCardSelect.pSeqCtrl = pSeqCtrl;
@@ -5392,13 +5392,13 @@ void CJiminyMemo::contentCardView() {
         splitMessage(&m_ContentCardView.iTextLineNum, &m_ContentCardView.pTextLineBuf, CCtdMan::getText(cardManualNo),
                      0xF);
         m_ContentCardView.iStringNum = m_ContentCardView.iTextLineNum + 0x42;
-        pString = new (__FILE__ "(7836)") D2::C2DFnt*[m_ContentCardView.iStringNum];
+        pString = new KH_AT("(7836)") D2::C2DFnt*[m_ContentCardView.iStringNum];
         if (pString) {
             for (INT i = 0; i < m_ContentCardView.iStringNum; i++) pString[i] = NULL;
             m_ContentCardView.pString = pString;
         }
         m_ContentCardView.iSeqCtrlNum = m_ContentCardView.iTextLineNum + 9;
-        pSeqCtrl = new (__FILE__ "(7844)") D2::C2DSeqCtrl*[m_ContentCardView.iSeqCtrlNum];
+        pSeqCtrl = new KH_AT("(7844)") D2::C2DSeqCtrl*[m_ContentCardView.iSeqCtrlNum];
         if (pSeqCtrl) {
             for (INT i = 0; i < m_ContentCardView.iSeqCtrlNum; i++) pSeqCtrl[i] = NULL;
             m_ContentCardView.pSeqCtrl = pSeqCtrl;
@@ -5468,7 +5468,7 @@ void CJiminyMemo::contentCardView() {
             m_ContentCardView.pTopArrowSeq = *pSeqCtrl++;
             createMarkSequence(0xC3, 1, 0x15, 0xD, 0x11, pList, pSeqCtrl);
             m_ContentCardView.pBottomArrowSeq = *pSeqCtrl;
-            pCard = new (__FILE__ "(7987)") CMemo2DCard(m_pLadName);
+            pCard = new KH_AT("(7987)") CMemo2DCard(m_pLadName);
             if (pCard) {
                 CARD card;
                 m_ContentCardView.pCard = pCard;
@@ -5744,13 +5744,13 @@ void CJiminyMemo::contentChara() {
         m_ContentChara.iCursorPosiNum = posiNum;
         m_ContentChara.iCTCodeOffset = ctNo;
         m_ContentChara.iStringNum = posiNum;
-        pString = new (__FILE__ "(8341)") D2::C2DFnt*[m_ContentChara.iStringNum];
+        pString = new KH_AT("(8341)") D2::C2DFnt*[m_ContentChara.iStringNum];
         if (pString) {
             for (INT i = 0; i < m_ContentChara.iStringNum; i++) pString[i] = NULL;
             m_ContentChara.pString = pString;
         }
         m_ContentChara.iSeqCtrlNum = m_ContentChara.iStringNum + listNum * 2 + 3;
-        pSeqCtrl = new (__FILE__ "(8348)") D2::C2DSeqCtrl*[m_ContentChara.iSeqCtrlNum];
+        pSeqCtrl = new KH_AT("(8348)") D2::C2DSeqCtrl*[m_ContentChara.iSeqCtrlNum];
         if (pSeqCtrl) {
             for (INT i = 0; i < m_ContentChara.iSeqCtrlNum; i++) pSeqCtrl[i] = NULL;
             m_ContentChara.pSeqCtrl = pSeqCtrl;
@@ -6009,13 +6009,13 @@ void CJiminyMemo::contentCharaSelect() {
         m_ContentCharaSelect.pCTCodeTbl = ctTbl;
         m_ContentCharaSelect.iEventFlagId = eventFlagId + eventFlagOffset;
         m_ContentCharaSelect.iStringNum = m_ContentCharaSelect.iCursorPosiNum;
-        pString = new (__FILE__ "(8702)") D2::C2DFnt*[m_ContentCharaSelect.iStringNum];
+        pString = new KH_AT("(8702)") D2::C2DFnt*[m_ContentCharaSelect.iStringNum];
         if (pString) {
             for (INT i = 0; i < m_ContentCharaSelect.iStringNum; i++) pString[i] = NULL;
             m_ContentCharaSelect.pString = pString;
         }
         m_ContentCharaSelect.iSeqCtrlNum = m_ContentCharaSelect.iCursorPosiNum + listNum + 3;
-        pSeqCtrl = new (__FILE__ "(8709)") D2::C2DSeqCtrl*[m_ContentCharaSelect.iSeqCtrlNum];
+        pSeqCtrl = new KH_AT("(8709)") D2::C2DSeqCtrl*[m_ContentCharaSelect.iSeqCtrlNum];
         if (pSeqCtrl) {
             for (INT i = 0; i < m_ContentCharaSelect.iSeqCtrlNum; i++) pSeqCtrl[i] = NULL;
             m_ContentCharaSelect.pSeqCtrl = pSeqCtrl;
@@ -6236,13 +6236,13 @@ void CJiminyMemo::contentCharaView() {
         m_ContentCharaView.iListNum = listNum;
         m_ContentCharaView.iCurrentTextLine = 2;
         m_ContentCharaView.iStringNum = 9;
-        pString = new (__FILE__ "(8999)") D2::C2DFnt*[m_ContentCharaView.iStringNum];
+        pString = new KH_AT("(8999)") D2::C2DFnt*[m_ContentCharaView.iStringNum];
         if (pString) {
             for (INT i = 0; i < m_ContentCharaView.iStringNum; i++) pString[i] = NULL;
             m_ContentCharaView.pString = pString;
         }
         m_ContentCharaView.iSeqCtrlNum = m_ContentCharaView.iStringNum + 2;
-        pSeqCtrl = new (__FILE__ "(9006)") D2::C2DSeqCtrl*[m_ContentCharaView.iSeqCtrlNum];
+        pSeqCtrl = new KH_AT("(9006)") D2::C2DSeqCtrl*[m_ContentCharaView.iSeqCtrlNum];
         if (pSeqCtrl) {
             for (INT i = 0; i < m_ContentCharaView.iSeqCtrlNum; i++) pSeqCtrl[i] = NULL;
             m_ContentCharaView.pSeqCtrl = pSeqCtrl;
@@ -6279,7 +6279,7 @@ void CJiminyMemo::contentCharaView() {
             m_ContentCharaView.pTopArrowSeq = *pSeqCtrl++;
             createMarkSequence(0xC3, 1, 0x23, 0xB, 0x10, pList, pSeqCtrl);
             m_ContentCharaView.pBottomArrowSeq = *pSeqCtrl;
-            CMemo2DCard* pChara = new (__FILE__ "(9108)") CMemo2DCard(m_pLadName);
+            CMemo2DCard* pChara = new KH_AT("(9108)") CMemo2DCard(m_pLadName);
             if (pChara) {
                 m_ContentCharaView.pChara = pChara;
                 pChara->setLayer(0x10);
@@ -6544,7 +6544,7 @@ INT CJiminyMemo::contentCharaView_ModelView() {
                 work(0x3C4) = (INT)pDusty;
                 pDusty->setInState(0);
             }
-            pObj = new (__FILE__ "(9474)")
+            pObj = new KH_AT("(9474)")
                 CMemo3DObj(this, groupId, rsrcId, 0x12, FALSE);
 
             if (pObj) {
@@ -6627,13 +6627,13 @@ void CJiminyMemo::contentMinigame() {
         D2::C2DFnt** pString;
         CMemo2DSequence* pList;
         m_ContentMinigame.iStringNum = 13;
-        pString = new (__FILE__ "(9647)") D2::C2DFnt*[m_ContentMinigame.iStringNum];
+        pString = new KH_AT("(9647)") D2::C2DFnt*[m_ContentMinigame.iStringNum];
         if (pString) {
             for (INT i = 0; i < m_ContentMinigame.iStringNum; i++) pString[i] = NULL;
             m_ContentMinigame.pString = pString;
         }
         m_ContentMinigame.iSeqCtrlNum = m_ContentMinigame.iStringNum + 6;
-        pSeqCtrl = new (__FILE__ "(9654)") D2::C2DSeqCtrl*[m_ContentMinigame.iSeqCtrlNum];
+        pSeqCtrl = new KH_AT("(9654)") D2::C2DSeqCtrl*[m_ContentMinigame.iSeqCtrlNum];
         if (pSeqCtrl) {
             for (INT i = 0; i < m_ContentMinigame.iSeqCtrlNum; i++) pSeqCtrl[i] = NULL;
             m_ContentMinigame.pSeqCtrl = pSeqCtrl;

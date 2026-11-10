@@ -168,7 +168,7 @@ CChatMan::~CChatMan() {
 
 void CChatMan::setup() {
     if (!m_pCChatWndDtList) {
-        m_pCChatWndDtList = new (__FILE__ "(72)") CChatWndDtList;
+        m_pCChatWndDtList = new KH_AT("(72)") CChatWndDtList;
     }
 }
 
@@ -191,10 +191,10 @@ INT CChatMan::onCreateChatWindowCTD(INT nCmd, void* pParam, INT nID) {
     if (searchChatWndDt(nID)) {
         return -1;
     }
-    CTextWnd* pTextWnd = new (__FILE__ "(156)") CTextWnd(*this, 0);
+    CTextWnd* pTextWnd = new KH_AT("(156)") CTextWnd(*this, 0);
     ChatWndCTDParam* p = (ChatWndCTDParam*)pParam;
     pTextWnd->createWindowCTD(p->nCtdID, &p->pos, &p->pos2, p->a, p->pB, p->c);
-    CChatWndDt* pChatWndDt = new (__FILE__ "(161)") CChatWndDt;
+    CChatWndDt* pChatWndDt = new KH_AT("(161)") CChatWndDt;
     pChatWndDt->m_pBaseWnd = pTextWnd;
     if (nID >= 0) {
         pChatWndDt->m_nID = nID;
@@ -214,14 +214,14 @@ INT CChatMan::createChatWindow(INT nCmd, void* pParam, INT nID, INT fg) {
     if (searchChatWndDt(nID)) {
         return -1;
     }
-    CTextWnd* pTextWnd = new (__FILE__ "(237)") CTextWnd(*this, 0);
+    CTextWnd* pTextWnd = new KH_AT("(237)") CTextWnd(*this, 0);
     ChatWndParam* p = (ChatWndParam*)pParam;
     if (!fg) {
         pTextWnd->createWindow(p->pos, p->size, p->a, p->pText, p->b, p->c, p->d, p->pt, p->e, p->f);
     } else {
         pTextWnd->createWindowC(p->pos, p->size, p->a, p->pText, p->b, p->c, p->d, p->pt, p->e, p->f);
     }
-    CChatWndDt* pChatWndDt = new (__FILE__ "(246)") CChatWndDt;
+    CChatWndDt* pChatWndDt = new KH_AT("(246)") CChatWndDt;
     pChatWndDt->m_pBaseWnd = pTextWnd;
     if (nID >= 0) {
         pChatWndDt->m_nID = nID;
@@ -375,7 +375,7 @@ INT CChatMan::onCreateImageWindow(INT nCmd, void* pParam, INT nID) {
     if (searchChatWndDt(nID)) {
         return -1;
     }
-    CImageWnd* pImageWnd = new (__FILE__ "(742)") CImageWnd(*CTaskMan::getSysTask(0));
+    CImageWnd* pImageWnd = new KH_AT("(742)") CImageWnd(*CTaskMan::getSysTask(0));
     ImageWndParam* p = (ImageWndParam*)pParam;
     pImageWnd->createWindow(p->pos, p->size, p->pos2, p->size2, p->pName, p->fRate, p->col0, p->col1,
                             (p->nFlag & 6) >> 1);
@@ -383,7 +383,7 @@ INT CChatMan::onCreateImageWindow(INT nCmd, void* pParam, INT nID) {
         pImageWnd->setDestroy();
         return 1;
     }
-    CChatWndDt* pChatWndDt = new (__FILE__ "(753)") CChatWndDt;
+    CChatWndDt* pChatWndDt = new KH_AT("(753)") CChatWndDt;
     pChatWndDt->m_pBaseWnd = pImageWnd;
     if (nID >= 0) {
         pChatWndDt->m_nID = nID;

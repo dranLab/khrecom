@@ -96,14 +96,14 @@ void CTitleReportDllStarter::stateDllLoad() {
         switch (m_LaunchMode) {
         case 0:
 #line 126
-            m_hChildTask = (new (__FILE__ "(126)")
+            m_hChildTask = (new KH_AT("(126)")
                                 CTitle(this, m_nParam))->getHandle();
             break;
         case 1:
             break;
         case 2:
 #line 128
-            new (__FILE__ "(128)") BattleReport::CBtlReport(this);
+            new KH_AT("(128)") BattleReport::CBtlReport(this);
             break;
         }
         changeState(2);

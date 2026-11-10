@@ -107,7 +107,7 @@ void CPlayerGauge::_initialize() {
     m_tqRed = 0;
     m_szSeqFace = _ref(g_szSeqFace); // MATCH: global load kept after the field stores
     m_pSeqCtrl = NULL;
-    m_pSeqCtrl = new (__FILE__ "(134)") D2::C2DSeqCtrl;
+    m_pSeqCtrl = new KH_AT("(134)") D2::C2DSeqCtrl;
     m_pSeqCtrl->setLayer(2);
     m_pSeqCtrl->addSeq(g_szSeqGauge, 0xE);
     m_pSeqCtrl->addSeq(g_szSeqGauge, 7);
@@ -119,13 +119,13 @@ void CPlayerGauge::_initialize() {
     changeTimeHP(m_pSeqCtrl, 3, m_nMaxHP);
     D2::C2DMan::getLayPosition(g_szLadGauge, 1, 0, pos, FALSE);
     m_pSeqCtrl->setPos(pos);
-    m_pCommon = new (__FILE__ "(161)") CCommonGauge(this);
-    m_pPrize = new (__FILE__ "(162)") CPrizeGauge(this);
+    m_pCommon = new KH_AT("(161)") CCommonGauge(this);
+    m_pPrize = new KH_AT("(162)") CPrizeGauge(this);
     if (!CSceneInfo::isBattleScene() && !CSceneInfo::isMinigameScene()) {
-        m_pNaviMap = new (__FILE__ "(166)") CNaviMap(this);
+        m_pNaviMap = new KH_AT("(166)") CNaviMap(this);
         INT mode = CGame::getDbgGameMode();
-        if (mode >= 7) m_pFriend = new (__FILE__ "(178)") CFriendGauge(this);
-        else if (mode < 4) m_pFriend = new (__FILE__ "(178)") CFriendGauge(this);
+        if (mode >= 7) m_pFriend = new KH_AT("(178)") CFriendGauge(this);
+        else if (mode < 4) m_pFriend = new KH_AT("(178)") CFriendGauge(this);
     }
     if (CGameWork::getInt(1, 0xE2) & 1) {
         m_iState = 7;
@@ -142,7 +142,7 @@ void CPlayerGauge::_initialize() {
     m_nDP = 0;
     m_nStateDP = 0;
     if (CGame::isRikuGame() && CSceneInfo::isBattleScene()) {
-        m_pSeqCtrlDP = new (__FILE__ "(206)") D2::C2DSeqCtrl[3];
+        m_pSeqCtrlDP = new KH_AT("(206)") D2::C2DSeqCtrl[3];
         m_nMaxDP = 30;
         if (CGameWork::getInt(0, 0x24) & 8) m_uiFlag |= 4;
     }
@@ -532,16 +532,16 @@ void CLockonMarker::_initialize() {
 
     m_uiKind = 0;
     m_pSeqCtrl = NULL;
-    m_pSeqCtrl = new (__FILE__ "(850)") D2::C2DSeqCtrl(2);
+    m_pSeqCtrl = new KH_AT("(850)") D2::C2DSeqCtrl(2);
     m_pSeqCtrl->setLayer(2);
     m_pSeqCtrl->addSeq(g_szSeqCockpit, m_nSeqNo);
     m_pSeqCtrl->enableDisp(0, FALSE);
     m_pSeqCtrlPush = NULL;
-    m_pSeqCtrlPush = new (__FILE__ "(856)") D2::C2DSeqCtrl(2);
+    m_pSeqCtrlPush = new KH_AT("(856)") D2::C2DSeqCtrl(2);
     m_vDispPos.init();
     if (CSceneInfo::isBattleScene() || CSceneInfo::isMinigameScene()) {
         m_uiFlag |= 4;
-        m_pGauge = new (__FILE__ "(865)") CEnemyGauge(this);
+        m_pGauge = new KH_AT("(865)") CEnemyGauge(this);
     }
 }
 void CLockonMarker::main() {
@@ -835,7 +835,7 @@ void CEnemyGauge::_initialize() {
     m_hTarget = 0;
     m_tqRed = 0;
     m_pSeqCtrl = NULL;
-    m_pSeqCtrl = new (__FILE__ "(1484)") D2::C2DSeqCtrl(1);
+    m_pSeqCtrl = new KH_AT("(1484)") D2::C2DSeqCtrl(1);
     m_pSeqCtrl->setLayer(2);
     m_pSeqCtrl->addSeq(g_szLadGauge, 1, 2);
     m_pSeqCtrl->addSeq(g_szLadGauge, 1, 0);
@@ -1058,7 +1058,7 @@ void CCommonGauge::_initialize() {
     INT i;
     m_uiFlag = 0;
     m_pSeqCtrls = NULL;
-    m_pSeqCtrls = new (__FILE__ "(1901)") D2::C2DSeqCtrl[7];
+    m_pSeqCtrls = new KH_AT("(1901)") D2::C2DSeqCtrl[7];
     m_pSeqCtrls[0].addSeq(_ref(g_szSeqCockpit), 0xD);
     m_pSeqCtrls[1].addSeq(g_szSeqCockpit, 0xD);
     m_pSeqCtrls[2].addSeq(g_szSeqCockpit, 0xC);
@@ -1203,7 +1203,7 @@ void CPrizeGauge::_initialize() {
     m_iExp = 0;
     m_iOldExp = 0;
     m_pSeqCtrls = NULL;
-    m_pSeqCtrls = new (__FILE__ "(2119)") D2::C2DSeqCtrl[6];
+    m_pSeqCtrls = new KH_AT("(2119)") D2::C2DSeqCtrl[6];
     size = 16;
     m_pSeqCtrls->setLayer(8);
     m_pSeqCtrls->addSeq(g_szSeqCockpit, 0x51);
@@ -1225,7 +1225,7 @@ void CPrizeGauge::_initialize() {
     m_iOldMp = 0;
     m_iDropMp = 0;
     m_pMogSeqCtrls = NULL;
-    m_pMogSeqCtrls = new (__FILE__ "(2148)") D2::C2DSeqCtrl[6];
+    m_pMogSeqCtrls = new KH_AT("(2148)") D2::C2DSeqCtrl[6];
     m_pMogSeqCtrls->setLayer(8);
     m_pMogSeqCtrls->addSeq(g_szSeqCockpit, 0x66);
     D2::C2DMan::getLayPosition(g_szLadCockpit, 0x10, 0, pos, FALSE);
@@ -1243,8 +1243,8 @@ void CPrizeGauge::_initialize() {
     m_uiCardState = 0;
     m_cardData.init(0, 0);
     m_pCardSeqCtrls = NULL;
-    m_pCardSeqCtrls = new (__FILE__ "(2173)") D2::C2DSeqCtrl[2];
-    m_pCard = new (__FILE__ "(2174)") C2DCard;
+    m_pCardSeqCtrls = new KH_AT("(2173)") D2::C2DSeqCtrl[2];
+    m_pCard = new KH_AT("(2174)") C2DCard;
     for (i = 0; i < 4; i++) m_cardStack[i].init(0, 0);
     m_nStack = 0;
     m_nTexID = 0;
@@ -1562,7 +1562,7 @@ void CPrizeGauge::setPrizeCard(CARD& inData, INT inMode, INT inStack) {
 
     if (!m_pInstance) {
 #line 2645
-        new (__FILE__ "(2645)") CPrizeGauge(NULL);
+        new KH_AT("(2645)") CPrizeGauge(NULL);
         setPrizeCard(inData, inMode, 0);
         return;
     }
@@ -1596,7 +1596,7 @@ void CPrizeGauge::setPrizeCard(CARD& inData, INT inMode, INT inStack) {
             pSeq0->setPos(pos);
             rgba.col = 0x80808080;
 #line 2705
-            p2DFnt = new (__FILE__ "(2705)") D2::C2DFnt(0, 0, &rgba, 0xE, inData.getName(), 0);
+            p2DFnt = new KH_AT("(2705)") D2::C2DFnt(0, 0, &rgba, 0xE, inData.getName(), 0);
             pSeq0->addFnt(g_szSeqGetCard, p2DFnt);
             pSeq0->enableColorCtrl(TRUE);
             pSeq1 = &_ref(m_pInstance)->m_pCardSeqCtrls[1];
@@ -1630,7 +1630,7 @@ void CPrizeGauge::setPrizeCard(CARD& inData, INT inMode, INT inStack) {
         pSeq0->setPos(pos);
         rgba.col = 0x80808080;
 #line 2746
-        p2DFnt = new (__FILE__ "(2746)") D2::C2DFnt(0, 0, &rgba, 0x12, inData.getName(), 2);
+        p2DFnt = new KH_AT("(2746)") D2::C2DFnt(0, 0, &rgba, 0x12, inData.getName(), 2);
         pSeq0->addFnt(g_szSeqGetCard, p2DFnt);
         pSeq0->enableColorCtrl(TRUE);
         pSeq1 = &_ref(m_pInstance)->m_pCardSeqCtrls[1];
@@ -1681,7 +1681,7 @@ INT CPrizeGauge::exePrizeCard() {
             pSeq->setPos(pos);
             rgba.col = 0x80808080;
 #line 2816
-            p2DFnt = new (__FILE__ "(2816)") D2::C2DFnt(0, 0, &rgba, 0x12, m_cardData.getName(), 2);
+            p2DFnt = new KH_AT("(2816)") D2::C2DFnt(0, 0, &rgba, 0x12, m_cardData.getName(), 2);
             pSeq->addFnt(g_szSeqGetCard, p2DFnt);
             pSeq->enableColorCtrl(TRUE);
             pSeq = &m_pCardSeqCtrls[1];
@@ -1727,7 +1727,7 @@ CEscapeGauge::~CEscapeGauge() {
 void CEscapeGauge::_initialize() {
     m_uiState = 0;
     m_uiFlag = 0;
-    m_pSeqCtrl = new (__FILE__ "(2903)") D2::C2DSeqCtrl;
+    m_pSeqCtrl = new KH_AT("(2903)") D2::C2DSeqCtrl;
     m_pSeqCtrl->setLayer(8);
 }
 void CEscapeGauge::main() {
@@ -1806,9 +1806,9 @@ void CFriendGauge::_initialize() {
             m_uiCount++;
         }
     }
-    if (m_uiCount) m_pCards = new (__FILE__ "(3041)") C2DCard[m_uiCount];
+    if (m_uiCount) m_pCards = new KH_AT("(3041)") C2DCard[m_uiCount];
     else m_pCards = NULL;
-    m_pSeqCtrls = new (__FILE__ "(3045)") D2::C2DSeqCtrl[3];
+    m_pSeqCtrls = new KH_AT("(3045)") D2::C2DSeqCtrl[3];
 }
 void CFriendGauge::main() {
     if (CSceneEnv::isStopGauge()) return;

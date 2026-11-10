@@ -233,7 +233,7 @@ CPlayerCamera::CPlayerCamera(CTask* pParent) : CCamera(pParent, -1), m_uiFlag(0)
     DebugWork::g_dw.player.m_szCamera[3] = m_strCamera3;
     DebugWork::g_dw.player.m_szCamera[4] = m_strCamera4;
 #line 269
-    m_pWindow = new (__FILE__ "(269)") CDebugWindow(this, DWTPlayer::debugPlayerCameraInfo);
+    m_pWindow = new KH_AT("(269)") CDebugWindow(this, DWTPlayer::debugPlayerCameraInfo);
     m_pWindow->dispOff(0);
     DebugWork::g_dw.player.iCamMode = 1;
     g_pCamData[0] = NULL;
@@ -453,7 +453,7 @@ void CPlayerCamera::initCamera(INT inMode, INT inReset, FVECTOR* inDir) {
         if (m_pLines) delete m_pLines;
         m_pLines = NULL;
 #line 608
-        m_pLines = new (__FILE__ "(608)") C3DLines;
+        m_pLines = new KH_AT("(608)") C3DLines;
         if (!(m_pLines)) AssertApp(__FILE__, __LINE__, "m_pLines", 0);
         m_pLines->m_pCrd = &Crd(0);
         InverseMatrix(m, Crd(0).getWorldMatrix());

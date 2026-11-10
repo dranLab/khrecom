@@ -422,214 +422,214 @@ CEntity* CEntityFactory::createEnemy(INT inRsrcID, CTask* inParent, void* inExtr
 
     switch (inRsrcID) {
     case 1: case 32:
-        enemy = new (__FILE__ "(127)") CEnemyShadow(parent);
+        enemy = new KH_AT("(127)") CEnemyShadow(parent);
         break;
     case 2:
-        enemy = new (__FILE__ "(131)") CEnemySoldier(parent);
+        enemy = new KH_AT("(131)") CEnemySoldier(parent);
         break;
     case 3:
-        enemy = new (__FILE__ "(135)") CEnemyRednocturne(parent);
+        enemy = new KH_AT("(135)") CEnemyRednocturne(parent);
         break;
     case 4:
-        enemy = new (__FILE__ "(139)") CEnemyBluerhapsody(parent);
+        enemy = new KH_AT("(139)") CEnemyBluerhapsody(parent);
         break;
     case 5:
-        enemy = new (__FILE__ "(143)") CEnemyYellowopera(parent);
+        enemy = new KH_AT("(143)") CEnemyYellowopera(parent);
         break;
     case 6:
-        enemy = new (__FILE__ "(147)") CEnemyGreenrequiem(parent);
+        enemy = new KH_AT("(147)") CEnemyGreenrequiem(parent);
         break;
     case 7:
-        enemy = new (__FILE__ "(151)") CEnemyPowerwild(parent);
+        enemy = new KH_AT("(151)") CEnemyPowerwild(parent);
         break;
     case 8:
-        enemy = new (__FILE__ "(155)") CEnemyBouncywild(parent);
+        enemy = new KH_AT("(155)") CEnemyBouncywild(parent);
         break;
     case 9:
-        enemy = new (__FILE__ "(159)") CEnemyLargebody(parent);
+        enemy = new KH_AT("(159)") CEnemyLargebody(parent);
         break;
     case 10:
-        enemy = new (__FILE__ "(163)") CEnemyFatbandit(parent);
+        enemy = new KH_AT("(163)") CEnemyFatbandit(parent);
         break;
     case 11:
-        enemy = new (__FILE__ "(167)") CEnemyBandit(parent);
+        enemy = new KH_AT("(167)") CEnemyBandit(parent);
         break;
     case 12:
-        enemy = new (__FILE__ "(171)") CEnemyWightnight(parent);
+        enemy = new KH_AT("(171)") CEnemyWightnight(parent);
         break;
     case 13:
-        enemy = new (__FILE__ "(175)") CEnemyGargoyle(parent);
+        enemy = new KH_AT("(175)") CEnemyGargoyle(parent);
         break;
     case 14: case 33:
-        enemy = new (__FILE__ "(180)") CEnemySearchghost(parent);
+        enemy = new KH_AT("(180)") CEnemySearchghost(parent);
         break;
     case 15:
-        enemy = new (__FILE__ "(184)") CEnemyAirsoldier(parent);
+        enemy = new KH_AT("(184)") CEnemyAirsoldier(parent);
         break;
     case 16: case 34:
-        enemy = new (__FILE__ "(189)") CEnemyWhitemushroom(parent);
+        enemy = new KH_AT("(189)") CEnemyWhitemushroom(parent);
         break;
     case 17: case 35:
-        enemy = new (__FILE__ "(194)") CEnemyBlackfungus(parent);
+        enemy = new KH_AT("(194)") CEnemyBlackfungus(parent);
         break;
     case 18:
-        enemy = new (__FILE__ "(198)") CEnemySeaneon(parent);
+        enemy = new KH_AT("(198)") CEnemySeaneon(parent);
         break;
     case 19:
-        enemy = new (__FILE__ "(202)") CEnemyScrewdiver(parent);
+        enemy = new KH_AT("(202)") CEnemyScrewdiver(parent);
         break;
     case 20:
-        enemy = new (__FILE__ "(206)") CEnemyAquatank(parent);
+        enemy = new KH_AT("(206)") CEnemyAquatank(parent);
         break;
     case 21:
-        enemy = new (__FILE__ "(210)") CEnemyPirate(parent);
+        enemy = new KH_AT("(210)") CEnemyPirate(parent);
         break;
     case 22:
-        enemy = new (__FILE__ "(214)") CEnemyAirpirate(parent);
+        enemy = new KH_AT("(214)") CEnemyAirpirate(parent);
         break;
     case 23:
-        enemy = new (__FILE__ "(218)") CEnemyDarkball(parent);
+        enemy = new KH_AT("(218)") CEnemyDarkball(parent);
         break;
     case 24:
-        enemy = new (__FILE__ "(222)") CEnemyWyvern(parent);
+        enemy = new KH_AT("(222)") CEnemyWyvern(parent);
         break;
     case 25:
-        enemy = new (__FILE__ "(226)") CEnemyWizard(parent);
+        enemy = new KH_AT("(226)") CEnemyWizard(parent);
         break;
     case 26:
-        enemy = new (__FILE__ "(230)") CEnemyDefender(parent);
+        enemy = new KH_AT("(230)") CEnemyDefender(parent);
         break;
     case 27:
-        enemy = new (__FILE__ "(234)") CEnemyNeoshadow(parent);
+        enemy = new KH_AT("(234)") CEnemyNeoshadow(parent);
         break;
     case 28:
-        enemy = new (__FILE__ "(238)") CEnemyBarrelspider(parent);
+        enemy = new KH_AT("(238)") CEnemyBarrelspider(parent);
         break;
     case 29:
-        enemy = new (__FILE__ "(242)") CEnemyTornadostep(parent);
+        enemy = new KH_AT("(242)") CEnemyTornadostep(parent);
         break;
     case 30:
-        enemy = new (__FILE__ "(246)") CEnemyLoudness(parent);
+        enemy = new KH_AT("(246)") CEnemyLoudness(parent);
         break;
     case 31: case 36:
-        enemy = new (__FILE__ "(251)") CEnemyCreapplant(parent);
+        enemy = new KH_AT("(251)") CEnemyCreapplant(parent);
         break;
     case 37:
-        enemy = new (__FILE__ "(256)") CEnemy100AcreBB_Beehive(parent);
+        enemy = new KH_AT("(256)") CEnemy100AcreBB_Beehive(parent);
         break;
     case 38:
-        enemy = new (__FILE__ "(260)") CEnemy100AcreBB_Bee(parent);
+        enemy = new KH_AT("(260)") CEnemy100AcreBB_Bee(parent);
         break;
     case 100:
-        enemy = new (__FILE__ "(265)") CTutorialHood(parent);
+        enemy = new KH_AT("(265)") CTutorialHood(parent);
         break;
     case 101:
-        enemy = new (__FILE__ "(269)") CTutorialLeon(parent);
+        enemy = new KH_AT("(269)") CTutorialLeon(parent);
         break;
     case 102:
-        enemy = new (__FILE__ "(274)") CBossGuardarmor(parent);
+        enemy = new KH_AT("(274)") CBossGuardarmor(parent);
         break;
     case 106:
-        enemy = new (__FILE__ "(278)") CBossCloud(parent);
+        enemy = new KH_AT("(278)") CBossCloud(parent);
         break;
     case 107:
-        enemy = new (__FILE__ "(282)") CBossHades(parent);
+        enemy = new KH_AT("(282)") CBossHades(parent);
         break;
     case 110:
-        enemy = new (__FILE__ "(286)") CBossParasiteCage(parent);
+        enemy = new KH_AT("(286)") CBossParasiteCage(parent);
         break;
     case 112:
-        enemy = new (__FILE__ "(290)") CBossHook(parent);
+        enemy = new KH_AT("(290)") CBossHook(parent);
         break;
     case 114:
-        enemy = new (__FILE__ "(294)") CBossVexen(parent);
+        enemy = new KH_AT("(294)") CBossVexen(parent);
         break;
     case 116:
-        enemy = new (__FILE__ "(298)") CBossRiku(parent);
+        enemy = new KH_AT("(298)") CBossRiku(parent);
         break;
     case 117:
-        enemy = new (__FILE__ "(302)") CBossLarxene(parent);
+        enemy = new KH_AT("(302)") CBossLarxene(parent);
         break;
     case 118:
-        enemy = new (__FILE__ "(306)") CBossAxel(parent);
+        enemy = new KH_AT("(306)") CBossAxel(parent);
         break;
     case 105:
-        enemy = new (__FILE__ "(310)") CBossTrickMaster(parent);
+        enemy = new KH_AT("(310)") CBossTrickMaster(parent);
         break;
     case 108:
-        enemy = new (__FILE__ "(314)") CBossJafar(parent);
+        enemy = new KH_AT("(314)") CBossJafar(parent);
         break;
     case 125:
-        enemy = new (__FILE__ "(317)") CBossJafarBird(parent);
+        enemy = new KH_AT("(317)") CBossJafarBird(parent);
         break;
     case 126:
-        enemy = new (__FILE__ "(320)") CBossJafarLamp(parent);
+        enemy = new KH_AT("(320)") CBossJafarLamp(parent);
         break;
     case 109:
-        enemy = new (__FILE__ "(324)") CBossBoogie(parent);
+        enemy = new KH_AT("(324)") CBossBoogie(parent);
         break;
     case 209:
-        enemy = new (__FILE__ "(327)") CBossBoogieDice(parent);
+        enemy = new KH_AT("(327)") CBossBoogieDice(parent);
         break;
     case 111:
-        enemy = new (__FILE__ "(331)") CBossUrsula(parent);
+        enemy = new KH_AT("(331)") CBossUrsula(parent);
         break;
     case 201:
-        enemy = new (__FILE__ "(334)") CBossUrsulaTentacle1(parent);
+        enemy = new KH_AT("(334)") CBossUrsulaTentacle1(parent);
         break;
     case 202:
-        enemy = new (__FILE__ "(337)") CBossUrsulaTentacle2(parent);
+        enemy = new KH_AT("(337)") CBossUrsulaTentacle2(parent);
         break;
     case 203:
-        enemy = new (__FILE__ "(340)") CBossUrsulaTentacle3(parent);
+        enemy = new KH_AT("(340)") CBossUrsulaTentacle3(parent);
         break;
     case 204:
-        enemy = new (__FILE__ "(343)") CBossUrsulaTentacle4(parent);
+        enemy = new KH_AT("(343)") CBossUrsulaTentacle4(parent);
         break;
     case 113:
-        enemy = new (__FILE__ "(347)") CBossMDragon(parent);
+        enemy = new KH_AT("(347)") CBossMDragon(parent);
         break;
     case 115:
-        enemy = new (__FILE__ "(351)") CBossDarkSide(parent);
+        enemy = new KH_AT("(351)") CBossDarkSide(parent);
         break;
     case 120:
-        enemy = new (__FILE__ "(355)") CBossMarluxia2(parent);
+        enemy = new KH_AT("(355)") CBossMarluxia2(parent);
         break;
     case 135:
-        enemy = new (__FILE__ "(358)") CBossMarluxia2Funnel(parent);
+        enemy = new KH_AT("(358)") CBossMarluxia2Funnel(parent);
         break;
     case 136: case 137:
-        enemy = new (__FILE__ "(362)") CBossMarluxia2Scythe(parent);
+        enemy = new KH_AT("(362)") CBossMarluxia2Scythe(parent);
         break;
     case 132:
-        enemy = new (__FILE__ "(366)") CBossMarluxia3(parent);
+        enemy = new KH_AT("(366)") CBossMarluxia3(parent);
         break;
     case 138:
-        enemy = new (__FILE__ "(369)") CBossMarluxia3Specter(parent);
+        enemy = new KH_AT("(369)") CBossMarluxia3Specter(parent);
         break;
     case 119:
-        enemy = new (__FILE__ "(373)") CBossMarluxia(parent);
+        enemy = new KH_AT("(373)") CBossMarluxia(parent);
         break;
     case 121:
-        enemy = new (__FILE__ "(377)") CBossLexaeus(parent);
+        enemy = new KH_AT("(377)") CBossLexaeus(parent);
         break;
     case 124:
-        enemy = new (__FILE__ "(381)") CBossZexion(parent);
+        enemy = new KH_AT("(381)") CBossZexion(parent);
         break;
     case 133:
-        enemy = new (__FILE__ "(384)") CBossZexionBook(parent);
+        enemy = new KH_AT("(384)") CBossZexionBook(parent);
         break;
     case 122:
-        enemy = new (__FILE__ "(388)") CBossAnsem(parent);
+        enemy = new KH_AT("(388)") CBossAnsem(parent);
         break;
     case 103:
-        enemy = new (__FILE__ "(393)") CEnemySpadesoldier(parent);
+        enemy = new KH_AT("(393)") CEnemySpadesoldier(parent);
         break;
     case 104:
-        enemy = new (__FILE__ "(397)") CEnemyHeartsoldier(parent);
+        enemy = new KH_AT("(397)") CEnemyHeartsoldier(parent);
         break;
     default:
-        enemy = new (__FILE__ "(401)") CSampleEnemy(parent);
+        enemy = new KH_AT("(401)") CSampleEnemy(parent);
         break;
     }
 
@@ -652,19 +652,19 @@ CEntity* CEntityFactory::createMapEnemy(const OBJ_INFO& inObjInfo, CTask* inPare
 
     switch (inObjInfo.sID) {
     case 1: case 27: case 32: case 302:
-        enemy = new (__FILE__ "(440)") CMapEnemyShadow(parent);
+        enemy = new KH_AT("(440)") CMapEnemyShadow(parent);
         break;
     case 2: case 7: case 9: case 10: case 26: case 30:
-        enemy = new (__FILE__ "(449)") CMapEnemyGround(parent);
+        enemy = new KH_AT("(449)") CMapEnemyGround(parent);
         break;
     case 16: case 17: case 34: case 35:
-        enemy = new (__FILE__ "(456)") CMapEnemyMushroom(parent);
+        enemy = new KH_AT("(456)") CMapEnemyMushroom(parent);
         break;
     case 13: case 14: case 20: case 23: case 24: case 33:
-        enemy = new (__FILE__ "(469)") CMapEnemyAir(parent);
+        enemy = new KH_AT("(469)") CMapEnemyAir(parent);
         break;
     default:
-        enemy = new (__FILE__ "(473)") CMapEnemy(parent);
+        enemy = new KH_AT("(473)") CMapEnemy(parent);
         break;
     }
 

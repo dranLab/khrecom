@@ -1,7 +1,7 @@
 # Read by configure.py. The US retail ELF (docs/retail-plan.md): the beta's toolchains; the libraries are the same
 # objects. `sources`: fnmatch patterns of the units whose source in src/ this version builds (the others stay
 # splat's assembly of this version): none yet, the sources are the beta's until the retail macros exist.
-sources: []
+sources: [System/Buf, System/Graphic/TexCtrl, Form/Menu/LevelUp]
 elf: iso/SLUS_217.99_retail     # original ELF (not committed): the US retail disc's boot ELF
 compiler: ee-gcc2.95.3-136   # SN Systems ProDG build (Windows, runs under wibo)
 cflags: -O2 -G0 -fno-exceptions -fno-rtti -DKH_RETAIL   # the beta's without -g (docs/retail.md): weak functions and vtables then go to

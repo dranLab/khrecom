@@ -212,7 +212,7 @@ CCardBattle::~CCardBattle() {
 }
 CCardBattle* CCardBattle::getInstance() {
     if (!m_pInstance) {
-        m_pInstance = new (__FILE__ "(162)") CCardBattle;
+        m_pInstance = new KH_AT("(162)") CCardBattle;
         if (!(m_pInstance)) AssertApp(__FILE__, 163, "m_pInstance", 0);
     }
     return m_pInstance;
@@ -269,7 +269,7 @@ void CCardBattle::init() {
     }
     m_cardRoom.init(cardID, cardNum);
     if (!m_pSeqCtrlEnemy) {
-        m_pSeqCtrlEnemy = new (__FILE__ "(237)") D2::C2DSeqCtrl(2);
+        m_pSeqCtrlEnemy = new KH_AT("(237)") D2::C2DSeqCtrl(2);
     }
     initCardBreak(0, 0);
     m_uiDuelState = 0;
@@ -280,7 +280,7 @@ void CCardBattle::init() {
     UINT flag = 0x20000;
     if (m_uiFlag & flag) {
         if (CGameWork::getInt(0, 0x24) & 0x20) m_uiDuelState = 1;
-        m_pDuelGauge = new (__FILE__ "(265)") CDuelGauge(this);
+        m_pDuelGauge = new KH_AT("(265)") CDuelGauge(this);
     }
 }
 void CCardBattle::main() {
@@ -999,7 +999,7 @@ INT CCardBattle::setPlayCard(HANDLE inHandle, INT inUser, CBattleCard* inCard, C
     } else {
         if (!(inData)) AssertApp(__FILE__, 1708, "inData", 0);
         m_cardData[_PLAYER][0] = *inData;
-        m_pCard[_PLAYER][0] = new (__FILE__ "(1710)")
+        m_pCard[_PLAYER][0] = new KH_AT("(1710)")
             CBattleCard(this, inData->m_nKind, inData->m_nNumber, inUser, 0);
         if (m_pCard[_PLAYER][0]) m_pCard[_PLAYER][0]->setRoomEffect(NULL);
         m_cardData[_PLAYER][0] = *m_pCard[_PLAYER][0]->getCardData();
@@ -1061,7 +1061,7 @@ INT CCardBattle::setEnchantCard(HANDLE inHandle, INT inUser, CBattleCard* inCard
     CSound::playSE(0x20, -1, 0x40);
     if (m_pEnchantGauge[_PLAYER]) delete m_pEnchantGauge[_PLAYER];
     m_pEnchantGauge[_PLAYER] = NULL;
-    m_pEnchantGauge[_PLAYER] = new (__FILE__ "(1858)")
+    m_pEnchantGauge[_PLAYER] = new KH_AT("(1858)")
         CEnchantGauge(this, inUser, m_cardEnchant[_PLAYER]);
     m_nEnchantTime[_PLAYER] = _ref(g_pBattleCardList)[m_cardEnchant[_PLAYER].m_nKind].EFF_TIMES;
     if (_PLAYER == 0) setPlayerEnchant(m_cardEnchant[0].m_nKind);
@@ -1401,7 +1401,7 @@ void CCardBattle::initCardBreak(HANDLE inHandle, UINT inUser) {
     if (!inHandle) {
         m_hBreak = 0;
         if (!m_pSeqCtrlBreak) {
-            m_pSeqCtrlBreak = new (__FILE__ "(2598)") D2::C2DSeqCtrl(2);
+            m_pSeqCtrlBreak = new KH_AT("(2598)") D2::C2DSeqCtrl(2);
             m_pSeqCtrlBreak->setLayer(7);
             m_pSeqCtrlBreak->addSeq(g_szSeqCockpit, 1);
             UINT flag = 0x20000;
@@ -1415,7 +1415,7 @@ void CCardBattle::initCardBreak(HANDLE inHandle, UINT inUser) {
         }
         m_hSpeed = 0;
         if (!m_pSeqCtrlSpeed) {
-            m_pSeqCtrlSpeed = new (__FILE__ "(2616)") D2::C2DSeqCtrl(2);
+            m_pSeqCtrlSpeed = new KH_AT("(2616)") D2::C2DSeqCtrl(2);
             UINT flag = 0x20000;
             if (m_uiFlag & flag) {
                 m_pSeqCtrlSpeed->setLayer(7);
@@ -1560,7 +1560,7 @@ CStockFolder* CCardBattle::setStockFolder(::CTask* pParent, INT inUser) {
     UINT _PLAYER = inUser - 1;
     if (!m_pInstance->m_pStockFolder[_PLAYER]) {
         m_pInstance->m_pStockFolder[_PLAYER] =
-            new (__FILE__ "(2898)") CStockFolder(pParent, inUser);
+            new KH_AT("(2898)") CStockFolder(pParent, inUser);
         _ref(m_pInstance)->m_hDuelEnemy = pParent->getHandle();
     }
     return m_pInstance->m_pStockFolder[_PLAYER];
@@ -2264,7 +2264,7 @@ void CDuelGauge::_initialize() {
     m_tqTimer = 0;
     m_tqLimit = 0;
     m_hTimerSE = 0;
-    m_pSeqCtrls = new (__FILE__ "(4378)") D2::C2DSeqCtrl[12];
+    m_pSeqCtrls = new KH_AT("(4378)") D2::C2DSeqCtrl[12];
 }
 void CDuelGauge::main() {
     switch (m_uiState) {

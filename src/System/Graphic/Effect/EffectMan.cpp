@@ -206,7 +206,7 @@ CEffectTask::CEffectTask(CTask* p) : CTask(p, 0x4000) {
     declareSysTask(0x14);
     s_pTask = this;
 #line 371
-    m_pDebugLine = new (__FILE__ "(371)") C3DLineStrip;
+    m_pDebugLine = new KH_AT("(371)") C3DLineStrip;
     ASSERT(m_pDebugLine);
     m_pDebugLine->setLayerFG(0);
 }
@@ -276,7 +276,7 @@ HANDLE CEffectMan::_setEffect(const EFFECT_DATA& effect_data, UINT no, ObjType::
 
     if (s_pSLCManager) {
 #line 515
-        pEff = new (__FILE__ "(515)") CEffect;
+        pEff = new KH_AT("(515)") CEffect;
         if (!pEff) {
             hEff = 0;
             goto end;
@@ -1056,19 +1056,19 @@ void CEffectMan::initialize(CTask* p) {
 #line 1864
     ASSERT((__null == s_pSLCManager) && (__null == s_pEffectList) && (__null == s_pExceptEffect));
 #line 1866
-    s_pSLCManager = new (__FILE__ "(1866)") CEffectSLCManager;
+    s_pSLCManager = new KH_AT("(1866)") CEffectSLCManager;
     ASSERT(s_pSLCManager);
 #line 1869
-    s_pEffectList = new (__FILE__ "(1869)") CEffectList(*s_pSLCManager);
+    s_pEffectList = new KH_AT("(1869)") CEffectList(*s_pSLCManager);
     TRACE("sizeof(CEffect) == %dbyte\n", sizeof(CEffect));
 #line 1872
-    s_pExceptEffect = new (__FILE__ "(1872)") CEffect;
+    s_pExceptEffect = new KH_AT("(1872)") CEffect;
     ASSERT(s_pEffectList && s_pExceptEffect);
     s_pEffectList->pushBack(*s_pExceptEffect);
     _effInitialize(0x80000, 0x30000);
     if (!s_pTask) {
 #line 1881
-        new (__FILE__ "(1881)") CEffectTask(p);
+        new KH_AT("(1881)") CEffectTask(p);
     }
 }
 void CEffectMan::finalize() {

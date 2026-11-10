@@ -138,23 +138,23 @@ MODEL_SEND_CACHE s_sModelCache __attribute__((aligned(64)));
 void CModelMan::initialize() {
     CDispListBase** ppList = s_pDispListTbl;
 
-    ppList[2] = new (__FILE__ "(69)") CDispListBG;
+    ppList[2] = new KH_AT("(69)") CDispListBG;
 
 
 
 
 
 
-    ppList[1] = new (__FILE__ "(76)") CDispListSemiSingle;
-    ppList[7] = new (__FILE__ "(77)") CDispListShadowDraw;
-    ppList[8] = new (__FILE__ "(78)") CDispListShadowMap;
-    ppList[0] = new (__FILE__ "(79)") CDispListSemi;
+    ppList[1] = new KH_AT("(76)") CDispListSemiSingle;
+    ppList[7] = new KH_AT("(77)") CDispListShadowDraw;
+    ppList[8] = new KH_AT("(78)") CDispListShadowMap;
+    ppList[0] = new KH_AT("(79)") CDispListSemi;
 
-    ppList[4] = new (__FILE__ "(81)") CDispListSemiSingleSort;
-    ppList[5] = new (__FILE__ "(82)") CDispListSemiZSingleSort;
-    ppList[6] = new (__FILE__ "(83)") CDispListSemiLastSingleSort;
+    ppList[4] = new KH_AT("(81)") CDispListSemiSingleSort;
+    ppList[5] = new KH_AT("(82)") CDispListSemiZSingleSort;
+    ppList[6] = new KH_AT("(83)") CDispListSemiLastSingleSort;
 
-    ppList[3] = new (__FILE__ "(85)") CDispListFG;
+    ppList[3] = new KH_AT("(85)") CDispListFG;
     s_pSemiList = NULL;
     s_nSemiListNum = 0;
     s_sLayerInfo._nInfo = 0;
@@ -383,7 +383,7 @@ void CModelMan::drawDispListSemi() {
             INT i = 0;
             CPackMan::initSemiPacket();
 #line 622
-            pSemiList = new (__FILE__ "(622)") SEMI_PACKET_LIST[nSemiListNum];
+            pSemiList = new KH_AT("(622)") SEMI_PACKET_LIST[nSemiListNum];
             ASSERT(pSemiList);
             if (nSemiListSemiNum > 0) {
                 i = ((CDispListSemiSingleSort*)s_pDispListTbl[4])->draw(pSemiList);

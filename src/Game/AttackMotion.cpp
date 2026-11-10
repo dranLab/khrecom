@@ -50,7 +50,7 @@ CAttackMotionCtrl::~CAttackMotionCtrl() {
 BOOL CAttackMotionCtrl::initialize(CEntity* inOwner, COLL_KIND inCollKind) {
     ASSERT(inOwner);
 #line 62
-    m_pCollAttack = new (__FILE__ "(62)") CCollAttack;
+    m_pCollAttack = new KH_AT("(62)") CCollAttack;
     if (!m_pCollAttack) {
         return FALSE;
     }
@@ -363,7 +363,7 @@ BOOL CAttackMotion::initialize(ATK_COLL_PARAM* inAtkCollParam, INT inCount) {
     }
     m_iAtkMotCtrlCount = 12;
 #line 469
-    m_pAtkMotCtrl = new (__FILE__ "(469)") CAttackMotionCtrl[12];
+    m_pAtkMotCtrl = new KH_AT("(469)") CAttackMotionCtrl[12];
     if (!m_pAtkMotCtrl) {
         m_iAtkMotCtrlCount = 0;
         return FALSE;

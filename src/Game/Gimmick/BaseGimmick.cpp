@@ -58,7 +58,7 @@ CBaseGimmick::CBaseGimmick(CTask* inParent, const ZONEPARTS& inParts)
         initFSM_();
     } else {
 #line 148
-        m_pMove = new (__FILE__ "(148)") CMovement(this);
+        m_pMove = new KH_AT("(148)") CMovement(this);
         if (!m_pMove) {
             out();
             return;

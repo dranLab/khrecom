@@ -39,7 +39,7 @@ public:
 #line 36
     static CStatus& initialize() {
         if (!(__null == m_pInstance)) AssertApp(__FILE__, __LINE__, "__null == m_pInstance", 0);
-        m_pInstance = new (__FILE__ "(38)") CStatus;
+        m_pInstance = new KH_AT("(38)") CStatus;
         return *m_pInstance;
     }
     static void finalize() {

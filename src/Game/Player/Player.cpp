@@ -639,21 +639,21 @@ void CPlayer::makeWeapon() {
     m_iBoneHead = getBoneIndex(*(LPCSTR*)&PL::g_szBoneHead, 0);
     m_iBoneLFoot = getBoneIndex(*(LPCSTR*)&PL::g_szBoneLToes, 0);
     m_iBoneRFoot = getBoneIndex(*(LPCSTR*)&PL::g_szBoneRToes, 0);
-    m_pWeapon = new (__FILE__ "(1094)") PlayerWeapon::CPlayerWeapon(this, m_uiCharaID, m_iBoneWeapon);
+    m_pWeapon = new KH_AT("(1094)") PlayerWeapon::CPlayerWeapon(this, m_uiCharaID, m_iBoneWeapon);
     offWeapon();
 }
 __asm__(".rdata\n");
 void CPlayer::makeCockpit() {
-    m_pCam = new (__FILE__ "(1103)") PlayerCamera::CPlayerCamera(this);
-    m_pMarker = new (__FILE__ "(1106)") Gauge::CLockonMarker(this, FALSE);
+    m_pCam = new KH_AT("(1103)") PlayerCamera::CPlayerCamera(this);
+    m_pMarker = new KH_AT("(1106)") Gauge::CLockonMarker(this, FALSE);
     if (m_bIsBattleScene) {
-        m_pEscape = new (__FILE__ "(1112)") Gauge::CEscapeGauge(this);
+        m_pEscape = new KH_AT("(1112)") Gauge::CEscapeGauge(this);
     }
-    m_pGauge = new (__FILE__ "(1117)") Gauge::CPlayerGauge(this);
+    m_pGauge = new KH_AT("(1117)") Gauge::CPlayerGauge(this);
     m_pGauge->setMaxHP(m_iMaxHP);
     m_pGauge->setHP(m_iHP, 1);
     m_pGauge->setDP(m_iDP, 30);
-    m_pDebug = new (__FILE__ "(1124)") CPlayerDebug(this);
+    m_pDebug = new KH_AT("(1124)") CPlayerDebug(this);
 }
 __asm__(".rdata\n");
 void CPlayer::makeRevolver() {
@@ -664,18 +664,18 @@ void CPlayer::makeRevolver() {
         if (CGameWork::getFlag(1, 0x2C)) pDeck = NULL;
         if (m_bIsMinigameScene) pDeck = NULL;
         if (!pDeck) {
-            m_pRevolver = new (__FILE__ "(1156)") CardBattle::CCardRevolver(this, NULL, 1, -1);
+            m_pRevolver = new KH_AT("(1156)") CardBattle::CCardRevolver(this, NULL, 1, -1);
         } else {
             INT max = CCard::getCurrentDeckMax();
             INT sc = CCard::getCurrentShortCut();
             if (dbgCheckUser(KKIKUCHI) && sc == -1) sc = DebugWork::g_dw.player.iTemp;
-            deck = new (__FILE__ "(1172)") CARD[max + 1];
+            deck = new KH_AT("(1172)") CARD[max + 1];
             for (INT i = 0; i < max; i++) {
                 deck[i] = pDeck[i];
                 if (deck[i].m_nCategory1 == 7) deck[i].m_nNumber = -1;
             }
             deck[max].init(0xFF, 0);
-            m_pRevolver = new (__FILE__ "(1181)") CardBattle::CCardRevolver(this, deck, 1, sc);
+            m_pRevolver = new KH_AT("(1181)") CardBattle::CCardRevolver(this, deck, 1, sc);
             if (deck) com_free(deck);
         }
     }
@@ -3143,14 +3143,14 @@ INT CPlayer::chkGimmick(UINT inID) {
         if (CSceneInfo::getRoomInfo(-1)->_doors[((CGimmickDoor*)pEntity)->getDoorID()].canSelectWorld()) {
             FLOAT r = _limitPI(pEntity->getRot().y - m_fDir);
             if (getHoukouFromAngle(r) == 4) return 0;
-            new (__FILE__ "(5804)") CWorldSelect(CTaskMan::getSysTask(1), handle);
+            new KH_AT("(5804)") CWorldSelect(CTaskMan::getSysTask(1), handle);
             m_pMarker->holdTarget(8);
             result = 0x15;
         } else {
             if (!CSceneInfo::getRoomInfo(-1)->_doors[((CGimmickDoor*)pEntity)->getDoorID()].canCreateRoom()) return 0;
             FLOAT r = _limitPI(pEntity->getRot().y - m_fDir);
             if (getHoukouFromAngle(r) == 4) return 0;
-            new (__FILE__ "(5819)") CRoomCreation(CTaskMan::getSysTask(1), handle);
+            new KH_AT("(5819)") CRoomCreation(CTaskMan::getSysTask(1), handle);
             m_pMarker->holdTarget(8);
             result = 0x14;
         }
@@ -6635,7 +6635,7 @@ void CPlayer::setQuake(FLOAT inCycle, FLOAT inPower, UINT inTime) {
     cqp._fCycle = inCycle;
     cqp._nTime = inTime;
     cqp._fPower = inPower;
-    new (__FILE__ "(12257)") CCameraQuakeV(*cam, &cqp, inPower);
+    new KH_AT("(12257)") CCameraQuakeV(*cam, &cqp, inPower);
 }
 void CPlayer::notifyReturnCard(const CARD* inCard) {
     if (!m_pInstance) return;
@@ -7360,7 +7360,7 @@ void CPlayer::cmdState_initWorldSelect(HANDLE inDoor) {
     m_hGimmick = inDoor;
     m_pMarker->holdTarget(8);
     initWorldSelect();
-    new (__FILE__ "(13487)") CWorldSelect(CTaskMan::getSysTask(1), m_hGimmick);
+    new KH_AT("(13487)") CWorldSelect(CTaskMan::getSysTask(1), m_hGimmick);
 }
 void CPlayer::cmdState_setEncountWait() {
     setPlayerFlag(0x100, 0);
@@ -7869,7 +7869,7 @@ CPlayerDebug::CPlayerDebug(CTask* pParent) : CTask(pParent, 0x4000) {
     m_iPrevMuteki = 0;
     m_iPrevHP = 0;
 #line 14052
-    m_pWin = new (__FILE__ "(" "14052" ")") CDebugWindow(this, DWTPlayer::debugPlayerInfo);
+    m_pWin = new KH_AT("(" "14052" ")") CDebugWindow(this, DWTPlayer::debugPlayerInfo);
     m_pWin->dispOff(0);
     for (i = 0; i < 71; i++) szAtkAnimID[i] = PL_ANIM::g_MotNameTbl[PLM::g_uiPlayerID][i].pFileName;
     m_pCamData = 0;

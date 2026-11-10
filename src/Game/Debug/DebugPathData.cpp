@@ -1110,13 +1110,13 @@ CDebugPathData::CDebugPathData(CTask* p, BOOL bEnd) : CTask(p, 0x4000) {
     ignorePause(TRUE);
     m_szFileName[0] = 0;
     if (bEnd) {
-        pWnd = new (__FILE__ "(1928)") CDebugWindow(this, debugWinPath);
+        pWnd = new KH_AT("(1928)") CDebugWindow(this, debugWinPath);
     } else {
-        pWnd = new (__FILE__ "(1929)") CDebugWindow(this, debugWinPathNoEnd);
+        pWnd = new KH_AT("(1929)") CDebugWindow(this, debugWinPathNoEnd);
     }
     m_hChildWnd = pWnd ? pWnd->getHandle() : 0;
     m_iActivePathNum = 0;
-    m_pFrame = new (__FILE__ "(1938)") CPDFrameTime;
+    m_pFrame = new KH_AT("(1938)") CPDFrameTime;
     m_gpPArrowPoly.create(0xB, 3);
     m_gpPArrowPoly.setLayerFG(2);
     CDebugWindow::enableTopDebugWindow(FALSE);
@@ -1134,7 +1134,7 @@ CDebugPathData::~CDebugPathData() {
 }
 BOOL CDebugPathData::create(CTask* p, BOOL bEnd) {
     if (!m_pInstance) {
-        m_pInstance = new (__FILE__ "(1963)") CDebugPathData(p, bEnd);
+        m_pInstance = new KH_AT("(1963)") CDebugPathData(p, bEnd);
         return TRUE;
     }
     return FALSE;
@@ -1186,7 +1186,7 @@ void CDebugPathData::entryCam() {
     CDebugPathData* p = getInstance();
     FVECTOR vPos;
     vPos.init0();
-    p->m_pDCam = new (__FILE__ "(2054)") CNakCamera(p, 1, 0x100, &vPos, 0.0f, (void**)&p->m_pDCam);
+    p->m_pDCam = new KH_AT("(2054)") CNakCamera(p, 1, 0x100, &vPos, 0.0f, (void**)&p->m_pDCam);
 }
 CNakCamera* CDebugPathData::getCam() { return getInstance()->m_pDCam; }
 void CDebugPathData::removeCam() {
@@ -1204,7 +1204,7 @@ BOOL CDebugPathData::newPath(const CHAR* pName) {
     makeFileName(pName, TRUE);
     delete p->m_pPath;
     p->m_pPath = NULL;
-    p->m_pPath = new (__FILE__ "(2088)") CPathData((const PATH_DATA*)NULL, TRUE);
+    p->m_pPath = new KH_AT("(2088)") CPathData((const PATH_DATA*)NULL, TRUE);
     if (!p->m_pPath) AssertApp(__FILE__, 2089, "p->m_pPath", 0);
     setActivePathNum(0, 0);
     return TRUE;
@@ -1214,7 +1214,7 @@ BOOL CDebugPathData::entryPath(const CHAR* pName) {
     makeFileName(pName, FALSE);
     delete p->m_pPath;
     p->m_pPath = NULL;
-    p->m_pPath = new (__FILE__ "(2106)") CPathData(pName, TRUE);
+    p->m_pPath = new KH_AT("(2106)") CPathData(pName, TRUE);
     if (!p->m_pPath) AssertApp(__FILE__, 2107, "p->m_pPath", 0);
     setActivePathNum(0, 0);
     return TRUE;
@@ -1240,7 +1240,7 @@ BOOL CDebugPathData::loadPath(const CHAR* pName) {
     }
     delete p->m_pPath;
     p->m_pPath = NULL;
-    p->m_pPath = new (__FILE__ "(2141)") CPathData((const PATH_DATA*)pBuf, TRUE);
+    p->m_pPath = new KH_AT("(2141)") CPathData((const PATH_DATA*)pBuf, TRUE);
     if (!p->m_pPath) AssertApp(__FILE__, 2142, "p->m_pPath", 0);
     if (pBuf) com_free(pBuf);
     CFileIO::closeFile(iFD);

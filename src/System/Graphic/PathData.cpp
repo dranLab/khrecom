@@ -94,7 +94,7 @@ void CPathVector::_init(const FVECTOR* pPath, INT iPathMax, BOOL bAlloc) {
         if (iPathMax <= 0) m_iVecMax = 1;
         m_iVecMemMax = m_iVecMax + 8;
 #line 94
-        m_pVec = new (__FILE__ "(94)") FVECTOR[m_iVecMemMax];
+        m_pVec = new KH_AT("(94)") FVECTOR[m_iVecMemMax];
         ASSERT(m_pVec);
         if (pPath) {
             memcpy(m_pVec, pPath, m_iVecMax * sizeof(FVECTOR));
@@ -113,7 +113,7 @@ void CPathVector::_init(const FVECTOR* pPath, INT iPathMax, BOOL bAlloc) {
         }
         m_iStatus |= 1;
 #line 122
-        m_pCube = new (__FILE__ "(122)") CDbgCube[m_iVecMemMax];
+        m_pCube = new KH_AT("(122)") CDbgCube[m_iVecMemMax];
         for (INT i = 0; i < m_iVecMemMax; i++) {
             m_pCube[i].setCoord(NULL, NULL);
         }
@@ -124,7 +124,7 @@ void CPathVector::_init(const FVECTOR* pPath, INT iPathMax, BOOL bAlloc) {
         m_pVec = (FVECTOR*)pPath;
         m_iVecMax = iPathMax;
 #line 137
-        m_pCube = new (__FILE__ "(137)") CDbgCube[iPathMax];
+        m_pCube = new KH_AT("(137)") CDbgCube[iPathMax];
         for (INT i = 0; i < m_iVecMax; i++) {
             m_pCube[i].setCoord(&m_pVec[i], NULL);
         }
@@ -631,7 +631,7 @@ void CPathVector::setPathParam(PATH_PARAM& sParam) {
 }
 void CPathVector::__addPathAlloc(FVECTOR*& pVec, INT iVecMax, INT iVecMemMax) {
 #line 1098
-    FVECTOR* p = new (__FILE__ "(1098)") FVECTOR[iVecMemMax];
+    FVECTOR* p = new KH_AT("(1098)") FVECTOR[iVecMemMax];
     memcpy(p, pVec, iVecMax * sizeof(FVECTOR));
     if (pVec) com_free(pVec);
     pVec = p;
@@ -652,14 +652,14 @@ BOOL CPathVector::addPath(INT iNum) {
             if (m_iVecMemMax < m_iVecMax + 1) {
                 m_iVecMemMax += 8;
 #line 1121
-                FVECTOR* p = new (__FILE__ "(1121)") FVECTOR[m_iVecMemMax];
+                FVECTOR* p = new KH_AT("(1121)") FVECTOR[m_iVecMemMax];
                 memcpy(p, m_pVec, m_iVecMax * sizeof(FVECTOR));
                 if (m_pVec) com_free(m_pVec);
                 m_pVec = p;
                 if (m_pCube) delete[] m_pCube;
                 m_pCube = NULL;
 #line 1131
-                m_pCube = new (__FILE__ "(1131)") CDbgCube[m_iVecMemMax];
+                m_pCube = new KH_AT("(1131)") CDbgCube[m_iVecMemMax];
                 for (INT i = 0; i < m_iVecMemMax; i++) {
                     m_pCube[i].setCoord(NULL, NULL);
                 }

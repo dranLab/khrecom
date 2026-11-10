@@ -257,7 +257,7 @@ BOOL CMemoca::reqSave(INT nPort, const CHAR* pszName, const BYTE* pBuf, INT nSiz
     strcpy(s_szMcFileName, pszName);
     s_nMcPort = nPort;
 #line 450
-    s_pSaveData = new (__FILE__ "(450)") CBuf;
+    s_pSaveData = new KH_AT("(450)") CBuf;
     s_nMcFileSize = nSize + nHeaderSize;
     s_nDataType = type;
     s_pszTitle = (CHAR*)pszTitle;
@@ -609,7 +609,7 @@ INT CMemoca::getFreeSize() {
         if (s_nMaxEnt == 0) {
             if (s_pTmpBuf) delete s_pTmpBuf;
 #line 868
-            s_pTmpBuf = new (__FILE__ "(868)") CBuf;
+            s_pTmpBuf = new KH_AT("(868)") CBuf;
             s_pTmpBuf->allocBuf_A64(0x4000);
             s_pRootDirTbl = (sceMcTblGetDir*)s_pTmpBuf->getBufPtr();
         }
@@ -1484,7 +1484,7 @@ static INT _McDataRead() {
         }
         if (s_pLoadData) delete s_pLoadData;
 #line 2266
-        s_pLoadData = new (__FILE__ "(2266)") CBuf;
+        s_pLoadData = new KH_AT("(2266)") CBuf;
         if (s_nDataType == MC_DATATYPE_SYS) {
             s_pLoadData->allocBuf_A64(s_nMcFileSize);
         } else {

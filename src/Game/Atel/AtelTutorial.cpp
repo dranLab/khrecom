@@ -54,7 +54,7 @@ CAtelCardSeq::CAtelCardSeq(CTask* pParent, INT in_type, INT in_posX, INT in_posY
     TRACE("CAtelCardSeq Create\n");
     char* mesfile = "message.sqd";
     m_pSeqArrow = NULL;
-    m_pSeqArrow = new (__FILE__ "(80)") D2::C2DSeqCtrl;
+    m_pSeqArrow = new KH_AT("(80)") D2::C2DSeqCtrl;
     if (m_pSeqArrow != NULL) {
         switch (in_type) {
         case 0:

@@ -241,14 +241,14 @@ void CDebugWindow::init(const DEBUG_WINDOW_TBL& data) {
     }
     if (bCurX) {
 #line 269
-        m_pWinCurX = new (__FILE__ "(269)") DEBUG_WINDOW_LINE_CURX[m_iCurMax];
+        m_pWinCurX = new KH_AT("(269)") DEBUG_WINDOW_LINE_CURX[m_iCurMax];
         ASSERT(m_pWinCurX);
         for (i = 0; i < m_iCurMax; i++) {
             m_pWinCurX[i].iCurX = -1;
         }
     }
 #line 277
-    m_pWinLine = new (__FILE__ "(277)") DEBUG_WINDOW_LINE_BUF[m_iWh];
+    m_pWinLine = new KH_AT("(277)") DEBUG_WINDOW_LINE_BUF[m_iWh];
     ASSERT(m_pWinLine);
     for (i = 0; i < m_iWh; i++) {
         INT iSize = (strlen(m_pWinLineData[getY(i)].szString) + 1) / 2;
@@ -498,10 +498,10 @@ BOOL CDebugWindow::openChild(const DEBUG_WINDOW_TBL* pWTBL, const char* pStr) {
         CTask* p;
         if (pWTBL) {
 #line 615
-            p = new (__FILE__ "(615)") CDebugWindow(this, *pWTBL);
+            p = new KH_AT("(615)") CDebugWindow(this, *pWTBL);
         } else if (pStr) {
 #line 617
-            p = new (__FILE__ "(617)") CDebugWindow(this, pStr);
+            p = new KH_AT("(617)") CDebugWindow(this, pStr);
         } else {
             return FALSE;
         }
@@ -862,7 +862,7 @@ void CNakCamera::init(INT iPad, UINT iFlg, FVECTOR* pvPos, FLOAT fDirY, void** p
     m_pWin = NULL;
     if (iFlg & 0x100) {
 #line 1210
-        m_pWin = new (__FILE__ "(1210)") CDebugWindow(this, debugCamWin);
+        m_pWin = new KH_AT("(1210)") CDebugWindow(this, debugCamWin);
     }
     m_pVoid = pVoid;
     if (iPad < 0) {
@@ -1323,7 +1323,7 @@ void CGlidWorld::disp() {
 void CDebugWindow::openTopDebugWindow(CTask* p) {
     if (m_bTopOpen && !m_pInstance) {
 #line 2085
-        m_pInstance = new (__FILE__ "(2085)") CDebugWindow(p, DWT::debugWinTop, TRUE);
+        m_pInstance = new KH_AT("(2085)") CDebugWindow(p, DWT::debugWinTop, TRUE);
     }
 }
 

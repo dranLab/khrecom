@@ -93,7 +93,7 @@ void CCollDisp::init() {
         Crd(i).recalcWorldMatrix();
     }
 #line 121
-    m_pLines = new (__FILE__ "(121)") C3DCPrim[40];
+    m_pLines = new KH_AT("(121)") C3DCPrim[40];
     for (i = 0; i < 40; i++) {
         m_pLines[i].create(2, 76, &Crd(i), 0);
         m_pLines[i].m_fGeta = 0.0f;
@@ -124,7 +124,7 @@ void CCollDisp::main() {
     if (m_fgMapZoneDisp) {
         if (!m_pMapZone) {
 #line 163
-            m_pMapZone = new (__FILE__ "(163)") CCollDispMapZone(this, *(MCD_INFO**)((UBYTE*)&CCollUtil::instance() + 0x20));
+            m_pMapZone = new KH_AT("(163)") CCollDispMapZone(this, *(MCD_INFO**)((UBYTE*)&CCollUtil::instance() + 0x20));
         }
         UINT uiCol = (m_bMapZoneColA << 24) | (m_bMapZoneColB << 16) | (m_bMapZoneColG << 8) | m_bMapZoneColR;
         if (m_pMapZone->getLineColor() != uiCol) m_pMapZone->changeLineColor(uiCol);
@@ -449,7 +449,7 @@ void CCollDispMapZone::_makeModelPrim() {
     INT nPoly4Sum;
     if (!m_pInfo) return;
 #line 898
-    m_pLine = new (__FILE__ "(898)") C3DCPrim[m_iChipNum];
+    m_pLine = new KH_AT("(898)") C3DCPrim[m_iChipNum];
     ASSERT(m_pLine);
     nPoly3Sum = 0;
     nPoly4Sum = 0;
@@ -586,7 +586,7 @@ void CCollRideModelDisp::_makeModelPrim() {
     m_pInfo = &m_pRideModel->m_MCDInfo;
     if ((m_iChipNum = m_pInfo->iChipSuu) <= 0) return;
 #line 1123
-    m_pLine = new (__FILE__ "(1123)") C3DCPrim[m_iChipNum];
+    m_pLine = new KH_AT("(1123)") C3DCPrim[m_iChipNum];
     MC_CHIP* pMCChip = m_pInfo->pMCChip;
     for (INT i = 0; i < m_iChipNum; i++, pMCChip++) {
         MC_DATA* pMCData = (MC_DATA*)pMCChip->data;

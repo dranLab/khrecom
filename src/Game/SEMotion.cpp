@@ -528,7 +528,7 @@ BOOL CSEMotion::initialize_(SES_HEADER* inHeader) {
     m_iSEMotCtrlCount = 16;
     m_iNowCtrlCount = 0;
 #line 887
-    m_pSEMotCtrl = new (__FILE__ "(887)") CSEMotionCtrl[16](this);
+    m_pSEMotCtrl = new KH_AT("(887)") CSEMotionCtrl[16](this);
     for (INT i = 0; i < m_iSEMotCtrlCount; i++) {
         m_pSEMotCtrl[i].initalize(m_pOwner);
     }
@@ -546,7 +546,7 @@ BOOL CSEMotion::initialize_(SES_HEADER* inHeader) {
     if (count > 0) {
         m_iRandomDataNum = count;
 #line 909
-        RANDOM_DATA* rd = m_pRandomData = new (__FILE__ "(909)") RANDOM_DATA[count];
+        RANDOM_DATA* rd = m_pRandomData = new KH_AT("(909)") RANDOM_DATA[count];
         if (!rd) {
             return FALSE;
         }

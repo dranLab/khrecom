@@ -170,12 +170,12 @@ void CNaviMap::_initialize() {
         if (pModelTbl) {
             INT i;
 #line 194
-            m_pModels = new (__FILE__ "(194)") CModel[m_nModelCount];
+            m_pModels = new KH_AT("(194)") CModel[m_nModelCount];
             ASSERT(m_pModels);
             for (i = 0; i < m_nModelCount; i++) {
                 if (pModelTbl[i]->enableLight()) {
 #line 201
-                    m_pLight = new (__FILE__ "(201)") CLightUnit;
+                    m_pLight = new KH_AT("(201)") CLightUnit;
                     ASSERT(m_pLight);
                     break;
                 }
@@ -215,11 +215,11 @@ void CNaviMap::_initialize() {
     if (pRoom) {
         m_cardRoom.init(pRoom->getRoomNameCardID(), 0xFF);
 #line 254
-        m_pRoomName = new (__FILE__ "(254)") C2DSeqCtrl[2];
+        m_pRoomName = new KH_AT("(254)") C2DSeqCtrl[2];
     }
     if (m_cardRoom.m_nCategory20 == 9) {
 #line 257
-        m_pCard = new (__FILE__ "(257)") C2DCard;
+        m_pCard = new KH_AT("(257)") C2DCard;
     }
 }
 
@@ -471,7 +471,7 @@ void CNaviMap::initRoomName(const CHAR* inFile, UINT inIdxSeq) {
     G_RGBA rgba;
     rgba.col = 0x80808080;
 #line 689
-    C2DFnt* p2DFnt = new (__FILE__ "(689)") C2DFnt(0, 0, &rgba, 13, m_cardRoom.getName(), 0x42);
+    C2DFnt* p2DFnt = new KH_AT("(689)") C2DFnt(0, 0, &rgba, 13, m_cardRoom.getName(), 0x42);
     pSeq->addFnt((LPCTSTR)inFile, 0, p2DFnt);
     pSeq->enableColorCtrl(TRUE);
     if (!m_pCard) {

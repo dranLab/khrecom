@@ -1,0 +1,5 @@
+# Exact data starts of retail units, measured from their compiled objects (tools/helpers/retail_try.py
+# --record); tools/split_version.py applies them. <unit> <section> <address>
+Form/Menu/LevelUp .bss 0x005BF4C8 0x50
+Form/Menu/LevelUp .data 0x00340010 0xD8
+Form/Menu/LevelUp .rodata 0x0042AAE0 0x370

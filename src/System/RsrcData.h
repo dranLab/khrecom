@@ -122,7 +122,7 @@ public:
 #line 155 RSRCDATA_H_PATH
     CRsrcData(const RsrcInfo& info, CBuf& data) {
         init(info);
-        m_pDataSrc = new (__FILE__ "(156)") CBuf;
+        m_pDataSrc = new KH_AT("(156)") CBuf;
         data.copyTo(*m_pDataSrc);
     }
     CRsrcData(const RsrcInfo& info) : m_pDataSrc(NULL) { init(info); }

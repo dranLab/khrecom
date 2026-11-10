@@ -343,14 +343,14 @@ void CSound::initialize() {
     _setBGMMasterVolume(128);
     for (i = 0; i < 2; i++) {
 #line 408
-        s_pBGMAgents[i] = new (__FILE__ "(408)") CBGMAgentStream(i);
+        s_pBGMAgents[i] = new KH_AT("(408)") CBGMAgentStream(i);
         ASSERT(s_pBGMAgents[i]);
     }
 #line 417
-    s_pVoiceAgent = new (__FILE__ "(417)") CVoiceAgent(i);
+    s_pVoiceAgent = new KH_AT("(417)") CVoiceAgent(i);
     ASSERT(s_pVoiceAgent);
 #line 424
-    s_pBGMMasterVolAgent = new (__FILE__ "(424)") CMasterVolAgent;
+    s_pBGMMasterVolAgent = new KH_AT("(424)") CMasterVolAgent;
     ASSERT(s_pBGMMasterVolAgent);
 }
 

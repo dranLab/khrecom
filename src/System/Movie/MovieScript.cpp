@@ -193,7 +193,7 @@ CHAR* CMovieScript::getFileName(const CHAR* pszPath) {
 
 void MovieScriptUnit::open(CTask& parent, const MovieScriptData& src) {
     m_pSrc = (MovieScriptData*)&src;
-    m_pWnd = new (__FILE__ "(268)") CTextWnd(parent, 0);
+    m_pWnd = new KH_AT("(268)") CTextWnd(parent, 0);
 #line 269
     if (!m_pWnd) AssertApp(__FILE__, __LINE__, "m_pWnd", 0);
     m_pWnd->setWndStyle(5);

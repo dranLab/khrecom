@@ -39,12 +39,12 @@ void CCoordMan::initialize() {
 #line 109
     ASSERT((NULL == s_pSLCManager) && (NULL == s_pCoordsList1) && (NULL == s_pCoordsList2) && (NULL == s_pExceptCoords));
 
-    s_pSLCManager = new (__FILE__ "(111)") CCoordsSLCManager;
+    s_pSLCManager = new KH_AT("(111)") CCoordsSLCManager;
     ASSERT(s_pSLCManager);
 
-    s_pCoordsList1 = new (__FILE__ "(114)") CCoordsList(*s_pSLCManager);
-    s_pCoordsList2 = new (__FILE__ "(115)") CCoordsList(*s_pSLCManager);
-    s_pExceptCoords = new (__FILE__ "(116)") CCoords(CCoords::_PP_PRIMARY);
+    s_pCoordsList1 = new KH_AT("(114)") CCoordsList(*s_pSLCManager);
+    s_pCoordsList2 = new KH_AT("(115)") CCoordsList(*s_pSLCManager);
+    s_pExceptCoords = new KH_AT("(116)") CCoords(CCoords::_PP_PRIMARY);
     ASSERT(s_pCoordsList1 && s_pCoordsList2 && s_pExceptCoords);
     s_pExceptCoords->addCoord(1, NULL);
     s_pCoordsList1->pushBack(*s_pExceptCoords);

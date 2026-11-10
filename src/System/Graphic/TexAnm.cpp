@@ -116,7 +116,7 @@ void CTexAnm::setup(const TEXANM_DATA& inData, INT nAnmGroupNum) {
                   m_pData->szDstTexName);
             m_pData = NULL;
         } else {
-            m_pClut = new (__FILE__ "(96)") u_long128[m_nClutQSize * 16];
+            m_pClut = new KH_AT("(96)") u_long128[m_nClutQSize * 16];
             if (!m_pClut) AssertApp(__FILE__, __LINE__, "m_pClut", 0);
         }
     }
@@ -294,9 +294,9 @@ void CModelTexAnm::setup(CTexAnm* pATbl, INT nANum, TexInfoStub* pTTbl, INT nTNu
     _dispose();
     m_nTexAnmNum = getTexAnmCount(pATbl, nANum, pTTbl, nTNum);
     if (m_nTexAnmNum <= 0) return;
-    m_pTexAnm = new (__FILE__ "(400)") CTexAnm*[m_nTexAnmNum];
+    m_pTexAnm = new KH_AT("(400)") CTexAnm*[m_nTexAnmNum];
     if (!m_pTexAnm) AssertApp(__FILE__, __LINE__, "m_pTexAnm", 0);
-    m_pID = new (__FILE__ "(402)") UBYTE[m_nTexAnmNum];
+    m_pID = new KH_AT("(402)") UBYTE[m_nTexAnmNum];
     if (!m_pID) AssertApp(__FILE__, __LINE__, "m_pID", 0);
     nCount = 0;
     for (INT i = 0; i < nTNum; i++) {

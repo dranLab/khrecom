@@ -377,7 +377,7 @@ BOOL CGimmickManager::LoadWorldResrc() {
         SHORT* p = (SHORT*)cmnGimData->getRsrcData();
         p = (SHORT*)((BYTE*)p + 6);
         if ((m_NomalCardDropProbNum = *p++) != 0) {
-            m_pNomalCardDropProbTable = new (__FILE__ "(602)")
+            m_pNomalCardDropProbTable = new KH_AT("(602)")
                 GimmickEveryCardProb[m_NomalCardDropProbNum];
             for (int i = 0; i < m_NomalCardDropProbNum; i++) {
                 m_pNomalCardDropProbTable[i].CardID = *p++;
@@ -385,7 +385,7 @@ BOOL CGimmickManager::LoadWorldResrc() {
             }
         }
         if ((m_TreasureCardDropProbNum = *p++) != 0) {
-            m_pTreasureCardDropProbTable = new (__FILE__ "(614)")
+            m_pTreasureCardDropProbTable = new KH_AT("(614)")
                 GimmickEveryCardProb[m_TreasureCardDropProbNum];
             for (int i = 0; i < m_TreasureCardDropProbNum; i++) {
                 m_pTreasureCardDropProbTable[i].CardID = *p++;
@@ -399,7 +399,7 @@ BOOL CGimmickManager::LoadWorldResrc() {
     if (cmnGimData != NULL) {
         SHORT* p = (SHORT*)cmnGimData->getRsrcData();
         m_WorldGimNum = *p++;
-        m_pGimParam = new (__FILE__ "(642)") GimParam[m_WorldGimNum];
+        m_pGimParam = new KH_AT("(642)") GimParam[m_WorldGimNum];
         for (int i = 0; i < m_WorldGimNum; i++) {
             GimParam info;
             info.GimID = *p;
@@ -457,7 +457,7 @@ BOOL CGimmickManager::LoadWorldResrcMapCard() {
     p = (SHORT*)cmnGimData->getRsrcData();
     p = (SHORT*)((BYTE*)p + 6);
     if ((m_MapCardProb.ProbNum = *p++) != 0) {
-        m_MapCardProb.pProb = new (__FILE__ "(737)")
+        m_MapCardProb.pProb = new KH_AT("(737)")
             GimmickEveryCardProb[m_MapCardProb.ProbNum];
         for (int i = 0; i < m_MapCardProb.ProbNum; i++) {
             m_MapCardProb.pProb[i].CardID = *p++;
@@ -479,8 +479,8 @@ BOOL CGimmickManager::LoadFloorPrizeDropTable() {
     BYTE* pB = cmnGimData->getRsrcData();
     m_GPrizeTableNum = *pB++;
     m_RPrizeTableNum = *pB++;
-    m_pGBallDropTable = new (__FILE__ "(783)") BallDropTable[m_GPrizeTableNum];
-    m_pRBallDropTable = new (__FILE__ "(784)") BallDropTable[m_RPrizeTableNum];
+    m_pGBallDropTable = new KH_AT("(783)") BallDropTable[m_GPrizeTableNum];
+    m_pRBallDropTable = new KH_AT("(784)") BallDropTable[m_RPrizeTableNum];
     for (int i = 0; i < m_GPrizeTableNum; i++) {
         for (int j = 0; j < 6; j++) {
             m_pGBallDropTable[i].type[j] = *pB++;
@@ -1686,7 +1686,7 @@ static DEBUG_WINDOW_LINE debugGimProbLine[25] = {
 CGimmickProbDebug::CGimmickProbDebug(CTask* pParent) : CTask(pParent, 0x8000) {
     m_pWindow = NULL;
     DEBUG_WINDOW_TBL debugGimProbInfo = {"\x83M\x83~\x83""b\x83N\x82\xbf\x82\xe3\x82\xa4\x82\xb9\x82\xf1", 0x68, -(SCREEN_HEIGHT >> 1) + 0x28, 13, 24, 12, 0, 6, debugGimProbLine, NULL, NULL};
-    m_pWindow = new (__FILE__ "(2870)") CDebugWindow(this, debugGimProbInfo);
+    m_pWindow = new KH_AT("(2870)") CDebugWindow(this, debugGimProbInfo);
     m_pWindow->dispOn(0);
     szdebugGimPossibleCardName = DebugWork::g_dw.gimDropProb.PossibleCardName;
     szdebugGimCardName = DebugWork::g_dw.gimDropProb.CardName;

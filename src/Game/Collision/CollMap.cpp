@@ -49,11 +49,11 @@ void CCollMap::init(COLL_KIND collKind, COLL_TYPE collType, INT fgStatus, HANDLE
         switch (collType) {
         case COLL_TYPE_POINT:
 #line 55
-            m_pCollision = new (__FILE__ "(55)") CPointCollision;
+            m_pCollision = new KH_AT("(55)") CPointCollision;
             break;
         case COLL_TYPE_SPHERE:
 #line 58
-            m_pCollision = new (__FILE__ "(58)") CSphereCollision;
+            m_pCollision = new KH_AT("(58)") CSphereCollision;
             break;
         default:
             return;
@@ -204,7 +204,7 @@ void CCollMap::registerLastRide(HANDLE hTask) {
         removeRide();
     }
 #line 298
-    m_pRider = new (__FILE__ "(298)")
+    m_pRider = new KH_AT("(298)")
         CRider(hTask, getShiftY(), getRadius(), (COLL_KIND)getKind(), FALSE);
     m_pLastRide->addRiderList(*m_pRider);
     m_pNowRide = m_pLastRide;
@@ -279,7 +279,7 @@ void CCollMap::registerLastHang(HANDLE hTask) {
         removeHang();
     }
 #line 391
-    m_pHanger = new (__FILE__ "(391)")
+    m_pHanger = new KH_AT("(391)")
         CRider(hTask, getShiftY(), getRadius(), (COLL_KIND)getKind(), TRUE);
     m_pLastRide->addRiderList(*m_pHanger);
     m_pNowHang = m_pLastRide;

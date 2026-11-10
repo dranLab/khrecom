@@ -45,7 +45,7 @@ CCtdMan::~CCtdMan() {
 void CCtdMan::setup() {
     if (m_pCtdList == NULL) {
 #line 37
-        m_pCtdList = new (__FILE__ "(37)") CCtdList;
+        m_pCtdList = new KH_AT("(37)") CCtdList;
     }
 }
 
@@ -55,7 +55,7 @@ void CCtdMan::initializeData(void* pDtHead) {
     CtdHeader* pHead = (CtdHeader*)pDtHead;
     if (*(UINT*)pHead->sig == 0x44544340) {
 #line 57
-        CCtd* pCtd = new (__FILE__ "(57)") CCtd;
+        CCtd* pCtd = new KH_AT("(57)") CCtd;
         CtdBlock* pCtdBlock = (CtdBlock*)(pHead + 1);
         pCtd->m_nBlock = pHead->nBlock;
         pCtd->m_nText = pHead->nText;
@@ -84,7 +84,7 @@ void CCtdMan::disposeData(void* pDtHead) {
     INT listSize = m_pCtdList->getListSize();
     if (listSize != 0) {
 #line 103
-        CCtd** pCtdList = new (__FILE__ "(103)") CCtd*[listSize];
+        CCtd** pCtdList = new KH_AT("(103)") CCtd*[listSize];
         INT i = 0;
         for (CCtd *pCtd = m_pCtdList->getHead(), *__pn = pCtd ? pCtd->getNext() : NULL; pCtd != NULL;
              pCtd = __pn, __pn = __pn ? __pn->getNext() : NULL) {

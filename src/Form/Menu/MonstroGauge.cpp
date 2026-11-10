@@ -83,7 +83,7 @@ void CMostroGauge::main() {
         vec.init();
 
 #line 79
-        m_pGaugeCtrl = new (__FILE__ "(79)") C2DSeqCtrl;
+        m_pGaugeCtrl = new KH_AT("(79)") C2DSeqCtrl;
         m_pGaugeCtrl->enableColorCtrl(TRUE);
         m_pGaugeCtrl->setPos(vec);
         p2DSeqObj = m_pGaugeCtrl->addSeq(pSeqName, 1);
@@ -99,7 +99,7 @@ void CMostroGauge::main() {
         p2DSeqObj = m_pGaugeCtrl->addSeq(pSeqName, 5);
         p2DSeqObj->changeLayer(2);
 #line 96
-        m_pTimeCtrl = new (__FILE__ "(96)") C2DSeqCtrl;
+        m_pTimeCtrl = new KH_AT("(96)") C2DSeqCtrl;
         m_pTimeCtrl->setLayer(2);
         m_pTimeCtrl->enableColorCtrl(TRUE);
         m_pTimeCtrl->setPos(vec);

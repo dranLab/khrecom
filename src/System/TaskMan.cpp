@@ -107,7 +107,7 @@ static void _initForMainTask();
 
 #line 126
 void CTaskMan::initialize() {
-    _pSLCManager = new (__FILE__ "(127)") CTaskSLCManager;
+    _pSLCManager = new KH_AT("(127)") CTaskSLCManager;
     ASSERT(_pSLCManager);
     for (INT i = 0; i < SYS_TASK_MAX; i++) {
         _arraySysTask[i] = -1;
@@ -116,20 +116,20 @@ void CTaskMan::initialize() {
         _arrayMainTask[i] = -1;
     }
 #line 137
-    _pRootList = new (__FILE__ "(137)") CTaskSLCList(*_pSLCManager);
+    _pRootList = new KH_AT("(137)") CTaskSLCList(*_pSLCManager);
     ASSERT(_pRootList);
 #line 140
-    _pRootTask = new (__FILE__ "(140)") CRootTask;
+    _pRootTask = new KH_AT("(140)") CRootTask;
     ASSERT(_pRootTask);
     _pRootList->pushBack(*_pRootTask);
     _pRootTask->setHandle(0);
 #line 147
-    CTask* pTop = new (__FILE__ "(147)") CTask(_pRootTask, 0x4000);
+    CTask* pTop = new KH_AT("(147)") CTask(_pRootTask, 0x4000);
     ASSERT(pTop);
     pTop->declareSysTask(14);
     _initForMainTask();
 #line 155
-    _pSecondaryTaskArray = new (__FILE__ "(155)") CVector<int>;
+    _pSecondaryTaskArray = new KH_AT("(155)") CVector<int>;
     ASSERT(_pSecondaryTaskArray);
     _pSecondaryTaskArray->reserve(8);
     _nRnd = rand() & 0xF;
@@ -308,7 +308,7 @@ BOOL CTaskMan::unregisterSysTask(CTask& task) {
 
 #line 450
 static void _initForMainTask() {
-    _pMainTaskRoot = new (__FILE__ "(451)") CMainTaskRoot(_pRootTask);
+    _pMainTaskRoot = new KH_AT("(451)") CMainTaskRoot(_pRootTask);
     ASSERT(_pMainTaskRoot);
     _nMainTaskStackLevel = -1;
     _nMainTaskState = _MAINTASK_STATE_NONE;
