@@ -68,7 +68,7 @@ static const FVECTOR lightVolumeVec = {0.299f, 0.587f, 0.114f, 0.0f};
 
 void CLightUnit::setAmbient(const FVECTOR& in_color) {
     m_Ambient = in_color;
-    m_Ambient.w = sceVu0InnerProduct((float*)in_color.v, (float*)lightVolumeVec.v) + -1.0f;
+    m_Ambient.w = sceVu0InnerProduct((float*)in_color.v, lightVolumeVec) + -1.0f;
 }
 
 void CLightUnit::setAnchor(const CCoord* p, INT kind) {
@@ -83,7 +83,7 @@ void CLightUnit::setAnchor(const CCoord* p, INT kind) {
 }
 
 void CLightUnit::getCenter(FVECTOR& ctr) {
-    ctr.set(m_pCrd->m_World.v[3]);
+    ctr.set(m_pCrd->getWorldMatrix().v[3]);
 }
 
 LIGHTDATA* CLightUnit::getLightData() const {
@@ -274,7 +274,7 @@ void CLightUnit::setLight(INT idx, FVECTOR in_light, FVECTOR in_color) {
         m_Color.m[idx][2] = in_color.z;
         FVECTOR vLCol;
         AbsVector(vLCol, in_color);
-        m_Color.m[idx][3] = sceVu0InnerProduct(vLCol.v, (float*)lightVolumeVec.v);
+        m_Color.m[idx][3] = sceVu0InnerProduct(vLCol.v, lightVolumeVec);
     }
 }
 
@@ -282,10 +282,10 @@ void CLightUnit::setLight(INT idx, FVECTOR in_light, FVECTOR in_color) {
 
 void CLightUnit::betaShade(FVECTOR& out, const FVECTOR& in) {
     FVECTOR ret = m_Ambient;
-    ret += m_Color.v[0];
-    ret += m_Color.v[1];
-    ret += m_Color.v[2];
-    ret += m_Color.v[3];
+    ret += m_Color.m[0];
+    ret += m_Color.m[1];
+    ret += m_Color.m[2];
+    ret += m_Color.m[3];
     ret.w = 1.0f;
     out = ret * in;
     if (out.x > 255.0f) {
@@ -302,7 +302,7 @@ void CLightUnit::betaShade(FVECTOR& out, const FVECTOR& in) {
 static FLOAT getLightVolume(const FVECTOR& ctr, INFINITELIGHT* l) {
     FVECTOR vLCol;
     AbsVector(vLCol, l->col);
-    return sceVu0InnerProduct(vLCol.v, (float*)lightVolumeVec.v);
+    return sceVu0InnerProduct(vLCol.v, lightVolumeVec);
 }
 
 static FLOAT getLightVolume(FLOAT& dv, const FVECTOR& ctr, POINTLIGHT* l) {
@@ -330,7 +330,7 @@ static FLOAT getLightVolume(FLOAT& dv, const FVECTOR& ctr, POINTLIGHT* l) {
     }
     FVECTOR vLCol;
     AbsVector(vLCol, l->col);
-    FLOAT pow = sceVu0InnerProduct(vLCol.v, (float*)lightVolumeVec.v);
+    FLOAT pow = sceVu0InnerProduct(vLCol.v, lightVolumeVec);
     FLOAT start = l->start * l->start;
     if (dv <= start) {
         return pow;

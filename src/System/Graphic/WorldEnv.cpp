@@ -251,10 +251,10 @@ FLOAT CWorldEnv::getFogNear() { return _vecFogParam.x; }
 FLOAT CWorldEnv::getFogFar() { return _vecFogParam.y; }
 
 void CWorldEnv::setFogColor(INT r, INT g, INT b) {
-    _ivecFogColor.x = r;
-    _ivecFogColor.y = g;
-    _ivecFogColor.z = b;
-    _ivecFogColor.w = 0;
+    _ivecFogColor.set(r, g, b, 0);
+
+
+
 }
 
 IVECTOR& CWorldEnv::getFogColor() {

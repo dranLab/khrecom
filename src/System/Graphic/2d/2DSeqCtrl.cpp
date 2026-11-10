@@ -53,12 +53,12 @@ static inline void _unitMatrix(FMATRIX& m) {
 
 
 /* FVECTOR::set as the original orders its stores (name unknown) */
-static inline void _set(FVECTOR& v, FLOAT _x, FLOAT _y, FLOAT _z, FLOAT _w) {
-    v.w = _w;
-    v.z = _z;
-    v.y = _y;
-    v.x = _x;
-}
+
+
+
+
+
+
 
 /* SeqControl's inline constructor (original name unknown) */
 static inline void _initSeqControl(SeqControl& sc) {
@@ -70,12 +70,12 @@ static inline void _initSeqControl(SeqControl& sc) {
     sc.fgFntScale = 0;
     sc.fgBilinear = 0;
     sc.fgColor = 0;
-    _set(sc.parentColor, 1.0f, 1.0f, 1.0f, 1.0f);
-    _set(sc.controlColor, 1.0f, 1.0f, 1.0f, 1.0f);
+    sc.parentColor.setAll(1.0f);
+    sc.controlColor.setAll(1.0f);
     sc.vPos.init0();
     sc.vScl.set(1.0f, 1.0f, 1.0f, 0.0f);
     sc.vRot.zero();
-    _set(sc.vCol, 1.0f, 1.0f, 1.0f, 1.0f);
+    sc.vCol.setAll(1.0f);
 }
 
 C2DSeqCtrl::C2DSeqCtrl() {

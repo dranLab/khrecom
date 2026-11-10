@@ -1177,7 +1177,7 @@ void CSky::main() {
         ScaleVector(vAddRot, (*(FVECTOR*)(ofs + (INT)m_pRotShift)), fRate);
         (*(FVECTOR*)(ofs + (INT)m_pRot)).addRot(vAddRot);
         sceVu0UnitMatrix(lMat.m);
-        sceVu0RotMatrix(Crd(i + 1).m_Local.m, lMat.m, ((FVECTOR*)(ofs + (INT)m_pRot))->v);
+        sceVu0RotMatrix(Crd(i + 1).m_Local.m, lMat.m, *(FVECTOR*)(ofs + (INT)m_pRot));
     }
 }
 void MulVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);

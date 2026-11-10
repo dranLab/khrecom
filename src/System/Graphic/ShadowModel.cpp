@@ -172,7 +172,7 @@ void CShadowModelMan::updateShadowMatrix(const FVECTOR& vMax, const FVECTOR& vMi
     vUp.w = 1.0f;
     SubVectorXYZ(vTmp, vLook, vEye);
     Normalize(vTmp, vTmp);
-    sceVu0CameraMatrix(mWorldView.m, vEye.v, vTmp.v, vUp.v);
+    sceVu0CameraMatrix(mWorldView, vEye.v, vTmp.v, vUp.v);
     fLenX = (vMax.x - vMin.x) * 0.5f;
     fLenY = orgMaxY - orgMinY;
     fLenZ = (vMax.z - vMin.z) * 0.5f;
@@ -279,14 +279,14 @@ static QWdata* setSdwTSprite32(QWdata* qp, FIX4 plsx, FIX4 plsy, UINT z, FLOAT f
         fvUVRect.x *= 0.0625f;
         FTOI4Vector(ivUVRect, fvUVRect);
     } else {
-        ivUVRect.x = 32 << 4;
-        ivUVRect.y = sdw_SCREEN_HEIGHT << 4;
-        ivUVPosUL.x = 0;
-        ivUVPosUL.y = 0;
-        ivUVPosUL.z = 0;
-        ivUVPosUL.w = 0;
-        ivUVRect.z = 0;
-        ivUVRect.w = 0;
+        ivUVPosUL.set(0, 0, 0, 0);
+
+        ivUVRect.set(32 << 4, sdw_SCREEN_HEIGHT << 4, 0, 0);
+
+
+
+
+
     }
     iNextSize = ivUVRect.x;
     uv[0].x = ivUVPosUL.x;

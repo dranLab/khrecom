@@ -11,12 +11,12 @@
 
 #define CH_MAX 4
 
-static inline void setV(FVECTOR& v, FLOAT x, FLOAT y, FLOAT z, FLOAT w) {
-    v.w = w;
-    v.z = z;
-    v.y = y;
-    v.x = x;
-}
+
+
+
+
+
+
 
 struct CSceneEnvColor {
 private:
@@ -32,9 +32,9 @@ private:
 
 public:
     CSceneEnvColor() {
-        setV(m_vColor, 1.0f, 1.0f, 1.0f, 1.0f);
-        setV(m_vOrg, 1.0f, 1.0f, 1.0f, 1.0f);
-        setV(m_vAim, 1.0f, 1.0f, 1.0f, 1.0f);
+        m_vColor.setAll(1.0f);
+        m_vOrg.setAll(1.0f);
+        m_vAim.setAll(1.0f);
         m_fPar = 1.0f;
         m_fParAdd = 1.0f;
         m_iColBit = ObjType::OBJ_BIT_CLEAR;
