@@ -48,9 +48,20 @@ every change that is merged without regenerating. Regenerating all four takes ab
   (sddrv_ee's `.bss`, blocked: see docs/asm-leftovers.md).
 - **Libraries:** 5 parked (memcpy, memset, memmove, graphdev sceGsSetDefDispEnv, kprintf2 _sceSnprintf), 0 not
   attempted, 26 hand-written (stay assembly), no unit with data from assembly; details in `docs/sdk-leftovers.md`.
-- **Header cleanup:** PARTIAL 162 (134 in 44 headers, 28 in 15 .cpp), 8 foreign stand-ins in 5 files, 0
-  duplicate classes, 0 untagged mechanisms; classes complete 1178, superset 16, partial 1, gated 3, missing 6.
+- **Header cleanup:** PARTIAL 158 (131 in 45 headers, 27 in 15 .cpp), 8 foreign stand-ins in 5 files, 0
+  duplicate classes, 659 mechanism sites (0 untagged); classes complete 1177, superset 17 (IVECTOR/FVECTOR/FMATRIX's
+  ref conversion operators read as extra methods: a partials.py limit), partial 1, gated 3, missing 6.
   `tools/partials.py --queue` has the ready items (the R1/R2 gate items there stay, see "Queue state").
+- **2026-11-10 (afternoon): Coord.h unification, 4 cleanup steps, all merged (user decision: full, step by step).**
+  System/Coord.h now holds the original's Coord.h on its lines: FVECTOR/IVECTOR/FMATRIX, F_UL/G_*, FVECTOR2, CCoord,
+  CCoords, the ref's sceVu0 declarations and conversion operators, the free matrix inlines 340-643 and every member
+  inline; the original's System/Graphic/VuCode/vu0.h (no ref file) is back with its inlines on lines 15-820. About
+  130 local helpers and declaration copies across ~150 files replaced; functions with differing Coord.h line markers
+  314 -> 26, vu0.h 125 -> 6 (the rest: parked drafts, sites kept with a note, 1019-1020 left as is by the user).
+  PARTIAL 160 -> 158, mechanisms 661 -> 659 (VECTOR_H_SET_CALL gone). No function matches; parked drafts unchanged
+  (Camp 27/23, Math3D 90, DispList 59, Map 82/709; WorldEnv still matches with the original namespace name). Details:
+  the four "Done (cleanup/coord-unify-...)" entries. Next cleanup candidates: Math3D.h's `_sqrtf` (6+ local copies),
+  PackMan.h's free inlines 117-128, G_RGBA::set; the parked drafts could now use the new inlines.
 - **2026-11-10: pool run (3 workers, 6 units) + one coordinator match.** Matched: HumanBoss setupAct (a function-scope
   `FLOAT none = -1` the ref lacks, accepted by the user after a no-behaviour-change proof: same image, single
   assignment, -1.0f -> SHORT exact; memory humanboss-unit-lessons), Model CBBox::makePkt (no padding: the original's
