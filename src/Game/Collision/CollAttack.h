@@ -73,7 +73,7 @@ public:
     HANDLE getEnemyHandle() { return m_hEnemyTask; }
     void setEnemyHandle(HANDLE hEnemyTask) { m_hEnemyTask = hEnemyTask; }
     void initEnemyPos() {
-        asm volatile("sqc2 $vf0, 0x0(%0)" : : "r"(&m_vEnemyPos));
+        m_vEnemyPos.init0();
         m_vEnemyPos.w = 1.0f;
     }
     void updateAttackID();

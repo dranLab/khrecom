@@ -603,7 +603,7 @@ static inline u_long128 _rotTransPersVf4(const FVECTOR& v0) {
     return ret;
 }
 
-static inline void _setVf0(FVECTOR& v) { asm volatile("sqc2 $vf0, 0x0(%0)" : : "r"(&v) : "memory"); }
+
 
 static inline FLOAT _lengthVf4(const FVECTOR& v0) {
     INT iTmp;
@@ -807,8 +807,8 @@ void CEffectMan::_calc(FLOAT fFrameRate, const FMATRIX& mWV, const FMATRIX& mVS,
     ObjType::eObjBit eStopBit;
     SLContainerT<CEffect>* pContainer;
 
-    asm volatile("sqc2 $vf0, 0x0(%0)" : : "r"(&vPosTmp));
-    asm volatile("sqc2 $vf0, 0x0(%0)" : : "r"(&vLookTmp));
+    vPosTmp.init0();
+    vLookTmp.init0();
     if (pCam) {
         pPos = &pCam->Crd(0).m_World.v[3];
         // MATCH: a ternary (with an if, pPos and pLook get each other's s-registers)

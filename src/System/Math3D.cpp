@@ -39,12 +39,12 @@ static inline FLOAT _fabsf(FLOAT inValue) {
 
 
 
-static inline void _init0(FVECTOR& v) {
-    asm volatile("sqc2 $vf0, 0x0(%0)" : : "r"(&v) : "memory");
-}
+
+
+
 
 static inline void _initTrans(FMATRIX& m) {
-    _init0(m.v[3]);
+    m.v[3].init0();
 }
 
 static inline void _unitMatrix(FMATRIX& m) {

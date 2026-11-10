@@ -48,9 +48,9 @@ static inline void _unitMatrix(FMATRIX& m) {
                  : "memory");
 }
 
-static inline void _unitVector(FVECTOR& v) {
-    asm volatile("sqc2 $vf0, 0x0(%0)" : : "r"(&v));
-}
+
+
+
 
 /* FVECTOR::set as the original orders its stores (name unknown) */
 static inline void _set(FVECTOR& v, FLOAT _x, FLOAT _y, FLOAT _z, FLOAT _w) {
@@ -72,7 +72,7 @@ static inline void _initSeqControl(SeqControl& sc) {
     sc.fgColor = 0;
     _set(sc.parentColor, 1.0f, 1.0f, 1.0f, 1.0f);
     _set(sc.controlColor, 1.0f, 1.0f, 1.0f, 1.0f);
-    _unitVector(sc.vPos);
+    sc.vPos.init0();
     sc.vScl.set(1.0f, 1.0f, 1.0f, 0.0f);
     sc.vRot.zero();
     _set(sc.vCol, 1.0f, 1.0f, 1.0f, 1.0f);

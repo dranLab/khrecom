@@ -49,10 +49,10 @@ MAPUNITTABLE g_DoorWorld12[12] = DOOR_WORLD(12);
 MAPUNITTABLE g_DoorWorld13[12] = DOOR_WORLD(13);
 MAPUNITTABLE g_DoorWorld0[12] = DOOR_WORLD(14);
 
-static inline void _unitVectorVu0(FVECTOR& v) {
-    /* no "memory" clobber: a bare volatile asm makes cse2 flush its tables (keeps a hoisted lui) */
-    asm volatile("sqc2 $vf0, 0x0(%0)" : : "r"(&v));
-}
+
+
+
+
 
 static inline BOOL isSpecialRoom(INT inRoomID) { return inRoomID == 0 || inRoomID == 99; }
 
@@ -137,7 +137,7 @@ CGimmickDoor::CGimmickDoor(CTask* inParent, const ZONEPARTS& inParts) : CBaseGim
     if (info->_shape == 1) {
         if (m_DoorState == DOOR_STAT_CLOSED) {
             FVECTOR vRot[2];
-            _unitVectorVu0(vRot[0]);
+            vRot[0].init0();
             vRot[1].set(0.0f, 3.1415927f, 0.0f, 1.0f);
             for (INT i = 0; i < 2; i++) {
                 CEffect* pEff;

@@ -9,9 +9,9 @@
 #include "System/Graphic/Effect/EffectMan.h"
 
 /* stores the VU0's vf0 (0, 0, 0, 1) (original name unknown) */
-static inline void _unitVector(FVECTOR& v) {
-    asm volatile("sqc2 $vf0, 0x0(%0)" : : "r"(&v));
-}
+
+
+
 
 class CCollBody : public CCollObj {
     friend class CPlayer; // MATCH: Game/Player/Player stores m_uiFlag/m_GuardAttrFlag directly: setGuard() & co. on the embedded m_collBody keep a separate base pointer (offsets not folded)
@@ -62,7 +62,7 @@ public:
     ATK_ATTR getDamageAttr() { return m_DamageAttr; }
     void setDamagePlane(FVECTOR& inNorm) { m_DamagePlane = inNorm; }
     void setDamagePlane(FVECTOR& inPos0, FVECTOR& inPos1, FVECTOR& inPos2);
-    void clearDamagePlane() { _unitVector(m_DamagePlane); }
+    void clearDamagePlane() { m_DamagePlane.init0(); }
     BOOL isDamagePlane() { return m_DamagePlane.x != 0.0f || m_DamagePlane.y != 0.0f || m_DamagePlane.z != 0.0f; }
     FVECTOR& getDamagePlane() { return m_DamagePlane; }
     void setDamagePos(FVECTOR& damegePosS, FVECTOR& damegePosE) {
@@ -93,7 +93,7 @@ public:
     void setEnemyPos(const FVECTOR& inPos) { m_vEnemyPos = inPos; }
     const FVECTOR& getEnemyPos() const { return m_vEnemyPos; }
     void initEnemyPos() {
-        _unitVector(m_vEnemyPos);
+        m_vEnemyPos.init0();
         m_vEnemyPos.w = 1.0f;
     }
     void setDir(const FLOAT& inDir) { m_fDir = inDir; }

@@ -71,9 +71,9 @@ ULONGLONG CShadowModelMan::m_lTex0;
 FVECTOR CShadowModelMan::m_vParam;
 FVECTOR CShadowModelMan::m_vCamPos;
 
-static inline void _initVf0(FVECTOR& v) {
-    asm volatile("sqc2 $vf0, 0x0(%0)" : : "r"(&v));
-}
+
+
+
 
 template <class T> static inline T& _ref(T& v) {
     return v;
@@ -117,7 +117,7 @@ void CShadowModelMan::updateMatrix() {
     if (pCamera) {
         m_vCamPos = pCamera->Crd(0).getWorldMatrix().getTransRef();
     } else {
-        _initVf0(m_vCamPos);
+        m_vCamPos.init0();
     }
 }
 

@@ -22,9 +22,9 @@ void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 
-static inline void _initVf0(FVECTOR& v) {
-    asm volatile("sqc2 $vf0, 0x0(%0)\n" : : "r"(&v));
-}
+
+
+
 
 #line 28
 CHermitePathCamera::CHermitePathCamera(CTask* p, const FVECTOR* pPath, INT iPathMax, const CTask* pTarget,
@@ -93,8 +93,8 @@ void CHermitePathCamera::_init(const CTask* pTarget, const PATH_TARGET_PARAM& sT
     m_iPathFlags = sTargetParam.sPDParam.iFlags;
     m_pHPath = sTargetParam.pHPath;
     m_pMyHPath = NULL;
-    _initVf0(m_vPos);
-    _initVf0(m_vWPos);
+    m_vPos.init0();
+    m_vWPos.init0();
     m_fStep = 0.0f;
     m_fStartProj = sTargetParam.sPDParam.fProj;
     m_fEndProj = sTargetParam.sPDParam.fProj2;
@@ -166,7 +166,7 @@ void CHermitePathCamera::_init(const CTask* pTarget, const PATH_TARGET_PARAM& sT
     }
     m_DDPathCamArrow.getCoord().setParent(&Crd(0));
     FVECTOR vRot;
-    _initVf0(vRot);
+    vRot.init0();
     vRot.w = 5.0f;
     m_DDPathCamArrow.setCoord(NULL, &vRot);
 }

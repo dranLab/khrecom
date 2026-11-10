@@ -32,9 +32,9 @@ static inline void _unitMatrixVu0(FMATRIX& m) {
                  : "memory");
 }
 
-static inline void _initVf0(FVECTOR& v) {
-    asm volatile("sqc2 $vf0, 0x0(%0)\n" : : "r"(&v));
-}
+
+
+
 
 #line 30
 CPathDataCamera::CPathDataCamera(CTask* p, const CHAR* pszInName, INT iKind, const CTask* pTarget, INT iNum,
@@ -174,7 +174,7 @@ void CPathDataCamera::update(FLOAT fr, BOOL bUpdate) {
     case 0:
         if (m_DDPathCamArrow) {
             FVECTOR vRot;
-            _initVf0(vRot);
+            vRot.init0();
             m_pHPM->getNowRot(vRot, 1.0f);
             vRot.z = m_pHPM->getNowRoll();
             vRot.w = 5.0f;
@@ -214,7 +214,7 @@ void CPathDataCamera::entryDebugArrow() {
         m_DDPathCamArrow = new (__FILE__ "(314)") CDbgArrow;
         if (!m_DDPathCamArrow) AssertApp(__FILE__, __LINE__, "m_DDPathCamArrow", 0);
         m_DDPathCamArrow->getCoord().setParent(&Crd(0));
-        _initVf0(vRot);
+        vRot.init0();
         vRot.w = 5.0f;
         m_DDPathCamArrow->setCoord(NULL, &vRot);
     }
