@@ -37,12 +37,6 @@ void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT t);
 
 #include "Game/Player/PlayerGauge.h"
 
-static inline void _unitMatrix(FMATRIX& m) {
-    sceVu0UnitMatrix(m.m);
-}
-static inline void _rotMatrixY(FMATRIX& m, FLOAT r) {
-    sceVu0RotMatrixY(m.m, m.m, r);
-}
 
 static inline FLOAT _limitPI(FLOAT r) {
     if (r < -3.1415927f) r += 6.2831855f;
@@ -187,8 +181,8 @@ void CSummonTink::stateAction1() {
         }
         FVECTOR ofs = { { 0.0f, 0.0f, m_pAtkData->RADIUS * 0.1f, 1.0f } };
         FVECTOR pos = getPos();
-        _unitMatrix(m);
-        _rotMatrixY(m, m_fDir);
+        UnitMatrix(m);
+        RotMatrixY(m, m, m_fDir);
         ApplyMatrix(ofs, m, ofs);
         AddVectorXYZ(ofs, m_vAimPos, ofs);
         pos.x = Movement::Approach(pos.x, ofs.x, m_pAtkData->WORK0 * 0.005f, getFrameRateF());

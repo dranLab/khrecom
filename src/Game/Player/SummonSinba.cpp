@@ -29,12 +29,6 @@ inline void _emptyStringPlaceholder2() { /* MATCH: placeholder: an inline functi
 
 void ApplyMatrixXYZ(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 
-static inline void _unitMatrix(FMATRIX& m) {
-    sceVu0UnitMatrix(m.m);
-}
-static inline void _rotMatrixY(FMATRIX& m, FLOAT r) {
-    sceVu0RotMatrixY(m.m, m.m, r);
-}
 
 static inline FVECTOR _makeVector(FLOAT inX, FLOAT inY, FLOAT inZ) {
     FVECTOR v;
@@ -75,8 +69,8 @@ void CSummonSinba::stateAppear() {
     ofs.w = 1.0f;
     FVECTOR rot = getRot();
     FMATRIX m;
-    _unitMatrix(m);
-    _rotMatrixY(m, rot.y);
+    UnitMatrix(m);
+    RotMatrixY(m, m, rot.y);
     ApplyMatrixXYZ(ofs, m, ofs);
     FVECTOR vStart = { { pos.x, pos.y, pos.z, 1.0f } };
     FVECTOR vEnd = { { pos.x + ofs.x, pos.y + ofs.y, pos.z + ofs.z, 1.0f } };

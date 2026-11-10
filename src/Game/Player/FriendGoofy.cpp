@@ -32,14 +32,6 @@ inline void _emptyStringPlaceholder2() { /* MATCH: placeholder: an inline functi
 void ApplyMatrixXYZ(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 
-/* Through inline wrappers (as in FriendKing): the original recomputes the matrix address for each call. */
-static inline void _unitMatrix(FMATRIX& m) {
-    sceVu0UnitMatrix(m.m);
-}
-static inline void _rotMatrixY(FMATRIX& m, FLOAT r) {
-    sceVu0RotMatrixY(m.m, m.m, r);
-}
-
 namespace Friend {
 
 static LPCSTR g_szBoneShield = "shield";
@@ -493,8 +485,8 @@ void CFriendGoofy::adjustPlayer(INT inWarp) {
 
     rot = m_pPlayer->getRot();
     setRot(rot);
-    _unitMatrix(m);
-    _rotMatrixY(m, rot.y);
+    UnitMatrix(m);
+    RotMatrixY(m, m, rot.y);
     ApplyMatrixXYZ(pos, m, pos);
     AddVectorXYZ(pos, pos, m_pPlayer->getPos());
     if (inWarp) {

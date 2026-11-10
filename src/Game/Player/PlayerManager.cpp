@@ -654,8 +654,8 @@ void CPlayerManager::calcFieldStartPos() {
         r = rotY;
         if (3.1415927f < r) r -= 6.2831855f;
     }
-    sceVu0UnitMatrix(mat.m);
-    sceVu0RotMatrixY(mat.m, mat.m, r);
+    UnitMatrix(mat);
+    RotMatrixY(mat, mat, r);
     ApplyMatrixXYZ(pos, mat, pos);
     AddVectorXYZ(pos, pos, pDoor->getPos());
     pos.y += 0.0035f;

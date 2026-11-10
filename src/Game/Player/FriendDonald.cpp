@@ -45,14 +45,6 @@ extern BULLET_EFFECT_INFO g_EffTbl_HitMark[27]; /* Game/Player/PlayerAttack.h */
 extern BULLET_EFFECT_INFO g_EffTbl_Skill[67][4]; /* Game/Player/PlayerAttack.h */
 }
 
-/* Through inline wrappers (as in FriendKing): the original recomputes the matrix address for each call. */
-static inline void _unitMatrix(FMATRIX& m) {
-    sceVu0UnitMatrix(m.m);
-}
-static inline void _rotMatrixY(FMATRIX& m, FLOAT r) {
-    sceVu0RotMatrixY(m.m, m.m, r);
-}
-
 namespace Friend {
 
 static LPCSTR g_szBoneWeaponR = "WeaponR";
@@ -392,8 +384,8 @@ HANDLE CFriendDonald::setBlitz() {
     FVECTOR pos = { { 0.0f, 0.0f, m_pAtkData->WORK0 * 0.1f, 1.0f } };
     FMATRIX m;
 
-    _unitMatrix(m);
-    _rotMatrixY(m, m_pPlayer->getRot().y);
+    UnitMatrix(m);
+    RotMatrixY(m, m, m_pPlayer->getRot().y);
     ApplyMatrixXYZ(pos, m, pos);
     AddVectorXYZ(pos, pos, m_pPlayer->getPos());
     m_fDist = calcDistance(pos) - 1.0f;
@@ -562,8 +554,8 @@ void CFriendDonald::adjustPlayer(INT inWarp) {
 
     rot = m_pPlayer->getRot();
     setRot(rot);
-    _unitMatrix(m);
-    _rotMatrixY(m, rot.y);
+    UnitMatrix(m);
+    RotMatrixY(m, m, rot.y);
     ApplyMatrixXYZ(pos, m, pos);
     AddVectorXYZ(pos, pos, m_pPlayer->getPos());
     if (inWarp) {

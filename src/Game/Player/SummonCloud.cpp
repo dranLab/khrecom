@@ -52,12 +52,6 @@ static inline FLOAT _abs(FLOAT inValue) {
     return ret;
 }
 
-static inline void _unitMatrix(FMATRIX& m) {
-    sceVu0UnitMatrix(m.m);
-}
-static inline void _rotMatrixY(FMATRIX& m, FLOAT r) {
-    sceVu0RotMatrixY(m.m, m.m, r);
-}
 
 namespace Summon {
 
@@ -163,8 +157,8 @@ void CSummonCloud::beginStateAppear() {
         FVECTOR start = { { 0.0f, 0.0f, -0.75f, 1.0f } };
         FMATRIX m;
         FVECTOR v;
-        _unitMatrix(m);
-        _rotMatrixY(m, m_pPlayer->getRot().y);
+        UnitMatrix(m);
+        RotMatrixY(m, m, m_pPlayer->getRot().y);
         ApplyMatrixXYZ(start, m, start);
         AddVectorXYZ(pos, pos, start);
         coll->setStartPos(pos);
