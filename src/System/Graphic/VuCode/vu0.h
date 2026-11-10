@@ -2,10 +2,14 @@
 // has no such file (no types are defined in it); its inlines and their lines come from the original's .mdebug line
 // markers, the names are ours. System/Coord.h includes it after the vector classes and before FVECTOR::set's
 // definition (Coord.h:730): an inline here that calls FVECTOR::set keeps the call (ModelMan reset/setupDrawEnv).
+// An inline starts on the line of its parameter setup (where the markers show one) and ends its asm on the line
+// of its instructions: 15-29 clip range, 36-46 fog parameter, 55-69 bounding-box clip, 114-122 / 129-135 matrix
+// into vf20 / vf28, 190-198 vf16 into a matrix, 252 / 262 vf2 / vf3 out, 337 wait, 348-366 vf28 x vf20, 383-391
+// unit matrix, 396-820 the vector and matrix operations of System/Coord. Not here: 94, the clip result, whose asm
+// in the original branches (Model's checkBBox/resultCheckBBox keep it in C).
 #ifndef SYSTEM_GRAPHIC_VUCODE_VU0_H
 #define SYSTEM_GRAPHIC_VUCODE_VU0_H
 
-/* BEGIN GEN */
 #line 15
 inline void vu0SetClipRange() {
     FVECTOR vMax;
@@ -260,7 +264,7 @@ inline void vu0Normalize(FVECTOR& v0, const FVECTOR& v1) {
 }
 #line 606
 inline void vu0DivVector(FVECTOR& v0, const FVECTOR& v1, FLOAT q) {
-
+    /* MATCH: the divisor moves through $8 as in the original (the mfc1 from C: a $8 register local) */
 
 
 
@@ -272,7 +276,7 @@ inline void vu0DivVector(FVECTOR& v0, const FVECTOR& v1, FLOAT q) {
 }
 #line 620
 inline void vu0DivVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT q) {
-
+    /* MATCH: the divisor moves through $8 as in the original (the mfc1 from C: a $8 register local) */
 
 
 
@@ -435,6 +439,5 @@ inline void vu0ApplyMatrixXYZ(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1)
                  "vmaddw.xyz $vf4, $vf8, $vf0w\n"
                  "sqc2 $vf4, 0x0(%0)" : : "r"(&v0), "r"(&m0), "r"(&v1) : "memory");
 }
-/* END GEN */
 
 #endif /* SYSTEM_GRAPHIC_VUCODE_VU0_H */
