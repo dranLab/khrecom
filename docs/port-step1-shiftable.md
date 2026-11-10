@@ -451,4 +451,5 @@ Boot-test log:
 
 | date | preset | build (commit) | reached | problems |
 |---|---|---|---|---|
-| 2026-11-10 | text128 | 252c1623 (disc C:\temp\recom.iso) | boots; the tutorial level entered | user: movie playback full of green blocks (picture shapes visible, chroma and block texture wrong). Cause: `src/lib/mpc.c`'s hand-written `_copyRefImage` (raw `.word` instructions) loaded its 0x00FF00FF mask with `lui $t2, 0x37` / `addiu $t2, $t2, 0x6C0`: the hard-coded address 0x3706C0, which the shifted code no longer has there. Fixed: `%hi/%lo($Lcopy_mask)` (same words in the matching build). Not booted again yet. |
+| 2026-11-10 | text128 | 252c1623 (disc C:\temp\recom.iso) | boots; the tutorial level entered | user: movie playback full of green blocks (picture shapes visible, chroma and block texture wrong). Cause: `src/lib/mpc.c`'s hand-written `_copyRefImage` (raw `.word` instructions) loaded its 0x00FF00FF mask with `lui $t2, 0x37` / `addiu $t2, $t2, 0x6C0`: the hard-coded address 0x3706C0, which the shifted code no longer has there. Fixed: `%hi/%lo($Lcopy_mask)` (same words in the matching build). Fixed in 6df533ff. |
+| 2026-11-10 | text128 | 6df533ff | movie playback correct (user) | none reported |
