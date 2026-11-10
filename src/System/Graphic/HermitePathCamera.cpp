@@ -249,11 +249,11 @@ void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
 void Normalize(FVECTOR& v0, const FVECTOR& v1);
-namespace Math3D {
-FLOAT VectorLength(const FVECTOR& inVector);
-}
-
 #include "System/Math3D.h"
+
+
+
+
 
 
 

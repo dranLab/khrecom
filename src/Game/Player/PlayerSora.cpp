@@ -99,7 +99,7 @@ static inline UINT _upKind(INT inType0, INT inType1) {
 void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void Normalize(FVECTOR& outV, const FVECTOR& inV);
 extern "C" float atan2f(float y, float x);
-namespace Math3D { FLOAT VectorLength(const FVECTOR& inVector); }
+#include "System/Math3D.h"
 namespace MG_SKILL {
 HANDLE createMGSkill(INT inType, INT inLevel);
 BOOL isMGSkillAlive();
@@ -149,7 +149,7 @@ static inline FLOAT _limitPI(FLOAT r) {
     return r;
 }
 
-#include "System/Math3D.h"
+
 
 
 

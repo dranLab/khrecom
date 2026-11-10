@@ -27,17 +27,17 @@ void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
 FLOAT InnerProduct(const FVECTOR& v0);
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
-namespace Math3D {
-FLOAT PointToPointDistance(const FVECTOR& inP0, const FVECTOR& inP1);
-FLOAT LimitPI(FLOAT pai);
-}
+#include "System/Math3D.h"
+
+
+
 
 // Form/DebugWindowTBL.h
 namespace DWT {
 extern DEBUG_WINDOW_TBL debugWinTop;
 }
 
-#include "System/Math3D.h"
+
 
 
 

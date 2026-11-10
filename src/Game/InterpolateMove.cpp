@@ -8,11 +8,11 @@ float atan2f(float y, float x);
 
 #include "System/Coord.h"
 // from System/Math3D.h
-namespace Math3D {
-FLOAT PointToPointDistance(const FVECTOR& inP0, const FVECTOR& inP1);
-}
-
 #include "System/Math3D.h"
+
+
+
+
 
 
 

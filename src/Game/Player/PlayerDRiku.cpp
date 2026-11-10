@@ -122,9 +122,9 @@ void ApplyMatrix33(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 extern "C" float sinf(float);
 extern "C" float cosf(float);
 void ApplyMatrixXYZ(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
-namespace Math3D {
-FLOAT LimitPI(FLOAT pai);
-}
+
+
+
 
 
 

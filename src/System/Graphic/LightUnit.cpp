@@ -17,9 +17,9 @@ void AbsVector(FVECTOR& v0, const FVECTOR& v1);
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 void spinMatrixX(FMATRIX& m0, const FMATRIX& m1, INT deg);
 void spinMatrixY(FMATRIX& m0, const FMATRIX& m1, INT deg);
-namespace Math3D {
-FLOAT GetDistance2OfLimitedLineAndPoint(const FVECTOR& inP1, const FVECTOR& inP2, const FVECTOR& inP);
-}
+#include "System/Math3D.h"
+
+
 
 /* The map viewer of the debug DLL (task 0x31): not in the main program, the original calls address 0 */
 class CMapViewer {
@@ -338,7 +338,7 @@ static FLOAT getLightVolume(FLOAT& dv, const FVECTOR& ctr, POINTLIGHT* l) {
     return pow * (1.0f - (dv - start) / (end - start));
 }
 
-#include "System/Math3D.h"
+
 
 
 
