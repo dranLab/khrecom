@@ -607,7 +607,7 @@ Keep output small: one function's assembly at a time; `funcdiff` without `--full
   replaced. Differing vu0.h markers 125 -> 6 (Map init/disp, Math3D InvMatrix parked; EffectMan _updateCoord 535 code
   equal; Model checkBBox kept with a note; resultCheckBBox(CCoord&) 94 = branching asm kept in C), Coord.h 50 -> 26
   (build/vu/clfw.py --file vu0.h). Kept in asm with MATCH: the mfc1 of ScaleVector/ScaleVectorXYZ (Sony's libvu0
-  form), vu0LengthSq's mtc1 (no GPR -> FPR move in C). Next: Math3D.h's _sqrtf/_fabsf (Math3D.h:129-137, local copies in 19
+  form), vu0LengthSq's mtc1 (no GPR -> FPR move in C). Next (Math3D.h done: cleanup/math3d-h): (Math3D.h:129-137, local copies in 19
   units); PackMan.h's free inlines 117-128.
 - **Done (cleanup/vector-types, merged 2026-11-07; superseded 2026-11-10, now in Coord.h):** F_UL, G_XY, G_XYZ, G_RGBA, G_UV,
   G_ST at the end of System/Vector.h and the C++ QWdata after khtypes.h's u_int128 (the original's .mdebug type order,
