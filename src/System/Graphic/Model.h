@@ -476,6 +476,11 @@ private:
     virtual void makePkt();
 };
 
+struct CShader {
+    virtual ~CShader();
+    virtual void setExtendedWork();
+};
+
 class CShadowModel : public CFadeModel { 
     INT m_nSize; /* 0x28 */
 public:
