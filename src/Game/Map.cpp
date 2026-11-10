@@ -62,8 +62,8 @@ public:
 
 extern LIGHTDATA ALF_default;
 extern const FVECTOR ONE_VECTOR;
-extern "C" char D_00480CE8[];
-extern "C" char D_00480D08[];
+
+
 
 
 
@@ -1168,50 +1168,61 @@ void CMap::createEnvSE(const ZONEPARTS& inParts) {
     if (unitId.c[1] == '0') CGame::playConstEnvSE(nFile * 1000 + nID, -1, FALSE);
 }
 extern "C" FLOAT sinf(FLOAT);
+#line 1808
 CSky::CSky(CTask* pInParent, void* pAZF, ZONEDATA* pZone) : CTaskSecondary(pInParent) {
+    USHORT nLayer;
     setPriority((TASK_PRIORITY)0x8000);
+
     m_modelSuu = pZone->skynum;
-    m_pModel = new ("c:/KHCOM/MainApp/Game/Map.cpp(1813)") CModelBG[m_modelSuu];
-    m_pRot = new ("c:/KHCOM/MainApp/Game/Map.cpp(1816)") FVECTOR[m_modelSuu];
-    m_pRotShift = new ("c:/KHCOM/MainApp/Game/Map.cpp(1817)") FVECTOR[m_modelSuu];
+    m_pModel = new (__FILE__ "(1813)") CModelBG[m_modelSuu];
+
+
+    m_pRot = new (__FILE__ "(1816)") FVECTOR[m_modelSuu];
+    m_pRotShift = new (__FILE__ "(1817)") FVECTOR[m_modelSuu];
+
     m_vColor.setAll(1.0f);
+
     addCoord(m_modelSuu + 1);
     CCoord& crd = Crd(0);
-    vu0UnitMatrix(crd.m_Local);
+    crd.m_Local.init();
     crd.touch();
-    USHORT nLayer = 3;
+
+
+    nLayer = 3;
     for (INT i = 0; i < m_modelSuu; i++) {
         CModelBG& model = m_pModel[i];
         ZONEPARTS* pZoneparts = &pZone->parts[i];
+
         m_pRot[i].set(0.0f, 0.0f, 0.0f, 0.0f);
         m_pRotShift[i].zero();
-        if (pZoneparts->rot.x) {
-            FVECTOR& v = *(FVECTOR*)((i << 4) + (INT)m_pRotShift); // MATCH: offset + base (addu s0,s1,s0); &m_pRotShift[i] adds base first
-            v.x = sinf(Math3D::LimitPI(pZoneparts->rot.x * 0.01f * 0.017453292f)) * 0.1f;
-        }
-        if (pZoneparts->rot.y) {
-            FVECTOR& v = *(FVECTOR*)((i << 4) + (INT)m_pRotShift);
-            v.y = sinf(Math3D::LimitPI(pZoneparts->rot.y * 0.01f * 0.017453292f)) * 0.1f;
-        }
-        if (pZoneparts->rot.z) {
-            FVECTOR& v = *(FVECTOR*)((i << 4) + (INT)m_pRotShift);
-            v.z = sinf(Math3D::LimitPI(pZoneparts->rot.z * 0.01f * 0.017453292f)) * 0.1f;
-        }
+
+
+        if (pZoneparts->rot.x)
+            m_pRotShift[i].x = sinf(Math3D::LimitPI(pZoneparts->rot.x * 0.01f * 0.017453292f)) * 0.1f;
+        if (pZoneparts->rot.y)
+            m_pRotShift[i].y = sinf(Math3D::LimitPI(pZoneparts->rot.y * 0.01f * 0.017453292f)) * 0.1f;
+        if (pZoneparts->rot.z)
+            m_pRotShift[i].z = sinf(Math3D::LimitPI(pZoneparts->rot.z * 0.01f * 0.017453292f)) * 0.1f;
         m_pRotShift[i].w = 0.0f;
         model.setLayerDepth(nLayer);
-        INT nIndex = pZone->parts[i].modelIndex + 1;
-        MODELDATA* d;
-        if (!pAZF) d = NULL;
-        else d = ((MODELDATA**)pAZF)[nIndex];
-        if (!d) AssertApp(D_00480CE8, 1846, D_00480D08, 0);
-        vu0UnitMatrix(Crd(i + 1).m_Local);
-        Crd(i + 1).m_pParent = &Crd(0);
+
+        MODELDATA* d = (MODELDATA*)_getAZFData(pAZF, pZone->parts[i].modelIndex + 1);
+        if (!(d)) AssertApp(__FILE__, __LINE__, "d", 0);
+
+
+        Crd(i + 1).m_Local.init();
+        Crd(i + 1).setParent(&Crd(0));
         Crd(i + 1).touch();
+
         model.assign(this, d, i + 1);
+
+
         if (model.getSemiModel()) model.getSemiModel()->setTestFlag(0x3360D);
+#line 1861
         if (nLayer < 9) nLayer += 2;
     }
 }
+#line 1226
 CSky::~CSky() {
     if (m_pModel) delete[] m_pModel;
     m_pModel = NULL;
@@ -1221,20 +1232,27 @@ CSky::~CSky() {
     m_pRotShift = NULL;
 }
 void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT t);
+#line 1878
 void CSky::main() {
     if (CSceneEnv::getStopTypeBit() & 0x1000) return;
+
+
     FLOAT fRate = getFrameRateF();
+
     for (INT i = 0; i < m_modelSuu; i++) {
-        FMATRIX lMat;
-        INT ofs = i << 4; // MATCH: not in the ref; one offset for both arrays, offset + base (computed into s3 directly)
-        FVECTOR vAddRot;
-        if ((*(FVECTOR*)(ofs + (INT)m_pRotShift))._ul[0] == 0 && (*(FVECTOR*)(ofs + (INT)m_pRotShift))._ul[1] == 0) continue;
-        ScaleVector(vAddRot, (*(FVECTOR*)(ofs + (INT)m_pRotShift)), fRate);
-        (*(FVECTOR*)(ofs + (INT)m_pRot)).addRot(vAddRot);
-        sceVu0UnitMatrix(lMat.m);
-        sceVu0RotMatrix(Crd(i + 1).m_Local.m, lMat.m, *(FVECTOR*)(ofs + (INT)m_pRot));
+#line 1899
+        if (m_pRotShift[i]._ul[0] != 0 || m_pRotShift[i]._ul[1] != 0) {
+            FMATRIX lMat;
+            FVECTOR vAddRot;
+            ScaleVector(vAddRot, m_pRotShift[i], fRate);
+            m_pRot[i].addRot(vAddRot);
+            sceVu0UnitMatrix(lMat);
+            sceVu0RotMatrix(Crd(i + 1).m_Local, lMat, m_pRot[i]);
+        }
+#line 1963
     }
 }
+#line 1245
 void MulVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void CSky::disp() {
     if (DebugWork::g_dw.sys.m_iSkyDisp < -1) DebugWork::g_dw.sys.m_iSkyDisp = m_modelSuu;
