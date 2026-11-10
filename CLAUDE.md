@@ -126,7 +126,7 @@ The plan for all remaining work (state, work order, per-function loop, validatio
 | newlib libm (`lib/src/newlib/*`, fdlibm) | ee-gcc2.9-991111-01 `-O2 -G0 -g -fno-builtin` + its own 2.9 as (`assembler: ee-gcc2.9-991111-01`): this compiler pads `div.s` with nops (EE erratum; ef_fmod, kf_tan), -fno-builtin keeps fabsf a call, its as adds hazard nops (mfc1, c.cond) only where gcc enters `.set noreorder` and moves no stores into `jr` slots. Source is newlib's own; `src/lib/src/newlib/libm/fdlibm.h` has the macros |
 | `lib/nodebug/*` (newlib libc, libsn; no debug info) | the game's own toolchain: ee-gcc2.95.3-136 `-O2 -G0` + Ps2EeAs (no `assembler:`); only 990721 and 2.95.3-136 matched the first str*/stdlib functions, and only Ps2EeAs gives strstr's loop-head nops. Source is newlib libc's |
 
-## Shifted build (branch port/shiftable; plan: `docs/port-step1-shiftable.md`)
+## Shifted build (port step 1; plan and boot log: `docs/port-step1-shiftable.md`)
 
 - `ninja shift` links the matching objects with padding (`config/<VERSION>/shift.yaml` presets) and without any label
   pinned to its original address; `tools/check.sh --shift` also checks them (`tools/shiftpins.py`: nothing undefined
