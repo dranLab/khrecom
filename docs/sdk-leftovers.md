@@ -142,6 +142,10 @@ shows a draft's diff after you switch its `#if 0` to `#if 1` (the permuters swit
   M|V|H|X|Y|W (unique best of all 120; Sony's own X|Y|M|V|W|H gives 127); dispfb psm before fbw. Left: in both
   non-interlaced blocks the original issues `h - 1` between the div and the off[0] load (sx/DY a1/v1 swapped): an
   extra dependence in its RTL, not reproduced. On 991111-01 the cross-jump runs after sched2; `-fsched-verbose-9`.
+  2026-11-10: the sched2 dump (build/sched/dump.sh) shows the loads depend only on div_trap; the original's order needs
+  a dependence from `h - 1` to a load that no final register or memory provides: sched2 keeps pre-reload dependence
+  links (haifa-sched.c ~8551 removes only inter-block ones), so it comes from a different pre-reload form of the code.
+  Not statement order (~190k permuter iterations, 20+ variants 22-48, other compilers and flags: loads first).
 - **csc** (matched 2026-11-07, data from source): both "register swaps" were source shape: `*D_STAT = 8;
   EnableDmac(3);` on one line (as moves the volatile store into the jal slot), the `do { } while (0)` around exactly
   the `DIntr() ... if (oldei) EIntr();` critical section, and qwc (`mbnum * 0x40`) in its own local next to rgb.
@@ -208,7 +212,7 @@ Sorted by unit, then size. `instr`: instructions in the original.
 | unit | function | instr | status | what differs |
 |---|---|---:|---|---|
 | `lib/nodebug/snDebugInit` | `snTeq` | 26 | hand-written | trap handler |
-| `lib/graphdev_checkModelVersion` | `sceGsSetDefDispEnv` | 221 | parked | 21 of 232 lines (2026-11-09): only the two non-interlaced blocks differ (NTSC falls into PAL's tail): the original issues h - 1 between the div and the off[0] load (ours loads off[0], off[1] first: their priority 10/9 beats h - 1's 7 in sched2, so in the original the loads cannot have been ready … |
+| `lib/graphdev_checkModelVersion` | `sceGsSetDefDispEnv` | 221 | parked | 21 of 232 lines (2026-11-10): only the two non-interlaced blocks differ (NTSC falls into PAL's tail): the original issues h - 1 between the div and the off[0] load (ours loads off[0], off[1] first: their priority 10/9 beats h - 1's 7 in sched2, so in the original the loads cannot have been ready … |
 | `lib/mpc` | `_rix_111` | 72 | hand-written | MMI reference-copy routines (_rix_*: luminance, _ri0_*: chrominance) |
 | `lib/mpc` | `_ri0_111` | 69 | hand-written | MMI reference-copy routines (_rix_*: luminance, _ri0_*: chrominance) |
 | `lib/mpc` | `_ri0_011` | 63 | hand-written | MMI reference-copy routines (_rix_*: luminance, _ri0_*: chrominance) |
