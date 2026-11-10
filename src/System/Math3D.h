@@ -17,6 +17,9 @@ struct BOUNDING_CYLINDER {
     FLOAT fR;
 };
 
+/* CFrustum and the free inlines below sit on the original header's lines (.mdebug line markers: isInit 59, the
+ * sqrt.s inline 129, the abs.s inline 133-137). */
+#line 51
 struct CFrustum {
 private:
     BOOL m_bInit;
@@ -44,6 +47,26 @@ void RotationArc(QUATERNION& outQuat, const FVECTOR& inV0, const FVECTOR& inV1);
 void MakeQuaternion(QUATERNION& outQuat, FLOAT rx, FLOAT ry, FLOAT rz);
 void QuaternionConjugate(QUATERNION& outQuat, const QUATERNION& inQuat);
 void QuaternionMulVector(QUATERNION& outQuat, const QUATERNION& inQuat, const FVECTOR& inVect);
+}
+
+/* Free inlines of the original header (names ours: the .mdebug has none for inlined functions; parameter and local
+ * names from their inline blocks). An argument loaded from memory carries the declarator line (133). MATCH: asm
+ * volatile, as every former local copy (InvMatrix keeps its first abs.s next to its load). */
+#line 125
+inline FLOAT _sqrtf(FLOAT inValue) {
+    FLOAT ret;
+
+
+    asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(inValue));
+    return ret;
+}
+
+inline FLOAT _fabsf(FLOAT inValue) {
+    FLOAT ret;
+
+
+    asm volatile("abs.s %0, %1" : "=f"(ret) : "f"(inValue));
+    return ret;
 }
 
 namespace Math3D {

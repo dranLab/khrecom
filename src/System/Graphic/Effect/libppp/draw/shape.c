@@ -252,10 +252,24 @@ void pppStartVu1ShapeProg(int fog) {
    both schedulers (45-59). Also tried: i = 0x80000000 as the shared constant (i is a0 in .mdebug; 38-40),
    spaPktSize >>= 4 at 386 (39), spPktSize in two statements (11), spaPktSize from dspa - dspa0 (53), tag 3
    next/id/qwc (11).
-   2026-11-10: the dependence is an in-place write of sp's register a1 between tag 2's `pkt = sp + 2` and its qwc
-   store, in both schedulers: `asm("" : "+r"(sp));` anywhere on line 408 (experiment only, not source) puts `or a0`
-   exactly where the original has it, but only with tag 2's qwc written through sp (`((sceDmaTag *)sp)[2].qwc`: the
-   asm hides sp + 32 from cse, so pkt->qwc becomes 0(t6)); the t3/t4 swap stays (0x70's sched1 life 19, needs 20).
+   2026-11-10: `asm("" : "+r"(sp));` anywhere on line 408 (experiment only, not source) puts `or a0` exactly where
+   the original has it, but only with tag 2's qwc written through sp (`((sceDmaTag *)sp)[2].qwc`: the asm hides
+   sp + 32 from cse, so pkt->qwc becomes 0(t6)), and it moves tag 0's `sb t2,3(a1)` before its p[1] store (7 lines;
+   14 with tag 3 id-first: the t3/t4 swap stays, 0x70's sched1 life 19, needs 20).
+   2026-11-10 (later): an in-place write of a1 cannot be the original's mechanism. Any SET of a1 (asm, no-op move,
+   in-place extension) takes the epilogue blockage's anti-dependences of tag 0's a1-only readers, but tag 0's sb keeps
+   its blockage dependence through t2 (0x30 is read again by tags 1/2): sb gets 17 dependents against p[1]'s 16 and
+   sched2's rank_for_schedule issues it first; the original issues p[1] first, so whatever delays `or a0` must leave
+   tag 0's dependent counts alone (a hard-reg CLOBBER would; no source form found). The t3/t4 swap is only 0x70's
+   sched1 life: any extra sched1 insn inside it fixes the registers (asm "+r"(sp) twice: regs right, 7 lines; one
+   asm "+r"(pkt) after line 411 with tag 3 id-first: regs right, 8 lines; both experiments, not source).
+   Neutral or worse: Sony libdma.h's settag macro (id, next, (u_short)qwc) for tags 0-3 (= the id-first forms, 4/11),
+   sceDmaTag __attribute__((aligned(16))) as in libdma.h (same code), KeData16 union views of tag 0 fields (same
+   code), unreferenced labels / `goto L; L:` on lines 406-408 (deleted early, same code), flow-dead
+   `if (x) { ... }` blocks on the code-less lines 384-417 (the branch survives to jump2 and vanishes, but the block
+   boundary splits local-alloc: 26-105), sp reassigned from pkt (cse no-op, 4), 216 field orders of tags 0/1/3 with
+   the asm (min 7); tools/permuter.py 15 min on the asm form (75174 candidates, 7 stays); decomp-permuter 15 min on
+   the asm form (rescored 14 and 18 lines against its base's 7).
    A real copy into a pseudo that outlives the block (`dspa = (OSPRITE_VU1A *)sp`, cse makes dspa canonical) is
    hoisted by sched1 and gets its own register (+1 insn, 33). No flag explains it (-fno-schedule-insns 116,
    -fno-schedule-insns2 47, -fno-gcse 49, -fno-regmove / -fno-rerun-cse-after-loop 4). Also neutral: all 432 field

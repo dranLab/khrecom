@@ -91,11 +91,11 @@ static inline void _setOne(FVECTOR& v) {
 
 }
 
-static inline FLOAT _sqrtf(FLOAT x) {
-    FLOAT ret;
-    asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));
-    return ret;
-}
+
+
+
+
+
 void SubVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void Normalize(FVECTOR& v0, const FVECTOR& v1);
 void MulMatrix(FMATRIX& m0, const FMATRIX& m1, const FMATRIX& m2);

@@ -10,11 +10,11 @@
 #include "System/Graphic/HermitePath.h"
 #include "include_asm.h"
 
-static inline FLOAT _fabs(FLOAT inValue) {
-    FLOAT ret;
-    asm volatile("abs.s %0, %1" : "=f"(ret) : "f"(inValue));
-    return ret;
-}
+
+
+
+
+
 
 
 
@@ -615,7 +615,7 @@ FLOAT CPathVector::getPathStepToRoll(FLOAT fStep) {
         if (idx[2] >= 0) {
             fRoll[0] = getPathRoll(idx[1]);
             fRoll[1] = getPathRoll(idx[2]);
-            if (_fabs(fRoll[0] - fRoll[1]) > 3.1415927f) {
+            if (_fabsf(fRoll[0] - fRoll[1]) > 3.1415927f) {
                 if (fRoll[1] < 0.0f) fRoll[1] += 6.2831855f;
                 else fRoll[1] -= 6.2831855f;
             }

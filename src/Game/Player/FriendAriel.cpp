@@ -25,11 +25,11 @@ inline void _emptyStringPlaceholder2() { /* MATCH: placeholder: an inline functi
 #include "Game/Movement.h"
 #include "Game/LockOnManager.h"
 
-static inline FLOAT Abs(FLOAT inVal) {
-    FLOAT ret;
-    asm volatile("abs.s %0, %1" : "=f"(ret) : "f"(inVal));
-    return ret;
-}
+#include "System/Math3D.h"
+
+
+
+
 
 namespace Friend {
 
@@ -146,7 +146,7 @@ INT CFriendAriel::exeArielAttack() {
         FVECTOR pos;
         getLockOnPos(pos);
         vel = getVel();
-        FLOAT ret = Abs(m_vAimPos.y - pos.y);
+        FLOAT ret = _fabsf(m_vAimPos.y - pos.y);
         if (ret > 0.3f) {
             if (m_vAimPos.y < pos.y) {
                 vel.y = -0.1f;

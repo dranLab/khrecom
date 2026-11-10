@@ -46,11 +46,11 @@ void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 /* CEntity::m_vStartPos (Game/Entity.h has it as raw bytes). */
 
 
-static inline FLOAT _abs(FLOAT inValue) {
-    FLOAT ret;
-    __asm__ volatile("abs.s %0, %1" : "=f"(ret) : "f"(inValue));
-    return ret;
-}
+
+
+
+
+
 
 
 namespace Summon {
@@ -415,7 +415,7 @@ void CSummonCloud::stateAction2() {
         FVECTOR pos;
         getLockOnPos(pos);
         vel = getVel();
-        if (_abs(m_vAimPos.y - pos.y) > 0.3f) {
+        if (_fabsf(m_vAimPos.y - pos.y) > 0.3f) {
             if (m_vAimPos.y < pos.y) {
                 vel.y = -0.1f;
             } else if (pos.y < m_vAimPos.y) {

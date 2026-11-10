@@ -41,10 +41,10 @@ every change that is merged without regenerating. Regenerating all four takes ab
 
 ## Where things stand (2026-11-10)
 
-- **Progress (`tools/check.sh`):** 12262 functions decompiled in 662 files, 648 files complete; libraries 954 of 985
+- **Progress (`tools/check.sh`):** 12265 functions decompiled in 662 files, 650 files complete; libraries 954 of 985
   in 153 files, 147 complete. (Its totals count hand-written library units as done.)
-- **Game:** 10 functions still `INCLUDE_ASM` in 8 units, all parked (C draft under `#if 0` with a note): Camp 2,
-  Map 2, DispList, shape, Math3D, and the blocked WorldEnv, Rcf, RcfCD. 1 unit takes a data section from assembly
+- **Game:** 7 functions still `INCLUDE_ASM` in 6 units, all parked (C draft under `#if 0` with a note): Camp 2,
+  DispList, shape, and the blocked WorldEnv, Rcf, RcfCD. 1 unit takes a data section from assembly
   (sddrv_ee's `.bss`, blocked: see docs/asm-leftovers.md).
 - **Libraries:** 5 parked (memcpy, memset, memmove, graphdev sceGsSetDefDispEnv, kprintf2 _sceSnprintf), 0 not
   attempted, 26 hand-written (stay assembly), no unit with data from assembly; details in `docs/sdk-leftovers.md`.
@@ -52,6 +52,16 @@ every change that is merged without regenerating. Regenerating all four takes ab
   duplicate classes, 659 mechanism sites (0 untagged); classes complete 1177, superset 17 (IVECTOR/FVECTOR/FMATRIX's
   ref conversion operators read as extra methods: a partials.py limit), partial 1, gated 3, missing 6.
   `tools/partials.py --queue` has the ready items (the R1/R2 gate items there stay, see "Queue state").
+- **2026-11-10 (evening): pool run (3 workers, 7 parked units + 2 cleanups).** Matched: Game/Map init (82 -> 0: the
+  original's line markers and block tree, the ref's xmin..zmax initialised, user decision) and disp (709 -> 0: laid
+  out on lines 1250-1585 with the ref's variables, the bounding-box kick as an inline, a CMapGrid& reference), CSky
+  ctor/main without mechanisms; System/Math3D InvMatrix (90 -> 0: `INT n = 4` as every loop bound, user decision).
+  Map and Math3D are complete. Unchanged, notes corrected: Camp 27/23, DispList _drawOT 59 (loop.c and global-alloc,
+  two independent causes), shape pppVu1ShapeDraw 4 (a write to sp's register cannot be the cause), graphdev
+  sceGsSetDefDispEnv 21 (a pre-reload dependence), memcpy 11 / memset 12 / memmove 31 (cse and reload never turn a
+  cheap CONST_INT into a copy). Cleanups: Game/CardKind.h (static cardDataTbl + CARD inlines, 23 table copies gone,
+  user request) and System/Math3D.h (_sqrtf/_fabsf, 38 copies gone); partials.py skips a header's static const
+  initializer in the string check. Every remaining item has had a worker this run.
 - **2026-11-10 (afternoon): Coord.h unification, 4 cleanup steps, all merged (user decision: full, step by step).**
   System/Coord.h now holds the original's Coord.h on its lines: FVECTOR/IVECTOR/FMATRIX, F_UL/G_*, FVECTOR2, CCoord,
   CCoords, the ref's sceVu0 declarations and conversion operators, the free matrix inlines 340-643 and every member
@@ -60,8 +70,7 @@ every change that is merged without regenerating. Regenerating all four takes ab
   314 -> 26, vu0.h 125 -> 6 (the rest: parked drafts, sites kept with a note, 1019-1020 left as is by the user).
   PARTIAL 160 -> 158, mechanisms 661 -> 659 (VECTOR_H_SET_CALL gone). No function matches; parked drafts unchanged
   (Camp 27/23, Math3D 90, DispList 59, Map 82/709; WorldEnv still matches with the original namespace name). Details:
-  the four "Done (cleanup/coord-unify-...)" entries. Next cleanup candidates: Math3D.h's `_sqrtf` (6+ local copies),
-  PackMan.h's free inlines 117-128; the parked drafts could now use the new inlines.
+  the four "Done (cleanup/coord-unify-...)" entries. Next cleanup candidates: PackMan.h's free inlines 117-128; the parked drafts could now use the new inlines.
 - **2026-11-10: pool run (3 workers, 6 units) + one coordinator match.** Matched: HumanBoss setupAct (a function-scope
   `FLOAT none = -1` the ref lacks, accepted by the user after a no-behaviour-change proof: same image, single
   assignment, -1.0f -> SHORT exact; memory humanboss-unit-lessons), Model CBBox::makePkt (no padding: the original's
@@ -474,6 +483,9 @@ header split the original didn't have, or make a class a template to hide its st
 | a sceVu0 address kept in a saved register, the original recomputes it | pass `.m`/`.v`, not the conversion operator: coord-free-inlines-map |
 | a statement's instructions carry the line marker of a later line | a multi-line statement gets the line it ends on: coord-free-inlines-map |
 | chained-assignment stores in reverse order (w first) | `x = y = z = w = f` (FVECTOR::setAll): coord-free-inlines-map |
+| nested constant-bound loops: ours strength-reduces `i++`, the original copies the inner start (`i = t3`) | the bound as a local `INT n = 4` in every loop (ask the user): loop-bound-variable-pre |
+| `mflo v1; move s6,v1` (or its reverse) around a division/inline result | mention the variable before that cse block: an initialiser on the ref's local (ask the user): early-mention-cse-canonical |
+| a far-off draft (hundreds of lines) | lay it out on the original's line markers with `#line`, then rebuild blocks from the ref's locals: map-unit-lessons |
 | an inline's parameter setup on another line than its body | the setup carries the inline's first (declarator) line; .mdebug shows pointer parameters, not references: coord-free-inlines-map |
 | an asm temporary in a callee-saved register the original keeps from entry | an input operand the asm overwrites (live from entry, one use): coord-free-inlines-map |
 | struct argument built from four `lhu` + dsll/or | `_NORMA_PIECES` in `System/Graphic/2d/2DCard.h` |
@@ -583,6 +595,21 @@ Keep output small: one function's assembly at a time; `funcdiff` without `--full
   Movement ctor, MSVideo _setXYZ, Anim _exeRootMove); 1124 = effect.h's getCoords PARTIAL; 160 = getTransRef
   overload constness unknown; 1019-1020 (Model link/setLocal: a CCoord member the ref lacks; left as is, user decision 2026-11-10).
   Guesses: init(FLOAT inW = 1.0f), the _FVECTOR overloads' parameter types, unary minus as -1.0f * *this.
+- **Done (cleanup/math3d-h, merged 2026-11-10):** System/Math3D.h on the original's lines: CFrustum (isInit 59),
+  `_sqrtf` (125-129) and `_fabsf` (133-137), asm volatile with `ret` (names ours, parameter `inValue` from the .mdebug).
+  38 local copies in 37 units replaced (22 units now include Math3D.h, strings unchanged); builtin fabsf calls the
+  original attributes to 137 (JiminyMemo, MapEnemy, LockOnManager, Movement Approach, CollAttack: its three reorg
+  barrier asms gone) use the inline. Math3D.h marker differences 102 -> 1 (CollUtilO distanceLineO keeps an
+  early-clobber copy with a note). Left: CollDisp's local _sqrtf (its sqrt.s is CollDisp.cpp:352, not the header);
+  CollDisp, DispList, Gprim still declare `namespace Math3D` locally (strings not checked).
+- **Done (cleanup/cardkind-h, merged 2026-11-10, user request):** Game/CardKind.h on the original's lines: the
+  `static const CARD_DATA cardDataTbl[224]` (gcc emits it, with its strings at the end of .rodata, only in units that
+  reference it: the image's 23 copies) and CARD::init(USHORT inKind, BYTE inNumber = 0xFF) at 553-558 (default a
+  guess; BYTE from andi 0xff), getTexNo 561, getTexPos 564. 23 local table copies and the card helpers (_setCard*,
+  _makeCardNK, VSME setCard, JiminyMemo getCardData) in 22 units replaced; CardKind.h marker differences 80 -> 1 (Camp
+  setMapCardWin, parked: it keeps _setCardNK). partials.py now skips a header's static const initializer in the
+  string check. Open (user question, not asked yet): CARD_KIND/CARD_CATEGORY0/1 probably sat in the original's
+  CardKind.h below 534; ours in Game/CardKindEnum.h (PARTIAL), the ref puts CARD_KIND in BattleEnemy.h.
 - **Done (cleanup/coord-unify-vu0, merged 2026-11-10, step 4):** the original's System/Graphic/VuCode/vu0.h (no ref
   file: inlines only, names ours) with its inlines on lines 15-820, included by Coord.h after the classes and the
   sceVu0 block (so ModelMan's FVECTOR::set calls stay out of line: VECTOR_H_SET_CALL gone). FMATRIX::init at 910 calls
@@ -590,8 +617,8 @@ Keep output small: one function's assembly at a time; `funcdiff` without `--full
   replaced. Differing vu0.h markers 125 -> 6 (Map init/disp, Math3D InvMatrix parked; EffectMan _updateCoord 535 code
   equal; Model checkBBox kept with a note; resultCheckBBox(CCoord&) 94 = branching asm kept in C), Coord.h 50 -> 26
   (build/vu/clfw.py --file vu0.h). Kept in asm with MATCH: the mfc1 of ScaleVector/ScaleVectorXYZ (Sony's libvu0
-  form), vu0LengthSq's mtc1 (no GPR -> FPR move in C). Next: Math3D.h's _sqrtf (Math3D.h:129, local copies in 6+
-  units); PackMan.h's free inlines 117-128.
+  form), vu0LengthSq's mtc1 (no GPR -> FPR move in C). Next: PackMan.h's free inlines 117-128 (Math3D.h's
+  _sqrtf/_fabsf: done, cleanup/math3d-h).
 - **Done (cleanup/vector-types, merged 2026-11-07; superseded 2026-11-10, now in Coord.h):** F_UL, G_XY, G_XYZ, G_RGBA, G_UV,
   G_ST at the end of System/Vector.h and the C++ QWdata after khtypes.h's u_int128 (the original's .mdebug type order,
   against the ref's placement; user decision). The former `D2MAN_H_PATH`/`RSRCDATA_H_FULL` entry is settled (checked 2026-11-07): RSRCDATA_H_FULL was dropped

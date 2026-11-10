@@ -41,7 +41,12 @@ int *__errno(void)
    cse_set_around_loop's copy into the REG_LOOP_TEST_P register (cse.c ~8350, inserted after the entry test's set),
    which needs an in-loop source costlier than a pseudo. Also tried: do {} while (0) barriers, explicit/shared/scoped
    temps, index and pointer-increment forms, an index loop, alias-set changes (strict aliasing is off), 10 compilers x
-   30 flags for the copy: no gain */
+   30 flags for the copy: no gain. 2026-11-10 (unchanged, 11/31): every pass that can turn a constant into a register
+   copy refuses a cheap CONST_INT (cse_insn and cse_set_around_loop by cost, reload_cse_simplify_set/_operands by
+   rtx_cost <= reg), and our cse2 sees the entry test's -1 and the hoisted -1 in one extended block: the copy needs
+   other RTL, not another order; early mentions (len/dst assigned after the declarations, aligned_dst/src
+   initialised), 10 byte-loop forms (!= 0, > 0, for, index, --len >= 0, if/do, end pointer, != -1), size_t/long len,
+   -Os/-O1/-O3/-mips3/-mgp32/-mlong32: no gain */
 #if 0
 void *memcpy(void *dst0, const void *src0, size_t len0)
 {
@@ -147,7 +152,12 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/nodebug/__errno", memmove);
    (no gain). 2026-11-09 (unchanged, 12): newlib's d = c & 0xff with buffer = d; buffer = (buffer << 8) | d (gives
    the original's or operand order), the newlib i < LBLOCKSIZE loop, d as int/unsigned/long, a separate pcpyh output
    variable (16 variants: 12-18); empty asm clobbers of $2/$3 at each point (14 variants: 12-18, 9 only with one
-   inside the quadword loop, which moves the globals: an invented mechanism, not kept) */
+   inside the quadword loop, which moves the globals: an invented mechanism, not kept). 2026-11-10 (unchanged, 12):
+   different-mode copies (int/unsigned/short/char d, (long)d with (unsigned long)d, (long)(int)d, buffer from c and
+   from (unsigned char)c), d initialised at its declaration (newlib's unsigned int d = c & 0xff: 14, the andi moves to
+   the entry block), buffer <<= 8; buffer |= d (19), a one-pass for loop (23), 18 flag sets: cse/combine fold every
+   extension of the andi result into one register. The original's block uses neither v0 nor a0-a3 (local-alloc's
+   first choices), as if its pseudos were global or v0 live across the block */
 #if 0
 void *memset(void *m, int c, size_t n)
 {

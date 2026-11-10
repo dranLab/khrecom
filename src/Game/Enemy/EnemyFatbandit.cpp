@@ -23,11 +23,11 @@ extern "C" float atan2f(float y, float x);
 
 extern CEntity* g_pPlayer; /* a CPlayer (Game/Player/Player.h) */
 
-static inline FLOAT _sqrtf(FLOAT x) {
-    FLOAT ret;
-    asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));
-    return ret;
-}
+#include "System/Math3D.h"
+
+
+
+
 
 namespace Fatbandit {
 static CHAR* IdlingMotion = "e010_001";

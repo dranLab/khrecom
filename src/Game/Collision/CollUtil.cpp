@@ -37,11 +37,11 @@ void OuterProduct(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void DivVector(FVECTOR& v0, const FVECTOR& v1, FLOAT q);
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 FLOAT InnerProduct4(const FVECTOR& v0, const FVECTOR& v1);
-static inline FLOAT _sqrtf(FLOAT x) {
-    FLOAT ret;
-    asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));
-    return ret;
-}
+#include "System/Math3D.h"
+
+
+
+
 static inline FLOAT _distance(FVECTOR& v, const FVECTOR& p0, const FVECTOR& p1) {
     SubVector(v, p0, p1);
     return _sqrtf(InnerProduct(v));
@@ -1002,20 +1002,20 @@ INT CCollUtil::detectPLine() {
     } while (0);
     return TRUE;
 }
-/* MATCH: distanceLine's square roots never share the input register (early-clobber output) */
-static inline FLOAT _sqrtfE(FLOAT x) {
-    FLOAT ret;
-    asm volatile("sqrt.s %0, %1" : "=&f"(ret) : "f"(x));
-    return ret;
-}
+
+
+
+
+
+
 
 static inline FLOAT _distanceE(FVECTOR& v, const FVECTOR& p0, const FVECTOR& p1) {
     SubVector(v, p0, p1);
-    return _sqrtfE(InnerProduct(v));
+    return _sqrtf(InnerProduct(v));
 }
 
 static inline INT _normalizeQ(FVECTOR& v) {
-    FLOAT l = _sqrtfE(InnerProduct(v));
+    FLOAT l = _sqrtf(InnerProduct(v));
     DivVector(v, v, l);
     return l != 0.0f;
 }
@@ -1069,7 +1069,7 @@ INT CCollUtil::distanceLine(FVECTOR* pP0, FVECTOR* pP1) {
     AddVector(s1, m_vCk0, vec0);
     f0 = _distanceE(qs, s1, s0);
     if (m_RadiusL < f0) break;
-    m = _sqrtfE(m_Radius2 - f0 * f0);
+    m = _sqrtf(m_Radius2 - f0 * f0);
     SubVector(pq, s1, s0);
     OuterProduct(qs, v0, pq);
     if (_normalizeQ(qs) && 1e-05f <= f0) {
@@ -1077,14 +1077,14 @@ INT CCollUtil::distanceLine(FVECTOR* pP0, FVECTOR* pP1) {
         ScaleVector(qs, qs, m);
         Normalize(su, v0);
         if (0.0f < InnerProduct(su, m_vCkVec)) ScaleVector(su, su, -1.0f);
-        f1 = _sqrtfE(v00);
+        f1 = _sqrtf(v00);
         l2 = m_CkVecl2;
         if (1e-05f <= v01 || v01 < -1e-05f) {
             f1 = f1 * l2 / v01;
             g = f1 * f1;
             g -= 1.0f;
             if (1e-05f <= g || g < -1e-05f) {
-                ScaleVector(su, su, m / _sqrtfE(g));
+                ScaleVector(su, su, m / _sqrtf(g));
             } else {
                 su._q = 0;
             }
@@ -1094,7 +1094,7 @@ INT CCollUtil::distanceLine(FVECTOR* pP0, FVECTOR* pP1) {
     } else {
         Normalize(v, v0);
         if (0.0f < InnerProduct(v, m_vCkVec)) ScaleVector(v, v, -1.0f);
-        f1 = _sqrtfE(v00);
+        f1 = _sqrtf(v00);
         l2 = m_CkVecl2;
         if (1e-05f <= v01 || v01 < -1e-05f) {
             f1 = f1 * l2 / v01;

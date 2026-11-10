@@ -10,11 +10,11 @@
 
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 
-static inline FLOAT _sqrtf(FLOAT x) {
-    FLOAT ret;
-    asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));
-    return ret;
-}
+#include "System/Math3D.h"
+
+
+
+
 
 static inline void _scaleAdd(FVECTOR& v, const FVECTOR& d, FLOAT t, const FVECTOR& o) {
     ScaleVector(v, d, t);
@@ -281,7 +281,7 @@ INT CCollUtil::_detectSphereSphere(CSphereCollision& sphereColl0, CSphereCollisi
     }
     return 0;
 }
-/* MATCH: distanceLineO's square roots never share the input register (early-clobber output) */
+/* MATCH: Math3D.h:129's inline with an early-clobber output (the header's _sqrtf changes distanceLineO's registers) */
 static inline FLOAT _sqrtfE(FLOAT x) {
     FLOAT ret;
     asm volatile("sqrt.s %0, %1" : "=&f"(ret) : "f"(x));

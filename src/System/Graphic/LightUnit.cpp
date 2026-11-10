@@ -17,9 +17,9 @@ void AbsVector(FVECTOR& v0, const FVECTOR& v1);
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 void spinMatrixX(FMATRIX& m0, const FMATRIX& m1, INT deg);
 void spinMatrixY(FMATRIX& m0, const FMATRIX& m1, INT deg);
-namespace Math3D {
-FLOAT GetDistance2OfLimitedLineAndPoint(const FVECTOR& inP1, const FVECTOR& inP2, const FVECTOR& inP);
-}
+#include "System/Math3D.h"
+
+
 
 /* The map viewer of the debug DLL (task 0x31): not in the main program, the original calls address 0 */
 class CMapViewer {
@@ -338,11 +338,11 @@ static FLOAT getLightVolume(FLOAT& dv, const FVECTOR& ctr, POINTLIGHT* l) {
     return pow * (1.0f - (dv - start) / (end - start));
 }
 
-static inline FLOAT ABS(FLOAT f) {
-    FLOAT ret;
-    __asm__ volatile("abs.s %0, %1" : "=f"(ret) : "f"(f));
-    return ret;
-}
+
+
+
+
+
 
 static FLOAT getLightVolume(const FVECTOR& c1, const FVECTOR& c2, POINTLIGHT* l) {
     FVECTOR d;
@@ -350,7 +350,7 @@ static FLOAT getLightVolume(const FVECTOR& c1, const FVECTOR& c2, POINTLIGHT* l)
     FVECTOR d2;
     d1.x = c1.x - l->pos.x;
     d2.x = c2.x - l->pos.x;
-    d.x = (ABS(d1.x) > ABS(d2.x)) ? ABS(d2.x) : ABS(d1.x);
+    d.x = (_fabsf(d1.x) > _fabsf(d2.x)) ? _fabsf(d2.x) : _fabsf(d1.x);
     if (d.x > l->end) {
         if (d1.x * d2.x >= 0.0f) {
             return 0.0f;
@@ -358,7 +358,7 @@ static FLOAT getLightVolume(const FVECTOR& c1, const FVECTOR& c2, POINTLIGHT* l)
     }
     d1.z = c1.z - l->pos.z;
     d2.z = c2.z - l->pos.z;
-    d.z = (ABS(d1.z) > ABS(d2.z)) ? ABS(d2.z) : ABS(d1.z);
+    d.z = (_fabsf(d1.z) > _fabsf(d2.z)) ? _fabsf(d2.z) : _fabsf(d1.z);
     if (d.z > l->end) {
         if (d1.z * d2.z >= 0.0f) {
             return 0.0f;
@@ -366,7 +366,7 @@ static FLOAT getLightVolume(const FVECTOR& c1, const FVECTOR& c2, POINTLIGHT* l)
     }
     d1.y = c1.y - l->pos.y;
     d2.y = c2.y - l->pos.y;
-    d.y = (ABS(d1.y) > ABS(d2.y)) ? ABS(d2.y) : ABS(d1.y);
+    d.y = (_fabsf(d1.y) > _fabsf(d2.y)) ? _fabsf(d2.y) : _fabsf(d1.y);
     if (d.y > l->end) {
         if (d1.y * d2.y >= 0.0f) {
             return 0.0f;

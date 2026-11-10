@@ -99,7 +99,7 @@ static inline UINT _upKind(INT inType0, INT inType1) {
 void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void Normalize(FVECTOR& outV, const FVECTOR& inV);
 extern "C" float atan2f(float y, float x);
-namespace Math3D { FLOAT VectorLength(const FVECTOR& inVector); }
+#include "System/Math3D.h"
 namespace MG_SKILL {
 HANDLE createMGSkill(INT inType, INT inLevel);
 BOOL isMGSkillAlive();
@@ -148,12 +148,12 @@ static inline FLOAT _limitPI(FLOAT r) {
     else if (r > 3.1415927f) r -= 6.2831855f;
     return r;
 }
-/* sqrt.s (Math3D.h) */
-static inline FLOAT _sqrtf(FLOAT x) {
-    FLOAT ret;
-    asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));
-    return ret;
-}
+
+
+
+
+
+
 
 
 CPlayerSora::CPlayerSora(CTask* inParent) : CPlayer(inParent, PLM::g_uiPlayerID, 0) {
@@ -4092,12 +4092,12 @@ void CPlayerSora::exeFriend() {
     }
 }
 
-/* abs.s of the original (Math3D.h) */
-static inline FLOAT _abs(FLOAT inValue) {
-    FLOAT ret;
-    __asm__ volatile("abs.s %0, %1" : "=f"(ret) : "f"(inValue));
-    return ret;
-}
+
+
+
+
+
+
 
 void CPlayerSora::watchTarget(INT inMode) {
     CEntity* pTarget;
@@ -4144,7 +4144,7 @@ void CPlayerSora::watchTarget(INT inMode) {
     SubVectorXYZ(vec, vec, m_vCenterPos);
     Normalize(vec, vec);
     tmp_dir = atan2f(vec.x, vec.z);
-    fTurn = RAD2DEG(_abs(_limitPI2(tmp_dir - getDir())));
+    fTurn = RAD2DEG(_fabsf(_limitPI2(tmp_dir - getDir())));
     m_fDir = Movement::Homing(getDir(), tmp_dir, 0.15f, m_fFrameRate);
     vec.set(0.0f, m_fDir, 0.0f);
     m_pMove->setRot(vec);
@@ -4152,7 +4152,7 @@ void CPlayerSora::watchTarget(INT inMode) {
     case 2: {
         FLOAT x = CPadHandler::getAnalogLX() * (1.0f / 4096.0f);
         FLOAT y = CPadHandler::getAnalogLY() * (1.0f / 4096.0f);
-        if (_abs(x) > 0.25f) {
+        if (_fabsf(x) > 0.25f) {
             setAnim(0x2B, -1, 0);
         } else {
             setAnim(0x2A, -1, 0);
@@ -4200,7 +4200,7 @@ void CPlayerSora::setAttack_inFriend(INT inID, INT inStock, HANDLE inTarget) {
         distY = m_vMarkPos.y - m_vCenterPos.y;
         distY -= 1.0f;
         calcDistance(*pTarget);
-        dir = _abs(calcDirection(*pTarget) - getDir());
+        dir = _fabsf(calcDirection(*pTarget) - getDir());
         m_hMark = m_hTarget;
         setPlayerFlag(0x100000, 0);
     } else {
@@ -4681,7 +4681,7 @@ void CPlayerSora::exeGlide() {
     if (m_pMove->getCollisionFlag() & 0xA) {
         FVECTOR vNormal = m_pMove->getWallNormal();
         m_fWallDir = _limitPI2(atan2f(vNormal.x, vNormal.z));
-        if (_abs(_limitPI2(m_fWallDir - m_fDir)) > 1.5707964f) {
+        if (_fabsf(_limitPI2(m_fWallDir - m_fDir)) > 1.5707964f) {
             initFall();
             return;
         }

@@ -37,11 +37,11 @@ namespace PL {
 extern BULLET_EFFECT_INFO g_EffTbl_Skill[67][4]; /* Game/Player/PlayerAttack.h */
 }
 
-static inline FLOAT _abs(FLOAT inValue) {
-    FLOAT ret;
-    __asm__ volatile("abs.s %0, %1" : "=f"(ret) : "f"(inValue));
-    return ret;
-}
+#include "System/Math3D.h"
+
+
+
+
 
 static inline FLOAT _limitPI(FLOAT r) {
     if (r < -3.1415927f) r += 6.2831855f;
@@ -154,14 +154,14 @@ void CSummonMushu::stateAction1() {
     FVECTOR rot = getRot();
     FLOAT x = getAnalogLX(0) * (1.0f / 4096.0f);
     FLOAT y = -(getAnalogLY(0) * (1.0f / 4096.0f));
-    if (_abs(x) > 0.25f) {
+    if (_fabsf(x) > 0.25f) {
         rot.y = _limitPI(rot.y - x * 3.0f * getFrameRateF() * 0.017453292f);
     }
-    if (_abs(y) > 0.25f) {
+    if (_fabsf(y) > 0.25f) {
         y = y * 1.5f * getFrameRateF() * 0.017453292f;
         rot.x = _limitPI(rot.x - y);
         FLOAT limit = 0.7853982f;
-        y = _abs(rot.x);
+        y = _fabsf(rot.x);
         if (y > limit) {
             if (rot.x < 0.0f) limit = -limit;
             rot.x = limit;

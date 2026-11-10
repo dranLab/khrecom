@@ -52,11 +52,11 @@ extern "C" float cosf(float x);
 
 
 
-static inline FLOAT _fabsf(FLOAT x) {
-    FLOAT ret;
-    asm volatile("abs.s %0, %1" : "=f"(ret) : "f"(x));
-    return ret;
-}
+#include "System/Math3D.h"
+
+
+
+
 
 static inline FLOAT _limitPI(FLOAT inValue) {
     FLOAT ret;
@@ -69,11 +69,11 @@ static inline FLOAT _limitPI(FLOAT inValue) {
 }
 
 
-static inline FLOAT _sqrtf(FLOAT x) {
-    FLOAT ret;
-    asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));
-    return ret;
-}
+
+
+
+
+
 
 
 

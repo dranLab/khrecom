@@ -72,16 +72,16 @@ void MulVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 extern "C" float atan2f(float, float);
 
 
-static inline FLOAT _sqrtf(FLOAT x) {
-    FLOAT ret;
-    asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));
-    return ret;
-}
-static inline FLOAT _fabsf(FLOAT x) {
-    FLOAT ret;
-    asm volatile("abs.s %0, %1" : "=f"(ret) : "f"(x));
-    return ret;
-}
+
+
+
+
+
+
+
+
+
+
 
 CEntity::CEntity(CTask* inParent, ObjType::eObjType inType) : CTask(inParent, 0x4000) {
     m_pModels = NULL;
