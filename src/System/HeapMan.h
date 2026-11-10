@@ -12,10 +12,10 @@ void* com_memalign(size_t alignment, size_t bytes);
 void com_free(void* mem);
 void* libc_malloc(size_t size);
 void libc_free(void* buffer);
-void* com_malloc_d(size_t bytes, char* msg, unsigned int ra);
-void* com_realloc_d(void* mem, size_t newsize, char* msg, unsigned int ra);
-void* com_calloc_d(size_t n_elements, size_t elem_size, char* msg, unsigned int ra);
-void* com_memalign_d(size_t alignment, size_t bytes, char* msg, unsigned int ra);
+void* (com_malloc_d)(size_t bytes, char* msg, unsigned int ra);
+void* (com_realloc_d)(void* mem, size_t newsize, char* msg, unsigned int ra);
+void* (com_calloc_d)(size_t n_elements, size_t elem_size, char* msg, unsigned int ra);
+void* (com_memalign_d)(size_t alignment, size_t bytes, char* msg, unsigned int ra);
 void _heap_dump(char* pszFileName, bool bCreate);
 void dump_heap(char* pszFileName, bool bCreate);
 }
@@ -47,13 +47,13 @@ inline void operator delete(void* mem) { com_free(mem); }
 inline void operator delete[](void* mem) { com_free(mem); }
 inline void* operator new(size_t size, char* msg) throw() {
     UINT nRA;
-    __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA));
+    KH_DEBUG(__asm__ volatile("daddu %0, $31, $0" : "=r"(nRA));)
     return com_malloc_d(size, msg, nRA);
 }
 
 inline void* operator new[](size_t size, char* msg) throw() {
     UINT nRA;
-    __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA));
+    KH_DEBUG(__asm__ volatile("daddu %0, $31, $0" : "=r"(nRA));)
     return com_malloc_d(size, msg, nRA);
 }
 inline void* operator new(size_t, void* p) throw() { return p; }

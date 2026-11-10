@@ -132,7 +132,7 @@ void libc_free(void* buffer) {
     free(buffer);
 }
 
-void* com_malloc_d(size_t bytes, char* msg, unsigned int ra) {
+void* (com_malloc_d)(size_t bytes, char* msg, unsigned int ra) {
     void* p;
 
     WaitSema(s_nSemaID);
@@ -147,7 +147,7 @@ void* com_malloc_d(size_t bytes, char* msg, unsigned int ra) {
     return p;
 }
 
-void* com_realloc_d(void* mem, size_t newsize, char* msg, unsigned int ra) {
+void* (com_realloc_d)(void* mem, size_t newsize, char* msg, unsigned int ra) {
     void* p;
     size_t oldsize;
 
@@ -164,7 +164,7 @@ void* com_realloc_d(void* mem, size_t newsize, char* msg, unsigned int ra) {
     return p;
 }
 
-void* com_calloc_d(size_t n_elements, size_t elem_size, char* msg, unsigned int ra) {
+void* (com_calloc_d)(size_t n_elements, size_t elem_size, char* msg, unsigned int ra) {
     void* p;
 
     WaitSema(s_nSemaID);
@@ -179,7 +179,7 @@ void* com_calloc_d(size_t n_elements, size_t elem_size, char* msg, unsigned int 
     return p;
 }
 
-void* com_memalign_d(size_t alignment, size_t bytes, char* msg, unsigned int ra) {
+void* (com_memalign_d)(size_t alignment, size_t bytes, char* msg, unsigned int ra) {
     void* p;
 
     WaitSema(s_nSemaID);

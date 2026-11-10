@@ -9,9 +9,9 @@
 // PARTIAL: added for System/MainTaskFactory. Only __alloc/__getSize are known (out-of-class template members,
 // instantiated wherever an inline function uses push_back); the other members are guesses.
 #include <string.h>
-extern "C" void* com_malloc_d(size_t bytes, char* msg, unsigned int ra);
+extern "C" void* (com_malloc_d)(size_t bytes, char* msg, unsigned int ra);
 extern "C" void com_free(void* mem);
-extern "C" void AssertApp(char* pszFile, int nLine, char* pszMsg, char* pszExp);
+extern "C" void (AssertApp)(char* pszFile, int nLine, char* pszMsg, char* pszExp);
 
 /* __FILE__ as in the original (the header is found through "-I src" here). Line numbers are not known. */
 /* MATCH: path override for System/TaskMan ("c:/KHCOM/MainApp/System/Vector.h") */

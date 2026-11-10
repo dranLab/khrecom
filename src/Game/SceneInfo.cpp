@@ -112,7 +112,7 @@ NormaDataHeader* _linkNormaData(const CHAR* pszFile);
 USHORT _getGoalRoomScene(WORLD_ID w);
 void _clearMapRsrcCache();
 FloorLayoutDataHeader* _isValidFloorIdx(USHORT nIdx, BOOL bSora);
-extern "C" void AssertApp(char* pszFile, int nLine, char* pszMsg, char* pszExp);
+extern "C" void (AssertApp)(char* pszFile, int nLine, char* pszMsg, char* pszExp);
 extern "C" int rand();
 
 /* The file's statics, in the original order */

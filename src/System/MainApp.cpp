@@ -1217,7 +1217,7 @@ void CMainApp::resetProcCountMax() {
     _nProcCountMax = 0;
 }
 
-void AssertApp(char* pszFile, int nLine, char* pszMsg, char* pszExp) {
+void (AssertApp)(char* pszFile, int nLine, char* pszMsg, char* pszExp) {
     CHeapMan::reportMemory();
     CMainApp::halt(pszFile, nLine, pszMsg, pszExp);
 }

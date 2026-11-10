@@ -24,10 +24,10 @@ CTask::CTask(CTask* pParent, INT nProcPrio)
         pParent->addChild(*this);
     }
     CMainApp::incObjCount();
-    m_pszDebugInfo = CHeapMan::getDebugComment(this);
-    if (!m_pszDebugInfo) {
-        m_pszDebugInfo = "";
-    }
+    KH_DEBUG(m_pszDebugInfo = CHeapMan::getDebugComment(this);)
+    KH_DEBUG(if (!m_pszDebugInfo) {)
+    KH_DEBUG(    m_pszDebugInfo = "";)
+    KH_DEBUG(})
 }
 
 CTask::~CTask() {

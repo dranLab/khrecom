@@ -7,7 +7,7 @@
 typedef u_long128 u_qword;
 extern u_long128 ot1_mpg_table[];
 
-void AssertApp(char *file, int line, char *exp, int arg);
+void (AssertApp)(char *file, int line, char *exp, int arg);
 void pppSendVu1Prog(int vu1prog);
 void pppSendTagVif1Packet(sceDmaTag *pkt);
 extern u_char ppvVu1SprDbId;

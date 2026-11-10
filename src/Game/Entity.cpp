@@ -116,8 +116,8 @@ CEntity::CEntity(CTask* inParent, ObjType::eObjType inType) : CTask(inParent, 0x
     m_vRootMoveScale.set(1.0f, 1.0f, 1.0f);
     SE_MANAGED_DATA* data = m_SeManagedData;
     for (INT i = 0; i < 4; i++, data++) data->hHandle = 0;
-    m_tqDamageDispTimer = 0;
-    m_pDamageString = NULL;
+    KH_DEBUG(m_tqDamageDispTimer = 0;)
+    KH_DEBUG(m_pDamageString = NULL;)
 }
 CEntity::~CEntity() {
     delete m_pMove;
@@ -148,8 +148,8 @@ CEntity::~CEntity() {
     m_pTexAnm = NULL;
     delete m_pRideModel;
     m_pRideModel = NULL;
-    delete m_pDamageString;
-    m_pDamageString = NULL;
+    KH_DEBUG(delete m_pDamageString;)
+    KH_DEBUG(m_pDamageString = NULL;)
     TRACE("Delete entity ... ID = 0x%08x\n", getID());
 }
 INT CEntity::getTypeID() const { return 0x1000; }
@@ -167,15 +167,15 @@ BOOL CEntity::initalize(INT inGroupID, INT inRsrcID, UINT iFlag) {
     if (!m_pEffectEx) return FALSE;
     m_pSEEx = new (__FILE__ "(174)") CSEMotion(this);
     if (!m_pSEEx) return FALSE;
-    if (DebugWork::g_dw.sys.m_iDagameNumber) {
-        m_pDamageString = new (__FILE__ "(181)") CFnt;
-        if (m_pDamageString) {
-            m_pDamageString->CFntM2::setStyle(0x8002);
-            m_pDamageString->setSize(24);
-            m_pDamageString->setLayerFG(1);
-            m_pDamageString->setColor(255, 255, 255);
-        }
-    }
+    KH_DEBUG(if (DebugWork::g_dw.sys.m_iDagameNumber) {)
+        KH_DEBUG(m_pDamageString = new (__FILE__ "(181)") CFnt;)
+        KH_DEBUG(if (m_pDamageString) {)
+            KH_DEBUG(m_pDamageString->CFntM2::setStyle(0x8002);)
+            KH_DEBUG(m_pDamageString->setSize(24);)
+            KH_DEBUG(m_pDamageString->setLayerFG(1);)
+            KH_DEBUG(m_pDamageString->setColor(255, 255, 255);)
+        KH_DEBUG(})
+    KH_DEBUG(})
     return TRUE;
 }
 void CEntity::main() {
@@ -217,7 +217,7 @@ void CEntity::main() {
         lastUpdate();
     }
     loadModelColor_();
-    if (m_tqDamageDispTimer > 0) m_tqDamageDispTimer -= getFrameRate();
+    KH_DEBUG(if (m_tqDamageDispTimer > 0) m_tqDamageDispTimer -= getFrameRate();)
 }
 void CEntity::disp() {
     translucence_();
@@ -232,7 +232,7 @@ void CEntity::disp() {
             if (!(m_uiDispOffFlag & (1 << i))) m_pModels[i].disp();
         }
     }
-    if (DebugWork::g_dw.sys.m_iDagameNumber && m_pDamageString && m_tqDamageDispTimer > 0) m_pDamageString->disp();
+    KH_DEBUG(if (DebugWork::g_dw.sys.m_iDagameNumber && m_pDamageString && m_tqDamageDispTimer > 0) m_pDamageString->disp();)
 }
 void CEntity::setPos(const FVECTOR& inV) {
     if (!(m_pMove)) AssertApp(__FILE__, 369, "m_pMove", 0);
@@ -950,18 +950,18 @@ void CEntity::updateBadStatusEffect(HANDLE inHandle) {
     effect->Crd(0).m_Local.setTrans(pos);
     effect->Crd(0).touch();
 }
-void CEntity::setDamageNumber(const FVECTOR& inPos, INT inDamage) {
-    if (!DebugWork::g_dw.sys.m_iDagameNumber) return;
-    if (!m_pDamageString) return;
-    IVECTOR ivec;
-    SetRotTransPersMatrix(CWorldEnv::getWorldScreenMatrix());
-    RotTransPersClipW(ivec, inPos);
-    if (ivec.w) return;
-    sprintf(m_szNumberString, "%d", inDamage);
-    m_pDamageString->setPosition((ivec.x >> 4) - 0x800, (ivec.y >> 4) - 0x800, 0xFFFF28);
-    m_pDamageString->setText(m_szNumberString);
-    m_tqDamageDispTimer = 6000;
-}
+KH_DEBUG(void CEntity::setDamageNumber(const FVECTOR& inPos, INT inDamage) {)
+    KH_DEBUG(if (!DebugWork::g_dw.sys.m_iDagameNumber) return;)
+    KH_DEBUG(if (!m_pDamageString) return;)
+    KH_DEBUG(IVECTOR ivec;)
+    KH_DEBUG(SetRotTransPersMatrix(CWorldEnv::getWorldScreenMatrix());)
+    KH_DEBUG(RotTransPersClipW(ivec, inPos);)
+    KH_DEBUG(if (ivec.w) return;)
+    KH_DEBUG(sprintf(m_szNumberString, "%d", inDamage);)
+    KH_DEBUG(m_pDamageString->setPosition((ivec.x >> 4) - 0x800, (ivec.y >> 4) - 0x800, 0xFFFF28);)
+    KH_DEBUG(m_pDamageString->setText(m_szNumberString);)
+    KH_DEBUG(m_tqDamageDispTimer = 6000;)
+KH_DEBUG(})
 BOOL CEntity::startTargetChase(CEntity* inTarget, FLOAT inSpeed, FLOAT inRate) {
     if (m_uiEntityFlag & 0x78) return FALSE;
     if (!inTarget) return FALSE;

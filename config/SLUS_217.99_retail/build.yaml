@@ -4,8 +4,8 @@
 sources: []
 elf: iso/SLUS_217.99_retail     # original ELF (not committed): the US retail disc's boot ELF
 compiler: ee-gcc2.95.3-136   # SN Systems ProDG build (Windows, runs under wibo)
-cflags: -O2 -G0 -fno-exceptions -fno-rtti   # the beta's without -g (docs/retail.md): weak functions and vtables then go to
-                                            # .gnu.linkonce sections, as in the retail link
+cflags: -O2 -G0 -fno-exceptions -fno-rtti -DKH_RETAIL   # the beta's without -g (docs/retail.md): weak functions and vtables then go to
+                                            # .gnu.linkonce sections, as in the retail link; KH_RETAIL: include/khversion.h
 source_root: c:/KHCOM/MainApp/   # original path prefix of __FILE__ (src/ in this repo)
 # Per-unit toolchains (the libraries were built with other compilers than the game): the first entry whose `match`
 # (an fnmatch pattern on the unit name) matches overrides compiler / cflags / source_root. More specific first.

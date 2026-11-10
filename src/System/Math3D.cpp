@@ -20,8 +20,8 @@ void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT t);
 void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 float vu0Cosf(float x);
 float vu0Sinf(float x);
-extern "C" void TRACE(char* fmt, ...);
-extern "C" void AssertApp(char* pszFile, int nLine, char* pszMsg, char* pszExp);
+extern "C" void (TRACE)(char* fmt, ...);
+extern "C" void (AssertApp)(char* pszFile, int nLine, char* pszMsg, char* pszExp);
 
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 

@@ -119,7 +119,7 @@ INT dbgAnalogLY(USER uid, INT padId) {
     return CPadIO::getAnalogLY(padId);
 }
 
-extern "C" void TRACE(char* fmt, ...) {
+extern "C" void (TRACE)(char* fmt, ...) {
     va_list args;
 
     va_start(args, fmt);
@@ -132,7 +132,7 @@ extern "C" void TRACE(char* fmt, ...) {
     va_end(args);
 }
 
-extern "C" void TRACE_COL(TtyColor nCol, char* fmt, ...) {
+extern "C" void (TRACE_COL)(TtyColor nCol, char* fmt, ...) {
     va_list args;
 
     printf("\x1B[%dm", nCol);
@@ -147,7 +147,7 @@ extern "C" void TRACE_COL(TtyColor nCol, char* fmt, ...) {
     va_end(args);
 }
 
-extern "C" void TRACE_USER(USER uid, char* fmt, ...) {
+extern "C" void (TRACE_USER)(USER uid, char* fmt, ...) {
     va_list args;
 
     if (dbgCheckUser(uid)) {
@@ -162,7 +162,7 @@ extern "C" void TRACE_USER(USER uid, char* fmt, ...) {
     }
 }
 
-extern "C" void TRACE_USER_COL(USER uid, TtyColor nCol, char* fmt, ...) {
+extern "C" void (TRACE_USER_COL)(USER uid, TtyColor nCol, char* fmt, ...) {
     va_list args;
 
     if (dbgCheckUser(uid)) {

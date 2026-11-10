@@ -78,7 +78,7 @@ private:
     HANDLE m_hThis;
     CTask* m_pParent;
     CTaskSLCList m_listChildren;
-    CHAR* m_pszDebugInfo;
+    KH_DEBUG(CHAR* m_pszDebugInfo;) /* retail: no debug info (docs/retail.md) */
 
 public:
     CTask(CTask* pParent, INT nProcPrio);
@@ -216,7 +216,7 @@ private:
     void setInfo(SHORT nInfo) { m_nInfo = nInfo; }
 
 public:
-    CHAR* getDebugInfo() const { return m_pszDebugInfo; }
+    CHAR* getDebugInfo() const { return KH_DEBUG(m_pszDebugInfo) KH_RELEASE(""); }
 };
 typedef CTask CBfObj;
 

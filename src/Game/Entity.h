@@ -103,9 +103,9 @@ private:
     struct COLL_PARAM_HEADER* m_pCollParam; /* 0x124 */
     class CRideModel* m_pRideModel;         /* 0x128 */
     SE_MANAGED_DATA m_SeManagedData[4]; /* 0x130 */
-    TIMEQ m_tqDamageDispTimer;          /* 0x1b0 */
-    char m_szNumberString[16];          /* 0x1b4 */
-    class CFnt* m_pDamageString;        /* 0x1c4 */
+    KH_DEBUG(TIMEQ m_tqDamageDispTimer;)          /* 0x1b0 (retail: no damage display) */
+    KH_DEBUG(char m_szNumberString[16];)          /* 0x1b4 */
+    KH_DEBUG(class CFnt* m_pDamageString;)        /* 0x1c4 */
 
 public:
     CEntity(CTask* inParent);

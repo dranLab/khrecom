@@ -107,7 +107,8 @@ def decode(words: list[int], base: int):
     """Per instruction: (masked word, word with registers masked too, jal target or None, data address or None,
     branch flag). Branch offsets stay in the masked word; `loose` clears them as well."""
     hi = {}  # register -> value of its lui
-    luiregs = {28}
+    # every register some lui of the function loads (a use may come before the lui in address order: loops)
+    luiregs = {28} | {(w >> 16) & 31 for w in words if w >> 26 == 15}
     out = []
     for w in words:
         op, rs, rt = w >> 26, (w >> 21) & 31, (w >> 16) & 31

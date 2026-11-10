@@ -92,7 +92,7 @@ static void _makePkt_SaveScreen();
 extern "C" void FlushCache(int op); /* MATCH: void (the SDK returns int): v0 stays free for the lui after the call in saveScreen */
 extern "C" void sceDmaSend(sceDmaChan* d, void* tag);
 extern "C" int sceGsSyncPath(int mode, u_short timeout);
-extern "C" void TRACE(char* fmt, ...);
+extern "C" void (TRACE)(char* fmt, ...);
 extern "C" int DIntr();
 extern "C" int EIntr();
 extern "C" {
