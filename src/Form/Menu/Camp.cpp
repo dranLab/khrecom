@@ -4397,7 +4397,14 @@ INT CCamp::setButtonHelp(INT nSetCmd, INT nMode, INT nKind) {
    final code); with refs 9 the original order needs nTechSelectTop live >= 77 (or refs 7 at 41), and i above
    nTechSeqIdx needs nTechSeqIdx live > 87. Init above the ternary (against line 5470) gives nTechKind s3,
    nTechSelectTop s4 (one step); compare operand swap, *pTechCateTbl[..], [1] load first, 2 + i, ++ forms, != 9,
-   <= 8: registers unchanged. */
+   <= 8: registers unchanged. 2026-11-10 (after the Coord.h unification, re-measured 27): every header line marker
+   now has the original's instruction counts (Coord.h:730 FVECTOR::set, HeapMan.h 150-153, 2DSeqCtrl.h, Fnt.h,
+   MenuParts.h, Task.h); the block tree differs only in getFrameRateF's nested getFrameRate block, which has no
+   `this` symbol in the original (also in the matched setDeckSetWin; const/non-const variants of the two Task.h
+   inlines change nothing). sched1 (-dS) of bb 50 issues T_i (i + 1) and T_sel (nTechSelectTop + 1) together at t=2
+   and the zero-extended nTechSeqIdx at t=3; even T_sel at the block end would give nTechSelectTop only ~60 insns of
+   life (priority 4500: then nTechKind s3, nTechSelectTop s4), not the 77 needed. pFnt (not in the ref, see above)
+   still awaits the user's decision; without it the draft is 36. */
 #if 0
 INT CCamp::setTechWin(INT nSetCmd) {
     FVECTOR vec;
@@ -4727,7 +4734,15 @@ INT CCamp::setDeckSetWin(INT nSetCmd) {
    vec.set with 4 arguments, `= NULL` on the three pointer locals; separate `p2DFnt = new ...; m_pMCInfoFnt[0] =
    p2DFnt;` gives S 699/i r301 (the chain is +2 pseudos, ~+4 insns), the 5731/5753 chains +1 pseudo each. Original
    line markers: each C2DFnt new statement ends one line below its "(N)" line (5737-5738, 5740-5741, 5743-5744,
-   5747-5748), 5746/5749 carry no code, and vec.set is an inline at Coord.h:730 (not Vector.h). */
+   5747-5748), 5746/5749 carry no code, and vec.set is an inline at Coord.h:730 (not Vector.h). 2026-11-10 (after
+   the Coord.h unification, re-measured 23, S 701, i r303): all header line markers have the original's counts
+   except CardKind.h 553-558 (54 insns: the CARD::init inline of case 9, ours _setCardNK in this file); probes
+   (build/camp/probe2.py: S and the outer i's pseudo per variant): separate stores for the case-0 chain, the 4-argument
+   vec.set, a p2DSeqCtrl chain at 5731: no change; CtdMan.h instance() without its reference local i r307, plus a
+   reference local in getText r309, S 701 both (header-wide, not kept); cardOld forms: `.m_nId =` S 699,
+   `(CARD)`/`CARD(...)` S 701, none of them keeps cardOld as the register variable the original has (ours: the
+   trivial operator= stores through ADDRESSOF into a copy that gcse cprop deletes; the original loads into cardOld
+   directly). */
 #if 0
 INT CCamp::setMapCardWin(INT nSetCmd) {
     static char* pStrNum[4] = { "%02d/99", "%02d", "\x81~%02d", "" };
