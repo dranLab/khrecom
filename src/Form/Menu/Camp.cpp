@@ -4470,8 +4470,8 @@ INT CCamp::setDeckSetWin(INT nSetCmd) {
    local (+2 per getText, global), chains p2DSeqCtrl/p2DCard = at the 5731/5753 news (+1 pseudo, +1 insn each:
    with them two empty asms reach S 703 but i is only 305), `new T()`, the 4-argument vec.set, casts, split chains
    (-2), member-first chains (S 699). Likely natural source, not yet tested where it counts: the original sets cards
-   with an inline CARD member at CardKind.h:553-558 (.mdebug block "CARD *this; USHORT inKind", line 553 = the -1
-   default), i.e. CARD::init(USHORT inKind, CHAR inNumber = -1) with cardDataTbl in CardKind.h, where this unit has the
+   with an inline CARD member at CardKind.h:553-558 (.mdebug block "CARD *this; USHORT inKind", line 553 = the this
+   setup), i.e. CARD::init(USHORT inKind, BYTE inNumber = 0xFF), in CardKind.h with cardDataTbl since 2026-11-10; this unit keeps the
    _setCardNK helper; a probe with the member form in case 9 alone changed nothing (it comes after the loop), so the
    missing pseudos must come from header inlines used before it (CardKind.h/Card.h forms, operator new, getText).
    Found 2026-11-08 from the .mdebug block tree (33 -> 23): nColSeq/cardOld/pCampRoomInfo declared in the switch
@@ -4492,7 +4492,7 @@ INT CCamp::setDeckSetWin(INT nSetCmd) {
    exactly 1400 (1-3 empty asms keep S 701, 4 give 703); a wider solve (S 601-1001, this fixed) still allows only
    S 703 with i in r313..~420 (any nKind). Block trees equal except cardOld and the CARD inline's names. Tested
    without effect on S/i: CARD::init(USHORT inKind, BYTE inNumber = 0xFF) as a CARD member for both case-9 uses
-   (the .mdebug's "CARD *this; USHORT inKind", CardKind.h:553-558; cardDataTbl would then belong in CardKind.h),
+   (the .mdebug's "CARD *this; USHORT inKind", CardKind.h:553-558; cardDataTbl is in CardKind.h since 2026-11-10),
    vec.set with 4 arguments, `= NULL` on the three pointer locals; separate `p2DFnt = new ...; m_pMCInfoFnt[0] =
    p2DFnt;` gives S 699/i r301 (the chain is +2 pseudos, ~+4 insns), the 5731/5753 chains +1 pseudo each. Original
    line markers: each C2DFnt new statement ends one line below its "(N)" line (5737-5738, 5740-5741, 5743-5744,
