@@ -544,7 +544,11 @@ Keep output small: one function's assembly at a time; `funcdiff` without `--full
   .mdebug: _makeQW at 969, _getHi64/_getX.._getW, _colToVec/_vecToCol, _vecToXYZ, _oneVector, _packWord, _screenClamp,
   _mulCol), 37 unit-local stand-ins replaced. Next: CDrawable/ALPHA/G_LAYER belong to DispList.h per the ref (DispList.h
   includes Gprim.h: a type move), FrecFont's parked makePkt can use _colToVec/_mulCol/_vecToCol, Gprim.h:827 unplaced.
-- **Done (cleanup/vector-types, merged 2026-11-07):** F_UL, G_XY, G_XYZ, G_RGBA, G_UV,
+- **Done (cleanup/coord-unify-types, merged 2026-11-10, user decision):** FVECTOR/IVECTOR/FMATRIX, F_UL/G_* and
+  CCoord (against the ref's Camera.h: line markers 1009-1072) live in System/Coord.h on the original's lines; Vector.h
+  is only CVector. Next: the free matrix wrappers at Coord.h:340-643 (build/coordh/NOTES.md); a "vu0.h" header in the
+  original calls FVECTOR::set (ModelMan's out-of-line calls, lines 18/19/38); Coord.h:1019-1020 and 87-201 unplaced.
+- **Done (cleanup/vector-types, merged 2026-11-07; superseded 2026-11-10, now in Coord.h):** F_UL, G_XY, G_XYZ, G_RGBA, G_UV,
   G_ST at the end of System/Vector.h and the C++ QWdata after khtypes.h's u_int128 (the original's .mdebug type order,
   against the ref's placement; user decision). The former `D2MAN_H_PATH`/`RSRCDATA_H_FULL` entry is settled (checked 2026-11-07): RSRCDATA_H_FULL was dropped
   on 2026-11-02 (bfbdb0dd), 2DMan.h's classes are complete and ungated in all 166 includers (strings ok), and
