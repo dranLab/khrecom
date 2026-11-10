@@ -106,51 +106,12 @@ overwrite its config, `import_symbols.py` its `elf_symbol_addrs.txt` and `split_
 
 ## Building
 
-### What you need
-
-| | Where | How |
-|---|---|---|
-| Linux packages, Python venv | system, `.venv/` | `bash tools/setup_wsl.sh` (once) |
-| Game executable | `iso/SLUS_217.99` (SHA-1 `9bd4535c...`) | `python3 tools/extract_iso.py iso/<image>.iso` |
-| Compilers + wibo | `tools/compilers/`, `tools/wibo/` | `python3 tools/download_compiler.py <pkg>`, see "First steps" |
-
-Run everything from the repository root with the venv active (`source .venv/bin/activate`), or call
-`.venv/bin/python` directly: the system `python3` lacks splat.
-
-### What the build does
-
-1. **`configure.py`** splits `iso/SLUS_217.99` with splat (`config/SLUS_217.99/SLUS_217.99.yaml`): one assembly
-   file per original object file in `asm/`, its data in `asm/data/`. A unit with a file in `src/` is compiled
-   from it instead; its `INCLUDE_ASM` functions still come from `asm/`. It writes the effective config to
-   `build/SLUS_217.99/`, plus `build.ninja` and `objdiff.json`.
-2. **`ninja`** then builds every unit:
-   - game code: `ee-gcc 2.95.3` (under wibo) compiles to assembly, `tools/ee_asm_compat.py` adapts it (original
-     source paths `c:/KHCOM/MainApp/...`, anonymous-namespace names, weak copies the original linker dropped), and
-     SN's assembler Ps2EeAs assembles it;
-   - library units: the compiler and assembler set per unit in `build.yaml`'s `overrides:`;
-   - everything still in assembly: `mips-linux-gnu-as`.
-
-   Then it links all objects in the original order (`mips-linux-gnu-ld`), copies the code image out
-   (`objcopy`) and compares its SHA-1 with the original's. The default target fails unless the image is
-   byte-identical. ninja re-runs `configure.py` by itself when the config or the set of files in `src/` changes.
-
-### Commands
-
 ```sh
-tools/check.sh                       # the full check: configure + build + SHA-1 + per-file overview; exit 0 = match
-python3 configure.py                 # re-split and regenerate build.ninja (~30 s)
-ninja                                # build and verify the image (default target)
-ninja expected                       # objects assembled from the original, per unit (for objdiff/funcdiff)
-ninja iso                            # bootable disc image (see "Boot testing")
-
-python3 tools/funcdiff.py <unit> [<function>]   # per function: MATCH or the differing lines
-python3 tools/imagediff.py           # where the rebuilt image differs (object, section, symbol)
+tools/check.sh                                  # configure + build + SHA-1 check; exit 0 = match
+python3 configure.py                            # re-split and regenerate build.ninja
+ninja                                           # build and verify the image
+python3 tools/funcdiff.py <unit> [<function>]   # compare functions with the original
 ```
-
-`<unit>` is an original object file named after its source path, e.g. `System/Graphic/ColorFader`.
-`tools/check.sh` writes the logs to `build.configure.log` and `build.ninja.log`, and lists every file's state in
-`build/check.overview.txt`. When the checksum fails, it runs `imagediff.py` itself. CI runs `tools/check.sh` on
-every push to `main` (`.github/workflows/check.yml`).
 
 ## Boot testing
 
