@@ -51,13 +51,13 @@ disc image and the toolchain.
    ```sh
    python3 tools/extract_iso.py iso/khrecom.iso        # writes iso/SLUS_217.99 + iso/SYSTEM.CNF
    ```
-3. **Get the compiler and wibo.** The compiler is SN Systems' Windows build (see `config/SLUS_217.99/build.yaml`);
-   it runs under [wibo](https://github.com/decompals/wibo), which `configure.py` expects at `tools/wibo/wibo`.
+3. **Get the compilers and wibo.** The game's compiler is SN Systems' Windows build of ee-gcc 2.95.3; the
+   libraries need four older ee-gcc packages (all listed in `config/SLUS_217.99/build.yaml`). They run under
+   [wibo](https://github.com/decompals/wibo), which `download_compiler.py` puts at `tools/wibo/wibo`.
    ```sh
-   python3 tools/download_compiler.py ee-gcc2.95.3-136   # -> tools/compilers/ee-gcc2.95.3-136/
-   mkdir -p tools/wibo
-   curl -fsSL -o tools/wibo/wibo https://github.com/decompals/wibo/releases/download/1.2.0/wibo-x86_64
-   chmod +x tools/wibo/wibo
+   for pkg in ee-gcc2.95.3-136 ee-gcc2.96 ee-gcc2.9-991111 ee-gcc2.9-991111-01 ee-gcc2.9-990721; do
+       python3 tools/download_compiler.py $pkg    # -> tools/compilers/<pkg>/ (+ tools/wibo/wibo)
+   done
    ```
 4. **Split and build**
    ```sh
@@ -103,6 +103,54 @@ overwrite its config, `import_symbols.py` its `elf_symbol_addrs.txt` and `split_
    ```
 3. **Build with 100% assembly**: `python3 configure.py && ninja`. Iterate on the splat yaml (splitting `.text`
    into files, adding symbols) until the checksum passes, then keep it passing while decompiling.
+
+## Building
+
+### What you need
+
+| | Where | How |
+|---|---|---|
+| Linux packages, Python venv | system, `.venv/` | `bash tools/setup_wsl.sh` (once) |
+| Game executable | `iso/SLUS_217.99` (SHA-1 `9bd4535c...`) | `python3 tools/extract_iso.py iso/<image>.iso` |
+| Compilers + wibo | `tools/compilers/`, `tools/wibo/` | `python3 tools/download_compiler.py <pkg>`, see "First steps" |
+
+Run everything from the repository root with the venv active (`source .venv/bin/activate`), or call
+`.venv/bin/python` directly: the system `python3` lacks splat.
+
+### What the build does
+
+1. **`configure.py`** splits `iso/SLUS_217.99` with splat (`config/SLUS_217.99/SLUS_217.99.yaml`): one assembly
+   file per original object file in `asm/`, its data in `asm/data/`. A unit with a file in `src/` is compiled
+   from it instead; its `INCLUDE_ASM` functions still come from `asm/`. It writes the effective config to
+   `build/SLUS_217.99/`, plus `build.ninja` and `objdiff.json`.
+2. **`ninja`** then builds every unit:
+   - game code: `ee-gcc 2.95.3` (under wibo) compiles to assembly, `tools/ee_asm_compat.py` adapts it (original
+     source paths `c:/KHCOM/MainApp/...`, anonymous-namespace names, weak copies the original linker dropped), and
+     SN's assembler Ps2EeAs assembles it;
+   - library units: the compiler and assembler set per unit in `build.yaml`'s `overrides:`;
+   - everything still in assembly: `mips-linux-gnu-as`.
+
+   Then it links all objects in the original order (`mips-linux-gnu-ld`), copies the code image out
+   (`objcopy`) and compares its SHA-1 with the original's. The default target fails unless the image is
+   byte-identical. ninja re-runs `configure.py` by itself when the config or the set of files in `src/` changes.
+
+### Commands
+
+```sh
+tools/check.sh                       # the full check: configure + build + SHA-1 + per-file overview; exit 0 = match
+python3 configure.py                 # re-split and regenerate build.ninja (~30 s)
+ninja                                # build and verify the image (default target)
+ninja expected                       # objects assembled from the original, per unit (for objdiff/funcdiff)
+ninja iso                            # bootable disc image (see "Boot testing")
+
+python3 tools/funcdiff.py <unit> [<function>]   # per function: MATCH or the differing lines
+python3 tools/imagediff.py           # where the rebuilt image differs (object, section, symbol)
+```
+
+`<unit>` is an original object file named after its source path, e.g. `System/Graphic/ColorFader`.
+`tools/check.sh` writes the logs to `build.configure.log` and `build.ninja.log`, and lists every file's state in
+`build/check.overview.txt`. When the checksum fails, it runs `imagediff.py` itself. CI runs `tools/check.sh` on
+every push to `main` (`.github/workflows/check.yml`).
 
 ## Boot testing
 
