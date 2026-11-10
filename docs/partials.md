@@ -169,9 +169,9 @@ One row per merge into main (`partials.py --summary` before and after).
 ## Summary
 
 ```
-PARTIAL: 158 (131 in 45 headers, 27 in 15 .cpp); MATCH: 1046
-  by category: method 30, data member 9, type 12, fwd decl 2, #include 13, changed in place 40, padding 2, gate 5, guessed 9, header-level 22, stand-in 10, other 4
-stand-ins: 8 foreign in 5 files (6 names), 166 unattributed, 181 own
+PARTIAL: 157 (131 in 45 headers, 26 in 14 .cpp); MATCH: 1046
+  by category: method 30, data member 9, type 12, fwd decl 2, #include 13, changed in place 40, padding 2, gate 5, guessed 8, header-level 22, stand-in 10, other 4
+stand-ins: 8 foreign in 5 files (6 names), 167 unattributed, 181 own
 duplicate class names across headers: 0
 padding: 2 arrays, 0 accessors
 mechanisms: 659 sites (0 untagged); #line: 1408
@@ -246,8 +246,8 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/Effect/EffectMan.h` | 1 | 2/0/0/0 | 173 |
 | `System/Graphic/Effect/ObjType.h` | 1 | 1/0/0/0 | 177 |
 | `System/Graphic/Effect/effect.h` | 3 | 5/1/0/0 | 77 |
-| `System/Graphic/Effect/libppp/draw/draw_w.h` | 2 | 3/0/0/0 | 16 |
-| `System/Graphic/Effect/libppp/draw/global_w.h` | 1 | 0/0/0/0 | 9 |
+| `System/Graphic/Effect/libppp/draw/draw_w.h` | 2 | 3/0/0/0 | 17 |
+| `System/Graphic/Effect/libppp/draw/global_w.h` | 1 | 0/0/0/0 | 10 |
 | `System/Graphic/Effect/libppp/draw/md.h` | 2 | 0/0/0/0 | 42 |
 | `System/Graphic/Effect/libppp/eiProg/pppChrSclXYZMatrix.h` | 0 | 1/1/0/0 | 1 |
 | `System/Graphic/Effect/libppp/eiProg/pppChrSclXZMatrix.h` | 0 | 1/1/0/0 | 1 |
@@ -255,7 +255,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/Effect/libppp/eiProg/pppChrXSclXYZMatrix.h` | 0 | 1/1/0/0 | 1 |
 | `System/Graphic/Effect/libppp/eiProg/pppChrYSclXYZMatrix.h` | 0 | 1/1/0/0 | 1 |
 | `System/Graphic/Effect/libppp/keProg/pppKeTh.h` | 0 | 6/0/1/0 | 1 |
-| `System/Graphic/Effect/libppp/pppPart.h` | 25 | 21/0/0/0 | 216 |
+| `System/Graphic/Effect/libppp/pppPart.h` | 25 | 21/0/0/0 | 218 |
 | `System/Graphic/Gprim.h` | 1 | 56/0/0/0 | 232 |
 | `System/Graphic/Model.h` | 2 | 9/0/0/0 | 70 |
 | `System/Graphic/Str.h` | 1 | 0/0/0/0 | 141 |

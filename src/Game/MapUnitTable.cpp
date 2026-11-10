@@ -15,7 +15,7 @@ extern MAPUNITTABLE g_DoorWorld9[12];
 extern MAPUNITTABLE g_DoorWorld10[12];
 extern MAPUNITTABLE g_DoorWorld11[12];
 extern MAPUNITTABLE g_DoorWorld12[12];
-extern MAPUNITTABLE g_DoorWorld13[12];
+extern MAPUNITTABLE g_DoorWorld13[12]; /* DLL imports (0 for the link, config/SLUS_217.99/dll_imports.ld): */ extern MAPUNITTABLE g_Gimmick1060, g_Gimmick1077, g_Gimmick1090, g_Gimmick1091, g_Gimmick1092;
 
 MAPUNITTABLE* mapUnitTable_G[1] = {
     NULL,
@@ -191,11 +191,11 @@ MAPUNITTABLE* mapUnitTable_10[18] = {
     &g_DoorWorld10[9],
     &g_DoorWorld10[10],
     &g_DoorWorld10[11],
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
+    &g_Gimmick1060, /* DLL import: the loader writes its address */
+    &g_Gimmick1077,
+    &g_Gimmick1090,
+    &g_Gimmick1091,
+    &g_Gimmick1092,
     NULL,
 };
 

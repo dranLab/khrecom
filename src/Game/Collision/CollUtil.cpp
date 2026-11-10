@@ -1270,13 +1270,13 @@ INT CCollUtil::slidingHosei(FVECTOR& vCenter, FVECTOR& vSurface, FVECTOR& vNorma
     m_vCk1.w = 1.0f;
     return 1;
 }
-/* MATCH: the original links no CCollDbg (debug build only) and calls address 0. Ps2EeAs makes undefined weak symbols
-   global, so the method is a weak absolute 0, as in Game/Gimmick/CreateGimmick (the relocation names func_0 there) */
+/* MATCH: the original links no CCollDbg (debug build only) and calls address 0: a DLL import, undefined here and
+   0 for the link (config/SLUS_217.99/dll_imports.ld), so the call keeps its relocation for the DLL table */
 class CCollDbg {
 public:
     void initEveryInt(INT nMax);
 };
-__asm__(".weak initEveryInt__8CCollDbgi\ninitEveryInt__8CCollDbgi = 0\n");
+/* DLL import initEveryInt__8CCollDbgi: 0 in config/SLUS_217.99/dll_imports.ld */
 void CCollUtil::_initDbg() {
     if (m_pCollDbg) {
         ((CCollDbg*)m_pCollDbg)->initEveryInt(m_PrimInfoMax);

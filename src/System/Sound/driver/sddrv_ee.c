@@ -75,8 +75,8 @@ typedef struct {
 } SebTimeHEAD;
 
 sceSifClientData cd;
-u_int rpc_buf[8];
-u_char ee_param[4096];
+u_int rpc_buf[8] __attribute__((aligned(64))); /* SIF RPC buffers: 64-byte aligned (the COMMON layout needs >= 32) */
+u_char ee_param[4096] __attribute__((aligned(64)));
 u_int *wd_param;
 u_int wd_ee_param[16];
 u_int *seb_param;

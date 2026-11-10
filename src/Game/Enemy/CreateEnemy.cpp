@@ -62,9 +62,9 @@ inline void _createEnemyMotionName() {
 
 
 
-/* Enemies whose code is not in the main executable (map overlays): the original calls their constructors through
- * "jal 0". Only the constructor and the size matter here; the names are guesses from the debug info (classes and
- * sizes), unknown ones are named after their resource ID. */
+/* Enemies whose code is not in the main executable (they are in DLLs): the original calls their constructors
+ * through "jal 0". Only the constructor and the size matter here. Names: the DLL table's imports (tools/sndll.py
+ * --names pairs each call site with its original name), sizes: types.h. */
 class CEnemy100AcreBB_Beehive : public CBattleEnemy {
 public:
     CEnemy100AcreBB_Beehive(CTask* inParent);
@@ -121,17 +121,17 @@ private:
     UBYTE _m_0x830[0x8f0 - 0x830];
 };
 
-class CEnemyOverlay110 : public CBattleEnemy {
+class CBossParasiteCage : public CBattleEnemy {
 public:
-    CEnemyOverlay110(CTask* inParent);
+    CBossParasiteCage(CTask* inParent);
 
 private:
     UBYTE _m_0x830[0x8a0 - 0x830];
 };
 
-class CEnemyOverlay112 : public CBattleEnemy {
+class CBossHook : public CBattleEnemy {
 public:
-    CEnemyOverlay112(CTask* inParent);
+    CBossHook(CTask* inParent);
 
 private:
     UBYTE _m_0x830[0x920 - 0x830];
@@ -169,49 +169,49 @@ private:
     UBYTE _m_0x830[0x8f0 - 0x830];
 };
 
-class CEnemyOverlay105 : public CBattleEnemy {
+class CBossTrickMaster : public CBattleEnemy {
 public:
-    CEnemyOverlay105(CTask* inParent);
+    CBossTrickMaster(CTask* inParent);
 
 private:
     UBYTE _m_0x830[0x8b0 - 0x830];
 };
 
-class CEnemyOverlay108 : public CBattleEnemy {
+class CBossJafar : public CBattleEnemy {
 public:
-    CEnemyOverlay108(CTask* inParent);
+    CBossJafar(CTask* inParent);
 
 private:
     UBYTE _m_0x830[0xa50 - 0x830];
 };
 
-class CEnemyOverlay125 : public CBattleEnemy {
+class CBossJafarBird : public CBattleEnemy {
 public:
-    CEnemyOverlay125(CTask* inParent);
+    CBossJafarBird(CTask* inParent);
 
 private:
     UBYTE _m_0x830[0x8e0 - 0x830];
 };
 
-class CEnemyOverlay126 : public CBattleEnemy {
+class CBossJafarLamp : public CBattleEnemy {
 public:
-    CEnemyOverlay126(CTask* inParent);
+    CBossJafarLamp(CTask* inParent);
 
 private:
     UBYTE _m_0x830[0x870 - 0x830];
 };
 
-class CEnemyOverlay109 : public CBattleEnemy {
+class CBossBoogie : public CBattleEnemy {
 public:
-    CEnemyOverlay109(CTask* inParent);
+    CBossBoogie(CTask* inParent);
 
 private:
     UBYTE _m_0x830[0x8f0 - 0x830];
 };
 
-class CEnemyOverlay209 : public CBattleEnemy {
+class CBossBoogieDice : public CBattleEnemy {
 public:
-    CEnemyOverlay209(CTask* inParent);
+    CBossBoogieDice(CTask* inParent);
 
 private:
     UBYTE _m_0x830[0x870 - 0x830];
@@ -225,17 +225,17 @@ private:
     UBYTE _m_0x830[0x910 - 0x830];
 };
 
-class CEnemyOverlay113 : public CBattleEnemy {
+class CBossMDragon : public CBattleEnemy {
 public:
-    CEnemyOverlay113(CTask* inParent);
+    CBossMDragon(CTask* inParent);
 
 private:
     UBYTE _m_0x830[0x8e0 - 0x830];
 };
 
-class CEnemyOverlay115 : public CBattleEnemy {
+class CBossDarkSide : public CBattleEnemy {
 public:
-    CEnemyOverlay115(CTask* inParent);
+    CBossDarkSide(CTask* inParent);
 
 private:
     UBYTE _m_0x830[0x9b0 - 0x830];
@@ -313,9 +313,9 @@ private:
     UBYTE _m_0x830[0x970 - 0x830];
 };
 
-class CEnemyOverlay122 : public CBattleEnemy {
+class CBossAnsem : public CBattleEnemy {
 public:
-    CEnemyOverlay122(CTask* inParent);
+    CBossAnsem(CTask* inParent);
 
 private:
     UBYTE _m_0x830[0x9b0 - 0x830];
@@ -353,51 +353,51 @@ public:
     virtual ~CBossUrsulaTentacle4();
 };
 
-/* Ps2EeAs makes undefined weak symbols global (the link would fail), so define them as weak absolute 0: the
- * same "jal 0" as the original (whose relocation names func_0); the Tentacles' vtables are also at 0. */
-__asm__(
-    ".weak __23CEnemy100AcreBB_BeehiveP5CTask\n__23CEnemy100AcreBB_BeehiveP5CTask = 0\n"
-    ".weak __19CEnemy100AcreBB_BeeP5CTask\n__19CEnemy100AcreBB_BeeP5CTask = 0\n"
-    ".weak __13CTutorialHoodP5CTask\n__13CTutorialHoodP5CTask = 0\n"
-    ".weak __13CTutorialLeonP5CTask\n__13CTutorialLeonP5CTask = 0\n"
-    ".weak __15CBossGuardarmorP5CTask\n__15CBossGuardarmorP5CTask = 0\n"
-    ".weak __10CBossCloudP5CTask\n__10CBossCloudP5CTask = 0\n"
-    ".weak __10CBossHadesP5CTask\n__10CBossHadesP5CTask = 0\n"
-    ".weak __16CEnemyOverlay110P5CTask\n__16CEnemyOverlay110P5CTask = 0\n"
-    ".weak __16CEnemyOverlay112P5CTask\n__16CEnemyOverlay112P5CTask = 0\n"
-    ".weak __10CBossVexenP5CTask\n__10CBossVexenP5CTask = 0\n"
-    ".weak __9CBossRikuP5CTask\n__9CBossRikuP5CTask = 0\n"
-    ".weak __12CBossLarxeneP5CTask\n__12CBossLarxeneP5CTask = 0\n"
-    ".weak __9CBossAxelP5CTask\n__9CBossAxelP5CTask = 0\n"
-    ".weak __16CEnemyOverlay105P5CTask\n__16CEnemyOverlay105P5CTask = 0\n"
-    ".weak __16CEnemyOverlay108P5CTask\n__16CEnemyOverlay108P5CTask = 0\n"
-    ".weak __16CEnemyOverlay125P5CTask\n__16CEnemyOverlay125P5CTask = 0\n"
-    ".weak __16CEnemyOverlay126P5CTask\n__16CEnemyOverlay126P5CTask = 0\n"
-    ".weak __16CEnemyOverlay109P5CTask\n__16CEnemyOverlay109P5CTask = 0\n"
-    ".weak __16CEnemyOverlay209P5CTask\n__16CEnemyOverlay209P5CTask = 0\n"
-    ".weak __11CBossUrsulaP5CTask\n__11CBossUrsulaP5CTask = 0\n"
-    ".weak __16CEnemyOverlay113P5CTask\n__16CEnemyOverlay113P5CTask = 0\n"
-    ".weak __16CEnemyOverlay115P5CTask\n__16CEnemyOverlay115P5CTask = 0\n"
-    ".weak __14CBossMarluxia2P5CTask\n__14CBossMarluxia2P5CTask = 0\n"
-    ".weak __20CBossMarluxia2FunnelP5CTask\n__20CBossMarluxia2FunnelP5CTask = 0\n"
-    ".weak __20CBossMarluxia2ScytheP5CTask\n__20CBossMarluxia2ScytheP5CTask = 0\n"
-    ".weak __14CBossMarluxia3P5CTask\n__14CBossMarluxia3P5CTask = 0\n"
-    ".weak __21CBossMarluxia3SpecterP5CTask\n__21CBossMarluxia3SpecterP5CTask = 0\n"
-    ".weak __13CBossMarluxiaP5CTask\n__13CBossMarluxiaP5CTask = 0\n"
-    ".weak __12CBossLexaeusP5CTask\n__12CBossLexaeusP5CTask = 0\n"
-    ".weak __11CBossZexionP5CTask\n__11CBossZexionP5CTask = 0\n"
-    ".weak __15CBossZexionBookP5CTask\n__15CBossZexionBookP5CTask = 0\n"
-    ".weak __16CEnemyOverlay122P5CTask\n__16CEnemyOverlay122P5CTask = 0\n"
-    ".weak __19CBossUrsulaTentacleP5CTask\n__19CBossUrsulaTentacleP5CTask = 0\n"
-    ".weak _vt$20CBossUrsulaTentacle1\n_vt$20CBossUrsulaTentacle1 = 0\n"
-    ".weak _vt$20CBossUrsulaTentacle1$4CFSM\n_vt$20CBossUrsulaTentacle1$4CFSM = 0\n"
-    ".weak _vt$20CBossUrsulaTentacle2\n_vt$20CBossUrsulaTentacle2 = 0\n"
-    ".weak _vt$20CBossUrsulaTentacle2$4CFSM\n_vt$20CBossUrsulaTentacle2$4CFSM = 0\n"
-    ".weak _vt$20CBossUrsulaTentacle3\n_vt$20CBossUrsulaTentacle3 = 0\n"
-    ".weak _vt$20CBossUrsulaTentacle3$4CFSM\n_vt$20CBossUrsulaTentacle3$4CFSM = 0\n"
-    ".weak _vt$20CBossUrsulaTentacle4\n_vt$20CBossUrsulaTentacle4 = 0\n"
-    ".weak _vt$20CBossUrsulaTentacle4$4CFSM\n_vt$20CBossUrsulaTentacle4$4CFSM = 0\n"
-);
+/* DLL imports: undefined here, 0 for the link (config/SLUS_217.99/dll_imports.ld): the same "jal 0" as the
+ * original, and each use keeps its relocation (tools/sndll.py); the Tentacles' vtables are imports too. */
+/* DLL imports, 0 in config/SLUS_217.99/dll_imports.ld (the loader patches their uses):
+ * __23CEnemy100AcreBB_BeehiveP5CTask
+ * __19CEnemy100AcreBB_BeeP5CTask
+ * __13CTutorialHoodP5CTask
+ * __13CTutorialLeonP5CTask
+ * __15CBossGuardarmorP5CTask
+ * __10CBossCloudP5CTask
+ * __10CBossHadesP5CTask
+ * __17CBossParasiteCageP5CTask
+ * __9CBossHookP5CTask
+ * __10CBossVexenP5CTask
+ * __9CBossRikuP5CTask
+ * __12CBossLarxeneP5CTask
+ * __9CBossAxelP5CTask
+ * __16CBossTrickMasterP5CTask
+ * __10CBossJafarP5CTask
+ * __14CBossJafarBirdP5CTask
+ * __14CBossJafarLampP5CTask
+ * __11CBossBoogieP5CTask
+ * __15CBossBoogieDiceP5CTask
+ * __11CBossUrsulaP5CTask
+ * __12CBossMDragonP5CTask
+ * __13CBossDarkSideP5CTask
+ * __14CBossMarluxia2P5CTask
+ * __20CBossMarluxia2FunnelP5CTask
+ * __20CBossMarluxia2ScytheP5CTask
+ * __14CBossMarluxia3P5CTask
+ * __21CBossMarluxia3SpecterP5CTask
+ * __13CBossMarluxiaP5CTask
+ * __12CBossLexaeusP5CTask
+ * __11CBossZexionP5CTask
+ * __15CBossZexionBookP5CTask
+ * __10CBossAnsemP5CTask
+ * __19CBossUrsulaTentacleP5CTask
+ * _vt$20CBossUrsulaTentacle1
+ * _vt$20CBossUrsulaTentacle1$4CFSM
+ * _vt$20CBossUrsulaTentacle2
+ * _vt$20CBossUrsulaTentacle2$4CFSM
+ * _vt$20CBossUrsulaTentacle3
+ * _vt$20CBossUrsulaTentacle3$4CFSM
+ * _vt$20CBossUrsulaTentacle4
+ * _vt$20CBossUrsulaTentacle4$4CFSM
+ */
 
 
 
@@ -536,10 +536,10 @@ CEntity* CEntityFactory::createEnemy(INT inRsrcID, CTask* inParent, void* inExtr
         enemy = new (__FILE__ "(282)") CBossHades(parent);
         break;
     case 110:
-        enemy = new (__FILE__ "(286)") CEnemyOverlay110(parent);
+        enemy = new (__FILE__ "(286)") CBossParasiteCage(parent);
         break;
     case 112:
-        enemy = new (__FILE__ "(290)") CEnemyOverlay112(parent);
+        enemy = new (__FILE__ "(290)") CBossHook(parent);
         break;
     case 114:
         enemy = new (__FILE__ "(294)") CBossVexen(parent);
@@ -554,22 +554,22 @@ CEntity* CEntityFactory::createEnemy(INT inRsrcID, CTask* inParent, void* inExtr
         enemy = new (__FILE__ "(306)") CBossAxel(parent);
         break;
     case 105:
-        enemy = new (__FILE__ "(310)") CEnemyOverlay105(parent);
+        enemy = new (__FILE__ "(310)") CBossTrickMaster(parent);
         break;
     case 108:
-        enemy = new (__FILE__ "(314)") CEnemyOverlay108(parent);
+        enemy = new (__FILE__ "(314)") CBossJafar(parent);
         break;
     case 125:
-        enemy = new (__FILE__ "(317)") CEnemyOverlay125(parent);
+        enemy = new (__FILE__ "(317)") CBossJafarBird(parent);
         break;
     case 126:
-        enemy = new (__FILE__ "(320)") CEnemyOverlay126(parent);
+        enemy = new (__FILE__ "(320)") CBossJafarLamp(parent);
         break;
     case 109:
-        enemy = new (__FILE__ "(324)") CEnemyOverlay109(parent);
+        enemy = new (__FILE__ "(324)") CBossBoogie(parent);
         break;
     case 209:
-        enemy = new (__FILE__ "(327)") CEnemyOverlay209(parent);
+        enemy = new (__FILE__ "(327)") CBossBoogieDice(parent);
         break;
     case 111:
         enemy = new (__FILE__ "(331)") CBossUrsula(parent);
@@ -587,10 +587,10 @@ CEntity* CEntityFactory::createEnemy(INT inRsrcID, CTask* inParent, void* inExtr
         enemy = new (__FILE__ "(343)") CBossUrsulaTentacle4(parent);
         break;
     case 113:
-        enemy = new (__FILE__ "(347)") CEnemyOverlay113(parent);
+        enemy = new (__FILE__ "(347)") CBossMDragon(parent);
         break;
     case 115:
-        enemy = new (__FILE__ "(351)") CEnemyOverlay115(parent);
+        enemy = new (__FILE__ "(351)") CBossDarkSide(parent);
         break;
     case 120:
         enemy = new (__FILE__ "(355)") CBossMarluxia2(parent);
@@ -620,7 +620,7 @@ CEntity* CEntityFactory::createEnemy(INT inRsrcID, CTask* inParent, void* inExtr
         enemy = new (__FILE__ "(384)") CBossZexionBook(parent);
         break;
     case 122:
-        enemy = new (__FILE__ "(388)") CEnemyOverlay122(parent);
+        enemy = new (__FILE__ "(388)") CBossAnsem(parent);
         break;
     case 103:
         enemy = new (__FILE__ "(393)") CEnemySpadesoldier(parent);

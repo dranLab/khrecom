@@ -196,7 +196,7 @@ static const WorldSelTable s_pWorldTableRiku[12] = {
     { 1, (WORLD_ID*)s_WorldTableRiku5 },
     { 1, (WORLD_ID*)s_WorldTableRiku6 }
 };
-extern "C" char D_00484A10[];
+
 namespace PLM {
 extern BOOL g_bIsLastSceneBattle;
 }
@@ -1013,7 +1013,7 @@ BOOL CSceneInfo::reqEnterDoor(DOOR_ID door) {
     if (stat == DOOR_STAT_CLOSED || stat == DOOR_STAT_OPENED) {
         TRACE(" >>> Try Enter The Door [%d], type = [%d], stat = [%d], dstRoom = [%d]\n", pDoor->_id, pDoor->_type, stat, pDoor->_nDstRoom);
         RoomInfo* pDstRoom = getRoomInfo(pDoor->_nDstRoom);
-        if (!(pDstRoom)) AssertApp(__FILE__, 1657, D_00484A10, 0);
+        if (!(pDstRoom)) AssertApp(__FILE__, 1657, "pDstRoom", 0);
         if (pDoor->_shape == 5 && (USHORT)pDstRoom->getSceneNum() == 2 && !pDstRoom->hasEntered()) {
             makeRoom(*pDstRoom, _getDstDoorID(door), 2, getCardIDFromSceneNum(2), CGameWork::m_pMCWork->_nNextRCNormaNum);
         } else if (!pDstRoom->isCreated() || (pDstRoom->isFixSceneRoom() && !pDstRoom->hasEntered())) {
@@ -1762,7 +1762,7 @@ void CSceneInfo::openGoalDoor() {
     setEventRoomSceneNum(_EVENTROOM_GOAL, 2);
     makeRoom(*pRoom, nDoor, 2, getCardIDFromSceneNum(2), CGameWork::m_pMCWork->_nNextRCNormaNum);
 }
-__asm__(".rdata\n.align 3\n.word 0x8B837581\n.word 0x80835B81\n.word 0x5A836564\n.word 0x4E838C83\n.word 0x76816783\n.word 0x4F8AC888\n.word 0xFC93C582\n.word 0xC482C182\n.word 0xCC82E982\n.word 0x4181C582\n.word 0x5B815383\n.word 0xE0948B83\n.word 0x4A8AF082\n.word 0xDC82AF82\n.word 0xF182B982\n.word 0x0000000A\n.word 0x00000000\n.word 0x00000000\n.text\n");
+__asm__(".rdata\n" ".align 3\n" "D_00484E38:\n" ".word 0x8B837581\n" ".word 0x80835B81\n" ".word 0x5A836564\n" ".word 0x4E838C83\n" ".word 0x76816783\n" ".word 0x4F8AC888\n" ".word 0xFC93C582\n" ".word 0xC482C182\n" ".word 0xCC82E982\n" ".word 0x4181C582\n" ".word 0x5B815383\n" ".word 0xE0948B83\n" ".word 0x4A8AF082\n" ".word 0xDC82AF82\n" ".word 0xF182B982\n" ".word 0x0000000A\n" ".word 0x00000000\n" ".word 0x00000000\n" ".text\n");
 void CSceneInfo::backupEventDoorState() {
     USHORT nFloorIdx = getCurrentFloorIndex();
     if (nFloorIdx == 0xff) return;

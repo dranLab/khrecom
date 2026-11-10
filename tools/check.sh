@@ -10,16 +10,21 @@
 # complete (INCLUDE_ASM or not matching) and those changed on this branch or uncommitted, plus the totals;
 # --full prints every file. This only changes what is printed, never the checks or the exit code.
 #
-#   tools/check.sh [--full]
+#   tools/check.sh [--full] [--shift]
+#
+# --shift (docs/port-step1-shiftable.md): also link the shifted presets of config/<VERSION>/shift.yaml and check
+# them (tools/shiftpins.py, tools/shiftcheck.py); their failure fails the gate.
 set -uo pipefail
 cd "$(git rev-parse --show-toplevel)"
 PY=.venv/bin/python
 status=0
 full=0
+shift_check=0
 for arg in "$@"; do
     case "$arg" in
         --full) full=1 ;;
-        *) echo "usage: tools/check.sh [--full]" >&2; exit 2 ;;
+        --shift) shift_check=1 ;;
+        *) echo "usage: tools/check.sh [--full] [--shift]" >&2; exit 2 ;;
     esac
 done
 # Source files changed on this branch (since it left main) or not committed yet.
@@ -111,6 +116,29 @@ if lib["files"]:
 PY
 else
     echo "  (objdiff report failed)"
+fi
+
+if [[ $shift_check == 1 ]]; then
+    echo "== shifted links (docs/port-step1-shiftable.md)"
+    if ! ninja shift > build/shift.log 2>&1; then
+        grep -E "^FAILED|undefined reference|[Ee]rror" build/shift.log | head -10
+        echo "FAIL: shifted links, see build/shift.log"
+        status=1
+    elif ! $PY tools/shiftpins.py > build/shiftpins.log 2>&1; then
+        head -12 build/shiftpins.log
+        echo "FAIL: pinned or undefined symbols in the shifted link"
+        status=1
+    else
+        for preset in $($PY -c 'import yaml,glob; print(" ".join(yaml.safe_load(open(glob.glob("config/*/shift.yaml")[0]))["presets"]))'); do
+            if $PY tools/shiftcheck.py --preset "$preset" --details 5 > "build/shiftcheck.$preset.log" 2>&1; then
+                echo "OK: $preset ($(sed -n 2,3p "build/shiftcheck.$preset.log" | tr '\n' ' '))"
+            else
+                cat "build/shiftcheck.$preset.log"
+                echo "FAIL: shiftcheck $preset"
+                status=1
+            fi
+        done
+    fi
 fi
 
 echo "== branch"

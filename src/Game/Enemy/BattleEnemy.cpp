@@ -79,9 +79,9 @@ struct CB_ENCHANT_VIEW {
 static inline INT _getEnchantKind(CardBattle::CCardBattle* p, INT inUser) {
     return ((CB_ENCHANT_VIEW*)p)->m_cardEnchant[inUser - 1].m_nKind < 0x44 ? 0 : ((CB_ENCHANT_VIEW*)p)->m_cardEnchant[inUser - 1].m_nKind - 0x43;
 }
-extern "C" char D_004AC8E8[];
-extern "C" char D_004AC8F0[];
-extern "C" char D_004AC920[];
+
+
+
 
 
 
@@ -101,7 +101,7 @@ extern "C" char D_004AC920[];
 static inline BOOL _setupEnemyParam(ENEMY_PARAM* inParam) {
     INT* p = (INT*)inParam;
     if (p[1] < 0) return TRUE;
-    if (strncmp((const char*)inParam, D_004AC8E8, 4)) return FALSE;
+    if (strncmp((const char*)inParam, "@ENP", 4)) return FALSE;
     if (p[1] != 1) return FALSE;
     p[1] = 0x80000001;
     p[2] = (INT)inParam + p[2];
@@ -110,9 +110,9 @@ static inline BOOL _setupEnemyParam(ENEMY_PARAM* inParam) {
     p[0x94 / 4] = (INT)inParam + p[0x94 / 4];
     return TRUE;
 }
-/* ENEMY_PARAM's floor accessor (Game/Enemy/EnemyParam.h line 229 in the original) */
+/* ENEMY_PARAM's floor accessor (EnemyParam.h line 229 in the original; "src/..." is that header's __FILE__ as the compiler sees it, so both strings share its copies) */
 static inline BASIC_ENEMY_PARAM* _getBasicParam(ENEMY_PARAM* inParam, INT inFloor) {
-    if (!(0 <= inFloor && inFloor < 13)) AssertApp(D_004AC8F0, 0xE5, D_004AC920, 0);
+    if (!(0 <= inFloor && inFloor < 13)) AssertApp("src/Game/Enemy/EnemyParam.h", 0xE5, "0 <= inFloor && inFloor < BASIC_MAX", 0);
     return &inParam->pBasic[inFloor];
 }
 struct PRIZE_DATA {
@@ -353,7 +353,7 @@ void (CBattleEnemy::*CBattleEnemy::m_pEndStateTbl[])() = {
     &CBattleEnemy::endStateDead_,
 };
 INT CBattleEnemy::m_iDuelCardNum = 0;
-INT CBattleEnemy::m_iDuelCardPtr = 0;
+INT CBattleEnemy::m_iDuelCardPtr = 0; int CBattleEnemy::m_iDuelCardArray[10]; /* COMMON in the original (linker-placed) */
 
 INT BattleEnemy::GameModeHp(INT inHp) {
     return inHp * GameModeParamHp[CGameWork::getByte(0, 0x61)] / 100;

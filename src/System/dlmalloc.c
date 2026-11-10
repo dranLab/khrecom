@@ -1235,6 +1235,6 @@ size_t mspace_get_chunk_size_from_mem(void* mem) {
     return chunksize(mem2chunk(mem));
 }
 
-/* Words in other units' data equal these addresses (splat made them references). */
-asm(".globl D_00504D20\nD_00504D20 = 0x00504D20\n.globl D_00504D4D\nD_00504D4D = 0x00504D4D");
+/* (Absolute D_00504D20 / D_00504D4D stood here, for string bytes in .sndata that splat had made references;
+   tools/sndll.py generates .sndata now, with only real pointers symbolic.) */
 // SOURCE DATA: .bss

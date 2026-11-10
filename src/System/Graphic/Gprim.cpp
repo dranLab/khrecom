@@ -99,7 +99,7 @@ static inline void _getTmpTexArea(INT nID, UINT& nTexPos, UINT& nClutPos) { /* P
         nClutPos = VRAM::_CLUT_TMP2_START;
     }
 }
-TexInfo* CGTexPrim::m_pTexCache = NULL;
+TexInfo* CGTexPrim::m_pTexCache = NULL; TexInfo* CGTexPrim2D::m_pTexCache[28]; /* COMMON in the original (linker-placed) */
 INT CGTexPrim::m_nTmpTexArea = 1;
 unsigned char C3DCPrim::m_PackReglist[8] = {1, 1, 0, 1, 0, 0, 1, 1};
 unsigned char C3DTPrim::m_PackReglist[8] = {1, 1, 0, 1, 0, 0, 1, 1};

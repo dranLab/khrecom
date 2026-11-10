@@ -1,0 +1,39 @@
+# Shifted links (docs/port-step1-shiftable.md): padding inserted into the matching build's objects, linked without
+# any pinned address. `ninja shift-<preset>` links one preset into build/SLUS_217.99/shift/<preset>/, `ninja shift`
+# all of them. Entry: section (.text .data .rodata .sdata .sbss .bss), after (a unit name, or `start` for the
+# beginning of the section), size in bytes.
+presets:
+  # code addresses, jump tables, function pointers in data
+  text128:
+    - {section: .text, after: crt0, size: 0x80}
+  # crt0 moves too (the entry point; references to its labels, like lib/table's false func_00100000)
+  text0:
+    - {section: .text, after: start, size: 0x80}
+  # data pointers, DMA chains, _gp-relative data, _end
+  data128:
+    - {section: .data, after: start, size: 0x80}
+    - {section: .rodata, after: start, size: 0x80}
+    - {section: .sdata, after: start, size: 0x80}
+    - {section: .sbss, after: start, size: 0x80}
+    - {section: .bss, after: start, size: 0x80}
+  # alignment assumptions (qword DMA data, 64-byte packets)
+  all8:
+    - {section: .text, after: crt0, size: 0x8}
+    - {section: .data, after: start, size: 0x10}
+    - {section: .rodata, after: start, size: 0x10}
+    - {section: .sdata, after: start, size: 0x10}
+    - {section: .sbss, after: start, size: 0x10}
+    - {section: .bss, after: start, size: 0x10}
+  # .bss by 8 only: the COMMON block's 16-byte statics must stay aligned (configure.py split_common)
+  # (right before the block: at the start of .bss the first object's 128-byte alignment would absorb the 8)
+  bss8:
+    - {section: .bss, after: lib/nodebug/memcmp, size: 0x8}
+  # distances between parts of the image (pointer arithmetic across units)
+  mid:
+    - {section: .text, after: Game/Map, size: 0x80}
+    - {section: .data, after: Game/Player/Player, size: 0x80}
+  # 16-bit offsets, %hi carries, memory limits (heap, _end)
+  big:
+    - {section: .text, after: crt0, size: 0x10000}
+    - {section: .data, after: start, size: 0x10000}
+    - {section: .bss, after: start, size: 0x10000}
