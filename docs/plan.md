@@ -475,6 +475,8 @@ header split the original didn't have, or make a class a template to hide its st
 | a statement's instructions carry the line marker of a later line | a multi-line statement gets the line it ends on: coord-free-inlines-map |
 | chained-assignment stores in reverse order (w first) | `x = y = z = w = f` (FVECTOR::setAll): coord-free-inlines-map |
 | nested constant-bound loops: ours strength-reduces `i++`, the original copies the inner start (`i = t3`) | the bound as a local `INT n = 4` in every loop (ask the user): loop-bound-variable-pre |
+| `mflo v1; move s6,v1` (or its reverse) around a division/inline result | mention the variable before that cse block: an initialiser on the ref's local (ask the user): early-mention-cse-canonical |
+| a far-off draft (hundreds of lines) | lay it out on the original's line markers with `#line`, then rebuild blocks from the ref's locals: map-unit-lessons |
 | an inline's parameter setup on another line than its body | the setup carries the inline's first (declarator) line; .mdebug shows pointer parameters, not references: coord-free-inlines-map |
 | an asm temporary in a callee-saved register the original keeps from entry | an input operand the asm overwrites (live from entry, one use): coord-free-inlines-map |
 | struct argument built from four `lhu` + dsll/or | `_NORMA_PIECES` in `System/Graphic/2d/2DCard.h` |
