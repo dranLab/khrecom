@@ -29,8 +29,12 @@ extern "C" void AssertApp(char* pszFile, int nLine, char* pszMsg, char* pszExp);
 #include "System/Graphic/WorldEnv.h"
 #line 35
 
+/* The original's Math3D.h:133-137 inline (parameter setup on 133, abs.s on 137; ref locals inValue, ret). MATCH: asm
+ * volatile keeps InvMatrix's first abs.s next to its load. */
 static inline FLOAT _fabsf(FLOAT inValue) {
-    return __builtin_fabsf(inValue);
+    FLOAT ret;
+    asm volatile("abs.s %0, %1" : "=f"(ret) : "f"(inValue));
+    return ret;
 }
 
 
@@ -45,19 +49,6 @@ static inline FLOAT _fabsf(FLOAT inValue) {
 
 static inline void _initTrans(FMATRIX& m) {
     m.v[3].init0();
-}
-
-static inline void _unitMatrix(FMATRIX& m) { /* the parked InvMatrix draft's (vu0.h's vu0UnitMatrix) */
-    asm volatile("vmr32.xyzw $vf1, $vf0\n"
-                 "sqc2 $vf0, 0x30(%0)\n"
-                 "vmr32.xyzw $vf2, $vf1\n"
-                 "sqc2 $vf1, 0x20(%0)\n"
-                 "vmr32.xyzw $vf3, $vf2\n"
-                 "sqc2 $vf2, 0x10(%0)\n"
-                 "sqc2 $vf3, 0x0(%0)\n"
-                 :
-                 : "r"(&m)
-                 : "memory");
 }
 
 static inline FLOAT _sqrtf(FLOAT x) {
@@ -1515,18 +1506,12 @@ BOOL Math3D::HitPillarBall(const FVECTOR& m, const FVECTOR& n, const FVECTOR& c,
     return HitLineBall(m, n, c, mnr + cr);
 }
 
-/* Parked: 90 of 248 lines (2026-11-09): the outer loop of the elimination hoists 1e-8/-1e-8 (lui/ori/mtc1 into
- * $f5/$f4) in loop pass 2 (-dL: 118 real insns; the original keeps them in the loop, so it had 123-125 there), which
- * shifts every register after it (&c in s1 instead of a3, i in t0, k-part temps) and turns bnezl into bnez.
- * Found: the original .mdebug tree has ONE function-level i (t1) and no blocks in the k part (this draft's
- * `for (INT i` are not the original's), tmp in the `if (pibot != i)` block, only two fabs inlines (the pivot
- * search keeps |a[j][i]| in a local .mdebug omits: fAbs here), and a two-level unit-matrix inline (Coord.h:910 ->
- * vu0.h:391). With the shared i the 1e-8 stay inside (pass 2: 125 insns) but loop pass 1 strength-reduces i (147
- * lines): gcse PRE leaves `i++` as is because lcm.c compute_isoinout calls it isolated (the k part recomputes i+1 on
- * every path); the original's `i = t3` copy needs an exit path before the k part's first i+1 at gcse time (a
- * non-constant k start shows it: insn redundant, no biv). asm volatile abs.s for _fabsf (Entity/SummonCloud form):
- * 85. tried: block-tree shapes, fabs forms, swap order, unit-matrix chain, -dL/-dG dumps; no permuter (not a near
- * miss) */
+/* Parked: 0 of 236 lines (2026-11-10): the draft below matches, but it needs `INT n = 4;`, a local the ref lacks
+ * (invisible in the .mdebug: gcse's cprop replaces every use by 4; with it the block tree equals the original's), used
+ * as every loop bound; waits for the user's decision (memory no-filler-locals: a used invisible local that replaces a
+ * repeated literal). Without n: 147 lines (gcse PRE calls i + 1 isolated, loop.c strength-reduces i), n only in the
+ * k part: 57, const n: 147, literal in the swap loop: 47. Also needed: _fabsf as the asm volatile abs.s (Math3D.h:137)
+ * and c.init() (Coord.h:910). */
 #if 0
 void Math3D::InvMatrix(FMATRIX& outMat, const FMATRIX& inMat) {
     FMATRIX a;
@@ -1536,14 +1521,20 @@ void Math3D::InvMatrix(FMATRIX& outMat, const FMATRIX& inMat) {
     INT k;
     INT pibot;
     FLOAT fMax;
+    /* MATCH: the matrix size as a variable, not a literal. It is invisible in the .mdebug (gcse's cprop replaces every
+     * use by 4, so it never gets a register; with it our .mdebug tree equals the original's). The loops starting at a
+     * constant keep their initial test until cse2 (cse1 can't fold i < n), and those paths let gcse PRE turn every
+     * i++ into the original's copy of the j start value (i = t3). With literals PRE calls i + 1 isolated and loop.c
+     * strength-reduces i (147 lines); with n only in the k part, loop pass 2 hoists the 1e-8 constants (57). */
+    INT n = 4;
 
     a = inMat;
-    _unitMatrix(c);
-    for (i = 0; i < 4; i++) {
+    c.init();
+    for (i = 0; i < n; i++) {
         fMax = _fabsf(a.m[i][i]);
         pibot = i;
-        for (j = i + 1; j < 4; j++) {
-            FLOAT fAbs = _fabsf(a.m[j][i]);
+        for (j = i + 1; j < n; j++) {
+            FLOAT fAbs = _fabsf(a.m[j][i]); /* invisible in the .mdebug too (copy-propagated): 2 fabs inlines there */
             if (fAbs > fMax) {
                 fMax = fAbs;
                 pibot = j;
@@ -1551,7 +1542,7 @@ void Math3D::InvMatrix(FMATRIX& outMat, const FMATRIX& inMat) {
         }
         if (pibot != i) {
             FLOAT tmp;
-            for (j = 0; j < 4; j++) {
+            for (j = 0; j < n; j++) {
                 tmp = a.m[pibot][j];
                 a.m[pibot][j] = a.m[i][j];
                 a.m[i][j] = tmp;
@@ -1560,26 +1551,23 @@ void Math3D::InvMatrix(FMATRIX& outMat, const FMATRIX& inMat) {
                 c.m[i][j] = tmp;
             }
         }
-        if (a.m[i][i] == 0.0f) {
-            a.m[i][i] = 1e-08f;
-        } else if (a.m[i][i] == -0.0f) {
-            a.m[i][i] = -1e-08f;
-        }
-        for (j = i + 1; j < 4; j++) {
+        if (a.m[i][i] == 0.0f) a.m[i][i] = 1e-08f;
+        else if (a.m[i][i] == -0.0f) a.m[i][i] = -1e-08f;
+        for (j = i + 1; j < n; j++) {
             a.m[j][i] /= a.m[i][i];
-            for (k = i + 1; k < 4; k++) {
+            for (k = i + 1; k < n; k++) {
                 a.m[j][k] -= a.m[i][k] * a.m[j][i];
             }
         }
     }
-    for (k = 0; k < 4; k++) {
-        for (INT i = 0; i < 4; i++) {
-            for (j = i + 1; j < 4; j++) {
+    for (k = 0; k < n; k++) {
+        for (i = 0; i < n; i++) {
+            for (j = i + 1; j < n; j++) {
                 c.m[j][k] -= c.m[i][k] * a.m[j][i];
             }
         }
-        for (INT i = 3; i >= 0; i--) {
-            for (j = i + 1; j < 4; j++) {
+        for (i = n - 1; i >= 0; i--) {
+            for (j = i + 1; j < n; j++) {
                 c.m[i][k] -= a.m[i][j] * c.m[j][k];
             }
             c.m[i][k] /= a.m[i][i];
