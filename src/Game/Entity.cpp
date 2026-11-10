@@ -637,8 +637,8 @@ BOOL CEntity::entityVisibleAxisY(const CEntity* inEntity, FLOAT inAngle) {
 void CEntity::positionFix(const FVECTOR& inPos, FLOAT inDir) {
     setPos(inPos);
     setOldPos(inPos);
-    FVECTOR vRot;
-    vRot.set(0.0f, inDir, 0.0f);
+    FVECTOR vRot = {0.0f, inDir, 0.0f, 1.0f};
+
     setRot(vRot);
     updateCoord();
     coordFix();

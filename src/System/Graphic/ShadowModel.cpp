@@ -265,15 +265,15 @@ static QWdata* setSdwTSprite32(QWdata* qp, FIX4 plsx, FIX4 plsy, UINT z, FLOAT f
     pv[1].y = pv[0].y + (sdw_SCREEN_HEIGHT << 4);
     if (fScale != 1.0f) {
         fRate = 1.0f / fScale;
-        fvUVPosUL.x = sdw_SCREEN_WIDTH / 2;
-        fvUVPosUL.y = sdw_SCREEN_HEIGHT / 2;
-        fvUVPosUL.z = 0.0f;
-        fvUVPosUL.w = 0.0f;
+        fvUVPosUL.set(sdw_SCREEN_WIDTH / 2, sdw_SCREEN_HEIGHT / 2, 0.0f, 0.0f);
+
+
+
         ScaleVector(fvUVPosUL, fvUVPosUL, 1.0f - fRate);
-        fvUVRect.x = sdw_SCREEN_WIDTH;
-        fvUVRect.y = sdw_SCREEN_HEIGHT;
-        fvUVRect.z = 0.0f;
-        fvUVRect.w = 0.0f;
+        fvUVRect.set(sdw_SCREEN_WIDTH, sdw_SCREEN_HEIGHT, 0.0f, 0.0f);
+
+
+
         ScaleVector(fvUVRect, fvUVRect, fRate);
         FTOI4Vector(ivUVPosUL, fvUVPosUL);
         fvUVRect.x *= 0.0625f;

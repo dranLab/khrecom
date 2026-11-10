@@ -478,10 +478,10 @@ static BOOL __isRect(const FVECTOR& v, const FVECTOR* vRect) {
     FVECTOR __CCTPrim_vDefRect;
     INT iRet;
     if (vRect == NULL) {
-        __CCTPrim_vDefRect.x = -256.0f;
-        __CCTPrim_vDefRect.y = -SCREEN_HEIGHT / 2;
-        __CCTPrim_vDefRect.z = 512.0f;
-        __CCTPrim_vDefRect.w = SCREEN_HEIGHT;
+        __CCTPrim_vDefRect.set(-256.0f, -SCREEN_HEIGHT / 2, 512.0f, SCREEN_HEIGHT);
+
+
+
         vRect = &__CCTPrim_vDefRect;
     }
     __asm__ volatile(

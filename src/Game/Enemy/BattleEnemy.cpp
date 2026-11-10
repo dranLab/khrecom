@@ -1821,10 +1821,10 @@ void CBattleEnemy::beginStateBeat() {
     } else {
         changeDamageMotion(m_pEnemyParam->iDamageMotionIndex[8], 0, 0, -1);
     }
-    vel.x = 0.0f;
-    vel.y = -0.2f;
-    vel.z = 0.0f;
-    vel.w = 1.0f;
+    vel.set(0.0f, -0.2f, 0.0f, 1.0f);
+
+
+
     m_pMove->setVel(vel);
     m_pMove->enableGravity(TRUE);
     playBigDamageSE();

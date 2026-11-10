@@ -85,10 +85,10 @@ static inline FLOAT _limitRot(FLOAT r) {
 
 
 static inline void _setOne(FVECTOR& v) {
-    v.x = 1.0f;
-    v.y = 1.0f;
-    v.z = 1.0f;
-    v.w = 1.0f;
+    v.set(1.0f, 1.0f, 1.0f, 1.0f);
+
+
+
 }
 
 static inline FLOAT _sqrtf(FLOAT x) {

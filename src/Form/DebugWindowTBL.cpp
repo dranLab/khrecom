@@ -2826,10 +2826,10 @@ static BOOL debugWinDispBrightLineCall(CDebugWindow* pObj, INT iLineY, INT inPar
     if (inParam & 0x10) {
         FVECTOR vColor;
         FLOAT _x = DebugWork::g_dw.sys.m_fMapBright;
-        vColor.x = _x;
-        vColor.y = _x;
-        vColor.z = _x;
-        vColor.w = 1.0f;
+        vColor.set(_x, _x, _x, 1.0f);
+
+
+
         CSceneEnv::setColor((ObjType::eObjBit)0xF88, 0.0f, vColor, NULL, 3);
     }
     return TRUE;

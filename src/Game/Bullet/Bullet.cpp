@@ -546,10 +546,10 @@ HANDLE CBullet::makeEffect(INT inID) {
         vecUp.y = 1.0f;
         normal = m_pMove->getDetectNormal();
         if (-1e-05f < normal.x && normal.x < 1e-05f && -1e-05f < normal.z && normal.z < 1e-05f) {
-            vecRight.x = -normal.y;
-            vecRight.y = 0.0f;
-            vecRight.z = 0.0f;
-            vecRight.w = 0.0f;
+            vecRight.set(-normal.y, 0.0f, 0.0f, 0.0f);
+
+
+
         } else {
             OuterProduct(vecRight, vecUp, normal);
         }
@@ -648,10 +648,10 @@ void CBullet::updateShadow() {
         vecUp.y = 1.0f;
         normal = *coll->getDetectNormal();
         if (-1e-05f < normal.x && normal.x < 1e-05f && -1e-05f < normal.z && normal.z < 1e-05f) {
-            vecRight.x = normal.y;
-            vecRight.y = 0.0f;
-            vecRight.z = 0.0f;
-            vecRight.w = 0.0f;
+            vecRight.set(normal.y, 0.0f, 0.0f, 0.0f);
+
+
+
         } else {
             OuterProduct(vecRight, vecUp, normal);
         }

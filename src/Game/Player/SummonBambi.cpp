@@ -247,10 +247,10 @@ void CSummonBambi::stateAction2() {
                 FLOAT theta = m_pAtkData->WORK1 * 0.017453292f;
                 FLOAT s = sinf(theta);
                 FLOAT c = cosf(theta);
-                vel.y = s;
-                vel.z = c;
-                vel.w = 1.0f;
-                vel.x = 0.0f;
+                vel.set(0.0f, s, c, 1.0f);
+
+
+
                 m_pMove->calcVelocity(m_pMove->calcOrbitSpeedFromDistance(theta, m_fDist), vel);
                 vel = m_pMove->getVel();
             } else {

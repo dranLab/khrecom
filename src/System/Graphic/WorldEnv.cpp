@@ -236,10 +236,10 @@ static void _makeViewClipMatrix() {
 }
 
 void CWorldEnv::setFogParam(FLOAT fNear, FLOAT fFar, FLOAT fMax, FLOAT fMin) {
-    _vecFogParam.x = fNear;
-    _vecFogParam.y = fFar;
-    _vecFogParam.z = (fMin - fMax) / (fFar - fNear);
-    _vecFogParam.w = (fMax - fMin) * fFar / (fFar - fNear) + fMin;
+    _vecFogParam.set(fNear, fFar, (fMin - fMax) / (fFar - fNear), (fMax - fMin) * fFar / (fFar - fNear) + fMin);
+
+
+
     CEffectMan::setFogRange(fNear, fFar);
     CEffectMan::setFogClamp((INT)fMin, (INT)fMax);
 }

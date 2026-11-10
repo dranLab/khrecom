@@ -489,10 +489,10 @@ CEncountEffectTask::~CEncountEffectTask() {
     }
     if (!CGame::isBlackBeforeEncount()) {
         FVECTOR vColor;
-        vColor.x = 1.0f;
-        vColor.y = 1.0f;
-        vColor.z = 1.0f;
-        vColor.w = 1.0f;
+        vColor.set(1.0f, 1.0f, 1.0f, 1.0f);
+
+
+
         CSceneEnv::setColor((ObjType::eObjBit)0xFFFEFFFF, 0.0f, vColor, NULL, 0);
     }
     _setBattleBGM();

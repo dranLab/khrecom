@@ -188,10 +188,10 @@ HANDLE CLockOnManager::changeLockOnObject_(HANDLE inHandle) {
     FLOAT y = CPadHandler::getAnalogRY(0) * (1.0f / 4096.0f);
     if (x == 0.0f && y == 0.0f) return 0;
     FVECTOR dir;
-    dir.x = x;
-    dir.y = y;
-    dir.z = 0.0f;
-    dir.w = 1.0f;
+    dir.set(x, y, 0.0f, 1.0f);
+
+
+
     Normalize(dir, dir);
     FLOAT deg = atan2f(dir.x, dir.y);
     FMATRIX& m = CWorldEnv::getWorldScreenMatrix();

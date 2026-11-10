@@ -352,10 +352,10 @@ void C2DSeqScrollbarCtrl::updateForm() {
 
     fBodySize = _round1(m_fMaxBodySize * m_fBodyRatio);
     fBodyScale = fBodySize / m_fBaseBodySize;
-    v.x = 1.0f;
-    v.y = fBodyScale;
-    v.z = 1.0f;
-    v.w = 0.0f;
+    v.set(1.0f, fBodyScale, 1.0f, 0.0f);
+
+
+
     m_pCtrls[1]->setScl(v);
     if (m_pCtrls[0]) {
         FLOAT fMovable = m_fMaxBodySize - fBodySize;

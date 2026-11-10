@@ -208,10 +208,10 @@ void CGimmickCarry::stateMain() {
         m_Wait += getFrameRateF();
         if (m_Wait >= 6.0f) {
             FVECTOR v;
-            v.x = 0.0f;
-            v.w = 1.0f;
-            v.y = 0.0f;
-            v.z = 0.0f;
+            v.set(0.0f, 0.0f, 0.0f, 1.0f);
+
+
+
             m_pMove->setVel(v);
             changeMotion(2, 0, FALSE, 0, 0, 0);
             m_pMove->setFlag(1, 0);
@@ -312,17 +312,17 @@ void CGimmickCarry::CarryliftStart() {
         rotY -= CARRY_PI;
     }
     rotY = Math3D::LimitPI(rotY);
-    v.x = 0.0f;
-    v.y = 1.0f;
-    v.z = 0.0f;
-    v.w = 1.0f;
+    v.set(0.0f, 1.0f, 0.0f, 1.0f);
+
+
+
     Quaternion::QuaternionNormalize(m_rotQtn, m_rotQtn);
     Quaternion::QuaternionRotationAxis(m_rotQtn, v, -rotY);
     setDispOffFlag(2, 0);
-    v.x = 0.0f;
-    v.y = 0.0f;
-    v.z = 0.0f;
-    v.w = 1.0f;
+    v.set(0.0f, 0.0f, 0.0f, 1.0f);
+
+
+
     setRot(v);
     setPos(v);
     warp(v);

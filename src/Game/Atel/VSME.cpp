@@ -2599,7 +2599,7 @@ struct AvatarMotionParamEx2 {
 };
 /* Math3D.h:137 and coord.h:730 in the original ($LM tags); the volatile abs.s keeps the original order (a scheduling barrier) */
 static inline FLOAT FABS(FLOAT f) { FLOAT r; __asm__ volatile("abs.s %0, %1" : "=f"(r) : "f"(f)); return r; }
-static inline void setFVector(FVECTOR& v, FLOAT _x, FLOAT _y, FLOAT _z) { v.x = _x; v.y = _y; v.z = _z; v.w = 1.0f; }
+
 INT CVSM::execExt2Code(INT op, eATEL_REQ_RET& ret) {
     INT nID;
     INT c;
@@ -2648,7 +2648,7 @@ INT CVSM::execExt2Code(INT op, eATEL_REQ_RET& ret) {
             if (CCameraMan::instance().reqCommand(0x452, NULL, i1) == 1) CCameraMan::instance().reqCommand(0x44F, NULL, i1);
             CMCP.pathDateTargetID = 0;
             CMCP.fOffsetY = 1.5f;
-            setFVector(CMCP.cameraPos, f2, f3, f4);
+            CMCP.cameraPos.set(f2, f3, f4);
             CMCP.changeKind = i5 & 0xFF;
             CMCP.changeKind2 = (i5 >> 8) & 0xFF;
             CMCP.pCvsm = this;
@@ -2717,8 +2717,8 @@ INT CVSM::execExt2Code(INT op, eATEL_REQ_RET& ret) {
             if (CCameraMan::instance().reqCommand(0x452, NULL, i0) == 1) CCameraMan::instance().reqCommand(0x44F, NULL, i0);
             CMCP.fOffsetY = 1.5f;
             CMCP.pathDateTargetID = 0;
-            setFVector(CMCP.cameraPos, f2, f3, f4);
-            setFVector(CMCP.targetPos, f5, f6, f7);
+            CMCP.cameraPos.set(f2, f3, f4);
+            CMCP.targetPos.set(f5, f6, f7);
             CMCP.changeKind = i1 & 0xFF;
             CMCP.changeKind2 = (i1 >> 8) & 0xFF;
             if (op == 0xA1) f9 += 1000.0f;
@@ -3576,10 +3576,10 @@ INT CVSM::execExt3Code(INT op, eATEL_REQ_RET& ret) {
             case 11: {
                 PRIZE_PARAM_C param;
                 param.PrizeKind = 0x31;
-                setFVector(param.vPos, 0.0f, 0.8f, 3.0f);
+                param.vPos.set(0.0f, 0.8f, 3.0f);
                 param.iNumber = 0;
                 param.uiFlag = 0;
-                setFVector(param.vRot, 0.0f, 0.0f, 0.0f);
+                param.vRot.set(0.0f, 0.0f, 0.0f);
                 param.fSpeed = 0.0f;
                 CEntityFactory::getInstance()->createPrize(param, NULL);
                 break;
@@ -4347,8 +4347,8 @@ INT CVSM::execExt3Code(INT op, eATEL_REQ_RET& ret) {
             if (!(CWorldEnv::getActiveCamera())) AssertApp(__FILE__, __LINE__, "CWorldEnv::getActiveCamera()", 0);
             FVECTOR vPos;
             FVECTOR vRot;
-            setFVector(vPos, 0.0f, 0.0f, f);
-            setFVector(vRot, 0.0f, 3.1415927f, 0.0f);
+            vPos.set(0.0f, 0.0f, f);
+            vRot.set(0.0f, 3.1415927f, 0.0f);
             m_hEffect = CEffectMan::attachEffect((CHAR*)(m_pDseg + i1), i2, (ObjType::eObjType)0xD, &CWorldEnv::getActiveCamera()->Crd(0), &vPos, &vRot, 0.0f);
             CEffect* pEffect = CEffectMan::getEffect(m_hEffect);
             if (pEffect) pEffect->setDrawLast(0);
@@ -4523,8 +4523,8 @@ INT CVSM::execExt3Code(INT op, eATEL_REQ_RET& ret) {
             AvatarSetLook look;
             look.TargetID = searchActor((CHAR*)(m_pDseg + i2));
             look.BoneName = (char*)(m_pDseg + i1);
-            setFVector(look.LookMin, DEG2RAD(f20), DEG2RAD(f21), DEG2RAD(f22));
-            setFVector(look.LookMax, DEG2RAD(f23), DEG2RAD(f24), DEG2RAD(f25));
+            look.LookMin.set(DEG2RAD(f20), DEG2RAD(f21), DEG2RAD(f22));
+            look.LookMax.set(DEG2RAD(f23), DEG2RAD(f24), DEG2RAD(f25));
             look.OffsetY = f26;
             look.Rate = f27;
             m_pCurrentActor->_pAvatar->reqCommand(0x30, &look, 0);
@@ -4557,9 +4557,9 @@ INT CVSM::execExt3Code(INT op, eATEL_REQ_RET& ret) {
             TRACE("LAG:%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n", m_pDseg + i1, f20, f21, f22, f23, f24, f25, f26, f27, f28, f29);
             AvatarSetLookAngle look;
             look.BoneName = (char*)(m_pDseg + i1);
-            setFVector(look.LookAngle, DEG2RAD(f20), DEG2RAD(f21), DEG2RAD(f22));
-            setFVector(look.LookMin, DEG2RAD(f23), DEG2RAD(f24), DEG2RAD(f25));
-            setFVector(look.LookMax, DEG2RAD(f26), DEG2RAD(f27), DEG2RAD(f28));
+            look.LookAngle.set(DEG2RAD(f20), DEG2RAD(f21), DEG2RAD(f22));
+            look.LookMin.set(DEG2RAD(f23), DEG2RAD(f24), DEG2RAD(f25));
+            look.LookMax.set(DEG2RAD(f26), DEG2RAD(f27), DEG2RAD(f28));
             look.Rate = f29;
             m_pCurrentActor->_pAvatar->reqCommand(0x32, &look, 0);
             break;
@@ -4572,7 +4572,7 @@ INT CVSM::execExt3Code(INT op, eATEL_REQ_RET& ret) {
             TRACE("UDA:%f,%f,%f,%f\n", f20, f21, f22, f23);
             AvatarSetLookAngle look;
             look.Rate = f23;
-            setFVector(look.LookAngle, DEG2RAD(f20), DEG2RAD(f21), DEG2RAD(f22));
+            look.LookAngle.set(DEG2RAD(f20), DEG2RAD(f21), DEG2RAD(f22));
             m_pCurrentActor->_pAvatar->reqCommand(0x33, &look, 0);
             break;
         }
@@ -4897,7 +4897,7 @@ INT CVSM::execExt3Code(INT op, eATEL_REQ_RET& ret) {
             param.pathDateTargetID = nIdx;
             if (i5 >= 0) param.changeFlag = 0; else param.changeFlag = 1;
             param.pathDateLocalID = 0;
-            setFVector(param.cameraPos, f1, f2, f3);
+            param.cameraPos.set(f1, f2, f3);
             param.changeKind = i5 & 0xFF;
             param.changeKind2 = (i5 >> 8) & 0xFF;
             param.fChangeRate = fRate + 1000.0f;
@@ -4922,7 +4922,7 @@ INT CVSM::execExt3Code(INT op, eATEL_REQ_RET& ret) {
             CameraManCreateParam param;
             param.fOffsetY = 1.5f;
             param.pathDateTargetID = nIdx;
-            setFVector(param.cameraPos, f1, f2, f3);
+            param.cameraPos.set(f1, f2, f3);
             param.changeKind = i5 & 0xFF;
             param.changeKind2 = (i5 >> 8) & 0xFF;
             param.fChangeRate = fRate + 1000.0f;
@@ -4949,7 +4949,7 @@ INT CVSM::execExt3Code(INT op, eATEL_REQ_RET& ret) {
             CameraManCreateParam param;
             param.fOffsetY = 1.5f;
             param.pathDateTargetID = nIdx;
-            setFVector(param.cameraPos, f1, f2, f3);
+            param.cameraPos.set(f1, f2, f3);
             param.changeKind = i5 & 0xFF;
             param.changeKind2 = (i5 >> 8) & 0xFF;
             param.fChangeRate = fRate + 1000.0f;
@@ -5115,7 +5115,7 @@ INT CVSM::execExt3Code(INT op, eATEL_REQ_RET& ret) {
             FLOAT f1 = m_S[m_SP--].F;
             INT i1 = m_S[m_SP--].I;
             FVECTOR vPos;
-            setFVector(vPos, f1, f2, f3);
+            vPos.set(f1, f2, f3);
             m_hEffect = CEffectMan::setEffect((CHAR*)(m_pDseg + m_S[m_SP].I), i1, (ObjType::eObjType)4, &vPos, NULL, 0.0f);
             break;
         }

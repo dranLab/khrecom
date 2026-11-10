@@ -240,10 +240,10 @@ void CLevelUp::main() {
         m_pExplaneCtrl = new (__FILE__ "(248)") C2DSeqCtrl;
         m_pExplaneCtrl->setLayer(12);
         m_pExplaneCtrl->enableColorCtrl(TRUE);
-        vec.x = 26.0f;
-        vec.y = 368.0f;
-        vec.z = 0.0f;
-        vec.w = 1.0f;
+        vec.set(26.0f, 368.0f, 0.0f, 1.0f);
+
+
+
         m_pExplaneCtrl->setPos(vec);
         m_pExplaneCtrl->addSeq(m_pSeqName, 0x41);
         rgba.col = 0x807C7C7C;
@@ -579,10 +579,10 @@ INT CLevelUp::setWinAb(INT nSetCmd) {
     switch (nSetCmd) {
     case 0:
         rgba.col = 0x807C7C7C;
-        vec.x = 0.0f;
-        vec.y = 96.0f;
-        vec.z = 0.0f;
-        vec.w = 1.0f;
+        vec.set(0.0f, 96.0f, 0.0f, 1.0f);
+
+
+
         for (INT i = 0; i < 3; i++) {
 #line 747
             p2DSeqCtrl = m_pWinAbCtrl[i] = new (__FILE__ "(747)") C2DSeqCtrl;
@@ -699,10 +699,10 @@ INT CLevelUp::setWinLvl(INT nSetCmd) {
 
     switch (nSetCmd) {
     case 0:
-        vec.x = 365.0f;
-        vec.y = 46.0f;
-        vec.z = 0.0f;
-        vec.w = 1.0f;
+        vec.set(365.0f, 46.0f, 0.0f, 1.0f);
+
+
+
         rgba.col = 0x807C7C7C;
 #line 912
         m_pLevelCtrl = new (__FILE__ "(912)") C2DSeqCtrl;
@@ -746,10 +746,10 @@ INT CLevelUp::setEffect(INT nSetCmd) {
 
     switch (nSetCmd) {
     case 0:
-        vec.x = 380.0f;
-        vec.y = 150.0f;
-        vec.z = 0.0f;
-        vec.w = 1.0f;
+        vec.set(380.0f, 150.0f, 0.0f, 1.0f);
+
+
+
 #line 975
         m_pEffectCtrl = new (__FILE__ "(975)") C2DSeqCtrl;
         m_pEffectCtrl->setLayer(12);
@@ -775,10 +775,10 @@ INT CLevelUp::setEffect(INT nSetCmd) {
 #line 1003
         m_pUpEffectCtrl = new (__FILE__ "(1003)") C2DSeqCtrl;
         m_pUpEffectCtrl->setLayer(15);
-        vec.x = 120.0f;
-        vec.y = 0.0f;
-        vec.z = 0.0f;
-        vec.w = 1.0f;
+        vec.set(120.0f, 0.0f, 0.0f, 1.0f);
+
+
+
         m_pUpEffectCtrl->setLocalPos(vec);
         m_pUpEffectCtrl->addSeq(pCockpitSeqName, 0x3D);
         break;
@@ -857,10 +857,10 @@ void CLevelUp::moveCursor(FLOAT fFrameRate) {
     if (m_fgCursorMove == 0) return;
     if (m_pCursorCtrl == NULL) return;
     if (m_fgCursorMove < 0) {
-        vec.x = 236.0f;
-        vec.y = m_nSelect * 94.0f + 90.0f;
-        vec.z = 0.0f;
-        vec.w = 1.0f;
+        vec.set(236.0f, m_nSelect * 94.0f + 90.0f, 0.0f, 1.0f);
+
+
+
         m_pCursorCtrl->setPos(vec);
         vec.x += -4.0f;
         vec.y += -24.0f;

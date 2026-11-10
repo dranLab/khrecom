@@ -4803,7 +4803,7 @@ void CPlayer::procAttackMove(TIMEQ inNowFrame, FLOAT inRadius, FLOAT inMaxSpeed,
         vec.y = 0.0f;
         m_fDistXZ = _sqrtf(InnerProduct(vec, vec));
         FLOAT d = Movement::Homing(m_fDir, atan2f(dir.x, dir.z), inRate, m_fFrameRate);
-        vec.y = d;
+        vec.y = d; /* the original: FVECTOR::set (Coord.h:730); set() here gives other store order */
         vec.x = 0.0f;
         vec.z = 0.0f;
         vec.w = 1.0f;
@@ -6059,8 +6059,8 @@ void CPlayer::setConfuse(INT inFlag, TIMEQ inTime) {
         m_tqConfuse = tq;
         m_uiConditionFlag = uiCond | 8;
         m_uiPadFlag = uiPad | 4;
-        FVECTOR pos;
-        pos.set(0.0f, 0.65f, 0.0f);
+        FVECTOR pos = {0.0f, 0.65f, 0.0f, 1.0f};
+
         m_hEffBad = attachEffect(PL::g_szDpxAbnormal, 2, &Crd(m_iBoneCenter), &pos, NULL, 0.0f);
         CEffect* effect = CEffectMan::getEffect(m_hEffBad);
         if (effect) effect->m_iFlag |= 4;
@@ -6256,7 +6256,7 @@ void CPlayer::setCure(INT inID, INT inPow) {
     FVECTOR pos;
     INT no = inID - 14;
     if (inID == 0x33) no = 0;
-    pos.set(0.0f, 0.85f, 0.0f);
+    pos.set(0.0f, 0.85f, 0.0f); /* the original: a brace init (stores on the declaration line); that form swaps $f0/$f1 here */
     CEffect* effect = CEffectMan::getEffect(attachEffect(PL::g_EffTbl_Skill[inID][1].pEffectName, no, &Crd(0), &pos, NULL, 0.0f));
     if (effect) effect->m_iFlag |= 4;
     addHP(inPow, 0, 1);
@@ -6471,8 +6471,8 @@ void CPlayer::exeEscape() {
     }
 }
 void CPlayer::setBGFade(FLOAT inRate, FLOAT inTime, INT inFlag) {
-    FVECTOR v;
-    v.set(inRate, inRate, inRate, 1.0f);
+    FVECTOR v = {inRate, inRate, inRate, 1.0f};
+
     setBGFade(v, inTime, inFlag);
 }
 void CPlayer::setBGFade(FVECTOR& inColor, FLOAT inFrame, INT inFlag) {
@@ -6528,8 +6528,8 @@ INT CPlayer::exeWarp(INT inSet) {
 void CPlayer::setBanish(INT inFlag) {
     if (!inFlag) {
         setConditionFlag(0, 0x40);
-        FVECTOR vColor;
-        vColor.set(1.0f, 1.0f, 1.0f);
+        FVECTOR vColor = {1.0f, 1.0f, 1.0f, 1.0f};
+
         CSceneEnv::setColor((ObjType::eObjBit)2, 30.0f, vColor, NULL, 2);
     } else {
         setConditionFlag(0x40, 0);
@@ -6539,8 +6539,8 @@ void CPlayer::setBanish(INT inFlag) {
 }
 void CPlayer::exeBanish() {
     if (isConditionFlag(0x40)) {
-        FVECTOR vColor;
-        vColor.set(1.0f, 1.0f, 1.0f, 0.5f);
+        FVECTOR vColor = {1.0f, 1.0f, 1.0f, 0.5f};
+
         vColor.w = (cosf((FLOAT)m_tqBanish * 0.0006f) + 1.0f) * 0.5f * 0.85f + 0.1f;
         CSceneEnv::setColor((ObjType::eObjBit)2, 0.0f, vColor, NULL, 2);
         m_tqBanish += m_tqFrameRate;
