@@ -1687,19 +1687,19 @@ INT getWorldRotY(FLOAT& outRotY, const FMATRIX& inMat) {
     float fDist[3];
     INT i;
     for (i = 0; i < 3; i++) {
-        register INT iTmp asm("$9");
-        FLOAT ret;
-        asm volatile("lqc2 $vf4, 0x0(%2)\n"
-                     "vaddy.x $vf6, $vf0, $vf4y\n"
-                     "vaddz.x $vf7, $vf0, $vf4z\n"
-                     "vmulax.x $ACC, $vf4, $vf4x\n"
-                     "vmadday.x $ACC, $vf6, $vf4y\n"
-                     "vmaddz.x $vf5, $vf7, $vf4z\n"
-                     "qmfc2 %1, $vf5\n"
-                     "mtc1 %1, %0\n"
-                     : "=f"(ret), "=r"(iTmp)
-                     : "r"(&mMat.v[i]));
-        fDist[i] = _sqrtf(ret);
+        fDist[i] = _sqrtf(vu0LengthSq(mMat.v[i]));
+
+
+
+
+
+
+
+
+
+
+
+
         if (fDist[i] < 0.0001f) return 0;
     }
     DivVector(mMat.v[0], mMat.v[0], fDist[0]);

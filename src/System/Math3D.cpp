@@ -416,20 +416,20 @@ void Quaternion::QuaternionMulVector(QUATERNION& outQuat, const QUATERNION& inQu
 }
 
 FLOAT Math3D::VectorLength(const FVECTOR& inVector) {
-    INT iTmp;
-    FLOAT ret;
-    asm volatile("lqc2 $vf4, 0x0(%1)\n"
-                 "vaddy.x $vf6, $vf0, $vf4y\n"
-                 "vaddz.x $vf7, $vf0, $vf4z\n"
-                 "vmulax.x $ACC, $vf4, $vf4x\n"
-                 "vmadday.x $ACC, $vf6, $vf4y\n"
-                 "vmaddz.x $vf5, $vf7, $vf4z\n"
-                 "qmfc2 $v0, $vf5\n"
-                 "mtc1 $v0, %0\n"
-                 : "=f"(ret)
-                 : "r"(&inVector)
-                 : "$2");
-    return _sqrtf(ret);
+    return _sqrtf(vu0LengthSq(inVector));
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
 
 FLOAT Math3D::VectorLengthSq(const FVECTOR& inVector) {

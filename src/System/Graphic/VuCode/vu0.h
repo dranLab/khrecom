@@ -179,6 +179,25 @@ inline void vu0OuterProduct(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2) {
                  "vopmsub.xyz $vf6, $vf5, $vf4\n"
                  "sqc2 $vf6, 0x0(%0)" : : "r"(&v0), "r"(&v1), "r"(&v2) : "memory");
 }
+#line 535
+inline FLOAT vu0LengthSq(const FVECTOR& v) {
+    INT iTmp;
+    FLOAT ret;
+    /* MATCH: iTmp is an input the asm overwrites (qmfc2.ni into it, mtc1 from it; C has no GPR -> FPR move
+     * without memory): read before written, it is live from the caller's entry and ranks as one use, which
+     * gives the original's registers (s3 in EffectMan _updateCoord, s5/s6 in DispList's ShadowMap insert, t1 in
+     * PlayerManager getWorldRotY); "=r" or "+r" do not */
+
+    asm volatile("lqc2 $vf4, 0x0(%1)\n"
+                 "vaddy.x $vf6, $vf0, $vf4y\n"
+                 "vaddz.x $vf7, $vf0, $vf4z\n"
+                 "vmulax.x $ACC, $vf4, $vf4x\n"
+                 "vmadday.x $ACC, $vf6, $vf4y\n"
+                 "vmaddz.x $vf5, $vf7, $vf4z\n"
+                 "qmfc2.ni %2, $vf5\n"
+                 "mtc1 %2, %0" : "=f"(ret) : "r"(&v), "r"(iTmp));
+    return ret;
+}
 #line 562
 inline void vu0Normalize(FVECTOR& v0, const FVECTOR& v1) {
 
@@ -262,9 +281,9 @@ inline void vu0ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT t) {
 
 
 
-
-
-    asm volatile("lqc2 $vf4, 0x0(%0)" : : "r"(&v1)); register FLOAT t3 asm("$3") = t; asm volatile("qmtc2.ni %0, $vf5\n" "vmulx.xyz $vf4, $vf4, $vf5x\n" "sqc2 $vf4, 0x0(%1)" : : "r"(t3), "r"(&v0) : "memory");
+    /* MATCH: the mfc1 stays in the asm (as in vu0ScaleVector): from C gcc loads a constant factor straight into
+     * $3 (DispList CDispListShadowMap::insert: lui/mtc1/mfc1 in the original) */
+    asm volatile("lqc2 $vf4, 0x0(%1)\n" "mfc1 $3, %2\n" "qmtc2.ni $3, $vf5\n" "vmulx.xyz $vf4, $vf4, $vf5x\n" "sqc2 $vf4, 0x0(%0)" : : "r"(&v0), "r"(&v1), "f"(t) : "$3", "memory");
 }
 #line 691
 inline void vu0FTOI0Vector(IVECTOR& v0, const FVECTOR& v1) {

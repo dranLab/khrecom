@@ -594,50 +594,50 @@ void CDispListFG::_endDraw() {
     CPackMan::changeLayer(0);
 }
 void CDispListShadowDraw::_beginDraw() { _startDirectMode(); }
-/* VU0 helpers (original names unknown) */
-static inline void _vecAdd(FVECTOR& vOut, const FVECTOR& v0, const FVECTOR& v1) {
-    asm volatile("lqc2 $vf4, 0x0(%1)\n"
-                 "lqc2 $vf5, 0x0(%2)\n"
-                 "vadd.xyz $vf4, $vf4, $vf5\n"
-                 "sqc2 $vf4, 0x0(%0)\n"
-                 :
-                 : "r"(&vOut), "r"(&v0), "r"(&v1)
-                 : "memory");
-}
-static inline void _vecSub(FVECTOR& vOut, const FVECTOR& v0, const FVECTOR& v1) {
-    asm volatile("lqc2 $vf4, 0x0(%1)\n"
-                 "lqc2 $vf5, 0x0(%2)\n"
-                 "vsub.xyz $vf4, $vf4, $vf5\n"
-                 "sqc2 $vf4, 0x0(%0)\n"
-                 :
-                 : "r"(&vOut), "r"(&v0), "r"(&v1)
-                 : "memory");
-}
-static inline void _vecScale(FVECTOR& vOut, const FVECTOR& v0, FLOAT f) {
-    asm volatile("lqc2 $vf4, 0x0(%1)\n"
-                 "mfc1 $3, %2\n"
-                 "qmtc2.ni $3, $vf5\n"
-                 "vmulx.xyz $vf4, $vf4, $vf5x\n"
-                 "sqc2 $vf4, 0x0(%0)\n"
-                 :
-                 : "r"(&vOut), "r"(&v0), "f"(f)
-                 : "$3", "memory");
-}
-/* the original keeps the integer copy in s5/s6 and the result in f0/f1: a macro over explicit register locals */
-#define _LENGTH_SQ(ret, iTmp, v0)                                    \
-    asm volatile("lqc2 $vf4, 0x0(%1)\n"                              \
-                 "vaddy.x $vf6, $vf0, $vf4y\n"                       \
-                 "vaddz.x $vf7, $vf0, $vf4z\n"                       \
-                 "vmulax.x $ACC, $vf4, $vf4x\n"                      \
-                 "vmadday.x $ACC, $vf6, $vf4y\n"                     \
-                 "vmaddz.x $vf5, $vf7, $vf4z\n"                      \
-                 "qmfc2.ni %0, $vf5\n"                               \
-                 : "=r"(iTmp)                                        \
-                 : "r"(&(v0)));                                      \
-    asm volatile("mtc1 %1, %0\n"                                     \
-                 "nop\n"                                             \
-                 : "=f"(ret)                                         \
-                 : "r"(iTmp))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 struct SHADOWMODELBUF {
     CShadowModel* pModel;
     HANDLE hHnd;
@@ -832,18 +832,18 @@ void CDispListShadowMap::insert(CDrawable& inPrim, FIX4 inZ) {
         FVECTOR& vCamPos = CShadowModelMan::getUpdateCameraPos();
         FLOAT fClip = CShadowModelMan::getClipDistanceSq();
         pModel->getWorldBBox(v[0], v[1]);
-        _vecAdd(v[1], v[0], v[1]);
-        _vecScale(v[1], v[1], 0.5f);
-        _vecSub(v[0], v[0], v[1]);
-        register INT iTmp asm("$21");
-        register FLOAT ret asm("$f0");
-        _LENGTH_SQ(ret, iTmp, v[0]);
-        FLOAT fLen2 = ret + fClip;
-        _vecSub(v[0], vCamPos, v[1]);
-        register INT iTmp2 asm("$22");
-        register FLOAT ret2 asm("$f1");
-        _LENGTH_SQ(ret2, iTmp2, v[0]);
-        if (ret2 < fLen2) {
+        vu0AddVectorXYZ(v[1], v[0], v[1]);
+        vu0ScaleVectorXYZ(v[1], v[1], 0.5f);
+        vu0SubVectorXYZ(v[0], v[0], v[1]);
+
+
+
+        FLOAT fLen2 = vu0LengthSq(v[0]) + fClip;
+        vu0SubVectorXYZ(v[0], vCamPos, v[1]);
+
+
+
+        if (vu0LengthSq(v[0]) < fLen2) {
             OTtag& tag = getOTtagTbl()[0];
             tag.addTail(&inPrim);
             inPrim.m_nZ = inZ;
