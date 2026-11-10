@@ -116,3 +116,12 @@ with the macros in place (the beta matched them through `-g`'s `$LM` labels).
 - Retail split: strong and weak `.text` range per unit, vtables in `.data`; from `functions.tsv`/`data.tsv`.
 - Phase 2 pilot needs the layout `#ifdef`s of `CTask`/`CEntity` as well as the assert/allocation macros: pick
   pilot units without CEntity classes first (System/*, Form/*), then one CEntity unit.
+
+## Phase 1 (2026-11-10): the retail build from assembly
+
+`ninja` builds and checks both images; the retail one is built entirely from splat's assembly of the retail ELF
+and matches (its `.rom` SHA-1 1c255c21…, the load image of the ELF 865450e0…). The split (`tools/split_version.py`):
+655 units with code, 134 `.linkonce` code parts, 448 `.data`, 255 `.rodata`, 93 `.bss` units; the map gained a
+fifth pairing pass (a unit's functions at one common offset: mpc's jump-table-only `_rix_*`, +32 functions).
+How and what changed in the tools: `docs/retail-plan.md`, Phase 1.
+

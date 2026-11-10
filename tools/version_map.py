@@ -358,6 +358,31 @@ class Mapper:
                         new += 1
         return new
 
+    # -- 5: unit offset: a unit whose paired functions all sit at one offset (the libraries, unchanged units) ------
+    def unit_offsets(self) -> int:
+        new = 0
+        by_unit = defaultdict(list)
+        for a in self.fstarts:
+            by_unit[self.unit_of(a)].append(a)
+        taken = set(self.pair.values())
+        for unit, fs in by_unit.items():
+            offs = Counter(self.pair[a] - a for a in fs if a in self.pair)
+            if len(offs) != 1:
+                continue
+            off = next(iter(offs))
+            for a in fs:
+                size = self.funcs[a][1]
+                if a in self.pair or not size or a + off in taken:
+                    continue
+                o = a + off
+                if not self.other.text[0] <= o < self.other.text[1] - size:
+                    continue
+                if [x[0] for x in self.body(self.beta, a, size)] == [x[0] for x in self.body(self.other, o, size)]:
+                    self.pair[a], self.how[a] = o, "offset"
+                    taken.add(o)
+                    new += 1
+        return new
+
     # -- classification ---------------------------------------------------------------------------------------
     def classify(self, a: int):
         """'same', or the kinds of the differing blocks of an alignment (branch offsets ignored): `debug` (the beta
@@ -499,6 +524,9 @@ def main():
         if not n1 and not n2:
             break
 
+    n4 = m.unit_offsets()
+    m.refresh()
+    print(f"unit offsets: +{n4}")
     n3 = m.gaps()
     m.refresh()
     n1 = m.propagate()

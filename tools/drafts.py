@@ -32,12 +32,13 @@ from compare_compilers import functions  # noqa: E402
 from funcdiff import compare_rows, disassemble  # noqa: E402
 from permuter import (Scorer, build_command, definition_pattern, demangle, disabled, enable_draft,  # noqa: E402
                       select_definition)
+from versions import default_version  # noqa: E402
 
 INCLUDE_ASM = re.compile(r'^INCLUDE_ASM\("[^"]*",\s*([^)\s]+)\s*\);', re.M)
 
 
 def version_and_build() -> tuple[str, str]:
-    version = sorted(p.name for p in (ROOT / "config").iterdir() if (p / f"{p.name}.yaml").exists())[0]
+    version = default_version()
     opts = yaml.safe_load((ROOT / "config" / version / f"{version}.yaml").read_text())["options"]
     return version, opts["build_path"]
 

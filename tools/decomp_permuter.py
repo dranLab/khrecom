@@ -158,7 +158,8 @@ def setup(unit: str, func: str, workdir: Path) -> None:
     import yaml
     sys.path.insert(0, str(ROOT / "tools"))
     from permuter import build_command, definition_pattern, enable_draft, find_function  # (not loaded by the per-candidate --objdump)
-    version = sorted(p.name for p in (ROOT / "config").iterdir() if (p / f"{p.name}.yaml").exists())[0]
+    from versions import default_version
+    version = default_version()
     build = yaml.safe_load((ROOT / "config" / version / f"{version}.yaml").read_text())["options"]["build_path"]
     source = ROOT / "src" / f"{unit}.c"
     if not source.exists():

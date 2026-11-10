@@ -13,8 +13,13 @@ Checks: every symbol of the manifest must be COMMON in some object; replaying th
 original start must give every symbol its original address (so the C types and alignments are the original's;
 the matching build's SHA-1 and _end assert check the link as well).
 
+--allow-missing (a version whose units aren't all compiled yet, e.g. the retail build from assembly): a symbol
+that no object declares COMMON keeps splat's size (up to the next symbol) and the alignment of its original
+address (at most 128).
+
 Usage (from build.ninja): tools/commons.py --pieces <pieces.txt> --objects <objects.txt> --out-dir <dir>
-  pieces.txt: `<object> <symbol> <original address>` in the original order; objects.txt: the other link objects.
+  pieces.txt: `<object> <symbol> <original address> <splat's size>` in the original order; objects.txt: the other
+  link objects.
 """
 
 import argparse
@@ -45,6 +50,8 @@ def main() -> None:
     parser.add_argument("--pieces", required=True)
     parser.add_argument("--objects", required=True)
     parser.add_argument("--out-dir", required=True)
+    parser.add_argument("--allow-missing", action="store_true",
+                        help="symbols no object declares COMMON keep splat's size and their address's alignment")
     args = parser.parse_args()
 
     pieces = [line.split() for line in Path(args.pieces).read_text(encoding="utf-8").splitlines() if line.strip()]
@@ -52,12 +59,15 @@ def main() -> None:
     records = common_records(objects)
     errors, plan = [], []
     addr = int(pieces[0][2], 16)  # the block's original start
-    for obj, name, original in pieces:
+    for obj, name, original, splat_size in pieces:
         original = int(original, 16)
-        if name not in records:
+        if name in records:
+            size, align, owners = records[name]
+        elif args.allow_missing:
+            size, align, owners = int(splat_size, 16), min(128, original & -original), ["splat's assembly"]
+        else:
             errors.append(f"{name}: not COMMON in any object (declare it in its unit's C)")
             continue
-        size, align, owners = records[name]
         addr = (addr + align - 1) & -align
         if addr != original:
             errors.append(f"{name}: placed at {addr:#x} (size {size:#x}, alignment {align} from "

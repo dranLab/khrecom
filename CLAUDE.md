@@ -6,7 +6,8 @@ Everything runs in Linux (WSL), from the repo root, with the project's venv: `.v
 
 ## Build and verify
 
-- `tools/check.sh` - the gate: configure + full build + checksum + overview. Must exit 0 before any commit/merge.
+- `tools/check.sh` - the gate: configure + full build + checksums (every version, see "Versions") + overview. Must exit
+  0 before any commit/merge.
   CI (`.github/workflows/check.yml`) runs it from a fresh clone on every push to `main` (game ELF from the
   repository secret `GAME_ELF_URL`, optional `GAME_ELF_TOKEN`), so the build must not depend on local leftovers.
   Lists only files not complete or changed on the branch (all: `--full` or `build/check.overview.txt`).
@@ -125,6 +126,17 @@ The plan for all remaining work (state, work order, per-function loop, validatio
 | libgcc (`lib/src/gcc/*`, from GCC 2.9's libgcc2.c) | ee-gcc2.9-991111 + the 2.9 ee-as of ee-gcc2.9-990721 (`assembler: ee-gcc2.9-990721`): __floatdisf leaves a `jal` delay slot open that GNU as 2.10 would fill. Source is GCC's own (`src/lib/src/gcc/libgcc2.h` has the types and `umul_ppmm`); the EH runtime (L_eh, `-fexceptions`) is libgcc2.c of 1999-03-24, frame.c that of 2.95.3 |
 | newlib libm (`lib/src/newlib/*`, fdlibm) | ee-gcc2.9-991111-01 `-O2 -G0 -g -fno-builtin` + its own 2.9 as (`assembler: ee-gcc2.9-991111-01`): this compiler pads `div.s` with nops (EE erratum; ef_fmod, kf_tan), -fno-builtin keeps fabsf a call, its as adds hazard nops (mfc1, c.cond) only where gcc enters `.set noreorder` and moves no stores into `jr` slots. Source is newlib's own; `src/lib/src/newlib/libm/fdlibm.h` has the macros |
 | `lib/nodebug/*` (newlib libc, libsn; no debug info) | the game's own toolchain: ee-gcc2.95.3-136 `-O2 -G0` + Ps2EeAs (no `assembler:`); only 990721 and 2.95.3-136 matched the first str*/stdlib functions, and only Ps2EeAs gives strstr's loop-head nops. Source is newlib libc's |
+
+## Versions (retail: `docs/retail-plan.md`, `docs/retail.md`)
+
+- `config/versions.yaml`: the beta `SLUS_217.99` (the reference: ref/, objdiff, the tools' default) and the US retail
+  `SLUS_217.99_retail` (`iso/SLUS_217.99_retail`, from `iso/khrecom_retail.iso`). `configure.py` writes
+  `build/<VERSION>/build.ninja` for each; `ninja` checks every image (`check-<VERSION>` for one; the retail's other
+  targets carry `-SLUS_217.99_retail`). Tools take `--version` or `KH_VERSION`. A version without its ELF in `iso/` is
+  SKIPPED.
+- Retail is built from splat assembly only (`build.yaml` `sources: []`); its split comes from
+  `tools/version_map.py` + `tools/split_version.py` (regenerated, not hand-edited). Decompilation work targets the
+  beta as before; don't edit the retail config in a decompilation task.
 
 ## Shifted build (port step 1; plan and boot log: `docs/port-step1-shiftable.md`)
 

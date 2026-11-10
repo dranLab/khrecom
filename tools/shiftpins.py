@@ -20,16 +20,16 @@ from pathlib import Path
 
 import yaml
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from versions import default_version  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 NM = "mips-linux-gnu-nm"
 ASSIGNED = re.compile(r"(?<![\w$.])([A-Za-z_$.][\w$.]*)\s*=\s*[^=;]+;")
 
 
 def pick_version() -> str:
-    versions = [p.name for p in (ROOT / "config").iterdir() if (p / "build.yaml").exists()]
-    if len(versions) != 1:
-        sys.exit(f"error: {len(versions)} versions under config/")
-    return versions[0]
+    return default_version()
 
 
 def pin_files(version: str, build_path: str) -> dict[str, str]:

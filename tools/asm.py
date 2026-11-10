@@ -18,6 +18,9 @@ import subprocess
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from versions import default_version  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 PREFIX = re.compile(r"^\s*/\* [0-9A-F]+ ([0-9A-F]+)(?: [0-9A-F]+)? \*/\s*")
 SKIP = (".align", ".include", ".set", ".section", "/* Generated", "nonmatching", "endlabel", "enddlabel", ".size")
@@ -25,12 +28,7 @@ LUI_AT = re.compile(r"lui\s+\$at, \(0x([0-9A-F]{8}) >> 16\)")
 
 
 def version_dir(version):
-    if version:
-        return version
-    versions = [p.name for p in (ROOT / "config").iterdir() if p.is_dir()]
-    if len(versions) != 1:
-        sys.exit(f"several versions, pass --version: {versions}")
-    return versions[0]
+    return default_version(version)
 
 
 def short_float(hexbits):

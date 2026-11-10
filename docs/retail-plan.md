@@ -1,6 +1,7 @@
 # Plan: align the decompilation with the US retail ELF (second build target)
 
-Status: Phase 0 done 2026-11-10: **go** (results in `docs/retail.md`: retail is the same source built without `-g`
+Status: Phase 1 done 2026-11-10 (the retail image builds from splat assembly and matches; details at its end).
+Phase 0 done 2026-11-10: **go** (results in `docs/retail.md`: retail is the same source built without `-g`
 and with the debug configuration off; ~225 functions unexplained). Phases 1-4 not started; Phase 0's findings
 (weak functions and vtables in `.gnu.linkonce.*` sections, debug members removed from class layouts) change Phase
 1 and 2 as listed at the end of `docs/retail.md`.
@@ -149,6 +150,33 @@ substantially different build and the user decides again.
    the 12 files' paths lose `asm/SLUS_217.99/` (mechanical, beta image unchanged).
 5. Milestone: the retail image builds 100 % from splat assembly and passes its SHA-1 (the "Starting a new game
    version" step 3 of the README, for retail).
+
+**Done 2026-11-10.** How it was done (differs from the steps above where noted):
+
+- `config/SLUS_217.99_retail/`: `init_version.py`, then `tools/split_version.py SLUS_217.99_retail` writes the yaml
+  (the beta's options and layout) and `elf_symbol_addrs.txt` from `tools/version_map.py`'s output (run it first;
+  `build/SLUS_217.99_retail/version_map/`). Units start at the first of their functions / data items that keep the
+  link order (longest increasing subsequence); a unit's weak functions and vtables are a second subsegment
+  `<unit>.linkonce` (the `.gnu.linkonce` blocks at the end of `.text` and `.data`); the libraries' data units are
+  placed by their offset (the same objects); the 10 debug units retail lacks are left out. `build.yaml`: the beta's,
+  game cflags without `-g`, `sources: []`.
+- `config/versions.yaml` lists the versions (reference first); `tools/versions.py` gives every tool its default
+  (`--version` or `KH_VERSION` for another). `configure.py` (no argument) configures all of them in parallel into
+  `build/<VERSION>/build.ninja`; the root `build.ninja` includes them, `ninja` = `check` = every image. The
+  reference keeps the plain target names (`iso`, `expected`, `shift*`), the others get `-<VERSION>`
+  (`check-SLUS_217.99_retail`). A version whose original ELF isn't in `iso/` is SKIPPED (CI: the beta only, until
+  Phase 4 adds the retail secret).
+- `build.yaml` `sources:` (fnmatch patterns, `!` excludes): which units a version builds from `src/`; units it
+  doesn't have are skipped. Absent = all (the beta).
+- INCLUDE_ASM: instead of changing `include_asm.h` (splat writes it) and the sources, `tools/ee_asm_compat.py
+  --asm-path asm/<VERSION>` reads `asm/<any>/nonmatchings/...` from the building version's tree.
+- Port step 1 tools per version: `tools/commons.py --allow-missing` (COMMON symbols whose unit isn't compiled keep
+  splat's size; only for a version with `sources:`), `tools/sndll.py` accepts an import site in splat's assembly
+  whose field is 0 (`jal func_0`). The VU microcode `can_reference:False` entries weren't needed for the matching
+  link (to revisit for a shifted retail link).
+- Tried and reverted: the libraries from source in retail (`sources: ["lib/*", ...]`): kprintf2's source has a jump
+  table with beta-address labels (`.L00385C34`), `lib/nodebug/__errno` has `memmove` (absent in retail), and the
+  `.data` cut of `lib/nodebug/__CTOR_LIST__` (whose contents differ) lands inside tlbfunc's data. Phase 3 work.
 
 ## Phase 2: pilot (the bet)
 

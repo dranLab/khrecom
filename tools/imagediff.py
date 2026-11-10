@@ -17,6 +17,9 @@ from pathlib import Path
 
 import yaml
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from versions import default_version  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 SECTION = re.compile(r"^ (\.\w+)\s+0x([0-9a-f]+)\s+0x([0-9a-f]+) (\S+)$")
 SYMBOL = re.compile(r"^\s+0x([0-9a-f]+)\s+([^\s=]+)$")
@@ -41,8 +44,7 @@ def main() -> None:
     parser.add_argument("-n", type=int, default=10, help="differing ranges to show (default 10)")
     args = parser.parse_args()
 
-    versions = sorted(p.name for p in (ROOT / "config").iterdir() if (p / f"{p.name}.yaml").exists())
-    version = args.version or versions[0]
+    version = default_version(args.version)
     cfg = yaml.safe_load((ROOT / "config" / version / f"{version}.yaml").read_text(encoding="utf-8"))
     opts, first = cfg["options"], cfg["segments"][0]
     base = first["vram"] - first["start"]  # image offset -> address

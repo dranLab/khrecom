@@ -31,6 +31,10 @@ Always:
   but the original code already contains those nops. Branches are PC-relative, so their encodings
   stay valid as long as nothing moves.
 
+--asm-path asm/<VERSION> (every assembler): INCLUDE_ASM paths name the beta's tree (asm/SLUS_217.99/nonmatchings/...);
+they are read from the building version's tree instead, where splat wrote that version's functions under the same
+names (docs/retail-plan.md).
+
 Usage (from configure.py's cc rule):
     ee_asm_compat.py IN.s OUT.s [--assembler gas|snas] [--source src/X.cpp --symbols elf_symbol_addrs.txt]
                    [--own-data 0xSTART-0xEND,...] [--unit-data 0xSTART-0xEND,...]
@@ -46,6 +50,12 @@ CVT_W_S = re.compile(r"^(\s*)cvt\.w\.s\s+\$f(\d+)\s*,\s*\$f(\d+)\s*$")
 ANON_NAMESPACE = re.compile(r"(?:(?<=Q\d)|(?<![\dQ]))\d+(_GLOBAL_\$N\$[\w.]*?\.(?:cpp|cc|c)[A-Za-z0-9]{6})(?=\$|\d|\W|$)")
 GLOBAL_CDTOR = re.compile(r"_GLOBAL_\$([ID])\$[\w.]*?\.(?:cpp|cc|c)[A-Za-z0-9]{6}(?=\$|\W|$)")
 INCLUDE = re.compile(r'^\s*\.include\s+"([^"]+)"\s*$')
+ASM_PATH = None  # --asm-path
+
+
+def version_path(path: str) -> str:
+    """An INCLUDE_ASM path in the building version's splat tree (see --asm-path)."""
+    return re.sub(r"^asm/[^/]+/nonmatchings/", f"{ASM_PATH}/nonmatchings/", path) if ASM_PATH else path
 MACRO = re.compile(r'^\s*(glabel|alabel|ehlabel|jlabel|dlabel|endlabel|enddlabel|nonmatching)\s+"?([^",\s]+)"?\s*(?:,\s*(\S+))?\s*$')
 SPLAT_INSN = re.compile(r"^\s*/\* [0-9A-F]+ [0-9A-F]+ ([0-9A-F]{8}) \*/\s+(\S+)")
 SECTION = re.compile(r'^\s*\.section\s+(\.\w+)\s*,\s*"[a-z]*"\s*$')
@@ -306,7 +316,7 @@ def inline_splat_asm(path: Path) -> list[str]:
     for line in path.read_text(encoding="utf-8").splitlines():
         if m := INCLUDE.match(line):
             if m.group(1).endswith(".s"):
-                out += inline_splat_asm(Path(m.group(1)))
+                out += inline_splat_asm(Path(version_path(m.group(1))))
             continue  # macro.inc / labels.inc
         if m := MACRO.match(line):
             out += expand_macro(*m.groups())
@@ -335,7 +345,11 @@ def main() -> None:
     parser.add_argument("--source-root", help='original path prefix for "src/" in string literals')
     parser.add_argument("--unit-data", help='address ranges of all the unit\'s data, from source or not (as --own-data)')
     parser.add_argument("--own-data", help='address ranges of the data from source ("0xSTART-0xEND,..." or "none")')
+    parser.add_argument("--asm-path", help="the building version's splat tree (asm/<VERSION>): INCLUDE_ASM paths "
+                                           "asm/<any version>/nonmatchings/... are read from it")
     args = parser.parse_args()
+    global ASM_PATH
+    ASM_PATH = args.asm_path
 
     with open(args.input, encoding="latin-1") as f:
         text = f.read()
@@ -359,10 +373,12 @@ def main() -> None:
         source_lines = fix_short_loops(source_lines)  # compiled code only: INCLUDE_ASM'd code is inlined below
     for line in source_lines:
         if args.assembler == "gas":
+            if (m := INCLUDE.match(line)) and m.group(1).endswith(".s"):
+                line = line.replace(m.group(1), version_path(m.group(1)))
             lines.append(fix_cvt_w_s(line))
         elif m := INCLUDE.match(line):
             if m.group(1).endswith(".s"):
-                lines += inline_splat_asm(Path(m.group(1)))
+                lines += inline_splat_asm(Path(version_path(m.group(1))))
             # else: splat's macro.inc / labels.inc, expanded above instead
         else:
             lines.append(line)

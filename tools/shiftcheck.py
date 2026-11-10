@@ -34,6 +34,9 @@ from pathlib import Path
 
 import yaml
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from versions import default_version  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 CROSS = "mips-linux-gnu-"
 # Instructions that take the low half of an address after a lui (opcode -> name).
@@ -109,7 +112,7 @@ def main() -> None:
     parser.add_argument("--details", type=int, default=40, help="lines per category in the report")
     args = parser.parse_args()
 
-    version = next(p.name for p in (ROOT / "config").iterdir() if (p / "build.yaml").exists())
+    version = default_version()
     opts = yaml.safe_load((ROOT / "config" / version / f"{version}.yaml").read_text(encoding="utf-8"))["options"]
     build = ROOT / opts["build_path"]
     m_elf, s_elf = build / f"{version}.elf", build / "shift" / args.preset / f"{version}.elf"
@@ -158,7 +161,7 @@ def main() -> None:
 
     # Objects generated with every pointer checked (tools/sndll.py's .sndata): not splat's guesses.
     generated = set(re.findall(r"^build (\S+\.o): as \S+/sndll/sndata\.s$",
-                               (ROOT / "build.ninja").read_text(encoding="utf-8"), re.M))
+                               (build / "build.ninja").read_text(encoding="utf-8"), re.M))
     errors, suspects, review, cleared, compiled_hits = [], [], Counter(), 0, []
     code_hits = []  # addresses built in code without relocation (any object: code is never "a constant")
 

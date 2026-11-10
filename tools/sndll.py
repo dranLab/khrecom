@@ -125,6 +125,11 @@ class Objects:
         return f"{sorted(table[o])[0]} + 0x{offset - o:X}"
 
 
+def zero_field(word: int, rtype: int) -> bool:
+    """Whether the field a relocation of this type fills is 0 in the original (an unresolved import)."""
+    return {2: word == 0, 4: word & 0x3FFFFFF == 0, 5: word & 0xFFFF == 0, 6: word & 0xFFFF == 0}.get(rtype, False)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--rom", required=True)
@@ -194,6 +199,11 @@ def main() -> None:
             continue
         obj, section, offset = where
         found = objects.relocs.get((obj, section), {}).get(offset)
+        if not found and "/asm/" in obj and zero_field(word(site) if start <= site < end else
+                                                       struct.unpack_from("<I", rom, site - BASE)[0], rtype):
+            # splat's assembly of a unit not compiled yet: `jal func_0` / a plain 0 instead of the import's name.
+            # Resolved to 0 like an import, so the site is right in every link; compiled sources name the import.
+            found = (rtype, import_name)
         if not found or found[0] != rtype:
             errors.append(f"reloc {i}: {obj} {section}+{offset:#x} has no type-{rtype} relocation against a DLL "
                           f"import (table: {import_name}; object: {found})")
