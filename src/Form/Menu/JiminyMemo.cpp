@@ -984,103 +984,7 @@ struct MODEL_VIEW_DATA {
 /* The original's file-scope const tables (and the two dynamically initialized floats): gcc emits them after
    the vtables at the end of .rodata, the global namespace first, then JiminyMemo's own, then its nested
    namespaces in reverse creation order; the namespaces are opened here in their original order. */
-static const CARD_DATA cardDataTbl[224] = {
-    { { 0x00 }, 0, 0, 0, "" }, { { 0x11 }, 2, 0, 3, "Kingdom Key" }, { { 0x11 }, 2, 1, 3, "Three Wishes" },
-    { { 0x11 }, 2, 2, 3, "Crabclaw" }, { { 0x11 }, 2, 3, 3, "Pumpkinhead" },
-    { { 0x11 }, 2, 4, 3, "Fairy Harp" }, { { 0x11 }, 2, 5, 3, "Wishing Star" },
-    { { 0x11 }, 2, 6, 3, "Spellbinder" }, { { 0x11 }, 2, 7, 3, "Metal Chocobo" },
-    { { 0x11 }, 3, 0, 3, "Olympia" }, { { 0x11 }, 3, 1, 3, "Lionheart" }, { { 0x11 }, 3, 2, 3, "Lady Luck" },
-    { { 0x11 }, 3, 3, 3, "Divine Rose" }, { { 0x11 }, 3, 4, 3, "Oathkeeper" },
-    { { 0x11 }, 3, 5, 3, "Oblivion" }, { { 0x11 }, 3, 6, 3, "Ultima Weapon" },
-    { { 0x11 }, 3, 7, 3, "Diamond Dust" }, { { 0x11 }, 4, 0, 3, "One-Winged Angel" },
-    { { 0x11 }, 4, 1, 4, "Soul Eater" }, { { 0x11 }, 4, 2, 3, "Star Seeker" },
-    { { 0x11 }, 4, 3, 3, "Monochrome" }, { { 0x11 }, 4, 4, 3, "Follow the Wind" },
-    { { 0x11 }, 4, 5, 3, "Hidden Dragon" }, { { 0x11 }, 4, 6, 3, "Photon Debugger" },
-    { { 0x11 }, 4, 7, 3, "Bond of Flame" }, { { 0x11 }, 26, 0, 0, "-" }, { { 0x22 }, 5, 0, 3, "Fire" },
-    { { 0x22 }, 5, 1, 3, "Blizzard" }, { { 0x22 }, 5, 2, 3, "Thunder" }, { { 0x22 }, 5, 3, 3, "Cure" },
-    { { 0x22 }, 5, 4, 3, "Gravity" }, { { 0x22 }, 5, 5, 3, "Stop" }, { { 0x22 }, 5, 6, 3, "Aero" },
-    { { 0x22 }, 26, 2, 0, "-" }, { { 0x22 }, 26, 1, 0, "-" }, { { 0x33 }, 5, 7, 3, "Simba" },
-    { { 0x33 }, 6, 0, 3, "Genie" }, { { 0x33 }, 6, 1, 3, "Bambi" }, { { 0x33 }, 6, 2, 3, "Dumbo" },
-    { { 0x33 }, 6, 3, 3, "Tinker Bell" }, { { 0x33 }, 6, 4, 3, "Mushu" }, { { 0x33 }, 6, 5, 3, "Cloud" },
-    { { 0x44 }, 6, 6, 6, "Potion" }, { { 0x44 }, 6, 7, 6, "Hi-Potion" }, { { 0x44 }, 7, 0, 2, "Mega-Potion" },
-    { { 0x44 }, 7, 1, 2, "Ether" }, { { 0x44 }, 7, 2, 2, "Mega-Ether" }, { { 0x44 }, 7, 3, 2, "Elixir" },
-    { { 0x44 }, 7, 4, 2, "Megalixir" }, { { 0x55 }, 7, 5, 2, "Donald Duck" }, { { 0x55 }, 7, 6, 2, "Goofy" },
-    { { 0x55 }, 7, 7, 2, "Aladdin" }, { { 0x55 }, 8, 0, 2, "Ariel" }, { { 0x55 }, 8, 1, 2, "Jack" },
-    { { 0x55 }, 8, 2, 2, "Peter Pan" }, { { 0x55 }, 8, 3, 2, "The Beast" }, { { 0x55 }, 8, 4, 4, "The King" },
-    { { 0x55 }, 8, 5, 2, "Pluto" }, { { 0x66 }, 8, 6, 6, "Guard Armor" }, { { 0x66 }, 8, 6, 6, "Trickmaster" },
-    { { 0x66 }, 8, 6, 6, "Jafar" }, { { 0x66 }, 8, 6, 6, "Oogie Boogie" },
-    { { 0x66 }, 8, 6, 6, "Parasite Cage" }, { { 0x66 }, 8, 6, 6, "Ursula" },
-    { { 0x66 }, 8, 6, 6, "Dragon Maleficent" }, { { 0x66 }, 8, 6, 6, "Darkside" }, { { 0xE6 }, 8, 7, 4, "-" },
-    { { 0xE6 }, 9, 0, 0, "-" }, { { 0x77 }, 9, 1, 6, "Shadow" }, { { 0x77 }, 9, 2, 2, "Soldier" },
-    { { 0x77 }, 9, 3, 6, "Large Body" }, { { 0x77 }, 9, 4, 2, "Red Nocturne" },
-    { { 0x77 }, 9, 5, 2, "Blue Rhapsody" }, { { 0x77 }, 9, 6, 2, "Yellow Opera" },
-    { { 0x77 }, 9, 7, 2, "Green Requiem" }, { { 0x77 }, 10, 0, 6, "Powerwild" },
-    { { 0x77 }, 10, 1, 2, "Bouncywild" }, { { 0x77 }, 10, 2, 2, "Air Soldier" },
-    { { 0x77 }, 10, 3, 2, "Bandit" }, { { 0x77 }, 10, 4, 6, "Fat Bandit" },
-    { { 0x77 }, 10, 5, 2, "Barrel Spider" }, { { 0x77 }, 10, 6, 6, "Search Ghost" },
-    { { 0x77 }, 10, 7, 6, "Sea Neon" }, { { 0x77 }, 11, 0, 2, "Screwdiver" },
-    { { 0x77 }, 11, 1, 2, "Aquatank" }, { { 0x77 }, 11, 2, 6, "Wight Knight" },
-    { { 0x77 }, 11, 3, 2, "Gargoyle" }, { { 0x77 }, 11, 4, 6, "Pirate" }, { { 0x77 }, 11, 5, 2, "Air Pirate" },
-    { { 0x77 }, 11, 6, 4, "Darkball" }, { { 0x77 }, 11, 7, 6, "Defender" }, { { 0x77 }, 12, 0, 2, "Wyvern" },
-    { { 0x77 }, 12, 1, 2, "Wizard" }, { { 0x77 }, 12, 2, 2, "Neoshadow" },
-    { { 0x77 }, 12, 3, 2, "White Mushroom" }, { { 0x77 }, 12, 4, 2, "Black Fungus" },
-    { { 0x77 }, 12, 5, 2, "Creeper Plant" }, { { 0x77 }, 12, 6, 2, "Tornado Step" },
-    { { 0x77 }, 12, 7, 2, "Crescendo" }, { { 0x77 }, 13, 0, 6, "Guard Armor" },
-    { { 0x77 }, 13, 1, 6, "Parasite Cage" }, { { 0x77 }, 13, 2, 6, "Trickmaster" },
-    { { 0x77 }, 13, 3, 6, "Darkside" }, { { 0x77 }, 13, 4, 2, "Card Soldier" },
-    { { 0x77 }, 13, 5, 6, "Hades" }, { { 0x77 }, 13, 6, 6, "Jafar" }, { { 0x77 }, 13, 7, 6, "Oogie Boogie" },
-    { { 0x77 }, 14, 0, 6, "Ursula" }, { { 0x77 }, 14, 1, 6, "Hook" },
-    { { 0x77 }, 14, 2, 6, "Dragon Maleficent" }, { { 0x77 }, 14, 3, 2, "Riku" },
-    { { 0x77 }, 14, 4, 2, "Axel" }, { { 0x77 }, 14, 5, 2, "Larxene" }, { { 0x77 }, 14, 6, 2, "Vexen" },
-    { { 0x77 }, 14, 7, 2, "Marluxia" }, { { 0x77 }, 15, 0, 6, "Lexaeus" }, { { 0x77 }, 15, 1, 2, "Ansem" },
-    { { 0x77 }, 15, 3, 6, "Zexion" }, { { 0x77 }, 15, 4, 2, "Xemnas" }, { { 0x77 }, 15, 5, 2, "Xigbar" },
-    { { 0x77 }, 15, 6, 2, "Xaldin" }, { { 0x77 }, 15, 7, 2, "Sa\203\307x" }, { { 0x77 }, 16, 0, 2, "Demyx" },
-    { { 0x77 }, 16, 1, 2, "Luxord" }, { { 0x77 }, 16, 2, 2, "Roxas" }, { { 0x77 }, 21, 6, 2, "Gold Card" },
-    { { 0x77 }, 21, 7, 2, "Platinum Card" }, { { 0x77 }, 15, 2, 0, "Card Soldier Spade" },
-    { { 0x77 }, 13, 4, 0, "Card Soldier Heart" }, { { 0x17 }, 22, 0, 0, "\203N\203\211\203E\203hA" },
-    { { 0x17 }, 22, 1, 0, "\203N\203\211\203E\203hB" }, { { 0x17 }, 22, 2, 0, "\203n\203f\203XA" }, { { 0x27 }, 22, 3, 0, "\203n\203f\203XB" },
-    { { 0x17 }, 22, 4, 0, "\203t\203b\203NA" }, { { 0x17 }, 22, 5, 0, "\203t\203b\203NB" }, { { 0x17 }, 22, 6, 0, "\203t\203b\203NC" },
-    { { 0x27 }, 22, 7, 0, "\203t\203b\203ND" }, { { 0x17 }, 23, 0, 0, "\203A\203N\203Z\203\213A" },
-    { { 0x17 }, 23, 1, 0, "\203A\203N\203Z\203\213B" }, { { 0x17 }, 23, 2, 0, "\203\211\203N\203V\201[\203kA" },
-    { { 0x17 }, 23, 3, 0, "\203\211\203N\203V\201[\203kB" }, { { 0x27 }, 23, 4, 0, "\203\211\203N\203V\201[\203kC" },
-    { { 0x17 }, 23, 5, 0, "\203\212\203NA" }, { { 0x17 }, 23, 6, 0, "\203\212\203NB" }, { { 0x17 }, 23, 7, 0, "\203\212\203NC" },
-    { { 0x17 }, 24, 0, 0, "\203\212\203ND" }, { { 0x17 }, 24, 1, 0, "\203\224\203B\203N\203Z\203\223A" },
-    { { 0x27 }, 24, 2, 0, "\203\224\203B\203N\203Z\203\223B" }, { { 0x17 }, 24, 3, 0, "\203}\201[\203\213\201[\203V\203\203A" },
-    { { 0x17 }, 24, 4, 0, "\203}\201[\203\213\201[\203V\203\203B" }, { { 0x27 }, 24, 5, 0, "\203}\201[\203\213\201[\203V\203\203C" },
-    { { 0x77 }, 24, 6, 0, "\203}\201[\203\213\201[\203V\203\2032" }, { { 0x77 }, 24, 7, 0, "\203}\201[\203\213\201[\203V\203\2033" },
-    { { 0x17 }, 25, 0, 0, "\203\214\203N\203Z\203E\203XA" }, { { 0x17 }, 25, 1, 0, "\203\214\203N\203Z\203E\203XB" },
-    { { 0x27 }, 25, 2, 0, "\203\214\203N\203Z\203E\203XC" }, { { 0x17 }, 25, 3, 0, "\203A\203\223\203Z\203\200A" },
-    { { 0x27 }, 25, 4, 0, "\203A\203\223\203Z\203\200B" }, { { 0x27 }, 25, 5, 0, "\203[\203N\203V\203I\203\223A" }, { { 0x77 }, 26, 3, 0, "-" },
-    { { 0x88 }, 0, 0, 6, "\203\212\203\215\201[\203h" }, { { 0x99 }, 16, 3, 6, "Tranquil Darkness" },
-    { { 0x99 }, 16, 4, 6, "Teeming Darkness" }, { { 0x99 }, 16, 5, 6, "Feeble Darkness" },
-    { { 0x99 }, 16, 6, 6, "Almighty Darkness" }, { { 0x99 }, 16, 7, 6, "Sleeping Darkness" },
-    { { 0x99 }, 17, 0, 6, "Looming Darkness" }, { { 0x99 }, 17, 1, 2, "Premium Room" },
-    { { 0x99 }, 17, 2, 2, "White Room" }, { { 0x99 }, 17, 3, 6, "Black Room" },
-    { { 0x99 }, 17, 4, 6, "Bottomless Darkness" }, { { 0x99 }, 17, 5, 6, "Roulette Room" },
-    { { 0xA9 }, 17, 6, 6, "Martial Waking" }, { { 0xA9 }, 17, 7, 2, "Sorcerous Waking" },
-    { { 0xA9 }, 18, 0, 2, "Alchemic Waking" }, { { 0xA9 }, 18, 1, 6, "Meeting Ground" },
-    { { 0xA9 }, 18, 2, 6, "Stagnant Space" }, { { 0xA9 }, 18, 3, 6, "Strong Initiative" },
-    { { 0xA9 }, 18, 4, 6, "Lasting Daze" }, { { 0xB9 }, 18, 5, 2, "Calm Bounty" },
-    { { 0xB9 }, 18, 6, 2, "Guarded Trove" }, { { 0xB9 }, 18, 7, 2, "False Bounty" },
-    { { 0xB9 }, 19, 0, 6, "Moment's Reprieve" }, { { 0xB9 }, 19, 1, 6, "Mingling Worlds" },
-    { { 0xB9 }, 19, 2, 2, "Moogle Room" }, { { 0xB9 }, 19, 3, 6, "Random Joker" },
-    { { 0xCA }, 19, 4, 6, "Key of Beginnings" }, { { 0xCA }, 19, 5, 6, "Key of Guidance" },
-    { { 0xCA }, 19, 6, 6, "Key to Truth" }, { { 0xCA }, 19, 7, 2, "Key to Rewards" },
-    { { 0xDB }, 20, 0, 6, "Traverse Town" }, { { 0xDB }, 20, 3, 6, "Agrabah" },
-    { { 0xDB }, 20, 2, 6, "Olympus Coliseum" }, { { 0xDB }, 20, 1, 6, "Wonderland" },
-    { { 0xDB }, 20, 5, 6, "Monstro" }, { { 0xDB }, 20, 4, 6, "Halloween Town" },
-    { { 0xDB }, 20, 6, 6, "Atlantica" }, { { 0xDB }, 20, 7, 6, "Neverland" },
-    { { 0xDB }, 21, 0, 6, "Hollow Bastion" }, { { 0xDB }, 21, 1, 2, "100 Acre Woods" },
-    { { 0xDB }, 21, 2, 6, "Twilight Town" }, { { 0xDB }, 21, 3, 6, "Destiny Islands" },
-    { { 0xDB }, 21, 4, 4, "Castle Oblivion" }, { { 0x0D }, 0, 0, 0, "EXP\220\302\217\254" },
-    { { 0x0D }, 0, 1, 0, "EXP\220\302\222\206" }, { { 0x0D }, 0, 2, 0, "EXP\220\302\221\345" }, { { 0x0D }, 0, 3, 0, "EXP\220\324\217\254" },
-    { { 0x0D }, 0, 4, 0, "EXP\220\324\222\206" }, { { 0x0D }, 0, 5, 0, "EXP\220\324\221\345" }, { { 0x0D }, 0, 6, 0, "EXP\213\342" },
-    { { 0x0D }, 1, 0, 0, "HP\217\254" }, { { 0x0D }, 1, 1, 0, "HP\221\345" }, { { 0x0D }, 2, 0, 0, "MP\217\254" },
-    { { 0x0D }, 2, 1, 0, "MP\221\345" }, { { 0x0D }, 3, 0, 0, "P" }, { { 0x0D }, 4, 0, 0, "R" },
-    { { 0x0C }, 0, 0, 0, "Unknown Room" }, { { 0x0C }, 0, 0, 0, "Conqueror's Respite" },
-    { { 0x0C }, 0, 0, 0, "Room of Rewards" }, { { 0x0C }, 0, 0, 0, "" }, { { 0x0C }, 0, 0, 0, "" },
-    { { 0x00 }, 0, 0, 0, "" }, { { 0x00 }, 0, 0, 0, "" }, { { 0x00 }, 0, 0, 0, "" }
-};
+#line 1084
 namespace JiminyMemo {
 static CHAR* const StoryLadName[13] = {
     "01ca", "05tr", "06wo", "07ol", "08ag", "09ha", "10mo", "11at", "12ne", "13ho", "14po", "15tw", "16de"
@@ -2457,15 +2361,10 @@ CMemo2DCard::CMemo2DCard(const CHAR* inEmptySeqName) {
 }
 CMemo2DCard::~CMemo2DCard() {}
 __asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
-/* CardKind.h's inline lookup (line 561 in the original header) */
-static inline const CARD_DATA* getCardData(CARD inCard) {
-    const CARD_DATA* p = cardDataTbl;
-    return &p[inCard.m_nKind];
-}
+#line 3432
 void CMemo2DCard::create(CARD inCard, INT inMode) {
     if (inCard.m_nCategory0 == 0xC) return;
-    const CARD_DATA* pData = getCardData(inCard);
-    createPicture(pData->nTexNo, pData->nTexPos);
+    createPicture(inCard.getTexNo(), inCard.getTexPos());
     if (inMode > 0) {
         BYTE frameSeqTbl[15] = { 0, 7, 5, 5, 6, 6, 6, 4, 0x2f, 2, 1, 0, 3, 9, 7 };
         m_iFrameSeqNo = (inCard.m_nKind == 0xB9) ? 0x14 : frameSeqTbl[inCard.m_nCategory1];
@@ -4230,13 +4129,7 @@ INT CJiminyMemo::getPrevStoryId(INT inId) {
 INT CJiminyMemo::getNextStoryId(INT inId) {
     return getNextContentId(inId, work(0x178), work(0x170));
 }
-static inline void _setCard(CARD& c, USHORT kind, BYTE num) {
-    c.m_nId = 0;
-    c.m_nNumber2 = num;
-    c.m_nKind2 = kind;
-    c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0;
-    c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1;
-}
+#line 5671
 namespace JiminyMemo {
 namespace Collect {
 namespace D {
@@ -4338,7 +4231,7 @@ void CJiminyMemo::contentCollection() {
                             pCard[no]->setLayer(0xF);
                             pCard[no]->enableColorCtrl(TRUE);
                             pCard[no]->setParent(pBase);
-                            _setCard(card, pCardEncyclTbl[kind][i], 0xFF);
+                            card.init(pCardEncyclTbl[kind][i], 0xFF);
                             pCard[no]->create(card, 1);
                         }
                     }
@@ -5587,7 +5480,7 @@ void CJiminyMemo::contentCardView() {
                 pCard->setLocalPosition();
                 pCard->enableDisp(TRUE);
                 pCard->setState(1);
-                _setCard(card, cardEncyclNo, 0xFF);
+                card.init(cardEncyclNo, 0xFF);
                 pCard->create(card, 1);
                 pCard->enableDisp(3, FALSE);
             }
