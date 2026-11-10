@@ -73,22 +73,7 @@ static inline FLOAT _sqrtf(FLOAT x) {
     asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));
     return ret;
 }
-#line 302
-static inline void _setCard(CARD& c, USHORT kind, BYTE num) {
-    c.m_nId = 0;
-    c.m_nKind2 = kind;
-    c.m_nNumber2 = num;
-    c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0;
-    c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1;
-}
-/* MATCH: this CARD init stores the number before the kind (as CardRevolver's debug cards) */
-static inline void _setCardNum(CARD& c, USHORT kind, BYTE num) {
-    c.m_nId = 0;
-    c.m_nNumber2 = num;
-    c.m_nKind2 = kind;
-    c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0;
-    c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1;
-}
+#line 317
 template <class T> static inline T& _ref(T& v) { return v; }
 
 CPlayerGauge::CPlayerGauge(CTask* p) : CTask(p, 0x4000), m_pNaviMap(NULL), m_pFriend(NULL) { _initialize(); }
@@ -1256,11 +1241,11 @@ void CPrizeGauge::_initialize() {
         m_pMogSeqCtrls[i].enableDisp(0, FALSE);
     }
     m_uiCardState = 0;
-    _setCardNum(m_cardData, 0, 0);
+    m_cardData.init(0, 0);
     m_pCardSeqCtrls = NULL;
     m_pCardSeqCtrls = new (__FILE__ "(2173)") D2::C2DSeqCtrl[2];
     m_pCard = new (__FILE__ "(2174)") C2DCard;
-    for (i = 0; i < 4; i++) _setCard(m_cardStack[i], 0, 0);
+    for (i = 0; i < 4; i++) m_cardStack[i].init(0, 0);
     m_nStack = 0;
     m_nTexID = 0;
     if (PLM::CPlayerManager::getPLM() && PLM::CPlayerManager::getPLM()->is100AcreWood()) m_nTexID = 4;
@@ -1663,7 +1648,7 @@ void CPrizeGauge::setPrizeCard(CARD& inData, INT inMode, INT inStack) {
     }
     if (inStack > 0) {
         for (i = 0; i < 2; i++) _ref(m_pInstance)->m_cardStack[i] = _ref(m_pInstance)->m_cardStack[i + 1];
-        _setCard(_ref(m_pInstance)->m_cardStack[3], 0, 0);
+        _ref(m_pInstance)->m_cardStack[3].init(0, 0);
         _ref(m_pInstance)->m_nStack--;
     }
 }
@@ -1813,11 +1798,11 @@ void CFriendGauge::_initialize() {
     m_uiState = 0;
     m_uiCount = 0;
     pPLM = PLM::CPlayerManager::getPLM();
-    for (i = 0; i < 3; i++) _setCard(m_cardFriend[i], 0, 0);
+    for (i = 0; i < 3; i++) m_cardFriend[i].init(0, 0);
     for (i = 0; i < 3; i++) {
         kind = pPLM->getAppearFriendCard(i, 1);
         if (kind) {
-            _setCard(m_cardFriend[m_uiCount], kind, 0xFF);
+            m_cardFriend[m_uiCount].init(kind, 0xFF);
             m_uiCount++;
         }
     }

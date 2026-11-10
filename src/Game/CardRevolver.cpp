@@ -144,20 +144,12 @@ static inline BOOL _isEqual(UINT a, UINT b) { return a == b; }
 
 
 extern INT SCREEN_HEIGHT;
-#line 373
-
-static inline void _setCard(CARD& c, USHORT kind, BYTE num) {
-    c.m_nId = 0;
-    c.m_nKind2 = kind;
-    c.m_nNumber2 = num;
-    c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0;
-    c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1;
-}
+#line 381
 
 void CardBattle::convBtlDeckToCard(BTL_DECK* inDeck) {
     for (INT i = 0; i < 100; i++) {
         if (inDeck[i].m_nKind <= 0 || inDeck[i].m_nKind > 202) break;
-        _setCard(*(CARD*)&inDeck[i], (BYTE)inDeck[i].m_nKind, inDeck[i].m_nNumber);
+        ((CARD*)&inDeck[i])->init((BYTE)inDeck[i].m_nKind, inDeck[i].m_nNumber);
     }
 }
 CCardRevolver::CCardRevolver(CTask* pParent, CARD* inDeck, INT inUser, INT inShortCut) : CTask(pParent, 0x4000) {
@@ -226,7 +218,7 @@ void CCardRevolver::_init() {
     m_nAdd = 0;
     m_nReturn = 0;
     for (i = 0; i < 39; i++) {
-        _setCard(m_cardAdd[i], 0, 0);
+        m_cardAdd[i].init(0, 0);
     }
     for (i = 0; i < 7; i++) {
         m_pCardsS[i] = NULL;
@@ -290,7 +282,7 @@ void CCardRevolver::_initialize(CARD* inDeck, INT inShortCut) {
     }
     if (m_uiFlag & 1) return;
     CARD dummy;
-    _setCard(dummy, 0xFF, 0);
+    dummy.init(0xFF, 0);
     setDeck(&dummy, -1);
 }
 void CCardRevolver::_initCounter() {
@@ -614,7 +606,7 @@ void CCardRevolver::setDeck(CARD* pDeck, INT inShortCut) {
     }
     if (m_uiFlag & 0x80) m_iChargeCount = -1;
     else m_iChargeCount = 1;
-    _setCard(card, 0xA0, m_iChargeCount);
+    card.init(0xA0, m_iChargeCount);
     m_pCards[m_nRemain[0]].setHand(card, m_nRemain[0], m_nTotal[0], 0);
     m_iCharge = 0;
     m_tqCharge = 0;
@@ -807,14 +799,7 @@ CARD* CCardRevolver::getActiveCardData() {
     if (pCard) return pCard->getCardData();
     return NULL;
 }
-/* MATCH: the debug cards store the number before the kind (the ref has CARD member inlines here) */
-static inline void _setCardNum(CARD& c, USHORT kind, BYTE num) {
-    c.m_nId = 0;
-    c.m_nNumber2 = num;
-    c.m_nKind2 = kind;
-    c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0;
-    c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1;
-}
+#line 1043
 INT CCardRevolver::setPlayCard(INT inFlag, INT inTest) {
     UINT flag;
     CBattleCard* card;
@@ -850,7 +835,7 @@ INT CCardRevolver::setPlayCard(INT inFlag, INT inTest) {
     case 6:
     case 14: {
         CARD gimmick;
-        _setCard(gimmick, data->m_nKind, 0);
+        gimmick.init(data->m_nKind, 0);
         pCB->notifyMakeGimmick(&gimmick, 1);
         break;
     }
@@ -866,12 +851,12 @@ INT CCardRevolver::setPlayCard(INT inFlag, INT inTest) {
         if (DebugWork::g_dw.player.iCardNumLock != -1) {
             CARD dbug_card;
             if (DebugWork::g_dw.player.iCardNumLock < 10) {
-                _setCardNum(dbug_card, data->m_nKind, DebugWork::g_dw.player.iCardNumLock);
+                dbug_card.init(data->m_nKind, DebugWork::g_dw.player.iCardNumLock);
                 card->changeData(dbug_card);
             } else {
                 num = CCardBattle::getPlayingCardPoint(0);
                 if (num != -1 && num < 10) {
-                    _setCardNum(dbug_card, data->m_nKind, num);
+                    dbug_card.init(data->m_nKind, num);
                     card->changeData(dbug_card);
                 }
             }
@@ -880,7 +865,7 @@ INT CCardRevolver::setPlayCard(INT inFlag, INT inTest) {
     } else {
         if (DebugWork::g_dw.player.iEnemyCardLock) {
             CARD dbug_card;
-            _setCardNum(dbug_card, DebugWork::g_dw.player.iEnemyCardLock + 0x43, 0xFF);
+            dbug_card.init(DebugWork::g_dw.player.iEnemyCardLock + 0x43, 0xFF);
             card->changeData(dbug_card);
         }
         result = pCB->setEnchantCard(m_hOwner, m_uiUser, card);
@@ -2079,7 +2064,7 @@ INT CCardRevolver::exeAddCard() {
     if (m_uiFlag & 0x2000) m_pCards[count].setCardOwner(1);
     m_pCards[count].testDisp();
     m_nRemain[0]++;
-    _setCard(m_cardAdd[num], 0, 0);
+    m_cardAdd[num].init(0, 0);
     rollDeck(0, 1, 300);
     return 1;
 }
@@ -2801,7 +2786,7 @@ INT CCardRevolver::exeReturnCard() {
                 m_nRemain[0]++;
             }
             m_nReturn--;
-            _setCard(m_cardAdd[count], 0, 0);
+            m_cardAdd[count].init(0, 0);
             rollDeck(0, 1, 300);
             return 1;
         }
@@ -2811,7 +2796,7 @@ INT CCardRevolver::exeReturnCard() {
         card->testDisp();
     }
     m_nReturn--;
-    _setCard(m_cardAdd[count], 0, 0);
+    m_cardAdd[count].init(0, 0);
     return 1;
 }
 INT CCardRevolver::canSnatch() {
@@ -2852,12 +2837,12 @@ INT CCardRevolver::setPlayerPronounceCard(INT inTest) {
     }
     if (DebugWork::g_dw.player.iCardNumLock != -1) {
         if (DebugWork::g_dw.player.iCardNumLock < 10) {
-            _setCard(tmp, data->m_nKind, DebugWork::g_dw.player.iCardNumLock);
+            tmp.init(data->m_nKind, DebugWork::g_dw.player.iCardNumLock);
             card->changeData(tmp);
         } else {
             num = CCardBattle::getPlayingCardPoint(0);
             if (num != -1 && num < 10) {
-                _setCard(tmp, data->m_nKind, num);
+                tmp.init(data->m_nKind, num);
                 card->changeData(tmp);
             }
         }

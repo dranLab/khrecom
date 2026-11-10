@@ -427,13 +427,7 @@ void CWorldSelect::main() {
         break;
     }
 }
-static inline void _setCard(CARD& c, USHORT kind, BYTE num) {
-    c.m_nId = 0;
-    c.m_nNumber2 = num;
-    c.m_nKind2 = kind;
-    c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0;
-    c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1;
-}
+#line 460
 
 
 
@@ -479,7 +473,7 @@ INT CWorldSelect::menuMain() {
             pCardCtrl->addSeq(pSeqName, 0xD);
 #line 512
             C2DCard* pCard = m_pCard[i] = new (__FILE__ "(512)") C2DCard;
-            _setCard(card, cardKindTbl[m_nWorld[i]], 0);
+            card.init(cardKindTbl[m_nWorld[i]], 0);
             pCard->create(card);
             pCard->setParent(pCardCtrl);
         }

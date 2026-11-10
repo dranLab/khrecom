@@ -264,13 +264,7 @@ void CRoomCreation::removeRsrc() {
         m_iEffectRsrc = 0;
     }
 }
-static inline void _setCard(CARD& c, USHORT kind, BYTE num) {
-    c.m_nId = 0;
-    c.m_nNumber2 = num;
-    c.m_nKind2 = kind;
-    c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0;
-    c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1;
-}
+#line 507
 
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 /* g_pPlayer read through a reference: its load stays after the preceding member stores. */
@@ -390,7 +384,7 @@ void CRoomCreation::main() {
         m_pCurrentRoomNameCtrl->addSeq(m_pSeqName, 0x7A);
         vPos.init();
         m_pCurrentRoomNameCtrl->setPos(vPos);
-        _setCard(card, m_pRoomInfo->getRoomNameCardID(), 0);
+        card.init(m_pRoomInfo->getRoomNameCardID(), 0);
         rgba.col = 0x807C7C7C;
 #line 346
         m_pCurrentRoomNameFnt = new (__FILE__ "(346)") C2DFnt(0, 0, &rgba, 15, card.getName(), 0x241);
@@ -632,7 +626,7 @@ INT CRoomCreation::menuMain() {
             pCard->enableColorCtrl(TRUE);
             pCard->setLayer(12);
             if (i == 0 && m_fgKeyCard) {
-                _setCard(card, m_fgKeyCard, 0);
+                card.init(m_fgKeyCard, 0);
                 pCard->create(card);
             } else {
                 INT idx = m_idxNorma + nNorma - i;
@@ -912,7 +906,7 @@ INT CRoomCreation::menuMain() {
             if (m_nNumSelect < 0) {
                 break;
             }
-            _setCard(card, m_pCardWinCard[m_nCardSelect]->m_card.m_nKind, m_nNumSelect);
+            card.init(m_pCardWinCard[m_nCardSelect]->m_card.m_nKind, m_nNumSelect);
             INT fgExist = CCard::searchCard(card.m_nKind, m_nNumSelect);
 #line 1020
             ASSERT(fgExist > 0);
@@ -1158,7 +1152,7 @@ void CRoomCreation::initCard() {
     for (INT i = 0; i < m_nCardKindMax; i++) {
         INT cardKind = m_nCardKind[i];
         if (m_nCategorySelect == 0 || cardDataTbl[cardKind].nCategory1 - 8 == m_nCategorySelect) {
-            _setCard(card, cardKind, -1);
+            card.init(cardKind, -1);
             C2DCard* pCard = m_pCardWinCard[m_nCardSelectMax] = new (__FILE__ "(1355)") C2DCard;
             pCard->setLayer(12);
             pCard->enableColorCtrl(TRUE);
@@ -1472,7 +1466,7 @@ LPCTSTR CRoomCreation::getNormaInfo() {
         return NULL;
     }
     if (m_fgKeyCard && m_nNorma == 1) {
-        _setCard(card, m_fgKeyCard, 0);
+        card.init(m_fgKeyCard, 0);
         sprintf(m_normaInfoBuf, wordEtc[0], card.getName());
     } else {
         strcpy(m_normaInfoBuf, wordEtc[1]);

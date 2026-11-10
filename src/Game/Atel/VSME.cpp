@@ -3188,15 +3188,7 @@ public:
 };
 }
 __asm__(".weak __Q210MoogleShop15CMoogleShopCoreP5CTask\n__Q210MoogleShop15CMoogleShopCoreP5CTask = 0\n");
-#line 2543
-/* CardKind.h:554-558 in the original (a CARD constructor) */
-static inline void setCard(CARD& card, USHORT nKind, CHAR nNumber) {
-    card.m_nId = 0;
-    card.m_nNumber = nNumber;
-    card.m_nKind2 = nKind;
-    card.m_nCategory0 = cardDataTbl[card.m_nKind].nCategory0;
-    card.m_nCategory1 = cardDataTbl[card.m_nKind].nCategory1;
-}
+#line 2551
 /* CollUtil.h:194/245 in the original */
 static inline CCollUtil* collUtilInstance() {
     CCollUtil*& instance = CCollUtil::m_pInstance;
@@ -3318,7 +3310,7 @@ INT CVSM::execExt3Code(INT op, eATEL_REQ_RET& ret) {
             case 5:
                 if (!CGameWork::getFlag(1, 0x33)) {
                     CARD card;
-                    setCard(card, param1.I, param2.I);
+                    card.init(param1.I, param2.I);
                     card = CCard::correctCardRank(card);
                     if (card.m_nKind) CPlayer::notifyGetPrize(param1.I, param2.I, 2);
                 }

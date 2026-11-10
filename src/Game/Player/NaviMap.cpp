@@ -52,15 +52,7 @@ extern FLOAT ASPECT_RATE_Y;
 
 using namespace D2;
 
-#line 283
-
-static inline void _setCard(CARD& c, USHORT kind, BYTE num) {
-    c.m_nId = 0;
-    c.m_nNumber2 = num;
-    c.m_nKind2 = kind;
-    c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0;
-    c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1;
-}
+#line 291
 
 
 
@@ -218,10 +210,10 @@ void CNaviMap::_initialize() {
         }
     }
     calcDispFlag();
-    _setCard(m_cardRoom, 0, 0);
+    m_cardRoom.init(0, 0);
     RoomInfo* pRoom = CSceneInfo::getRoomInfo(-1);
     if (pRoom) {
-        _setCard(m_cardRoom, pRoom->getRoomNameCardID(), 0xFF);
+        m_cardRoom.init(pRoom->getRoomNameCardID(), 0xFF);
 #line 254
         m_pRoomName = new (__FILE__ "(254)") C2DSeqCtrl[2];
     }

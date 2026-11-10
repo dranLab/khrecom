@@ -352,20 +352,7 @@ void CPlayer::initFSM_() {
     }
     m_iState = -1;
 }
-static inline void _setCard(CARD& c, USHORT kind, BYTE num) {
-    c.m_nId = 0;
-    c.m_nKind2 = kind;
-    c.m_nNumber2 = num;
-    c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0;
-    c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1;
-}
-static inline void _setCardNK(CARD& c, USHORT kind, BYTE num) {
-    c.m_nId = 0;
-    c.m_nNumber2 = num;
-    c.m_nKind2 = kind;
-    c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0;
-    c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1;
-}
+#line 628
 void CPlayer::_init() {
     INT i;
     m_fAnalogPower = 0.0f;
@@ -507,9 +494,9 @@ void CPlayer::_init() {
     m_hEffGuard = 0;
     m_uiCardID = 0;
     m_iCardNum = -1;
-    _setCardNK(((CARD*)m_recvCardInfo)[0], 0, 0);
-    _setCardNK(((CARD*)m_recvCardInfo)[1], 0, 0);
-    _setCardNK(((CARD*)m_recvCardInfo)[2], 0, 0);
+    ((CARD*)m_recvCardInfo)[0].init(0, 0);
+    ((CARD*)m_recvCardInfo)[1].init(0, 0);
+    ((CARD*)m_recvCardInfo)[2].init(0, 0);
     *(SHORT*)(m_recvCardInfo + 0x1c) = 0;
     m_recvCardInfo[0x1e] = 0;
     m_recvCardInfo[0x1f] = 0;
@@ -687,7 +674,7 @@ void CPlayer::makeRevolver() {
                 deck[i] = pDeck[i];
                 if (deck[i].m_nCategory1 == 7) deck[i].m_nNumber = -1;
             }
-            _setCard(deck[max], 0xFF, 0);
+            deck[max].init(0xFF, 0);
             m_pRevolver = new (__FILE__ "(1181)") CardBattle::CCardRevolver(this, deck, 1, sc);
             if (deck) com_free(deck);
         }
@@ -3970,11 +3957,11 @@ void CPlayer::onMsg(INT inMsg, void* inExtraInfo) {
             case 3:
             case 4:
             case 5:
-                _setCardNK(CARD0, DebugWork::g_dw.player.iCardLock, CARD0.m_nNumber);
+                CARD0.init(DebugWork::g_dw.player.iCardLock, CARD0.m_nNumber);
                 break;
             case 6:
             case 14:
-                _setCardNK(CARD0, DebugWork::g_dw.player.iCardLock, 0);
+                CARD0.init(DebugWork::g_dw.player.iCardLock, 0);
                 break;
             case 7:
             case 8:
@@ -6670,10 +6657,10 @@ void CPlayer::notifyGetPrize(INT inKind, INT inNumber, INT inState) {
     INT work;
     INT work2;
     if (inKind <= 0xCA) {
-        _setCard(card, inKind, inNumber);
+        card.init(inKind, inNumber);
         switch (card.m_nCategory20) {
         case 7:
-            _setCard(card, inKind, 0xFF);
+            card.init(inKind, 0xFF);
         case 1:
         case 2:
         case 3:

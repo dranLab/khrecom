@@ -1332,14 +1332,7 @@ C2DSeqAgent* CSaveLoadUI::createWorldIcon(D2::C2DSeqCtrl*& pOutCtrl) {
     pAgent->setupState(tbl);
     return pAgent;
 }
-/* CARD's inline constructor (Game/Card.cpp's _setCard) */
-static inline void _setCard(CARD& c, USHORT nKind, CHAR nNumber) {
-    c.m_nId = 0;
-    c.m_nNumber2 = nNumber;
-    c.m_nKind2 = nKind;
-    c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0;
-    c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1;
-}
+#line 1590
 C2DSeqAgent* CSaveLoadUI::createRoomName(D2::C2DSeqCtrl*& pOutCtrl) {
     C2DSeqAgent::SeqTbl tbl = {{42, 43, 44}};
     FVECTOR v;
@@ -1357,7 +1350,7 @@ C2DSeqAgent* CSaveLoadUI::createRoomName(D2::C2DSeqCtrl*& pOutCtrl) {
         }
     }
     CARD card;
-    _setCard(card, nCardID, 0);
+    card.init(nCardID, 0);
     G_RGBA rgba;
     rgba.col = 0x80707070;
     D2::C2DFnt* pFnt =

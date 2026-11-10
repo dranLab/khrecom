@@ -72,15 +72,7 @@ inline void _emptyStringPlaceholder() {
 
 extern INT SCREEN_HEIGHT;
 
-#line 303
-
-static inline void _setCard(CARD& c, USHORT kind, BYTE num) {
-    c.m_nId = 0;
-    c.m_nNumber2 = num;
-    c.m_nKind2 = kind;
-    c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0;
-    c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1;
-}
+#line 311
 
 /* gimmicks whose state is kept in the room's storage */
 #define IS_STORAGE_GIMMICK(t)                                                                                        \
@@ -1544,13 +1536,13 @@ void CGimmickManager::createPrizeType_04(const DropPrize& in_Prize, const FVECTO
 DropPrize CGimmickManager::checkAddCardTresureBox(DropPrize in_Prize) {
     DropPrize prize = in_Prize;
     CARD card;
-    _setCard(card, in_Prize.Kind, in_Prize.No);
+    card.init(in_Prize.Kind, in_Prize.No);
     card = CCard::correctCardRank(card);
     if (card.m_nKind == 0) {
         for (INT i = 0; i < m_TreasureCardDropProbNum; i++) {
             INT Kind = m_pTreasureCardDropProbTable[i].CardID + 1;
             if (checkPossibleCard((CARD_KIND)Kind)) {
-                _setCard(card, Kind, 0);
+                card.init(Kind, 0);
                 card = CCard::correctCardRank(card);
                 if (card.m_nKind != 0) break;
             }
@@ -1558,7 +1550,7 @@ DropPrize CGimmickManager::checkAddCardTresureBox(DropPrize in_Prize) {
         TRACE("CGimmickManager:\x83J\x81[\x83h\x8e\x9d\x82\xc4\x82\xc8\x82\xa2\x82\xa9\x82\xe7\x82\xb7\x82\xe8\x91\xd6\x82\xa6:%d\x81\xa8%d\n", in_Prize.Kind, card.m_nKind);
         prize.No = getRand() % 10;
         prize.Kind = (CARD_KIND)card.m_nKind;
-        _setCard(card, prize.Kind, prize.No);
+        card.init(prize.Kind, prize.No);
         card = CCard::correctCardRank(card);
         prize.Kind = (CARD_KIND)card.m_nKind;
         prize.No = card.m_nNumber2;
@@ -1569,13 +1561,13 @@ DropPrize CGimmickManager::checkAddCardTresureBox(DropPrize in_Prize) {
 DropPrize CGimmickManager::checkAddCardGimmick(DropPrize in_Prize) {
     DropPrize prize = in_Prize;
     CARD card;
-    _setCard(card, in_Prize.Kind, in_Prize.No);
+    card.init(in_Prize.Kind, in_Prize.No);
     card = CCard::correctCardRank(card);
     if (card.m_nKind == 0) {
         for (INT i = 0; i < m_NomalCardDropProbNum; i++) {
             INT Kind = m_pNomalCardDropProbTable[i].CardID + 1;
             if (checkPossibleCard((CARD_KIND)Kind)) {
-                _setCard(card, Kind, 0);
+                card.init(Kind, 0);
                 card = CCard::correctCardRank(card);
                 if (card.m_nKind != 0) break;
             }
@@ -1583,7 +1575,7 @@ DropPrize CGimmickManager::checkAddCardGimmick(DropPrize in_Prize) {
         TRACE("CGimmickManager:\x83J\x81[\x83h\x8e\x9d\x82\xc4\x82\xc8\x82\xa2\x82\xa9\x82\xe7\x82\xb7\x82\xe8\x91\xd6\x82\xa6%d\x81\xa8%d\n", in_Prize.Kind, card.m_nKind);
         prize.No = getRand() % 10;
         prize.Kind = (CARD_KIND)card.m_nKind;
-        _setCard(card, prize.Kind, prize.No);
+        card.init(prize.Kind, prize.No);
         card = CCard::correctCardRank(card);
         prize.Kind = (CARD_KIND)card.m_nKind;
         prize.No = card.m_nNumber2;
@@ -1594,19 +1586,19 @@ DropPrize CGimmickManager::checkAddCardGimmick(DropPrize in_Prize) {
 DropPrize CGimmickManager::checkAddCardMapCard(DropPrize in_Prize) {
     DropPrize prize = in_Prize;
     CARD card;
-    _setCard(card, in_Prize.Kind, in_Prize.No);
+    card.init(in_Prize.Kind, in_Prize.No);
     card = CCard::correctCardRank(card);
     if (card.m_nKind == 0) {
         for (INT i = 0; i < m_MapCardProb.ProbNum; i++) {
             INT Kind = m_MapCardProb.pProb[i].CardID + 0xA1;
-            _setCard(card, Kind, 0);
+            card.init(Kind, 0);
             card = CCard::correctCardRank(card);
             if (card.m_nKind != 0) break;
         }
         TRACE("CGimmickManager:\x83J\x81[\x83h\x8e\x9d\x82\xc4\x82\xc8\x82\xa2\x82\xa9\x82\xe7\x82\xb7\x82\xe8\x91\xd6\x82\xa6%d\x81\xa8%d\n", in_Prize.Kind, card.m_nKind);
         prize.No = getRand() % 10;
         prize.Kind = (CARD_KIND)card.m_nKind;
-        _setCard(card, prize.Kind, prize.No);
+        card.init(prize.Kind, prize.No);
         card = CCard::correctCardRank(card);
         prize.Kind = (CARD_KIND)card.m_nKind;
         prize.No = card.m_nNumber2;

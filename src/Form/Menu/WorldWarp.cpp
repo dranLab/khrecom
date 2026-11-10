@@ -90,13 +90,7 @@ using namespace D2;
  * pointer to $3 through an empty asm reproduces the allocation and emits nothing. */
 #define PIN_V1(p) ({ register typeof(p) _p asm("$3") = (p); __asm__("" : "+r"(_p)); _p; })
 
-static inline void _setCard(CARD& c, USHORT kind, BYTE num) {
-    c.m_nId = 0;
-    c.m_nNumber2 = num;
-    c.m_nKind2 = kind;
-    c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0;
-    c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1;
-}
+#line 333
 
 CWorldWarp::CWorldWarp(CTask* p, BOOL bWarpOrCard) : CMenu(p, -1) {
     m_pLadName = "wwarp.lad";
@@ -457,7 +451,7 @@ INT CWorldWarp::menuMain() {
                 m_pWorldCard->enableColorCtrl(TRUE);
                 m_pWorldCard->setParent(m_pWinConfirm->get2DSeqCtrl());
                 m_pWorldCard->addSeqShift(m_pSeqName, 100, -103.0f, 18.0f);
-                _setCard(card, m_idxWorld[m_idxDistWorld] + 0xBE, 0xFF);
+                card.init(m_idxWorld[m_idxDistWorld] + 0xBE, 0xFF);
                 m_pWorldCard->create(card);
                 if (card.m_nKind == 0xC7 && (m_bPooClear & 1)) {
                     G_UV start;
