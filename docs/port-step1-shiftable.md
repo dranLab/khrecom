@@ -444,7 +444,7 @@ itself (newlib's `_reent` pointing at its own `__sf[]` streams).
 | S5 DLL imports (125 relocs, 120 raw) | done 2026-11-10 | imports undefined in sources + `dll_imports.ld`; all 125 sites checked against object relocations. `shiftpins.py` 0/0; all 5 presets link. check.sh exit 0 |
 | S6 shiftcheck | done 2026-11-10 | all 5 presets: 0 errors, 0 suspects (92 cleared individually), 0 lost alignment |
 | S7 presets | done 2026-11-10 | text128, text0, data128, all8, mid, big link and pass shiftcheck (incl. the section-crossing check). `--no-check-sections` dropped (ELFs identical). |
-| S8 boot tests | text128 and data128 played 30 minutes each by the user 2026-11-10 (tutorial world, boss fight); movie bug found and fixed; `mid` and the memory-card swap not run | `ninja shift-iso-<preset>` builds the disc (`build_iso.py --shifted`: image comparison skipped and said so); text128's disc built 2026-11-10 (`build/SLUS_217.99/shift/text128/SLUS_217.99.iso`, ELF 0x60CF38 bytes at sector 631, entry 0x100008). Runs and the DLL list from the original are the user's. |
+| S8 boot tests | done 2026-11-10 (user): text128 and data128 30 minutes each (tutorial world, boss fight = DLL load), mid from memory-card saves; movie bug found and fixed. Not run: saving in a shifted build and loading in the original | `ninja shift-iso-<preset>` builds the disc (`build_iso.py --shifted`: image comparison skipped and said so); text128's disc built 2026-11-10 (`build/SLUS_217.99/shift/text128/SLUS_217.99.iso`, ELF 0x60CF38 bytes at sector 631, entry 0x100008). Runs and the DLL list from the original are the user's. |
 | S9 check.sh/CLAUDE.md | done 2026-11-10 | `tools/check.sh --shift` (all presets: shiftpins + shiftcheck), exit 0; CLAUDE.md section "Shifted build" on this branch. CI unchanged (branch unmerged). |
 
 Boot-test log:
@@ -455,4 +455,4 @@ Boot-test log:
 | 2026-11-10 | text128 | 6df533ff | movie playback correct (user) | none reported |
 | 2026-11-10 | text128 | 6df533ff | 30 minutes (user): tutorial world, boss fight | none reported |
 | 2026-11-10 | data128 | 6df533ff (disc C:\temp\recom-data128.iso) | 30 minutes (user): tutorial world, boss fight | none reported. The first boss (Guard Armor, `__15CBossGuardarmorP5CTask`) is a DLL import: if that was the fight, the DLL loader worked through the generated table in both layouts |
-| 2026-11-10 | mid | 6df533ff (disc C:\temp\recom-mid.iso) | works (user, with savestates) | open: counts only if the session booted from this disc; a savestate taken with another disc restores that build's code |
+| 2026-11-10 | mid | 6df533ff (disc C:\temp\recom-mid.iso) | works (user): booted from this disc, game loaded from memory-card saves of earlier sessions | none reported. Memory-card saves hold no code: loading saves made with another build in this layout worked (one direction of the save swap) |
