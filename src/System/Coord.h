@@ -3,7 +3,94 @@
 #define SYSTEM_COORD_H
 
 #include "khtypes.h"
-#include "System/Graphic/Camera.h"
+#include "System/Vector.h"
+
+/* MATCH: CCoord is in System/Coord.h, not in Camera.h as the ref says: the original's line markers put its
+ * constructor at Coord.h:1009-1016 and its accessors at Coord.h:1043-1072 (user decision 2026-11-10). */
+class CCoord {
+public:
+    FMATRIX m_Local;
+    // PARTIAL: the ref's fields from here are private (ours public)
+    union {
+        struct {
+            union {
+                struct {
+                    TIMEQ m_FixTimestamp; /* 0x40 */
+                    INT m_Flag;           /* 0x44 */
+                };
+                ULONGLONG _ulFixTimestamp;
+            };
+            TIMEQ m_WorldTimestamp; /* 0x48 */
+            CCoord* m_pParent;      /* 0x4c */
+        };
+        u_long128 _q40; // MATCH: Game/Atel/EventTrap: the constructor clears 0x40..0x4f at once
+    };
+    union {
+        FMATRIX m_Rot;              /* 0x50 */
+        struct {
+            int m_hHandlePad___[12];
+            FLOAT m_fScaleX;        /* 0x80 */
+            FLOAT m_fScaleY;        /* 0x84 */
+            FLOAT m_fScaleZ;        /* 0x88 */
+            INT m_hHandle;          /* 0x8c */
+        };
+    };
+    FMATRIX m_World;     /* 0x90 */
+    void setLocal(const FMATRIX& matIn) {
+        if (m_Local != matIn) {
+            m_Local = matIn;
+            touch();
+        }
+    }
+    void updateLocal(/* parameters unknown */);
+    void setTrans(/* parameters unknown */);
+    void updateTrans(/* parameters unknown */);
+    void setParent(CCoord* pParent) { m_pParent = pParent; }
+    void touch(); // defined below the class
+    CCoord() {
+        _q40 = 0;
+        m_fScaleX = 1.0f;
+        m_fScaleY = 1.0f;
+        m_fScaleZ = 1.0f;
+        m_hHandle = 0;
+    }
+    void fix(INT n = 0);
+    TIMEQ getWorldTimestamp(/* parameters unknown */);
+    FMATRIX& getWorldMatrix() { return m_World; }
+    FMATRIX& getWorldRot33Matrix(/* parameters unknown */);
+    FVECTOR getWorldPos() { return m_World.v[3]; } // PARTIAL: Effect/effect and EffectMan (original name unknown)
+    FMATRIX& getLocalMatrix() { return m_Local; }
+    CCoord* getParent() { return m_pParent; }
+    void recalcLocalMatrix();
+    void getScale(FVECTOR& outScale) {
+        outScale.x = m_fScaleX;
+        outScale.y = m_fScaleY;
+        outScale.z = m_fScaleZ;
+    }
+    void recalcWorldMatrix();
+    void getRotTransPersMatrix(FMATRIX& outMat);
+    void getRotTransPersMatrix_VF04_07();
+    void RotTransPers(IVECTOR& outV, const FVECTOR& inV);
+    void RotTransPers(FVECTOR& outV, const FVECTOR& inV);
+    void resetTimestamp() {
+        m_FixTimestamp = -1;
+        m_WorldTimestamp = -1;
+    }
+    HANDLE getHandle(/* parameters unknown */);
+    void setHandle(HANDLE h) { m_hHandle = h; }
+    void setScale(const FVECTOR& inScale) {
+        m_fScaleX = inScale.x;
+        m_fScaleY = inScale.y;
+        m_fScaleZ = inScale.z;
+        m_Flag = 1;
+    }
+
+private:
+    void _mulParent(/* parameters unknown */);
+    void _checkParent(/* parameters unknown */);
+};
+
+inline void CCoord::touch() { m_Flag = 1; }
 
 class CCoords {
 public:

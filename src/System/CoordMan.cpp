@@ -1,5 +1,6 @@
 
 #include "System/CoordMan.h"
+#include "System/SLContainer.h"
 #include "System/FifoFpl.h"
 #include "System/HeapMan.h"
 #include "System/MainApp.h"
