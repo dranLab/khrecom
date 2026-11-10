@@ -213,7 +213,7 @@ HANDLE CLockOnManager::changeLockOnObject_(HANDLE inHandle) {
                 pos.z = 0.0f;
                 Normalize(pos, pos);
                 FLOAT ret = Math3D::LimitPI(deg - atan2f(pos.x, pos.y));
-                if (fabsf(ret) <= limit) {
+                if (_fabsf(ret) <= limit) {
                     object[count++] = obj;
                 }
             }

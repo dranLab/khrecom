@@ -138,11 +138,11 @@ void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
 void ApplyMatrix33(FVECTOR& v0, const FMATRIX& m, const FVECTOR& v1);
 FLOAT InnerProduct(const FVECTOR& v0, const FVECTOR& v1);
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
-static inline FLOAT _sqrtf(FLOAT x) {
-    FLOAT ret;
-    asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));
-    return ret;
-}
+
+
+
+
+
 
 
 

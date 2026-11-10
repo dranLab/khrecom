@@ -33,7 +33,7 @@
 
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 
-extern "C" float fabsf(float x);
+
 extern "C" int sprintf(char* s, const char* fmt, ...);
 extern "C" float sinf(float x);
 extern "C" float cosf(float x);
@@ -50,17 +50,17 @@ void Normalize(FVECTOR& v0, const FVECTOR& v1);
 void OuterProduct(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 FLOAT InnerProduct(const FVECTOR& v0, const FVECTOR& v1);
 
-static inline FLOAT _sqrtf(FLOAT x) {
-    FLOAT ret;
-    asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));
-    return ret;
-}
 
-static inline FLOAT _fabs(FLOAT inValue) {
-    FLOAT ret;
-    asm volatile("abs.s %0, %1" : "=f"(ret) : "f"(inValue));
-    return ret;
-}
+
+
+
+
+
+
+
+
+
+
 
 /* No clobbers on purpose: a volatile asm whose pattern is a bare ASM_OPERANDS makes cse flush its tables (the
  * original reloads constants and member addresses after it, move_). */
@@ -117,7 +117,7 @@ FLOAT Movement::Homing(FLOAT inA0, FLOAT inA1, FLOAT inRate, FLOAT inFrameRate) 
     if (t <= 0.0f) return a0;
     if (1.0f <= t) return a1;
     FLOAT f = Math3D::LimitPI(a1 - a0) * t;
-    if (_fabs(f) < t * 0.001f) return a1;
+    if (_fabsf(f) < t * 0.001f) return a1;
     return Math3D::LimitPI(a0 + f);
 }
 
@@ -126,7 +126,7 @@ FLOAT Movement::Approach(FLOAT inA0, FLOAT inA1, FLOAT inRate, FLOAT inFrameRate
     FLOAT t = inRate * inFrameRate;
     FLOAT f = inA1 - inA0;
     if (t < 1.0f) f *= t;
-    if (fabsf(f) < 0.0003f) return inA1;
+    if (_fabsf(f) < 0.0003f) return inA1;
     return inA0 + f;
 }
 
@@ -570,7 +570,7 @@ void CMovement::land(FLOAT inDownLength, FLOAT inUpLength, BOOL inFirstHit) {
     if (inFirstHit) {
         if (rideCollisionDetect_(m_vOldPos, m_vPos, &ridePos, NULL)) {
             if (mapCollisionDetect_(m_vOldPos, m_vPos, &mapPos, NULL) &&
-                _fabs(pos.y - ridePos.y) > _fabs(pos.y - mapPos.y)) {
+                _fabsf(pos.y - ridePos.y) > _fabsf(pos.y - mapPos.y)) {
                 collideMap_(TRUE);
             } else {
                 collideRide_();
@@ -1090,7 +1090,7 @@ void CMovement::setWaterSurfaceEffect_() {
         case 0: {
             setFlag(0, 0x80000000);
             pos = m_vOldPos;
-            m_pMapCollision->checkWaterSurface(pos, _fabs(m_vPos.y - m_vOldPos.y) + 0.1f);
+            m_pMapCollision->checkWaterSurface(pos, _fabsf(m_vPos.y - m_vOldPos.y) + 0.1f);
             FVECTOR rot = m_vRot;
             rot.x = 0.0f;
             rot.z = 0.0f;

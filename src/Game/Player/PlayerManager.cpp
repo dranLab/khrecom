@@ -1676,11 +1676,11 @@ INT isEntityTypeID(INT inID) {
     return 1;
 }
 
-static inline FLOAT _sqrtf(FLOAT x) {
-    FLOAT ret;
-    asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));
-    return ret;
-}
+
+
+
+
+
 
 INT getWorldRotY(FLOAT& outRotY, const FMATRIX& inMat) {
     FMATRIX mMat = inMat;

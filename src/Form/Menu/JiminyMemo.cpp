@@ -1820,7 +1820,7 @@ void CMemo3DObj::calcLocalMatrix() {
     crd.touch();
 }
 void CMemo3DObj::setRotateY(FLOAT inRotY) {
-    if (__builtin_fabsf(Math3D::LimitPI(m_fRotY - inRotY)) != 0.0f) {
+    if (_fabsf(Math3D::LimitPI(m_fRotY - inRotY)) != 0.0f) {
         m_fRotY = inRotY;
         m_bTouch = TRUE;
     }

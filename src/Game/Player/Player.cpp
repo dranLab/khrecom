@@ -84,16 +84,16 @@ void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void Normalize(FVECTOR& outV, const FVECTOR& inV);
 FLOAT InnerProduct(const FVECTOR& inV0, const FVECTOR& inV1);
 template <class T> static inline T& _ref(T& v) { return v; } static inline UINT _upKind(INT inType0, INT inType1) { UINT up = inType0 > 0 ? 1 << (inType0 - 1) : 0; if (inType1 > 0) up |= 1 << (inType1 - 1); return up; }
-static inline FLOAT _abs(FLOAT inValue) {
-    FLOAT ret;
-    __asm__ volatile("abs.s %0, %1" : "=f"(ret) : "f"(inValue));
-    return ret;
-}
-static inline FLOAT _sqrtf(FLOAT x) {
-    FLOAT ret;
-    asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));
-    return ret;
-}
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1809,7 +1809,7 @@ void CPlayer::exeWalk() {
     FLOAT dirY = getDir();
     FVECTOR v = { 0.0f, aim_dir, 0.0f, 0.0f };
     m_pMove->setRot(v);
-    m_fMovePower = 1.0f - _abs(_limitPI(aim_dir - dirY)) / 3.1415927f;
+    m_fMovePower = 1.0f - _fabsf(_limitPI(aim_dir - dirY)) / 3.1415927f;
     m_fWalkSpeed = m_fWalkSpeed / 60.0f * m_fMovePower;
     m_pMove->calcVelocityXZ(m_fWalkSpeed);
      /* keeps aim_dir live past the wrap: matching lever */
@@ -2117,7 +2117,7 @@ void CPlayer::exeWall() {
         rot.y = d0;
         setRot(rot);
         r = _limitPI(m_fWallDir - m_fDir);
-        if (_abs(r) < 0.03141593f) {
+        if (_fabsf(r) < 0.03141593f) {
             m_iSubState = 1;
             m_fDir = m_fWallDir;
         }
@@ -2663,7 +2663,7 @@ void CPlayer::exeJump() {
         m_fDir = d0;
         m_pMove->getRot() = v;
         r = _limitPI2(aim_dir - d0);
-        m_fMovePower = 1.0f - _abs(r) / 3.1415927f;
+        m_fMovePower = 1.0f - _fabsf(r) / 3.1415927f;
         m_fWalkSpeed = m_fWalkSpeed / 60.0f * m_fMovePower * 0.8f;
         if (m_fJumpSpdXZ != m_fWalkSpeed) {
             m_fJumpSpdXZ = m_fJumpSpdXZ + (m_fWalkSpeed - m_fJumpSpdXZ) * (m_fFrameRate * 0.05f);
@@ -3124,16 +3124,16 @@ INT CPlayer::chkGimmick(UINT inID) {
         break;
     case 0x2003:
         dir = calcDirection(pEntity->getPos());
-        if (_abs(_limitPI(dir - m_fDir)) * 57.295776f > 75.0f) return 0;
+        if (_fabsf(_limitPI(dir - m_fDir)) * 57.295776f > 75.0f) return 0;
         if (!((CGimmickCarry*)pEntity)->checkCarryPermission()) return 0;
         procTargetMark();
         result = 0x1E;
         break;
     case 0x2000:
         if (((CGimmickTreasureBox*)pEntity)->isOpenTresureBox()) return 0;
-        if (_abs(_limitPI(pEntity->getRot().y - m_fDir)) < 1.5707964f) return 0;
+        if (_fabsf(_limitPI(pEntity->getRot().y - m_fDir)) < 1.5707964f) return 0;
         dir = pEntity->calcDirection(m_vCenterPos);
-        if (_abs(_limitPI2(pEntity->getRot().y - dir)) * 57.295776f > 75.0f) return 0;
+        if (_fabsf(_limitPI2(pEntity->getRot().y - dir)) * 57.295776f > 75.0f) return 0;
         if (!((CGimmickTreasureBox*)pEntity)->checkOpenTresureBoxPermission()) return 0;
         ((CGimmickTreasureBox*)pEntity)->OpenTreasureBox();
         m_pMarker->holdTarget(8);
@@ -4316,7 +4316,7 @@ void CPlayer::setAttack() {
         distY -= 1.0f;
         dist = calcDistance(*pTarget);
         dir = calcDirection(*pTarget) - m_fDir;
-        dir = _abs(dir);
+        dir = _fabsf(dir);
         m_hMark = m_hTarget;
     } else {
         m_iSubState = 3;
@@ -4626,7 +4626,7 @@ void CPlayer::procGravity(TIMEQ inNowFrame, TIMEQ inEndFrame, INT inFlag) {
         if (m_hMark > 0) {
             FVECTOR vec;
             SubVectorXYZ(vec, m_vMarkPos, m_vCenterPos);
-            m_fDistY = _abs(vec.y);
+            m_fDistY = _fabsf(vec.y);
             if (vec.y < 0.0f) {
                 if (m_fJumpSpdY > 0.0f) {
                     if (m_fDistY < 0.5f) m_fJumpSpdY *= PL::g_fJumpStopRate;
@@ -4859,7 +4859,7 @@ BOOL CPlayer::chkDamage() {
     }
     SubVectorXYZ(dpos, dir, getPos());
     dir0 = atan2f(dpos.x, dpos.z);
-    bIsBackHit = _abs(_limitPI(dir0 - m_fDir)) < 1.5707964f ? FALSE : TRUE;
+    bIsBackHit = _fabsf(_limitPI(dir0 - m_fDir)) < 1.5707964f ? FALSE : TRUE;
     {
         register UINT uiFlag asm("$3") = m_uiConditionFlag; /* MATCH: isConditionFlag with the word in v1, the mask in v0 */
         old_condition = uiFlag & 0x881803F;
@@ -6163,7 +6163,7 @@ INT CPlayer::chkEscape() {
         setBGFade(0.5f, 120.0f, 0);
     }
     vNormal = m_pMove->getEscapeNormal();
-    if (_abs(vNormal.x) > _abs(vNormal.z)) vNormal.z = 0.0f;
+    if (_fabsf(vNormal.x) > _fabsf(vNormal.z)) vNormal.z = 0.0f;
     else vNormal.x = 0.0f;
     FLOAT d = atan2f(vNormal.x, vNormal.z) + 3.1415927f;
     FLOAT r;

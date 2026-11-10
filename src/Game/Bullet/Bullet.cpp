@@ -56,11 +56,11 @@ void MulMatrix(FMATRIX& res, const FMATRIX& m0, const FMATRIX& m1);
 
 
 
-static inline FLOAT _sqrtf(FLOAT x) {
-    FLOAT ret;
-    asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));
-    return ret;
-}
+
+
+
+
+
 
 static inline void _apply33(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1) { ApplyMatrix33(v0, m0, v1); }
 
