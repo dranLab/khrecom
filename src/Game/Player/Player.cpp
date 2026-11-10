@@ -1136,7 +1136,7 @@ void CPlayer::updateBodyCollPos() {
     m_vHeadPos.y = _y;
     m_vHeadPos.z = _z;
     top.set(_x, _y, _z);
-    FLOAT y = (Crd(m_iBoneLFoot).getWorldMatrix().getTrans().y + Crd(m_iBoneRFoot).getWorldMatrix().getTrans().y) * 0.5f;
+    FLOAT y = (Crd(m_iBoneLFoot).getWorldMatrix().getTransRef().y + Crd(m_iBoneRFoot).getWorldMatrix().getTransRef().y) * 0.5f;
     bottom.set(m_vCenterPos.x, y, m_vCenterPos.z);
     m_collBody.setTopPos(top);
     m_collBody.setBottomPos(bottom);

@@ -315,7 +315,7 @@ void CDeFocusPrim::_makePktDeFocus() {
     pCam = CWorldEnv::getActiveCamera();
     if (!pCam) return;
     if (!pCam->getLook()) return;
-    vPos = ((CCoord&)pCam->Crd(0)).getWorldMatrix().getTrans();
+    vPos = ((CCoord&)pCam->Crd(0)).getWorldMatrix().getTransRef();
     vLook = *pCam->getLook();
     SubVectorXYZ(vN, vLook, vPos);
     Normalize(vN, vN);
@@ -496,7 +496,7 @@ void CBlurPrim::_makePktBlur() {
             m_iAlpha = Bak_iBlurAlpha;
             return;
         }
-        vCam = ((CCoord&)pCam->Crd(0)).getWorldMatrix().getTrans();
+        vCam = ((CCoord&)pCam->Crd(0)).getWorldMatrix().getTransRef();
         vLook = *pCam->getLook();
         SubVectorXYZ(vN, vLook, vCam);
         Normalize(vN, vN);

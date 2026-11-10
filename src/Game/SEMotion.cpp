@@ -281,7 +281,7 @@ BOOL CSEMotionCtrl::setupFootSE_() {
     case 14:
     case 15: {
         CPointCollision coll;
-        coll.setStartPos(m_pOwner->Crd(0).m_World.getTrans());
+        coll.setStartPos(m_pOwner->Crd(0).m_World.getTransRef());
         coll.m_inWE.set(0.0f, 0.0f, 1.0f);
         ApplyMatrix(coll.m_inWE, m_pOwner->Crd(0).m_World, coll.m_inWE);
         if (coll.collideMap()) {
@@ -465,7 +465,7 @@ void CSEMotion::playFootStopSE() {
     CCollMap* collMap = m_pOwner->m_pMove->getMapCollision();
 #line 776
     ASSERT(collMap);
-    FVECTOR start = m_pOwner->Crd(0).m_World.getTrans();
+    FVECTOR start = m_pOwner->Crd(0).m_World.getTransRef();
     FVECTOR end = start;
     start.y += 0.05f;
     end.y -= 0.4f;

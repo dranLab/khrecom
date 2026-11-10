@@ -115,7 +115,7 @@ void CShadowModelMan::finalize() {}
 void CShadowModelMan::updateMatrix() {
     CCamera* pCamera = CWorldEnv::getActiveCamera();
     if (pCamera) {
-        m_vCamPos = pCamera->Crd(0).getWorldMatrix().getTrans();
+        m_vCamPos = pCamera->Crd(0).getWorldMatrix().getTransRef();
     } else {
         _initVf0(m_vCamPos);
     }

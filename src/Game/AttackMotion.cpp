@@ -123,7 +123,7 @@ void CAttackMotionCtrl::update(TIMEQ inCurrentTime) {
         m_pCollAttack->setEnemyPos(m_vEnemyPos);
         m_uiFlag &= ~1;
     } else {
-        m_pCollAttack->setEnemyPos(getParent_(m_pOwner)->Crd(0).m_World.getTrans());
+        m_pCollAttack->setEnemyPos(getParent_(m_pOwner)->Crd(0).m_World.getTransRef());
     }
 }
 

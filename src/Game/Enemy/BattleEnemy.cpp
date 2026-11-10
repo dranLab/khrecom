@@ -691,7 +691,7 @@ INT CBattleEnemy::getAttackRate() const {
 }
 void CBattleEnemy::getUseCardPos(FVECTOR& outPos) {
     FLOAT offset = getExtraParam(BattleEnemy::CamTrgOfsParamName);
-    outPos = Crd(0).m_World.getTrans();
+    outPos = Crd(0).m_World.getTransRef();
     outPos.y += offset;
 }
 BOOL CBattleEnemy::isPlayingCardBattle() {
@@ -769,7 +769,7 @@ INT CBattleEnemy::checkHitPos() {
     Normalize(n, n);
     n.w = InnerProduct(n, *hit->getStartPos());
     if (InnerProduct(n, *detect) - n.w > 0.0f) result = 1;
-    FVECTOR center = Crd(1).m_World.getTrans();
+    FVECTOR center = Crd(1).m_World.getTransRef();
     if (center.x == 0.0f && center.y == 0.0f && center.z == 0.0f) center.y = 1.0f;
     Normalize(n, center);
     ScaleVector(center, center, 0.5f);
@@ -834,7 +834,7 @@ void CBattleEnemy::makeExpPrize() {
     if (m_pBodyColl->getHitCollBody()) {
         makeExpPrize(m_pBodyColl->getHitCollBody()->getDetectPos());
     } else {
-        makeExpPrize(&Crd(1).m_World.getTrans());
+        makeExpPrize(&Crd(1).m_World.getTransRef());
     }
 }
 void CBattleEnemy::makePrize() {
@@ -1885,7 +1885,7 @@ void CBattleEnemy::stateMagnet() {
         m_pMove->setAcc(v);
         m_pMove->setVel(v);
         if (m_iSysStep == 0) {
-            setEffect(BattleEnemy::MagnetEffectName, 5, &Crd(1).m_World.getTrans(), NULL, 0.0f);
+            setEffect(BattleEnemy::MagnetEffectName, 5, &Crd(1).m_World.getTransRef(), NULL, 0.0f);
             m_iSysStep++;
         }
     }
@@ -2143,7 +2143,7 @@ HANDLE CBattleEnemy::recover(INT inPoint, const CHAR* inEffectName, INT inEffect
         FMATRIX m;
         if (inParent) {
             InverseMatrix(m, inParent->m_World);
-            stopDmg->vDetectPos = m.getTrans();
+            stopDmg->vDetectPos = m.getTransRef();
             goto fail;
         }
         stopDmg->vDetectPos = inPos;
@@ -2264,7 +2264,7 @@ void CBattleEnemy::setupHitBack() {
     CCollBody* hit = m_pBodyColl->getHitCollBody();
     CTask* task;
     if (hit && (task = CTaskMan::getTask(hit->getEnemyHandle()))) {
-        dir = task->Crd(0).m_World.getTrans();
+        dir = task->Crd(0).m_World.getTransRef();
     } else {
         dir = getPlayerPos(0);
     }
@@ -3603,7 +3603,7 @@ void CBattleEnemy::updateSpotLight_() {
     RotMatrixY(m, m, atan2f(n.x, n.z));
     FVECTOR pos = getPos();
     pos.w = 1.0f;
-    m.getTrans() = pos;
+    m.getTransRef() = pos;
     effect->getCoords()->Crd(0).m_Local = m;
     effect->getCoords()->Crd(0).m_Flag = 1;
 }

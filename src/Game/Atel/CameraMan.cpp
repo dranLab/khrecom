@@ -161,8 +161,8 @@ void CCameraMan::main() {
         ICamera* pCam = pDt->m_pCamera;
         FVECTOR vec;
         FVECTOR objTrans;
-        if (pDt->m_kind == 5) objTrans = pDt->m_pTargetObj->Crd(0).getWorldMatrix().getTrans();
-        if (pDt->m_kind < 2) objTrans = pDt->m_pTargetObj->Crd(0).getWorldMatrix().getTrans();
+        if (pDt->m_kind == 5) objTrans = pDt->m_pTargetObj->Crd(0).getWorldMatrix().getTransRef();
+        if (pDt->m_kind < 2) objTrans = pDt->m_pTargetObj->Crd(0).getWorldMatrix().getTransRef();
         switch (pDt->m_kind) {
         case 1:
             if (pDt->m_changeKind == 16) {

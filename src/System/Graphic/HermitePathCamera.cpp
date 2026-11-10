@@ -139,7 +139,7 @@ void CHermitePathCamera::_init(const CTask* pTarget, const PATH_TARGET_PARAM& sT
             break;
         }
     }
-    m_vTargetPos = ((CCoord&)m_pTarget->Crd(0)).getWorldMatrix().getTrans();
+    m_vTargetPos = ((CCoord&)m_pTarget->Crd(0)).getWorldMatrix().getTransRef();
     m_vTargetPos.y += m_fOffsetY;
     m_iStep = 1;
     FVECTOR vPos;
@@ -151,17 +151,17 @@ void CHermitePathCamera::_init(const CTask* pTarget, const PATH_TARGET_PARAM& sT
             m_vLearpAimLook = m_vTargetPos;
             m_vLearpOldLook = *pCam->getLook();
             m_vLearpAimPos = m_vWPos;
-            m_vLearpOldPos = pCam->Crd(0).getWorldMatrix().getTrans();
+            m_vLearpOldPos = pCam->Crd(0).getWorldMatrix().getTransRef();
             m_fLearpAimProj = getProjectionDist();
             m_fLearpOldProj = pCam->getProjectionDist();
             m_iStep = 0;
         }
     }
     updateMatrix(vPos, vLook, updatePos(vPos, vLook, 0.0f, FALSE));
-    FVECTOR _vPos = Crd(0).getWorldMatrix().getTrans();
+    FVECTOR _vPos = Crd(0).getWorldMatrix().getTransRef();
     TRACE("START P:%f %f %f %f\n", _vPos.x, _vPos.y, _vPos.z, _vPos.w);
     if (m_pTarget) {
-        FVECTOR _vLook = ((CCoord&)m_pTarget->Crd(0)).getWorldMatrix().getTrans();
+        FVECTOR _vLook = ((CCoord&)m_pTarget->Crd(0)).getWorldMatrix().getTransRef();
         TRACE("START L:%f %f %f %f\n", _vLook.x, _vLook.y, _vLook.z, _vLook.w);
     }
     m_DDPathCamArrow.getCoord().setParent(&Crd(0));
@@ -193,17 +193,17 @@ void CHermitePathCamera::_setMyCamPath(const PATH_TARGET_PARAM& sTargetParam) {
 }
 
 void CHermitePathCamera::out() {
-    FVECTOR _vPos = Crd(0).getWorldMatrix().getTrans();
+    FVECTOR _vPos = Crd(0).getWorldMatrix().getTransRef();
     TRACE("END P:%f %f %f %f\n", _vPos.x, _vPos.y, _vPos.z, _vPos.w);
     if (m_pTarget) {
-        FVECTOR _vLook = ((CCoord&)m_pTarget->Crd(0)).getWorldMatrix().getTrans();
+        FVECTOR _vLook = ((CCoord&)m_pTarget->Crd(0)).getWorldMatrix().getTransRef();
         TRACE("END L:%f %f %f %f\n", _vLook.x, _vLook.y, _vLook.z, _vLook.w);
     }
     FLOAT fProj = getProjectionDist();
     TRACE("END Proj %f %f\x93x\n", fProj + 512.0f, ProjectionToViewAngle(fProj));
     CCamera* pCam = CWorldEnv::getOldCamera();
     if (pCam && pCam->getLook()) {
-        FVECTOR _vPos = pCam->Crd(0).getWorldMatrix().getTrans();
+        FVECTOR _vPos = pCam->Crd(0).getWorldMatrix().getTransRef();
         TRACE("END OP:%f %f %f %f\n", _vPos.x, _vPos.y, _vPos.z, _vPos.w);
         FVECTOR _vLook = *pCam->getLook();
         TRACE("END OL:%f %f %f %f\n", _vLook.x, _vLook.y, _vLook.z, _vLook.w);
@@ -228,8 +228,8 @@ void CHermitePathCamera::main() {
             if (pCam && pCam->getLook()) {
                 m_vLearpAimLook = *pCam->getLook();
                 m_vLearpOldLook = *getLook();
-                m_vLearpAimPos = pCam->Crd(0).getWorldMatrix().getTrans();
-                m_vLearpOldPos = ((CCoord&)((const CTask*)this)->Crd(0)).getWorldMatrix().getTrans();
+                m_vLearpAimPos = pCam->Crd(0).getWorldMatrix().getTransRef();
+                m_vLearpOldPos = ((CCoord&)((const CTask*)this)->Crd(0)).getWorldMatrix().getTransRef();
                 m_fLearpAimProj = pCam->getProjectionDist();
                 m_fLearpOldProj = getProjectionDist();
                 m_iStep = 3;
@@ -275,7 +275,7 @@ FLOAT CHermitePathCamera::updatePos(FVECTOR& vPos, FVECTOR& vLook, FLOAT fr, BOO
                 switch (m_iKind) {
                 case 2:
                     fStep = m_pPath->getTargetDistanceToPathStep(
-                        ((CCoord&)m_pTarget->Crd(0)).getWorldMatrix().getTrans(), m_fDistance);
+                        ((CCoord&)m_pTarget->Crd(0)).getWorldMatrix().getTransRef(), m_fDistance);
                     if (bUpdate) {
                         fRate = fr * 0.125f;
                         if (1.0f < fRate) fRate = 1.0f;
@@ -371,7 +371,7 @@ FLOAT CHermitePathCamera::updatePos(FVECTOR& vPos, FVECTOR& vLook, FLOAT fr, BOO
         } else {
             m_vWPos = m_vPos;
         }
-        vLook = ((CCoord&)m_pTarget->Crd(0)).getWorldMatrix().getTrans();
+        vLook = ((CCoord&)m_pTarget->Crd(0)).getWorldMatrix().getTransRef();
         vLook.y += m_fOffsetY;
         if (bUpdate) {
             fRate = m_fLookDelay * fr;
@@ -425,7 +425,7 @@ FLOAT CHermitePathCamera::updatePos(FVECTOR& vPos, FVECTOR& vLook, FLOAT fr, BOO
             CCamera* pCam = CWorldEnv::getOldCamera();
             if (pCam) {
                 m_vTargetPos = *pCam->getLook();
-                m_vWPos = pCam->Crd(0).getWorldMatrix().getTrans();
+                m_vWPos = pCam->Crd(0).getWorldMatrix().getTransRef();
                 m_fProj = pCam->getProjectionDist();
             }
             fRate = m_fLearpOut;
