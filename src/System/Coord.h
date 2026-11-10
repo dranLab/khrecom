@@ -273,8 +273,22 @@ public:
         };
     };
     FMATRIX m_World;     /* 0x90 */
+    /* the inlines in the ref's order on the original's lines (line markers: the constructor 1009-1016, setLocal
+     * 1024-1029, getParent 1043, setParent 1044, getScale 1046, setScale 1047, touch 1051, getWorldMatrix 1055,
+     * resetTimestamp 1062, setHandle 1072) */
+#line 1009
+    CCoord() {
+        _q40 = 0;
+#line 1013
+        m_fScaleX = 1.0f;
+        m_fScaleY = 1.0f;
+        m_fScaleZ = 1.0f;
+        m_hHandle = 0;
+    }
+#line 1023
     void setLocal(const FMATRIX& matIn) {
         if (m_Local != matIn) {
+#line 1026
             m_Local = matIn;
             touch();
         }
@@ -282,52 +296,36 @@ public:
     void updateLocal(/* parameters unknown */);
     void setTrans(/* parameters unknown */);
     void updateTrans(/* parameters unknown */);
+#line 1043
+    CCoord* getParent() { return m_pParent; }
     void setParent(CCoord* pParent) { m_pParent = pParent; }
-    void touch(); // defined below the class
-    CCoord() {
-        _q40 = 0;
-        m_fScaleX = 1.0f;
-        m_fScaleY = 1.0f;
-        m_fScaleZ = 1.0f;
-        m_hHandle = 0;
-    }
+
+    void getScale(FVECTOR& outScale) { outScale.x = m_fScaleX; outScale.y = m_fScaleY; outScale.z = m_fScaleZ; }
+    void setScale(const FVECTOR& inScale) { m_fScaleX = inScale.x; m_fScaleY = inScale.y; m_fScaleZ = inScale.z; m_Flag = 1; }
     void fix(INT n = 0);
+#line 1051
+    void touch() { m_Flag = 1; }
     TIMEQ getWorldTimestamp(/* parameters unknown */);
+    FMATRIX& getLocalMatrix() { return m_Local; }
+#line 1055
     FMATRIX& getWorldMatrix() { return m_World; }
     FMATRIX& getWorldRot33Matrix(/* parameters unknown */);
     FVECTOR getWorldPos() { return m_World.v[3]; } // PARTIAL: Effect/effect and EffectMan (original name unknown)
-    FMATRIX& getLocalMatrix() { return m_Local; }
-    CCoord* getParent() { return m_pParent; }
-    void recalcLocalMatrix();
-    void getScale(FVECTOR& outScale) {
-        outScale.x = m_fScaleX;
-        outScale.y = m_fScaleY;
-        outScale.z = m_fScaleZ;
-    }
-    void recalcWorldMatrix();
     void getRotTransPersMatrix(FMATRIX& outMat);
     void getRotTransPersMatrix_VF04_07();
     void RotTransPers(IVECTOR& outV, const FVECTOR& inV);
     void RotTransPers(FVECTOR& outV, const FVECTOR& inV);
-    void resetTimestamp() {
-        m_FixTimestamp = -1;
-        m_WorldTimestamp = -1;
-    }
+    void resetTimestamp() { m_FixTimestamp = -1; m_WorldTimestamp = -1; }
+    void recalcWorldMatrix();
+    void recalcLocalMatrix();
     HANDLE getHandle(/* parameters unknown */);
+#line 1072
     void setHandle(HANDLE h) { m_hHandle = h; }
-    void setScale(const FVECTOR& inScale) {
-        m_fScaleX = inScale.x;
-        m_fScaleY = inScale.y;
-        m_fScaleZ = inScale.z;
-        m_Flag = 1;
-    }
 
 private:
     void _mulParent(/* parameters unknown */);
     void _checkParent(/* parameters unknown */);
 };
-
-inline void CCoord::touch() { m_Flag = 1; }
 
 class CCoords {
 public:
