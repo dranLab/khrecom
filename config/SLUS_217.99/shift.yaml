@@ -24,6 +24,10 @@ presets:
     - {section: .sdata, after: start, size: 0x10}
     - {section: .sbss, after: start, size: 0x10}
     - {section: .bss, after: start, size: 0x10}
+  # .bss by 8 only: the COMMON block's 16-byte statics must stay aligned (configure.py split_common)
+  # (right before the block: at the start of .bss the first object's 128-byte alignment would absorb the 8)
+  bss8:
+    - {section: .bss, after: lib/nodebug/memcmp, size: 0x8}
   # distances between parts of the image (pointer arithmetic across units)
   mid:
     - {section: .text, after: Game/Map, size: 0x80}
