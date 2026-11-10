@@ -127,8 +127,8 @@ using namespace D2;
 
 template <class T> static inline T& _ref(T& v) { return v; }
 
-/* CCard's inline accessors (not in the original's symbols) */
-
+/* A copy of CARD::init (CardKind.h 553-558) kept for the parked setMapCardWin draft below (#if 0); the
+   matched code calls CARD::init. */
 static inline void _setCardNK(CARD& c, USHORT kind, BYTE num) {
     c.m_nId = 0;
     c.m_nNumber2 = num;
@@ -136,21 +136,7 @@ static inline void _setCardNK(CARD& c, USHORT kind, BYTE num) {
     c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0;
     c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1;
 }
-
-static inline CARD _makeCardNK(USHORT kind, BYTE num) {
-    CARD c;
-    _setCardNK(c, kind, num);
-    return c;
-}
-
-static inline void _setCard(CARD& c, USHORT kind, BYTE num) {
-    c.m_nId = 0;
-    c.m_nKind2 = kind;
-    c.m_nNumber2 = num;
-    c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0;
-    c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1;
-}
-
+#line 381
 INT CCamp::m_iWorldRsrc = 0;
 CCamp* CCamp::m_pInstance = NULL;
 
@@ -3096,7 +3082,10 @@ INT CCamp::deckEditMenu() {
                 m_nErrorWinStep = 0;
                 break;
             }
-            CCard::insertDeck(_makeCardNK(m_kindTbl[m_nKindSelect], m_nNumSelect), m_nDeckNoSelect, m_nDeckSelect, FALSE);
+            CARD card;
+            card.init(m_kindTbl[m_nKindSelect], m_nNumSelect);
+            CCard::insertDeck(card, m_nDeckNoSelect, m_nDeckSelect, FALSE);
+#line 3327
             initCardData(0);
             initCardKind(m_nDeckNoSelect, m_nKindCategorySelect, FALSE);
             initDeck(m_nDeckNoSelect, 0);
@@ -3598,7 +3587,7 @@ void CCamp::setDeckCard(INT nSetCmd) {
                 p2DCard->destroy(j);
             }
             if (idx < m_nKind[m_nKindCategorySelect]) {
-                _setCardNK(card, m_kindTbl[idx], -1);
+                card.init(m_kindTbl[idx], 0xFF);
                 p2DCard->create(card);
                 if (card.m_fgPremium || card.m_nKind == 0x7D || card.m_nKind == 0x7E) {
                     p2DCard->restart(p2DCard->getNumSeq() - 1, m_iFrame60);
@@ -3958,7 +3947,7 @@ INT CCamp::setDeckInfo(INT nSetCmd) {
             if (!m_nCardInOut) {
                 if (m_nKind[m_nKindCategorySelect]) {
                     nKind = m_kindTbl[m_nKindSelect];
-                    _setCardNK(card, nKind, -1);
+                    card.init(nKind, 0xFF);
                     if (nKind) {
                         m_pDeckInfoCard->create(card);
                         if (nKind != cardOld.m_nKind) {
@@ -4047,7 +4036,7 @@ INT CCamp::setDeckInfo(INT nSetCmd) {
         break;
     }
     case 13:
-        _setCardNK(card, m_kindTbl[m_nKindSelect], m_nNumSelect);
+        card.init(m_kindTbl[m_nKindSelect], m_nNumSelect);
         sprintf(chrTmp, pStrNum[0], CCard::getCP(card));
         m_pDeckInfoFnt[0]->allocText(chrTmp);
         break;
@@ -4924,7 +4913,7 @@ INT CCamp::setStatusWin(INT nSetCmd) {
                     }
                     if (kind) {
                         CARD card;
-                        _setCardNK(card, kind, -1);
+                        card.init(kind, 0xFF);
                         pBuf = card.getName();
                     } else {
                         pBuf = NULL;
@@ -5512,7 +5501,7 @@ INT CCamp::setWorldmap(INT nSetCmd) {
                     p2DSeqCtrl->setLocalPos(vec2);
                     p2DSeqCtrl->addSeq(pSeqName, cardID == 0xB8 ? 0x53 : 0x55);
                     p2DSeqCtrl->enableDisp(FALSE);
-                    _setCardNK(card, cardID, -1);
+                    card.init(cardID, 0xFF);
                     p2DCard = m_pShopAndSave[nCard++] = new (operator new(sizeof(C2DCard), __FILE__ "(6905)")) C2DCard;
                     p2DCard->setParent(p2DSeqCtrl);
                     p2DCard->setLayer(0xC);
@@ -5860,7 +5849,7 @@ void CCamp::setWorldmapCursor() {
                     vec.set(k * 82.0f, 0.0f, 0.0f);
                     p2DCard->setLocalPos(vec);
                     if (k == nNorma && fgKeyCard) {
-                        _setCardNK(card, fgKeyCard, 0);
+                        card.init(fgKeyCard, 0);
                         p2DCard->create(card);
                     } else {
                         INT nNI = k + nNormaIndex;
@@ -6135,7 +6124,7 @@ INT CCamp::setStatusWin1(INT nSetCmd) {
                         p2DCard->enableColorCtrl(TRUE);
                         p2DCard->setLocalPos(vec);
                         vec.x += 74.0f;
-                        _setCardNK(card, kind, -1);
+                        card.init(kind, 0xFF);
                         m_pWindow1Card[idx]->create(card);
                         m_pWin1EtcButton[idx] = new (__FILE__ "(7731)") CButton;
                         pButton = m_pWin1EtcButton[idx];
@@ -6803,7 +6792,7 @@ void CCamp::setCardHelp(SHORT kind) {
         m_pHelpFnt->setText(pStrNull);
         return;
     }
-    _setCard(card, kind, 0);
+    card.init(kind, 0);
     m_pHelpFnt->setText(card.getName());
 }
 
@@ -6928,7 +6917,7 @@ void CCamp::setWMRoomName(BYTE cardID, INT nRoomSelect, const RoomInfo* pRoomInf
     if ((m_roomDiscover[nRoom] >= 0 && !m_bPooWorld) || pRoomInfo->hasEntered()) {
         if (cardID && hasOpenedDoor(pRoomInfo, pRooms)) {
             CARD card;
-            _setCard(card, cardID, 0);
+            card.init(cardID, 0);
             INT idxPooRoom = m_roomMap[nRoomSelect] - 2;
             m_nWMRoomNameSeq = roomColorSeqTbl[card.m_nCategory21 ? card.m_nCategory21 - 9 : 3] - bIn;
             m_pWMRoomNameCtrl->replaceSeq(0, pSeqName, m_nWMRoomNameSeq);
@@ -7020,7 +7009,7 @@ void CCamp::setCurrentRoomName(INT nSetCmd) {
             if (pRoomInfo) {
                 cardID = pRoomInfo->getRoomNameCardID();
             }
-            _setCardNK(card, cardID, 0);
+            card.init(cardID, 0);
             rgba.col = 0x807C7C7C;
             m_pCurrentRoomNameFnt = new (__FILE__ "(8871)") C2DFnt(0, 0, &rgba, 0xF, card.getName(), 0x241);
             m_pCurrentRoomNameFnt->setLayer(0xF, 0);
