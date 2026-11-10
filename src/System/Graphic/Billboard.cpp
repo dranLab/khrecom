@@ -39,10 +39,10 @@ CBillboardHelper::CBillboardHelper() {
 CBillboardHelper::~CBillboardHelper() {}
 
 void CBillboardHelper::setEyeMatrixImpl(FMATRIX& inMat, const FVECTOR& vInRot) {
-    sceVu0UnitMatrix(inMat.m);
-    sceVu0RotMatrixX(inMat.m, inMat.m, vInRot.x);
-    sceVu0RotMatrixY(inMat.m, inMat.m, vInRot.y);
-    sceVu0RotMatrixZ(inMat.m, inMat.m, vInRot.z);
+    UnitMatrix(inMat);
+    RotMatrixX(inMat, inMat, vInRot.x);
+    RotMatrixY(inMat, inMat, vInRot.y);
+    RotMatrixZ(inMat, inMat, vInRot.z);
 }
 
 void CBillboardHelper::calcBillboardMatrix(FMATRIX& inMat, const FVECTOR& vInPos, const FVECTOR& vInEyePos,

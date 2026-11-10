@@ -332,7 +332,7 @@ void Quaternion::MatrixToQuaternion(QUATERNION& outQuat, const FMATRIX& inMatrix
 
 void Quaternion::QuaternionLerp(QUATERNION& outResult, const QUATERNION& inQuat0, const QUATERNION& inQuat1, FLOAT inT) {
     QUATERNION q;
-    sceVu0InterVector(q.v, (float*)inQuat1.v, (float*)inQuat0.v, inT);
+    InterVector(q, inQuat1, inQuat0, inT);
     QuaternionNormalize(outResult, q);
 }
 

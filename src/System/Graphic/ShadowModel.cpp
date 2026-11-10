@@ -610,17 +610,14 @@ static int _getCrossPoint(FVECTOR& ww, const FVECTOR& pw0, const FVECTOR& vw0, f
     return ret;
 }
 
-static inline void _unitMatrix(FMATRIX& m1) {
-    sceVu0UnitMatrix(m1.m);
-}
 
 static void _ScreenToWorld(FVECTOR& w, const FMATRIX& wvm, const SCREEN* scr, const FVECTOR& s) {
     FMATRIX rotm;
     FMATRIX mat;
-    _unitMatrix(mat);
+    UnitMatrix(mat);
     mat.m[0][0] = 1.0f / scr->ax;
     mat.m[1][1] = 1.0f / scr->ay;
-    sceVu0InversMatrix(rotm.m, ((FMATRIX&)wvm).m);
+    InversMatrix(rotm, wvm);
     MulMatrix(rotm, rotm, mat);
     ApplyMatrix(w, rotm, s);
     w.w = 1.0f;

@@ -1235,7 +1235,7 @@ void CImageWnd::mainImpl() {
             m_step = 5;
             m_phaseCnt++;
         }
-        sceVu0InterVector(m_currentPos.v, m_targetPos.v, m_initPos.v, m_fCurrentRate);
+        InterVector(m_currentPos, m_targetPos, m_initPos, m_fCurrentRate);
         fvec0 = m_currentPos;
         ScaleVector(fvec0, fvec0, 16.0f);
         fvec0.x -= fvec0.z * 0.5f;
@@ -1249,7 +1249,7 @@ void CImageWnd::mainImpl() {
         _setXYZ(m_pPolyGT4->m_P3, ivec.z, ivec.w);
         fvec0.set(m_initColor.a, m_initColor.b, m_initColor.g, m_initColor.r);
         fvec1.set(m_targetColor.a, m_targetColor.b, m_targetColor.g, m_targetColor.r);
-        sceVu0InterVector(fvec0.v, fvec1.v, fvec0.v, m_fCurrentRate);
+        InterVector(fvec0, fvec1, fvec0, m_fCurrentRate);
         FTOI0Vector(ivec, fvec0);
         m_currentColor.a = ivec.x;
         m_currentColor.b = ivec.y;

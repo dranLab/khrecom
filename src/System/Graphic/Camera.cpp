@@ -96,7 +96,7 @@ void CCamera::lookAt(const FVECTOR& vTarget, FLOAT fBank) {
     lookAt(vTarget, (const FVECTOR*)NULL);
     FMATRIX& mat = Crd(0).getWorldMatrix();
     _unitMatrixVu0(matLocal);
-    sceVu0RotMatrixZ(matLocal.m, matLocal.m, fBank);
+    RotMatrixZ(matLocal, matLocal, fBank);
     MulMatrix(mat, mat, matLocal);
     Crd(0).recalcLocalMatrix();
 }
