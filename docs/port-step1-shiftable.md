@@ -402,8 +402,8 @@ itself (newlib's `_reent` pointing at its own `__sf[]` streams).
 | S5 DLL imports (125 relocs, 120 raw) | done 2026-11-10 | imports undefined in sources + `dll_imports.ld`; all 125 sites checked against object relocations. `shiftpins.py` 0/0; all 5 presets link. check.sh exit 0 |
 | S6 shiftcheck | done 2026-11-10 | all 5 presets: 0 errors, 0 suspects (92 cleared individually), 0 lost alignment |
 | S7 presets | done 2026-11-10 | text128, data128, all8, mid, big link and pass shiftcheck. `--no-check-sections` still on (untested without). |
-| S8 boot tests | open | |
-| S9 check.sh/CLAUDE.md | open | |
+| S8 boot tests | prepared, **not run** (no PCSX2 in this environment) | `ninja shift-iso-<preset>` builds the disc (`build_iso.py --shifted`: image comparison skipped and said so); text128's disc built 2026-11-10 (`build/SLUS_217.99/shift/text128/SLUS_217.99.iso`, ELF 0x60CF38 bytes at sector 631, entry 0x100008). Runs and the DLL list from the original are the user's. |
+| S9 check.sh/CLAUDE.md | done 2026-11-10 | `tools/check.sh --shift` (all presets: shiftpins + shiftcheck), exit 0; CLAUDE.md section "Shifted build" on this branch. CI unchanged (branch unmerged). |
 
 Boot-test log:
 

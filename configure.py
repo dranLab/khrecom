@@ -397,6 +397,9 @@ def write_shift_links(n, cfg_dir: str, opts: dict, objects: list[str]) -> None:
         f" -T {imports} -o $out",
         description="LD (shifted) $out",
     )
+    version = Path(opts["elf_path"]).stem
+    n.rule("iso_shift", f"{sys.executable} tools/build_iso.py {version} --elf $in --out $out --shifted",
+           description="ISO (shifted) $out")
     # Padding objects only contribute the section they are listed under; alignment 1, so the padding is exact.
     pad_align = " ".join(f"--set-section-alignment {s}=1" for s in sorted(SHIFT_SECTIONS))
     elves = []
@@ -426,6 +429,10 @@ def write_shift_links(n, cfg_dir: str, opts: dict, objects: list[str]) -> None:
         n.build(elf, "ld_shift", objects + pad_objects, implicit=[script, extra, imports],
                 variables={"ldscript": script, "mapfile": str(Path(elf).with_suffix(".map"))})
         n.build(f"shift-{preset}", "phony", elf)
+        # Boot test disc (S8), on demand only: a 4+ GB copy of the original image with this ELF.
+        iso = f"{out_dir}/{Path(opts['elf_path']).stem}.iso"
+        n.build(iso, "iso_shift", elf, implicit=["tools/build_iso.py"])
+        n.build(f"shift-iso-{preset}", "phony", iso)
         elves.append(elf)
     n.build("shift", "phony", elves)
     n.newline()
