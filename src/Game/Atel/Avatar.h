@@ -268,139 +268,139 @@ public:
     }
     void setAvatarFadeTimeLimit(AvatarFadeStruct* in_pFadeStruct, INT t) {
 #line 494 AVATAR_H_PATH
-        if (!(in_pFadeStruct)) AssertApp(__FILE__, __LINE__, "in_pFadeStruct", 0);
+        KH_DEBUG(if (!(in_pFadeStruct)) AssertApp(__FILE__, __LINE__, "in_pFadeStruct", 0);)
         in_pFadeStruct->_nFadeTimeLimit = t;
     }
     void setAvatarFadeTimeLimit(FLOAT f) { setAvatarFadeTimeLimit(secTQ(f)); } // MATCH: the original's overload calls itself (TIMEQ -> FLOAT)
     void setAvatarTargetFade(AvatarFadeStruct* in_pFadeStruct, const FLOAT& f) {
 #line 498 AVATAR_H_PATH
-        if (!(in_pFadeStruct)) AssertApp(__FILE__, __LINE__, "in_pFadeStruct", 0);
+        KH_DEBUG(if (!(in_pFadeStruct)) AssertApp(__FILE__, __LINE__, "in_pFadeStruct", 0);)
         in_pFadeStruct->_fTargetFade = f;
     }
     void setAvatarFadeSpeed(AvatarFadeStruct* in_pFadeStruct, const FLOAT& f) {
 #line 500 AVATAR_H_PATH
-        if (!(in_pFadeStruct)) AssertApp(__FILE__, __LINE__, "in_pFadeStruct", 0);
+        KH_DEBUG(if (!(in_pFadeStruct)) AssertApp(__FILE__, __LINE__, "in_pFadeStruct", 0);)
         in_pFadeStruct->_fFadeSpeed = f;
     }
     FLOAT& getAvatarTargetFade(AvatarFadeStruct* in_pFadeStruct) const {
 #line 506 AVATAR_H_PATH
-        if (!(in_pFadeStruct)) AssertApp(__FILE__, __LINE__, "in_pFadeStruct", 0);
+        KH_DEBUG(if (!(in_pFadeStruct)) AssertApp(__FILE__, __LINE__, "in_pFadeStruct", 0);)
         return in_pFadeStruct->_fTargetFade;
     }
     FLOAT& getAvatarFadeSpeed(AvatarFadeStruct* in_pFadeStruct) const {
 #line 508 AVATAR_H_PATH
-        if (!(in_pFadeStruct)) AssertApp(__FILE__, __LINE__, "in_pFadeStruct", 0);
+        KH_DEBUG(if (!(in_pFadeStruct)) AssertApp(__FILE__, __LINE__, "in_pFadeStruct", 0);)
         return in_pFadeStruct->_fFadeSpeed;
     }
     TIMEQ getAvatarFadeTimeLimit(AvatarFadeStruct* in_pFadeStruct) const {
 #line 510 AVATAR_H_PATH
-        if (!(in_pFadeStruct)) AssertApp(__FILE__, __LINE__, "in_pFadeStruct", 0);
+        KH_DEBUG(if (!(in_pFadeStruct)) AssertApp(__FILE__, __LINE__, "in_pFadeStruct", 0);)
         return in_pFadeStruct->_nFadeTimeLimit;
     }
     TIMEQ getAvatarFadeTimeCount(AvatarFadeStruct* in_pFadeStruct) const {
 #line 512 AVATAR_H_PATH
-        if (!(in_pFadeStruct)) AssertApp(__FILE__, __LINE__, "in_pFadeStruct", 0);
+        KH_DEBUG(if (!(in_pFadeStruct)) AssertApp(__FILE__, __LINE__, "in_pFadeStruct", 0);)
         return in_pFadeStruct->_nFadeTimeCount;
     }
     FLOAT getAvatarFadeTimeCountRate(AvatarFadeStruct* in_pFadeStruct) const {
 #line 514 AVATAR_H_PATH
-        if (!(in_pFadeStruct)) AssertApp(__FILE__, __LINE__, "in_pFadeStruct", 0);
+        KH_DEBUG(if (!(in_pFadeStruct)) AssertApp(__FILE__, __LINE__, "in_pFadeStruct", 0);)
         return getTimeCountRate(in_pFadeStruct->_nFadeTimeLimit, in_pFadeStruct->_nFadeTimeCount);
     }
     BOOL isOverAvatarFadeTimeLimit(AvatarFadeStruct* in_pFadeStruct) const {
 #line 520 AVATAR_H_PATH
-        if (!(in_pFadeStruct)) AssertApp(__FILE__, __LINE__, "in_pFadeStruct", 0);
+        KH_DEBUG(if (!(in_pFadeStruct)) AssertApp(__FILE__, __LINE__, "in_pFadeStruct", 0);)
         return in_pFadeStruct->isOverTimeLimit();
     }
     BOOL isOverAvatarFadeTimeLimit(AvatarFadeStruct* in_pFadeStruct, INT t) const {
 #line 521 AVATAR_H_PATH
-        if (!(in_pFadeStruct)) AssertApp(__FILE__, __LINE__, "in_pFadeStruct", 0);
+        KH_DEBUG(if (!(in_pFadeStruct)) AssertApp(__FILE__, __LINE__, "in_pFadeStruct", 0);)
         return in_pFadeStruct->isOverTimeLimit(t);
     }
     void clearAvatarFadeSpeed(AvatarFadeStruct* in_pFadeStruct) {
 #line 528 AVATAR_H_PATH
-        if (!(in_pFadeStruct)) AssertApp(__FILE__, __LINE__, "in_pFadeStruct", 0);
+        KH_DEBUG(if (!(in_pFadeStruct)) AssertApp(__FILE__, __LINE__, "in_pFadeStruct", 0);)
         in_pFadeStruct->_fFadeSpeed = 0.0f;
     }
     void FadeAvatarEnd();
     void cancelFadeAvatar();
     void clearAvatarFadeTimeCount(AvatarFadeStruct* in_pFadeStruct) {
 #line 534 AVATAR_H_PATH
-        if (!(in_pFadeStruct)) AssertApp(__FILE__, __LINE__, "in_pFadeStruct", 0);
+        KH_DEBUG(if (!(in_pFadeStruct)) AssertApp(__FILE__, __LINE__, "in_pFadeStruct", 0);)
         in_pFadeStruct->_nFadeTimeCount = 0;
     }
     void countAvatarFadeTime(AvatarFadeStruct* in_pFadeStruct, INT t) {
 #line 536 AVATAR_H_PATH
-        if (!(in_pFadeStruct)) AssertApp(__FILE__, __LINE__, "in_pFadeStruct", 0);
+        KH_DEBUG(if (!(in_pFadeStruct)) AssertApp(__FILE__, __LINE__, "in_pFadeStruct", 0);)
         in_pFadeStruct->_nFadeTimeCount += t;
     }
     BOOL FadeAvatarMain();
     void setAvatarScaleTimeLimit(INT t) {
 #line 547 AVATAR_H_PATH
-        if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);
+        KH_DEBUG(if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);)
         m_pScaleStruct->_nScaleTimeLimit = t;
     }
     void setAvatarScaleTimeLimit(FLOAT f) { setAvatarScaleTimeLimit(secTQ(f)); }
     void setAvatarTargetScale(const FVECTOR& v) {
 #line 551 AVATAR_H_PATH
-        if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);
+        KH_DEBUG(if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);)
         m_pScaleStruct->_vTargetScale.set(v);
     }
     void setAvatarScaleSpeed(const FVECTOR& v) {
 #line 553 AVATAR_H_PATH
-        if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);
+        KH_DEBUG(if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);)
         m_pScaleStruct->_vScaleSpeed.set(v);
     }
     FVECTOR& getAvatarTargetScale() const {
 #line 560 AVATAR_H_PATH
-        if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);
+        KH_DEBUG(if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);)
         return m_pScaleStruct->_vTargetScale;
     }
     FVECTOR& getAvatarScaleSpeed() const {
 #line 562 AVATAR_H_PATH
-        if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);
+        KH_DEBUG(if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);)
         return m_pScaleStruct->_vScaleSpeed;
     }
     TIMEQ getAvatarScaleTimeLimit() const {
 #line 564 AVATAR_H_PATH
-        if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);
+        KH_DEBUG(if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);)
         return m_pScaleStruct->_nScaleTimeLimit;
     }
     TIMEQ getAvatarScaleTimeCount() const {
 #line 566 AVATAR_H_PATH
-        if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);
+        KH_DEBUG(if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);)
         return m_pScaleStruct->_nScaleTimeCount;
     }
     FLOAT getAvatarScaleTimeCountRate() const {
 #line 568 AVATAR_H_PATH
-        if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);
+        KH_DEBUG(if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);)
         return getTimeCountRate(m_pScaleStruct->_nScaleTimeLimit, m_pScaleStruct->_nScaleTimeCount);
     }
     BOOL isOverAvatarScaleTimeLimit() const {
 #line 574 AVATAR_H_PATH
-        if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);
+        KH_DEBUG(if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);)
         return m_pScaleStruct->_nScaleTimeCount >= m_pScaleStruct->_nScaleTimeLimit;
     }
     BOOL isOverAvatarScaleTimeLimit(INT t) const {
 #line 575 AVATAR_H_PATH
-        if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);
+        KH_DEBUG(if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);)
         return m_pScaleStruct->_nScaleTimeCount + t >= m_pScaleStruct->_nScaleTimeLimit;
     }
     void clearAvatarScaleSpeed() {
 #line 582 AVATAR_H_PATH
-        if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);
+        KH_DEBUG(if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);)
         m_pScaleStruct->_vScaleSpeed.zero();
     }
     void ScaleAvatarEnd();
     void cancelScaleAvatar();
     void clearAvatarScaleTimeCount() {
 #line 588 AVATAR_H_PATH
-        if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);
+        KH_DEBUG(if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);)
         m_pScaleStruct->_nScaleTimeCount = 0;
     }
     void countAvatarScaleTime(INT t) {
 #line 590 AVATAR_H_PATH
-        if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);
+        KH_DEBUG(if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);)
         m_pScaleStruct->_nScaleTimeCount += t;
     }
     BOOL ScaleAvatarMain();
@@ -408,78 +408,78 @@ public:
     void setAvatarRotTimeLimit(FLOAT f) { setAvatarRotTimeLimit(secTQ(f)); }
     void setAvatarStartRot(const FVECTOR& v) {
 #line 605 AVATAR_H_PATH
-        if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);
+        KH_DEBUG(if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);)
         m_pRotateStruct->_vStartRot.set(v);
     }
     void setAvatarTargetRot(const FVECTOR& v) {
 #line 607 AVATAR_H_PATH
-        if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);
+        KH_DEBUG(if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);)
         m_pRotateStruct->_vTargetRot.set(v);
     }
     void setAvatarRotSpeed(const FVECTOR& v) {
 #line 609 AVATAR_H_PATH
-        if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);
+        KH_DEBUG(if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);)
         m_pRotateStruct->_vRotSpeed.set(v);
     }
     USHORT getAvatarRotType() const {
 #line 615 AVATAR_H_PATH
-        if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);
+        KH_DEBUG(if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);)
         return m_pRotateStruct->_nRotateType & 0xf;
     }
     TIMEQ getAvatarRotTimeLimit() const {
 #line 617 AVATAR_H_PATH
-        if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);
+        KH_DEBUG(if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);)
         return m_pRotateStruct->_nRotTimeLimit;
     }
     FVECTOR& getAvatarTargetRot() const {
 #line 619 AVATAR_H_PATH
-        if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);
+        KH_DEBUG(if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);)
         return m_pRotateStruct->_vTargetRot;
     }
     FLOAT getAvatarDirY2Target(const FVECTOR* pvTarget, const FMATRIX* pMatRide);
     FMATRIX* getAvatarRideMatrix() const {
 #line 623 AVATAR_H_PATH
-        if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);
+        KH_DEBUG(if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);)
         return m_pMoveStruct->_pMatRide;
     }
     FVECTOR& getAvatarStartRot() const {
 #line 625 AVATAR_H_PATH
-        if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);
+        KH_DEBUG(if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);)
         return m_pRotateStruct->_vStartRot;
     }
     FVECTOR& getAvatarRotSpeed() const {
 #line 627 AVATAR_H_PATH
-        if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);
+        KH_DEBUG(if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);)
         return m_pRotateStruct->_vRotSpeed;
     }
     BOOL isAvatarRotEternal() const {
 #line 633 AVATAR_H_PATH
-        if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);
+        KH_DEBUG(if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);)
         return m_pRotateStruct->_nRotateType & 0x10;
     }
     BOOL isOverAvatarRotTimeLimit() const {
 #line 635 AVATAR_H_PATH
-        if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);
+        KH_DEBUG(if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);)
         return !isAvatarRotEternal() && m_pRotateStruct->isOverTimeLimit();
     }
     BOOL isOverAvatarRotTimeLimit(INT t) const {
 #line 636 AVATAR_H_PATH
-        if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);
+        KH_DEBUG(if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);)
         return !isAvatarRotEternal() && m_pRotateStruct->isOverTimeLimit(t);
     }
     void clearAvatarRotTimeCount() {
 #line 643 AVATAR_H_PATH
-        if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);
+        KH_DEBUG(if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);)
         m_pRotateStruct->_nRotTimeCount = 0;
     }
     void clearAvatarRotSpeed() {
 #line 645 AVATAR_H_PATH
-        if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);
+        KH_DEBUG(if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);)
         m_pRotateStruct->_vRotSpeed.zero();
     }
     void countAvatarRotTime(INT t) {
 #line 647 AVATAR_H_PATH
-        if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);
+        KH_DEBUG(if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);)
         m_pRotateStruct->_nRotTimeCount += t;
     }
     BOOL RotateAvatarMain();
@@ -487,94 +487,94 @@ public:
     void setRotAhead();
     void setAvatarStartPos(const FVECTOR& v) {
 #line 659 AVATAR_H_PATH
-        if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);
+        KH_DEBUG(if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);)
         m_pMoveStruct->_vStartPos.set(v);
         m_pMoveStruct->_vStartPos.w = 1.0f;
     }
     FVECTOR& getAvatarStartPos() const {
 #line 662 AVATAR_H_PATH
-        if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);
+        KH_DEBUG(if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);)
         return m_pMoveStruct->_vStartPos;
     }
     FVECTOR& getAvatarTargetPos() const {
 #line 665 AVATAR_H_PATH
-        if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);
+        KH_DEBUG(if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);)
         return m_pMoveStruct->_vTargetPos;
     }
     FVECTOR& getAvatarStartPosLocal() const { return m_pMoveStruct->_vStartPosLocal; }
     FVECTOR& getAvatarTargetPosLocal() const { return m_pMoveStruct->_vTargetPosLocal; }
     void setAvatarTargetPos(const FVECTOR& v) {
 #line 674 AVATAR_H_PATH
-        if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);
+        KH_DEBUG(if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);)
         m_pMoveStruct->_vTargetPos.set(v);
         m_pMoveStruct->_vTargetPos.w = 1.0f;
     }
     void clearAvatarMoveTimeCount() {
 #line 677 AVATAR_H_PATH
-        if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);
+        KH_DEBUG(if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);)
         m_pMoveStruct->_nMoveTimeCount = 0;
     }
     void countAvatarMoveTime(INT t) {
 #line 680 AVATAR_H_PATH
-        if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);
+        KH_DEBUG(if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);)
         m_pMoveStruct->_nMoveTimeCount += t;
     }
     void setAvatarMoveTimeLimit(INT t) {
 #line 683 AVATAR_H_PATH
-        if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);
+        KH_DEBUG(if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);)
         m_pMoveStruct->_nMoveTimeLimit = t;
     }
     void setAvatarMoveTimeLimit(FLOAT f) { setAvatarMoveTimeLimit(secTQ(f)); }
     void setAvatarSpeed(FLOAT f) {
 #line 689 AVATAR_H_PATH
-        if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);
+        KH_DEBUG(if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);)
         m_pMoveStruct->_fSpeed = f * 0.16666667f;
     }
     void calcAvatarMoveSpeed(FVECTOR& vOut);
     USHORT getAvatarMoveType() const {
 #line 695 AVATAR_H_PATH
-        if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);
+        KH_DEBUG(if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);)
         return m_pMoveStruct->_nMoveType & 0xf;
     }
     TIMEQ getAvatarMoveTimeLimit() const {
 #line 698 AVATAR_H_PATH
-        if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);
+        KH_DEBUG(if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);)
         return m_pMoveStruct->_nMoveTimeLimit;
     }
     FLOAT getAvatarSpeed() const {
 #line 701 AVATAR_H_PATH
-        if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);
+        KH_DEBUG(if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);)
         return m_pMoveStruct->_fSpeed;
     }
     BOOL isAvatarMoveWithGravity() const {
 #line 704 AVATAR_H_PATH
-        if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);
+        KH_DEBUG(if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);)
         return m_pMoveStruct->_nMoveType & 0x200;
     }
     BOOL isOverAvatarMoveTimeLimit() const {
 #line 707 AVATAR_H_PATH
-        if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);
+        KH_DEBUG(if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);)
         return m_pMoveStruct->isOverTimeLimit();
     }
     BOOL isOverAvatarMoveTimeLimit(INT t) const {
 #line 708 AVATAR_H_PATH
-        if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);
+        KH_DEBUG(if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);)
         return m_pMoveStruct->isOverTimeLimit(t);
     }
     USHORT getAvatarMoveMotion() const {
 #line 711 AVATAR_H_PATH
-        if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);
+        KH_DEBUG(if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);)
         return m_pMoveStruct->_nMoveMotion;
     }
     BOOL updateAvatarPosOnPath(TIMEQ nTime);
     void getAvatarPosOnPath(FVECTOR& vPos) {
 #line 717 AVATAR_H_PATH
-        if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);
+        KH_DEBUG(if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);)
         m_pMoveStruct->getPosOnPath(vPos);
     }
     BOOL isAvatarRotAhead() const {
 #line 720 AVATAR_H_PATH
-        if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);
+        KH_DEBUG(if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);)
         return !isAvatarRotating() && (m_pMoveStruct->_nMoveType & 0x10) != 0;
     }
     BOOL isArrivingTarget();

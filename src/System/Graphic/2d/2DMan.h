@@ -70,7 +70,7 @@ private:
 public:
 #line 47 D2MAN_H_PATH
     static C2DMan& initialize(CTask* p) {
-        if (!(__null == m_pInstance)) AssertApp(__FILE__, __LINE__, "__null == m_pInstance", 0);
+        KH_DEBUG(if (!(__null == m_pInstance)) AssertApp(__FILE__, __LINE__, "__null == m_pInstance", 0);)
         m_pInstance = new KH_AT("(49)") C2DMan(p);
         return *m_pInstance;
     }

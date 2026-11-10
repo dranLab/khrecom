@@ -35,9 +35,9 @@ public:
             return NULL;
         }
         TRACE("CTitleReportDllStarter::create\n");
-        if (!(__null == m_pInstance)) AssertApp(__FILE__, __LINE__, "__null == m_pInstance", 0);
+        KH_DEBUG(if (!(__null == m_pInstance)) AssertApp(__FILE__, __LINE__, "__null == m_pInstance", 0);)
         m_pInstance = new KH_AT("(56)") CTitleReportDllStarter(pParent, nArg1, nArg2);
-        if (!(m_pInstance)) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
+        KH_DEBUG(if (!(m_pInstance)) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);)
         return m_pInstance;
     }
 

@@ -53,7 +53,7 @@ public:
 #endif
 #line 58 PATHDATACAMERA_H_PATH
     void initBGCheck(BOOL fgTransparency) {
-        if (!m_pHPC) AssertApp(__FILE__, __LINE__, "m_pHPC", 0);
+        KH_DEBUG(if (!m_pHPC) AssertApp(__FILE__, __LINE__, "m_pHPC", 0);)
         m_pHPC->initBGCheck(fgTransparency);
     }
     BOOL isStop() { return m_iStatus & 2; }

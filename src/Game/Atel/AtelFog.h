@@ -59,9 +59,9 @@ public:
     static void initialize(CTask* pParent) {
         if (m_pInstance) return;
         TRACE("CAtelFog::initialize\n");
-        if (!(__null == m_pInstance)) AssertApp(__FILE__, __LINE__, "__null == m_pInstance", 0);
+        KH_DEBUG(if (!(__null == m_pInstance)) AssertApp(__FILE__, __LINE__, "__null == m_pInstance", 0);)
         m_pInstance = new KH_AT("(111)") CAtelFog(pParent);
-        if (!(m_pInstance)) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
+        KH_DEBUG(if (!(m_pInstance)) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);)
     }
     static void finalize() {
         CAtelFog*& p = m_pInstance;
@@ -71,7 +71,7 @@ public:
     static CAtelFog& instance() {
         CAtelFog*& p = m_pInstance;
 #line 122
-        if (!(p)) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
+        KH_DEBUG(if (!(p)) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);)
         return *p;
     }
     virtual void main();

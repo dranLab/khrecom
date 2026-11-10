@@ -15,7 +15,7 @@
  * strings come first in its .rodata. */
 #line 1 EFFECT_H_PATH
 inline void _effectCheckValid(BOOL inValid) {
-    if (!inValid) AssertApp(__FILE__, __LINE__, "isValid()", 0);
+    KH_DEBUG(if (!inValid) AssertApp(__FILE__, __LINE__, "isValid()", 0);)
 }
 #endif
 

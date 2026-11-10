@@ -48,9 +48,9 @@ public:
     static void initialize(CTask* pParent) {
         if (m_pInstance) return;
         TRACE("CCameraMan::initialize\n");
-        if (!(__null == m_pInstance)) AssertApp(__FILE__, __LINE__, "__null == m_pInstance", 0);
+        KH_DEBUG(if (!(__null == m_pInstance)) AssertApp(__FILE__, __LINE__, "__null == m_pInstance", 0);)
         m_pInstance = new KH_AT("(68)") CCameraMan(pParent);
-        if (!(m_pInstance)) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
+        KH_DEBUG(if (!(m_pInstance)) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);)
         m_pInstance->setup();
     }
     static void finalize() {
@@ -61,7 +61,7 @@ public:
 #line 79 CAMERAMAN_H_PATH
     static CCameraMan& instance() {
         CCameraMan*& p = m_pInstance;
-        if (!(p)) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
+        KH_DEBUG(if (!(p)) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);)
         return *p;
     }
     virtual void main();

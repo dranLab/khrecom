@@ -46,9 +46,9 @@ public:
     virtual ~CCollDisp();
 #line 47 COLLDISP_H_PATH
     static CCollDisp& initialize(CTask* pInParent, INT fgDisp, INT inMapZoneDisp) {
-        if (!(__null == m_pInstance)) AssertApp(__FILE__, __LINE__, "__null == m_pInstance", 0);
+        KH_DEBUG(if (!(__null == m_pInstance)) AssertApp(__FILE__, __LINE__, "__null == m_pInstance", 0);)
         m_pInstance = new KH_AT("(49)") CCollDisp(pInParent, fgDisp, inMapZoneDisp);
-        if (!(m_pInstance)) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
+        KH_DEBUG(if (!(m_pInstance)) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);)
         return *m_pInstance;
     }
     static void finalize() {

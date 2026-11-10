@@ -120,7 +120,7 @@ public:
     void setBodyRviseCoefficient(FLOAT inCoefficient) { m_fBodyRviseCoefficient = inCoefficient; }
 #line 226 BATTLEENEMY_H_PATH
     void setAttrDmgSeIdentifyNo(INT inIndex, INT inNo) {
-        if (!(0 <= inIndex && inIndex < 6)) AssertApp(__FILE__, __LINE__, "0 <= inIndex && inIndex < ATK_ATTR_MAX", 0);
+        KH_DEBUG(if (!(0 <= inIndex && inIndex < 6)) AssertApp(__FILE__, __LINE__, "0 <= inIndex && inIndex < ATK_ATTR_MAX", 0);)
         m_sAttrDmgSeIdentifyNo[inIndex] = inNo;
     }
     void setCardBreakSeIdentifyNo(INT inNo) { m_iCardBreakSeIdentifyNo = inNo; }
@@ -205,7 +205,7 @@ public:
     BOOL changeMotionIndex(INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo);
 #line 399 BATTLEENEMY_H_PATH
     void changeAttackRate(INT inIndex) {
-        if (!(0 <= inIndex && inIndex < 2)) AssertApp(__FILE__, __LINE__, "0 <= inIndex && inIndex < 2", 0);
+        KH_DEBUG(if (!(0 <= inIndex && inIndex < 2)) AssertApp(__FILE__, __LINE__, "0 <= inIndex && inIndex < 2", 0);)
         m_iActiveAttackRate = inIndex;
     }
     virtual BOOL startCardBattle();
@@ -352,7 +352,7 @@ protected:
     CBattleEnemyManager* getBattleEnemyManager() const;
 #line 673 BATTLEENEMY_H_PATH
     void setAttackState(INT inState) {
-        if (!(2 <= inState && inState < 10)) AssertApp(__FILE__, __LINE__, "BTL_ENEMY_STATE_ATTACK1 <= inState && inState < BTL_ENEMY_STATE_ATTACK_MAX", 0);
+        KH_DEBUG(if (!(2 <= inState && inState < 10)) AssertApp(__FILE__, __LINE__, "BTL_ENEMY_STATE_ATTACK1 <= inState && inState < BTL_ENEMY_STATE_ATTACK_MAX", 0);)
         m_iAttackState = inState;
     }
     void makePrize(const FVECTOR* inPos);

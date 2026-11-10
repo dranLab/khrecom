@@ -243,7 +243,7 @@ public:
     INT getBBoxFlag() { return m_BBoxFlag; }
     void setBBoxFlag(INT nFlag) { m_BBoxFlag = nFlag; }
     BBOX* getBBox(INT nIndex) {
-        if (!(m_pData != NULL)) AssertApp(__FILE__, 262, "m_pData != __null", 0);
+        KH_DEBUG(if (!(m_pData != NULL)) AssertApp(__FILE__, 262, "m_pData != __null", 0);)
         return &m_pData->m_pBBox[nIndex];
     }
     MODELDATA* getModelData() { return (MODELDATA*)m_pData; }
@@ -503,7 +503,7 @@ public:
  * "delete CMCShader\n") are in .rodata of every includer, in this order. Only line 569 is known. */
 #line 1 MODEL_H_PATH
 inline void _modelCheckData(void* inData) {
-    if (!(inData != __null)) AssertApp(__FILE__, __LINE__, "m_pData != __null", 0);
+    KH_DEBUG(if (!(inData != __null)) AssertApp(__FILE__, __LINE__, "m_pData != __null", 0);)
 }
 inline void* _modelCreate() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
     return com_malloc_d(4, __FILE__ "(569)", (UINT)-1);

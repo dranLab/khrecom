@@ -23,7 +23,7 @@ union FVECTOR;
 #endif
 #line 1 CARDBATTLE_H_PATH
 inline void _cardBattleCheckUser(void* inUser) {
-    if (!inUser) AssertApp(__FILE__, __LINE__, "inUser", 0);
+    KH_DEBUG(if (!inUser) AssertApp(__FILE__, __LINE__, "inUser", 0);)
 }
 
 
@@ -160,18 +160,18 @@ public: BOOL setEnemyDuelCard(HANDLE inHandle, INT inKind, INT inNumber); void s
     TIMEQ getSubTimer() const { return m_tqSubTimer; }
     INT getEnchantKind(INT inUser) const {
 #line 641
-        if (!(inUser)) AssertApp(__FILE__, __LINE__, "inUser", 0);
+        KH_DEBUG(if (!(inUser)) AssertApp(__FILE__, __LINE__, "inUser", 0);)
         return m_cardEnchant[inUser - 1].m_nKind < 0x44 ? 0 : m_cardEnchant[inUser - 1].m_nKind - 0x43;
     }
     static CARD* getRoomCard() { return m_pInstance ? &m_pInstance->m_cardRoom : NULL; }
     static CARD* getEnchantCard(INT inUser) {
 #line 644
-        if (!(inUser)) AssertApp(__FILE__, __LINE__, "inUser", 0);
+        KH_DEBUG(if (!(inUser)) AssertApp(__FILE__, __LINE__, "inUser", 0);)
         return m_pInstance ? &m_pInstance->m_cardEnchant[inUser - 1] : NULL;
     }
     static INT getStockCount(INT inUser) {
 #line 658
-        if (!(inUser)) AssertApp(__FILE__, __LINE__, "inUser", 0);
+        KH_DEBUG(if (!(inUser)) AssertApp(__FILE__, __LINE__, "inUser", 0);)
         return m_pInstance ? m_pInstance->m_iCount[inUser - 1] : 0;
     }
 #else

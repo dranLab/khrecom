@@ -9,10 +9,10 @@
  * assert strings are in .rodata of every includer, in this order. Line numbers are not known. */
 #line 1 "System/Graphic/Str.h"
 inline void _strCheckLengths(BOOL inOk) {
-    if (!inOk) AssertApp(__FILE__, __LINE__, "strlen(inString.m_szBuff) <= 255", 0);
-    if (!inOk) AssertApp(__FILE__, __LINE__, "strlen(inString) <= 255", 0);
-    if (!inOk) AssertApp(__FILE__, __LINE__, "strlen(m_szBuff) + strlen(inString.m_szBuff) <= 255", 0);
-    if (!inOk) AssertApp(__FILE__, __LINE__, "strlen(m_szBuff) + strlen(inString) <= 255", 0);
+    KH_DEBUG(if (!inOk) AssertApp(__FILE__, __LINE__, "strlen(inString.m_szBuff) <= 255", 0);)
+    KH_DEBUG(if (!inOk) AssertApp(__FILE__, __LINE__, "strlen(inString) <= 255", 0);)
+    KH_DEBUG(if (!inOk) AssertApp(__FILE__, __LINE__, "strlen(m_szBuff) + strlen(inString.m_szBuff) <= 255", 0);)
+    KH_DEBUG(if (!inOk) AssertApp(__FILE__, __LINE__, "strlen(m_szBuff) + strlen(inString) <= 255", 0);)
 }
 
 #endif /* SYSTEM_GRAPHIC_STR_H */
