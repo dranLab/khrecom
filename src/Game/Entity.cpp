@@ -235,31 +235,31 @@ void CEntity::disp() {
     KH_DEBUG(if (DebugWork::g_dw.sys.m_iDagameNumber && m_pDamageString && m_tqDamageDispTimer > 0) m_pDamageString->disp();)
 }
 void CEntity::setPos(const FVECTOR& inV) {
-    if (!(m_pMove)) AssertApp(__FILE__, 369, "m_pMove", 0);
+    KH_DEBUG(if (!(m_pMove)) AssertApp(__FILE__, 369, "m_pMove", 0);)
     *(FVECTOR*)((BYTE*)m_pMove + 0x20) = inV;
 }
 void CEntity::setOldPos(const FVECTOR& inV) {
-    if (!(m_pMove)) AssertApp(__FILE__, 377, "m_pMove", 0);
+    KH_DEBUG(if (!(m_pMove)) AssertApp(__FILE__, 377, "m_pMove", 0);)
     *(FVECTOR*)((BYTE*)m_pMove + 0x0) = inV;
 }
 void CEntity::setRot(const FVECTOR& inV) {
-    if (!(m_pMove)) AssertApp(__FILE__, 385, "m_pMove", 0);
+    KH_DEBUG(if (!(m_pMove)) AssertApp(__FILE__, 385, "m_pMove", 0);)
     *(FVECTOR*)((BYTE*)m_pMove + 0x40) = inV;
 }
 void CEntity::setQuat(const FVECTOR& inV) {
-    if (!(m_pMove)) AssertApp(__FILE__, 393, "m_pMove", 0);
+    KH_DEBUG(if (!(m_pMove)) AssertApp(__FILE__, 393, "m_pMove", 0);)
     *(FVECTOR*)((BYTE*)m_pMove + 0x50) = inV;
 }
 void CEntity::setScale(const FVECTOR& inV) {
-    if (!(m_pMove)) AssertApp(__FILE__, 401, "m_pMove", 0);
+    KH_DEBUG(if (!(m_pMove)) AssertApp(__FILE__, 401, "m_pMove", 0);)
     *(FVECTOR*)((BYTE*)m_pMove + 0x60) = inV;
 }
 void CEntity::setVel(const FVECTOR& inV) {
-    if (!(m_pMove)) AssertApp(__FILE__, 409, "m_pMove", 0);
+    KH_DEBUG(if (!(m_pMove)) AssertApp(__FILE__, 409, "m_pMove", 0);)
     *(FVECTOR*)((BYTE*)m_pMove + 0x70) = inV;
 }
 void CEntity::setHitBackVel(const FVECTOR& inV) {
-    if (!(m_pMove)) AssertApp(__FILE__, 417, "m_pMove", 0);
+    KH_DEBUG(if (!(m_pMove)) AssertApp(__FILE__, 417, "m_pMove", 0);)
     *(FVECTOR*)((BYTE*)m_pMove + 0x90) = inV;
 }
 void CEntity::setModelAlphaScale(FLOAT inAlpha, INT inIndex) {
@@ -272,7 +272,7 @@ void CEntity::setModelAlphaScale(FLOAT inAlpha, INT inIndex) {
                 pModel++;
             }
         } else {
-            if (!(0 <= inIndex && inIndex < m_iModelCount)) AssertApp(__FILE__, 440, "0 <= inIndex && inIndex < m_iModelCount", 0);
+            KH_DEBUG(if (!(0 <= inIndex && inIndex < m_iModelCount)) AssertApp(__FILE__, 440, "0 <= inIndex && inIndex < m_iModelCount", 0);)
             m_pModels[inIndex].setAlphaScale(inAlpha);
         }
     }
@@ -287,7 +287,7 @@ void CEntity::setModelColorScale(const FVECTOR& inColor, INT inIndex) {
                 pModel++;
             }
         } else {
-            if (!(0 <= inIndex && inIndex < m_iModelCount)) AssertApp(__FILE__, 465, "0 <= inIndex && inIndex < m_iModelCount", 0);
+            KH_DEBUG(if (!(0 <= inIndex && inIndex < m_iModelCount)) AssertApp(__FILE__, 465, "0 <= inIndex && inIndex < m_iModelCount", 0);)
             m_pModels[inIndex].setColorScale(inColor);
         }
     }
@@ -296,44 +296,44 @@ void CEntity::setAnimSpeed(FLOAT inSpeed) {
     if (m_pAnim) m_pAnim->setSpeed(inSpeed);
 }
 void CEntity::setMoveFlag(UINT inSet, UINT inMask) {
-    if (!(m_pMove)) AssertApp(__FILE__, 487, "m_pMove", 0);
+    KH_DEBUG(if (!(m_pMove)) AssertApp(__FILE__, 487, "m_pMove", 0);)
     UINT* pFlag = (UINT*)((BYTE*)m_pMove + 0x108);
     *pFlag = (*pFlag | inSet) & ~inMask;
 }
 const FVECTOR& CEntity::getPos() const {
-    if (!(m_pMove)) AssertApp(__FILE__, 495, "m_pMove", 0);
+    KH_DEBUG(if (!(m_pMove)) AssertApp(__FILE__, 495, "m_pMove", 0);)
     return *(FVECTOR*)((BYTE*)m_pMove + 0x20);
 }
 const FVECTOR& CEntity::getOldPos() const {
-    if (!(m_pMove)) AssertApp(__FILE__, 503, "m_pMove", 0);
+    KH_DEBUG(if (!(m_pMove)) AssertApp(__FILE__, 503, "m_pMove", 0);)
     return *(FVECTOR*)((BYTE*)m_pMove + 0x10);
 }
 const FVECTOR& CEntity::getRot() const {
-    if (!(m_pMove)) AssertApp(__FILE__, 511, "m_pMove", 0);
+    KH_DEBUG(if (!(m_pMove)) AssertApp(__FILE__, 511, "m_pMove", 0);)
     return *(FVECTOR*)((BYTE*)m_pMove + 0x40);
 }
 FVECTOR& CEntity::getRot() {
-    if (!(m_pMove)) AssertApp(__FILE__, 516, "m_pMove", 0);
+    KH_DEBUG(if (!(m_pMove)) AssertApp(__FILE__, 516, "m_pMove", 0);)
     return *(FVECTOR*)((BYTE*)m_pMove + 0x40);
 }
 const FVECTOR& CEntity::getQuat() const {
-    if (!(m_pMove)) AssertApp(__FILE__, 524, "m_pMove", 0);
+    KH_DEBUG(if (!(m_pMove)) AssertApp(__FILE__, 524, "m_pMove", 0);)
     return *(FVECTOR*)((BYTE*)m_pMove + 0x50);
 }
 FVECTOR& CEntity::getQuat() {
-    if (!(m_pMove)) AssertApp(__FILE__, 529, "m_pMove", 0);
+    KH_DEBUG(if (!(m_pMove)) AssertApp(__FILE__, 529, "m_pMove", 0);)
     return *(FVECTOR*)((BYTE*)m_pMove + 0x50);
 }
 const FVECTOR& CEntity::getScale() const {
-    if (!(m_pMove)) AssertApp(__FILE__, 538, "m_pMove", 0);
+    KH_DEBUG(if (!(m_pMove)) AssertApp(__FILE__, 538, "m_pMove", 0);)
     return *(FVECTOR*)((BYTE*)m_pMove + 0x60);
 }
 const FVECTOR& CEntity::getVel() const {
-    if (!(m_pMove)) AssertApp(__FILE__, 546, "m_pMove", 0);
+    KH_DEBUG(if (!(m_pMove)) AssertApp(__FILE__, 546, "m_pMove", 0);)
     return *(FVECTOR*)((BYTE*)m_pMove + 0x70);
 }
 INT CEntity::getBoneIndex(const CHAR* inBoneName, INT inModelIndex) const {
-    if (!(inBoneName)) AssertApp(__FILE__, 554, "inBoneName", 0);
+    KH_DEBUG(if (!(inBoneName)) AssertApp(__FILE__, 554, "inBoneName", 0);)
     if (m_pModels) return m_pModels[inModelIndex].getBoneIndex(inBoneName);
     return -1;
 }
@@ -342,7 +342,7 @@ const CHAR* CEntity::getBoneName(INT inBone, INT inModel) const {
     return NULL;
 }
 FMATRIX* CEntity::getBoneMatrix(const CHAR* inBoneName) const {
-    if (!(inBoneName)) AssertApp(__FILE__, 581, "inBoneName", 0);
+    KH_DEBUG(if (!(inBoneName)) AssertApp(__FILE__, 581, "inBoneName", 0);)
     INT nIdx = getBoneIndex(inBoneName, 0);
     if (nIdx >= 0) return (FMATRIX*)((BYTE*)&Crd(nIdx) + 0x90);
     return NULL;
@@ -414,7 +414,7 @@ void CEntity::enableFade2Path(BOOL inSw, INT inIndex) {
                 pModel++;
             }
         } else {
-            if (!(0 <= inIndex && inIndex < m_iModelCount)) AssertApp(__FILE__, 802, "0 <= inIndex && inIndex < m_iModelCount", 0);
+            KH_DEBUG(if (!(0 <= inIndex && inIndex < m_iModelCount)) AssertApp(__FILE__, 802, "0 <= inIndex && inIndex < m_iModelCount", 0);)
             m_pModels[inIndex].fade2Path(inSw);
         }
     }
@@ -449,7 +449,7 @@ const CHAR* CEntity::getMotionName(INT inIndex) const {
     return m_pAnim->getMotFilename(inIndex);
 }
 INT CEntity::getMotionIndex(const CHAR* inName) const {
-    if (!(inName)) AssertApp(__FILE__, 865, "inName", 0);
+    KH_DEBUG(if (!(inName)) AssertApp(__FILE__, 865, "inName", 0);)
     if (!m_pAnim) return -1;
     INT n = m_pAnim->getMotCount();
     INT start = 0;
@@ -484,7 +484,7 @@ INT CEntity::getMotionIndex(const CHAR* inName) const {
 FLOAT CEntity::getHeight() const {
     FLOAT heightRide = 1e+04f;
     FLOAT heightMap = 1e+04f;
-    if (!(m_pMove)) AssertApp(__FILE__, 929, "m_pMove", 0);
+    KH_DEBUG(if (!(m_pMove)) AssertApp(__FILE__, 929, "m_pMove", 0);)
     CCollMap* coll = m_pMove->getMapCollision();
     FVECTOR pos = getPos();
     coll->setStartPos(pos);
@@ -506,7 +506,7 @@ void CEntity::getHeadPos(FVECTOR& outPos) const {
         outPos.y += 1.0f;
     } else {
         OTHER_PARAM* other = coll->pOtherParam;
-        if (!(other)) AssertApp(__FILE__, 979, "other", 0);
+        KH_DEBUG(if (!(other)) AssertApp(__FILE__, 979, "other", 0);)
         outPos.set(other->BadStatusPos.fOffsetX, other->BadStatusPos.fOffsetY, other->BadStatusPos.fOffsetZ);
         ApplyMatrix(outPos, *(FMATRIX*)((BYTE*)&Crd(other->BadStatusPos.iBoneIndex) + 0x90), outPos);
     }
@@ -539,7 +539,7 @@ FLOAT CEntity::calcDistanceSq(const CEntity* inEntity) const {
 }
 FLOAT CEntity::calcDistanceSq(const FVECTOR& inPos) const {
     FVECTOR v;
-    if (!(m_pMove)) AssertApp(__FILE__, 1072, "m_pMove", 0);
+    KH_DEBUG(if (!(m_pMove)) AssertApp(__FILE__, 1072, "m_pMove", 0);)
     SubVector(v, m_pMove->getPos(), inPos);
     return InnerProduct(v, v);
 }
@@ -549,7 +549,7 @@ FLOAT CEntity::calcDistanceXZSq(const CEntity* inEntity) const {
     return 1e+08f;
 }
 FLOAT CEntity::calcDistanceXZSq(const FVECTOR& inPos) const {
-    if (!(m_pMove)) AssertApp(__FILE__, 1095, "m_pMove", 0);
+    KH_DEBUG(if (!(m_pMove)) AssertApp(__FILE__, 1095, "m_pMove", 0);)
     FVECTOR v0 = m_pMove->getPos();
     FVECTOR v1 = inPos;
     v0.y = v1.y = 0.0f;
@@ -563,7 +563,7 @@ FLOAT CEntity::calcDirection(const CEntity* inEntity) const {
 }
 FLOAT CEntity::calcDirection(const FVECTOR& inPos) const {
     FVECTOR v;
-    if (!(m_pMove)) AssertApp(__FILE__, 1123, "m_pMove", 0);
+    KH_DEBUG(if (!(m_pMove)) AssertApp(__FILE__, 1123, "m_pMove", 0);)
     SubVector(v, inPos, m_pMove->getPos());
     return atan2f(v.x, v.z);
 }
@@ -574,7 +574,7 @@ void CEntity::calcDirection(FVECTOR& outRot, const CEntity* inEntity) const {
 }
 void CEntity::calcDirection(FVECTOR& outRot, const FVECTOR& inPos) const {
     FVECTOR v;
-    if (!(m_pMove)) AssertApp(__FILE__, 1147, "m_pMove", 0);
+    KH_DEBUG(if (!(m_pMove)) AssertApp(__FILE__, 1147, "m_pMove", 0);)
     SubVector(v, inPos, m_pMove->getPos());
     Normalize(v, v);
     outRot.x = -atan2f(v.y, _sqrtf(v.z * v.z + v.x * v.x));
@@ -653,7 +653,7 @@ void CEntity::positionFix(const FVECTOR& inPos, const FVECTOR& inRot) {
     if (m_pBodyColl) m_pBodyColl->update();
 }
 void CEntity::updateCoord() {
-    if (!(m_pMove)) AssertApp(__FILE__, 1286, "m_pMove", 0);
+    KH_DEBUG(if (!(m_pMove)) AssertApp(__FILE__, 1286, "m_pMove", 0);)
     FMATRIX& m = Crd(0).m_Local;
     m.initWithScale(m_pMove->getScl());
 
@@ -726,7 +726,7 @@ void CEntity::updateRootMove() {
     FVECTOR trans;
     FLOAT rot_y;
     m_pAnim->getRootMove(trans, rot_y);
-    if (!(m_pMove)) AssertApp(__FILE__, 1351, "m_pMove", 0);
+    KH_DEBUG(if (!(m_pMove)) AssertApp(__FILE__, 1351, "m_pMove", 0);)
     FVECTOR diff;
     SubVectorXYZ(diff, trans, getPos());
     MulVectorXYZ(diff, diff, m_vRootMoveScale);
@@ -737,7 +737,7 @@ void CEntity::updateRootMove() {
     m_pMove->setRot(rot);
 }
 void CEntity::changeMotionFileName(const CHAR* inName, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo) {
-    if (!(inName)) AssertApp(__FILE__, 1370, "inName", 0);
+    KH_DEBUG(if (!(inName)) AssertApp(__FILE__, 1370, "inName", 0);)
     INT nIndex = getMotionIndex(inName);
     if (nIndex != -1) changeMotion(nIndex, inTq, inRootMove, inGr, inEffectNo, inSENo);
 }
@@ -756,12 +756,12 @@ void CEntity::changeMotion(INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr,
     }
 }
 void CEntity::changeMotionFileNameWithSameCheck(const CHAR* inName, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo) {
-    if (!(inName)) AssertApp(__FILE__, 1433, "inName", 0);
+    KH_DEBUG(if (!(inName)) AssertApp(__FILE__, 1433, "inName", 0);)
     INT nIndex = getMotionIndex(inName);
     if (nIndex != -1) changeMotionWithSameCheck(nIndex, inTq, inRootMove, inGr, inEffectNo, inSENo);
 }
 void CEntity::changeMotionWithSameCheck(INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo) {
-    if (!(m_pAnim)) AssertApp(__FILE__, 1445, "m_pAnim", 0);
+    KH_DEBUG(if (!(m_pAnim)) AssertApp(__FILE__, 1445, "m_pAnim", 0);)
     if (m_pAnim->getAnimID() != inIndex) changeMotion(inIndex, inTq, inRootMove, inGr, inEffectNo, inSENo);
 }
 void CEntity::changeMotionEx(INT inRsrcID, INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo) {
@@ -785,7 +785,7 @@ void CEntity::changeMotionEx(INT inRsrcID, INT inIndex, TIMEQ inTq, BOOL inRootM
     }
 }
 void CEntity::changeMotionEx(const CHAR* inRsrcName, INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo) {
-    if (!(inRsrcName)) AssertApp(__FILE__, 1515, "inRsrcName", 0);
+    KH_DEBUG(if (!(inRsrcName)) AssertApp(__FILE__, 1515, "inRsrcName", 0);)
     if (m_pAnim) {
         if (inGr < 0) m_pAnim->startEx(inRsrcName, inIndex, inTq);
         else m_pAnim->changeEx(inRsrcName, inIndex, inTq, inGr);
@@ -826,7 +826,7 @@ void CEntity::setGroundIK(INT inFlag) {
     }
 }
 void CEntity::setFootEffectIK(const CHAR* pszEffName, INT inFlag) {
-    if (!(pszEffName)) AssertApp(__FILE__, 1621, "pszEffName", 0);
+    KH_DEBUG(if (!(pszEffName)) AssertApp(__FILE__, 1621, "pszEffName", 0);)
     if (m_pAnim) {
         BYTE* pIK = *(BYTE**)((BYTE*)m_pAnim + 0x100);
         if (pIK) {
@@ -856,10 +856,10 @@ INT CEntity::isFirstStandsGroundIK() {
     return 0;
 }
 void CEntity::warp(const FVECTOR& inPos) {
-    if (!(m_pMove)) AssertApp(__FILE__, 1679, "m_pMove", 0);
+    KH_DEBUG(if (!(m_pMove)) AssertApp(__FILE__, 1679, "m_pMove", 0);)
     if (*(UINT*)((BYTE*)m_pMove + 0x110) & 4) {
         CCollMap* coll = *(CCollMap**)((BYTE*)m_pMove + 0x144);
-        if (!(coll)) AssertApp(__FILE__, 1683, "coll", 0);
+        KH_DEBUG(if (!(coll)) AssertApp(__FILE__, 1683, "coll", 0);)
         coll->removeRide();
         *(UINT*)((BYTE*)m_pMove + 0x110) = (INT)*(UINT*)((BYTE*)m_pMove + 0x110) & ~4;
     }
@@ -867,7 +867,7 @@ void CEntity::warp(const FVECTOR& inPos) {
     *(FVECTOR*)((BYTE*)m_pMove + 0x00) = inPos;
 }
 void CEntity::land(FLOAT inDownLength, FLOAT inUpLength, BOOL inFirstHit) {
-    if (!(m_pMove)) AssertApp(__FILE__, 1696, "m_pMove", 0);
+    KH_DEBUG(if (!(m_pMove)) AssertApp(__FILE__, 1696, "m_pMove", 0);)
     m_pMove->land(inDownLength, inUpLength, inFirstHit);
 }
 BOOL CEntity::initalizeModel(INT inGroup, BOOL bLight) {
@@ -941,7 +941,7 @@ void CEntity::updateBadStatusEffect(HANDLE inHandle) {
     if (!effect) return;
     if (!m_pCollParam) return;
     OTHER_PARAM* other = m_pCollParam->pOtherParam;
-    if (!(other)) AssertApp(__FILE__, 1860, "other", 0);
+    KH_DEBUG(if (!(other)) AssertApp(__FILE__, 1860, "other", 0);)
     FVECTOR ofs;
     ofs.set(other->BadStatusPos.fOffsetX, other->BadStatusPos.fOffsetY, other->BadStatusPos.fOffsetZ);
     ApplyMatrix(ofs, *(FMATRIX*)((BYTE*)&Crd(other->BadStatusPos.iBoneIndex) + 0x90), ofs);
@@ -1102,11 +1102,11 @@ BOOL CEntity::arriveTargetXZ(const FVECTOR& inTarget, FLOAT inRadius) {
     return FALSE;
 }
 void CEntity::rideModelSetAttachMatrix(const FMATRIX* inpMat) {
-    if (!(inpMat)) AssertApp(__FILE__, 2207, "inpMat", 0);
+    KH_DEBUG(if (!(inpMat)) AssertApp(__FILE__, 2207, "inpMat", 0);)
     if (m_pRideModel) m_pRideModel->setAttachMatrix(inpMat);
 }
 void CEntity::rideModelSetChipLocalMatrix(INT inIndex, const FMATRIX* in_pMatrix) {
-    if (!(in_pMatrix)) AssertApp(__FILE__, 2218, "in_pMatrix", 0);
+    KH_DEBUG(if (!(in_pMatrix)) AssertApp(__FILE__, 2218, "in_pMatrix", 0);)
     if (m_pRideModel) m_pRideModel->setChipLocalMatrix(inIndex, in_pMatrix);
 }
 void CEntity::rideModelEnableAllCollision(BOOL inEnable) {
@@ -1132,7 +1132,7 @@ HANDLE CEntity::playSEPanAndVol(INT inFile, INT inID, INT inBoneIndex, const FVE
         return playSEPan(inFile, inID, -1, inBoneIndex, inOffset, inType);
     }
     FVECTOR pos;
-    if (!(0 <= inBoneIndex && inBoneIndex < getCoordNum())) AssertApp(__FILE__, 2283, "0 <= inBoneIndex && inBoneIndex < getCoordNum()", 0);
+    KH_DEBUG(if (!(0 <= inBoneIndex && inBoneIndex < getCoordNum())) AssertApp(__FILE__, 2283, "0 <= inBoneIndex && inBoneIndex < getCoordNum()", 0);)
     if (inOffset) ApplyMatrix(pos, *(FMATRIX*)((BYTE*)&Crd(inBoneIndex) + 0x90), *inOffset);
     else pos = *(FVECTOR*)((BYTE*)&Crd(inBoneIndex) + 0xc0);
     INT vol = -1;
@@ -1144,7 +1144,7 @@ HANDLE CEntity::playSEPanAndVol(INT inFile, INT inID, INT inBoneIndex, const FVE
 }
 HANDLE CEntity::playSEPan(INT inFile, INT inID, INT inVol, INT inBoneIndex, const FVECTOR* inOffset, INT inType) {
     FVECTOR pos;
-    if (!(0 <= inBoneIndex && inBoneIndex < getCoordNum())) AssertApp(__FILE__, 2313, "0 <= inBoneIndex && inBoneIndex < getCoordNum()", 0);
+    KH_DEBUG(if (!(0 <= inBoneIndex && inBoneIndex < getCoordNum())) AssertApp(__FILE__, 2313, "0 <= inBoneIndex && inBoneIndex < getCoordNum()", 0);)
     if (inOffset) ApplyMatrix(pos, *(FMATRIX*)((BYTE*)&Crd(inBoneIndex) + 0x90), *inOffset);
     else pos = *(FVECTOR*)((BYTE*)&Crd(inBoneIndex) + 0xc0);
     INT pan = CSound::getPan(pos);
@@ -1171,7 +1171,7 @@ void CEntity::setSEPanAndVol(HANDLE inHandle, INT inFile, INT inID, INT inBoneIn
         return;
     }
     FVECTOR pos;
-    if (!(0 <= inBoneIndex && inBoneIndex < getCoordNum())) AssertApp(__FILE__, 2380, "0 <= inBoneIndex && inBoneIndex < getCoordNum()", 0);
+    KH_DEBUG(if (!(0 <= inBoneIndex && inBoneIndex < getCoordNum())) AssertApp(__FILE__, 2380, "0 <= inBoneIndex && inBoneIndex < getCoordNum()", 0);)
     if (inOffset) ApplyMatrix(pos, *(FMATRIX*)((BYTE*)&Crd(inBoneIndex) + 0x90), *inOffset);
     else pos = *(FVECTOR*)((BYTE*)&Crd(inBoneIndex) + 0xc0);
     INT vol = -1;
@@ -1184,7 +1184,7 @@ void CEntity::setSEPanAndVol(HANDLE inHandle, INT inFile, INT inID, INT inBoneIn
 }
 void CEntity::setSEPan(HANDLE inHandle, INT inFile, INT inID, INT inVol, INT inBoneIndex, const FVECTOR* inOffset, INT inType) {
     FVECTOR pos;
-    if (!(0 <= inBoneIndex && inBoneIndex < getCoordNum())) AssertApp(__FILE__, 2417, "0 <= inBoneIndex && inBoneIndex < getCoordNum()", 0);
+    KH_DEBUG(if (!(0 <= inBoneIndex && inBoneIndex < getCoordNum())) AssertApp(__FILE__, 2417, "0 <= inBoneIndex && inBoneIndex < getCoordNum()", 0);)
     if (inOffset) ApplyMatrix(pos, *(FMATRIX*)((BYTE*)&Crd(inBoneIndex) + 0x90), *inOffset);
     else pos = *(FVECTOR*)((BYTE*)&Crd(inBoneIndex) + 0xc0);
     INT pan = CSound::getPan(pos);
@@ -1313,7 +1313,7 @@ void CEntity::saveRideModelMatrix_() {
 void CEntity::rideModelAdjustRiders_() {
     if (m_pRideModel) {
         FVECTOR v;
-        if (!(m_pMove)) AssertApp(__FILE__, 2754, "m_pMove", 0);
+        KH_DEBUG(if (!(m_pMove)) AssertApp(__FILE__, 2754, "m_pMove", 0);)
         SubVector(v, *(FVECTOR*)((BYTE*)m_pMove + 0x40), *(FVECTOR*)((BYTE*)m_pMove + 0x30));
         m_pRideModel->hoseiRiders(v);
     }
@@ -1500,7 +1500,7 @@ HANDLE CEntity::setAppearEffect() {
     COLL_PARAM_HEADER* coll = m_pCollParam;
     if (!coll) return 0;
     OTHER_PARAM* other = coll->pOtherParam;
-    if (!(other)) AssertApp(__FILE__, 3183, "other", 0);
+    KH_DEBUG(if (!(other)) AssertApp(__FILE__, 3183, "other", 0);)
     if (strcmp(other->szAppearEffectDpx, "")) {
         FVECTOR pos;
         pos.set(other->AppearPos.fOffsetX, other->AppearPos.fOffsetY, other->AppearPos.fOffsetZ);
@@ -1513,7 +1513,7 @@ HANDLE CEntity::setDisappearEffect() {
     COLL_PARAM_HEADER* coll = m_pCollParam;
     if (!coll) return 0;
     OTHER_PARAM* other = coll->pOtherParam;
-    if (!(other)) AssertApp(__FILE__, 3210, "other", 0);
+    KH_DEBUG(if (!(other)) AssertApp(__FILE__, 3210, "other", 0);)
     if (strcmp(other->szAppearEffectDpx, "")) {
         FVECTOR pos;
         pos.set(other->AppearPos.fOffsetX, other->AppearPos.fOffsetY, other->AppearPos.fOffsetZ);
@@ -1525,7 +1525,7 @@ HANDLE CEntity::setDisappearEffect() {
 void CEntity::setDeathEffect(const FVECTOR* inPos) {
     if (m_pCollParam) {
         OTHER_PARAM* other = m_pCollParam->pOtherParam;
-        if (!(other)) AssertApp(__FILE__, 3235, "other", 0);
+        KH_DEBUG(if (!(other)) AssertApp(__FILE__, 3235, "other", 0);)
         if (strcmp(other->szDeathEffectDpx, "")) {
             if (other->iDeathEffectNo1 >= 0) setEffect(other->szDeathEffectDpx, other->iDeathEffectNo1, inPos, &getRot(), 0.0f);
             if (other->iDeathEffectNo2 >= 0) setEffect(other->szDeathEffectDpx, other->iDeathEffectNo2, inPos, &getRot(), 0.0f);
@@ -1536,7 +1536,7 @@ HANDLE CEntity::setDeathEffect() {
     COLL_PARAM_HEADER* coll = m_pCollParam;
     if (!coll) return 0;
     OTHER_PARAM* other = coll->pOtherParam;
-    if (!(other)) AssertApp(__FILE__, 3257, "other", 0);
+    KH_DEBUG(if (!(other)) AssertApp(__FILE__, 3257, "other", 0);)
     if (!strcmp(other->szDeathEffectDpx, "")) return 0;
     if (other->iDeathEffectNo1 >= 0) {
         FVECTOR pos;
@@ -1549,7 +1549,7 @@ HANDLE CEntity::setBadStatusEffect(const CHAR* inEffectName, INT inBadStatus, FL
     COLL_PARAM_HEADER* coll = m_pCollParam;
     if (!coll) return 0;
     OTHER_PARAM* other = coll->pOtherParam;
-    if (!(other)) AssertApp(__FILE__, 3290, "other", 0);
+    KH_DEBUG(if (!(other)) AssertApp(__FILE__, 3290, "other", 0);)
     FVECTOR pos;
     pos.set(other->BadStatusPos.fOffsetX, other->BadStatusPos.fOffsetY, other->BadStatusPos.fOffsetZ);
     ApplyMatrix(pos, *(FMATRIX*)((BYTE*)&Crd(other->BadStatusPos.iBoneIndex) + 0x90), pos);
@@ -1561,7 +1561,7 @@ HANDLE CEntity::setBadStatusEffect(const CHAR* inEffectName, INT inBadStatus, FL
 HANDLE CEntity::setRecoverEffect(const CHAR* inName, INT inNo) {
     if (!m_pCollParam) return 0;
     BYTE* pOther = *(BYTE**)((BYTE*)m_pCollParam + 0x18);
-    if (!(pOther)) AssertApp(__FILE__, 3328, "other", 0);
+    KH_DEBUG(if (!(pOther)) AssertApp(__FILE__, 3328, "other", 0);)
     FVECTOR v;
     v.set(*(FLOAT*)(pOther + 0x34), *(FLOAT*)(pOther + 0x38), *(FLOAT*)(pOther + 0x3c));
     return attachEffect(inName, 0, &Crd(*(INT*)(pOther + 0x30)), &v, NULL, 0.0f);

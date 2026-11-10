@@ -181,7 +181,7 @@ void CAvatar::InitAvatar(INT in_flag) {
     LockOnManager::CLockOnManager::registerLockOnObject(getHandle());
 }
 void CAvatar::changeAvatarMainState(INT nState) {
-    if (!((0 <= nState) && (2 > nState))) AssertApp(__FILE__, 154, "(0 <= nState) && (_MAIN_STATE_MAX > nState)", 0);
+    KH_DEBUG(if (!((0 <= nState) && (2 > nState))) AssertApp(__FILE__, 154, "(0 <= nState) && (_MAIN_STATE_MAX > nState)", 0);)
     gotoState(m_MainState[nState]);
 }
 void CAvatar::beginStateMain() {
@@ -243,12 +243,12 @@ void CAvatar::lastUpdate() {
 }
 CAtel& CAvatar::getAtel() {
     CAtel* pAtel = (CAtel*)getParent();
-    if (!(pAtel)) AssertApp(__FILE__, 360, "pAtel", 0);
+    KH_DEBUG(if (!(pAtel)) AssertApp(__FILE__, 360, "pAtel", 0);)
     return *pAtel;
 }
 CVSM& CAvatar::getVSM() {
     CVSM* pVSM = getAtel().getVSM();
-    if (!(pVSM)) AssertApp(__FILE__, 370, "pVSM", 0);
+    KH_DEBUG(if (!(pVSM)) AssertApp(__FILE__, 370, "pVSM", 0);)
     return *pVSM;
 }
 void CAvatar::getNowPosition(FVECTOR& vPos) const { vPos = getPos(); }
@@ -398,7 +398,7 @@ INT CAvatar::onSetPosPathTop(INT nCmd, void* pParam, INT nID) {
 }
 INT CAvatar::onMove(INT nCmd, void* pParam, INT nID) {
     AvatarMoveParam* p = (AvatarMoveParam*)pParam;
-    if (!(p)) AssertApp(__FILE__, 779, "p", 0);
+    KH_DEBUG(if (!(p)) AssertApp(__FILE__, 779, "p", 0);)
     if (!m_pMoveStruct && !createMoveStruct()) return -1;
     m_nState = ((m_nState | 0x10) & ~0x20) | 0x400;
     FVECTOR vOrigin;
@@ -582,7 +582,7 @@ static inline void _shortestRad(FLOAT& f, FLOAT fStart) {
 }
 INT CAvatar::onRotate(INT nCmd, void* pParam, INT nID) {
     AvatarRotateParam* p = (AvatarRotateParam*)pParam;
-    if (!(p)) AssertApp(__FILE__, 1232, "p", 0);
+    KH_DEBUG(if (!(p)) AssertApp(__FILE__, 1232, "p", 0);)
     if (!m_pRotateStruct && !createRotateStruct()) return -1;
     m_pRotateStruct->_nRotateType = p->_nType;
     USHORT nType = getAvatarRotType();
@@ -664,7 +664,7 @@ INT CAvatar::onRotate(INT nCmd, void* pParam, INT nID) {
     return -1;
 }
 void CAvatar::setAvatarRotTimeLimit(TIMEQ nTime) {
-    if (!(m_pRotateStruct)) AssertApp(__FILE__, 1381, "m_pRotateStruct", 0);
+    KH_DEBUG(if (!(m_pRotateStruct)) AssertApp(__FILE__, 1381, "m_pRotateStruct", 0);)
     BOOL bEternal = FALSE;
     if (nTime < 0) {
         bEternal = TRUE;
@@ -713,7 +713,7 @@ INT CAvatar::onFadeing(INT nCmd, void* pParam, INT nID) {
     AvatarFadeStruct* pFadeStruct;
     FLOAT alp;
     FLOAT f;
-    if (!(p)) AssertApp(__FILE__, 1468, "p", 0);
+    KH_DEBUG(if (!(p)) AssertApp(__FILE__, 1468, "p", 0);)
     pFadeStruct = createFadeStruct();
     if (!pFadeStruct) return -1;
     pFadeStruct->_ModelNo = nID;
@@ -765,7 +765,7 @@ void CAvatar::cancelFadeAvatar() {}
 INT CAvatar::onScaling(INT nCmd, void* pParam, INT nID) {
     AvatarScaleParam* p = (AvatarScaleParam*)pParam;
     FVECTOR v;
-    if (!(p)) AssertApp(__FILE__, 1607, "p", 0);
+    KH_DEBUG(if (!(p)) AssertApp(__FILE__, 1607, "p", 0);)
     if (!m_pScaleStruct && !createScaleStruct()) return -1;
     setAvatarTargetScale(p->_vTarget);
     getScale(v);

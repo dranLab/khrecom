@@ -138,7 +138,7 @@ BOOL CMemocaAgent::reqCheckFreeMem() {
     _safeFree(m_pDirEntBuf);
 #line 147
     m_pDirEntBuf = (sceMcTblGetDir*)com_memalign_d(64, sizeof(sceMcTblGetDir) * 1024, __FILE__ "(147)", (UINT)-1);
-    if (!m_pDirEntBuf) AssertApp(__FILE__, __LINE__, "m_pDirEntBuf", 0);
+    KH_DEBUG(if (!m_pDirEntBuf) AssertApp(__FILE__, __LINE__, "m_pDirEntBuf", 0);)
     memset(m_pDirEntBuf, 0, sizeof(sceMcTblGetDir) * 1024);
     return TRUE;
 }
@@ -316,7 +316,7 @@ void CMemocaAgent::phaseGetEntries() {
         if (!m_pDirEntBuf) {
 #line 438
             m_pDirEntBuf = (sceMcTblGetDir*)com_memalign_d(64, sizeof(sceMcTblGetDir) * 1024, __FILE__ "(438)", (UINT)-1);
-            if (!m_pDirEntBuf) AssertApp(__FILE__, __LINE__, "m_pDirEntBuf", 0);
+            KH_DEBUG(if (!m_pDirEntBuf) AssertApp(__FILE__, __LINE__, "m_pDirEntBuf", 0);)
         }
         memset(m_pDirEntBuf, 0, sizeof(sceMcTblGetDir) * 1024);
         if (CMemoca::reqGetFreeSize(m_nCurrentSlot, m_pDirEntBuf, 1024)) {
@@ -571,7 +571,7 @@ static UINT _getGameDataSizes(UINT* pOutSizeTbl) {
 void CMemocaAgent::setupSaveData(CBuf& buf) {
     GameDataHeader* pHeader = m_pEntries->getEntry(m_nTargetIndex);
 #line 862
-    if (!pHeader) AssertApp(__FILE__, __LINE__, "pHeader", 0);
+    KH_DEBUG(if (!pHeader) AssertApp(__FILE__, __LINE__, "pHeader", 0);)
     BOOL bGameClearNow = (m_nFlag >> 1) & 1;
     BOOL bGameCleared = CGameWork::getFlag(0, 0x83);
     if (bGameClearNow) {
@@ -623,7 +623,7 @@ void CMemocaAgent::setupSaveData(CBuf& buf) {
         CGameWork::progMCW()._nRoomID = _nRoom[i];
         RoomInfo* pRoom = CSceneInfo::getRoomInfo(_nRoom[i]);
 #line 920
-        if (!pRoom) AssertApp(__FILE__, __LINE__, "pRoom", 0);
+        KH_DEBUG(if (!pRoom) AssertApp(__FILE__, __LINE__, "pRoom", 0);)
         CGameWork::progMCW()._nScene = pRoom->getSceneNum();
     } else if (g_pPlayer) {
         FVECTOR vPos;
@@ -892,7 +892,7 @@ void CMemocaAgent::phaseSaveSysData() {
         m_bufTmp.releaseBuf(0);
         SysDataCOM* p = (SysDataCOM*)m_bufTmp.allocBuf_A64(sizeof(SysDataCOM));
 #line 1291
-        if (!p) AssertApp(__FILE__, __LINE__, "p", 0);
+        KH_DEBUG(if (!p) AssertApp(__FILE__, __LINE__, "p", 0);)
         memset(p, 0, sizeof(SysDataCOM));
         p->Header.Version = 1;
         p->Header.Area = 0x504A;
@@ -939,7 +939,7 @@ CMemocaDataEntries::CMemocaDataEntries(INT nEntryCount) {
     m_nDataEntryCount = nEntryCount;
     m_pSysDataCOM = NULL;
 #line 1461
-    if (!(0 < nEntryCount)) AssertApp(__FILE__, __LINE__, "0 < nEntryCount", 0);
+    KH_DEBUG(if (!(0 < nEntryCount)) AssertApp(__FILE__, __LINE__, "0 < nEntryCount", 0);)
     m_DataTbl = new KH_AT("(1462)") GameDataHeader[nEntryCount];
     m_DataAttrTbl = new KH_AT("(1463)") GameDataAttr[nEntryCount];
     clearAll();

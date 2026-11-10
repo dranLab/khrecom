@@ -191,8 +191,8 @@ void EFFECT_DATA::Shift(u_long128* to, u_long128* from) {
 #line 216
 void EFFECT_SE::check() const {
     ASSERT(this);
-    if (!(!(this->sHead.nId != (0x00455345)))) AssertApp(__FILE__, __LINE__, "! (this->sHead.nId != (0x00455345))", 0);
-    if (!(!(this->sHead.nNum <= 0))) AssertApp(__FILE__, __LINE__, "! (this->sHead.nNum <= 0)", 0);
+    KH_DEBUG(if (!(!(this->sHead.nId != (0x00455345)))) AssertApp(__FILE__, __LINE__, "! (this->sHead.nId != (0x00455345))", 0);)
+    KH_DEBUG(if (!(!(this->sHead.nNum <= 0))) AssertApp(__FILE__, __LINE__, "! (this->sHead.nNum <= 0)", 0);)
 }
 
 const EFFECT_SE_DATA* EFFECT_SE::getData(INT nNo) const {

@@ -42,7 +42,7 @@ CLockOnManager::~CLockOnManager() {
 CLockOnManager& CLockOnManager::getInstance() {
     if (m_pInstance == NULL) {
         m_pInstance = new KH_AT("(55)") CLockOnManager;
-        if (!m_pInstance) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
+        KH_DEBUG(if (!m_pInstance) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);)
     }
     return *m_pInstance;
 }

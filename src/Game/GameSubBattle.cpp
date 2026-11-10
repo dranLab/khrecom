@@ -100,7 +100,7 @@ extern "C" int sprintf(char* s, const char* fmt, ...);
 /* Game/Collision/CollUtil.h's dispose accessor (line 202) */
 static inline void _collUtilDispose() {
     CCollUtil*& instance = CCollUtil::m_pInstance;
-    if (!instance) AssertApp(COLLUTIL_H_PATH, 202, "m_pInstance", 0);
+    KH_DEBUG(if (!instance) AssertApp(COLLUTIL_H_PATH, 202, "m_pInstance", 0);)
     instance->dispose();
 }
 
@@ -462,7 +462,7 @@ CEncountEffectTask::CEncountEffectTask() : CTask(CTask::getSysTask(0), 0x4000) {
     m_nStep = 0;
     m_hEffect = 0;
     m_pCamera = NULL;
-    if (!(_EESEQ_NOP == _ref(s_nEnEffSeq))) AssertApp(__FILE__, __LINE__, "_EESEQ_NOP == s_nEnEffSeq", 0);
+    KH_DEBUG(if (!(_EESEQ_NOP == _ref(s_nEnEffSeq))) AssertApp(__FILE__, __LINE__, "_EESEQ_NOP == s_nEnEffSeq", 0);)
     s_nEnEffSeq = _EESEQ_START;
     m_bNowLoading = CNowLoading::isEnable();
     if (m_bNowLoading) {
@@ -482,7 +482,7 @@ CEncountEffectTask::CEncountEffectTask() : CTask(CTask::getSysTask(0), 0x4000) {
 
 #line 763
 CEncountEffectTask::~CEncountEffectTask() {
-    if (!(_EESEQ_START == _ref(s_nEnEffSeq))) AssertApp(__FILE__, __LINE__, "_EESEQ_START == s_nEnEffSeq", 0);
+    KH_DEBUG(if (!(_EESEQ_START == _ref(s_nEnEffSeq))) AssertApp(__FILE__, __LINE__, "_EESEQ_START == s_nEnEffSeq", 0);)
     _ref(s_nEnEffSeq) = _EESEQ_END;
     if (m_bNowLoading) {
         CNowLoading::enable(TRUE);

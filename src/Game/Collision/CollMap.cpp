@@ -241,7 +241,7 @@ void CCollMap::removeRide() {
 
 void CCollMap::setRidePosition(FVECTOR& Rotate, FVECTOR& Position) {
 #line 341
-    if (!m_pRider) AssertApp(__FILE__, __LINE__, "m_pRider", 0);
+    KH_DEBUG(if (!m_pRider) AssertApp(__FILE__, __LINE__, "m_pRider", 0);)
     m_pRider->setPosition(Rotate, Position);
 }
 
@@ -316,7 +316,7 @@ void CCollMap::removeHang() {
 
 void CCollMap::setHangPosition(FVECTOR& Rotate, FVECTOR& Position) {
 #line 434
-    if (!m_pHanger) AssertApp(__FILE__, __LINE__, "m_pHanger", 0);
+    KH_DEBUG(if (!m_pHanger) AssertApp(__FILE__, __LINE__, "m_pHanger", 0);)
     m_pHanger->setPosition(Rotate, Position);
 }
 

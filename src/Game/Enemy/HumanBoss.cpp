@@ -658,7 +658,7 @@ BOOL CHumanBoss::reloadCardProc() {
 /* placeholder for enemyCardProc (INCLUDE_ASM): its strings */
 __attribute__((section(".sdata"))) void _enemyCardProc_placeholder(void* cb) {
     TRACE("----------- change normal card mode.\n");
-    if (!cb) AssertApp(__FILE__, 0, "cb", 0);
+    KH_DEBUG(if (!cb) AssertApp(__FILE__, 0, "cb", 0);)
     TRACE("----------- change enemy card mode.\n");
 }
 BOOL CHumanBoss::enemyCardProc(const CARD* inActiveCard) {

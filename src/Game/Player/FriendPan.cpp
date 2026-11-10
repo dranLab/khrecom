@@ -157,7 +157,7 @@ void CFriendPan::beginStateAction3() {
     m_nLogCount = 0;
     m_nLogCountMax = m_pAtkData->WORK0;
     m_pTrgLog = new KH_AT("(268)") TIMEQ[m_nLogCountMax];
-    if (!m_pTrgLog) AssertApp(__FILE__, __LINE__, "m_pTrgLog", 0);
+    KH_DEBUG(if (!m_pTrgLog) AssertApp(__FILE__, __LINE__, "m_pTrgLog", 0);)
     for (i = 0; i < m_nLogCountMax; i++) {
         m_pTrgLog[i] = getTimer() + m_pAtkData->TRG_FRAME * 100;
     }

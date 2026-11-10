@@ -204,9 +204,9 @@ extern "C" char _gp[];
 /* the singletons' inline creation/deletion (from their headers) */
 struct MainAppSingletons {
     static void initCollUtil() {
-        if (!(__null == CCollUtil::m_pInstance)) AssertApp("Game/Collision/CollUtil.h", 184, "__null == m_pInstance", 0);
+        KH_DEBUG(if (!(__null == CCollUtil::m_pInstance)) AssertApp("Game/Collision/CollUtil.h", 184, "__null == m_pInstance", 0);)
         CCollUtil::m_pInstance = new ("Game/Collision/CollUtil.h(185)") CCollUtil;
-        if (!(CCollUtil::m_pInstance)) AssertApp("Game/Collision/CollUtil.h", 186, "m_pInstance", 0);
+        KH_DEBUG(if (!(CCollUtil::m_pInstance)) AssertApp("Game/Collision/CollUtil.h", 186, "m_pInstance", 0);)
         CCollUtil::m_pInstance->setup();
     }
     static void finalizeCollUtil() {
@@ -1337,7 +1337,7 @@ static void _disposeTraceOnScreen() {
 static void _initFntTbl() {
 #line 2334
     s_pTrScrStrTbl = new KH_AT("(2334)") CFnt[24];
-    if (!(s_pTrScrStrTbl)) AssertApp(__FILE__, __LINE__, "s_pTrScrStrTbl", 0);
+    KH_DEBUG(if (!(s_pTrScrStrTbl)) AssertApp(__FILE__, __LINE__, "s_pTrScrStrTbl", 0);)
     for (UINT i = 0; i < 24; i++) {
         CFnt& f = s_pTrScrStrTbl[i];
         f.setSize(13);

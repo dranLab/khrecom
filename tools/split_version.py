@@ -199,21 +199,26 @@ def main() -> None:
     # exact starts measured from compiled units (tools/retail_units.py switch): config/<VERSION>/unit_starts.txt
     starts_file = cfg / "unit_starts.txt"
     if starts_file.exists():
+        recorded = []
         for line in starts_file.read_text(encoding="utf-8").splitlines():
-            if not line.strip() or line.startswith("#"):
-                continue
-            unit, section, addr, *size = line.split()
-            addr = int(addr, 16)
-            t = section.lstrip(".")
-            rows = [x for x in data_lines[section] if x[2] != unit and x[0] != addr] + [(addr, t, unit)]
-            if size:  # the next unit starts where this one ends (the gap is its leading data or alignment)
-                end = addr + int(size[0], 16)
-                rows.sort()
-                k = next(i for i, x in enumerate(rows) if x[2] == unit)
-                if k + 1 < len(rows) and rows[k + 1][0] > end:
-                    rows[k + 1] = (end,) + rows[k + 1][1:]
-            data_lines[section] = rows
+            if line.strip() and not line.startswith("#"):
+                unit, section, addr, *size = line.split()
+                recorded.append((unit, section, int(addr, 16), int(size[0], 16) if size else None))
+        fixed = {(u, sec) for u, sec, _, _ in recorded}
+        for unit, section, addr, _ in recorded:
+            data_lines[section] = [x for x in data_lines[section] if x[2] != unit and x[0] != addr] + \
+                [(addr, section.lstrip("."), unit)]
             report["starts from unit_starts.txt"] += 1
+        for unit, section, addr, size in recorded:
+            if size is None:
+                continue
+            # the next unit starts where this one ends (the gap is its leading data or alignment), unless its start
+            # is recorded too (then the gap is its alignment)
+            rows = sorted(data_lines[section])
+            k = next(i for i, x in enumerate(rows) if x[2] == unit)
+            if k + 1 < len(rows) and rows[k + 1][0] > addr + size and (rows[k + 1][2], section) not in fixed:
+                rows[k + 1] = (addr + size,) + rows[k + 1][1:]
+            data_lines[section] = rows
     for s in (".data", ".rodata", ".bss"):
         rows = sorted(data_lines[s])
         if rows[0][0] != sec[s][0]:
@@ -291,14 +296,26 @@ def main() -> None:
             syms[value] = (name, "type:func" + (f" size:0x{sizes[value]:X}" if value in sizes else ""))
         else:
             syms[value] = (name, "")
-    named_funcs = {n for n, _ in syms.values()}
+    # anonymous-namespace / static constructor names carry a per-compile suffix: beta names added below get this
+    # version's suffix for their file (from its table's names) so that every name of a file agrees
+    suffix_re = re.compile(r"((?:_\d+)?_GLOBAL_\$[NID]\$)(.*?\.(?:cpp|c))([0-9A-Za-z_]{6})(\$|$)")
+    version_suffix = {}
+    for n, _ in syms.values():
+        if m := suffix_re.search(n):
+            version_suffix.setdefault((m.group(1).lstrip("_0123456789"), m.group(2)), m.group(3))
+
+    def own_suffix(n: str) -> str:
+        def sub(m):
+            suf = version_suffix.get((m.group(1).lstrip("_0123456789"), m.group(2)))
+            return m.group(1) + m.group(2) + (suf or m.group(3)) + m.group(4)
+        return suffix_re.sub(sub, n)
     for r in funcs:
         if r["other"] and int(r["other"], 16) not in syms and r["how"] != "gap":
             o = int(r["other"], 16)
-            syms[o] = (r["name"], "type:func" + (f" size:0x{sizes[o]:X}" if o in sizes else ""))
+            syms[o] = (own_suffix(r["name"]), "type:func" + (f" size:0x{sizes[o]:X}" if o in sizes else ""))
     for b, o, n in dpairs:
         if n and o not in syms and not re.fullmatch(r"D_[0-9A-F]{8}", n):
-            syms[o] = (n, "")
+            syms[o] = (own_suffix(n), "")
     syms.setdefault(sec[".sndata"][0], ("sn_dll_header_root", ""))
     # names that occur more than once get an _<ADDR> suffix (as tools/import_symbols.py does)
     counts = Counter(n for n, _ in syms.values())

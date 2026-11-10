@@ -15,7 +15,7 @@ CMoogleShopMain::~CMoogleShopMain() {}
 
 #line 48
 void CMoogleShopMain::initMcWork(STORAGE::MCWork::_RoomInfo* pInfo) {
-    if (!pInfo) AssertApp(__FILE__, __LINE__, "pInfo", 0);
+    KH_DEBUG(if (!pInfo) AssertApp(__FILE__, __LINE__, "pInfo", 0);)
     pInfo->_moogleShopFlag = 0;
 }
 
@@ -60,4 +60,3 @@ void CMoogleShopMain::finalize() {
     }
 }
 // SOURCE DATA: .data .rodata
-// SOURCE DATA SLUS_217.99_retail: .data

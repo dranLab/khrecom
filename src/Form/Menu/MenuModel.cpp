@@ -62,7 +62,7 @@ CMenuModel::CMenuModel(CTask* p, INT nRsrcID, CCoord* pParentCoord, INT iPosX, I
     }
 #line 46
     m_pModels = new KH_AT("(46)") CModel[m_nModelCount];
-    if (!m_pModels) AssertApp(__FILE__, __LINE__, "m_pModels", 0);
+    KH_DEBUG(if (!m_pModels) AssertApp(__FILE__, __LINE__, "m_pModels", 0);)
 
     TEXANM_DATA* pTXAData = CRsrcDB::getRsrcTXA(m_nRsrcID);
     if (pTXAData) {

@@ -125,7 +125,7 @@ void CEnemyHeartsoldier::endStateAttack1() {}
 #line 115
 void CEnemyHeartsoldier::beginStateDead() {
     CBattleEnemyManager* bem = (CBattleEnemyManager*)CTaskMan::getSysTask(25);
-    if (!bem) AssertApp(__FILE__, __LINE__, "bem", 0);
+    KH_DEBUG(if (!bem) AssertApp(__FILE__, __LINE__, "bem", 0);)
     if (bem->getTotalEnemyNum() >= 2) {
         CBattleEnemy::beginStateDead();
         m_iStep = 0;

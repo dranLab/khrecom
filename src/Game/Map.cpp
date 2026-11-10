@@ -488,10 +488,10 @@ void CMap::init(BOOL bUseMapUnit, BOOL bTexClampRepeat) {
         if (!d) {
 
             TRACE("%d:\203\202\203f\203\213\203f\201[\203^\202\252\214\251\202\302\202\251\202\350\202\334\202\271\202\361 %d\n", partsIdx, m_pZone->parts[partsIdx].modelIndex);
-            if (!(d)) AssertApp(__FILE__, __LINE__, "d", 0);
+            KH_DEBUG(if (!(d)) AssertApp(__FILE__, __LINE__, "d", 0);)
         }
         nDispModel++;
-        if (!(i<m_nModelMax)) AssertApp(__FILE__, __LINE__, "i<m_nModelMax", 0);
+        KH_DEBUG(if (!(i<m_nModelMax)) AssertApp(__FILE__, __LINE__, "i<m_nModelMax", 0);)
 
 
         parts->crdIndex = i;
@@ -1207,7 +1207,7 @@ CSky::CSky(CTask* pInParent, void* pAZF, ZONEDATA* pZone) : CTaskSecondary(pInPa
         model.setLayerDepth(nLayer);
 
         MODELDATA* d = (MODELDATA*)_getAZFData(pAZF, pZone->parts[i].modelIndex + 1);
-        if (!(d)) AssertApp(__FILE__, __LINE__, "d", 0);
+        KH_DEBUG(if (!(d)) AssertApp(__FILE__, __LINE__, "d", 0);)
 
 
         Crd(i + 1).m_Local.init();

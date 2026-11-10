@@ -254,7 +254,7 @@ void CRootTask::_phaseChkMemoca() {
     case 1:
 #line 340
         m_pMemoca = new KH_AT("(340)") CMemocaAgent(this);
-        if (!(m_pMemoca)) AssertApp(__FILE__, __LINE__, "m_pMemoca", 0);
+        KH_DEBUG(if (!(m_pMemoca)) AssertApp(__FILE__, __LINE__, "m_pMemoca", 0);)
         m_pMemoca->reqLoadSysData();
         m_nStep = 2;
         break;

@@ -364,7 +364,7 @@ static void _makeBillboardMatrix(const FMATRIX* pWorldMat) {
 
 #line 711
 CBillboardHelper& CWorldEnv::getBBHelper() {
-    if (!_pBBHelper) AssertApp(__FILE__, __LINE__, "_pBBHelper", 0);
+    KH_DEBUG(if (!_pBBHelper) AssertApp(__FILE__, __LINE__, "_pBBHelper", 0);)
     return *_pBBHelper;
 }
 

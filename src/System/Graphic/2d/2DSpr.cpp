@@ -109,7 +109,7 @@ HANDLE C2DSpr::addList(C2DO& Obj) {
     SLContainerT<C2DO>* pNew;
     HANDLE h;
     if (Obj._getHandle()) return -1;
-    if (!m_p2DOSLCList) AssertApp(__FILE__, __LINE__, "m_p2DOSLCList", 0);
+    KH_DEBUG(if (!m_p2DOSLCList) AssertApp(__FILE__, __LINE__, "m_p2DOSLCList", 0);)
     pNew = m_p2DOSLCList->pushBack(Obj);
     if (!pNew) {
         h = -1;
@@ -126,7 +126,7 @@ HANDLE C2DSpr::replaceList(HANDLE hCurrent, C2DO& Obj) {
     HANDLE h;
     SLContainerT<C2DO>* pNew;
     if (!hCurrent) return 0;
-    if (!m_p2DOSLCList) AssertApp(__FILE__, __LINE__, "m_p2DOSLCList", 0);
+    KH_DEBUG(if (!m_p2DOSLCList) AssertApp(__FILE__, __LINE__, "m_p2DOSLCList", 0);)
     h = Obj._getHandle();
     if (h) m_p2DOSLCList->remove(h);
     pNew = m_p2DOSLCList->replace(hCurrent, Obj);
@@ -145,7 +145,7 @@ BOOL C2DSpr::deleteList(C2DO& Obj) {
     HANDLE h = Obj._getHandle();
     BOOL bResult;
     if (!h) return FALSE;
-    if (!m_p2DOSLCList) AssertApp(__FILE__, __LINE__, "m_p2DOSLCList", 0);
+    KH_DEBUG(if (!m_p2DOSLCList) AssertApp(__FILE__, __LINE__, "m_p2DOSLCList", 0);)
     bResult = m_p2DOSLCList->remove(h);
     if (bResult) Obj._setHandle(0);
     return bResult;

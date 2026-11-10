@@ -85,7 +85,7 @@ void CSceneEnvTask::disp() {}
 #line 188
 void CSceneEnv::initialize(CTask* p) {
     m_pCol = new KH_AT("(189)") CSceneEnvColor[CH_MAX];
-    if (!(m_pCol)) AssertApp(__FILE__, __LINE__, "m_pCol", 0);
+    KH_DEBUG(if (!(m_pCol)) AssertApp(__FILE__, __LINE__, "m_pCol", 0);)
     m_iStopBit = ObjType::OBJ_BIT_CLEAR;
     m_iStopBitReq = ObjType::OBJ_BIT_CLEAR;
     m_iStopGauge = 0;
@@ -113,7 +113,7 @@ void CSceneEnv::finalize() {
 
 #line 225
 void CSceneEnv::setColor(ObjType::eObjBit iBit, FLOAT fFrame, const FVECTOR& vAim, const FVECTOR* pvOrg, INT nCh) {
-    if (!(!((UINT)nCh >= CH_MAX || nCh < 0 || m_pCol == NULL))) AssertApp(__FILE__, __LINE__, "! (nCh >= CH_MAX || nCh < 0 || m_pCol == __null)", 0);
+    KH_DEBUG(if (!(!((UINT)nCh >= CH_MAX || nCh < 0 || m_pCol == NULL))) AssertApp(__FILE__, __LINE__, "! (nCh >= CH_MAX || nCh < 0 || m_pCol == __null)", 0);)
     m_pCol[nCh].setColor(iBit, fFrame, vAim, pvOrg);
 }
 
@@ -138,7 +138,7 @@ void CSceneEnvColor::setColor(ObjType::eObjBit iBit, FLOAT fFrame, const FVECTOR
 
 #line 260
 BOOL CSceneEnv::isColorEnd(INT nCh) {
-    if (!(!((UINT)nCh >= CH_MAX || nCh < 0 || m_pCol == NULL))) AssertApp(__FILE__, __LINE__, "! (nCh >= CH_MAX || nCh < 0 || m_pCol == __null)", 0);
+    KH_DEBUG(if (!(!((UINT)nCh >= CH_MAX || nCh < 0 || m_pCol == NULL))) AssertApp(__FILE__, __LINE__, "! (nCh >= CH_MAX || nCh < 0 || m_pCol == __null)", 0);)
     return m_pCol[nCh].isColorEnd();
 }
 
@@ -192,13 +192,13 @@ FVECTOR* CSceneEnv::getTypeColor(ObjType::eObjType eType) {
 
 #line 316
 FVECTOR& CSceneEnv::getColor(INT nCh) {
-    if (!(!((UINT)nCh >= CH_MAX || nCh < 0 || m_pCol == NULL))) AssertApp(__FILE__, __LINE__, "! (nCh >= CH_MAX || nCh < 0 || m_pCol == __null)", 0);
+    KH_DEBUG(if (!(!((UINT)nCh >= CH_MAX || nCh < 0 || m_pCol == NULL))) AssertApp(__FILE__, __LINE__, "! (nCh >= CH_MAX || nCh < 0 || m_pCol == __null)", 0);)
     return m_pCol[nCh].m_vColor;
 }
 
 #line 325
 ObjType::eObjBit CSceneEnv::getColorTypeBit(INT nCh) {
-    if (!(!((UINT)nCh >= CH_MAX || nCh < 0 || m_pCol == NULL))) AssertApp(__FILE__, __LINE__, "! (nCh >= CH_MAX || nCh < 0 || m_pCol == __null)", 0);
+    KH_DEBUG(if (!(!((UINT)nCh >= CH_MAX || nCh < 0 || m_pCol == NULL))) AssertApp(__FILE__, __LINE__, "! (nCh >= CH_MAX || nCh < 0 || m_pCol == __null)", 0);)
     return m_pCol[nCh].m_iColBit;
 }
 

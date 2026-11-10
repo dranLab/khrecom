@@ -35,7 +35,7 @@ void CAtWater::create(CTask* p) {
     if (!m_pInstance) {
         m_pInstance =
             new KH_AT("(28)") CAtWater(p);
-        if (!m_pInstance) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
+        KH_DEBUG(if (!m_pInstance) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);)
     }
 }
 
@@ -43,7 +43,7 @@ void CAtWater::create(CTask* p) {
 CAtWater::CAtWater(CTask* p) : CTask(p, 0x4000) {
     m_pAtWater =
         new KH_AT("(40)") CAtWaterPrim();
-    if (!m_pAtWater) AssertApp(__FILE__, __LINE__, "m_pAtWater", 0);
+    KH_DEBUG(if (!m_pAtWater) AssertApp(__FILE__, __LINE__, "m_pAtWater", 0);)
 }
 
 CAtWater::~CAtWater() {

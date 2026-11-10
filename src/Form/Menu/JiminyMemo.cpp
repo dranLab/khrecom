@@ -1678,7 +1678,7 @@ void CMemo3DObj::main() {
 #line 2485
                 m_pModels = new KH_AT("(2485)") CModel[m_iModelCount];
 #line 2487
-                if (!m_pModels) AssertApp(__FILE__, __LINE__, "m_pModels", 0);
+                KH_DEBUG(if (!m_pModels) AssertApp(__FILE__, __LINE__, "m_pModels", 0);)
                 pTexAnimData = CRsrcDB::getRsrcTXA(nID);
                 if (pTexAnimData) {
                     m_iTexAnimNum = pTexAnimData->getDataNum();
@@ -1696,7 +1696,7 @@ void CMemo3DObj::main() {
                 }
                 m_pAnime = new KH_AT("(2525)") CAnim;
 #line 2527
-                if (!m_pAnime) AssertApp(__FILE__, __LINE__, "m_pAnime", 0);
+                KH_DEBUG(if (!m_pAnime) AssertApp(__FILE__, __LINE__, "m_pAnime", 0);)
                 m_pAnime->link(this, nID);
                 m_pAnime->init(1, 0);
                 for (INT i = 0; i < m_iModelCount; i++) m_pModels[i].changeLayerExt(1, m_uiDispLayer);
@@ -1995,7 +1995,7 @@ void CMemo2DLayout::destroyLayer() {
 }
 D2::C2DSeqCtrl* CMemo2DLayout::createSequence(INT inSeqNo, INT inLayer) {
 #line 3011
-    if (!(inSeqNo < 32)) AssertApp(__FILE__, __LINE__, "inSeqNo < SEQCTRL_MAX", 0);
+    KH_DEBUG(if (!(inSeqNo < 32)) AssertApp(__FILE__, __LINE__, "inSeqNo < SEQCTRL_MAX", 0);)
     D2::C2DSeqCtrl* pSeq = new KH_AT("(3017)")
         D2::C2DSeqCtrl;
 
@@ -2080,7 +2080,7 @@ CMemo2DSequence::CMemo2DSequence() {
 CMemo2DSequence::~CMemo2DSequence() {}
 void CMemo2DSequence::setup(const CHAR* inSeqName, const INT* inSeqTbl, INT inLayer) {
 #line 3138
-    if (!(strlen(inSeqName) < 32)) AssertApp(__FILE__, __LINE__, "strlen(inSeqName) < 32", 0);
+    KH_DEBUG(if (!(strlen(inSeqName) < 32)) AssertApp(__FILE__, __LINE__, "strlen(inSeqName) < 32", 0);)
     strcpy(m_LayoutName, inSeqName);
     m_iStateFlag |= 1;
     for (INT i = 0; i < 5; i++) {
@@ -2092,7 +2092,7 @@ void CMemo2DSequence::setup(const CHAR* inSeqName, const INT* inSeqTbl, INT inLa
 }
 void CMemo2DSequence::setup(const CHAR* inSeqName, INT inSeqNo, INT inLayer) {
 #line 3158
-    if (!(strlen(inSeqName) < 32)) AssertApp(__FILE__, __LINE__, "strlen(inSeqName) < 32", 0);
+    KH_DEBUG(if (!(strlen(inSeqName) < 32)) AssertApp(__FILE__, __LINE__, "strlen(inSeqName) < 32", 0);)
     strcpy(m_LayoutName, inSeqName);
     setLayer(inLayer);
     setState(1);
@@ -3077,7 +3077,7 @@ INT CJiminyMemo::splitMessage(INT* outNum, CHAR*** outBuf, const CHAR* inStr, IN
         while (*pChar0 != '\0') {
             pChar1 = pChar0 + len;
 #line 4612
-            if (!(len < (inWidth - 1))) AssertApp(__FILE__, __LINE__, "len < (inWidth - 1)", 0);
+            KH_DEBUG(if (!(len < (inWidth - 1))) AssertApp(__FILE__, __LINE__, "len < (inWidth - 1)", 0);)
             if (*pChar1 == '\n' || *pChar1 == '\0') {
                 if (i == 1) {
                     (*outBuf)[lineNum] = (CHAR*)com_malloc_d(inWidth + 1, __FILE__ "(4617)", -1);

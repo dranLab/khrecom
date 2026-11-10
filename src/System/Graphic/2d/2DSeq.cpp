@@ -11,12 +11,12 @@ struct _GPrimCopy {
     void createFV(INT n) {
 #line 613 "System/Graphic/GPrim.h"
         m_V = (T*)com_malloc_d(n, __FILE__ "(613)", (UINT)-1);
-        if (!m_V) AssertApp(__FILE__, __LINE__, "m_V", 0);
+        KH_DEBUG(if (!m_V) AssertApp(__FILE__, __LINE__, "m_V", 0);)
     }
     void createFTV(INT n) {
 #line 684
         m_V = (T*)com_malloc_d(n, __FILE__ "(684)", (UINT)-1);
-        if (!m_V) AssertApp(__FILE__, __LINE__, "m_V", 0);
+        KH_DEBUG(if (!m_V) AssertApp(__FILE__, __LINE__, "m_V", 0);)
     }
 };
 inline void _gprimCopy(_GPrimCopy<FVERTEX>* p) {

@@ -93,7 +93,7 @@ static BOOL _openMovie(const CHAR* pszFile, BOOL bForDebug) {
     } else {
         p = new KH_AT("(148)") CMoviePlayerDummy(pParent);
     }
-    if (!p) AssertApp(__FILE__, __LINE__, "p", 0);
+    KH_DEBUG(if (!p) AssertApp(__FILE__, __LINE__, "p", 0);)
     /* volatile: keeps the store ahead of the vtable load (the original schedules it there) */
     *(volatile HANDLE*)&s_hVideoTask = p->getHandle();
     BOOL bResult = p->open(pszFile);

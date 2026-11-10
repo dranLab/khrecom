@@ -71,7 +71,7 @@ CMSStream::CMSStream() {
     m_bPauseStatus = 0;
     /* read through a reference: the load must not be scheduled above the member stores */
     CMSStream*& rpMSS = s_pMSS;
-    if (!(__null == rpMSS)) AssertApp(__FILE__, __LINE__, "__null == s_pMSS", 0);
+    KH_DEBUG(if (!(__null == rpMSS)) AssertApp(__FILE__, __LINE__, "__null == s_pMSS", 0);)
     s_nMssPtr = 0;
     s_pMSS = this;
     s_nMssThreadID = -1;

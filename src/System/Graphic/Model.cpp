@@ -207,7 +207,7 @@ void CModel::releaseData() {
     m_pTexAnm = NULL;
 }
 INT CModel::link(CTask* p, const CHAR* pName) {
-    if (!(p)) AssertApp(__FILE__, 451, "p", 0);
+    KH_DEBUG(if (!(p)) AssertApp(__FILE__, 451, "p", 0);)
     CCoords* pCrds = p->getCoords();
     if (!pCrds) {
         p->createCoords();
@@ -240,18 +240,18 @@ INT CModel::getBoneIndex(const CHAR* pName) const {
 }
 MODELDATA* AMFfromMDL(const CHAR* pszName, INT nIdx) {
     MODELDATA** ret = CRsrcDB::getRsrcMDL(pszName, NAME_CASE_SENSITIVE);
-    if (!(ret)) AssertApp(__FILE__, 500, "ret", 0);
+    KH_DEBUG(if (!(ret)) AssertApp(__FILE__, 500, "ret", 0);)
     return ret[nIdx];
 }
 MODELDATA* AMFfromMDL(INT nGroup, INT nIdx) {
     MODELDATA** ret = CRsrcDB::getRsrcMDL(nGroup);
-    if (!(ret)) AssertApp(__FILE__, 508, "ret", 0);
+    KH_DEBUG(if (!(ret)) AssertApp(__FILE__, 508, "ret", 0);)
     return ret[nIdx];
 }
 INT CModel::assign(CTask* p, const CHAR* pName, INT n) {
-    if (!(p)) AssertApp(__FILE__, 516, "p", 0);
+    KH_DEBUG(if (!(p)) AssertApp(__FILE__, 516, "p", 0);)
     CCoords* pCrds = p->getCoords();
-    if (!(pCrds)) AssertApp(__FILE__, 518, "pCrds", 0);
+    KH_DEBUG(if (!(pCrds)) AssertApp(__FILE__, 518, "pCrds", 0);)
     m_pTask = p;
     return assign(*pCrds, pName, n);
 }
@@ -265,21 +265,21 @@ INT CModel::assign(CCoords& crds, const CHAR* pName, INT n) {
     return assign(crds, n);
 }
 INT CModel::assign(CTask* p, INT n) {
-    if (!(p)) AssertApp(__FILE__, 537, "p", 0);
+    KH_DEBUG(if (!(p)) AssertApp(__FILE__, 537, "p", 0);)
     CCoords* pCrds = p->getCoords();
-    if (!(pCrds)) AssertApp(__FILE__, 539, "pCrds", 0);
+    KH_DEBUG(if (!(pCrds)) AssertApp(__FILE__, 539, "pCrds", 0);)
     m_pTask = p;
     return assign(*pCrds, n);
 }
 INT CModel::assign(CCoords& crds, INT crdidx) {
     INT i;
-    if (!(m_pData)) AssertApp(__FILE__, 546, "m_pData", 0);
+    KH_DEBUG(if (!(m_pData)) AssertApp(__FILE__, 546, "m_pData", 0);)
     m_pCrds = &crds;
     m_BoneStart = crdidx;
     m_BoneSkip = 0;
     m_BoneIdx = 0;
     m_TransTexCount = m_pData->m_nTexNum;
-    if (!(!(m_TransTexCount > 16))) AssertApp(__FILE__, 579, "! (m_TransTexCount > TEXMAX)", 0);
+    KH_DEBUG(if (!(!(m_TransTexCount > 16))) AssertApp(__FILE__, 579, "! (m_TransTexCount > TEXMAX)", 0);)
     for (i = 0; i < m_TransTexCount; i++) {
         *(u_long*)&m_TexInfo[i] = *(u_long*)((BYTE*)m_pData->m_pTexParam + i * 0x20 + 0x10);
     }
@@ -293,7 +293,7 @@ void CModel::setModelData(const MODELDATA* pData) {
     link(m_pTask);
 }
 INT CModel::link(CTask* p) {
-    if (!(p)) AssertApp(__FILE__, 620, "p", 0);
+    KH_DEBUG(if (!(p)) AssertApp(__FILE__, 620, "p", 0);)
     CCoords* pCrds = p->getCoords();
     if (!pCrds) {
         p->createCoords();
@@ -306,7 +306,7 @@ INT CModel::link(CCoords& crds) {
     BOOL add;
     INT nBoneNum;
     INT i;
-    if (!(m_pData)) AssertApp(__FILE__, 633, "m_pData", 0);
+    KH_DEBUG(if (!(m_pData)) AssertApp(__FILE__, 633, "m_pData", 0);)
     m_pCrds = &crds;
     INT nCrd = crds.getCoordNum();
     m_BoneSkip = nCrd;
@@ -333,7 +333,7 @@ INT CModel::link(CCoords& crds) {
         m_BoneIdx = m_BoneStart = m_pData->m_BoneIndex - 1;
     }
     m_TransTexCount = m_pData->m_nTexNum;
-    if (!(!(m_TransTexCount > 16))) AssertApp(__FILE__, 707, "! (m_TransTexCount > TEXMAX)", 0);
+    KH_DEBUG(if (!(!(m_TransTexCount > 16))) AssertApp(__FILE__, 707, "! (m_TransTexCount > TEXMAX)", 0);)
     for (INT i = 0; i < m_TransTexCount; i++) {
         *(u_long*)&m_TexInfo[i] = *(u_long*)((BYTE*)m_pData->m_pTexParam + i * 0x20 + 0x10);
     }
@@ -346,13 +346,13 @@ CCoord& CModel::getCrd(INT idx) {
     return m_pCrds->Crd(m_BoneStart + idx);
 }
 INT CModel::getCoordNum() const {
-    if (!(m_pCrds)) AssertApp(__FILE__, 737, "m_pCrds", 0);
+    KH_DEBUG(if (!(m_pCrds)) AssertApp(__FILE__, 737, "m_pCrds", 0);)
     return m_pCrds->getCoordNum();
 }
 void CModel::setLocal(INT index) {
-    if (!(m_pCrds != __null)) AssertApp(__FILE__, 743, "m_pCrds != __null", 0);
-    if (!(0 <= index && index < m_pCrds->getCoordNum())) AssertApp(__FILE__, 744, "0 <= index && index < m_pCrds->getCoordNum()", 0);
-    if (!(m_pData != __null)) AssertApp(__FILE__, 745, "m_pData != __null", 0);
+    KH_DEBUG(if (!(m_pCrds != __null)) AssertApp(__FILE__, 743, "m_pCrds != __null", 0);)
+    KH_DEBUG(if (!(0 <= index && index < m_pCrds->getCoordNum())) AssertApp(__FILE__, 744, "0 <= index && index < m_pCrds->getCoordNum()", 0);)
+    KH_DEBUG(if (!(m_pData != __null)) AssertApp(__FILE__, 745, "m_pData != __null", 0);)
     m_pCrds->Crd(index).m_Local = ((const FMATRIX*)m_pData->m_pBones)[index]; /* PARTIAL: CCoord::setLocal is Camera's compare+touch form */
 }
 INT CModel::getTextureIndex(const CHAR* pName) const {
@@ -549,7 +549,7 @@ void CModel::calcWorldBBox(BOOL bCalc) {
         FVECTOR vMin;
         CCoord* pCrd;
         INT iBoneNum;
-        if (!(m_pData)) AssertApp(__FILE__, 1067, "m_pData", 0);
+        KH_DEBUG(if (!(m_pData)) AssertApp(__FILE__, 1067, "m_pData", 0);)
         pCrd = &getCrd(0);
         iBoneNum = m_pData->m_nBoneNum;
         vMax.set(-1.70141183e+38f, -1.70141183e+38f, -1.70141183e+38f, 1.0f);
@@ -689,7 +689,7 @@ void CModel::linksub() {
     BOOL bHasSemiData;
     m_Mode = m_pData->getMode();
     m_pShader = searchShaderDesc(m_Mode);
-    if (!(m_pShader)) AssertApp(__FILE__, 1738, "m_pShader", 0);
+    KH_DEBUG(if (!(m_pShader)) AssertApp(__FILE__, 1738, "m_pShader", 0);)
     rawMode = m_pData->getRawMode();
     if (rawMode & 0x20000000) m_nTestFlag = (INT)m_nTestFlag & -2;
     else m_nTestFlag = ((INT)m_nTestFlag & -0x4000) | 0xFD;
@@ -727,7 +727,7 @@ void CModel::addTexture(const CHAR* texName, INT idx) {
     INT i;
     if (m_TransTexCount < m_pData->m_nTexNum + 1) {
         m_TransTexCount = m_pData->m_nTexNum + 1;
-        if (!(!(m_TransTexCount > 16))) AssertApp(__FILE__, 1867, "! (m_TransTexCount > TEXMAX)", 0);
+        KH_DEBUG(if (!(!(m_TransTexCount > 16))) AssertApp(__FILE__, 1867, "! (m_TransTexCount > TEXMAX)", 0);)
     }
     ((TexInfoStub*)&m_TexInfo[m_pData->m_nTexNum])->init(CRsrcDB::getRsrcTex(texName, NAME_CASE_SENSITIVE), -1, -1);
     nTmpTex = 0;
@@ -937,7 +937,7 @@ void CModel::disp0(INT semikind, u_long nInTest, INT iFlags) {
     const int (*pData)[4];
     UINT nMode;
     u_long tex0[16];
-    if (!(m_pShader)) AssertApp(__FILE__, 2446, "m_pShader", 0);
+    KH_DEBUG(if (!(m_pShader)) AssertApp(__FILE__, 2446, "m_pShader", 0);)
     pData = (const int (*)[4])_disp0_GetData(nMode, iFlags);
     if (pData) {
         if (!(m_iSendFlg & 1)) disp0_SetMicroCode(m_pShader->m_pMpg);
@@ -961,7 +961,7 @@ u_long* CModel::_disp0_GetData(UINT& nMode, INT iFlags) {
     return (u_long*)pData;
 }
 void CModel::disp0_SetMicroCode(u_long128* pMProg) {
-    if (!((m_pMpg == g_mpg0) || (m_pMpg == g_mpg2) || (m_pMpg == __null))) AssertApp(__FILE__, 2539, "(m_pMpg==g_mpg0)||(m_pMpg==g_mpg2)||(m_pMpg == __null)", 0);
+    KH_DEBUG(if (!((m_pMpg == g_mpg0) || (m_pMpg == g_mpg2) || (m_pMpg == __null))) AssertApp(__FILE__, 2539, "(m_pMpg==g_mpg0)||(m_pMpg==g_mpg2)||(m_pMpg == __null)", 0);)
     if (pMProg != m_pMpg || (m_iSendFlg & 0x100)) {
         m_pMpg = pMProg;
         CPackMan::pkCall(pMProg, 0);
@@ -1316,7 +1316,7 @@ void CSemiModel::makePkt() {
 void CSemiModel::setSemiTrans(ALPHA a) {
     UINT rawMode;
     if (!(a == ALPHA_PLUS) && !(a == ALPHA_MINUS) && !(a == ALPHA_BLEND)) {
-        if (!(m_pModel)) AssertApp(__FILE__, 3588, "m_pModel", 0);
+        KH_DEBUG(if (!(m_pModel)) AssertApp(__FILE__, 3588, "m_pModel", 0);)
         rawMode = m_pModel->getModelData()->getRawMode();
         if (rawMode & 0x10000000) a = ALPHA_BLEND;
         else a = ALPHA_PLUS;
@@ -1518,7 +1518,7 @@ void CModel::linkTexAnm(CTexAnm* pATbl, INT nANum) {
         nTexMax = m_TransTexCount;
         if (!m_pTexAnm && nTexMax > 0 && CModelTexAnm::getTexAnmCount(pATbl, nANum, (TexInfoStub*)m_TexInfo, nTexMax) > 0) {
             m_pTexAnm = new KH_AT("(4066)") CModelTexAnm;
-            if (!(m_pTexAnm)) AssertApp(__FILE__, 4067, "m_pTexAnm", 0);
+            KH_DEBUG(if (!(m_pTexAnm)) AssertApp(__FILE__, 4067, "m_pTexAnm", 0);)
             m_pTexAnm->setup(pATbl, nANum, (TexInfoStub*)m_TexInfo, nTexMax);
         }
     }
@@ -1708,7 +1708,7 @@ INT Mad::getModelAttachData(const MODEL_ATTACH_DATA** outMad, INT iRId) {
         return 0;
     }
     mad = (MODEL_ATTACH_DATA*)((BYTE*)header + header->uiOffset);
-    if (!(mad)) AssertApp(__FILE__, 4422, "mad", 0);
+    KH_DEBUG(if (!(mad)) AssertApp(__FILE__, 4422, "mad", 0);)
     *outMad = mad;
     return header->uiNum;
 }

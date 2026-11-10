@@ -154,7 +154,7 @@ char* CCamp::m_pMainCmdName[2][2][7] = {
 const unsigned char CCamp::m_itemAWBTbl[7] = { 101, 102, 100, 99, 98, 103, 97 };
 
 CCamp::CCamp(CTask* p, BOOL bWorldmapMode) : CMenu(p, 0) {
-    if (!(!_ref(m_pInstance))) AssertApp(__FILE__, 88, "!m_pInstance", 0);
+    KH_DEBUG(if (!(!_ref(m_pInstance))) AssertApp(__FILE__, 88, "!m_pInstance", 0);)
     m_pInstance = this;
     m_addrRsrcBuf = (BYTE*)PLM::getBattleRsrcFirst();
     m_bWorldmap = bWorldmapMode;

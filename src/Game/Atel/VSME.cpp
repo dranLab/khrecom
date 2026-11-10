@@ -1469,7 +1469,7 @@ void CVSM::loadFromMem(const BYTE* pAddr) {
     if (m_pIseg) com_free(m_pIseg);
     m_pIseg = (INSTR*)com_malloc_d(m_MaxPC * sizeof(INSTR), __FILE__ "(357)", (UINT)-1);
 #line 358
-    if (!(m_pIseg)) AssertApp(__FILE__, __LINE__, "m_pIseg", 0);
+    KH_DEBUG(if (!(m_pIseg)) AssertApp(__FILE__, __LINE__, "m_pIseg", 0);)
     p = (BYTE*)m_pIseg;
     for (INT j = 0; j < m_MaxPC * sizeof(INSTR); j++) {
         *p++ = *pAddr++;
@@ -1486,7 +1486,7 @@ void CVSM::loadFromMem(const BYTE* pAddr) {
     if (m_pDseg) com_free(m_pDseg);
     m_pDseg = (BYTE*)com_malloc_d(0x4000, __FILE__ "(376)", (UINT)-1);
 #line 377
-    if (!(m_pDseg)) AssertApp(__FILE__, __LINE__, "m_pDseg", 0);
+    KH_DEBUG(if (!(m_pDseg)) AssertApp(__FILE__, __LINE__, "m_pDseg", 0);)
     p = m_pDseg;
     for (INT j = 0; j < m_GAptr; j++) {
         *p++ = *pAddr++;
@@ -1678,7 +1678,7 @@ void CVSM::execActor() {
     ATP& atp = m_pCurrentActor->_ATP;
     INT nState = atp.status;
 #line 844
-    if (!((ATEL_REQ <= nState) && (_ATEL_REQ_MAX > nState))) AssertApp(__FILE__, __LINE__, "(ATEL_REQ <= nState) && (_ATEL_REQ_MAX > nState)", 0);
+    KH_DEBUG(if (!((ATEL_REQ <= nState) && (_ATEL_REQ_MAX > nState))) AssertApp(__FILE__, __LINE__, "(ATEL_REQ <= nState) && (_ATEL_REQ_MAX > nState)", 0);)
     if ((this->*m_ActorStateFnc[nState])()) {
         atp.status = 1;
         if (atp.Freg) m_Freg = atp.Freg;
@@ -1995,7 +1995,7 @@ INT CVSM::execStdCode(INT op, INT& addr, eATEL_REQ_RET& ret) {
         case 52:
             m_S[m_SP].I = (BYTE*)com_malloc_d(m_S[m_SP].I, __FILE__ "(1121)", (UINT)-1) - m_pDseg;
 #line 1122
-            if (!(m_S[m_SP].I)) AssertApp(__FILE__, __LINE__, "(m_S[m_SP].I)", 0);
+            KH_DEBUG(if (!(m_S[m_SP].I)) AssertApp(__FILE__, __LINE__, "(m_S[m_SP].I)", 0);)
             break;
         case 53:
             com_free(m_pDseg + m_S[m_SP--].I);
@@ -3192,7 +3192,7 @@ public:
 /* CollUtil.h:194/245 in the original */
 static inline CCollUtil* collUtilInstance() {
     CCollUtil*& instance = CCollUtil::m_pInstance;
-    if (!instance) AssertApp(COLLUTIL_H_PATH, 194, "m_pInstance", 0);
+    KH_DEBUG(if (!instance) AssertApp(COLLUTIL_H_PATH, 194, "m_pInstance", 0);)
     return instance;
 }
 static inline void enableChipCollision(FVECTOR& vChipCenter, BOOL fg) { collUtilInstance()->_enableChipCollision(vChipCenter, fg); }
@@ -4109,7 +4109,7 @@ INT CVSM::execExt3Code(INT op, eATEL_REQ_RET& ret) {
             INT i2 = m_S[m_SP--].I;
             INT i1 = m_S[m_SP].I;
 #line 3698
-            if (!(CWorldEnv::getActiveCamera())) AssertApp(__FILE__, __LINE__, "CWorldEnv::getActiveCamera()", 0);
+            KH_DEBUG(if (!(CWorldEnv::getActiveCamera())) AssertApp(__FILE__, __LINE__, "CWorldEnv::getActiveCamera()", 0);)
             FVECTOR vPos;
             FVECTOR vRot;
             vPos.set(0.0f, 0.0f, f);

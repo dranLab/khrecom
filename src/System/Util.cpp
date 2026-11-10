@@ -48,7 +48,7 @@ INT lotProbability(const INT* pRate, INT nNum) {
     nTotal = -1;
     for (i = 0; i < nNum; i++) {
 #line 80
-        if (!(pRate[i] >= 0)) AssertApp(__FILE__, __LINE__, "pRate[i] >= 0", 0);
+        KH_DEBUG(if (!(pRate[i] >= 0)) AssertApp(__FILE__, __LINE__, "pRate[i] >= 0", 0);)
         nTotal += pRate[i];
     }
     if (nTotal < 0) {

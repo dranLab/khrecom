@@ -292,7 +292,7 @@ CPlayer::CPlayer(CTask* inParent, UINT inChara, INT inEx) : CEntity(inParent, (O
     _init();
     m_uiRCID = PLM::g_uiPlayerRcid[m_uiCharaID];
     m_pParam = &PL::g_Param;
-    if (!m_pParam) AssertApp(__FILE__, 0x240, "m_pParam", 0);
+    KH_DEBUG(if (!m_pParam) AssertApp(__FILE__, 0x240, "m_pParam", 0);)
     if (inEx) {
         m_uiPlayerFlag |= 0x20000000;
     } else {
@@ -538,7 +538,7 @@ void CPlayer::lastUpdate() {
 }
 __asm__(".rdata\n");
 void CPlayer::changeState(INT inState) {
-    if (!((UINT)inState < 4)) AssertApp(__FILE__, 941, "0 <= inState && inState < STATE_MAX", 0);
+    KH_DEBUG(if (!((UINT)inState < 4)) AssertApp(__FILE__, 941, "0 <= inState && inState < STATE_MAX", 0);)
     gotoState(m_State[inState]);
 }
 void CPlayer::stateInitial() {
@@ -746,7 +746,7 @@ void CPlayer::makeAnimIndex(INT inChara) {
 }
 __asm__(".rdata\n");
 INT CPlayer::getMotIndex(INT inChara, INT inIndex) {
-    if (!(0 <= inIndex && inIndex < ANIM_MAX)) AssertApp(__FILE__, 1361, "0<=inIndex && inIndex<ANIM_MAX", 0);
+    KH_DEBUG(if (!(0 <= inIndex && inIndex < ANIM_MAX)) AssertApp(__FILE__, 1361, "0<=inIndex && inIndex<ANIM_MAX", 0);)
     return PL_ANIM::g_MotNameTbl[inChara][inIndex].iIndex;
 }
 void CPlayer::setAnimForce(INT inAnimID, TIMEQ inChangeTime, BOOL inRootMove, INT inEffSeq, INT inSESeq, TIMEQ inStart) {

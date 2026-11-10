@@ -83,7 +83,7 @@ void CMapEnemyManager::initRoomCreate() {
                 info->_MapEnemies[index]._byDead = 0;
                 index++;
 #line 117
-                if (!(index < MAP_ENEMY_ROOM_MAX)) AssertApp(__FILE__, __LINE__, "index < MAP_ENEMY_ROOM_MAX", 0);
+                KH_DEBUG(if (!(index < MAP_ENEMY_ROOM_MAX)) AssertApp(__FILE__, __LINE__, "index < MAP_ENEMY_ROOM_MAX", 0);)
             }
         }
     }
@@ -95,19 +95,19 @@ void CMapEnemyManager::initRoomCreate() {
 
 #line 152
 TIMEQ CMapEnemyManager::getFaintTime() const {
-    if (!(m_pMapEnemyParam)) AssertApp(__FILE__, __LINE__, "m_pMapEnemyParam", 0);
+    KH_DEBUG(if (!(m_pMapEnemyParam)) AssertApp(__FILE__, __LINE__, "m_pMapEnemyParam", 0);)
     return (TIMEQ)(m_pMapEnemyParam->fFaintTime * 60.0f * 50.0f);
 }
 
 #line 160
 TIMEQ CMapEnemyManager::getStopTime() const {
-    if (!(m_pMapEnemyParam)) AssertApp(__FILE__, __LINE__, "m_pMapEnemyParam", 0);
+    KH_DEBUG(if (!(m_pMapEnemyParam)) AssertApp(__FILE__, __LINE__, "m_pMapEnemyParam", 0);)
     return (TIMEQ)(m_pMapEnemyParam->fStopTime * 60.0f * 50.0f);
 }
 
 #line 168
 TIMEQ CMapEnemyManager::getConfuseTime() const {
-    if (!(m_pMapEnemyParam)) AssertApp(__FILE__, __LINE__, "m_pMapEnemyParam", 0);
+    KH_DEBUG(if (!(m_pMapEnemyParam)) AssertApp(__FILE__, __LINE__, "m_pMapEnemyParam", 0);)
     return (TIMEQ)(m_pMapEnemyParam->fConfuseTime * 60.0f * 50.0f);
 }
 
@@ -161,7 +161,7 @@ void CMapEnemyManager::setEncountEnemy(SHORT inEnemyID, SHORT inUniqueID, BYTE i
 void CMapEnemyManager::setEncountEventEnemy(INT inFormationNo, BYTE inHitPlayerAttack) {
     _MapEnemyRoomInfo* info = CSceneInfo::getCurrentRoomMapEnemyInfo();
     if (info != NULL) {
-        if (!(FORMATION_EVENT1 <= inFormationNo && inFormationNo <= FORMATION_EVENT5)) AssertApp(__FILE__, __LINE__, "FORMATION_EVENT1 <= inFormationNo && inFormationNo <= FORMATION_EVENT5", 0);
+        KH_DEBUG(if (!(FORMATION_EVENT1 <= inFormationNo && inFormationNo <= FORMATION_EVENT5)) AssertApp(__FILE__, __LINE__, "FORMATION_EVENT1 <= inFormationNo && inFormationNo <= FORMATION_EVENT5", 0);)
         info->_sEncountEnemyID = 0;
         info->_sEncountUniqueID = 0;
         info->_byFormationNo1 = inFormationNo;
@@ -202,7 +202,7 @@ BOOL CMapEnemyManager::init_() {
                     CEntity* entity = CEntityFactory::getInstance()->createMapEnemy(*info, this, &info->iParam);
                     if (entity != NULL) {
 #line 313
-                        if (!(entity->getTypeID() == CLASS_TYPE_CMAP_ENEMY)) AssertApp(__FILE__, __LINE__, "entity->getTypeID() == CLASS_TYPE_CMAP_ENEMY", 0);
+                        KH_DEBUG(if (!(entity->getTypeID() == CLASS_TYPE_CMAP_ENEMY)) AssertApp(__FILE__, __LINE__, "entity->getTypeID() == CLASS_TYPE_CMAP_ENEMY", 0);)
                         ((CMapEnemy*)entity)->setUniqueID(info->iUniqueID);
                     }
                 }

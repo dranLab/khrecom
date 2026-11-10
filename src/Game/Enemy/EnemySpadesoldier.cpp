@@ -151,7 +151,7 @@ void CEnemySpadesoldier::endStateAttack2() {}
 #line 147
 void CEnemySpadesoldier::beginStateDead() {
     CBattleEnemyManager* bem = (CBattleEnemyManager*)CTaskMan::getSysTask(25);
-    if (!bem) AssertApp(__FILE__, __LINE__, "bem", 0);
+    KH_DEBUG(if (!bem) AssertApp(__FILE__, __LINE__, "bem", 0);)
     if (bem->getTotalEnemyNum() >= 2) {
         CBattleEnemy::beginStateDead();
         m_iStep = 0;

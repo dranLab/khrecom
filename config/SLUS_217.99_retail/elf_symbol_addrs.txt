@@ -11505,7 +11505,7 @@ _69_GLOBAL_$N$c__KHCOM_MainApp_System_Graphic_Effect_EffectMan.cpp5haaaa$s_pArgW
 _69_GLOBAL_$N$c__KHCOM_MainApp_System_Graphic_Effect_EffectMan.cpp5haaaa$s_pArgViewScreen = 0x00332CB8;
 _69_GLOBAL_$N$c__KHCOM_MainApp_System_Graphic_Effect_EffectMan.cpp5haaaa$s_pArgCamera = 0x00332CBC;
 _69_GLOBAL_$N$c__KHCOM_MainApp_System_Graphic_Effect_EffectMan.cpp5haaaa$s_pTask = 0x00332CC0;
-_69_GLOBAL_$N$c__KHCOM_MainApp_System_Graphic_Effect_EffectMan.cppPOaaaa$TEXCOMMON_FNAME = 0x00332CC4;
+_69_GLOBAL_$N$c__KHCOM_MainApp_System_Graphic_Effect_EffectMan.cpp5haaaa$TEXCOMMON_FNAME = 0x00332CC4;
 ppvFrameTime = 0x00332CC8;
 ppvDispWidth = 0x00332CCC;
 ppvDispHeight = 0x00332CD0;
@@ -13109,7 +13109,7 @@ lightVolumeVec = 0x00400E90;
 _cfvClampClut.1611 = 0x00401010;
 _cfvWhiteClut.1618 = 0x00401020;
 cardDataTbl_00465530 = 0x00401C58;
-_69_GLOBAL_$N$c__KHCOM_MainApp_System_Graphic_Effect_EffectMan.cppPOaaaa$s_vEffKhComScale = 0x004023F0;
+_69_GLOBAL_$N$c__KHCOM_MainApp_System_Graphic_Effect_EffectMan.cpp5haaaa$s_vEffKhComScale = 0x004023F0;
 alDmaPkt = 0x00402400;
 _DRAW_PRIORITY_FIRST_Tbl = 0x00402460;
 _DRAW_PRIORITY_LAST_Tbl = 0x00402480;

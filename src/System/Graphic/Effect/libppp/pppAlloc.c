@@ -37,7 +37,7 @@ void *pppAlloc(pppMemMng *mng, u_word size) {
     pppEMCB *mcb;
     pppEMCB *newMcb;
 
-    if (mng == NULL) AssertApp(__FILE__, 89, "mng", 0);
+    KH_DEBUG(if (mng == NULL) AssertApp(__FILE__, 89, "mng", 0);)
 
     size = ((size + 15) & ~15) + sizeof(pppEMCB);
     if (mng->last_free_heap == NULL) {
@@ -103,7 +103,7 @@ void pppFree(pppMemMng *mng, void *ptr) {
     pppEMCB *next;
     pppEMCB *before;
 #line 179
-    if (mng == NULL) AssertApp(__FILE__, __LINE__, "mng", 0);
+    KH_DEBUG(if (mng == NULL) AssertApp(__FILE__, __LINE__, "mng", 0);)
     if (ptr == NULL) {
         TRACE("!!!!!!!!!!!!!!!!!!!!!!!!! Effect pppFree NULL! !!!!!!!!!!!!!!!!!!!!!!!\n");
         return;

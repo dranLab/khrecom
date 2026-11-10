@@ -309,7 +309,7 @@ void CBattleCard::testDisp() {
     }
 }
 void CBattleCard::changeState(INT inState) {
-    if (!(inState >= 0 && inState < 7)) AssertApp(__FILE__, 492, "0 <= inState && inState < STATE_MAX", 0);
+    KH_DEBUG(if (!(inState >= 0 && inState < 7)) AssertApp(__FILE__, 492, "0 <= inState && inState < STATE_MAX", 0);)
     gotoState(m_State[inState]);
 }
 void CBattleCard::setPlayCard() {

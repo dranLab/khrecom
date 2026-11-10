@@ -155,7 +155,7 @@ static INT _openFile(const CHAR* pszFile, INT nInFlags, USHORT nInMode) {
 INT CFileIO::openFile(const CHAR* pszInFile, INT nInFlags, USHORT nInMode) {
     char szPath[256];
     INT nRes;
-    if (!(0 == s_nOpenedFd)) AssertApp(__FILE__, __LINE__, "0 == s_nOpenedFd", 0);
+    KH_DEBUG(if (!(0 == s_nOpenedFd)) AssertApp(__FILE__, __LINE__, "0 == s_nOpenedFd", 0);)
     if (!pszInFile) {
         return -1;
     }
@@ -169,20 +169,20 @@ INT CFileIO::openFile(const CHAR* pszInFile, INT nInFlags, USHORT nInMode) {
 
 #line 216
 INT CFileIO::closeFile(INT nInFd) {
-    if (!(nInFd == s_nOpenedFd)) AssertApp(__FILE__, __LINE__, "nInFd == s_nOpenedFd", 0);
+    KH_DEBUG(if (!(nInFd == s_nOpenedFd)) AssertApp(__FILE__, __LINE__, "nInFd == s_nOpenedFd", 0);)
     sceClose(nInFd);
     s_nOpenedFd = 0;
 }
 
 #line 236
 INT CFileIO::readFile(INT nInFd, void* pInBuf, INT nInSize) {
-    if (!(nInFd == s_nOpenedFd)) AssertApp(__FILE__, __LINE__, "nInFd == s_nOpenedFd", 0);
+    KH_DEBUG(if (!(nInFd == s_nOpenedFd)) AssertApp(__FILE__, __LINE__, "nInFd == s_nOpenedFd", 0);)
     return sceRead(nInFd, pInBuf, nInSize);
 }
 
 #line 253
 INT CFileIO::writeFile(INT nInFd, const void* pInData, INT nInSize) {
-    if (!(nInFd == s_nOpenedFd)) AssertApp(__FILE__, __LINE__, "nInFd == s_nOpenedFd", 0);
+    KH_DEBUG(if (!(nInFd == s_nOpenedFd)) AssertApp(__FILE__, __LINE__, "nInFd == s_nOpenedFd", 0);)
     return sceWrite(nInFd, pInData, nInSize);
 }
 
@@ -448,3 +448,4 @@ static void threadBgLoad(void* p) {
     TRACE("Background Load End... [%d]\n", s_nBgLoadResult);
 }
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .data .rodata

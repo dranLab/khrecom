@@ -25,7 +25,7 @@ extern INT SCREEN_HEIGHT;
  * their strings are in .rodata in this order. Line numbers are only known where they are part of a string. */
 #line 1 "System/../Form/Menu/JiminyMemo.h"
 inline void _jiminyMemoCheckId(INT inId) {
-    if (!(inId < 8)) AssertApp(__FILE__, __LINE__, "inId < PARAM_NUM", 0);
+    KH_DEBUG(if (!(inId < 8)) AssertApp(__FILE__, __LINE__, "inId < PARAM_NUM", 0);)
 }
 
 namespace CollisionEditor {
@@ -34,7 +34,7 @@ struct ATK_COLL_DATA;
 
 #line 1 "../Dlls/DebugDll/CollisionEditor.h"
 inline void _checkIndex8(INT inIndex) {
-    if (!(0 <= inIndex && inIndex < 8)) AssertApp(__FILE__, __LINE__, "0 <= inIndex && inIndex < 8", 0);
+    KH_DEBUG(if (!(0 <= inIndex && inIndex < 8)) AssertApp(__FILE__, __LINE__, "0 <= inIndex && inIndex < 8", 0);)
 }
 inline void* _alloc528() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
     return com_malloc_d(4, __FILE__ "(528)", (UINT)-1);

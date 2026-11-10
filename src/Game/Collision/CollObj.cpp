@@ -107,7 +107,7 @@ void CCollObj::link(HANDLE hTask) {
         break;
     }
 #line 121
-    if (!pList) AssertApp(__FILE__, __LINE__, "pList", 0);
+    KH_DEBUG(if (!pList) AssertApp(__FILE__, __LINE__, "pList", 0);)
     pList->pushBack(*this);
 }
 

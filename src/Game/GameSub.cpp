@@ -70,7 +70,7 @@ void CGameSub::preSetupAtel() {
         CBuf* abc = CRsrcDB::getRsrcABC(CSceneInfo::getNextAtelSrcID());
         if (abc) {
             m_pAtel = new KH_AT("(79)") CAtel(CTaskMan::getSysTask(1));
-            if (!(m_pAtel)) AssertApp(__FILE__, __LINE__, "m_pAtel", 0);
+            KH_DEBUG(if (!(m_pAtel)) AssertApp(__FILE__, __LINE__, "m_pAtel", 0);)
             m_pAtel->loadFromMem(abc->getBufPtr());
             m_pAtel->setupActor();
         }

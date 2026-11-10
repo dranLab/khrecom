@@ -87,7 +87,7 @@ void CFriend::initFSM_() {
 static inline void _setNewState(CState*& p, CState& NewState) { p = &NewState; }
 #line 143
 void CFriend::changeState(INT inState) {
-    if (!(0 <= inState && inState < STATE_MAX)) AssertApp(__FILE__, __LINE__, "0 <= inState && inState < STATE_MAX", 0);
+    KH_DEBUG(if (!(0 <= inState && inState < STATE_MAX)) AssertApp(__FILE__, __LINE__, "0 <= inState && inState < STATE_MAX", 0);)
     _setNewState(m_pNewState, m_State[inState]);
 }
 

@@ -153,7 +153,7 @@ void C2DLay::enableDisp(HANDLE handle, BOOL bEnable) {
 
 #line 267
 void C2DLay::destroy(HANDLE handle) {
-    if (!(FALSE)) AssertApp(__FILE__, __LINE__, "FALSE", 0);
+    KH_DEBUG(if (!(FALSE)) AssertApp(__FILE__, __LINE__, "FALSE", 0);)
 }
 
 void C2DLay::_main() {}

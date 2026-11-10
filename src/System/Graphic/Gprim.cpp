@@ -3120,7 +3120,7 @@ void C3DCPrim::_create(ULONGLONG iPrim, INT iVertexNum, CCoord* pCParent, CCoord
     m_iMax = iVertexNum;
 #line 4121
     m_V = (G_STRIP*)com_malloc_d(m_iMax * sizeof(G_STRIP), __FILE__ "(4121)", (UINT)-1);
-    if (!m_V) AssertApp(__FILE__, __LINE__, "m_V", 0);
+    KH_DEBUG(if (!m_V) AssertApp(__FILE__, __LINE__, "m_V", 0);)
 }
 FIX4 C3DCPrim::calcZ() {
     G_STRIP* it;
@@ -3287,7 +3287,7 @@ void C3DTPrim::_create(ULONGLONG iPrim, INT iVertexNum, CCoord* pCParent, CCoord
     m_iMax = iVertexNum;
 #line 4316
     m_V = (G_STRIP*)com_malloc_d(m_iMax * sizeof(G_STRIP), __FILE__ "(4316)", (UINT)-1);
-    if (!m_V) AssertApp(__FILE__, __LINE__, "m_V", 0);
+    KH_DEBUG(if (!m_V) AssertApp(__FILE__, __LINE__, "m_V", 0);)
 }
 FIX4 C3DTPrim::calcZ() {
     G_STRIP* it;

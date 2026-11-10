@@ -302,7 +302,7 @@ void CEnemyShadow::stateAttack2() {
 void CEnemyShadow::beginStateDead() {
     if (CMonstroEventBattle::isMonstroEventBattleScene()) {
         CBattleEnemyManager* bem = (CBattleEnemyManager*)CTaskMan::getSysTask(25);
-        if (!bem) AssertApp(__FILE__, 531, "bem", 0);
+        KH_DEBUG(if (!bem) AssertApp(__FILE__, 531, "bem", 0);)
         bem->monstroEventBattleGaugeUp();
     }
     CBattleEnemy::beginStateDead();

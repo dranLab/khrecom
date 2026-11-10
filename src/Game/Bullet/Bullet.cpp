@@ -284,7 +284,7 @@ BOOL CBullet::setup(const BULLET_PARAM& inParam) {
         FVECTOR ofs;
         FMATRIX m;
         m_pCollLines = new KH_AT("(357)") C3DLines;
-        if (!(m_pCollLines)) AssertApp(__FILE__, __LINE__, "m_pCollLines", 0);
+        KH_DEBUG(if (!(m_pCollLines)) AssertApp(__FILE__, __LINE__, "m_pCollLines", 0);)
         m_pCollLines->m_pCrd = &Crd(0);
         {
             INT ring;
@@ -345,19 +345,19 @@ void CBullet::setCollAttackPos(const FVECTOR& inPos) {
 
 #line 439
 void CBullet::setAttackID(UINT inID) {
-    if (!(m_pAttack)) AssertApp(__FILE__, __LINE__, "m_pAttack", 0);
+    KH_DEBUG(if (!(m_pAttack)) AssertApp(__FILE__, __LINE__, "m_pAttack", 0);)
     m_pAttack->setAttackID(inID);
 }
 
 #line 447
 UINT CBullet::getAttackID() const {
-    if (!(m_pAttack)) AssertApp(__FILE__, __LINE__, "m_pAttack", 0);
+    KH_DEBUG(if (!(m_pAttack)) AssertApp(__FILE__, __LINE__, "m_pAttack", 0);)
     return m_pAttack->getAttackID();
 }
 
 #line 455
 void CBullet::updateAttackID() {
-    if (!(m_pAttack)) AssertApp(__FILE__, __LINE__, "m_pAttack", 0);
+    KH_DEBUG(if (!(m_pAttack)) AssertApp(__FILE__, __LINE__, "m_pAttack", 0);)
     m_pAttack->updateAttackID();
 }
 
@@ -633,7 +633,7 @@ void CBullet::updateShadow() {
         return;
     }
     coll = m_pMove->getMapCollision();
-    if (!(coll)) AssertApp(__FILE__, __LINE__, "coll", 0);
+    KH_DEBUG(if (!(coll)) AssertApp(__FILE__, __LINE__, "coll", 0);)
     pos = getPos();
     pos.y += 0.1f;
     coll->setStartPos(pos);
@@ -977,7 +977,7 @@ INT CHomingBullet::initExplode() {
         FLOAT deltaRingAngle;
         G_LINE line;
         m_pCollLines = new KH_AT("(1527)") C3DLines;
-        if (!(m_pCollLines)) AssertApp(__FILE__, __LINE__, "m_pCollLines", 0);
+        KH_DEBUG(if (!(m_pCollLines)) AssertApp(__FILE__, __LINE__, "m_pCollLines", 0);)
         m_pCollLines->m_pCrd = &Crd(0);
         {
             INT ring;
@@ -1029,7 +1029,7 @@ void CHomingBullet::exeSpread() {
         FLOAT deltaRingAngle;
         G_LINE line;
         m_pCollLines = new KH_AT("(1593)") C3DLines;
-        if (!(m_pCollLines)) AssertApp(__FILE__, __LINE__, "m_pCollLines", 0);
+        KH_DEBUG(if (!(m_pCollLines)) AssertApp(__FILE__, __LINE__, "m_pCollLines", 0);)
         m_pCollLines->m_pCrd = &Crd(0);
         {
             INT ring;

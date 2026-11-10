@@ -591,9 +591,9 @@ void CCollUtil::detectMCInit(MC_CHIP* pChip, INT iArea) {
     }
     if (!(m_PrimInfoIdx < 0x240)) {
         TRACE("PRIM_INFO_MAX \203I\201[\203o\201[\n");
-        if (!(m_PrimInfoIdx < 0x240)) AssertApp(__FILE__, 818, "m_PrimInfoIdx < PRIM_INFO_MAX", 0);
+        KH_DEBUG(if (!(m_PrimInfoIdx < 0x240)) AssertApp(__FILE__, 818, "m_PrimInfoIdx < PRIM_INFO_MAX", 0);)
     }
-    if (!(m_PrimInfoIdx2 < 0x40)) AssertApp(__FILE__, 819, "m_PrimInfoIdx2 < PRIM_INFO2_MAX", 0);
+    KH_DEBUG(if (!(m_PrimInfoIdx2 < 0x40)) AssertApp(__FILE__, 819, "m_PrimInfoIdx2 < PRIM_INFO2_MAX", 0);)
 }
 
 INT CCollUtil::_detectMCD(CCollision& collision) {
@@ -655,9 +655,9 @@ INT CCollUtil::_detectMCD(CCollision& collision) {
     vec0 = m_vCkE0 - m_vCkS0;
     DivVector(vec1, vec0, fLenCnt);
     m_pPrimInfo = (PRIM_INFO*)SPAD::allocSpad(0x2400);
-    if (!m_pPrimInfo) AssertApp(__FILE__, 890, "m_pPrimInfo", 0);
+    KH_DEBUG(if (!m_pPrimInfo) AssertApp(__FILE__, 890, "m_pPrimInfo", 0);)
     m_pPrimInfo2 = (PRIM_INFO2*)SPAD::allocSpad(0x1000);
-    if (!m_pPrimInfo2) AssertApp(__FILE__, 892, "m_pPrimInfo2", 0);
+    KH_DEBUG(if (!m_pPrimInfo2) AssertApp(__FILE__, 892, "m_pPrimInfo2", 0);)
     if (m_Radius != 0.0f) {
         m_RadiusL = m_Radius;
         m_Radius2 = m_Radius * m_Radius;

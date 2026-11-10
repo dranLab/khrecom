@@ -181,7 +181,7 @@ INT s_nPkUseSize;
 
 #line 179
 static inline void _checkSize(UINT iSize) {
-    if (!(!(iSize >= 0x10000))) AssertApp(__FILE__, __LINE__, "! (iSize >= 0x10000)", 0);
+    KH_DEBUG(if (!(!(iSize >= 0x10000))) AssertApp(__FILE__, __LINE__, "! (iSize >= 0x10000)", 0);)
 }
 static inline void _checkDmaTag() {
     pacVif1Packet* pPkt = s_pPktVif1;
@@ -1528,9 +1528,9 @@ void sceVif1PkRefLoadImage(pacVif1Packet* pPacket, u_short bp, u_char psm, u_sho
     UINT iLoadImageMaxSize = 0x10000;
     UINT iLoadImageStartAddr = 0x100000;
     UINT iLoadImageEndAddr = 0x1fc0000;
-    if (!(!(size > iLoadImageMaxSize))) AssertApp(__FILE__, 3668, "! (size > iLoadImageMaxSize)", 0);
-    if (!(!((UINT)image < iLoadImageStartAddr))) AssertApp(__FILE__, 3669, "! ((UINT)image < iLoadImageStartAddr)", 0);
-    if (!(!((UINT)image >= iLoadImageEndAddr))) AssertApp(__FILE__, 3670, "! ((UINT)image >= iLoadImageEndAddr )", 0);
+    KH_DEBUG(if (!(!(size > iLoadImageMaxSize))) AssertApp(__FILE__, 3668, "! (size > iLoadImageMaxSize)", 0);)
+    KH_DEBUG(if (!(!((UINT)image < iLoadImageStartAddr))) AssertApp(__FILE__, 3669, "! ((UINT)image < iLoadImageStartAddr)", 0);)
+    KH_DEBUG(if (!(!((UINT)image >= iLoadImageEndAddr))) AssertApp(__FILE__, 3670, "! ((UINT)image >= iLoadImageEndAddr )", 0);)
     sceVif1PkCnt(pPacket, 0);
     ULONGLONG* p64 = (ULONGLONG*)pPacket->pCurrent;
     p64[0] = 0x5100000500000000;

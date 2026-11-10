@@ -89,7 +89,7 @@ extern "C" int sprintf(char* s, const char* fmt, ...);
 /* Game/Collision/CollUtil.h's dispose accessor (line 202) */
 static inline void _collUtilDispose() {
     CCollUtil*& instance = CCollUtil::m_pInstance;
-    if (!instance) AssertApp(COLLUTIL_H_PATH, 202, "m_pInstance", 0);
+    KH_DEBUG(if (!instance) AssertApp(COLLUTIL_H_PATH, 202, "m_pInstance", 0);)
     instance->dispose();
 }
 

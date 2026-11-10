@@ -757,10 +757,10 @@ void CSaveLoadUI::preSelDataList() {
     CHAR* pszMes;
     if (n < 0) {
         m_nDataListTop = m_nDataListSel;
-        if (!(0 <= m_nDataListTop)) AssertApp(__FILE__, 1185, "0 <= m_nDataListTop", 0);
+        KH_DEBUG(if (!(0 <= m_nDataListTop)) AssertApp(__FILE__, 1185, "0 <= m_nDataListTop", 0);)
     } else if (n >= 4) {
         m_nDataListTop = m_nDataListSel - 3;
-        if (!(0 <= m_nDataListTop)) AssertApp(__FILE__, 1190, "0 <= m_nDataListTop", 0);
+        KH_DEBUG(if (!(0 <= m_nDataListTop)) AssertApp(__FILE__, 1190, "0 <= m_nDataListTop", 0);)
     }
     m_pMainLightMark->setSleep(FALSE);
     m_pDataItemPlate[(SHORT)(m_nDataListSel - m_nDataListTop)]->select(TRUE);
@@ -946,7 +946,7 @@ void CSaveLoadUI::preLoadData() {
     sprintf(szMsg, pszFmt, pszText, szSlot, pszText);
     openMessageDlg(szMsg, 0, 0);
     GameDataHeader* p = m_pGameDataEntries->getEntry(m_nDataListSel);
-    if (!p) AssertApp(__FILE__, 1474, "p", 0);
+    KH_DEBUG(if (!p) AssertApp(__FILE__, 1474, "p", 0);)
     CGameWork::resetAll();
     CSceneInfo::initNewGame(p->_cFlag & 1);
     m_nStep = 0;
@@ -1835,7 +1835,7 @@ void CSaveLoadUI::updateMemocaInfoBar() {
     for (i = 0; i < 3; i++) {
         nAll += nTbl[i];
     }
-    if (!nAll) AssertApp(__FILE__, 2807, "nAll", 0);
+    KH_DEBUG(if (!nAll) AssertApp(__FILE__, 2807, "nAll", 0);)
     for (i = 0; i < 3; i++) {
         UINT nCount = nTbl[i];
         if (!nCount) m_pMemocaInfoBar[i]->enableDisp(FALSE);

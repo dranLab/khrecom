@@ -173,17 +173,17 @@ CCardBattle::CCardBattle() : CTask(getSysTask(1), 0x4000) {
         void* p = pData ? CRsrcDB::getRsrcData(*pData) : NULL;
         g_pBattleCardList = (BC_PARAM*)p;
     }
-    if (!(g_pBattleCardList)) AssertApp(__FILE__, 101, "g_pBattleCardList", 0);
+    KH_DEBUG(if (!(g_pBattleCardList)) AssertApp(__FILE__, 101, "g_pBattleCardList", 0);)
     {
         CRsrcData* pData = CRsrcDB::getRsrc(1, g_szBinStockSkillList, NAME_CASE_SENSITIVE);
         void* p = pData ? CRsrcDB::getRsrcData(*pData) : NULL;
         g_pStockSkillList = (SS_PARAM*)p;
     }
-    if (!(g_pStockSkillList)) AssertApp(__FILE__, 105, "g_pStockSkillList", 0);
+    KH_DEBUG(if (!(g_pStockSkillList)) AssertApp(__FILE__, 105, "g_pStockSkillList", 0);)
     initLayoutData();
     init();
     m_pMesage = (Message::CMessageManager*)CTaskMan::getSysTask(0x17);
-    if (!(m_pMesage)) AssertApp(__FILE__, 118, "m_pMesage", 0);
+    KH_DEBUG(if (!(m_pMesage)) AssertApp(__FILE__, 118, "m_pMesage", 0);)
 }
 CCardBattle::~CCardBattle() {
     for (INT i = 0; i < 2; i++) {
@@ -213,7 +213,7 @@ CCardBattle::~CCardBattle() {
 CCardBattle* CCardBattle::getInstance() {
     if (!m_pInstance) {
         m_pInstance = new KH_AT("(162)") CCardBattle;
-        if (!(m_pInstance)) AssertApp(__FILE__, 163, "m_pInstance", 0);
+        KH_DEBUG(if (!(m_pInstance)) AssertApp(__FILE__, 163, "m_pInstance", 0);)
     }
     return m_pInstance;
 }
@@ -368,7 +368,7 @@ void CCardBattle::calcPlayingCard() {
     }
 }
 void CCardBattle::exePlaying(INT inUser) {
-    if (!(inUser)) AssertApp(__FILE__, 440, "inUser", 0);
+    KH_DEBUG(if (!(inUser)) AssertApp(__FILE__, 440, "inUser", 0);)
     UINT _PLAYER = inUser - 1;
     UINT _ENEMY = _PLAYER ^ 1;
     TIMEQ tqFrameRate = getFrameRate();
@@ -898,7 +898,7 @@ void CCardBattle::setNumberBreak(UINT _PLAYER, UINT _ENEMY) {
     }
 }
 BOOL CCardBattle::checkNowPlaying(INT inSide, CBattleCard* pCard) {
-    if (!(inSide)) AssertApp(__FILE__, 1425, "inUser", 0);
+    KH_DEBUG(if (!(inSide)) AssertApp(__FILE__, 1425, "inUser", 0);)
     for (INT i = 0; i < 7; i++) {
         if (m_pCard[inSide - 1][i] == pCard) return TRUE;
     }
@@ -980,7 +980,7 @@ INT CCardBattle::testBreakingCard(UINT inPlayer) {
     return 0;
 }
 INT CCardBattle::setPlayCard(HANDLE inHandle, INT inUser, CBattleCard* inCard, CARD* inData, INT inTest) {
-    if (!(inUser)) AssertApp(__FILE__, 1660, "inUser", 0);
+    KH_DEBUG(if (!(inUser)) AssertApp(__FILE__, 1660, "inUser", 0);)
     UINT _PLAYER = inUser - 1;
     if (m_uiState[_PLAYER]) return 0;
     m_hOwner[_PLAYER] = inHandle;
@@ -997,7 +997,7 @@ INT CCardBattle::setPlayCard(HANDLE inHandle, INT inUser, CBattleCard* inCard, C
         m_cardData[_PLAYER][0] = *inCard->getCardData();
         checkNowPlaying(inUser, inCard);
     } else {
-        if (!(inData)) AssertApp(__FILE__, 1708, "inData", 0);
+        KH_DEBUG(if (!(inData)) AssertApp(__FILE__, 1708, "inData", 0);)
         m_cardData[_PLAYER][0] = *inData;
         m_pCard[_PLAYER][0] = new KH_AT("(1710)")
             CBattleCard(this, inData->m_nKind, inData->m_nNumber, inUser, 0);
@@ -1021,7 +1021,7 @@ INT CCardBattle::setPlayCard(HANDLE inHandle, INT inUser, CBattleCard* inCard, C
 }
 INT CCardBattle::setPlayStock(HANDLE inHandle, INT inUser, CBattleCard** inCard, INT inSkill, INT inExtra, INT inFirst,
                               INT inTest) {
-    if (!(inUser)) AssertApp(__FILE__, 1754, "inUser", 0);
+    KH_DEBUG(if (!(inUser)) AssertApp(__FILE__, 1754, "inUser", 0);)
     UINT _PLAYER = inUser - 1;
     if (m_uiState[_PLAYER]) return 0;
     m_hOwner[_PLAYER] = inHandle;
@@ -1051,7 +1051,7 @@ INT CCardBattle::setPlayStock(HANDLE inHandle, INT inUser, CBattleCard** inCard,
     return 1;
 }
 INT CCardBattle::setEnchantCard(HANDLE inHandle, INT inUser, CBattleCard* inCard) {
-    if (!(inUser)) AssertApp(__FILE__, 1823, "inUser", 0);
+    KH_DEBUG(if (!(inUser)) AssertApp(__FILE__, 1823, "inUser", 0);)
     UINT _PLAYER = inUser - 1;
     if (m_uiState[_PLAYER]) return 0;
     if (m_pEnchant[_PLAYER]) resetEnchantCard(inUser);
@@ -1131,7 +1131,7 @@ INT CCardBattle::setEnchantCard(HANDLE inHandle, INT inUser, CBattleCard* inCard
     return 1;
 }
 void CCardBattle::decEnchantTime(INT inUser, INT inPart, INT inKind) {
-    if (!(inUser)) AssertApp(__FILE__, 1977, "inUser", 0);
+    KH_DEBUG(if (!(inUser)) AssertApp(__FILE__, 1977, "inUser", 0);)
     UINT _PLAYER = inUser - 1;
     CARD& card = _ref(m_pInstance)->m_cardEnchant[_PLAYER];
     if (!card.m_nKind) return;
@@ -1149,7 +1149,7 @@ void CCardBattle::decEnchantTime(INT inUser, INT inPart, INT inKind) {
 }
 void CCardBattle::destroyPlayCard(INT inFlag, INT inP1) { resetNowPlaying(inFlag); }
 void CCardBattle::resetNowPlaying(INT inUser) {
-    if (!(inUser)) AssertApp(__FILE__, 2028, "inUser", 0);
+    KH_DEBUG(if (!(inUser)) AssertApp(__FILE__, 2028, "inUser", 0);)
     UINT _PLAYER = inUser - 1;
     if (inUser == 1) {
         if (m_iStock[_PLAYER] > 0) {
@@ -1176,7 +1176,7 @@ void CCardBattle::resetNowPlaying(INT inUser) {
     m_iFirst[_PLAYER] = 0;
 }
 void CCardBattle::resetEnchantCard(INT inUser) {
-    if (!(inUser)) AssertApp(__FILE__, 2069, "inUser", 0);
+    KH_DEBUG(if (!(inUser)) AssertApp(__FILE__, 2069, "inUser", 0);)
     UINT _PLAYER = inUser - 1;
     if (!_PLAYER) {
         resetPlayerEnchant(m_cardEnchant[0].m_nKind);
@@ -1496,7 +1496,7 @@ void CCardBattle::destroyEnemyCard(INT inHandle) {
     if (inHandle == m_hOwner[1]) destroyPlayCard(2, inHandle);
 }
 void CCardBattle::destroyRevolver(INT inSide) {
-    if (!(inSide)) AssertApp(__FILE__, 2764, "inUser", 0);
+    KH_DEBUG(if (!(inSide)) AssertApp(__FILE__, 2764, "inUser", 0);)
     UINT _PLAYER = inSide - 1;
     if (m_pRevolver[_PLAYER]) {
         m_pRevolver[_PLAYER]->destroy();
@@ -1504,11 +1504,11 @@ void CCardBattle::destroyRevolver(INT inSide) {
     }
 }
 void CCardBattle::setRevolver(INT inSide, CCardRevolver* pRevolver) {
-    if (!(inSide)) AssertApp(__FILE__, 2774, "inUser", 0);
+    KH_DEBUG(if (!(inSide)) AssertApp(__FILE__, 2774, "inUser", 0);)
     m_pRevolver[inSide - 1] = pRevolver;
 }
 CCardRevolver* CCardBattle::getRevolver(INT inSide) {
-    if (!(inSide)) AssertApp(__FILE__, 2779, "inUser", 0);
+    KH_DEBUG(if (!(inSide)) AssertApp(__FILE__, 2779, "inUser", 0);)
     return m_pRevolver[inSide - 1];
 }
 void CCardBattle::setBattleEnd() {
@@ -1566,7 +1566,7 @@ CStockFolder* CCardBattle::setStockFolder(::CTask* pParent, INT inUser) {
     return m_pInstance->m_pStockFolder[_PLAYER];
 }
 void CCardBattle::destroyStockFolder(INT inSide) {
-    if (!(inSide)) AssertApp(__FILE__, 2905, "inUser", 0);
+    KH_DEBUG(if (!(inSide)) AssertApp(__FILE__, 2905, "inUser", 0);)
     UINT _PLAYER = inSide - 1;
     if (m_pStockFolder[_PLAYER]) {
         m_pStockFolder[_PLAYER]->destroy();
@@ -1610,7 +1610,7 @@ void ENCHANT_PARAM::init(INT inOwner, UINT inUser) {
     iNormal = 0;
 }
 void CCardBattle::calcEnchantParam(ENCHANT_PARAM& ioParam) {
-    if (!(ioParam.uiUser)) AssertApp(__FILE__, 3103, "ioParam.uiUser", 0);
+    KH_DEBUG(if (!(ioParam.uiUser)) AssertApp(__FILE__, 3103, "ioParam.uiUser", 0);)
     UINT _PLAYER = ioParam.uiUser - 1;
     CARD& enchant = m_pInstance->m_cardEnchant[_PLAYER];
     if (enchant.m_nKind < 0x44) return;

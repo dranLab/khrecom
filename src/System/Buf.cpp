@@ -4,7 +4,7 @@
 #line 22
 BYTE* CBuf::_allocBuf(INT nSize, UINT nAlign) {
     BYTE* pBuf;
-    if (!(__null == m_pBuf)) AssertApp(__FILE__, __LINE__, "__null == m_pBuf", 0);
+    KH_DEBUG(if (!(__null == m_pBuf)) AssertApp(__FILE__, __LINE__, "__null == m_pBuf", 0);)
     pBuf = nAlign ? (BYTE*)com_memalign_d(nAlign, nSize, __FILE__ "(25)", (UINT)-1) : (BYTE*)com_malloc_d(nSize, __FILE__ "(25)", (UINT)-1);
     m_nBufSize = nSize;
     m_bManaged = pBuf != NULL;
@@ -30,7 +30,7 @@ BYTE* CBuf::allocBuf_A256(INT nSize) {
 
 #line 67
 void CBuf::attachBuf(BYTE* pInBuf, INT nInSize) {
-    if (!((0) == m_bManaged)) AssertApp(__FILE__, __LINE__, "(0) == m_bManaged", 0);
+    KH_DEBUG(if (!((0) == m_bManaged)) AssertApp(__FILE__, __LINE__, "(0) == m_bManaged", 0);)
     m_pBuf = pInBuf;
     m_nBufSize = nInSize;
 }
@@ -56,7 +56,7 @@ void CBuf::clear() {
 
 #line 103
 void CBuf::copyTo(CBuf& outBuf) {
-    if (!((0) == outBuf.m_bManaged)) AssertApp(__FILE__, __LINE__, "(0) == outBuf.m_bManaged", 0);
+    KH_DEBUG(if (!((0) == outBuf.m_bManaged)) AssertApp(__FILE__, __LINE__, "(0) == outBuf.m_bManaged", 0);)
     if (this != &outBuf) {
         outBuf.m_pBuf = m_pBuf;
         outBuf.m_nBufSize = m_nBufSize;

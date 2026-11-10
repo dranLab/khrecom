@@ -462,7 +462,7 @@ BOOL CHeartless::canAttack() {
 
 BOOL CHeartless::canAttack(INT inIndex) {
 #line 720
-    if (!(0 <= inIndex && inIndex < getEnemyParam()->iActCount)) AssertApp(__FILE__, __LINE__, "0 <= inIndex && inIndex < m_pEnemyParam->iActCount", 0);
+    KH_DEBUG(if (!(0 <= inIndex && inIndex < getEnemyParam()->iActCount)) AssertApp(__FILE__, __LINE__, "0 <= inIndex && inIndex < m_pEnemyParam->iActCount", 0);)
     return canAttack_(&getEnemyParam()->pActs[inIndex]);
 }
 
@@ -528,7 +528,7 @@ INT CHeartless::getCardNumber_(INT inState) const {
     INT num = 0;
     if (act->iCard[0] < 0) {
 #line 834
-        if (!(PARAM->iCardCount > 0)) AssertApp(__FILE__, __LINE__, "m_pEnemyParam->iCardCount > 0", 0);
+        KH_DEBUG(if (!(PARAM->iCardCount > 0)) AssertApp(__FILE__, __LINE__, "m_pEnemyParam->iCardCount > 0", 0);)
         card = PARAM->pCards;
     } else {
         for (INT i = 0; i < PARAM->iCardCount; i++) {

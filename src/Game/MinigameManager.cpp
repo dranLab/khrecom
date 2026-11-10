@@ -77,24 +77,24 @@ static FLOAT s_fFogEndDisY = s_vStartPos.y - s_vEndPos.y;
 
 #line 1 "../Dlls/Minigame100Acre/Mini100AcreWildDive.h"
 inline void _wdPlaceholder(INT state) {
-    if (!((0 <= state) && (state < 1))) AssertApp(__FILE__, __LINE__, "(0 <= state) && (state < WD_MAIN_STATE_MAX)", 0);
-    if (!((0 <= state) && (state < 2))) AssertApp(__FILE__, __LINE__, "(0 <= state) && (state < WD_PLAYER_STATE_MAX)", 0);
-    if (!((0 <= state) && (state < 3))) AssertApp(__FILE__, __LINE__, "(0 <= state) && (state < WD_POO_STATE_MAX)", 0);
+    KH_DEBUG(if (!((0 <= state) && (state < 1))) AssertApp(__FILE__, __LINE__, "(0 <= state) && (state < WD_MAIN_STATE_MAX)", 0);)
+    KH_DEBUG(if (!((0 <= state) && (state < 2))) AssertApp(__FILE__, __LINE__, "(0 <= state) && (state < WD_PLAYER_STATE_MAX)", 0);)
+    KH_DEBUG(if (!((0 <= state) && (state < 3))) AssertApp(__FILE__, __LINE__, "(0 <= state) && (state < WD_POO_STATE_MAX)", 0);)
 }
 #line 1 "../Dlls/Minigame100Acre/Mini100AcreBalloonGlider.h"
 inline void _blPlaceholder(INT state) {
-    if (!((0 <= state) && (state < 1))) AssertApp(__FILE__, __LINE__, "(0 <= state) && (state < BL_MAIN_STATE_MAX)", 0);
-    if (!((0 <= state) && (state < 2))) AssertApp(__FILE__, __LINE__, "(0 <= state) && (state < BL_PLAYER_STATE_MAX)", 0);
-    if (!((0 <= state) && (state < 3))) AssertApp(__FILE__, __LINE__, "(0 <= state) && (state < BL_POO_STATE_MAX)", 0);
-    if (!((0 <= state) && (state < 4))) AssertApp(__FILE__, __LINE__, "(0 <= state) && (state < BL_OWL_STATE_MAX)", 0);
-    if (!((0 <= state) && (state < 5))) AssertApp(__FILE__, __LINE__, "(0 <= state) && (state < BL_BEEOBJ_STATE_MAX)", 0);
-    if (!((0 <= state) && (state < 6))) AssertApp(__FILE__, __LINE__, "(0 <= state) && (state < BL_BALLOONOBJ_STATE_MAX)", 0);
+    KH_DEBUG(if (!((0 <= state) && (state < 1))) AssertApp(__FILE__, __LINE__, "(0 <= state) && (state < BL_MAIN_STATE_MAX)", 0);)
+    KH_DEBUG(if (!((0 <= state) && (state < 2))) AssertApp(__FILE__, __LINE__, "(0 <= state) && (state < BL_PLAYER_STATE_MAX)", 0);)
+    KH_DEBUG(if (!((0 <= state) && (state < 3))) AssertApp(__FILE__, __LINE__, "(0 <= state) && (state < BL_POO_STATE_MAX)", 0);)
+    KH_DEBUG(if (!((0 <= state) && (state < 4))) AssertApp(__FILE__, __LINE__, "(0 <= state) && (state < BL_OWL_STATE_MAX)", 0);)
+    KH_DEBUG(if (!((0 <= state) && (state < 5))) AssertApp(__FILE__, __LINE__, "(0 <= state) && (state < BL_BEEOBJ_STATE_MAX)", 0);)
+    KH_DEBUG(if (!((0 <= state) && (state < 6))) AssertApp(__FILE__, __LINE__, "(0 <= state) && (state < BL_BALLOONOBJ_STATE_MAX)", 0);)
 }
 #line 1 "../Dlls/Minigame100Acre/Mini100AcreTiggerJump.h"
 inline void _tjPlaceholder(INT state, FLOAT& f) {
-    if (!((0 <= state) && (state < 1))) AssertApp(__FILE__, __LINE__, "(0 <= state) && (state < TJ_MAIN_STATE_MAX)", 0);
-    if (!((0 <= state) && (state < 2))) AssertApp(__FILE__, __LINE__, "(0 <= state) && (state < TJ_PLAYER_STATE_MAX)", 0);
-    if (!((0 <= state) && (state < 3))) AssertApp(__FILE__, __LINE__, "(0 <= state) && (state < TJ_TIGGER_STATE_MAX)", 0);
+    KH_DEBUG(if (!((0 <= state) && (state < 1))) AssertApp(__FILE__, __LINE__, "(0 <= state) && (state < TJ_MAIN_STATE_MAX)", 0);)
+    KH_DEBUG(if (!((0 <= state) && (state < 2))) AssertApp(__FILE__, __LINE__, "(0 <= state) && (state < TJ_PLAYER_STATE_MAX)", 0);)
+    KH_DEBUG(if (!((0 <= state) && (state < 3))) AssertApp(__FILE__, __LINE__, "(0 <= state) && (state < TJ_TIGGER_STATE_MAX)", 0);)
     LIMIT_RANGE<float>(f, 0.f, 1.f);
 }
 
@@ -175,7 +175,7 @@ CMinigameManager::~CMinigameManager() {
 
 void CMinigameManager::changeState(INT inState) {
 #line 111
-    if (!(inState >= 0 && inState < STATE_MAX)) AssertApp(__FILE__, __LINE__, "inState >= 0 && inState < STATE_MAX", 0);
+    KH_DEBUG(if (!(inState >= 0 && inState < STATE_MAX)) AssertApp(__FILE__, __LINE__, "inState >= 0 && inState < STATE_MAX", 0);)
     gotoState(m_State[inState]);
 }
 
@@ -189,7 +189,7 @@ void CMinigameManager::main() {
 
 void CMinigameManager::initialize() {
 #line 133
-    if (!(__null == m_pGame)) AssertApp(__FILE__, __LINE__, "__null == m_pGame", 0);
+    KH_DEBUG(if (!(__null == m_pGame)) AssertApp(__FILE__, __LINE__, "__null == m_pGame", 0);)
     switch (getMinigameType()) {
     case 0:
 #line 138
@@ -471,7 +471,7 @@ void CMinigameManager::enablePauseIdx(INT nIdx, BOOL inSw) {
 
 void CMinigameManager::_enablePause(INT nIdx, BOOL inSw) {
 #line 543
-    if (!(nIdx >= 0 && nIdx < PD_FLAG_IDX_MAX)) AssertApp(__FILE__, __LINE__, "nIdx >= 0 && nIdx < PD_FLAG_IDX_MAX", 0);
+    KH_DEBUG(if (!(nIdx >= 0 && nIdx < PD_FLAG_IDX_MAX)) AssertApp(__FILE__, __LINE__, "nIdx >= 0 && nIdx < PD_FLAG_IDX_MAX", 0);)
     if (inSw) {
         m_uiPauseDisableFlag &= ~(1 << nIdx);
     } else {

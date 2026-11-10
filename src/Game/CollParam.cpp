@@ -29,7 +29,7 @@ ATK_KIND ATK_COLL_PARAM::getAtkKind() const {
         /* [20] = */ ATK_KIND_DARK_PUNISHER
     };
 
-    if (!(0 <= iAtkKind && iAtkKind < (sizeof(g_AtkKind)/sizeof((g_AtkKind)[0])))) AssertApp(__FILE__, __LINE__, "0 <= iAtkKind && iAtkKind < (sizeof(g_AtkKind)/sizeof((g_AtkKind)[0]))", 0);
+    KH_DEBUG(if (!(0 <= iAtkKind && iAtkKind < (sizeof(g_AtkKind)/sizeof((g_AtkKind)[0])))) AssertApp(__FILE__, __LINE__, "0 <= iAtkKind && iAtkKind < (sizeof(g_AtkKind)/sizeof((g_AtkKind)[0]))", 0);)
     return g_AtkKind[iAtkKind];
 }
 

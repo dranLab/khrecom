@@ -112,7 +112,7 @@ static inline BOOL _setupEnemyParam(ENEMY_PARAM* inParam) {
 }
 /* ENEMY_PARAM's floor accessor (EnemyParam.h line 229 in the original; "src/..." is that header's __FILE__ as the compiler sees it, so both strings share its copies) */
 static inline BASIC_ENEMY_PARAM* _getBasicParam(ENEMY_PARAM* inParam, INT inFloor) {
-    if (!(0 <= inFloor && inFloor < 13)) AssertApp("src/Game/Enemy/EnemyParam.h", 0xE5, "0 <= inFloor && inFloor < BASIC_MAX", 0);
+    KH_DEBUG(if (!(0 <= inFloor && inFloor < 13)) AssertApp("src/Game/Enemy/EnemyParam.h", 0xE5, "0 <= inFloor && inFloor < BASIC_MAX", 0);)
     return &inParam->pBasic[inFloor];
 }
 struct PRIZE_DATA {
@@ -498,7 +498,7 @@ void CBattleEnemy::onMsg(INT inMsg, void* inExtraInfo) {
         setBattleEnemyFlag(0, 0x200);
         if (isPlayingCardBattle()) {
             setBattleEnemyFlag(4, 0);
-            if (!(2 <= m_iAttackState && m_iAttackState <= 10)) AssertApp(__FILE__, 0x32E, "BTL_ENEMY_STATE_ATTACK1 <= m_iAttackState && m_iAttackState <= BTL_ENEMY_STATE_ITEM", 0);
+            KH_DEBUG(if (!(2 <= m_iAttackState && m_iAttackState <= 10)) AssertApp(__FILE__, 0x32E, "BTL_ENEMY_STATE_ATTACK1 <= m_iAttackState && m_iAttackState <= BTL_ENEMY_STATE_ITEM", 0);)
             changeBattleEnemyState(m_iAttackState);
         }
         if (!inExtraInfo) return;
@@ -614,7 +614,7 @@ FLOAT CBattleEnemy::getExtraParam(const CHAR* inParamName) {
     return 0.0f;
 }
 FLOAT CBattleEnemy::getAttackPoint(INT inIndex, ATK_KIND inAtkKind, USHORT inUpFlag, ATK_KIND* outAtkKind, INT inFinish) {
-    if (!m_pEnemyParam) AssertApp(__FILE__, 0x414, "m_pEnemyParam", 0);
+    KH_DEBUG(if (!m_pEnemyParam) AssertApp(__FILE__, 0x414, "m_pEnemyParam", 0);)
     ENEMY_ACT* act = NULL;
     for (INT i = 0; i < m_pEnemyParam->iActCount; i++) {
         if (m_pEnemyParam->pActs[i].iActNo == inIndex) {
@@ -665,7 +665,7 @@ FLOAT CBattleEnemy::getAttackPoint(INT inIndex, ATK_KIND inAtkKind, USHORT inUpF
 }
 ATK_ATTR CBattleEnemy::getAttackAttr(INT inIndex) const {
     static ATK_ATTR g_AtkAttrTbl[6] = {(ATK_ATTR)0, (ATK_ATTR)1, (ATK_ATTR)2, (ATK_ATTR)3, (ATK_ATTR)4, (ATK_ATTR)5};
-    if (!m_pEnemyParam) AssertApp(__FILE__, 0x465, "m_pEnemyParam", 0);
+    KH_DEBUG(if (!m_pEnemyParam) AssertApp(__FILE__, 0x465, "m_pEnemyParam", 0);)
     ENEMY_ACT* act = NULL;
     for (INT i = 0; i < m_pEnemyParam->iActCount; i++) {
         if (m_pEnemyParam->pActs[i].iActNo == inIndex) {
@@ -702,7 +702,7 @@ BOOL CBattleEnemy::isPlayingCardBattle() {
     return FALSE;
 }
 BOOL CBattleEnemy::isCurrentState(INT inState) {
-    if (!((UINT)inState < 31)) AssertApp(__FILE__, 0x4AF, "0 <= inState && inState < BTL_ENEMY_STATE_MAX", 0);
+    KH_DEBUG(if (!((UINT)inState < 31)) AssertApp(__FILE__, 0x4AF, "0 <= inState && inState < BTL_ENEMY_STATE_MAX", 0);)
     CState& State = *(CState*)((inState * 0x20 + (INT)this) + 0x450);
     return isState(State);
 }
@@ -712,7 +712,7 @@ BOOL CBattleEnemy::isValidSynchro() {
 BOOL CBattleEnemy::canCardBattle() {
     if (CardBattle::CCardBattle::isPlayingEnemyCard()) return FALSE;
     CBattleEnemyManager* bem = (CBattleEnemyManager*)CTaskMan::getSysTask(0x19);
-    if (!bem) AssertApp(__FILE__, 0x4C8, "bem", 0);
+    KH_DEBUG(if (!bem) AssertApp(__FILE__, 0x4C8, "bem", 0);)
     return bem->canCardBattle(getHandle()) != FALSE;
 }
 BOOL CBattleEnemy::canKill() {
@@ -739,7 +739,7 @@ BOOL CBattleEnemy::startCardBattle() {
 }
 void CBattleEnemy::endCardBattle(CState* inState, TIMEQ inNextAttackWait) {
     CardBattle::CCardBattle* cb = (CardBattle::CCardBattle*)CTaskMan::getSysTask(0x16);
-    if (!cb) AssertApp(__FILE__, 0x56C, "cb", 0);
+    KH_DEBUG(if (!cb) AssertApp(__FILE__, 0x56C, "cb", 0);)
     if (_getEnchantKind(cb, 2) == 0x2F && isStockAct()) {
         changeBattleEnemyState(m_iAttackState);
         m_ullBtlEnemyFlag &= ~0x20000000;
@@ -827,7 +827,7 @@ void CBattleEnemy::getPlayerPosition(FVECTOR& outPos) {
 }
 HANDLE CBattleEnemy::getPlayerHandle() {
     if (isConfuse()) return 0;
-    if (!g_pPlayer) AssertApp(__FILE__, 0x611, "g_pPlayer", 0);
+    KH_DEBUG(if (!g_pPlayer) AssertApp(__FILE__, 0x611, "g_pPlayer", 0);)
     return g_pPlayer->getHandle();
 }
 void CBattleEnemy::makeExpPrize() {
@@ -1060,7 +1060,7 @@ void CBattleEnemy::stateBigDamage() {
                     changeBattleEnemyState(17);
                 } else {
                     CCollBody* hitBody = m_pBodyColl->getHitCollBody();
-                    if (!hitBody) AssertApp(__FILE__, 0x860, "hitBody", 0);
+                    KH_DEBUG(if (!hitBody) AssertApp(__FILE__, 0x860, "hitBody", 0);)
                     if (hitBody->getDamageKind() == ATK_KIND_SHOCK && m_pEnemyParam->getSpecialEffect(1)) {
                         changeBattleEnemyState(18);
                     } else {
@@ -1187,7 +1187,7 @@ void CBattleEnemy::stateDuel() {
     case 1:
         if (getTimer() <= 0) {
             CardBattle::CCardBattle* cb = (CardBattle::CCardBattle*)CTaskMan::getSysTask(0x16);
-            if (!cb) AssertApp(__FILE__, 0x96B, "cb", 0);
+            KH_DEBUG(if (!cb) AssertApp(__FILE__, 0x96B, "cb", 0);)
             if (m_iDuelCardNum > 0 && m_iDuelCardPtr < m_iDuelCardNum) {
                 if (cb->setEnemyDuelCard(getHandle(), m_DuelCardKind, m_iDuelCardArray[m_iDuelCardPtr])) m_iDuelCardPtr++;
             }
@@ -1306,12 +1306,12 @@ void CBattleEnemy::stateStop() {
             }
             break;
         }
-        if (!m_pBodyColl) AssertApp(__FILE__, 0xA2D, "m_pBodyColl", 0);
+        KH_DEBUG(if (!m_pBodyColl) AssertApp(__FILE__, 0xA2D, "m_pBodyColl", 0);)
         if (!m_pBodyColl->isHit()) break;
         if (m_pBodyColl->isGuard()) break;
         {
             CCollBody* hit = m_pBodyColl->getHitCollBody();
-            if (!hit) AssertApp(__FILE__, 0xA36, "hit", 0);
+            KH_DEBUG(if (!hit) AssertApp(__FILE__, 0xA36, "hit", 0);)
             switch (hit->getDamageKind()) {
             case ATK_KIND_DMG_SMALL:
             case ATK_KIND_DMG_BIG:
@@ -1322,7 +1322,7 @@ void CBattleEnemy::stateStop() {
             case ATK_KIND_TORNADO:
             case ATK_KIND_DRAIN: {
                 if (m_sStopDamageCount >= 8) break;
-                if (!m_pEnemyParam) AssertApp(__FILE__, 0xA44, "m_pEnemyParam", 0);
+                KH_DEBUG(if (!m_pEnemyParam) AssertApp(__FILE__, 0xA44, "m_pEnemyParam", 0);)
                 FLOAT attr = _getAttrRate(m_pEnemyParam, hit->getDamageAttr());
                 if (attr >= 1000.0f) attr = 100.0f;
                 STOP_DAMAGE* stopDmg = &m_StopDamage[m_sStopDamageCount];
@@ -1386,7 +1386,7 @@ void CBattleEnemy::stateStop() {
             }
         } else {
             CCollBody* body = m_pBodyColl->getCollBody(stopDmg->sHitIndex);
-            if (!body) AssertApp(__FILE__, 0xABC, "body", 0);
+            KH_DEBUG(if (!body) AssertApp(__FILE__, 0xABC, "body", 0);)
             body->setHp(body->getHp() - stopDmg->iDamage);
             m_pBodyColl->setHitCollBody(body);
             m_pBodyColl->setHitCollBodyIndex(stopDmg->sHitIndex);
@@ -1413,8 +1413,8 @@ void CBattleEnemy::stateStop() {
             break;
         }
         CCollBody* hit = m_pBodyColl->getHitCollBody();
-        if (!hit) AssertApp(__FILE__, 0xAEE, "hit", 0);
-        if (!hit->getCollision()) AssertApp(__FILE__, 0xAEF, "hit->getCollision()", 0);
+        KH_DEBUG(if (!hit) AssertApp(__FILE__, 0xAEE, "hit", 0);)
+        KH_DEBUG(if (!hit->getCollision()) AssertApp(__FILE__, 0xAEF, "hit->getCollision()", 0);)
         FVECTOR rot;
         rot.init();
         ApplyMatrix(stopDmg->vDetectPos, Crd(0).m_World, stopDmg->vDetectPos);
@@ -1510,7 +1510,7 @@ void CBattleEnemy::endStateStop() {
 }
 void CBattleEnemy::beginStateTerror() {
     CCollBody* hitBody = m_pBodyColl->getHitCollBody();
-    if (!hitBody) AssertApp(__FILE__, 0xBA0, "hitBody", 0);
+    KH_DEBUG(if (!hitBody) AssertApp(__FILE__, 0xBA0, "hitBody", 0);)
     setTimer(18000);
     setBadStatusEffect(3, hitBody->getHitEffectWait());
     m_ullBtlEnemyFlag |= 0x40000000000ULL;
@@ -1615,7 +1615,7 @@ void CBattleEnemy::endStateShock() {
     if (!(m_ullBackupFlag & 4)) m_pMove->enableGravity(FALSE);
 }
 void CBattleEnemy::beginStateTornado() {
-    if (!m_pEnemyParam) AssertApp(__FILE__, 0xC5B, "m_pEnemyParam", 0);
+    KH_DEBUG(if (!m_pEnemyParam) AssertApp(__FILE__, 0xC5B, "m_pEnemyParam", 0);)
     changeDamageMotion(m_pEnemyParam->iDamageMotionIndex[6], 0, 0, -1);
     m_pMove->enableGravity(FALSE);
     m_iSysStep = 0;
@@ -1623,9 +1623,9 @@ void CBattleEnemy::beginStateTornado() {
     bodyCollOffBody(-1);
 }
 void CBattleEnemy::stateTornado() {
-    if (!m_pBodyColl) AssertApp(__FILE__, 0xC65, "m_pBodyColl", 0);
+    KH_DEBUG(if (!m_pBodyColl) AssertApp(__FILE__, 0xC65, "m_pBodyColl", 0);)
     CCollBody* hitBody = m_pBodyColl->getHitCollBody();
-    if (!hitBody) AssertApp(__FILE__, 0xC67, "hitBody", 0);
+    KH_DEBUG(if (!hitBody) AssertApp(__FILE__, 0xC67, "hitBody", 0);)
     switch (m_iSysStep) {
     case 0: {
         CEntity* tornado = (CEntity*)CTaskMan::getTask(hitBody->getEnemyHandle());
@@ -1646,7 +1646,7 @@ void CBattleEnemy::stateTornado() {
     }
     case 1:
         if (m_pMove->getCollisionFlag() & 5) {
-            if (!m_pEnemyParam) AssertApp(__FILE__, 0xC8A, "m_pEnemyParam", 0);
+            KH_DEBUG(if (!m_pEnemyParam) AssertApp(__FILE__, 0xC8A, "m_pEnemyParam", 0);)
             computeDamage_(m_fDamage, _getAttrRate(m_pEnemyParam, hitBody->getDamageAttr()));
             if (m_iHp <= 0 && !isReraise_()) {
                 m_pBodyColl->setHitCollBody(NULL);
@@ -1679,7 +1679,7 @@ void CBattleEnemy::beginStateDegenerator() {
     bodyCollOff(-1);
     bodyCollOffBody(-1);
     getLockOnPos(pos);
-    if (!m_pBodyColl->getHitCollBody()) AssertApp(__FILE__, 0xCC3, "hitBody", 0);
+    KH_DEBUG(if (!m_pBodyColl->getHitCollBody()) AssertApp(__FILE__, 0xCC3, "hitBody", 0);)
     m_hDision = setEffect(BattleEnemy::DisionEffectName, 0, &pos, NULL, 0.0f);
     m_iHp = 0;
     m_pMove->enableGravity(FALSE);
@@ -1777,7 +1777,7 @@ void CBattleEnemy::beginStateToss() {
     getRot().y = calcDirection(enemyPos);
     m_pMove->calcOrbitVelocityFromSpeedY((1.0f - m_pMove->getForce()) * 0.175f + 0.25f, dist);
     m_pMove->enableGravity(TRUE);
-    if (!m_pEnemyParam) AssertApp(__FILE__, 0xD87, "m_pEnemyParam", 0);
+    KH_DEBUG(if (!m_pEnemyParam) AssertApp(__FILE__, 0xD87, "m_pEnemyParam", 0);)
     if (checkHitPos() & 1) {
         changeDamageMotion(m_pEnemyParam->iDamageMotionIndex[6], 0, 0, -1);
         getRot().y = calcDirection(enemyPos);
@@ -1834,9 +1834,9 @@ void CBattleEnemy::stateBeat() {
     switch (m_iSysStep) {
     case 0:
         if (m_pMove->getCollisionFlag() & 5) {
-            if (!m_pEnemyParam) AssertApp(__FILE__, 0xDEA, "m_pEnemyParam", 0);
+            KH_DEBUG(if (!m_pEnemyParam) AssertApp(__FILE__, 0xDEA, "m_pEnemyParam", 0);)
             CCollBody* hit = m_pBodyColl->getHitCollBody();
-            if (!hit) AssertApp(__FILE__, 0xDEC, "hit", 0);
+            KH_DEBUG(if (!hit) AssertApp(__FILE__, 0xDEC, "hit", 0);)
             FLOAT damage = hit->getDamage();
             FLOAT value = _getAttrRate(m_pEnemyParam, hit->getDamageAttr());
             computeDamage_(damage, value, hit->getDamageKind());
@@ -1904,7 +1904,7 @@ void CBattleEnemy::beginStateSuspend() {
 }
 void CBattleEnemy::stateSuspend() {
     CTask* cb = CTaskMan::getSysTask(0x16);
-    if (!cb) AssertApp(__FILE__, 0xE6B, "cb", 0);
+    KH_DEBUG(if (!cb) AssertApp(__FILE__, 0xE6B, "cb", 0);)
     if (!CardBattle::CCardBattle::isSuspend()) changeDefaultState();
 }
 void CBattleEnemy::endStateSuspend() {
@@ -1914,9 +1914,9 @@ void CBattleEnemy::endStateSuspend() {
 }
 void CBattleEnemy::beginStateVolley() {
     CCollBody* hitBody = m_pBodyColl->getHitCollBody();
-    if (!hitBody) AssertApp(__FILE__, 0xE83, "hitBody", 0);
+    KH_DEBUG(if (!hitBody) AssertApp(__FILE__, 0xE83, "hitBody", 0);)
     const FVECTOR& enemyPos = hitBody->getEnemyPos();
-    if (!m_pEnemyParam) AssertApp(__FILE__, 0xE86, "m_pEnemyParam", 0);
+    KH_DEBUG(if (!m_pEnemyParam) AssertApp(__FILE__, 0xE86, "m_pEnemyParam", 0);)
     if (checkHitPos() & 1) {
         changeDamageMotion(m_pEnemyParam->iDamageMotionIndex[6], 0, 0, -1);
         getRot().y = calcDirection(enemyPos);
@@ -2025,7 +2025,7 @@ CBattleEnemyManager* CBattleEnemy::getBattleEnemyManager() const {
     return NULL;
 }
 void CBattleEnemy::makePrize(const FVECTOR* inPos) {
-    if (!inPos) AssertApp(__FILE__, 0xF4B, "inPos", 0);
+    KH_DEBUG(if (!inPos) AssertApp(__FILE__, 0xF4B, "inPos", 0);)
     if (isNoMakePrize()) return;
     makeExpPrize(inPos);
     makePremiumPrize(inPos);
@@ -2057,19 +2057,19 @@ void CBattleEnemy::makeExpPrize(const FVECTOR* inPos) {
 }
 void CBattleEnemy::makePremiumPrize(const FVECTOR* inPos) {
     CBattleEnemyManager* bem = (CBattleEnemyManager*)CTaskMan::getSysTask(0x19);
-    if (!bem) AssertApp(__FILE__, 0xF9A, "bem", 0);
+    KH_DEBUG(if (!bem) AssertApp(__FILE__, 0xF9A, "bem", 0);)
     bem->createPremiumPrize(*inPos, (UINT)getID() % 10000);
 }
 void CBattleEnemy::makeRoulettePrize(const FVECTOR* inPos) {
     CBattleEnemyManager* bem = (CBattleEnemyManager*)CTaskMan::getSysTask(0x19);
-    if (!bem) AssertApp(__FILE__, 0xFA4, "bem", 0);
+    KH_DEBUG(if (!bem) AssertApp(__FILE__, 0xFA4, "bem", 0);)
     bem->createRoulettePrize(*inPos);
 }
 void CBattleEnemy::makeCard(const FVECTOR* inPos) {
     if (!m_pBasicParam) return;
     if (isNoCreateCard()) return;
     CBattleEnemyManager* bem = (CBattleEnemyManager*)CTaskMan::getSysTask(0x19);
-    if (!bem) AssertApp(__FILE__, 0xFB4, "bem", 0);
+    KH_DEBUG(if (!bem) AssertApp(__FILE__, 0xFB4, "bem", 0);)
     if (!bem->canCreateEnemyCard()) return;
     if (bem->isRoulettePrizeGet()) return;
     if (bem->isAppearRoulettePrize()) return;
@@ -2107,7 +2107,7 @@ void CBattleEnemy::makeCard(const FVECTOR* inPos) {
                 param.iNumber = RND::genrand_int31() % 10;
             } else {
                 CGimmickManager* gm = (CGimmickManager*)CTaskMan::getSysTask(0x11);
-                if (!gm) AssertApp(__FILE__, 0x103B, "gm", 0);
+                KH_DEBUG(if (!gm) AssertApp(__FILE__, 0x103B, "gm", 0);)
                 DropPrize drop = gm->DecideMapCardPrize(TRUE);
                 param.PrizeKind = drop.Kind;
                 param.iNumber = drop.No;
@@ -2254,7 +2254,7 @@ void CBattleEnemy::commonEndAttack() {
 void CBattleEnemy::notifyDead() {
     if (isNotifyDead()) return;
     CBattleEnemyManager* bem = (CBattleEnemyManager*)CTaskMan::getSysTask(0x19);
-    if (!bem) AssertApp(__FILE__, 0x116A, "bem", 0);
+    KH_DEBUG(if (!bem) AssertApp(__FILE__, 0x116A, "bem", 0);)
     bem->notifyDead(getHandle());
     m_ullBtlEnemyFlag |= 0x40000000;
 }
@@ -2327,7 +2327,7 @@ BOOL CBattleEnemy::initEnemyParam(INT inGroupID, INT inRsrcID, INT inIndex) {
         } else {
             floor += 12;
         }
-        if (!(0 <= floor && floor < 13)) AssertApp(__FILE__, 0x1203, "0 <= floor && floor < ENEMY_PARAM::BASIC_MAX", 0);
+        KH_DEBUG(if (!(0 <= floor && floor < 13)) AssertApp(__FILE__, 0x1203, "0 <= floor && floor < ENEMY_PARAM::BASIC_MAX", 0);)
         m_pBasicParam = _getBasicParam(param, floor);
         m_iHp = BattleEnemy::GameModeHp(m_pBasicParam->iHP);
         m_iExp = m_pBasicParam->iExp;
@@ -2406,7 +2406,7 @@ BOOL CBattleEnemy::setupDuelCard() {
         cardNum = g_iDuelCardNum[(UINT)RND::genrand_int31() % 3];
     }
     for (INT i = 0; i < 10; i++) m_iDuelCardArray[i] = 0;
-    if (!g_pPlayer) AssertApp(__FILE__, 0x128E, "g_pPlayer", 0);
+    KH_DEBUG(if (!g_pPlayer) AssertApp(__FILE__, 0x128E, "g_pPlayer", 0);)
     CardBattle::CCardRevolver* revolver = g_pPlayer->getRevolver();
     if (!revolver) return FALSE;
     INT number = 9;
@@ -2424,13 +2424,13 @@ BOOL CBattleEnemy::setupDuelCard() {
     m_iDuelCardNum = cardNum;
     m_iDuelCardPtr = 0;
     CardBattle::CCardBattle* cb = (CardBattle::CCardBattle*)CTaskMan::getSysTask(0x16);
-    if (!cb) AssertApp(__FILE__, 0x12AC, "cb", 0);
+    KH_DEBUG(if (!cb) AssertApp(__FILE__, 0x12AC, "cb", 0);)
     cb->setDuelBreakCount(0, cardNum);
     return result;
 }
 BOOL CBattleEnemy::destroyCard() {
     CardBattle::CCardBattle* cb = (CardBattle::CCardBattle*)CTaskMan::getSysTask(0x16);
-    if (!cb) AssertApp(__FILE__, 0x12F9, "cb", 0);
+    KH_DEBUG(if (!cb) AssertApp(__FILE__, 0x12F9, "cb", 0);)
     if (CardBattle::CCardBattle::getPlayingHandle(2) == getHandle()) {
         cb->destroyEnemyCard(getHandle());
         return TRUE;
@@ -2844,7 +2844,7 @@ void CBattleEnemy::initRoom_() {
     }
 }
 void CBattleEnemy::changeBattleEnemyState(INT inState) {
-    if (!((UINT)inState < 31)) AssertApp(__FILE__, 0x162B, "0 <= inState && inState < BTL_ENEMY_STATE_MAX", 0);
+    KH_DEBUG(if (!((UINT)inState < 31)) AssertApp(__FILE__, 0x162B, "0 <= inState && inState < BTL_ENEMY_STATE_MAX", 0);)
     CState& NewState = *(CState*)((inState * 0x20 + (INT)this) + 0x450);
     setBattleEnemyFlag(0, 0x10);
     m_pNewState = &NewState;
@@ -2854,7 +2854,7 @@ BOOL CBattleEnemy::hitTest_() {
     if (!m_pBodyColl) return FALSE;
     m_pBodyColl->detect();
     if (m_pBodyColl->isGuard() || m_pBodyColl->isHitMuteki()) {
-        if (!m_pBodyColl->getHitCollBody()) AssertApp(__FILE__, 0x164A, "m_pBodyColl->getHitCollBody()", 0);
+        KH_DEBUG(if (!m_pBodyColl->getHitCollBody()) AssertApp(__FILE__, 0x164A, "m_pBodyColl->getHitCollBody()", 0);)
         setGuardEffect_(m_pBodyColl->getHitCollBody()->getDetectPos());
         Gauge::CCommonGauge::setDispSeq(getHandle(), 3);
         onGuard();
@@ -2862,7 +2862,7 @@ BOOL CBattleEnemy::hitTest_() {
     }
     if (!m_pBodyColl->isHit()) return FALSE;
     CCollBody* hit = m_pBodyColl->getHitCollBody();
-    if (!hit) AssertApp(__FILE__, 0x165D, "hit", 0);
+    KH_DEBUG(if (!hit) AssertApp(__FILE__, 0x165D, "hit", 0);)
     FLOAT attr;
     if (m_pEnemyParam) {
         attr = _getAttrRate(m_pEnemyParam, hit->getDamageAttr());
@@ -2934,7 +2934,7 @@ INT CBattleEnemy::computeDamage_(FLOAT inDamage, FLOAT inAttr, ATK_KIND inAtkKin
     FLOAT damage = inDamage;
     BOOL special = TRUE;
     CCollBody* hitBody = m_pBodyColl->getHitCollBody();
-    if (!hitBody) AssertApp(__FILE__, 0x1703, "hitBody", 0);
+    KH_DEBUG(if (!hitBody) AssertApp(__FILE__, 0x1703, "hitBody", 0);)
     switch (inAtkKind) {
     case ATK_KIND_STOP:
         if (m_pEnemyParam->getSpecialEffect(1)) {
@@ -2971,7 +2971,7 @@ INT CBattleEnemy::computeDamage_(FLOAT inDamage, FLOAT inAttr, ATK_KIND inAtkKin
         break;
     case ATK_KIND_SYNCHRO: {
         CBattleEnemyManager* bem = (CBattleEnemyManager*)CTaskMan::getSysTask(0x19);
-        if (!bem) AssertApp(__FILE__, 0x176E, "bem", 0);
+        KH_DEBUG(if (!bem) AssertApp(__FILE__, 0x176E, "bem", 0);)
         INT hp = m_iHp;
         FLOAT wait = 0.0f;
         for (SLContainerT<CTask>* container = bem->getFirstBattleEnemy(); container; container = container->getNext()) {
@@ -3032,7 +3032,7 @@ INT CBattleEnemy::computeDamage_(FLOAT inDamage, FLOAT inAttr) {
     if (!isNoHpSub() && !isMatchless()) {
         if (isHitPoints()) {
             CCollBody* hitBody = m_pBodyColl->getHitCollBody();
-            if (!hitBody) AssertApp(__FILE__, 0x1846, "hitBody", 0);
+            KH_DEBUG(if (!hitBody) AssertApp(__FILE__, 0x1846, "hitBody", 0);)
             INT bodyHp = hitBody->getHp();
             if (!(DebugWork::g_dw.enemy.uiFlag & 1)) {
                 if (!isLastLeave_(bodyHp - result)) {
@@ -3043,7 +3043,7 @@ INT CBattleEnemy::computeDamage_(FLOAT inDamage, FLOAT inAttr) {
             }
             if (result >= 2) {
                 CardBattle::CCardBattle* cb = (CardBattle::CCardBattle*)CTaskMan::getSysTask(0x16);
-                if (!cb) AssertApp(__FILE__, 0x1864, "cb", 0);
+                KH_DEBUG(if (!cb) AssertApp(__FILE__, 0x1864, "cb", 0);)
                 CardBattle::CCardBattle::decEnchantTime(2, 0x27, 0);
                 TRACE_USER((USER)5, "======== Enemy damage infomation ========\n");
                 TRACE_USER((USER)5, "ID             = %d\n", getID());
@@ -3069,10 +3069,10 @@ INT CBattleEnemy::computeDamage_(FLOAT inDamage, FLOAT inAttr) {
             }
             if (result >= 2) {
                 CardBattle::CCardBattle* cb = (CardBattle::CCardBattle*)CTaskMan::getSysTask(0x16);
-                if (!cb) AssertApp(__FILE__, 0x18A3, "cb", 0);
+                KH_DEBUG(if (!cb) AssertApp(__FILE__, 0x18A3, "cb", 0);)
                 CardBattle::CCardBattle::decEnchantTime(2, 0x27, 0);
                 CCollBody* hitBody = m_pBodyColl->getHitCollBody();
-                if (!hitBody) AssertApp(__FILE__, 0x18A8, "hitBody", 0);
+                KH_DEBUG(if (!hitBody) AssertApp(__FILE__, 0x18A8, "hitBody", 0);)
                 TRACE_USER((USER)5, "======== Enemy damage infomation ========\n");
                 TRACE_USER((USER)5, "ID             = %d\n", getID());
                 TRACE_USER((USER)5, "\x83_\x83\x81\x81[\x83W\x97\xca     = %d\n", result);
@@ -3085,7 +3085,7 @@ INT CBattleEnemy::computeDamage_(FLOAT inDamage, FLOAT inAttr) {
         }
     }
     CCollBody* hitBody = m_pBodyColl->getHitCollBody();
-    if (!hitBody) AssertApp(__FILE__, 0x18BD, "hitBody", 0);
+    KH_DEBUG(if (!hitBody) AssertApp(__FILE__, 0x18BD, "hitBody", 0);)
     setDamageNumber(*hitBody->getDetectPos(), result);
     return result;
 }
@@ -3345,7 +3345,7 @@ INT CBattleEnemy::selectDamageMotion_() {
 void CBattleEnemy::enableBind_(BOOL inSw) {
     if (inSw) {
         CCollBody* hitBody = m_pBodyColl->getHitCollBody();
-        if (!hitBody) AssertApp(__FILE__, 0x1B8A, "hitBody", 0);
+        KH_DEBUG(if (!hitBody) AssertApp(__FILE__, 0x1B8A, "hitBody", 0);)
         setEntityFlag(0x8000, 0);
         m_ullBtlEnemyFlag |= 0x20000;
         setBadStatusEffect(0, hitBody->getHitEffectWait());
@@ -3455,11 +3455,11 @@ void CBattleEnemy::createFriendCard_(INT inRate) {
 void CBattleEnemy::setHitEffect_() {
     if (isNoSetHitEffect()) return;
     CCollBody* hit = m_pBodyColl->getHitCollBody();
-    if (!hit) AssertApp(__FILE__, 0x1C50, "hit", 0);
+    KH_DEBUG(if (!hit) AssertApp(__FILE__, 0x1C50, "hit", 0);)
     switch (hit->getDamageKind()) {
     case ATK_KIND_QUAKE: {
         CCollMap* coll = m_pMove->getMapCollision();
-        if (!coll) AssertApp(__FILE__, 0x1C57, "coll", 0);
+        KH_DEBUG(if (!coll) AssertApp(__FILE__, 0x1C57, "coll", 0);)
         FVECTOR pos = getPos();
         coll->setStartPos(pos);
         pos.y -= 1.0f;
@@ -3558,7 +3558,7 @@ void CBattleEnemy::updateDamageTimer_() {
     }
 }
 BOOL CBattleEnemy::isNowPlayDamageMotion_() {
-    if (!m_pAnim) AssertApp(__FILE__, 0x1D28, "m_pAnim", 0);
+    KH_DEBUG(if (!m_pAnim) AssertApp(__FILE__, 0x1D28, "m_pAnim", 0);)
     return m_pEnemyParam->isDamageMotion(m_pAnim->getAnimID());
 }
 BOOL CBattleEnemy::addEnemyKillCount_() {

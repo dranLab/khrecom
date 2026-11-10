@@ -365,7 +365,7 @@ void CVramMan::releaseClut(UINT nPos, INT nType) {
 static _MallocUnit* _createUnit(UINT nStartPos, UINT nSize, _MallocUnit* pPrev, _MallocUnit* pNext) {
     _MallocUnit* pUnit;
     pUnit = new KH_AT("(361)") _MallocUnit;
-    if (!pUnit) AssertApp(__FILE__, __LINE__, "pUnit", 0);
+    KH_DEBUG(if (!pUnit) AssertApp(__FILE__, __LINE__, "pUnit", 0);)
     pUnit->_nStartPos = nStartPos;
     pUnit->_nEndPos = nStartPos + nSize;
     pUnit->_nSize = nSize;
@@ -429,7 +429,7 @@ static INT _allocTex(UINT nSize, INT nType) {
         break;
     }
 #line 466
-    if (!ppAddr) AssertApp(__FILE__, __LINE__, "ppAddr", 0);
+    KH_DEBUG(if (!ppAddr) AssertApp(__FILE__, __LINE__, "ppAddr", 0);)
     return _allocSub(*ppAddr, nStartPos, nEndPos, nSize, "TEX");
 }
 
@@ -456,7 +456,7 @@ static INT _allocClut(UINT nSize, INT nType) {
         break;
     }
 #line 503
-    if (!ppAddr) AssertApp(__FILE__, __LINE__, "ppAddr", 0);
+    KH_DEBUG(if (!ppAddr) AssertApp(__FILE__, __LINE__, "ppAddr", 0);)
     return _allocSub(*ppAddr, nStartPos, nEndPos, nSize, "CLUT");
 }
 

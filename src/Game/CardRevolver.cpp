@@ -133,7 +133,7 @@ struct CB_ENCHANT_VIEW {
 };
 /* CCardBattle::getEnchantKind(INT inUser), an inline in Game/CardBattle.h */
 static inline INT _getEnchantKind(CCardBattle* p, INT inUser) {
-    if (!inUser) AssertApp("c:/KHCOM/MainApp/Game/CardBattle.h", 641, "inUser", 0);
+    KH_DEBUG(if (!inUser) AssertApp("c:/KHCOM/MainApp/Game/CardBattle.h", 641, "inUser", 0);)
     return ((CB_ENCHANT_VIEW*)p)->m_cardEnchant[inUser - 1].m_nKind < 0x44 ? 0 : ((CB_ENCHANT_VIEW*)p)->m_cardEnchant[inUser - 1].m_nKind - 0x43;
 }
 static inline BOOL _isEqual(UINT a, UINT b) { return a == b; }
@@ -3045,7 +3045,7 @@ void CEnchantGauge::_initialize() {
     INT num;
     m_uiState = 1;
     m_pSeqCtrls = new ("c:/KHCOM/MainApp/Game/CardRevolver.cpp(5825)") D2::C2DSeqCtrl[3];
-    if (!m_pSeqCtrls) AssertApp("c:/KHCOM/MainApp/Game/CardRevolver.cpp", 5826, "m_pSeqCtrls", "CEnchantGauge:: m_pSeqCtrls=New\x8e\xb8\x94s");
+    KH_DEBUG(if (!m_pSeqCtrls) AssertApp("c:/KHCOM/MainApp/Game/CardRevolver.cpp", 5826, "m_pSeqCtrls", "CEnchantGauge:: m_pSeqCtrls=New\x8e\xb8\x94s");)
     m_pSeqCtrls[0].setLayer(6);
     m_pSeqCtrls[0].addSeq(g_szSeqCockpit, 0x36);
     layout = (m_uiUser == 1) ? 6 : 5;

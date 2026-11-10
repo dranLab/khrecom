@@ -501,7 +501,7 @@ void CPlayerManager::procPlayerDead() {
         pPlayer->getPlayerCamera()->setFlag(0x20, 0);
         m_pPathCamera = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(892)")
             CPathCamera(pPlayer);
-        if (!m_pPathCamera) AssertApp("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp", 893, "m_pPathCamera", 0);
+        KH_DEBUG(if (!m_pPathCamera) AssertApp("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp", 893, "m_pPathCamera", 0);)
         m_pPathCamera->setLocal(TRUE);
         m_pPathCamera->init(_ref(g_szCamPDead000), TRUE, FALSE, 0xC0);
         m_pPathCamera->initBGCheck(FALSE);
@@ -1246,7 +1246,7 @@ CPlayer* createPlayer(UINT inID, CTask* inParent, INT inEx) {
                 CPlayer(parent, g_uiPlayerID, 0);
             break;
         }
-        if (!pPlayer) AssertApp("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp", 2315, "pPlayer", 0);
+        KH_DEBUG(if (!pPlayer) AssertApp("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp", 2315, "pPlayer", 0);)
         pPLM->notifyPlayer(pPlayer, inEx);
     } else {
         TRACE("\x81\xa6\x83\x8a\x83\\\x81[\x83X\x82\xaa\x96\xb3\x82\xa2\x82\xcc\x82\xc5\x90\xb6\x90\xac\x8e\xb8\x94s\x81I %d,%d\n",

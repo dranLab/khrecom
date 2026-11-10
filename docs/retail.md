@@ -182,3 +182,17 @@ heuristics; or retail has functions we don't), 58 with differing functions, ~20 
 7. (decision) `verify` blames, per output section, the compiled object placed last before the first difference,
    data sections first; it switches those back and repeats. It may throw out an innocent neighbour; `scan` +
    `switch` restore a unit once fixed.
+
+Second batch (2026-11-11): one-line asserts `if (...) AssertApp(...);` wrapped in `KH_DEBUG(...)` (136 in headers,
+355 in sources; +83 functions), file-local statics and `_GLOBAL_$I$` names paired correctly in `scan`, one
+anonymous-namespace suffix per file in the retail symbol file. 328 eligible, **318 build from source** after `verify`
+(MonstroEventBattle, PathCamera, 2DSeqCtrl, FriendAriel, BaseGimmick, GimmickGuillotine, Pause, SummonGenie,
+MonstroGauge, MoogleShop switched back: to look at).
+
+8. (decision) One-line assert statements are wrapped `KH_DEBUG(...)` everywhere (supersedes decision 2's "only where
+   needed": it is closer to the original's macro and costs nothing in the beta).
+9. (decision) `tools/commons.py --allow-missing` keeps splat's extent of a COMMON piece beyond its declared size as
+   padding (retail has unnamed COMMON data after its last named one).
+10. (decision) `verify` blames from the linker map: the first input section, by address, not at its split start
+    (also when the link's own checks fail), and the compiled object placed last before it.
+

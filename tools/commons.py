@@ -15,7 +15,8 @@ the matching build's SHA-1 and _end assert check the link as well).
 
 --allow-missing (a version whose units aren't all compiled yet, e.g. the retail build from assembly): a symbol
 that no object declares COMMON keeps splat's size (up to the next symbol) and the alignment of its original
-address (at most 128).
+address (at most 128), and every symbol keeps the rest of splat's extent as padding after it (unnamed COMMON
+symbols of this version).
 
 Usage (from build.ninja): tools/commons.py --pieces <pieces.txt> --objects <objects.txt> --out-dir <dir>
   pieces.txt: `<object> <symbol> <original address> <splat's size>` in the original order; objects.txt: the other
@@ -73,8 +74,11 @@ def main() -> None:
             errors.append(f"{name}: placed at {addr:#x} (size {size:#x}, alignment {align} from "
                           f"{', '.join(Path(o).name for o in owners)}), the original has it at {original:#x}")
             addr = original  # report each difference once
-        plan.append((obj, name, size, align))
-        addr += size
+        # --allow-missing: what splat's extent has beyond the declared size (unnamed COMMON symbols this version
+        # doesn't name, e.g. the 0x80 after retail's last one) stays as padding after the symbol
+        pad = max(0, int(splat_size, 16) - size) if args.allow_missing else 0
+        plan.append((obj, name, size, align, pad))
+        addr += size + pad
     if errors:
         for e in errors:
             print(f"error: {e}", file=sys.stderr)
@@ -82,11 +86,12 @@ def main() -> None:
 
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
-    for obj, name, size, align in plan:
+    for obj, name, size, align, pad in plan:
         src = Path(obj).with_suffix(".s")
         src.write_text(f"# {name}: COMMON, size {size:#x}, alignment {align} (from the objects) - tools/commons.py\n"
                        f'.section .bss, "wa"\n.globl "{name}"\n.type "{name}", @object\n"{name}":\n'
-                       f'.space {size:#x}\n.size "{name}", {size:#x}\n', encoding="utf-8")
+                       f'.space {size:#x}\n.size "{name}", {size:#x}\n' + (f".space {pad:#x}\n" if pad else ""),
+                       encoding="utf-8")
         subprocess.run([f"{CROSS}as", *AS_FLAGS, "-o", obj, str(src)], check=True)
         # exactly the symbol's alignment (gas would give every section 16)
         subprocess.run([f"{CROSS}objcopy", "--set-section-alignment", f".bss={align}",

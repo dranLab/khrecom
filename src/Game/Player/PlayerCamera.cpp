@@ -199,10 +199,10 @@ void CPlayerCamera::getBattleCamData(BCAM_PARAM& outParam) {
 CPlayerCamera::CPlayerCamera(CTask* pParent) : CCamera(pParent, -1), m_uiFlag(0) {
     m_pInstance = this;
     m_pParam = (PCAM_PARAM*)_getRsrcData(g_szBinPCamData);
-    if (!(m_pParam)) AssertApp(__FILE__, __LINE__, "m_pParam", 0);
+    KH_DEBUG(if (!(m_pParam)) AssertApp(__FILE__, __LINE__, "m_pParam", 0);)
 
     m_pPlayer = (CPlayer*)pParent;
-    if (!(m_pPlayer)) AssertApp(__FILE__, __LINE__, "m_pPlayer", 0);
+    KH_DEBUG(if (!(m_pPlayer)) AssertApp(__FILE__, __LINE__, "m_pPlayer", 0);)
 
 #line 241
     m_hNowPlayer = 0;
@@ -273,7 +273,7 @@ CPlayerCamera::~CPlayerCamera() {
 
 #line 347
 void CPlayerCamera::changeState(INT inState) {
-    if (!(0 <= inState && inState < STATE_MAX)) AssertApp(__FILE__, __LINE__, "0 <= inState && inState < STATE_MAX", 0);
+    KH_DEBUG(if (!(0 <= inState && inState < STATE_MAX)) AssertApp(__FILE__, __LINE__, "0 <= inState && inState < STATE_MAX", 0);)
     gotoState(m_State[inState]);
 }
 
@@ -333,7 +333,7 @@ void CPlayerCamera::initCamera(INT inMode, INT inReset, FVECTOR* inDir) {
     m_pData = g_pCamData[inMode];
 
 #line 460
-    if (!(m_pData)) AssertApp(__FILE__, __LINE__, "m_pData", 0);
+    KH_DEBUG(if (!(m_pData)) AssertApp(__FILE__, __LINE__, "m_pData", 0);)
 
     setGakaku(m_pData->fViewAngle);
     m_vOffset.init();
@@ -454,7 +454,7 @@ void CPlayerCamera::initCamera(INT inMode, INT inReset, FVECTOR* inDir) {
         m_pLines = NULL;
 #line 608
         m_pLines = new KH_AT("(608)") C3DLines;
-        if (!(m_pLines)) AssertApp(__FILE__, __LINE__, "m_pLines", 0);
+        KH_DEBUG(if (!(m_pLines)) AssertApp(__FILE__, __LINE__, "m_pLines", 0);)
         m_pLines->m_pCrd = &Crd(0);
         InverseMatrix(m, Crd(0).getWorldMatrix());
         ApplyMatrix33(ofs, m, m_vEye);
@@ -857,7 +857,7 @@ void CPlayerCamera::procFieldParallel() {
 void CPlayerCamera::changeModeBattle(INT inMode) {
     m_iMode = inMode;
     m_pData = g_pCamData[inMode];
-    if (!(m_pData)) AssertApp(__FILE__, __LINE__, "m_pData", 0);
+    KH_DEBUG(if (!(m_pData)) AssertApp(__FILE__, __LINE__, "m_pData", 0);)
 
     setGakaku(m_pData->fViewAngle);
     m_vOffset.init();

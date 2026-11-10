@@ -40,7 +40,7 @@
 CPathDataCamera::CPathDataCamera(CTask* p, const CHAR* pszInName, INT iKind, const CTask* pTarget, INT iNum,
                                  const CTask* pParent) : CTask(p, 0x4000) {
     m_pPathData = new KH_AT("(32)") CPathData(pszInName);
-    if (!m_pPathData) AssertApp(__FILE__, __LINE__, "m_pPathData", 0);
+    KH_DEBUG(if (!m_pPathData) AssertApp(__FILE__, __LINE__, "m_pPathData", 0);)
     m_iStatus = 1;
     _init(iKind, (CTask*)pTarget, iNum, (CTask*)pParent);
 }
@@ -49,7 +49,7 @@ CPathDataCamera::CPathDataCamera(CTask* p, const CHAR* pszInName, INT iKind, con
 CPathDataCamera::CPathDataCamera(CTask* p, const PATH_DATA* pPathData, INT iKind, const CTask* pTarget, INT iNum,
                                  const CTask* pParent) : CTask(p, 0x4000) {
     m_pPathData = new KH_AT("(43)") CPathData(pPathData);
-    if (!m_pPathData) AssertApp(__FILE__, __LINE__, "m_pPathData", 0);
+    KH_DEBUG(if (!m_pPathData) AssertApp(__FILE__, __LINE__, "m_pPathData", 0);)
     m_iStatus = 1;
     _init(iKind, (CTask*)pTarget, iNum, (CTask*)pParent);
 }
@@ -93,12 +93,12 @@ void CPathDataCamera::_init(INT iKind, CTask* pTarget, INT iNum, CTask* pParent)
     case 2:
 #line 109
         m_pHPC = new KH_AT("(109)") CHermitePathCamera(pObj, m_pPathData->getPathVectorData(m_iNum), m_pTarget, NULL, 1, pParent);
-        if (!m_pHPC) AssertApp(__FILE__, __LINE__, "m_pHPC", 0);
+        KH_DEBUG(if (!m_pHPC) AssertApp(__FILE__, __LINE__, "m_pHPC", 0);)
         break;
     case 1:
 #line 115
         m_pHPC = new KH_AT("(115)") CHermitePathCamera(pObj, m_pPathData->getPathVectorData(m_iNum), m_pTarget, NULL, 0, pParent);
-        if (!m_pHPC) AssertApp(__FILE__, __LINE__, "m_pHPC", 0);
+        KH_DEBUG(if (!m_pHPC) AssertApp(__FILE__, __LINE__, "m_pHPC", 0);)
         break;
     case 0:
     case 3:
@@ -111,7 +111,7 @@ void CPathDataCamera::_init(INT iKind, CTask* pTarget, INT iNum, CTask* pParent)
         }
         if (iIdx < 0) {
 #line 135
-            if (!(!("Child(Camera)Path Nothing!"))) AssertApp(__FILE__, __LINE__, "! (\"Child(Camera)Path Nothing!\")", 0);
+            KH_DEBUG(if (!(!("Child(Camera)Path Nothing!"))) AssertApp(__FILE__, __LINE__, "! (\"Child(Camera)Path Nothing!\")", 0);)
         }
         m_iCNum = iIdx;
         m_pTarget = this;
@@ -121,7 +121,7 @@ void CPathDataCamera::_init(INT iKind, CTask* pTarget, INT iNum, CTask* pParent)
         if (m_pPathData->getPathVectorNum(m_iNum) >= 2) {
 #line 149
             m_pHPM = new KH_AT("(149)") CHermitePath;
-            if (!m_pHPM) AssertApp(__FILE__, __LINE__, "m_pHPM", 0);
+            KH_DEBUG(if (!m_pHPM) AssertApp(__FILE__, __LINE__, "m_pHPM", 0);)
             m_pHPM->makePathFromPathVector(m_pPathData->getPathVectorData(m_iNum));
             iType = 1;
             if (m_iKind) iType = (m_iKind == 4) ? 2 : 0;
@@ -137,12 +137,12 @@ void CPathDataCamera::_init(INT iKind, CTask* pTarget, INT iNum, CTask* pParent)
         Crd(0).fix(0);
 #line 192
         m_pHPC = new KH_AT("(192)") CHermitePathCamera(pObj, m_pPathData->getPathVectorData(iIdx), m_pTarget, m_pHPM, iType, pParent);
-        if (!m_pHPC) AssertApp(__FILE__, __LINE__, "m_pHPC", 0);
+        KH_DEBUG(if (!m_pHPC) AssertApp(__FILE__, __LINE__, "m_pHPC", 0);)
         break;
     }
     default:
 #line 198
-        if (!(!("Kind Unknown!"))) AssertApp(__FILE__, __LINE__, "! (\"Kind Unknown!\")", 0);
+        KH_DEBUG(if (!(!("Kind Unknown!"))) AssertApp(__FILE__, __LINE__, "! (\"Kind Unknown!\")", 0);)
         break;
     }
     if (m_pHPC) m_hHPC = m_pHPC->getHandle();
@@ -212,7 +212,7 @@ void CPathDataCamera::entryDebugArrow() {
         FVECTOR vRot;
 #line 314
         m_DDPathCamArrow = new KH_AT("(314)") CDbgArrow;
-        if (!m_DDPathCamArrow) AssertApp(__FILE__, __LINE__, "m_DDPathCamArrow", 0);
+        KH_DEBUG(if (!m_DDPathCamArrow) AssertApp(__FILE__, __LINE__, "m_DDPathCamArrow", 0);)
         m_DDPathCamArrow->getCoord().setParent(&Crd(0));
         vRot.init0();
         vRot.w = 5.0f;

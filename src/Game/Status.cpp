@@ -65,10 +65,10 @@ void CStatus::initStatus(USHORT inNo, WORLD_ID inDebugWorldID, SHORT inCurrentFl
     INT idxCard;
     CRsrcData* pData = CRsrcDB::getRsrc(1, "CardInit", NAME_CASE_SENSITIVE);
     CARD_INIT_HEADER* pCardInitRsrc = pData ? (CARD_INIT_HEADER*)CRsrcDB::getRsrcData(*pData) : NULL;
-    if (!pCardInitRsrc) AssertApp(__FILE__, __LINE__, "pCardInitRsrc", 0);
+    KH_DEBUG(if (!pCardInitRsrc) AssertApp(__FILE__, __LINE__, "pCardInitRsrc", 0);)
     CARD_INIT_HEADER* pCIHeader = pCardInitRsrc;
 
-    if (!(*(UINT*)&pCIHeader->sig == 0x00494340)) AssertApp(__FILE__, __LINE__, "*(UINT*)&pCIHeader->sig == 0x00494340", 0);
+    KH_DEBUG(if (!(*(UINT*)&pCIHeader->sig == 0x00494340)) AssertApp(__FILE__, __LINE__, "*(UINT*)&pCIHeader->sig == 0x00494340", 0);)
     pIdxTbl = (USHORT*)((BYTE*)pCIHeader + pCIHeader->idxOfs);
     if (inNo == 0) {
         if (inCurrentFloorNumber == 0) {

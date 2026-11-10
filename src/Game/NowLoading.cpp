@@ -141,7 +141,7 @@ void CNowLoading::setupSprite() {
     if (!m_pSprite) {
 #line 236
         m_pSprite = new KH_AT("(236)") CSprt;
-        if (!m_pSprite) AssertApp(__FILE__, __LINE__, "m_pSprite", 0);
+        KH_DEBUG(if (!m_pSprite) AssertApp(__FILE__, __LINE__, "m_pSprite", 0);)
     }
     m_nX = 208;
     m_nY = (*(INT*)&SCREEN_HEIGHT >> 1) - 48; /* through a pointer: load stays after the m_nX store */

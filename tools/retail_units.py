@@ -53,6 +53,11 @@ class Version:
         self.out = ROOT / "build" / name / "retail_units"
         vmap = ROOT / "build" / Path(self.build_cfg["elf"]).name / "version_map" / "functions.tsv"
         self.pairs = {r["name"]: r for r in csv.DictReader(vmap.open(encoding="utf-8"), delimiter="\t")}
+        # file-local names the beta's symbol file de-duplicated (randf_0016A2C0): per unit, by the bare name
+        self.local_pairs = defaultdict(list)
+        for fname, r in self.pairs.items():
+            if m := re.fullmatch(r"(.+)_([0-9A-F]{8})", fname):
+                self.local_pairs[(r["unit"], m.group(1))].append(r)
         self.symbols = {}
         for line in (self.cfg / "elf_symbol_addrs.txt").read_text(encoding="utf-8").splitlines():
             if m := re.match(r"^(\S+) = 0x([0-9A-F]+);", line):
@@ -95,6 +100,7 @@ def try_unit(v: Version, unit: str, show=(), data=True) -> dict:
         return res
     out = v.out / "obj" / (unit.replace("/", "_") + ".o")
     out.parent.mkdir(parents=True, exist_ok=True)
+    src = src.relative_to(ROOT)  # as the build passes it: gcc's _GLOBAL_$I$<path> names come from it
     cmd = (f"{CC} -S {v.cflags} -I include -I src -o {out}.gcc.s {src} && "
            f"{sys.executable} tools/ee_asm_compat.py {out}.gcc.s {out}.s --source {src} "
            f"--symbols {v.cfg}/elf_symbol_addrs.txt --own-data 0x0-0xFFFFFFFF --unit-data none "
@@ -141,6 +147,14 @@ def try_unit(v: Version, unit: str, show=(), data=True) -> dict:
                 continue  # kept from another object in the original: removed in the build
             own_linkonce += secdata[sec][1]
         pair = v.pairs.get(name)
+        if not pair:
+            local = v.local_pairs.get((unit, name), [])
+            if len(local) == 1:
+                pair = local[0]
+            elif len(local) > 1:  # several statics of that name in the unit: in address order, like ours
+                same = sorted((r for r in local), key=lambda r: int(r["beta"], 16))
+                k = sum(1 for f in res["functions"] if re.sub(r"_[0-9A-F]{8}$", "", f[0]) == name)
+                pair = same[k] if k < len(same) else None
         if not pair or not pair["other"]:
             res["functions"].append((name, "extra", ""))
             continue
@@ -266,6 +280,44 @@ def image_culprits(v: Version) -> set[str]:
             found[name] = re.sub(r"^build/[^/]+/src/(.*)\.o$", r"\1", obj)
     data = {k: u for k, u in found.items() if k != ".text"}
     return set((data or found).values())
+
+
+def layout_culprits(v: Version) -> set[str]:
+    """From the linker map (written even when the link's checks fail): the first input section, by address, that
+    doesn't start where this version's split puts its unit; blamed: the compiled object placed last at or before it
+    (wrong itself, or its size moved what follows)."""
+    from imagediff import read_map
+    opts = yaml.safe_load((v.cfg / f"{v.name}.yaml").read_text(encoding="utf-8"))["options"]
+    sections, _ = read_map(ROOT / Path(opts["elf_path"]).with_suffix(".map"))
+    out_section = {}
+    for name, (lo, size) in v.image.sections.items():
+        out_section[name] = (lo, lo + size)
+    compiled_before = None
+    for start, end, sec, obj in sorted(sections):
+        kind = next((k for k, (lo, hi) in out_section.items() if lo <= start < hi), None)
+        if kind is None:
+            continue
+        if m := re.match(r"^build/[^/]+/src/(.*)\.o$", obj):
+            unit = m.group(1)
+            if sec.startswith(".gnu.linkonce."):
+                unit += ".linkonce"
+                first = v.ranges.get((unit, kind))
+                if first and not first[0] <= start < first[1]:
+                    return {m.group(1)}
+                compiled_before = m.group(1)
+                continue
+        elif m := re.match(r"^build/[^/]+/asm/[^/]+/data/(.*)\.(?:data|rodata|bss|sdata|sbss)\.o$", obj):
+            unit = m.group(1)
+        elif m := re.match(r"^build/[^/]+/asm/[^/]+/(.*)\.o$", obj):
+            unit = m.group(1)
+        else:
+            continue
+        want = v.ranges.get((unit, kind))
+        if want and want[0] != start and start != (want[0] & ~0x7F):
+            return {compiled_before} if compiled_before else set()
+        if obj.startswith(f"build/{v.name}/src/"):
+            compiled_before = unit
+    return set()
 
 
 def complete_units() -> list[str]:
@@ -409,6 +461,9 @@ def main() -> None:
                 culprits.add(m.group(1))
             for m in re.finditer(r"build/[^/]+/src/(\S+?)\.o[:(]", log):
                 culprits.add(m.group(1))
+            v = Version(v.name)  # the split changes every round
+            if not culprits:
+                culprits = layout_culprits(v)
             if not culprits:
                 culprits = image_culprits(v)
             if not culprits:

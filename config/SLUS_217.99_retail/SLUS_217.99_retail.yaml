@@ -902,7 +902,7 @@ segments:
       - [0x23AF70, data, System/Graphic/Effect/libppp/keProg/Ke]
       - [0x23B000, data, System/Graphic/Effect/libppp/keProg/KeTh]
       - [0x23B010, data, System/Graphic/Effect/libppp/keProg/pppKeLns]
-      - [0x23B011, data, System/Graphic/Effect/libppp/ryjProg/pppRyjDrawShipoly]
+      - [0x23B020, data, System/Graphic/Effect/libppp/ryjProg/pppRyjDrawShipoly]
       - [0x23B040, data, System/Graphic/Effect/libppp/ryjProg/pppRyjDrawShipolyBone]
       - [0x23B060, data, System/Sound/SoundMan]
       - [0x23B118, data, System/Movie/AudioDec]
@@ -951,8 +951,8 @@ segments:
       - [0x23C480, data, Game/Player/Friend]
       - [0x23C510, data, Game/Player/FriendAladdin]
       - [0x23C520, data, Game/Player/FriendAriel]
-      - [0x23C528, data, Game/Player/FriendBeast]
-      - [0x23C540, data, Game/Player/FriendDonald]
+      - [0x23C530, data, Game/Player/FriendBeast]
+      - [0x23C538, data, Game/Player/FriendDonald]
       - [0x23C560, data, Game/Player/FriendGoofy]
       - [0x23C578, data, Game/Player/FriendJack]
       - [0x23C590, data, Game/Player/FriendKing]
@@ -1029,7 +1029,7 @@ segments:
       - [0x240000, data, Form/Menu/JMemoFlag]
       - [0x240010, data, Form/Menu/LevelUp]
       - [0x2400E8, data, Form/Menu/MoogleShop]
-      - [0x2400EC, data, Form/Menu/Pause]
+      - [0x2400F0, data, Form/Menu/Pause]
       - [0x240168, data, Form/Menu/RoomCreation]
       - [0x2402F0, data, Form/Menu/Roulette]
       - [0x240338, data, Form/Menu/SaveLoad]
@@ -1318,7 +1318,7 @@ segments:
       - [0x2FF880, rodata, System/Component]
       - [0x2FF890, rodata, System/Coord]
       - [0x2FF8F8, rodata, System/Fsm]
-      - [0x2FF918, rodata, System/MainApp]
+      - [0x2FF910, rodata, System/MainApp]
       - [0x2FF948, rodata, System/Math3D]
       - [0x2FF958, rodata, System/Tsin]
       - [0x300770, rodata, System/Wnd]
@@ -1341,8 +1341,8 @@ segments:
       - [0x300FD8, rodata, System/Graphic/TexAnm]
       - [0x300FE0, rodata, System/Graphic/TexUtil]
       - [0x3010A4, rodata, System/Graphic/TriangleIK]
-      - [0x3010D0, rodata, System/Graphic/Fnt]
-      - [0x301C58, rodata, System/Graphic/2d/2DCard]
+      - [0x3010B0, rodata, System/Graphic/Fnt]
+      - [0x3010D8, rodata, System/Graphic/2d/2DCard]
       - [0x302360, rodata, System/Graphic/2d/2DLay]
       - [0x302378, rodata, System/Graphic/2d/2DSeqCtrl]
       - [0x3023F0, rodata, System/Graphic/Effect/EffectMan]
@@ -1353,7 +1353,7 @@ segments:
       - [0x303730, rodata, System/Graphic/Effect/libppp/draw/md0_p3]
       - [0x3037C0, rodata, System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly]
       - [0x3037E0, rodata, System/Graphic/Effect/libppp/keProg/pppKeHmg]
-      - [0x3037E4, rodata, System/Graphic/Effect/libppp/ryjProg/pppRyjDrawShipoly]
+      - [0x3037F0, rodata, System/Graphic/Effect/libppp/ryjProg/pppRyjDrawShipoly]
       - [0x303830, rodata, System/Graphic/Effect/libppp/ryjProg/pppRyjDrawShipolyBone]
       - [0x303870, rodata, System/Graphic/Effect/libppp/ryjProg/pppRyjMegaBirth]
       - [0x303930, rodata, System/Graphic/Effect/libppp/ryjProg/pppRyjMegaBirthModel]
@@ -1399,8 +1399,8 @@ segments:
       - [0x3109D0, rodata, Game/Atel/CameraMan]
       - [0x310A00, rodata, Game/Atel/VSME]
       - [0x313430, rodata, Game/Player/Friend]
-      - [0x313620, rodata, Game/Player/FriendAriel]
-      - [0x313650, rodata, Game/Player/FriendDonald]
+      - [0x313630, rodata, Game/Player/FriendAriel]
+      - [0x313670, rodata, Game/Player/FriendDonald]
       - [0x313720, rodata, Game/Player/FriendGoofy]
       - [0x3137A0, rodata, Game/Player/FriendJack]
       - [0x3137D0, rodata, Game/Player/FriendKing]
@@ -1458,8 +1458,8 @@ segments:
       - [0x321C80, rodata, Game/Gimmick/GimmickFallTomb]
       - [0x321D60, rodata, Game/Gimmick/GimmickFlowerLump]
       - [0x321E70, rodata, Game/Gimmick/GimmickFountain]
-      - [0x321F70, rodata, Game/Gimmick/GimmickGuillotine]
-      - [0x321FE0, rodata, Game/Gimmick/GimmickHitReturn]
+      - [0x321F78, rodata, Game/Gimmick/GimmickGuillotine]
+      - [0x321FF8, rodata, Game/Gimmick/GimmickHitReturn]
       - [0x322030, rodata, Game/Gimmick/GimmickJumpStand]
       - [0x322170, rodata, Game/Gimmick/GimmickLotusLeaf]
       - [0x322188, rodata, Game/Gimmick/GimmickManager]
@@ -1579,7 +1579,7 @@ segments:
       - { type: bss, vram: 0x00437480, name: crt0 }
       - { type: bss, vram: 0x00437680, name: System/MainApp }
       - { type: bss, vram: 0x00438710, name: System/Rnd }
-      - { type: bss, vram: 0x004390D0, name: System/FileIO }
+      - { type: bss, vram: 0x00439100, name: System/FileIO }
       - { type: bss, vram: 0x0043A140, name: System/mcd }
       - { type: bss, vram: 0x0043B220, name: System/Memoca }
       - { type: bss, vram: 0x0043B900, name: System/PadIO }

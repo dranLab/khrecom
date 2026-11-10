@@ -10,7 +10,7 @@ static USHORT* s_pMovieIdxTbl;
 #line 44
 void CMovieFiles::initialize() {
     s_pMovieIdxTbl = (USHORT*)com_malloc_d(0x100, __FILE__ "(45)", -1);
-    if (!s_pMovieIdxTbl) AssertApp(__FILE__, __LINE__, "s_pMovieIdxTbl", 0);
+    KH_DEBUG(if (!s_pMovieIdxTbl) AssertApp(__FILE__, __LINE__, "s_pMovieIdxTbl", 0);)
     s_nMovieFileCount = 0;
 }
 

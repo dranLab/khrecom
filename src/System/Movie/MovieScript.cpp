@@ -195,7 +195,7 @@ void MovieScriptUnit::open(CTask& parent, const MovieScriptData& src) {
     m_pSrc = (MovieScriptData*)&src;
     m_pWnd = new KH_AT("(268)") CTextWnd(parent, 0);
 #line 269
-    if (!m_pWnd) AssertApp(__FILE__, __LINE__, "m_pWnd", 0);
+    KH_DEBUG(if (!m_pWnd) AssertApp(__FILE__, __LINE__, "m_pWnd", 0);)
     m_pWnd->setWndStyle(5);
     CSizeI size(0, 2);
     m_pWnd->setFontSpace(size);

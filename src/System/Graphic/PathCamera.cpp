@@ -47,7 +47,7 @@ INT CPathCamera::init(const CHAR* inCamName, BOOL enableDataRoll, BOOL fgTarget,
     strcpy(camName, inCamName);
     strcat(camName, ".cam");
     m_pCamData = (CAMDATA*)CRsrcDB::getRsrcCAM(camName);
-    if (!m_pCamData) AssertApp(__FILE__, __LINE__, "m_pCamData", 0);
+    KH_DEBUG(if (!m_pCamData) AssertApp(__FILE__, __LINE__, "m_pCamData", 0);)
     if (!m_pCamData) {
         return FALSE;
     }

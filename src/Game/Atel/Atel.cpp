@@ -137,7 +137,7 @@ void CAtel::main() { update(); }
 
 void CAtel::changeState(INT nStat) {
 #line 174
-    if (!((0 <= nStat) && (4 > nStat))) AssertApp(__FILE__, __LINE__, "(_STATE_NOP <= nStat) && ( _STATE_MAX > nStat)", 0);
+    KH_DEBUG(if (!((0 <= nStat) && (4 > nStat))) AssertApp(__FILE__, __LINE__, "(_STATE_NOP <= nStat) && ( _STATE_MAX > nStat)", 0);)
     if (m_pVSM) {
         m_nFsmState = nStat;
         gotoState(m_State[nStat]);

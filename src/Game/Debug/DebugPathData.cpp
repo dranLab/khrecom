@@ -1205,7 +1205,7 @@ BOOL CDebugPathData::newPath(const CHAR* pName) {
     delete p->m_pPath;
     p->m_pPath = NULL;
     p->m_pPath = new KH_AT("(2088)") CPathData((const PATH_DATA*)NULL, TRUE);
-    if (!p->m_pPath) AssertApp(__FILE__, 2089, "p->m_pPath", 0);
+    KH_DEBUG(if (!p->m_pPath) AssertApp(__FILE__, 2089, "p->m_pPath", 0);)
     setActivePathNum(0, 0);
     return TRUE;
 }
@@ -1215,7 +1215,7 @@ BOOL CDebugPathData::entryPath(const CHAR* pName) {
     delete p->m_pPath;
     p->m_pPath = NULL;
     p->m_pPath = new KH_AT("(2106)") CPathData(pName, TRUE);
-    if (!p->m_pPath) AssertApp(__FILE__, 2107, "p->m_pPath", 0);
+    KH_DEBUG(if (!p->m_pPath) AssertApp(__FILE__, 2107, "p->m_pPath", 0);)
     setActivePathNum(0, 0);
     return TRUE;
 }
@@ -1233,7 +1233,7 @@ BOOL CDebugPathData::loadPath(const CHAR* pName) {
     iFD = CFileIO::openFile(p->m_szFileName, 1, 0x1FF);
     if (iFD < 0) return FALSE;
     pBuf = com_malloc_d(iSize, __FILE__ "(2132)", (UINT)-1);
-    if (!pBuf) AssertApp(__FILE__, 2133, "pBuf", 0);
+    KH_DEBUG(if (!pBuf) AssertApp(__FILE__, 2133, "pBuf", 0);)
     if (CFileIO::readFile(iFD, pBuf, iSize) < 0) {
         if (pBuf) com_free(pBuf);
         return FALSE;
@@ -1241,7 +1241,7 @@ BOOL CDebugPathData::loadPath(const CHAR* pName) {
     delete p->m_pPath;
     p->m_pPath = NULL;
     p->m_pPath = new KH_AT("(2141)") CPathData((const PATH_DATA*)pBuf, TRUE);
-    if (!p->m_pPath) AssertApp(__FILE__, 2142, "p->m_pPath", 0);
+    KH_DEBUG(if (!p->m_pPath) AssertApp(__FILE__, 2142, "p->m_pPath", 0);)
     if (pBuf) com_free(pBuf);
     CFileIO::closeFile(iFD);
     return TRUE;

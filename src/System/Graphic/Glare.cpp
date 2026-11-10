@@ -25,14 +25,14 @@ CGlare* CGlare::m_pInstance = NULL;
 void CGlare::create(CTask* p) {
     if (!m_pInstance) {
         m_pInstance = new KH_AT("(28)") CGlare(p);
-        if (!m_pInstance) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
+        KH_DEBUG(if (!m_pInstance) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);)
     }
 }
 
 #line 39
 CGlare::CGlare(CTask* p) : CTask(p, 0x4000) {
     m_pGlare = new KH_AT("(40)") CGlarePrim;
-    if (!m_pGlare) AssertApp(__FILE__, __LINE__, "m_pGlare", 0);
+    KH_DEBUG(if (!m_pGlare) AssertApp(__FILE__, __LINE__, "m_pGlare", 0);)
     m_iFlags = 8;
     m_iKey = 0xFF;
     m_fRate = 0;

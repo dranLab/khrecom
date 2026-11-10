@@ -149,7 +149,7 @@ void CSummonCloud::beginStateAppear() {
         FLOAT length;
         FLOAT len0;
         coll = m_pMove->getMapCollision();
-        if (!coll) AssertApp(__FILE__, 189, "coll", 0); /* line 189 of the original SummonCloud.cpp */
+        KH_DEBUG(if (!coll) AssertApp(__FILE__, 189, "coll", 0);) /* line 189 of the original SummonCloud.cpp */
         FLOAT radius = coll->getRadius();
         coll->setRadius(0.75f);
         coll->enableSliding(0);

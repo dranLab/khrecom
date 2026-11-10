@@ -105,7 +105,7 @@ static void initGraphicSystem() {
 void pppFreeParticle(void *mng) {
     pppMngSt *pMng = mng;
 #line 467
-    if (!(pMng != ((void *)0))) AssertApp(__FILE__, __LINE__, "pMng != ((void *)0)", 0);
+    KH_DEBUG(if (!(pMng != ((void *)0))) AssertApp(__FILE__, __LINE__, "pMng != ((void *)0)", 0);)
     pppAllFreePObject(pMng);
 }
 
