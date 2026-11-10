@@ -41,10 +41,10 @@ every change that is merged without regenerating. Regenerating all four takes ab
 
 ## Where things stand (2026-11-10)
 
-- **Progress (`tools/check.sh`):** 12262 functions decompiled in 662 files, 648 files complete; libraries 954 of 985
+- **Progress (`tools/check.sh`):** 12265 functions decompiled in 662 files, 650 files complete; libraries 954 of 985
   in 153 files, 147 complete. (Its totals count hand-written library units as done.)
-- **Game:** 10 functions still `INCLUDE_ASM` in 8 units, all parked (C draft under `#if 0` with a note): Camp 2,
-  Map 2, DispList, shape, Math3D, and the blocked WorldEnv, Rcf, RcfCD. 1 unit takes a data section from assembly
+- **Game:** 7 functions still `INCLUDE_ASM` in 6 units, all parked (C draft under `#if 0` with a note): Camp 2,
+  DispList, shape, and the blocked WorldEnv, Rcf, RcfCD. 1 unit takes a data section from assembly
   (sddrv_ee's `.bss`, blocked: see docs/asm-leftovers.md).
 - **Libraries:** 5 parked (memcpy, memset, memmove, graphdev sceGsSetDefDispEnv, kprintf2 _sceSnprintf), 0 not
   attempted, 26 hand-written (stay assembly), no unit with data from assembly; details in `docs/sdk-leftovers.md`.
@@ -52,6 +52,16 @@ every change that is merged without regenerating. Regenerating all four takes ab
   duplicate classes, 659 mechanism sites (0 untagged); classes complete 1177, superset 17 (IVECTOR/FVECTOR/FMATRIX's
   ref conversion operators read as extra methods: a partials.py limit), partial 1, gated 3, missing 6.
   `tools/partials.py --queue` has the ready items (the R1/R2 gate items there stay, see "Queue state").
+- **2026-11-10 (evening): pool run (3 workers, 7 parked units + 2 cleanups).** Matched: Game/Map init (82 -> 0: the
+  original's line markers and block tree, the ref's xmin..zmax initialised, user decision) and disp (709 -> 0: laid
+  out on lines 1250-1585 with the ref's variables, the bounding-box kick as an inline, a CMapGrid& reference), CSky
+  ctor/main without mechanisms; System/Math3D InvMatrix (90 -> 0: `INT n = 4` as every loop bound, user decision).
+  Map and Math3D are complete. Unchanged, notes corrected: Camp 27/23, DispList _drawOT 59 (loop.c and global-alloc,
+  two independent causes), shape pppVu1ShapeDraw 4 (a write to sp's register cannot be the cause), graphdev
+  sceGsSetDefDispEnv 21 (a pre-reload dependence), memcpy 11 / memset 12 / memmove 31 (cse and reload never turn a
+  cheap CONST_INT into a copy). Cleanups: Game/CardKind.h (static cardDataTbl + CARD inlines, 23 table copies gone,
+  user request) and System/Math3D.h (_sqrtf/_fabsf, 38 copies gone); partials.py skips a header's static const
+  initializer in the string check. Every remaining item has had a worker this run.
 - **2026-11-10 (afternoon): Coord.h unification, 4 cleanup steps, all merged (user decision: full, step by step).**
   System/Coord.h now holds the original's Coord.h on its lines: FVECTOR/IVECTOR/FMATRIX, F_UL/G_*, FVECTOR2, CCoord,
   CCoords, the ref's sceVu0 declarations and conversion operators, the free matrix inlines 340-643 and every member
