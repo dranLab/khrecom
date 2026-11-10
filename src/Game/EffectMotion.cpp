@@ -100,7 +100,7 @@ inline BOOL EET_HEADER::addrMapping() {
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 void MulMatrix(FMATRIX& m0, const FMATRIX& m1, const FMATRIX& m2);
 
-inline void UnitMatrix(FMATRIX& m) {
+inline void _unitMatrixVu0(FMATRIX& m) {
     __asm__ volatile(
         "vmr32.xyzw $vf1, $vf0\n"
         "sqc2 $vf0, 0x30(%0)\n"
@@ -279,7 +279,7 @@ BOOL CEffectMotionCtrl::updateAttachEffect_(TIMEQ inCurrentTime) {
                                                     &offset, &rot, 0.0f);
                 } else {
                     FMATRIX m;
-                    UnitMatrix(m);
+                    _unitMatrixVu0(m);
                     sceVu0RotMatrixX(m.m, m.m, rot.x);
                     sceVu0RotMatrixY(m.m, m.m, rot.y);
                     sceVu0RotMatrixZ(m.m, m.m, rot.z);
