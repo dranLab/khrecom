@@ -967,8 +967,8 @@ void CNakCamera::LookAngleDistanceToPos() {
     FVECTOR vec;
     vec.set(0.0f, 0.0f, -m_fDistance);
     _unitMatrix(mat);
-    sceVu0RotMatrixX(mat.m, mat.m, m_vCamRot.x);
-    sceVu0RotMatrixY(mat.m, mat.m, m_vCamRot.y);
+    RotMatrixX(mat, mat, m_vCamRot.x);
+    RotMatrixY(mat, mat, m_vCamRot.y);
     ApplyMatrix(vec, mat, vec);
     AddVectorXYZ(m_vCamPos, m_vCamLook, vec);
 }
@@ -978,8 +978,8 @@ void CNakCamera::PosAngleDistanceToLook() {
     FVECTOR vec;
     vec.set(0.0f, 0.0f, m_fDistance);
     _unitMatrix(mat);
-    sceVu0RotMatrixX(mat.m, mat.m, m_vCamRot.x);
-    sceVu0RotMatrixY(mat.m, mat.m, m_vCamRot.y);
+    RotMatrixX(mat, mat, m_vCamRot.x);
+    RotMatrixY(mat, mat, m_vCamRot.y);
     ApplyMatrix(vec, mat, vec);
     AddVectorXYZ(m_vCamLook, m_vCamPos, vec);
 }
@@ -1154,9 +1154,9 @@ void CNakCamera::SubjectivityUpdate() {
     if (m_iUpdate & 1) {
         m_vCamRotAim = m_vCamRot;
     }
-    sceVu0RotMatrixZ(mat.m, mat.m, m_vCamRot.z);
-    sceVu0RotMatrixX(mat.m, mat.m, m_vCamRot.x);
-    sceVu0RotMatrixY(mat.m, mat.m, m_vCamRot.y);
+    RotMatrixZ(mat, mat, m_vCamRot.z);
+    RotMatrixX(mat, mat, m_vCamRot.x);
+    RotMatrixY(mat, mat, m_vCamRot.y);
     if (m_iUpdate & 2) {
         ApplyMatrix(m_vCamMove, mat, m_vCamMove);
         AddVectorXYZ(m_vCamPos, m_vCamPos, m_vCamMove);
@@ -1241,13 +1241,13 @@ void CNakCamera::ObjectivityUpdate() {
     if (m_iUpdate & 1) {
         m_vCamRotAim = m_vCamRot;
     }
-    sceVu0RotMatrixZ(crd.m, crd.m, m_vCamRot.z);
-    sceVu0RotMatrixX(crd.m, crd.m, m_vCamRot.x);
-    sceVu0RotMatrixY(crd.m, crd.m, m_vCamRot.y);
+    RotMatrixZ(crd, crd, m_vCamRot.z);
+    RotMatrixX(crd, crd, m_vCamRot.x);
+    RotMatrixY(crd, crd, m_vCamRot.y);
     if (m_iUpdate & 2) {
         FMATRIX mat;
         _unitMatrix(mat);
-        sceVu0RotMatrixY(mat.m, mat.m, m_vCamRot.y);
+        RotMatrixY(mat, mat, m_vCamRot.y);
         ApplyMatrix(m_vCamMove, mat, m_vCamMove);
         AddVectorXYZ(m_vCamLook, m_vCamLook, m_vCamMove);
         m_vCamLookAim = m_vCamLook;

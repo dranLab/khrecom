@@ -216,7 +216,7 @@ void C2DSeqLightMarkAgent::updatePos() {
     if (m_pCtrl) {
         FLOAT fRate = (FLOAT)m_nMoveTime / 1500.0f;
         FVECTOR v;
-        sceVu0InterVectorXYZ(v.v, m_vBasePos.v, m_vTargetPos.v, fRate * fRate);
+        InterVectorXYZ(v, m_vBasePos, m_vTargetPos, fRate * fRate);
         m_pCtrl->setPos(v);
     }
 }

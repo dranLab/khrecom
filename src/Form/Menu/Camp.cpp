@@ -2116,10 +2116,10 @@ void CCamp::moveYNLight() {
             m_fYNLightTimer = 40.0f;
             m_fgYNLightMove = -1;
         }
-        FVECTOR& vecOut = m_vYNPosLightCurrent;
+
         FLOAT t = 1.0f - powf(1.0f - m_fYNLightTimer / 40.0f, 2.5f);
-        sceVu0InterVectorXYZ(vecOut.v, m_vYNPosLightTarget.v, m_vYNPosLightOld.v, t);
-        m_pYNLightCtrl->setLocalPos(vecOut);
+        InterVectorXYZ(m_vYNPosLightCurrent, m_vYNPosLightTarget, m_vYNPosLightOld, t);
+        m_pYNLightCtrl->setLocalPos(m_vYNPosLightCurrent);
     }
 }
 
@@ -6712,10 +6712,10 @@ void CButtonCursor::moveLight(FLOAT fFrameRate) {
             m_fLightTimer = 30.0f;
             m_fgLightMove = 0;
         }
-        FVECTOR& vecOut = m_vPosLightCurrent;
+
         FLOAT t = 1.0f - powf(1.0f - m_fLightTimer / 30.0f, 2.0f);
-        sceVu0InterVectorXYZ(vecOut.v, m_vPosLightTarget.v, m_vPosLightOld.v, t);
-        m_pLightCtrl->setPos(vecOut);
+        InterVectorXYZ(m_vPosLightCurrent, m_vPosLightTarget, m_vPosLightOld, t);
+        m_pLightCtrl->setPos(m_vPosLightCurrent);
     }
 }
 
@@ -6764,10 +6764,10 @@ void CCamp::moveLight() {
             m_fLightTimer = 30.0f;
             m_fgLightMove = 0;
         }
-        FVECTOR& vecOut = m_vPosLightCurrent;
+
         FLOAT t = 1.0f - powf(1.0f - m_fLightTimer / 30.0f, 2.0f);
-        sceVu0InterVectorXYZ(vecOut.v, m_vPosLightTarget.v, m_vPosLightOld.v, t);
-        m_pLightCtrl->setPos(vecOut);
+        InterVectorXYZ(m_vPosLightCurrent, m_vPosLightTarget, m_vPosLightOld, t);
+        m_pLightCtrl->setPos(m_vPosLightCurrent);
     }
 }
 
@@ -6778,10 +6778,10 @@ void CCamp::moveCursor2() {
             m_fCursor2Timer = 10.0f;
             m_fgCursor2Move = 0;
         }
-        FVECTOR& vecOut = m_vPosCursor2Current;
+
         FLOAT t = 1.0f - powf(1.0f - m_fCursor2Timer / 10.0f, 2.5f);
-        sceVu0InterVectorXYZ(vecOut.v, m_vPosCursor2Target.v, m_vPosCursor2Old.v, t);
-        m_pCursor2Ctrl->setLocalPos(vecOut);
+        InterVectorXYZ(m_vPosCursor2Current, m_vPosCursor2Target, m_vPosCursor2Old, t);
+        m_pCursor2Ctrl->setLocalPos(m_vPosCursor2Current);
     }
 }
 
@@ -6792,10 +6792,10 @@ void CCamp::moveCursor3() {
             m_fCursor3Timer = 10.0f;
             m_fgCursor3Move = 0;
         }
-        FVECTOR& vecOut = m_vPosCursor3Current;
+
         FLOAT t = 1.0f - powf(1.0f - m_fCursor2Timer / 10.0f, 2.5f);
-        sceVu0InterVectorXYZ(vecOut.v, m_vPosCursor3Target.v, m_vPosCursor3Old.v, t);
-        m_pCursor3Ctrl->setLocalPos(vecOut);
+        InterVectorXYZ(m_vPosCursor3Current, m_vPosCursor3Target, m_vPosCursor3Old, t);
+        m_pCursor3Ctrl->setLocalPos(m_vPosCursor3Current);
     }
 }
 
@@ -6806,10 +6806,10 @@ void CCamp::moveCursor4() {
             m_fCursor4Timer = 10.0f;
             m_fgCursor4Move = 0;
         }
-        FVECTOR& vecOut = m_vPosCursor4Current;
+
         FLOAT t = 1.0f - powf(1.0f - m_fCursor4Timer / 10.0f, 2.5f);
-        sceVu0InterVectorXYZ(vecOut.v, m_vPosCursor4Target.v, m_vPosCursor4Old.v, t);
-        m_pCursor4Ctrl->setLocalPos(vecOut);
+        InterVectorXYZ(m_vPosCursor4Current, m_vPosCursor4Target, m_vPosCursor4Old, t);
+        m_pCursor4Ctrl->setLocalPos(m_vPosCursor4Current);
     }
 }
 
@@ -6821,7 +6821,7 @@ void CCamp::moveWM() {
             m_fgWMMove = 0;
         }
         FLOAT t = 1.0f - powf(1.0f - m_fWMTimer / 12.0f, 3.5f);
-        sceVu0InterVector(m_vWMPosCurrent0.v, m_vWMPosTarget.v, m_vWMPosOld.v, t);
+        InterVector(m_vWMPosCurrent0, m_vWMPosTarget, m_vWMPosOld, t);
         m_vWMPosCurrent = m_vWMPosCurrent0;
         m_vWMPosCurrent.w = 0.0f;
         m_pWMMoveCtrl->setLocalPos(m_vWMPosCurrent);

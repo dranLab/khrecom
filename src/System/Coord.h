@@ -264,12 +264,12 @@ int sceVu0ClipAll(float *minv, float *maxv, float (*ms)[4], float (*vm)[4], int 
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1); // System/Coord
 void MulMatrix(FMATRIX& res, const FMATRIX& m0, const FMATRIX& m1);   // System/Coord
 
-/* The original's free inlines at 340-643 (its line markers: 340 ... 643). Names ours (the .mdebug has none for
- * inlined functions); parameter and local names from its inline blocks where they are visible: m1 (340, 613), m0
- * (613), v0 (344), matOut (354-370, 407, 429), matIn and fInRot (361-370), vecInTrans (396), vecPos/vecV/vecDir/
- * matWork (407-418), fInAx/fInAy (429), inT (477, 481), a and the result b (632-635), b (642-643). The bodies pass
- * the array members (.m/.v): through the conversion operators (one more inline call) cse keeps the addresses in
- * saved registers where the original recomputes them (FriendKing adjustPlayer). */
+/* The original's free inlines at 340-643 (its line markers). Names ours (the .mdebug has none for inlined
+ * functions); parameter and local names from its inline blocks where they are visible: m1 (340, 613), m0 (613), v0
+ * (344), matOut (354-370, 407, 429), matIn and fInRot (361-370), vecInTrans (396), vecPos/vecV/vecDir/matWork
+ * (407-418), fInAx/fInAy (429), vecInB (477), vecOut (481), inT (477, 481), a and the result b (632-635), b
+ * (642-643). The bodies pass the array members (.m/.v): through the conversion operators (one more inline call) cse
+ * keeps the addresses in saved registers where the original recomputes them (FriendKing adjustPlayer). */
 #line 340
 inline void InversMatrix(FMATRIX& m0, const FMATRIX& m1) { sceVu0InversMatrix(m0.m, (float(*)[4])m1.m); }
 #line 344

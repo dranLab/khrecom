@@ -865,7 +865,7 @@ INT CWorldSelect::menuMain() {
     _unitMatrixVu0(mat);
     vec2._q = 0;
     vec2.y = m_rotCircle.z;
-    sceVu0RotMatrix(mat.m, mat.m, m_rotCircle.v);
+    RotMatrix(mat, mat, m_rotCircle);
     for (INT i = 0; i < m_nSelectMax; i++) {
         ApplyMatrix(vec, mat, m_posLocal[i]);
         m_pCardCtrl[i]->setLocalPos(vec);

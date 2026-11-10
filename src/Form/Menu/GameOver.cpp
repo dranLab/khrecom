@@ -223,7 +223,7 @@ void CGameOver::moveCursor() {
             m_fgLightMove = 0;
         }
         FLOAT fRate = 1.0f - powf(1.0f - m_fLightTimer / 30.0f, 2.5f);
-        sceVu0InterVectorXYZ(m_vPosLightCurrent.v, m_vPosLightTarget.v, m_vPosLightOld.v, fRate);
+        InterVectorXYZ(m_vPosLightCurrent, m_vPosLightTarget, m_vPosLightOld, fRate);
         m_pLightCtrl->setPos(m_vPosLightCurrent);
     }
 }

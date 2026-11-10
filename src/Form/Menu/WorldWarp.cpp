@@ -317,10 +317,6 @@ using namespace D2;
  * pointer to $3 through an empty asm reproduces the allocation and emits nothing. */
 #define PIN_V1(p) ({ register typeof(p) _p asm("$3") = (p); __asm__("" : "+r"(_p)); _p; })
 
-static inline void interVectorXYZ(FVECTOR& vecOut, FVECTOR& vecInA, FVECTOR& vecInB, FLOAT t) {
-    sceVu0InterVectorXYZ(vecOut.v, vecInA.v, vecInB.v, t);
-}
-
 static inline void _setCard(CARD& c, USHORT kind, BYTE num) {
     c.m_nId = 0;
     c.m_nNumber2 = num;
@@ -914,7 +910,7 @@ void CWorldWarp::moveCursorAndLight(INT id, FLOAT fFrameRate) {
             m_fgLightMove[id] = 0;
         }
         FLOAT t = 1.0f - powf(1.0f - m_fLightTimer[id] / 40.0f, 2.5f);
-        interVectorXYZ(m_vPosLightCurrent[id], m_vPosLightTarget[id], m_vPosLightOld[id], t);
+        InterVectorXYZ(m_vPosLightCurrent[id], m_vPosLightTarget[id], m_vPosLightOld[id], t);
         m_pLightCtrl[id]->setLocalPos(m_vPosLightCurrent[id]);
     }
 }

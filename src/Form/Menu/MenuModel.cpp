@@ -41,10 +41,6 @@ static inline void _unitMatrixVu0(FMATRIX& m) {
 static inline void _setParent(CCoord& crd, CCoord* pParent) { crd.m_pParent = pParent; }
 static inline void _touch(CCoord& crd) { crd.m_Flag = 1; }
 
-static inline void _viewScreenMatrix(FMATRIX& matOut, FLOAT fInAx, FLOAT fInAy) {
-    sceVu0ViewScreenMatrix(matOut.m, 512.0f, ASPECT_RATE_X, ASPECT_RATE_Y, fInAx, fInAy, 1.0f, 16777000.0f, 0.1f, 100.0f);
-}
-
 CMenuModel::CMenuModel(CTask* p, INT nRsrcID, CCoord* pParentCoord, INT iPosX, INT iPosY) : CTask(p, 0x4000) {
     m_nRsrcID = nRsrcID;
     m_vPos.init();
@@ -181,9 +177,9 @@ void CMenuModel::changeLocalWS() {
     FMATRIX mVS;
     FMATRIX mWV;
     _unitMatrixVu0(mWV);
-    sceVu0RotMatrixY(mWV.m, mWV.m, 3.1415927f);
+    RotMatrixY(mWV, mWV, 3.1415927f);
     mWV.v[3] = m_vPosWSC;
-    sceVu0InversMatrix(mWV.m, mWV.m);
+    InversMatrix(mWV, mWV);
     mWV.m[0][0] = -mWV.m[0][0];
     mWV.m[1][0] = -mWV.m[1][0];
     mWV.m[2][0] = -mWV.m[2][0];
@@ -192,7 +188,7 @@ void CMenuModel::changeLocalWS() {
     mWV.m[1][1] = -mWV.m[1][1];
     mWV.m[2][1] = -mWV.m[2][1];
     mWV.m[3][1] = -mWV.m[3][1];
-    _viewScreenMatrix(mVS, m_PosScreen.x + 0x800, 0x800 - m_PosScreen.y);
+    ViewScreenMatrix(mVS, 512.0f, ASPECT_RATE_X, ASPECT_RATE_Y, m_PosScreen.x + 0x800, 0x800 - m_PosScreen.y, 100.0f);
     MulMatrix(m_mWS, mVS, mWV);
     for (INT i = 0; i < m_nModelCount; i++) {
         m_pModels[i].setWorldScreenMatrix(&m_mWS);
@@ -266,7 +262,7 @@ void CMenuModel::disp() {
                 m_bDisp = FALSE;
             }
         } else {
-            sceVu0InterVector(m_colorCurrent.v, m_colorTarget.v, m_colorOld.v, fRate);
+            InterVector(m_colorCurrent, m_colorTarget, m_colorOld, fRate);
         }
         for (INT i = 0; i < m_nModelCount; i++) {
             m_pModels[i].setColorScale(m_colorCurrent);

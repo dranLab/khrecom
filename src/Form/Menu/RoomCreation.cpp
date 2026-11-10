@@ -1556,7 +1556,7 @@ void CRoomCreation::moveCursor() {
             m_fgCursorMove = 0;
         }
         FLOAT t = 1.0f - powf(1.0f - m_fCursorTimer / 10.0f, 2.5f);
-        sceVu0InterVectorXYZ(m_vPosCursorCurrent.v, m_vPosCursorTarget.v, m_vPosCursorOld.v, t);
+        InterVectorXYZ(m_vPosCursorCurrent, m_vPosCursorTarget, m_vPosCursorOld, t);
         m_pCursorCtrl->setPos(m_vPosCursorCurrent);
     }
 }
