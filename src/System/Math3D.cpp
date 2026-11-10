@@ -1,5 +1,4 @@
 #include "System/Math3D.h"
-#include "include_asm.h"
 
 extern "C" float acosf(float x);
 extern "C" float tanf(float x);
@@ -1506,13 +1505,6 @@ BOOL Math3D::HitPillarBall(const FVECTOR& m, const FVECTOR& n, const FVECTOR& c,
     return HitLineBall(m, n, c, mnr + cr);
 }
 
-/* Parked: 0 of 236 lines (2026-11-10): the draft below matches, but it needs `INT n = 4;`, a local the ref lacks
- * (invisible in the .mdebug: gcse's cprop replaces every use by 4; with it the block tree equals the original's), used
- * as every loop bound; waits for the user's decision (memory no-filler-locals: a used invisible local that replaces a
- * repeated literal). Without n: 147 lines (gcse PRE calls i + 1 isolated, loop.c strength-reduces i), n only in the
- * k part: 57, const n: 147, literal in the swap loop: 47. Also needed: _fabsf as the asm volatile abs.s (Math3D.h:137)
- * and c.init() (Coord.h:910). */
-#if 0
 void Math3D::InvMatrix(FMATRIX& outMat, const FMATRIX& inMat) {
     FMATRIX a;
     FMATRIX c;
@@ -1575,9 +1567,6 @@ void Math3D::InvMatrix(FMATRIX& outMat, const FMATRIX& inMat) {
     }
     outMat = c;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Math3D", InvMatrix__6Math3DR7FMATRIXRC7FMATRIX);
-#endif
 BOOL Math3D::checkMaxMinOutsideXYZ(const FVECTOR& v, const FVECTOR& vMax, const FVECTOR& vMin) {
     INT iRet;
     asm volatile("lqc2 $vf4, 0x0(%1)\n"
@@ -1654,6 +1643,4 @@ void Math3D::MatrixToAngleZYX(FVECTOR& outvAngle, const FMATRIX& mMat) {
 extern "C" float __ieee754_sqrtf(float x) {
     return _sqrtf(x);
 }
-/* InvMatrix is still INCLUDE_ASM: its -0.0f constant, the last item of the unit's .rodata, under the label it uses */
-extern "C" const float D_0045C23C = -0.0f;
 // SOURCE DATA: .rodata
