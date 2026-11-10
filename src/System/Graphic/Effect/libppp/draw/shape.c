@@ -232,7 +232,7 @@ void pppStartVu1ShapeProg(int fog) {
 }
 
 
-/* Parked: 4 of 143 lines (2026-11-09): `or a0,a1,a0` (the call argument) issues before `addiu t6,a1,32` instead of after
+/* Parked: 4 of 143 lines (2026-11-10): `or a0,a1,a0` (the call argument) issues before `addiu t6,a1,32` instead of after
    tag 2's next store, and tag 3's `sb t4,3(t6)` comes after its p[1] store instead of first. With tag 3 written
    id/next/qwc like the others its stores match, but t3/t4 swap: local-alloc (QTY_CMP_PRI on the sched1 order) ranks
    the 0x70 constant (2 refs over 18 insns) above the -16 mask (3 refs over 29), 0x70 takes t3, the mask avoids it
@@ -252,6 +252,15 @@ void pppStartVu1ShapeProg(int fog) {
    both schedulers (45-59). Also tried: i = 0x80000000 as the shared constant (i is a0 in .mdebug; 38-40),
    spaPktSize >>= 4 at 386 (39), spPktSize in two statements (11), spaPktSize from dspa - dspa0 (53), tag 3
    next/id/qwc (11).
+   2026-11-10: the dependence is an in-place write of sp's register a1 between tag 2's `pkt = sp + 2` and its qwc
+   store, in both schedulers: `asm("" : "+r"(sp));` anywhere on line 408 (experiment only, not source) puts `or a0`
+   exactly where the original has it, but only with tag 2's qwc written through sp (`((sceDmaTag *)sp)[2].qwc`: the
+   asm hides sp + 32 from cse, so pkt->qwc becomes 0(t6)); the t3/t4 swap stays (0x70's sched1 life 19, needs 20).
+   A real copy into a pseudo that outlives the block (`dspa = (OSPRITE_VU1A *)sp`, cse makes dspa canonical) is
+   hoisted by sched1 and gets its own register (+1 insn, 33). No flag explains it (-fno-schedule-insns 116,
+   -fno-schedule-insns2 47, -fno-gcse 49, -fno-regmove / -fno-rerun-cse-after-loop 4). Also neutral: all 432 field
+   orders of tags 0-2 x tag 3 id-before-qwc (min 11), 11 argument forms x pkt++ / sp + k forms (all 4), 8 spaPktSize
+   x 6 spPktSize cast forms (4 / 11); tools/permuter.py 15 min on the id-first form (70332 candidates, 11 stays).
    2026-11-08 shape from the evidence, all neutral: y in its block (.mdebug { y { } }), spa = source / dspa = dest
    (.mdebug registers), spPktSize in qwords on its line (line markers put the sra at 400).
    tried: tag field orders (all 120 per tag 0-3, tags 0-2 also with tag 3 id-first), six call-argument forms,
