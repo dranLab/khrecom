@@ -662,18 +662,18 @@ static inline void _setCard(CARD& c, USHORT kind, BYTE num) {
     c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1;
 }
 
-static inline void _unitMatrixVu0(FMATRIX& m) {
-    asm volatile("vmr32.xyzw $vf1, $vf0\n"
-                 "sqc2 $vf0, 0x30(%0)\n"
-                 "vmr32.xyzw $vf2, $vf1\n"
-                 "sqc2 $vf1, 0x20(%0)\n"
-                 "vmr32.xyzw $vf3, $vf2\n"
-                 "sqc2 $vf2, 0x10(%0)\n"
-                 "sqc2 $vf3, 0x0(%0)\n"
-                 :
-                 : "r"(&m)
-                 : "memory");
-}
+
+
+
+
+
+
+
+
+
+
+
+
 
 INT CWorldSelect::menuMain() {
     static const unsigned char cardKindTbl[14] = { 0, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202 };
@@ -862,7 +862,7 @@ INT CWorldSelect::menuMain() {
         m_rotCircle.z = m_fRotCurrent = Math3D::LimitPI(m_fRotCurrent * 0.017453292f);
     }
     FMATRIX mat;
-    _unitMatrixVu0(mat);
+    mat.init();
     vec2.zero();
     vec2.y = m_rotCircle.z;
     RotMatrix(mat, mat, m_rotCircle);

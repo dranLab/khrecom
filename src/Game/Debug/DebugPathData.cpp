@@ -108,16 +108,16 @@ CHermitePathMoveS::CHermitePathMoveS(CTask* p, const CPathVector* pVec) : CTask(
     m_pPath = (CPathVector*)pVec;
     m_HPath.makePathFromPathVector(pVec);
     addCoord(1);
-    asm volatile("vmr32.xyzw $vf1, $vf0\n"
-                 "sqc2 $vf0, 0x30(%0)\n"
-                 "vmr32.xyzw $vf2, $vf1\n"
-                 "sqc2 $vf1, 0x20(%0)\n"
-                 "vmr32.xyzw $vf3, $vf2\n"
-                 "sqc2 $vf2, 0x10(%0)\n"
-                 "sqc2 $vf3, 0x0(%0)\n"
-                 :
-                 : "r"(&Crd(0).m_Local)
-                 : "memory");
+    vu0UnitMatrix(Crd(0).m_Local);
+
+
+
+
+
+
+
+
+
     Crd(0).touch();
     m_DDPathCamArrow.getCoord().setParent(&Crd(0));
     m_vRot.init0();
@@ -1150,16 +1150,16 @@ void CDebugPathData::disp() {
         if (m_iCtrlFlg & 1) {
             FMATRIX mMat;
             _ArrowVecs v = {{{0.0f, -64.0f, 0.0f, 1.0f}, {16.0f, 0.0f, 0.0f, 1.0f}, {-16.0f, 0.0f, 0.0f, 1.0f}}};
-            asm volatile("vmr32.xyzw $vf1, $vf0\n"
-                         "sqc2 $vf0, 0x30(%0)\n"
-                         "vmr32.xyzw $vf2, $vf1\n"
-                         "sqc2 $vf1, 0x20(%0)\n"
-                         "vmr32.xyzw $vf3, $vf2\n"
-                         "sqc2 $vf2, 0x10(%0)\n"
-                         "sqc2 $vf3, 0x0(%0)\n"
-                         :
-                         : "r"(&mMat)
-                         : "memory");
+            vu0UnitMatrix(mMat);
+
+
+
+
+
+
+
+
+
             RotMatrixZ(mMat, mMat, _getPathVectorConvWRoll(m_vActivePathPos.w));
             ApplyMatrix(*(FVECTOR*)&m_gpPArrowPoly.m_V[0], mMat, v.v[0]);
             ApplyMatrix(*(FVECTOR*)&m_gpPArrowPoly.m_V[1], mMat, v.v[1]);
