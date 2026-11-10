@@ -118,7 +118,7 @@ CHermitePathMoveS::CHermitePathMoveS(CTask* p, const CPathVector* pVec) : CTask(
                  :
                  : "r"(&Crd(0).m_Local)
                  : "memory");
-    Crd(0).m_Flag = 1;
+    Crd(0).touch();
     m_DDPathCamArrow.getCoord().setParent(&Crd(0));
     m_vRot.init0();
     m_vRot.w = 5.0f;
@@ -145,7 +145,7 @@ void CHermitePathMoveS::main() {
     m_vRot.w = 5.0f;
     m_DDPathCamArrow.setCoord(NULL, &m_vRot);
     Crd(0).m_Local.setTrans(vPos);
-    Crd(0).m_Flag = 1;
+    Crd(0).touch();
 }
 void CHermitePathMoveS::disp() { m_DDPathCamArrow.disp(); }
 INT debugWinPathEndOneCall(CDebugWindow* pWin, INT iMes, INT iParam) {

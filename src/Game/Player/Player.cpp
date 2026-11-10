@@ -6863,7 +6863,7 @@ void CPlayer::updateSpotLight(HANDLE inHandle) {
         pos.w = 1.0f;
         m.setTrans(pos);
         effect->getCoords()->getLocalMatrix(0) = m;
-        effect->getCoords()->Crd(0).m_Flag = 1;
+        effect->getCoords()->Crd(0).touch();
     }
 }
 __asm__(".rdata\n");

@@ -118,7 +118,7 @@ void CCollDisp::main() {
     if (!(DebugWork::g_dw.collision.uiFlag & 4)) {
         CTask* pPlayer = getSysTask(3);
         if (pPlayer && pPlayer->getCoordNum() && !CGameWork::getFlag(1, 0)) {
-            m_fvLookPos = pPlayer->Crd(0).getWorldPos();
+            m_fvLookPos = pPlayer->Crd(0).getWorldMatrix().getTrans();
         }
     }
     if (m_fgMapZoneDisp) {
@@ -569,7 +569,7 @@ CCollRideModelDisp::CCollRideModelDisp(CTask* inBo, CRideModel* inRideModel, BOO
     _unitMatrix(Crd(0).m_Local);
     Crd(0).recalcWorldMatrix();
     _unitMatrix(Crd(1).m_Local);
-    Crd(1).m_pParent = &Crd(0);
+    Crd(1).setParent(&Crd(0));
     _makeModelPrim();
     if (inAutoUpdate) m_uiStateFlag |= 1;
 }

@@ -302,7 +302,7 @@ void CAnim::save_hokan_by_mtx() {
         CCoord& crd = m_pCrds->Crd(i);
         crd.getScale(vScale);
         Quaternion::MatrixToQuaternion(q0->vQuatRotate, crd.getLocalMatrix());
-        FVECTOR vTrans = crd.getLocalMatrix().v[3];
+        FVECTOR vTrans = crd.getLocalMatrix().getTrans();
         q0->vTrans.set(vTrans);
         q0->vScale.set(vScale.x, vScale.y, vScale.z);
     }
@@ -935,7 +935,7 @@ void CAnim::_updateLookPosition(FLOAT fR) {
     RotMatrixZ(mMat, mMat, fvAng.x);
     RotMatrixX(mMat, mMat, fvAng.y);
     MulMatrix(crd.getLocalMatrix(), crd.getLocalMatrix(), mMat);
-    crdRoot.m_Flag = 1;
+    crdRoot.touch();
 }
 BOOL CAnim::createLegIK(FLOAT fFootLen, FLOAT fToesLen) {
     if (m_pModelData && !m_pLegIK) {

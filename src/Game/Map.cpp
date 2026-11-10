@@ -787,7 +787,7 @@ void CMap::main() {
 void setTransparency(const CCoord& crd, CModel& model) {
     if (!CCollMapCamera::m_pSemiModelList) return;
     FLOAT fAlpha = model.getAlphaScale();
-    FVECTOR ctr = crd.m_World.v[3];
+    FVECTOR ctr = crd.m_World.getTrans();
     SJ_FOREACH(CMCSemiModel, pEntry, *CCollMapCamera::m_pSemiModelList) {
         float dx = pEntry->center.x - ctr.x;
         if (dx < 0.0f) dx = -dx;
@@ -1123,7 +1123,7 @@ CSky::CSky(CTask* pInParent, void* pAZF, ZONEDATA* pZone) : CTaskSecondary(pInPa
     addCoord(m_modelSuu + 1);
     CCoord& crd = Crd(0);
     _unitMatrixVu0(crd.m_Local);
-    crd.m_Flag = 1;
+    crd.touch();
     USHORT nLayer = 3;
     for (INT i = 0; i < m_modelSuu; i++) {
         CModelBG& model = m_pModel[i];
@@ -1151,7 +1151,7 @@ CSky::CSky(CTask* pInParent, void* pAZF, ZONEDATA* pZone) : CTaskSecondary(pInPa
         if (!d) AssertApp(D_00480CE8, 1846, D_00480D08, 0);
         _unitMatrixVu0(Crd(i + 1).m_Local);
         Crd(i + 1).m_pParent = &Crd(0);
-        Crd(i + 1).m_Flag = 1;
+        Crd(i + 1).touch();
         model.assign(this, d, i + 1);
         if (model.getSemiModel()) model.getSemiModel()->setTestFlag(0x3360D);
         if (nLayer < 9) nLayer += 2;

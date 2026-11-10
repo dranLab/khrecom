@@ -19,7 +19,7 @@ static inline void _unitMatrixVu0(FMATRIX& m) {
 
 static inline void _resetCoord(CCoord& crd) {
     _unitMatrixVu0(crd.m_Local);
-    crd.m_Flag = 1;
+    crd.touch();
     crd.fix();
 }
 

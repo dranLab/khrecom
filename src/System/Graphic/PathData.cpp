@@ -140,7 +140,7 @@ void CPathVector::_init(const FVECTOR* pPath, INT iPathMax, BOOL bAlloc) {
     }
     CCoord* pCrd = &m_DDXYZCoord;
     _unitMatrixVu0(pCrd->m_Local);
-    pCrd->m_Flag = 1;
+    pCrd->touch();
     m_DDXYZLines.setCoord(&m_DDXYZCoord);
     Line.Term = 0;
     for (INT i = 0; i <= 40; i++) {
@@ -1017,7 +1017,7 @@ void CDbgCube::init(CCoord* pCrd) {
     if (pCrd) m_gpPolyStrip.setCoord(pCrd);
     else m_gpPolyStrip.setCoord(&m_Coord);
     _unitMatrixVu0(m_Coord.m_Local);
-    m_Coord.m_Flag = 1;
+    m_Coord.touch();
 }
 
 void CDbgCube::setCoord(FVECTOR* pvPos, FVECTOR* pvRot) {
@@ -1041,7 +1041,7 @@ void CDbgCube::setCoord(FVECTOR* pvPos, FVECTOR* pvRot) {
 }
 
 void CDbgCube::disp() {
-    m_Coord.m_Flag = 1;
+    m_Coord.touch();
     m_Coord.fix(CMainApp::getTickCount());
     m_gpPolyStrip.CGPrim::disp();
 }
@@ -1072,7 +1072,7 @@ void CDbgArrow::init(CCoord* pCrd) {
     if (pCrd) m_gpPolyStrip.setCoord(pCrd);
     else m_gpPolyStrip.setCoord(&m_Coord);
     _unitMatrixVu0(m_Coord.m_Local);
-    m_Coord.m_Flag = 1;
+    m_Coord.touch();
 }
 void CDbgArrow::setCoord(FVECTOR* pvPos, FVECTOR* pvRot) {
     FVECTOR vPos;
@@ -1103,7 +1103,7 @@ void CDbgArrow::setCoord(FVECTOR* pvPos, FVECTOR* pvRot) {
     m_Coord.m_Local.setTrans(vPos);
 }
 void CDbgArrow::disp() {
-    m_Coord.m_Flag = 1;
+    m_Coord.touch();
     m_Coord.fix(CMainApp::getTickCount());
     m_gpPolyStrip.CGPrim::disp();
 }

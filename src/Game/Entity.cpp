@@ -712,7 +712,7 @@ void CEntity::updateCoord() {
     FVECTOR pos = getPos();
     pos.w = 1.0f;
     m.setTrans(pos);
-    Crd(0).m_Flag = 1;
+    Crd(0).touch();
 }
 void CEntity::coordFix() {
     INT n = getCoordNum();
@@ -948,7 +948,7 @@ void CEntity::updateBadStatusEffect(HANDLE inHandle) {
     FVECTOR pos = *(FVECTOR*)((BYTE*)&Crd(other->BadStatusPos.iBoneIndex) + 0xc0);
     pos.y += Math3D::PointToPointDistance(ofs, pos);
     effect->Crd(0).m_Local.setTrans(pos);
-    effect->Crd(0).m_Flag = 1;
+    effect->Crd(0).touch();
 }
 void CEntity::setDamageNumber(const FVECTOR& inPos, INT inDamage) {
     if (!DebugWork::g_dw.sys.m_iDagameNumber) return;

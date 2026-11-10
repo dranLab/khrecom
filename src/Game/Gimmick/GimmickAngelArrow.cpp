@@ -249,7 +249,7 @@ void CGimmickAngelArrow::lastUpdate() {
     _unitMatrixVu0(mMat);
     RotMatrixY(mMat, mMat, m_addRot);
     MulMatrix(Crd(getBoneIndex("pl_rot", 0)).getLocalMatrix(), Crd(getBoneIndex("pl_rot", 0)).getLocalMatrix(), mMat);
-    Crd(0).m_Flag = 1;
+    Crd(0).touch();
 }
 
 void CGimmickAngelArrow::beginStateHitAttack() {

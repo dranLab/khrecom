@@ -336,7 +336,7 @@ void CGimmickCarry::CarryliftStart() {
     } else {
         changeMotionEx(0x1ADCF, 3, g_pPlayer->getMotionCurrentTime() + getFrameRate(), FALSE, 0, 0, 0);
     }
-    Crd(0).m_Flag = 1;
+    Crd(0).touch();
     updateCoord();
     coordFix();
     g_pPlayer->cancelLockon();
@@ -401,7 +401,7 @@ void CGimmickCarry::CarryThrow() {
     rot.z = 0.0f;
     setRot(rot);
     Crd(0).setParent(NULL);
-    Crd(0).m_Flag = 1;
+    Crd(0).touch();
     if (CGame::isSoraGame()) {
         changeMotionEx(0x1ADCE, 7, 0, FALSE, 0, 0, 0);
     } else {
@@ -500,7 +500,7 @@ void CGimmickCarry::CancelCarry() {
     rot.z = 0.0f;
     setRot(rot);
     Crd(0).setParent(NULL);
-    Crd(0).m_Flag = 1;
+    Crd(0).touch();
     if (CGame::isSoraGame()) {
         changeMotionEx(0x1ADCE, 7, 0, FALSE, 0, 0, 0);
     } else {

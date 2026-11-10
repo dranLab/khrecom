@@ -948,7 +948,7 @@ INT CAvatar::onAvatarStart(INT nCmd, void* pParam, INT nID) {
 INT CAvatar::onAvatarAttach(INT nCmd, void* pParam, INT nID) {
     CAvatar* pTarget = getAtel().getVSM()->getAvatar(nID);
     CCoord& crd = Crd(0);
-    *(CCoord**)((BYTE*)&crd + 0x4c) = &pTarget->Crd(pTarget->getBoneIndex((const CHAR*)pParam, 0));
+    crd.setParent(&pTarget->Crd(pTarget->getBoneIndex((const CHAR*)pParam, 0)));
     return -1;
 }
 INT CAvatar::onAvatarAttachEffect(INT nCmd, void* pParam, INT nID) {

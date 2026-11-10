@@ -3605,7 +3605,7 @@ void CBattleEnemy::updateSpotLight_() {
     pos.w = 1.0f;
     m.setTrans(pos);
     effect->getCoords()->Crd(0).m_Local = m;
-    effect->getCoords()->Crd(0).m_Flag = 1;
+    effect->getCoords()->Crd(0).touch();
 }
 BOOL CBattleEnemy::canCreateEnemyCard_() {
     if (CGame::isRikuGame()) return FALSE;

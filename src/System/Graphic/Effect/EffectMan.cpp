@@ -312,9 +312,9 @@ void CEffectMan::_setCoord(CEffect* pEff, INT nCNum, const CCoord* pParent, cons
         }
         if (pvPos) TransMatrix(*pLocal, *pLocal, *pvPos);
     }
-    crd.m_Flag = 1;
+    crd.touch();
     crd.fix();
-    crd.m_Flag = 1;
+    crd.touch();
 }
 HANDLE CEffectMan::setEffect(const CHAR* lpszInName, UINT nNo, ObjType::eObjType eType, const FVECTOR* pvPos, const FVECTOR* pvRot, FLOAT fWait) {
     EFFECT_DATA* pEffectData;
@@ -777,7 +777,7 @@ BOOL CEffectMan::_updateCoord(CEffect* effect) {
     }
     MulVector(effect->_scale(), effect->m_vScale, s_vEffKhComScale);
     effect->_updateSE();
-    effect->Crd(0).m_Flag = 1;
+    effect->Crd(0).touch();
     return TRUE;
 }
 void CEffectMan::_updateColor(CEffect* effect) {

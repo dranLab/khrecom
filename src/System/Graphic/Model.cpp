@@ -323,7 +323,7 @@ INT CModel::link(CCoords& crds) {
             nIdx = ((const BONELABEL*)m_pData->m_pBoneLabel)[i].m_ParentIndex;
             if (nIdx >= 0) crds.Crd(i).setParent(&crds.Crd(nIdx));
             crds.Crd(i).recalcWorldMatrix();
-            crds.Crd(i).m_Flag = 1;
+            crds.Crd(i).touch();
         }
     }
     if (m_pData->m_BoneIndex == 0) {
