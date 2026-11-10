@@ -546,8 +546,18 @@ Keep output small: one function's assembly at a time; `funcdiff` without `--full
   includes Gprim.h: a type move), FrecFont's parked makePkt can use _colToVec/_mulCol/_vecToCol, Gprim.h:827 unplaced.
 - **Done (cleanup/coord-unify-types, merged 2026-11-10, user decision):** FVECTOR/IVECTOR/FMATRIX, F_UL/G_* and
   CCoord (against the ref's Camera.h: line markers 1009-1072) live in System/Coord.h on the original's lines; Vector.h
-  is only CVector. Next: the free matrix wrappers at Coord.h:340-643 (build/coordh/NOTES.md); a "vu0.h" header in the
-  original calls FVECTOR::set (ModelMan's out-of-line calls, lines 18/19/38); Coord.h:1019-1020 and 87-201 unplaced.
+  is only CVector.
+- **Done (cleanup/coord-unify-wrappers, merged 2026-11-10, step 2):** Coord.h has the ref's `extern "C"` sceVu0 block
+  (64 local declarations gone), the ref's conversion operators of IVECTOR/FVECTOR/FMATRIX (`__opPA3_f`, `__opPA3_Cf`,
+  `__opRA3_f`) and the original's free inlines at 340-643 on their lines (InversMatrix 340/613, ClampVector 344,
+  UnitMatrix 354, RotMatrix/X/Y/Z 358-370, TransMatrix 396, CameraMatrix 407-418, ViewScreenMatrix 429-430,
+  InterVector/XYZ 477-482, GetMaxMinToVector8 521, SetRotTransPersMatrix 563-570, by-value ApplyMatrix 632-635 and
+  MulMatrix 640-643); the unit-local copies in ~70 units replaced, Coord.h line markers 330-650 equal the original's
+  in all 509 C++ units. Bodies pass `.m`/`.v` (through the conversion operators cse keeps addresses the original
+  recomputes). Some units include `coord.h` in lower case (Ride, CollUtilO, LightUnit, Atel, VSME, CollAttack,
+  CollMapCamera, CollUtilF). Left: the asm unit-matrix/mulMatrix copies are a "vu0.h" (vu0.h:391, 468; it also
+  calls FVECTOR::set out of line: ModelMan 18/19/38); Coord.h 770-955 (operators, FMATRIX), 87-201 and 1019-1020
+  unplaced; partials.py counts the conversion operators as extra methods (superset +1, a tool limit).
 - **Done (cleanup/vector-types, merged 2026-11-07; superseded 2026-11-10, now in Coord.h):** F_UL, G_XY, G_XYZ, G_RGBA, G_UV,
   G_ST at the end of System/Vector.h and the C++ QWdata after khtypes.h's u_int128 (the original's .mdebug type order,
   against the ref's placement; user decision). The former `D2MAN_H_PATH`/`RSRCDATA_H_FULL` entry is settled (checked 2026-11-07): RSRCDATA_H_FULL was dropped
