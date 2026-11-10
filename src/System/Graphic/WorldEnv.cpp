@@ -61,11 +61,11 @@ CBillboardHelper* _pBBHelper;
 
 static void _makeViewScreenMatrix();
 
-/* Parked: 0-8 of 177 lines (2026-11-08): this draft is the original source. Compiled with the original's own
- * anonymous-namespace name (c:/KHCOM/MainApp/System/Graphic/WorldEnv.cpp + suffix UPaaaa = pid 2588, via a rewritten .ii
- * line marker and a chosen pid) it matches every time; our build names the namespace src_..._WorldEnv.cpp + a random
- * pid suffix, which changes gcse PRE's hash order of the hoisted lui's (_vecFixCameraPos/Yd/Zd -> s0/s1/s3 rotate per
- * compile: MATCH in about 1 of 6 builds, else 5 or 8 lines; tools/drafts.py's copy has another path: 37-45).
+/* Parked: 6-15 of 177 lines (2026-11-10, after Coord.h step 2; drafts.py's copy: 46): this draft is the original source.
+ * Compiled with the original's own anonymous-namespace name (c:/KHCOM/MainApp/System/Graphic/WorldEnv.cpp + suffix
+ * UPaaaa = value 2588 of append_random_chars, pid mixed with the clock; via a rewritten .ii line marker and a chosen pid)
+ * it matches every time (2/2 on 2026-11-10); our build names the namespace src_..._WorldEnv.cpp + a random suffix, which
+ * changes gcse PRE's hash order of the hoisted lui's (_vecFixCameraPos/Yd/Zd -> s0/s1/s3 rotate per compile).
  * Needs the original anonymous-namespace name in the build (tools change). tried: .mdebug block tree (equal except operator new's nRA scope, no code change), fixed pid alone. */
 #if 0
 #line 84
