@@ -158,17 +158,18 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-09 | cleanup/heapman-nra: System/HeapMan.h new/new[] with the ref's function-level UINT nRA; 73 debug allocations in 29 files as new-expressions (HeapMan.h:153/159 line labels; 14 block trees now equal the original's, 89 closer), RET_ADDR and three local copies gone (user decision) | 162 | 8 | 0 | 663 (0) | 1041 |
 | 2026-11-09 | cleanup/heapman-ra-copies: the last local return-address asm copies in 20 files as new-expressions (JiminyMemo new[] x2, the rest new; 44 block trees closer, 0 further; CreateBullet's ending in the original's block shape) (user decision) | 162 | 8 | 0 | 663 (0) | 1041 |
 | 2026-11-09 | cleanup/gprim-unify: one Gprim.h on the original's line layout (GprimFull.h and the pragma pair gone), the original's free MMI/VU0 inlines at 752-1055, 37 stand-ins in 16 files replaced; 3 block trees now equal (user decision) | 162 | 8 | 0 | 662 (0) | 1039 |
+| 2026-11-10 | cleanup/coord-unify-types: Coord.h unification step 1: FVECTOR/IVECTOR/FMATRIX and F_UL/G_* from Vector.h, CCoord from Camera.h (line markers 1009-1072, against the ref owner, user decision) into System/Coord.h on the original's lines; Vector.h keeps CVector; EventTrap.h includes Gprim.h first (MATCH) | 160 | 8 | 0 | 661 (0) | 1054 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 162 (134 in 44 headers, 28 in 15 .cpp); MATCH: 1053
-  by category: method 30, data member 9, type 13, fwd decl 2, #include 13, changed in place 42, padding 2, gate 5, guessed 9, header-level 23, stand-in 10, other 4
+PARTIAL: 160 (132 in 45 headers, 28 in 15 .cpp); MATCH: 1054
+  by category: method 30, data member 9, type 12, fwd decl 2, #include 13, changed in place 42, padding 2, gate 5, guessed 9, header-level 22, stand-in 10, other 4
 stand-ins: 8 foreign in 5 files (6 names), 166 unattributed, 181 own
 duplicate class names across headers: 0
 padding: 2 arrays, 0 accessors
-mechanisms: 662 sites (0 untagged); #line: 1239
+mechanisms: 661 sites (0 untagged); #line: 1260
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
 classes: complete 1178, superset 16, partial 1, gated 3, missing 6, unattributed 8
 ```
@@ -189,7 +190,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 1.0 | `Game/Collision/CollUtil.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R1 | 1.0 | `Game/Collision/CollUtilA.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R1 | 1.0 | `System/Coord.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
-| R1 | 1.0 | `System/Vector.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R2 | 6.0 | `System/Graphic/Anim.h` | ready | 0 stand-in files, 0 dup headers, 6 gate users |  () | gated strings: ANIM_H_GETFLAG_DECL_ONLY |
 | R2 | 6.0 | `System/Graphic/modeldata.h` | ready | 0 stand-in files, 0 dup headers, 6 gate users |  () | gated strings: MODELDATA_H_TEXINFO |
 
@@ -237,7 +237,8 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/SceneEnv.h` | 1 | 1/0/0/0 | 38 |
 | `Game/SceneInfo.h` | 1 | 30/0/0/0 | 86 |
 | `System/Com.h` | 1 | 0/0/0/0 | 9 |
-| `System/Graphic/Camera.h` | 5 | 6/1/0/0 | 109 |
+| `System/Coord.h` | 3 | 8/3/0/0 | 266 |
+| `System/Graphic/Camera.h` | 2 | 6/0/0/0 | 93 |
 | `System/Graphic/Effect/EffectMan.h` | 1 | 2/0/0/0 | 173 |
 | `System/Graphic/Effect/ObjType.h` | 1 | 1/0/0/0 | 177 |
 | `System/Graphic/Effect/effect.h` | 3 | 5/1/0/0 | 77 |
@@ -258,8 +259,8 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/modeldata.h` | 2 | 3/0/0/1 | 82 |
 | `System/MainApp.h` | 2 | 1/0/0/1 | 274 |
 | `System/RsrcData.h` | 1 | 33/0/0/0 | 29 |
-| `System/SLContainer.h` | 4 | 0/0/0/0 | 253 |
-| `System/Vector.h` | 8 | 7/2/0/0 | 266 |
+| `System/SLContainer.h` | 4 | 0/0/0/0 | 245 |
+| `System/Vector.h` | 6 | 0/0/0/0 | 263 |
 
 ## Mechanisms
 
@@ -286,7 +287,6 @@ or `untagged`.
 | guard skip | `GAME_COLLISION_COLLUTILA_H` | 1 | 1 | the accessor only for includers that have the class (see above) |
 | guard skip | `GAME_ENTITY_H` | 1 | 1 | only for includers that have CEntity (see below) |
 | guard skip | `GAME_SCENEINFO_H` | 2 | 2 | initCard takes WORLD_ID: declared only where SceneInfo.h is included |
-| guard skip | `SYSTEM_COORD_H` | 1 | 1 | the Crd inlines need CCoords: only for includers with Coord.h before this (weak order) |
 | opt-out | `MAPENEMY_H_NO_COLL_ANIM` | 2 | 2 | the original has no BodyCollision.h/Anim.h strings |
 | opt-out site | `MAPENEMY_H_NO_COLL_ANIM` | 1 | 1 | the .rodata of Game/Enemy/MapEnemyManager and Game/Enemy/CreateEnemy has no BodyCollision.h/Anim.h
  * strings: they define MAPENEMY_H_NO_COLL_ANIM before includ |
