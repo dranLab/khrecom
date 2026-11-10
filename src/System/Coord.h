@@ -20,43 +20,17 @@ union FVECTOR {
     unsigned long _ul[2];
     unsigned int _ui[4];
     void init0() { asm volatile("sqc2 $vf0, 0x0(%0)" : : "r"(this)); }
-    void init() {
-        _q = 0;
-        w = 1.0f;
-    }
+    void init();
 #ifdef VECTOR_H_SET_CALL /* MATCH: setCall is defined before set, so it keeps a call (ModelMan calls FVECTOR::set out of line) */
     void setCall(FLOAT inX, FLOAT inY, FLOAT inZ, FLOAT inW) { set(inX, inY, inZ, inW); }
 #endif
-    void set(FLOAT inX, FLOAT inY, FLOAT inZ, FLOAT inW = 1.0f) {
-        x = inX;
-        y = inY;
-        z = inZ;
-        w = inW;
-    }
-    void setAll(FLOAT f) { x = y = z = w = f; }
+    void set(FLOAT inX, FLOAT inY, FLOAT inZ, FLOAT inW = 1.0f);
+    void setAll(FLOAT f);
     void setAllXYZ(FLOAT f) { x = y = z = f; }
     void zero(/* parameters unknown */);
-    void addRot(const FVECTOR& vInSrc) {
-        FVECTOR& vOut = *this;
-        FLOAT fPI = 3.1415927f;
-        INT nFlag;
-        __asm__ volatile("qmtc2.ni %3, $vf3\n" /* MATCH: one asm statement; a separate qmtc2 asm flushes cse, so the argument address stays in a copy register (Avatar RotateAvatarMain) */
-                         "vmr32.w $vf3, $vf3\n"
-                         "lqc2 $vf1, 0x0(%1)\n"
-                         "lqc2 $vf2, 0x0(%2)\n"
-                         "vadd.xyz $vf1, $vf1, $vf2\n"
-                         "vclipw.xyz $vf1, $vf3w\n"
-                         "vnop\n"
-                         "vnop\n"
-                         "vnop\n"
-                         "sqc2 $vf1, 0x0(%1)\n"
-                         "vnop\n"
-                         "cfc2.ni %0, $vi18\n"
-                         : "=r"(nFlag) : "r"(this), "r"(&vInSrc), "r"(fPI) : "memory");
-        if (nFlag & 0x3f) roundPI(vOut, nFlag);
-    }
+    void addRot(const FVECTOR& vInSrc);
     BOOL operator==(const FVECTOR& inV) const { return _ul[0] == inV._ul[0] && _ul[1] == inV._ul[1]; }
-    BOOL operator!=(const FVECTOR& inV) const { return _ul[0] != inV._ul[0] || _ul[1] != inV._ul[1]; }
+    BOOL operator!=(const FVECTOR& inV) const;
     void operator+=(const FVECTOR& in) {
         const float(&inV)[4] = in.v; /* MATCH: through the array (System/Graphic/LightUnit's betaShade) */
         x += inV[0];
@@ -130,12 +104,7 @@ union IVECTOR {
     u_long128 _q;
     unsigned long _ul[2];
     void init(/* parameters unknown */);
-    void set(INT _x, INT _y, INT _z, INT _w) {
-        x = _x;
-        y = _y;
-        z = _z;
-        w = _w;
-    }
+    void set(INT _x, INT _y, INT _z, INT _w);
     void setAll(/* parameters unknown */);
     void setAllXYZ(/* parameters unknown */);
     BOOL operator==(const IVECTOR& inV) const;
@@ -179,7 +148,7 @@ union FMATRIX {
     FVECTOR& getTransRef(/* parameters unknown */);
     void setTrans(const FVECTOR& vecIn) { v[3] = vecIn; }
     void set(/* parameters unknown */);
-    BOOL operator!=(const FMATRIX& inM) const { return v[0] != inM.v[0] || v[1] != inM.v[1] || v[2] != inM.v[2] || v[3] != inM.v[3]; }
+    BOOL operator!=(const FMATRIX& inM) const;
     BOOL operator==(const FMATRIX& inM) const { return v[0] == inM.v[0] && v[1] == inM.v[1] && v[2] == inM.v[2] && v[3] == inM.v[3]; }
     // PARTIAL: the ref's conversions are to _FMATRIX* / float(*)[4][4] / _FMATRIX& (Game/Bullet/Bullet needs the row pointer for sceVu0)
     operator _FMATRIX_ROWP() { return m; }
@@ -241,6 +210,46 @@ struct G_ST {
 #line 285
     void set(FLOAT _s, FLOAT _t) { s = _s; t = _t; }
 };
+
+/* The vector inlines with a place in the original's line markers, defined after the classes as there (IVECTOR::set
+ * at 679 sits between FVECTOR's addRot 654-673 and init 729): addRot 654-673, IVECTOR::set 679, init 729, set 730,
+ * setAll 733, FVECTOR::operator!= 754-756, FMATRIX::operator!= 952. */
+#line 652
+inline void FVECTOR::addRot(const FVECTOR& vInSrc) {
+    FVECTOR& vOut = *this;
+    FLOAT fPI = 3.1415927f;
+    INT nFlag;
+
+
+    __asm__ volatile("qmtc2.ni %3, $vf3\n" /* MATCH: one asm statement; a separate qmtc2 asm flushes cse, so the argument address stays in a copy register (Avatar RotateAvatarMain) */
+                     "vmr32.w $vf3, $vf3\n"
+                     "lqc2 $vf1, 0x0(%1)\n"
+                     "lqc2 $vf2, 0x0(%2)\n"
+                     "vadd.xyz $vf1, $vf1, $vf2\n"
+                     "vclipw.xyz $vf1, $vf3w\n"
+                     "vnop\n"
+                     "vnop\n"
+                     "vnop\n"
+                     "sqc2 $vf1, 0x0(%1)\n"
+                     "vnop\n"
+                     "cfc2.ni %0, $vi18\n"
+                     : "=r"(nFlag) : "r"(this), "r"(&vInSrc), "r"(fPI) : "memory");
+
+    if (nFlag & 0x3f) roundPI(vOut, nFlag);
+}
+#line 679
+inline void IVECTOR::set(INT _x, INT _y, INT _z, INT _w) { x = _x; y = _y; z = _z; w = _w; }
+#line 729
+inline void FVECTOR::init() { _q = 0; w = 1.0f; }
+inline void FVECTOR::set(FLOAT inX, FLOAT inY, FLOAT inZ, FLOAT inW) { x = inX; y = inY; z = inZ; w = inW; }
+#line 733
+inline void FVECTOR::setAll(FLOAT f) { x = y = z = w = f; }
+#line 754
+inline BOOL FVECTOR::operator!=(const FVECTOR& inV) const {
+    return _ul[0] != inV._ul[0] || _ul[1] != inV._ul[1];
+}
+#line 952
+inline BOOL FMATRIX::operator!=(const FMATRIX& inM) const { return v[0] != inM.v[0] || v[1] != inM.v[1] || v[2] != inM.v[2] || v[3] != inM.v[3]; }
 
 /* MATCH: CCoord is in System/Coord.h, not in Camera.h as the ref says: the original's line markers put its
  * constructor at Coord.h:1009-1016 and its accessors at Coord.h:1043-1072 (user decision 2026-11-10). */
