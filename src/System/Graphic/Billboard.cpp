@@ -30,7 +30,7 @@ static const FVECTOR s_vXd = {{1.f, 0.f, 0.f, 0.f}};
     "vopmsub.xyz $vf" #d ", $vf" #b ", $vf" #a "\n"
 
 CBillboardHelper::CBillboardHelper() {
-    m_matEye = *(const FMATRIX*)s_matEyeFix;
+    m_matEye.set(s_matEyeFix);
     m_vEyePos.set(0.f, 0.f, 0.f, 1.f);
     m_vEyeYd.set(0.f, 1.f, 0.f, 0.f);
     m_vEyeZd.set(0.f, 0.f, -1.f, 0.f);

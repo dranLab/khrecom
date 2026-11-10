@@ -692,8 +692,8 @@ void CAnim::_setUpdate(int nSkl, TIMEQ tqFr, BOOL bClipped) {
                 *pQuat = *pQuatHokan;
             } else {
                 Quaternion::QuaternionSlerp(pQuat->vQuatRotate, pQuat->vQuatRotate, pQuatHokan->vQuatRotate, racio);
-                pQuat->vTrans = pQuat->vTrans + (pQuatHokan->vTrans - pQuat->vTrans) * racio;
-                pQuat->vScale = pQuat->vScale + (pQuatHokan->vScale - pQuat->vScale) * racio;
+                pQuat->vTrans = pQuat->vTrans + racio * (pQuatHokan->vTrans - pQuat->vTrans);
+                pQuat->vScale = pQuat->vScale + racio * (pQuatHokan->vScale - pQuat->vScale);
                 Quaternion::QuaternionToMatrix(crd.getLocalMatrix(), pQuat->vQuatRotate, pQuat->vTrans);
                 vScale = pQuat->vScale;
             }

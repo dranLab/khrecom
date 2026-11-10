@@ -626,13 +626,13 @@ INT Math3D::SphereIntersectRay(FVECTOR* outIntersect, const FVECTOR& inSphere, c
         FLOAT t1 = _sqrtf(D);
         FLOAT t0 = (-b - t1) * 0.5f * a;
         t1 = (-b + t1) * 0.5f * a;
-        outIntersect[0] = Q + inV * t0 + inSphere;
-        outIntersect[1] = Q + inV * t1 + inSphere;
+        outIntersect[0] = Q + t0 * inV + inSphere;
+        outIntersect[1] = Q + t1 * inV + inSphere;
         return 2;
     }
     if (D == 0.0f) {
         FLOAT t = (-b - _sqrtf(D)) * 0.5f * a;
-        outIntersect[0] = Q + inV * t + inSphere;
+        outIntersect[0] = Q + t * inV + inSphere;
         return 1;
     }
     return 0;

@@ -158,11 +158,11 @@ C2DSprObj::C2DSprObj(SeqControl* pSeqControl, const TexInfo* pTexInfo) {
     m_nPoly = 0;
     m_fgDisp = 0;
     m_Flg = 0;
-    m_vPos._u64 = 0;
-    m_vOfs._u64 = 0;
-    m_vSwy._u64 = 0;
-    m_vScl.x = 1.0f;
-    m_vScl.y = 1.0f;
+    m_vPos.init0();
+    m_vOfs.init0();
+    m_vSwy.init0();
+    m_vScl.set(1.0f, 1.0f);
+
     m_vCol.set(1.0f, 1.0f, 1.0f, 1.0f);
     m_pSeqControl = pSeqControl;
     m_pTexInfo = pTexInfo;

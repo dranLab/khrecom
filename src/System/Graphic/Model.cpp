@@ -347,7 +347,7 @@ CCoord& CModel::getCrd(INT idx) {
 }
 INT CModel::getCoordNum() const {
     if (!(m_pCrds)) AssertApp(__FILE__, 737, "m_pCrds", 0);
-    return *(INT*)((BYTE*)m_pCrds + 4);
+    return m_pCrds->getCoordNum();
 }
 void CModel::setLocal(INT index) {
     if (!(m_pCrds != __null)) AssertApp(__FILE__, 743, "m_pCrds != __null", 0);

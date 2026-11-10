@@ -56,7 +56,7 @@ void CCoord::fix(TIMEQ tq) {
     CCoord* pParent = m_pParent;
 
     if (pParent && pParent->m_hHandle != m_hHandle) {
-        CCoords* pCrds = CCoordMan::getCoords(pParent->m_hHandle);
+        const CCoords* pCrds = CCoordMan::getCoords(pParent->m_hHandle);
         if (!pCrds || !pCrds->Crd()) {
             TRACE(" CCoord : \x83" "A\x83^\x83" "b\x83`\x90\xe6\x82\xcc\x90" "e\x82\xaa\x82\xa2\x82\xc8\x82\xad\x82\xc8\x82\xc1\x82\xc4\x82\xa2\x82\xdc\x82\xb7!! this:%08x Parent:%08x Ex:%08x ExP:%08x\n",
                   this, pParent, &CCoordMan::getExceptCoord(FALSE), CCoordMan::getExceptCoord(FALSE).m_pParent);
@@ -247,7 +247,7 @@ void CCoord::recalcWorldMatrix() {
     CCoord* pParent = m_pParent;
 
     if (pParent && pParent->m_hHandle != m_hHandle) {
-        CCoords* pCrds = CCoordMan::getCoords(pParent->m_hHandle);
+        const CCoords* pCrds = CCoordMan::getCoords(pParent->m_hHandle);
         if (!pCrds || !pCrds->Crd()) {
             TRACE(" CCoord : \x83" "A\x83^\x83" "b\x83`\x90\xe6\x82\xcc\x90" "e\x82\xaa\x82\xa2\x82\xc8\x82\xad\x82\xc8\x82\xc1\x82\xc4\x82\xa2\x82\xdc\x82\xb7!! this:%08x Parent:%08x Ex:%08x ExP:%08x\n",
                   this, pParent, &CCoordMan::getExceptCoord(FALSE), CCoordMan::getExceptCoord(FALSE).m_pParent);
@@ -313,7 +313,7 @@ void CCoord::recalcLocalMatrix() {
     CCoord* pParent = m_pParent;
 
     if (pParent && pParent->m_hHandle != m_hHandle) {
-        CCoords* pCrds = CCoordMan::getCoords(pParent->m_hHandle);
+        const CCoords* pCrds = CCoordMan::getCoords(pParent->m_hHandle);
         if (!pCrds || !pCrds->Crd()) {
             TRACE(" CCoord : \x83" "A\x83^\x83" "b\x83`\x90\xe6\x82\xcc\x90" "e\x82\xaa\x82\xa2\x82\xc8\x82\xad\x82\xc8\x82\xc1\x82\xc4\x82\xa2\x82\xdc\x82\xb7!! this:%08x Parent:%08x Ex:%08x ExP:%08x\n",
                   this, pParent, &CCoordMan::getExceptCoord(FALSE), CCoordMan::getExceptCoord(FALSE).m_pParent);
@@ -371,7 +371,7 @@ BOOL CCoords::addCoord(UINT nNum, CCoord* pParent) {
     m_nCrdNum = nNum;
     if (pParent) {
         for (i = 0; i < nNum; i++) {
-            m_pCrdArray[i].setParent(pParent);
+            m_pCrdArray[i].m_pParent = pParent;
         }
     }
     _setCoordHandle(m_hSysHandle);

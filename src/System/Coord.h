@@ -108,7 +108,7 @@ union FMATRIX {
         FLOAT w;
     };
     void init(/* parameters unknown */);
-    void initWithScale(/* parameters unknown */);
+    void initWithScale(const FVECTOR& vScale);
     void initC3(/* parameters unknown */);
     void initTrans(/* parameters unknown */);
     /* on the original's lines (line markers: getTrans 158, getTransRef 159/160, setTrans 161) */
@@ -124,6 +124,20 @@ union FMATRIX {
     operator _FMATRIX*();
     operator const _FMATRIX*() const;
     operator _FMATRIX&() const;
+};
+
+union FVECTOR2 {
+    float v[2];
+    struct {
+        FLOAT x;
+        FLOAT y;
+    };
+    ULONGLONG _u64;
+    LONGLONG _s64;
+    /* on the original's lines (line markers: set 200, init0 201) */
+#line 200
+    void set(FLOAT fX, FLOAT fY) { x = fX; y = fY; }
+    void init0() { _u64 = 0; }
 };
 
 /* The basic graphics types: in every original that has FVECTOR (274) they come right after the vector types and
@@ -461,6 +475,23 @@ inline FVECTOR FVECTOR::operator-() const { return -1.0f * *this; }
 inline FVECTOR::operator _FVECTOR*() { return &v; }
 inline FVECTOR::operator const _FVECTOR*() const { return &v; }
 inline FVECTOR::operator _FVECTOR&() const { return *(_FVECTOR*)&v; }
+#line 919
+inline void FMATRIX::initWithScale(const FVECTOR& vScale) {
+    /* MATCH: the scale diagonal as one asm on fixed registers with only input operands (outputs or C stores make
+     * gcc reload the scale's owner afterwards: Entity updateCoord) */
+
+    asm volatile("lq $5, 0x0(%0)\n"
+                 "pextuw $2, $5, $0\n"
+                 "pextlw $4, $0, $2\n"
+                 "pextlw $2, $0, $5\n"
+                 "pextuw $3, $2, $0\n"
+                 "pcpyld $2, $0, $2\n"
+                 "sq $2, 0x0(%1)\n"
+                 "sq $3, 0x10(%1)\n"
+                 "sq $4, 0x20(%1)\n"
+                 "sqc2 $vf0, 0x30(%1)"
+                 : : "r"(&vScale), "r"(this) : "$2", "$3", "$4", "$5");
+}
 #line 949
 inline void FMATRIX::set(const _FMATRIX& inM) { v[0].set(inM[0]); v[1].set(inM[1]); v[2].set(inM[2]); v[3].set(inM[3]); }
 #line 951
