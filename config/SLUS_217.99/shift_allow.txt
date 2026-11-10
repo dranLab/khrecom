@@ -95,3 +95,7 @@ asm/SLUS_217.99/data/lib/nodebug/__CTOR_LIST__.data.o .data 0x6D88 VU microcode 
 asm/SLUS_217.99/data/lib/nodebug/__CTOR_LIST__.data.o .data 0x6DC8 VU microcode instruction word (pppVu1ShapeProg)
 asm/SLUS_217.99/data/lib/nodebug/__FRAME_BEGIN__0.data.o .data 0xC DWARF CIE bytes (ra column 64, DW_CFA_def_cfa $sp 0, DW_CFA_register 64 $31)
 asm/SLUS_217.99/data/lib/table.rodata.o .rodata 0x13B4 16-bit table values (112, 89) (Sony lib table)
+asm/SLUS_217.99/data/lib/table.rodata.o .rodata 0x10 chswTable: 16-bit values (0, 16) of the ATRAC3 channel switch table (0x10 bytes, can_reference:False)
+asm/SLUS_217.99/data/lib/table.rodata.o .rodata 0x14 chswTable: 16-bit values (16, 16) of the ATRAC3 channel switch table (0x10 bytes, can_reference:False)
+src/Form/Menu/RoomCreation.o .text 0x4B00 compiled C: getRoomInfo returns &roomCreationeRoomInfo[kind - 0xA1] after checking kind - 0xA1 < 29, so the base - 0x284 is never accessed itself
+src/System/Graphic/FrecFont.o .text 0xFF8 compiled C: *(s_fntFixColor + nL - 0x50) inside "else if (nL < 0x60)" after nL >= 0x50, so index 0..15 of the 16 entries; base - 0x140 is never accessed itself

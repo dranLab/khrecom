@@ -393,7 +393,7 @@ def write_shift_links(n, cfg_dir: str, opts: dict, objects: list[str]) -> None:
     imports = f"{cfg_dir}/dll_imports.ld"
     n.rule(
         "ld_shift",
-        f"{CROSS}ld -EL -nostdlib --no-check-sections --emit-relocs -Map $mapfile -T $ldscript -T {extra}"
+        f"{CROSS}ld -EL -nostdlib --emit-relocs -Map $mapfile -T $ldscript -T {extra}"
         f" -T {imports} -o $out",
         description="LD (shifted) $out",
     )
@@ -512,7 +512,7 @@ def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg
         n.rule("bin", f"{CROSS}ld -EL -r -b binary -o $out $in", description="BIN $in")
         n.rule(
             "ld",
-            f"{CROSS}ld -EL -nostdlib --no-check-sections -Map $mapfile -T $ldscript $extra_scripts -o $out",
+            f"{CROSS}ld -EL -nostdlib -Map $mapfile -T $ldscript $extra_scripts -o $out",
             description="LD $out",
         )
         n.rule("objcopy", f"{CROSS}objcopy -O binary --gap-fill=0x00 $in $out", description="OBJCOPY $out")

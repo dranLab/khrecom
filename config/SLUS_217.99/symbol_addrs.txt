@@ -422,10 +422,11 @@ _vt$t7CVector1Z7G_STRIP_00481140 = 0x00481140; // size:0x18
 _end = 0x006A0EF8; // absolute:True
 _stack_size = 0x00040000; // absolute:True
 
-// port step 1 (S3): VU microprograms in the DVP data (lib/nodebug/__CTOR_LIST__): instruction words, never pointers
+// port step 1 (S3): data that holds no pointers although words look like code addresses: VU microprograms in the DVP data (lib/nodebug/__CTOR_LIST__): instruction words, never pointers
 // (splat took some for references: D_004005A8, D_00449CD8, ...). My_dma_start, a real DMA chain, keeps its references.
 My_VU0_start = 0x003BB760; // can_reference:False
 vu1mpg_start = 0x003BC1A0; // can_reference:False
 vu1mpg2_start = 0x003BF790; // can_reference:False
 pppVu1FogShapeProg = 0x003C1B10; // can_reference:False
 pppVu1ShapeProg = 0x003C2320; // can_reference:False
+chswTable = 0x004FD068; // can_reference:False

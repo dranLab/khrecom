@@ -64,14 +64,17 @@ class Image:
         return struct.unpack_from("<I", self.data, i)[0] if 0 <= i <= len(self.data) - 4 else None
 
 
-def relocations(elf: Path) -> dict[int, str]:
+def relocations(elf: Path) -> tuple[dict[int, str], dict[int, tuple[str, int, str]]]:
+    """offset -> type, and offset -> (type, symbol value, symbol name)."""
     out = subprocess.run([f"{CROSS}readelf", "-rW", str(elf)], capture_output=True, text=True, check=True).stdout
-    relocs = {}
+    relocs, detail = {}, {}
     for line in out.splitlines():
         parts = line.split()
         if len(parts) >= 3 and parts[2].startswith("R_MIPS_"):
             relocs[int(parts[0], 16)] = parts[2]
-    return relocs
+            if len(parts) >= 5:
+                detail[int(parts[0], 16)] = (parts[2], int(parts[3], 16), parts[4])
+    return relocs, detail
 
 
 def symbols(elf: Path, absolute: bool = False) -> list[tuple[int, str]]:
@@ -126,7 +129,7 @@ def main() -> None:
         return p[2] + (addr - p[0]) if p else None
 
     mi, si = Image(m_elf), Image(s_elf)
-    relocs = relocations(s_elf)
+    relocs, reloc_detail = relocations(s_elf)
     m_syms, s_syms = symbols(m_elf), symbols(s_elf)
     sym_starts = {a for a, _ in m_syms}
     linker_names = {"_gp", "_end", "end"}  # defined by the linker scripts, not by an object
@@ -205,6 +208,46 @@ def main() -> None:
                 if (wm >> 16) != (ws >> 16):
                     errors.append(f"{where_s}: {rel} changed the instruction {wm:#010x} -> {ws:#010x}")
 
+    # symbol + offset that lands in another input section than the symbol: the two can drift apart in a layout
+    # (splat expressed _gp as "<a .bss variable> + 0x2130"). Checked in the shifted image, by the final values.
+    s_pieces = sorted((p[2], p[1], p[3], p[4]) for p in pieces)
+    s_starts = [p[0] for p in s_pieces]
+
+    def s_piece(addr: int):
+        i = bisect.bisect_right(s_starts, addr) - 1
+        return s_pieces[i][2:] if i >= 0 and addr < s_pieces[i][0] + s_pieces[i][1] else None
+
+    crossing = []
+    lo_by_sym = defaultdict(list)
+    for off_s, (rtype, value, name) in reloc_detail.items():
+        if rtype == "R_MIPS_LO16":
+            lo_by_sym[name].append(off_s)
+    for name in lo_by_sym:
+        lo_by_sym[name].sort()
+    for off_s, (rtype, value, name) in sorted(reloc_detail.items()):
+        if rtype == "R_MIPS_32":
+            target = si.word(off_s)
+        elif rtype == "R_MIPS_HI16":
+            los = lo_by_sym.get(name, [])
+            j = bisect.bisect_right(los, off_s)
+            if j >= len(los) or los[j] - off_s > 0x400:
+                continue
+            lo = si.word(los[j]) & 0xFFFF
+            target = (((si.word(off_s) & 0xFFFF) << 16) + (lo - 0x10000 if lo & 0x8000 else lo)) & 0xFFFFFFFF
+        else:
+            continue
+        if target is None or name in linker_names or not value or name.startswith("."):
+            continue  # section symbols (.cod): --emit-relocs' form of references to local symbols
+        a, b = s_piece(value), s_piece(target)
+        if a and b and a != b:
+            i = bisect.bisect_right(s_starts, off_s) - 1
+            obj_r, sec_r, off_r = s_pieces[i][2], s_pieces[i][3], off_s - s_pieces[i][0]
+            if (obj_r.replace(f"build/{version}/", ""), sec_r, off_r) in allow:
+                cleared += 1
+                continue
+            crossing.append(f"{obj_r} {sec_r} 0x{off_r:X}: {rtype} {name} ({value:#x}) + "
+                            f"{target - value:#x} lands in {b[0]} {b[1]}, not in {a[0]} {a[1]}")
+
     misaligned = []
     for addr, name in m_syms:
         p = where(addr)
@@ -221,20 +264,22 @@ def main() -> None:
              f"errors: {len(errors)}", f"suspects: {len(suspects)} (+{cleared} cleared by shift_allow.txt)",
              f"compiled constants in the image range (not failed): {len(compiled_hits)}",
              f"lost alignment: {len(misaligned)}",
+             f"symbol + offset into another section: {len(crossing)}",
              f"review: {sum(review.values())} R_MIPS_32 words in splat data pointing into the middle of data "
              f"({dict(review.most_common(8))})"]
     detail = []
     for title, items in (("errors", errors), ("suspects", suspects), ("lost alignment", misaligned),
-                         ("review", review_lines), ("compiled constants", compiled_hits)):
+                         ("crossing", crossing), ("review", review_lines), ("compiled constants", compiled_hits)):
         if items:
             detail += [f"\n== {title}"] + items
     report.write_text("\n".join(lines + detail) + "\n", encoding="utf-8")
     print("\n".join(lines))
-    for title, items in (("errors", errors), ("suspects", suspects), ("lost alignment", misaligned)):
+    for title, items in (("errors", errors), ("suspects", suspects), ("lost alignment", misaligned),
+                         ("crossing", crossing)):
         for item in items[: args.details]:
             print(f"  [{title}] {item}")
     print(f"full report: {report.relative_to(ROOT)}")
-    sys.exit(1 if errors or suspects or misaligned else 0)
+    sys.exit(1 if errors or suspects or misaligned or crossing else 0)
 
 
 if __name__ == "__main__":

@@ -6,6 +6,9 @@ presets:
   # code addresses, jump tables, function pointers in data
   text128:
     - {section: .text, after: crt0, size: 0x80}
+  # crt0 moves too (the entry point; references to its labels, like lib/table's false func_00100000)
+  text0:
+    - {section: .text, after: start, size: 0x80}
   # data pointers, DMA chains, _gp-relative data, _end
   data128:
     - {section: .data, after: start, size: 0x80}
