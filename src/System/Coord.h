@@ -187,7 +187,8 @@ union FMATRIX {
 
 /* The basic graphics types: in every original that has FVECTOR (274) they come right after the vector types and
  * before CCoord, in this order (the .mdebug type order; the ref spreads them over Fnt.h, Wnd.h, 2DSeqObj.h, Gprim.h
- * and VSME.h). */
+ * and VSME.h). Their set()s are one-liners on the original's lines (the line markers: 233, 245/246, 262/263, 274,
+ * 285). */
 union F_UL {
     FLOAT f;
     ULONG ul;
@@ -196,25 +197,17 @@ union F_UL {
 struct G_XY {
     FIX4 x;
     FIX4 y;
-    void set(FIX4 _x, FIX4 _y) {
-        x = _x;
-        y = _y;
-    }
+#line 233
+    void set(FIX4 _x, FIX4 _y) { x = _x; y = _y; }
 };
 
 struct G_XYZ {
     FIX4 x;
     FIX4 y;
     FIX4 z;
-    void set(FIX4 _x, FIX4 _y, FIX4 _z) {
-        x = _x;
-        y = _y;
-        z = _z;
-    }
-    void set(FIX4 _x, FIX4 _y) {
-        x = _x;
-        y = _y;
-    }
+#line 245
+    void set(FIX4 _x, FIX4 _y, FIX4 _z) { x = _x; y = _y; z = _z; }
+    void set(FIX4 _x, FIX4 _y) { x = _x; y = _y; }
     void bufferZ(/* parameters unknown */);
 };
 
@@ -230,38 +223,23 @@ struct G_RGBA {
         UINT c;
         unsigned char v[4];
     };
-
-    void set(UBYTE _r, UBYTE _g, UBYTE _b, UBYTE _a) {
-        r = _r;
-        g = _g;
-        b = _b;
-        a = _a;
-    }
-
-    void set(UBYTE _r, UBYTE _g, UBYTE _b) {
-        r = _r;
-        g = _g;
-        b = _b;
-    }
+#line 262
+    void set(UBYTE _r, UBYTE _g, UBYTE _b, UBYTE _a) { r = _r; g = _g; b = _b; a = _a; }
+    void set(UBYTE _r, UBYTE _g, UBYTE _b) { r = _r; g = _g; b = _b; }
 };
 
 struct G_UV {
     USHORT u;
     USHORT v;
-
-    void set(USHORT _u, USHORT _v) {
-        u = _u;
-        v = _v;
-    }
+#line 274
+    void set(USHORT _u, USHORT _v) { u = _u; v = _v; }
 };
 
 struct G_ST {
     FLOAT s;
     FLOAT t;
-    void set(FLOAT _s, FLOAT _t) {
-        s = _s;
-        t = _t;
-    }
+#line 285
+    void set(FLOAT _s, FLOAT _t) { s = _s; t = _t; }
 };
 
 /* MATCH: CCoord is in System/Coord.h, not in Camera.h as the ref says: the original's line markers put its
@@ -371,8 +349,16 @@ public:
     BOOL addCoord(UINT nNum, CCoord* pParent);
     void delCoord();
     HANDLE setSysFix(BOOL bSet, _PROC_PRIO pp);
+    /* the inlines on the original's lines (line markers: getSysHandle 1117, getCoordNum 1120, Crd 1124-1155,
+     * getLocalMatrix 1158, getWorldMatrix 1161, isSysUpdate 1176) */
+#line 1117
     HANDLE getSysHandle() const { return m_hSysHandle; }
+
+
     INT getCoordNum() const { return m_nCrdNum; }
+
+
+
     CCoord& Crd(UINT nIndex) {
         if (m_nCrdNum && m_pCrdArray && nIndex < m_nCrdNum) {
             return m_pCrdArray[nIndex];
@@ -380,6 +366,8 @@ public:
         _coord_alart(nIndex);
         return getExceptCoord();
     }
+
+
     CCoord& Crd(UINT nIndex) const {
         if (m_nCrdNum && m_pCrdArray && nIndex < m_nCrdNum) {
             return m_pCrdArray[nIndex];
@@ -387,21 +375,27 @@ public:
         _coord_alart(nIndex);
         return getExceptCoord();
     }
+
+
     CCoord* Crd() {
-        if (m_nCrdNum && m_pCrdArray) {
+        if (m_nCrdNum && m_pCrdArray)
             return m_pCrdArray;
-        }
         _coord_nullalart();
         return __null;
     }
+
+
     CCoord* Crd() const {
-        if (m_nCrdNum && m_pCrdArray) {
+        if (m_nCrdNum && m_pCrdArray)
             return m_pCrdArray;
-        }
         _coord_nullalart();
         return __null;
     }
+
+
     FMATRIX& getLocalMatrix(UINT nIndex) { return Crd(nIndex).m_Local; }
+
+
     FMATRIX& getWorldMatrix(UINT nIndex) const { return Crd(nIndex).m_World; }
     void update(TIMEQ nTQ);
     void touch();
@@ -409,6 +403,7 @@ public:
 
 private:
     void _setCoordHandle(HANDLE h);
+#line 1176
     BOOL isSysUpdate(_PROC_PRIO pp) { return m_iFlags & pp; }
     void setSysHandle(HANDLE h);
     CCoord& getExceptCoord();
