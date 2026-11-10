@@ -3,10 +3,6 @@
 #include "System/TaskMan.h"
 #include "System/Task.h"
 #include "System/Coord.h"
-/* effect_inl.h defines these only when Coord.h comes first, but effect.h's strings come first in .rodata */
-inline CCoord& CEffect::Crd(INT nNum) { return m_pCrds->Crd(nNum); }
-inline CCoord& CEffect::Crd(INT nNum) const { return m_pCrds->Crd(nNum); }
-inline INT CEffect::getCoordNum() const { return m_pCrds->getCoordNum(); }
 #define GPRIM_H_PATH "System/Graphic/GPrim.h" /* MATCH: this unit names Gprim.h so (header default "System/Graphic/Gprim.h") */
 #include "System/Graphic/Gprim.h"
 #include "Game/Entity.h"

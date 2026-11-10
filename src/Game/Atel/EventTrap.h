@@ -2,8 +2,8 @@
 #define GAME_ATEL_EVENTTRAP_H
 
 #include "khtypes.h"
+#include "System/Graphic/Gprim.h" /* MATCH: before Vector.h: CCoord (System/Coord.h) is defined after Gprim.h's classes, else ~CEventBox is emitted after CEventLine's ctor */
 #include "System/Vector.h"
-#include "System/Graphic/Gprim.h"
 #include "System/Graphic/Camera.h"
 #include "Game/Collision/CollUtilA.h"
 
