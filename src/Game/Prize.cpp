@@ -314,18 +314,18 @@ __asm__(".globl _5Prize$g_PrizeDataTbl");
 
 static inline void _setNewState(CState*& p, CState& NewState) { p = &NewState; }
 
-static inline void _unitMatrixVu0(FMATRIX& m) {
-    asm volatile("vmr32.xyzw $vf1, $vf0\n"
-                 "sqc2 $vf0, 0x30(%0)\n"
-                 "vmr32.xyzw $vf2, $vf1\n"
-                 "sqc2 $vf1, 0x20(%0)\n"
-                 "vmr32.xyzw $vf3, $vf2\n"
-                 "sqc2 $vf2, 0x10(%0)\n"
-                 "sqc2 $vf3, 0x0(%0)\n"
-                 :
-                 : "r"(&m)
-                 : "memory");
-}
+
+
+
+
+
+
+
+
+
+
+
+
 
 CPrize::CPrize(CTask* inParent)
     : CEntity(inParent, (ObjType::eObjType)6), m_hEffectHandle(0), m_bHoming(FALSE), m_bSECall(FALSE),
@@ -459,7 +459,7 @@ void CPrize::flyHigh(BOOL bAll) {
     FVECTOR v;
     v.set(0.0f, 0.0f, 1.0f, 1.0f);
     FMATRIX m;
-    _unitMatrixVu0(m);
+    m.init();
     RotMatrixX(m, m, rot.x);
     RotMatrixY(m, m, rot.y);
     RotMatrixZ(m, m, rot.z);
@@ -547,7 +547,7 @@ void CPrize::prizeMain_() {
                 effect->scale().z = s;
                 FVECTOR v;
                 FMATRIX m;
-                _unitMatrixVu0(m);
+                vu0UnitMatrix(m);
                 RotMatrixY(m, m, 0.5934119f);
                 ApplyMatrix(m_vGetVel, m, m_vGetVel);
                 ScaleVectorXYZ(v, m_vGetVel, s);
@@ -667,7 +667,7 @@ void CPrize::cardMain_() {
                 setScale(scale);
                 FVECTOR v;
                 FMATRIX m;
-                _unitMatrixVu0(m);
+                m.init();
                 RotMatrixY(m, m, 0.5934119f);
                 ApplyMatrix(m_vGetVel, m, m_vGetVel);
                 ScaleVectorXYZ(v, m_vGetVel, s);
@@ -778,7 +778,7 @@ void CPrize::cardMainSpecial_() {
                 setScale(scale);
                 FVECTOR v;
                 FMATRIX m;
-                _unitMatrixVu0(m);
+                m.init();
                 RotMatrixY(m, m, 0.5934119f);
                 ApplyMatrix(m_vGetVel, m, m_vGetVel);
                 ScaleVectorXYZ(v, m_vGetVel, s);

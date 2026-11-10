@@ -671,35 +671,35 @@ void CEntity::updateCoord() {
     if (m_pMove->isQuaternion()) {
         FMATRIX mat;
         Quaternion::QuaternionToMatrix(mat, m_pMove->getQuaternion());
-        asm volatile("lqc2 $vf2, 0x0(%0)\n"
-                     "lqc2 $vf3, 0x10(%0)\n"
-                     "lqc2 $vf4, 0x20(%0)\n"
-                     "lqc2 $vf5, 0x30(%0)\n"
-                     "lqc2 $vf6, 0x0(%1)\n"
-                     "lqc2 $vf7, 0x10(%1)\n"
-                     "lqc2 $vf8, 0x20(%1)\n"
-                     "lqc2 $vf9, 0x30(%1)\n"
-                     "vmulax.xyzw $ACC, $vf2, $vf6x\n"
-                     "vmadday.xyzw $ACC, $vf3, $vf6y\n"
-                     "vmaddaz.xyzw $ACC, $vf4, $vf6z\n"
-                     "vmaddw.xyzw $vf6, $vf5, $vf6w\n"
-                     "vmulax.xyzw $ACC, $vf2, $vf7x\n"
-                     "vmadday.xyzw $ACC, $vf3, $vf7y\n"
-                     "vmaddaz.xyzw $ACC, $vf4, $vf7z\n"
-                     "vmaddw.xyzw $vf7, $vf5, $vf7w\n"
-                     "vmulax.xyzw $ACC, $vf2, $vf8x\n"
-                     "vmadday.xyzw $ACC, $vf3, $vf8y\n"
-                     "vmaddaz.xyzw $ACC, $vf4, $vf8z\n"
-                     "vmaddw.xyzw $vf8, $vf5, $vf8w\n"
-                     "vmulax.xyzw $ACC, $vf2, $vf9x\n"
-                     "vmadday.xyzw $ACC, $vf3, $vf9y\n"
-                     "vmaddaz.xyzw $ACC, $vf4, $vf9z\n"
-                     "vmaddw.xyzw $vf9, $vf5, $vf9w\n"
-                     "sqc2 $vf6, 0x0(%0)\n"
-                     "sqc2 $vf7, 0x10(%0)\n"
-                     "sqc2 $vf8, 0x20(%0)\n"
-                     "sqc2 $vf9, 0x30(%0)"
-                     : : "r"(&m), "r"(&mat) : "memory");
+        vu0MulMatrix(m, m, mat);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     } else if (m_uiEntityFlag & 0x2000) {
         if (!(m_uiEntityFlag & 0x200)) RotMatrixZ(m, m, m_pMove->getRot().z);
         if (!(m_uiEntityFlag & 0x100)) RotMatrixY(m, m, m_pMove->getRot().y);

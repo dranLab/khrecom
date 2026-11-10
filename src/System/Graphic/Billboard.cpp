@@ -54,20 +54,7 @@ void CBillboardHelper::calcBillboardMatrix(FMATRIX& inMat, const FVECTOR& vInPos
         pmatEye = &matEyeTmp;
     }
     FVECTOR vEyePosTmp;
-    asm volatile(
-        "lqc2 $vf8, 0x0(%1)\n"
-        "lqc2 $vf4, 0x0(%2)\n"
-        "lqc2 $vf5, 0x10(%2)\n"
-        "lqc2 $vf6, 0x20(%2)\n"
-        "lqc2 $vf7, 0x30(%2)\n"
-        "vmulax.xyzw $ACC, $vf4, $vf8x\n"
-        "vmadday.xyzw $ACC, $vf5, $vf8y\n"
-        "vmaddaz.xyzw $ACC, $vf6, $vf8z\n"
-        "vmaddw.xyzw $vf8, $vf7, $vf8w\n"
-        "sqc2 $vf8, 0x0(%0)\n"
-        :
-        : "r"(&vEyePosTmp), "r"(&vInEyePos), "r"(pmatEye)
-        : "memory");
+    vu0ApplyMatrix(vEyePosTmp, *pmatEye, vInEyePos);
     calcBillboardMatrixImpl(inMat, vInPos, vEyePosTmp, s_vYd, vInEyeZd, nInType);
 }
 

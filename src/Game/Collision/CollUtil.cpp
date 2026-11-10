@@ -266,37 +266,37 @@ static inline FLOAT _getLength(const FVECTOR& p0, const FVECTOR& p1) {
     return ret;
 }
 
-static inline void _mulMatrix(FMATRIX& res, const FMATRIX& m0, const FMATRIX& m1) {
-    asm volatile("lqc2 $vf2, 0x0(%1)\n"
-                 "lqc2 $vf3, 0x10(%1)\n"
-                 "lqc2 $vf4, 0x20(%1)\n"
-                 "lqc2 $vf5, 0x30(%1)\n"
-                 "lqc2 $vf6, 0x0(%2)\n"
-                 "lqc2 $vf7, 0x10(%2)\n"
-                 "lqc2 $vf8, 0x20(%2)\n"
-                 "lqc2 $vf9, 0x30(%2)\n"
-                 "vmulax.xyzw $ACC, $vf2, $vf6x\n"
-                 "vmadday.xyzw $ACC, $vf3, $vf6y\n"
-                 "vmaddaz.xyzw $ACC, $vf4, $vf6z\n"
-                 "vmaddw.xyzw $vf6, $vf5, $vf6w\n"
-                 "vmulax.xyzw $ACC, $vf2, $vf7x\n"
-                 "vmadday.xyzw $ACC, $vf3, $vf7y\n"
-                 "vmaddaz.xyzw $ACC, $vf4, $vf7z\n"
-                 "vmaddw.xyzw $vf7, $vf5, $vf7w\n"
-                 "vmulax.xyzw $ACC, $vf2, $vf8x\n"
-                 "vmadday.xyzw $ACC, $vf3, $vf8y\n"
-                 "vmaddaz.xyzw $ACC, $vf4, $vf8z\n"
-                 "vmaddw.xyzw $vf8, $vf5, $vf8w\n"
-                 "vmulax.xyzw $ACC, $vf2, $vf9x\n"
-                 "vmadday.xyzw $ACC, $vf3, $vf9y\n"
-                 "vmaddaz.xyzw $ACC, $vf4, $vf9z\n"
-                 "vmaddw.xyzw $vf9, $vf5, $vf9w\n"
-                 "sqc2 $vf6, 0x0(%0)\n"
-                 "sqc2 $vf7, 0x10(%0)\n"
-                 "sqc2 $vf8, 0x20(%0)\n"
-                 "sqc2 $vf9, 0x30(%0)\n"
-                 : : "r"(&res), "r"(&m0), "r"(&m1) : "memory");
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 INT CCollUtil::_detectOCD(CCollision& collision, MCD_INFO* pMCDInfo, OCD_WORK* pOCDWork, INT fgLocal) {
     INT i;
@@ -394,7 +394,7 @@ INT CCollUtil::_detectOCD(CCollision& collision, MCD_INFO* pMCDInfo, OCD_WORK* p
                 iChipSuu = m_pOCDInfo->iChipSuu;
                 for (iCnt = 0; iCnt < iChipSuu; iCnt++, pChip++, pOcdW++, pChipMat++) {
                     if (m_pOCDInfo->pMatrix && pOcdW->fgEnable) {
-                        _mulMatrix(pChip->matLW, *m_pOCDInfo->pMatrix, *pChipMat);
+                        vu0MulMatrix(pChip->matLW, *m_pOCDInfo->pMatrix, *pChipMat);
                         InversMatrix(pChip->matWL, pChip->matLW);
                         iArea = __detectMCInitInit(pChip);
                         if (iArea >= 0) detectMCInit(pChip, iArea);

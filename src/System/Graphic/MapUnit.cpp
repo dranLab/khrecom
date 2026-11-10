@@ -29,18 +29,18 @@ static inline void* _getAZFData(void* pInAZF, INT nIndex) {
     return ((void**)pTbl)[nIndex];
 }
 
-static inline void _unitMatrix(FMATRIX& m) {
-    __asm__ volatile("vmr32.xyzw $vf1, $vf0\n"
-                     "sqc2 $vf0, 0x30(%0)\n"
-                     "vmr32.xyzw $vf2, $vf1\n"
-                     "sqc2 $vf1, 0x20(%0)\n"
-                     "vmr32.xyzw $vf3, $vf2\n"
-                     "sqc2 $vf2, 0x10(%0)\n"
-                     "sqc2 $vf3, 0x0(%0)"
-                     :
-                     : "r"(&m)
-                     : "memory");
-}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -71,10 +71,10 @@ public:
         const ZONEPARTS& fr = parts;
         FVECTOR vec;
         vec._q = 0;
-        _unitMatrix(crd.m_Local);
+        vu0UnitMatrix(crd.m_Local);
         if (fr.rot.x) {
             FMATRIX rx;
-            _unitMatrix(rx);
+            vu0UnitMatrix(rx);
             rx.m[1][1] = rx.m[2][2] = tcos(fr.rot.x);
             rx.m[1][2] = tsin(fr.rot.x);
             rx.m[2][1] = -rx.m[1][2];
@@ -82,7 +82,7 @@ public:
         }
         if (fr.rot.y) {
             FMATRIX ry;
-            _unitMatrix(ry);
+            vu0UnitMatrix(ry);
             ry.m[2][2] = ry.m[0][0] = tcos(fr.rot.y);
             ry.m[2][0] = tsin(fr.rot.y);
             ry.m[0][2] = -ry.m[2][0];
@@ -90,7 +90,7 @@ public:
         }
         if (fr.rot.z) {
             FMATRIX rz;
-            _unitMatrix(rz);
+            vu0UnitMatrix(rz);
             rz.m[0][0] = rz.m[1][1] = tcos(fr.rot.z);
             rz.m[0][1] = tsin(fr.rot.z);
             rz.m[1][0] = -rz.m[0][1];

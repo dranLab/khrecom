@@ -35,17 +35,17 @@ void OuterProduct(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void Normalize(FVECTOR& v0, const FVECTOR& v1);
 extern "C" float atan2f(float y, float x);
 
-static inline void _unitMatrix(FMATRIX& m) {
-    asm volatile("vmr32.xyzw $vf1, $vf0\n"
-                 "sqc2 $vf0, 0x30(%0)\n"
-                 "vmr32.xyzw $vf2, $vf1\n"
-                 "sqc2 $vf1, 0x20(%0)\n"
-                 "vmr32.xyzw $vf3, $vf2\n"
-                 "sqc2 $vf2, 0x10(%0)\n"
-                 "sqc2 $vf3, 0x0(%0)\n"
-                 :
-                 : "r"(&m));
-}
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -89,7 +89,7 @@ void CCollDisp::init() {
     INT i;
     addCoord(40);
     for (i = 0; i < 40; i++) {
-        _unitMatrix(Crd(i).m_Local);
+        vu0UnitMatrix(Crd(i).m_Local);
         Crd(i).recalcWorldMatrix();
     }
 #line 121
@@ -254,7 +254,7 @@ void CCollDisp::setBBMatrix(CCoord* inpCrd, const FVECTOR& inrefPos, FLOAT infSh
         refMat.v[2].w = 1.0f;
         refMat.v[0].w = 1.0f;
     } else {
-        _unitMatrix(refMat);
+        vu0UnitMatrix(refMat);
     }
     refMat.setTrans(pos);
     refMat.v[3].w = 1.0f;
@@ -266,7 +266,7 @@ FLOAT CCollDisp::setColmMatrix(CCoord* inpCrd, const FVECTOR& refPos1, const FVE
     SubVectorXYZ(tmp, refPos2, refPos1);
     FLOAT fHeight = Math3D::VectorLength(tmp);
     if (!inpCrd) return fHeight;
-    _unitMatrix(inpCrd->m_Local);
+    vu0UnitMatrix(inpCrd->m_Local);
     if (fHeight > 0.0f) {
         FLOAT rx = atan2f(_sqrtf(tmp.x * tmp.x + tmp.z * tmp.z), tmp.y);
         FLOAT ry = atan2f(tmp.x, tmp.z);
@@ -421,7 +421,7 @@ CCollDispMapZone::CCollDispMapZone(CTask* inParentObj, MCD_INFO* inInfo) : CTask
     m_uiQuitReq = 0;
     if (inInfo && (m_iChipNum = inInfo->iChipSuu) > 0) {
         addCoord(m_iChipNum + 1);
-        _unitMatrix(Crd(0).m_Local);
+        vu0UnitMatrix(Crd(0).m_Local);
         Crd(0).recalcWorldMatrix();
         MC_CHIP* pChip = m_pInfo->pMCChip;
         for (INT i = 0; i < m_iChipNum; i++, pChip++) {
@@ -566,9 +566,9 @@ CCollRideModelDisp::CCollRideModelDisp(CTask* inBo, CRideModel* inRideModel, BOO
     m_uiLineCol = (CCollDisp::m_bMapZoneColA << 24) | (CCollDisp::m_bMapZoneColB << 16) |
                   (CCollDisp::m_bMapZoneColG << 8) | CCollDisp::m_bMapZoneColR;
     addCoord(2);
-    _unitMatrix(Crd(0).m_Local);
+    vu0UnitMatrix(Crd(0).m_Local);
     Crd(0).recalcWorldMatrix();
-    _unitMatrix(Crd(1).m_Local);
+    vu0UnitMatrix(Crd(1).m_Local);
     Crd(1).setParent(&Crd(0));
     _makeModelPrim();
     if (inAutoUpdate) m_uiStateFlag |= 1;

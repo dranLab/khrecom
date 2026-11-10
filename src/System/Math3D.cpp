@@ -47,7 +47,7 @@ static inline void _initTrans(FMATRIX& m) {
     m.v[3].init0();
 }
 
-static inline void _unitMatrix(FMATRIX& m) {
+static inline void _unitMatrix(FMATRIX& m) { /* the parked InvMatrix draft's (vu0.h's vu0UnitMatrix) */
     asm volatile("vmr32.xyzw $vf1, $vf0\n"
                  "sqc2 $vf0, 0x30(%0)\n"
                  "vmr32.xyzw $vf2, $vf1\n"
@@ -185,14 +185,14 @@ void Quaternion::QuaternionMultiply(QUATERNION& outQ, const QUATERNION& inQ0, co
 
 void Quaternion::QuaternionRotationAxis(QUATERNION& outQuat, const FVECTOR& inAxis, FLOAT inRad) {
     FLOAT theta = inRad * 0.5f;
-    asm volatile("lqc2 $vf4, 0x0(%1)\n"
-                 "mfc1 $v1, %2\n"
-                 "qmtc2 $v1, $vf5\n"
-                 "vmulx.xyzw $vf4, $vf4, $vf5x\n"
-                 "sqc2 $vf4, 0x0(%0)\n"
-                 :
-                 : "r"(&outQuat), "r"(&inAxis), "f"(vu0Sinf(theta))
-                 : "memory", "$3");
+    vu0ScaleVector(outQuat, inAxis, vu0Sinf(theta));
+
+
+
+
+
+
+
     outQuat.w = vu0Cosf(theta);
 }
 
@@ -416,20 +416,20 @@ void Quaternion::QuaternionMulVector(QUATERNION& outQuat, const QUATERNION& inQu
 }
 
 FLOAT Math3D::VectorLength(const FVECTOR& inVector) {
-    INT iTmp;
-    FLOAT ret;
-    asm volatile("lqc2 $vf4, 0x0(%1)\n"
-                 "vaddy.x $vf6, $vf0, $vf4y\n"
-                 "vaddz.x $vf7, $vf0, $vf4z\n"
-                 "vmulax.x $ACC, $vf4, $vf4x\n"
-                 "vmadday.x $ACC, $vf6, $vf4y\n"
-                 "vmaddz.x $vf5, $vf7, $vf4z\n"
-                 "qmfc2 $v0, $vf5\n"
-                 "mtc1 $v0, %0\n"
-                 : "=f"(ret)
-                 : "r"(&inVector)
-                 : "$2");
-    return _sqrtf(ret);
+    return _sqrtf(vu0LengthSq(inVector));
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
 
 FLOAT Math3D::VectorLengthSq(const FVECTOR& inVector) {
@@ -489,13 +489,13 @@ FLOAT Math3D::PointToPointDistanceSq(const FVECTOR& inP0, const FVECTOR& inP1) {
     FVECTOR v;
     INT iTmp;
     FLOAT ret;
-    asm volatile("lqc2 $vf4, 0x0(%1)\n"
-                 "lqc2 $vf5, 0x0(%2)\n"
-                 "vsub.xyzw $vf4, $vf4, $vf5\n"
-                 "sqc2 $vf4, 0x0(%0)\n"
-                 :
-                 : "r"(&v), "r"(&inP1), "r"(&inP0)
-                 : "memory");
+    vu0SubVector(v, inP1, inP0);
+
+
+
+
+
+
     asm volatile("lqc2 $vf4, 0x0(%1)\n"
                  "vaddy.x $vf6, $vf0, $vf4y\n"
                  "vaddz.x $vf7, $vf0, $vf4z\n"

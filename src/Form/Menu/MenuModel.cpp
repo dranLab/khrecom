@@ -25,18 +25,18 @@ extern FLOAT ASPECT_RATE_Y;
 
 void MulMatrix(FMATRIX& res, const FMATRIX& m0, const FMATRIX& m1);
 
-static inline void _unitMatrixVu0(FMATRIX& m) {
-    asm volatile("vmr32.xyzw $vf1, $vf0\n"
-                 "sqc2 $vf0, 0x30(%0)\n"
-                 "vmr32.xyzw $vf2, $vf1\n"
-                 "sqc2 $vf1, 0x20(%0)\n"
-                 "vmr32.xyzw $vf3, $vf2\n"
-                 "sqc2 $vf2, 0x10(%0)\n"
-                 "sqc2 $vf3, 0x0(%0)\n"
-                 :
-                 : "r"(&m)
-                 : "memory");
-}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -91,7 +91,7 @@ CMenuModel::CMenuModel(CTask* p, INT nRsrcID, CCoord* pParentCoord, INT iPosX, I
     m_pAnim->init(0, 0);
 
     CCoord& crd = Crd(0);
-    _unitMatrixVu0(crd.m_Local);
+    vu0UnitMatrix(crd.m_Local);
     if (!m_pParentCoord) {
         crd.m_Local.m[2][2] = 0.1f;
         crd.m_Local.m[1][1] = 0.1f;
@@ -176,7 +176,7 @@ BOOL CMenuModel::isAnimEnd() {
 void CMenuModel::changeLocalWS() {
     FMATRIX mVS;
     FMATRIX mWV;
-    _unitMatrixVu0(mWV);
+    mWV.init();
     RotMatrixY(mWV, mWV, 3.1415927f);
     mWV.setTrans(m_vPosWSC);
     InversMatrix(mWV, mWV);
@@ -226,7 +226,7 @@ void CMenuModel::setPosScreen(INT iPosX, INT iPosY) {
 
 void CMenuModel::setScale(FLOAT fScale) {
     CCoord& crd = Crd(0);
-    _unitMatrixVu0(crd.m_Local);
+    vu0UnitMatrix(crd.m_Local);
     if (!m_pParentCoord) {
         crd.m_Local.m[2][2] = fScale;
         crd.m_Local.m[1][1] = fScale;

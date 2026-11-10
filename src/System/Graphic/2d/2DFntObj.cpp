@@ -18,18 +18,18 @@ namespace D2 {
 
 
 
-static inline void _unitMatrixVu0(FMATRIX& m) {
-    asm volatile("vmr32.xyzw $vf1, $vf0\n"
-                 "sqc2 $vf0, 0x30(%0)\n"
-                 "vmr32.xyzw $vf2, $vf1\n"
-                 "sqc2 $vf1, 0x20(%0)\n"
-                 "vmr32.xyzw $vf3, $vf2\n"
-                 "sqc2 $vf2, 0x10(%0)\n"
-                 "sqc2 $vf3, 0x0(%0)\n"
-                 :
-                 : "r"(&m)
-                 : "memory");
-}
+
+
+
+
+
+
+
+
+
+
+
+
 
 C2DFntObj::C2DFntObj(SeqControl* pSeqControl) : C2DObj(pSeqControl) {
     m_p2DFnt = NULL;
@@ -60,7 +60,7 @@ void C2DFntObj::move() {
     G_RGBA rgba;
 
     if (m_p2DFnt) {
-        _unitMatrixVu0(mat);
+        vu0UnitMatrix(mat);
         mat.setTrans(m_vPos);
         ScaleVector(vCol, m_vCol, 128.0f);
         if (m_pSeqControl) {

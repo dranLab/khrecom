@@ -43,18 +43,18 @@ static inline FLOAT _sqrtf(FLOAT x) {
     return ret;
 }
 
-static inline void _unitMatrix(FMATRIX& m) {
-    asm volatile("vmr32.xyzw $vf1, $vf0\n"
-                 "sqc2 $vf0, 0x30(%0)\n"
-                 "vmr32.xyzw $vf2, $vf1\n"
-                 "sqc2 $vf1, 0x20(%0)\n"
-                 "vmr32.xyzw $vf3, $vf2\n"
-                 "sqc2 $vf2, 0x10(%0)\n"
-                 "sqc2 $vf3, 0x0(%0)\n"
-                 :
-                 : "r"(&m)
-                 : "memory");
-}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -966,7 +966,7 @@ void CNakCamera::LookAngleDistanceToPos() {
     FMATRIX mat;
     FVECTOR vec;
     vec.set(0.0f, 0.0f, -m_fDistance);
-    _unitMatrix(mat);
+    vu0UnitMatrix(mat);
     RotMatrixX(mat, mat, m_vCamRot.x);
     RotMatrixY(mat, mat, m_vCamRot.y);
     ApplyMatrix(vec, mat, vec);
@@ -977,7 +977,7 @@ void CNakCamera::PosAngleDistanceToLook() {
     FMATRIX mat;
     FVECTOR vec;
     vec.set(0.0f, 0.0f, m_fDistance);
-    _unitMatrix(mat);
+    vu0UnitMatrix(mat);
     RotMatrixX(mat, mat, m_vCamRot.x);
     RotMatrixY(mat, mat, m_vCamRot.y);
     ApplyMatrix(vec, mat, vec);
@@ -1150,7 +1150,7 @@ void CNakCamera::SubjectivityUpdate() {
     FLOAT fr = getFrameRateF();
     FVECTOR vVec;
     FMATRIX& mat = Crd(0).getLocalMatrix();
-    _unitMatrix(mat);
+    vu0UnitMatrix(mat);
     if (m_iUpdate & 1) {
         m_vCamRotAim = m_vCamRot;
     }
@@ -1237,7 +1237,7 @@ void CNakCamera::ObjectivityMove() {
 void CNakCamera::ObjectivityUpdate() {
     FLOAT fr = getFrameRateF();
     FMATRIX& crd = Crd(0).getLocalMatrix();
-    _unitMatrix(crd);
+    vu0UnitMatrix(crd);
     if (m_iUpdate & 1) {
         m_vCamRotAim = m_vCamRot;
     }
@@ -1246,7 +1246,7 @@ void CNakCamera::ObjectivityUpdate() {
     RotMatrixY(crd, crd, m_vCamRot.y);
     if (m_iUpdate & 2) {
         FMATRIX mat;
-        _unitMatrix(mat);
+        vu0UnitMatrix(mat);
         RotMatrixY(mat, mat, m_vCamRot.y);
         ApplyMatrix(m_vCamMove, mat, m_vCamMove);
         AddVectorXYZ(m_vCamLook, m_vCamLook, m_vCamMove);
@@ -1272,7 +1272,7 @@ CGlidWorld::CGlidWorld(CTask* p) : CTask(p, 0x4000) {
     G_STRIP Line;
     m_iStatus = 1;
     addCoord(1);
-    _unitMatrix(Crd(0).getLocalMatrix());
+    vu0UnitMatrix(Crd(0).getLocalMatrix());
     Crd(0).touch();
     m_3DLines.setCoord(&Crd(0));
     m_3DLines.setSemiTrans(ALPHA_OFF);

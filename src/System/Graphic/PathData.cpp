@@ -16,18 +16,18 @@ static inline FLOAT _fabs(FLOAT inValue) {
     return ret;
 }
 
-static inline void _unitMatrixVu0(FMATRIX& m) {
-    asm volatile("vmr32.xyzw $vf1, $vf0\n"
-                 "sqc2 $vf0, 0x30(%0)\n"
-                 "vmr32.xyzw $vf2, $vf1\n"
-                 "sqc2 $vf1, 0x20(%0)\n"
-                 "vmr32.xyzw $vf3, $vf2\n"
-                 "sqc2 $vf2, 0x10(%0)\n"
-                 "sqc2 $vf3, 0x0(%0)\n"
-                 :
-                 : "r"(&m)
-                 : "memory");
-}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -139,7 +139,7 @@ void CPathVector::_init(const FVECTOR* pPath, INT iPathMax, BOOL bAlloc) {
         TRACE("\x83\x7d\x83\x62\x83\x76\x82\xaa\x82\xa0\x82\xe8\x82\xdc\x82\xb9\x82\xf1\n");
     }
     CCoord* pCrd = &m_DDXYZCoord;
-    _unitMatrixVu0(pCrd->m_Local);
+    vu0UnitMatrix(pCrd->m_Local);
     pCrd->touch();
     m_DDXYZLines.setCoord(&m_DDXYZCoord);
     Line.Term = 0;
@@ -1016,7 +1016,7 @@ void CDbgCube::init(CCoord* pCrd) {
     }
     if (pCrd) m_gpPolyStrip.setCoord(pCrd);
     else m_gpPolyStrip.setCoord(&m_Coord);
-    _unitMatrixVu0(m_Coord.m_Local);
+    vu0UnitMatrix(m_Coord.m_Local);
     m_Coord.touch();
 }
 
@@ -1028,7 +1028,7 @@ void CDbgCube::setCoord(FVECTOR* pvPos, FVECTOR* pvRot) {
         vPos = *pvPos;
     }
     vPos.w = 1.0f;
-    _unitMatrixVu0(m_Coord.m_Local);
+    vu0UnitMatrix(m_Coord.m_Local);
     if (pvRot) {
         RotMatrixX(m_Coord.m_Local, m_Coord.m_Local, pvRot->x);
         RotMatrixY(m_Coord.m_Local, m_Coord.m_Local, pvRot->y);
@@ -1071,7 +1071,7 @@ void CDbgArrow::init(CCoord* pCrd) {
     m_gpPolyStrip.m_vVERT.back().Term = 1;
     if (pCrd) m_gpPolyStrip.setCoord(pCrd);
     else m_gpPolyStrip.setCoord(&m_Coord);
-    _unitMatrixVu0(m_Coord.m_Local);
+    vu0UnitMatrix(m_Coord.m_Local);
     m_Coord.touch();
 }
 void CDbgArrow::setCoord(FVECTOR* pvPos, FVECTOR* pvRot) {
@@ -1085,7 +1085,7 @@ void CDbgArrow::setCoord(FVECTOR* pvPos, FVECTOR* pvRot) {
         vPos = *pvPos;
     }
     vPos.w = 1.0f;
-    _unitMatrixVu0(m_Coord.m_Local);
+    vu0UnitMatrix(m_Coord.m_Local);
     if (pvRot) {
         RotMatrixX(m_Coord.m_Local, m_Coord.m_Local, pvRot->x);
         RotMatrixY(m_Coord.m_Local, m_Coord.m_Local, pvRot->y);

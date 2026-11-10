@@ -4,21 +4,21 @@
 
 void MulMatrix(FMATRIX& res, const FMATRIX& m0, const FMATRIX& m1);
 
-static inline void _unitMatrixVu0(FMATRIX& m) {
-    asm volatile("vmr32.xyzw $vf1, $vf0\n"
-                 "sqc2 $vf0, 0x30(%0)\n"
-                 "vmr32.xyzw $vf2, $vf1\n"
-                 "sqc2 $vf1, 0x20(%0)\n"
-                 "vmr32.xyzw $vf3, $vf2\n"
-                 "sqc2 $vf2, 0x10(%0)\n"
-                 "sqc2 $vf3, 0x0(%0)\n"
-                 :
-                 : "r"(&m)
-                 : "memory");
-}
+
+
+
+
+
+
+
+
+
+
+
+
 
 static inline void _resetCoord(CCoord& crd) {
-    _unitMatrixVu0(crd.m_Local);
+    crd.m_Local.init();
     crd.touch();
     crd.fix();
 }
@@ -82,7 +82,7 @@ void CEventBox::setupVertexes() {
     matV.v[1].set(fW, m_srcData._fHeight, -fD);
     matV.v[2].set(fW, 0.0f, fD);
     matV.v[3].set(-fW, 0.0f, fD);
-    _unitMatrixVu0(mat);
+    mat.init();
     RotMatrixY(mat, mat, m_srcData._fRotY);
     mat.setTrans(m_srcData._vPos);
     MulMatrix(m_matVert, mat, matV);

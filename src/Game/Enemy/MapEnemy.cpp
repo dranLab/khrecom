@@ -79,18 +79,18 @@ void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
 
 
-static inline void _unitMatrixVu0(FMATRIX& m) {
-    asm volatile("vmr32.xyzw $vf1, $vf0\n"
-                 "sqc2 $vf0, 0x30(%0)\n"
-                 "vmr32.xyzw $vf2, $vf1\n"
-                 "sqc2 $vf1, 0x20(%0)\n"
-                 "vmr32.xyzw $vf3, $vf2\n"
-                 "sqc2 $vf2, 0x10(%0)\n"
-                 "sqc2 $vf3, 0x0(%0)\n"
-                 :
-                 : "r"(&m)
-                 : "memory");
-}
+
+
+
+
+
+
+
+
+
+
+
+
 
 #include "System/RsrcDB.h"
 
@@ -545,7 +545,7 @@ void CMapEnemy::getRandomTargetPos(FVECTOR& outTarget, FLOAT inDistance, BOOL in
         FVECTOR target;
         FVECTOR dir;
         FLOAT dist;
-        _unitMatrixVu0(m);
+        vu0UnitMatrix(m);
         RotMatrixY(m, m, Math3D::LimitPI(startRot + rotDir * deg * 0.017453292f));
         dir.set(0.0f, 0.0f, 1.0f, 1.0f);
         ApplyMatrix(dir, m, dir);
@@ -612,7 +612,7 @@ void CMapEnemy::getWarpPos(FVECTOR& outPos) {
         FMATRIX m;
         FVECTOR target;
         FVECTOR dir;
-        _unitMatrixVu0(m);
+        vu0UnitMatrix(m);
         RotMatrixY(m, m, Math3D::LimitPI(getRot().y + rotDir * deg * 0.017453292f));
         dir.set(0.0f, 0.0f, 1.0f, 1.0f);
         ApplyMatrix(dir, m, dir);

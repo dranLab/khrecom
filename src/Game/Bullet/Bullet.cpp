@@ -43,18 +43,18 @@ void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 void ApplyMatrix33(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 void MulMatrix(FMATRIX& res, const FMATRIX& m0, const FMATRIX& m1);
 
-static inline void _unitMatrixVu0(FMATRIX& m) {
-    asm volatile("vmr32.xyzw $vf1, $vf0\n"
-                 "sqc2 $vf0, 0x30(%0)\n"
-                 "vmr32.xyzw $vf2, $vf1\n"
-                 "sqc2 $vf1, 0x20(%0)\n"
-                 "vmr32.xyzw $vf3, $vf2\n"
-                 "sqc2 $vf2, 0x10(%0)\n"
-                 "sqc2 $vf3, 0x0(%0)\n"
-                 :
-                 : "r"(&m)
-                 : "memory");
-}
+
+
+
+
+
+
+
+
+
+
+
+
 
 static inline FLOAT _sqrtf(FLOAT x) {
     FLOAT ret;
@@ -556,7 +556,7 @@ HANDLE CBullet::makeEffect(INT inID) {
         Normalize(vecRight, vecRight);
         OuterProduct(vecUp, normal, vecRight);
         Normalize(vecUp, vecUp);
-        _unitMatrixVu0(m);
+        m.init();
         m.v[0] = vecRight;
         m.v[1] = vecUp;
         m.v[2] = normal;
@@ -579,7 +579,7 @@ HANDLE CBullet::makeEffect(INT inID) {
         FMATRIX mat;
         m = Crd(0).getWorldMatrix();
         if (rot) {
-            _unitMatrixVu0(mat);
+            mat.init();
             RotMatrixX(mat, mat, rot->x);
             RotMatrixY(mat, mat, rot->y);
             RotMatrixZ(mat, mat, rot->z);
@@ -658,7 +658,7 @@ void CBullet::updateShadow() {
         Normalize(vecRight, vecRight);
         OuterProduct(vecUp, normal, vecRight);
         Normalize(vecUp, vecUp);
-        _unitMatrixVu0(m);
+        m.init();
         m.v[0] = vecRight;
         m.v[1] = vecUp;
         m.v[2] = normal;
@@ -1135,7 +1135,7 @@ BOOL CHomingBullet::bound_() {
         if (target) {
             FLOAT dir = calcDirection(target);
             FMATRIX m;
-            _unitMatrixVu0(m);
+            m.init();
             RotMatrixY(m, m, dir);
             ApplyMatrix33(reflect, m, reflect);
         }

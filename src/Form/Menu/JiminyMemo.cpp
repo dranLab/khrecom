@@ -1887,25 +1887,25 @@ void CMemo3DObj::disp() {
 }
 void MulMatrix(FMATRIX& m0, const FMATRIX& m1, const FMATRIX& m2);
 void scaleMatrixSelf(FMATRIX& m, FLOAT fScale);
-static inline void _unitMatrixVu0(FMATRIX& m) {
-    asm volatile("vmr32.xyzw $vf1, $vf0\n"
-                 "sqc2 $vf0, 0x30(%0)\n"
-                 "vmr32.xyzw $vf2, $vf1\n"
-                 "sqc2 $vf1, 0x20(%0)\n"
-                 "vmr32.xyzw $vf3, $vf2\n"
-                 "sqc2 $vf2, 0x10(%0)\n"
-                 "sqc2 $vf3, 0x0(%0)\n"
-                 :
-                 : "r"(&m)
-                 : "memory");
-}
+
+
+
+
+
+
+
+
+
+
+
+
 void CMemo3DObj::calcLocalMatrix() {
     CCoord& crd = Crd(0);
     FVECTOR posi = m_vBasePosition;
     FLOAT rate = m_vBasePosition.z / 3.0f;
     posi.x += m_vPosition.x * -rate;
     posi.y += m_vPosition.y * rate;
-    _unitMatrixVu0(crd.getLocalMatrix());
+    vu0UnitMatrix(crd.getLocalMatrix());
     RotMatrixY(crd.getLocalMatrix(), crd.getLocalMatrix(), m_fRotY);
     crd.getLocalMatrix().v[3].set(posi);
     CCamera* pCamera = CWorldEnv::getActiveCamera();

@@ -161,14 +161,14 @@ BOOL CSceneEnvColor::isColorEnd() {
     return TRUE;
 }
 
-static inline void mulVector(FVECTOR& v0, const FVECTOR& v1) {
-    __asm__ volatile(
-        "lqc2 $vf4, 0x0(%0)\n"
-        "lqc2 $vf5, 0x0(%1)\n"
-        "vmul.xyzw $vf4, $vf4, $vf5\n"
-        "sqc2 $vf4, 0x0(%2)\n"
-        : : "r"(&v0), "r"(&v1), "r"(&v0) : "memory");
-}
+
+
+
+
+
+
+
+
 
 FVECTOR* CSceneEnv::getTypeColor(ObjType::eObjType eType) {
     FVECTOR* p = NULL;
@@ -182,7 +182,7 @@ FVECTOR* CSceneEnv::getTypeColor(ObjType::eObjType eType) {
                     p = &m_vOutColor;
                     *p = v2;
                 } else {
-                    mulVector(m_vOutColor, v2);
+                    vu0MulVector(m_vOutColor, m_vOutColor, v2);
                 }
             }
         }

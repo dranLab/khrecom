@@ -15,18 +15,18 @@ void Normalize(FVECTOR& v0, const FVECTOR& v1);
 void OuterProduct(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void MulMatrix(FMATRIX& res, const FMATRIX& m0, const FMATRIX& m1);
 
-static inline void _unitMatrixVu0(FMATRIX& m) {
-    asm volatile("vmr32.xyzw $vf1, $vf0\n"
-                 "sqc2 $vf0, 0x30(%0)\n"
-                 "vmr32.xyzw $vf2, $vf1\n"
-                 "sqc2 $vf1, 0x20(%0)\n"
-                 "vmr32.xyzw $vf3, $vf2\n"
-                 "sqc2 $vf2, 0x10(%0)\n"
-                 "sqc2 $vf3, 0x0(%0)\n"
-                 :
-                 : "r"(&m)
-                 : "memory");
-}
+
+
+
+
+
+
+
+
+
+
+
+
 
 CCamera::CCamera(CTask* pParent, INT nPri) : CTaskSecondary(pParent) {
     init(nPri);
@@ -39,7 +39,7 @@ CCamera::~CCamera() {
 void CCamera::init(INT nPri) {
     setPriority(0x4000);
     addCoord(1);
-    _unitMatrixVu0(Crd(0).m_Local);
+    vu0UnitMatrix(Crd(0).m_Local);
     Crd(0).touch();
     setCameraPriority(nPri);
     FLOAT fDist = CWorldEnv::getScreenZ();
@@ -95,7 +95,7 @@ void CCamera::lookAt(const FVECTOR& vTarget, FLOAT fBank) {
     FMATRIX matLocal;
     lookAt(vTarget, (const FVECTOR*)NULL);
     FMATRIX& mat = Crd(0).getWorldMatrix();
-    _unitMatrixVu0(matLocal);
+    vu0UnitMatrix(matLocal);
     RotMatrixZ(matLocal, matLocal, fBank);
     MulMatrix(mat, mat, matLocal);
     Crd(0).recalcLocalMatrix();

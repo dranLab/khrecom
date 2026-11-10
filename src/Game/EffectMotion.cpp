@@ -100,17 +100,17 @@ inline BOOL EET_HEADER::addrMapping() {
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 void MulMatrix(FMATRIX& m0, const FMATRIX& m1, const FMATRIX& m2);
 
-inline void _unitMatrixVu0(FMATRIX& m) {
-    __asm__ volatile(
-        "vmr32.xyzw $vf1, $vf0\n"
-        "sqc2 $vf0, 0x30(%0)\n"
-        "vmr32.xyzw $vf2, $vf1\n"
-        "sqc2 $vf1, 0x20(%0)\n"
-        "vmr32.xyzw $vf3, $vf2\n"
-        "sqc2 $vf2, 0x10(%0)\n"
-        "sqc2 $vf3, 0x0(%0)\n"
-        : : "r"(&m) : "memory");
-}
+
+
+
+
+
+
+
+
+
+
+
 
 inline FLOAT DegToRad(FLOAT d) { return d * 0.017453292f; }
 
@@ -279,7 +279,7 @@ BOOL CEffectMotionCtrl::updateAttachEffect_(TIMEQ inCurrentTime) {
                                                     &offset, &rot, 0.0f);
                 } else {
                     FMATRIX m;
-                    _unitMatrixVu0(m);
+                    vu0UnitMatrix(m);
                     RotMatrixX(m, m, rot.x);
                     RotMatrixY(m, m, rot.y);
                     RotMatrixZ(m, m, rot.z);

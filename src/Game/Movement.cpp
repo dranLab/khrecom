@@ -89,18 +89,18 @@ static inline FLOAT _getLadderPosition(FVECTOR& outPos, FVECTOR& outNorm) {
     return CCollUtil::instance()._getLadderPosition(outPos, outNorm);
 }
 
-static inline void _unitMatrixVu0(FMATRIX& m) {
-    asm volatile("vmr32.xyzw $vf1, $vf0\n"
-                 "sqc2 $vf0, 0x30(%0)\n"
-                 "vmr32.xyzw $vf2, $vf1\n"
-                 "sqc2 $vf1, 0x20(%0)\n"
-                 "vmr32.xyzw $vf3, $vf2\n"
-                 "sqc2 $vf2, 0x10(%0)\n"
-                 "sqc2 $vf3, 0x0(%0)\n"
-                 :
-                 : "r"(&m)
-                 : "memory");
-}
+
+
+
+
+
+
+
+
+
+
+
+
 
 namespace Movement {
 CHAR* PlayerWaterSurfaceEffectName = "rec_move_efB";
@@ -166,7 +166,7 @@ void Movement::CalcPlaneMatrix(FMATRIX& outMat, const FVECTOR& inNormal, const F
     Normalize(vecRight, vecRight);
     OuterProduct(vecUp, inNormal, vecRight);
     Normalize(vecUp, vecUp);
-    _unitMatrixVu0(outMat);
+    vu0UnitMatrix(outMat);
     outMat.v[0] = vecRight;
     outMat.v[1] = vecUp;
     outMat.v[2] = inNormal;
@@ -627,7 +627,7 @@ void CMovement::calcPos_() {
             FLOAT theta = atan2f(_sqrtf(m_vDetectNormal.z * m_vDetectNormal.z + m_vDetectNormal.x * m_vDetectNormal.x),
                                  m_vDetectNormal.y);
             a.set(0.0f, 0.0f, m_fMass * 0.008166667f * sinf(Math3D::LimitPI(theta)), 1.0f);
-            _unitMatrixVu0(m);
+            m.init();
             RotMatrixY(m, m, atan2f(m_vDetectNormal.x, m_vDetectNormal.z));
             ApplyMatrix(a, m, a);
             AddVector(acc, acc, a);
@@ -848,7 +848,7 @@ INT CMovement::detectWall_() {
         FVECTOR normal;
         FVECTOR diff;
         FLOAT rad = Math3D::LimitPI(theta * 0.017453292f + m_vRot.y);
-        _unitMatrixVu0(m);
+        vu0UnitMatrix(m);
         RotMatrixX(m, m, m_vRot.x);
         RotMatrixY(m, m, rad);
         RotMatrixZ(m, m, m_vRot.z);
@@ -896,7 +896,7 @@ INT CMovement::detectWall_() {
         FVECTOR normal;
         FVECTOR diff;
         FLOAT rad = Math3D::LimitPI(theta * 0.017453292f + m_vRot.y);
-        _unitMatrixVu0(m);
+        vu0UnitMatrix(m);
         RotMatrixX(m, m, m_vRot.x);
         RotMatrixY(m, m, rad);
         RotMatrixZ(m, m, m_vRot.z);
@@ -1128,7 +1128,7 @@ void CMovement::calcVelocity_(FLOAT inSpeed) {
 
 void CMovement::calcVelocity_(FLOAT inSpeed, const FVECTOR& inDir) {
     FMATRIX m;
-    _unitMatrixVu0(m);
+    vu0UnitMatrix(m);
     RotMatrixX(m, m, m_vRot.x);
     RotMatrixY(m, m, m_vRot.y);
     RotMatrixZ(m, m, m_vRot.z);
@@ -1144,7 +1144,7 @@ void CMovement::calcVelocityXZ_(FLOAT inSpeed) {
 void CMovement::calcVelocityXZ_(FLOAT inSpeed, const FVECTOR& inDir) {
     FMATRIX m;
     FVECTOR v;
-    _unitMatrixVu0(m);
+    vu0UnitMatrix(m);
     RotMatrixY(m, m, m_vRot.y);
     ApplyMatrix33(v, m, inDir);
     ScaleVector(v, v, inSpeed);

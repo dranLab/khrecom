@@ -289,18 +289,18 @@ static inline void _setCard(CARD& c, USHORT kind, BYTE num) {
     c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1;
 }
 
-static inline void _unitMatrixVu0(FMATRIX& m) {
-    asm volatile("vmr32.xyzw $vf1, $vf0\n"
-                 "sqc2 $vf0, 0x30(%0)\n"
-                 "vmr32.xyzw $vf2, $vf1\n"
-                 "sqc2 $vf1, 0x20(%0)\n"
-                 "vmr32.xyzw $vf3, $vf2\n"
-                 "sqc2 $vf2, 0x10(%0)\n"
-                 "sqc2 $vf3, 0x0(%0)\n"
-                 :
-                 : "r"(&m)
-                 : "memory");
-}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -422,7 +422,7 @@ void CNaviMap::_initialize() {
                 }
             }
             CCoord& crd = Crd(0);
-            _unitMatrixVu0(crd.m_Local);
+            vu0UnitMatrix(crd.m_Local);
             RotMatrixY(crd.m_Local, crd.m_Local, 3.1415927f);
             crd.m_Local.m[3][0] = m_vPos.x;
             crd.m_Local.m[3][1] = m_vPos.y;
@@ -583,7 +583,7 @@ void CNaviMap::main() {
     }
     if (m_pModels) {
         CCoord& crd = Crd(0);
-        _unitMatrixVu0(crd.m_Local);
+        vu0UnitMatrix(crd.m_Local);
         FVECTOR rot;
         rot.x = _roundRot(_deg2rad(55.0f));
         rot.y = 0.0f;
@@ -597,7 +597,7 @@ void CNaviMap::main() {
         crd.touch();
         if (m_nModelCount >= 22) {
             CCoord& crd1 = Crd(1);
-            _unitMatrixVu0(crd1.m_Local);
+            vu0UnitMatrix(crd1.m_Local);
             rot.y = _roundRot(g_pPlayer->getRot().y - 0.7853982f + m_fRotOfs);
             RotMatrixY(crd1.m_Local, crd1.m_Local, rot.y);
             crd1.m_Local.setTrans(m_vPos);
@@ -635,7 +635,7 @@ void CNaviMap::disp() {
 void CNaviMap::changeLocalWS() {
     FMATRIX mVS;
     FMATRIX mWV;
-    _unitMatrixVu0(mWV);
+    mWV.init();
     RotMatrixY(mWV, mWV, 3.1415927f);
     mWV.m[3][2] = m_vPosWSC.z;
     InversMatrix(mWV, mWV);

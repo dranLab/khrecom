@@ -210,18 +210,18 @@ BOOL CGimmickFountain::loockAtPlayer() {
     return ret;
 }
 
-static inline void _unitMatrixVu0(FMATRIX& m) {
-    asm volatile("vmr32.xyzw $vf1, $vf0\n"
-                 "sqc2 $vf0, 0x30(%0)\n"
-                 "vmr32.xyzw $vf2, $vf1\n"
-                 "sqc2 $vf1, 0x20(%0)\n"
-                 "vmr32.xyzw $vf3, $vf2\n"
-                 "sqc2 $vf2, 0x10(%0)\n"
-                 "sqc2 $vf3, 0x0(%0)\n"
-                 :
-                 : "r"(&m)
-                 : "memory");
-}
+
+
+
+
+
+
+
+
+
+
+
+
 
 void CGimmickFountain::lastUpdate() {
     FMATRIX mMat;
@@ -230,7 +230,7 @@ void CGimmickFountain::lastUpdate() {
     } else if (m_addRot > 3.14f) {
         m_addRot -= 6.28f;
     }
-    _unitMatrixVu0(mMat);
+    vu0UnitMatrix(mMat);
     RotMatrixY(mMat, mMat, m_addRot);
     MulMatrix(Crd(getBoneIndex("pl_rot", 0)).getLocalMatrix(), Crd(getBoneIndex("pl_rot", 0)).getLocalMatrix(), mMat);
     Crd(0).touch();

@@ -68,14 +68,14 @@ void AddVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void ScaleVector(FVECTOR& v0, const FVECTOR& v1, float s);
 void SubVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 
-static inline void _itof0(FVECTOR& fVec, const IVECTOR& iVec) {
-    asm volatile("lqc2 $vf4, 0x0(%1)\n"
-                 "vitof0.xyzw $vf4, $vf4\n"
-                 "sqc2 $vf4, 0x0(%0)\n"
-                 :
-                 : "r"(&fVec), "r"(&iVec)
-                 : "memory");
-}
+
+
+
+
+
+
+
+
 
 
 INT C2DSprObj::m_fgParent;
@@ -434,18 +434,18 @@ void MulMatrix(FMATRIX& m0, const FMATRIX& m1, const FMATRIX& m2);
 void MulVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void FTOI0Vector(IVECTOR& v0, const FVECTOR& v1);
 
-static inline void _unitMatrixVu0(FMATRIX& m) {
-    asm volatile("vmr32.xyzw $vf1, $vf0\n"
-                 "sqc2 $vf0, 0x30(%0)\n"
-                 "vmr32.xyzw $vf2, $vf1\n"
-                 "sqc2 $vf1, 0x20(%0)\n"
-                 "vmr32.xyzw $vf3, $vf2\n"
-                 "sqc2 $vf2, 0x10(%0)\n"
-                 "sqc2 $vf3, 0x0(%0)\n"
-                 :
-                 : "r"(&m)
-                 : "memory");
-}
+
+
+
+
+
+
+
+
+
+
+
+
 static inline void _applyMatrix2(FVECTOR& v0, const FMATRIX& m0, const FVECTOR2& v2) {
     /* MATCH: the original passes the FVECTOR2 to qmtc2 in t0 ($8); an unpinned temp gets another register */
     register ULONGLONG xy asm("$8") = v2._u64;
@@ -463,14 +463,14 @@ static inline void _applyMatrix2(FVECTOR& v0, const FMATRIX& m0, const FVECTOR2&
                  : "r"(&v0), "r"(&m0), "r"(xy)
                  : "memory");
 }
-static inline void _ftoi4(IVECTOR& iVec, const FVECTOR& fVec) {
-    asm volatile("lqc2 $vf4, 0x0(%1)\n"
-                 "vftoi4.xyzw $vf4, $vf4\n"
-                 "sqc2 $vf4, 0x0(%0)\n"
-                 :
-                 : "r"(&iVec), "r"(&fVec)
-                 : "memory");
-}
+
+
+
+
+
+
+
+
 void C2DSprObj::move() {
     FVECTOR fVec;
     IVECTOR iVec;
@@ -483,13 +483,13 @@ void C2DSprObj::move() {
     FVECTOR2 primPosBuf[9][4];
     fgBilinear = 0;
     setBilinear(m_status.bilinear_disable);
-    _unitMatrixVu0(mat);
+    mat.init();
     mat.m[0][0] = m_vScl.x;
     mat.m[1][1] = m_vScl.y;
     RotMatrix(mat, mat, m_vRot);
     AddVector2(fVec, m_vPos, m_vSwy);
     mat.setTrans(fVec);
-    _unitMatrixVu0(mat2);
+    mat2.init();
     *(FVECTOR2*)&fVec = m_vOfs;
     mat2.setTrans(fVec);
     MulMatrix(mat, mat, mat2);
@@ -574,7 +574,7 @@ void C2DSprObj::move() {
         for (INT j = 0; j < 4; j++) {
             FVECTOR& v0 = fVec;
             _applyMatrix2(v0, mat, primPos[j]);
-            _ftoi4(iVec, fVec);
+            vu0FTOI4Vector(iVec, fVec);
             if (!bBilinear) {
                 iVec.x = (iVec.x & 0xFFFFFFF0) | 8;
                 iVec.y = (iVec.y & 0xFFFFFFF0) | 8;
@@ -591,7 +591,7 @@ void C2DSprObj::getRect(FVECTOR2* pvOut4, SprPrim& rSprPrim) {
     IVECTOR iVec;
     SPR_GROUP* pGroup = rSprPrim.pSprGroupe;
     iVec.set(pGroup->x0, pGroup->y0, pGroup->x1, pGroup->y1);
-    _itof0(fVec, iVec);
+    vu0ITOF0Vector(fVec, iVec);
     pvOut4[0].set(fVec.x, fVec.y);
     pvOut4[1].set(fVec.z, fVec.y);
     pvOut4[2].set(fVec.x, fVec.w);

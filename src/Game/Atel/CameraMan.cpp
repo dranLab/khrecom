@@ -140,18 +140,18 @@ CCameraDt::~CCameraDt() {
     if (m_pCamera) m_pCamera->out();
 }
 
-static inline void _unitMatrixVu0(FMATRIX& m) {
-    asm volatile("vmr32.xyzw $vf1, $vf0\n"
-                 "sqc2 $vf0, 0x30(%0)\n"
-                 "vmr32.xyzw $vf2, $vf1\n"
-                 "sqc2 $vf1, 0x20(%0)\n"
-                 "vmr32.xyzw $vf3, $vf2\n"
-                 "sqc2 $vf2, 0x10(%0)\n"
-                 "sqc2 $vf3, 0x0(%0)\n"
-                 :
-                 : "r"(&m)
-                 : "memory");
-}
+
+
+
+
+
+
+
+
+
+
+
+
 
 void CCameraMan::main() {
     CCameraDt* pDt = m_pActiveCameraDt;
@@ -213,7 +213,7 @@ void CCameraMan::main() {
                         fR0 -= 6.2831855f;
                     }
                     vec1.y = fR0;
-                    _unitMatrixVu0(mat0);
+                    mat0.init();
                     RotMatrixX(mat0, mat0, vec1.x);
                     RotMatrixY(mat0, mat0, vec1.y);
                     mat0.setTrans(pDt->m_currentTargetPos);

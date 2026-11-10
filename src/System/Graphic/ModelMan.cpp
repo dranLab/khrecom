@@ -1,4 +1,4 @@
-#define VECTOR_H_SET_CALL /* MATCH: FVECTOR::setCall (the original calls FVECTOR::set out of line) */
+
 #define MODELDATA_H_TEXINFO /* MATCH: TexInfoStub (the original has its assert strings) */
 #define GPRIM_H_PATH "c:/KHCOM/MainApp/System/Graphic/Gprim.h" /* MATCH: this unit names Gprim.h so (header default "System/Graphic/Gprim.h") */
 #define MODELDATA_H_PATH "c:/KHCOM/MainApp/System/Graphic/modeldata.h" /* MATCH: this unit names modeldata.h so (header default "System/Graphic/modeldata.h") */
@@ -176,46 +176,46 @@ void CModelMan::finalize() {
     CShadowModelMan::finalize();
 }
 
-static inline void _vu0SetDisp(FVECTOR& v0, FVECTOR& v1) {
-    asm volatile("lqc2 $vf1, 0x0(%0)\n"
-                 "lqc2 $vf2, 0x0(%1)\n"
-                 "viaddi $vi1, $vi0, 1\n"
-                 "vsqi.xyzw $vf1, ($vi1++)\n"
-                 "vsqi.xyzw $vf2, ($vi1++)\n"
-                 :
-                 : "r"(&v0), "r"(&v1));
-}
+
+
+
+
+
+
+
+
+
 
 void CModelMan::reset() {
     TexInfo* pInfo = CRsrcDB::getRsrcTex("errer", NAME_CASE_SENSITIVE);
     if (pInfo) s_ToonTex0 = pInfo->getTPage();
     pInfo = CRsrcDB::getRsrcTex("speclar", NAME_CASE_SENSITIVE);
     if (pInfo) s_SpecTex0 = pInfo->getTPage();
-    FVECTOR vMax;
-    FVECTOR vMin;
-    vMax.setCall(4096.0f, 4096.0f, 0.0f, 65535.0f);
-    vMin.setCall(0.0f, 0.0f, 0.0f, 0.0f);
-    asm volatile("lqc2 $vf1, 0x0(%0)\n"
-                 "lqc2 $vf2, 0x0(%1)\n"
-                 "viaddi $vi1, $vi0, 1\n"
-                 "vsqi.xyzw $vf1, ($vi1++)\n"
-                 "vsqi.xyzw $vf2, ($vi1++)\n"
-                 :
-                 : "r"(&vMax), "r"(&vMin));
+    vu0SetClipRange();
+
+
+
+
+
+
+
+
+
+
 }
 
-static inline void _unitMatrix(FMATRIX& m) {
-    asm volatile("vmr32.xyzw $vf1, $vf0\n"
-                 "sqc2 $vf0, 0x30(%0)\n"
-                 "vmr32.xyzw $vf2, $vf1\n"
-                 "sqc2 $vf1, 0x20(%0)\n"
-                 "vmr32.xyzw $vf3, $vf2\n"
-                 "sqc2 $vf2, 0x10(%0)\n"
-                 "sqc2 $vf3, 0x0(%0)\n"
-                 :
-                 : "r"(&m)
-                 : "memory");
-}
+
+
+
+
+
+
+
+
+
+
+
+
 
 void CModelMan::setupDrawEnv() {
     FMATRIX& matWS = CWorldEnv::getWorldScreenMatrix();
@@ -227,28 +227,28 @@ void CModelMan::setupDrawEnv() {
     CModel::resetWorldScreenMatrix();
     CModel::resetMicroProgram();
     setupDrawMode(0);
-    asm volatile("lqc2 $vf28, 0x0(%0)\n"
-                 "lqc2 $vf29, 0x10(%0)\n"
-                 "lqc2 $vf30, 0x20(%0)\n"
-                 "lqc2 $vf31, 0x30(%0)\n"
-                 :
-                 : "r"(&matWS));
-    {
-        FVECTOR vFogParam;
-        vFogParam.setCall(0.0f, CWorldEnv::getDispFar(), 0.0f, 0.0f);
-        asm volatile("lqc2 $vf1, 0x0(%0)\n"
-                     "viaddi $vi1, $vi0, 0\n"
-                     "vsqi.xyzw $vf1, ($vi1++)\n"
-                     :
-                     : "r"(&vFogParam));
-    }
+    vu0LoadMatrixVF28(&matWS);
+
+
+
+
+
+    vu0SetFogParam(CWorldEnv::getDispFar());
+
+
+
+
+
+
+
+
     FMATRIX wv_i;
     FMATRIX vs_i;
     FMATRIX ws_i;
     FMATRIX& matWV = CWorldEnv::getWorldViewMatrix();
     FMATRIX& matVS = CWorldEnv::getViewScreenMatrix();
     InverseMatrix(wv_i, matWV);
-    _unitMatrix(vs_i);
+    vu0UnitMatrix(vs_i);
     vs_i.m[0][0] = 1.0f / matVS.m[0][0];
     vs_i.m[3][0] = -matVS.m[2][0] / matVS.m[0][0];
     vs_i.m[1][1] = 1.0f / matVS.m[1][1];

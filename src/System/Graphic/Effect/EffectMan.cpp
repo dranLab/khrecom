@@ -94,18 +94,18 @@ public:
 };
 
 
-static inline void _unitMatrixVu0(FMATRIX& m) {
-    asm volatile("vmr32.xyzw $vf1, $vf0\n"
-                 "sqc2 $vf0, 0x30(%0)\n"
-                 "vmr32.xyzw $vf2, $vf1\n"
-                 "sqc2 $vf1, 0x20(%0)\n"
-                 "vmr32.xyzw $vf3, $vf2\n"
-                 "sqc2 $vf2, 0x10(%0)\n"
-                 "sqc2 $vf3, 0x0(%0)\n"
-                 :
-                 : "r"(&m)
-                 : "memory");
-}
+
+
+
+
+
+
+
+
+
+
+
+
 
 typedef struct {
     u_int DIR : 1;
@@ -304,7 +304,7 @@ void CEffectMan::_setCoord(CEffect* pEff, INT nCNum, const CCoord* pParent, cons
     if (pMat) {
         *pLocal = *pMat;
     } else {
-        _unitMatrixVu0(*pLocal);
+        vu0UnitMatrix(*pLocal);
         if (pvRot) {
             RotMatrixX(*pLocal, *pLocal, pvRot->x);
             RotMatrixY(*pLocal, *pLocal, pvRot->y);
@@ -605,26 +605,26 @@ static inline u_long128 _rotTransPersVf4(const FVECTOR& v0) {
 
 
 
-static inline FLOAT _lengthVf4(const FVECTOR& v0) {
-    INT iTmp;
-    register FLOAT ret asm("$f0");
-    asm volatile("lqc2 $vf4, 0x0(%1)\n"
-                 "vaddy.x $vf6, $vf0, $vf4y\n"
-                 "vaddz.x $vf7, $vf0, $vf4z\n"
-                 "vmulax.x $ACC, $vf4, $vf4x\n"
-                 "vmadday.x $ACC, $vf6, $vf4y\n"
-                 "vmaddz.x $vf5, $vf7, $vf4z\n"
-                 "qmfc2.ni %0, $vf5\n"
-                 : "+r"(iTmp) /* MATCH: read before written: live from entry, so it crosses calls (s3 in _updateCoord) */
-                 : "r"(&v0));
-    asm volatile("mtc1 %1, %0\n"
-                 "nop\n"
-                 "nop\n"
-                 "sqrt.s %0, %0\n"
-                 : "=f"(ret)
-                 : "r"(iTmp));
+static inline FLOAT _sqrtf(FLOAT x) { /* Math3D.h:129 (original name unknown) */
+    FLOAT ret;
+    asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));
     return ret;
 }
+static inline FLOAT _lengthVf4(const FVECTOR& v0) { return _sqrtf(vu0LengthSq(v0)); } /* a Math3D.h inline (original name unknown) */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 static int EffMan_QSortComp(const void* ax, const void* ay) {
     return ((EFFMAN_ZSORT_BUF*)ax)->nZ - ((EFFMAN_ZSORT_BUF*)ay)->nZ;

@@ -29,18 +29,18 @@ static inline FLOAT _sqrtf(FLOAT x) {
     return ret;
 }
 
-static inline void _unitMatrixVu0(FMATRIX& m) {
-    asm volatile("vmr32.xyzw $vf1, $vf0\n"
-                 "sqc2 $vf0, 0x30(%0)\n"
-                 "vmr32.xyzw $vf2, $vf1\n"
-                 "sqc2 $vf1, 0x20(%0)\n"
-                 "vmr32.xyzw $vf3, $vf2\n"
-                 "sqc2 $vf2, 0x10(%0)\n"
-                 "sqc2 $vf3, 0x0(%0)\n"
-                 :
-                 : "r"(&m)
-                 : "memory");
-}
+
+
+
+
+
+
+
+
+
+
+
+
 
 #line 20
 CRide::CRide() {
@@ -116,7 +116,7 @@ void CRideModel::init(void* pOCDData, CTask* pBFObj) {
         MC_CHIP* pChip = m_MCDInfo.pMCChip;
         for (INT i = 0; i < m_MCDInfo.iChipSuu; i++, pPartsMat++, pChip++) {
             m_pOCDWork[i].fgEnable = 0;
-            _unitMatrixVu0(*pPartsMat);
+            vu0UnitMatrix(*pPartsMat);
             RotMatrixX(*pPartsMat, *pPartsMat, pChip->r.x);
             RotMatrixY(*pPartsMat, *pPartsMat, pChip->r.y);
             RotMatrixZ(*pPartsMat, *pPartsMat, pChip->r.z);

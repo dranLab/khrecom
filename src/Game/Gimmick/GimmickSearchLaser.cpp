@@ -67,18 +67,18 @@ FLOAT InnerProduct(const FVECTOR& v0, const FVECTOR& v1);
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 void ApplyMatrixXYZ(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 
-static inline void _unitMatrixVu0(FMATRIX& m) {
-    asm volatile("vmr32.xyzw $vf1, $vf0\n"
-                 "sqc2 $vf0, 0x30(%0)\n"
-                 "vmr32.xyzw $vf2, $vf1\n"
-                 "sqc2 $vf1, 0x20(%0)\n"
-                 "vmr32.xyzw $vf3, $vf2\n"
-                 "sqc2 $vf2, 0x10(%0)\n"
-                 "sqc2 $vf3, 0x0(%0)\n"
-                 :
-                 : "r"(&m)
-                 : "memory");
-}
+
+
+
+
+
+
+
+
+
+
+
+
 
 CGimmickSearchLaser::CGimmickSearchLaser(CTask* inParent) : CBaseGimmick(inParent) {
     m_Step = 0;
@@ -345,7 +345,7 @@ BOOL CGimmickSearchLaserCircle::setMoveTargetPos() {
         FVECTOR v2;
         FVECTOR dirPl;
         FMATRIX m;
-        _unitMatrixVu0(m);
+        m.init();
         RotMatrixY(m, m, g_pPlayer->getRot().y);
         v.x = 0.0f;
         v.y = 0.0f;
@@ -373,7 +373,7 @@ BOOL CGimmickSearchLaserCircle::setMoveTargetPos() {
         FVECTOR v2;
         FVECTOR dirPl;
         FMATRIX m;
-        _unitMatrixVu0(m);
+        m.init();
         RotMatrixY(m, m, g_pPlayer->getRot().y);
         v.x = 0.0f;
         v.y = 0.0f;

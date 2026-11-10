@@ -624,7 +624,7 @@ INT checkBBox(const FMATRIX& mWorldMatrix, const BBOX* bbox) {
     v[1].x = bbox->x[1];
     v[1].y = bbox->y[1];
     v[1].z = bbox->z[1];
-    asm volatile("lqc2 $vf20, 0(%0)" : : "r"(v));
+    asm volatile("lqc2 $vf20, 0(%0)" : : "r"(v)); /* vu0.h's vu0CheckBBox (55-69): through it v moves v1 -> v0 */
     asm volatile("lqc2 $vf27, 0x10(%0)" : : "r"(v));
     asm volatile("lqc2 $vf21, 0x0(%0)\n"
                  "lqc2 $vf22, 0x10(%0)\n"
@@ -645,9 +645,9 @@ INT checkBBox(const FMATRIX& mWorldMatrix, const BBOX* bbox) {
     return 0xC0000000;
 }
 void resultCheckBBox(FVECTOR& min, FVECTOR& max) {
-    asm volatile("qmfc2.i $0, $vf0");
-    asm volatile("sqc2 $vf2, 0(%0)" : : "r"(&min) : "memory");
-    asm volatile("sqc2 $vf3, 0(%0)" : : "r"(&max) : "memory");
+    vu0WaitMicro();
+    vu0StoreVF2(&min);
+    vu0StoreVF3(&max);
 }
 INT resultCheckBBox(CCoord& crd, const BBOX* bbox) {
     INT ret;
