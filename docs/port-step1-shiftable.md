@@ -161,6 +161,28 @@ object's real name in place of the `D_` name. The matching build's SHA-1 proves 
 the shifted link proves it is symbolic. These edits touch matched units, so CLAUDE.md's usual rules apply
 (funcdiff, check.sh).
 
+**Done 2026-11-10 (66 -> 11), with `tools/shiftblocks.py`.** Finding: the `asm()` data blocks that units with
+INCLUDE_ASM'd functions emit for those functions held **hidden pointers**: Camp's two jump tables
+(`jtbl_004E3800`, `jtbl_004E3C50`: code addresses `.L00315FC8`, ... as `.byte` rows) and its string-pointer
+tables (`pTechCateNameTbl.4441`, ...: addresses of strings in the same blocks). No pin showed them, because
+nothing referenced them by name. `shiftblocks.py` finds every such block, locates its bytes in the original
+image, compares the range with the original data listing, and with `--fix` defines the labels the build needs
+by name and writes the pointers as `.word <label>` again. It keeps the bytes (the SHA-1 checks) and the source
+line count (line markers and `__LINE__` stay put). Applied to Camp (29 pointers, 33 labels), DebugPathData (17
+labels), SceneInfo (1), DispList (5). SceneInfo, BattleEnemy and CardRevolver used `extern "C" char D_xxx[]` for
+strings the unit already emits: replaced by the literal, which gcc pools with the existing copy (`"pDstRoom"`;
+`"@ENP"` as MapEnemy does; EnemyParam.h's assert strings, `"src/Game/Enemy/EnemyParam.h"` being that header's
+`__FILE__` as the compiler sees it; the TRACE format of line 370). Line-neutral edits, SHA-1 unchanged.
+
+**Left (11 pins, 4 hidden pointers), all from parked INCLUDE_ASM functions:** the asm'd code of Camp
+(`setTechWin`, `setMapCardWin`), WorldEnv `initialize`, shape `pppVu1ShapeDraw`, DispList and graphdev
+`sceGsSetDefDispEnv` uses constants the compiled C emits under gcc's anonymous `$LC` labels (`D_004E26D8`,
+`D_00463700`, ...), or Camp's copy of the CardKind.h table under splat's name `cardDataTbl_004E5840`; Camp's
+`pStrNum.4452` table points at such constants (`"%02d/99"`, `"%02d"`, ...). None can be named without changing the
+compiled C's emission (Ps2EeAs has no aliases; splat's `.s` is generated). They go away when those functions are
+matched (docs/plan.md): a shifted build needs either that or a non-matching C version of them in the shifted
+build only. Decide when everything else is done (S5/S6 first).
+
 ### S3 - pins in asm data (non-DLL), splat auto symbols, `_end`
 
 - The 1-3-reference users (lib/nodebug, crt0, libm, the data-only units `PlayerAnim`, `PlayerAttack`, `md1`,
@@ -220,6 +242,9 @@ whether that holds). The two ELFs are paired by symbol: every symbol of the matc
 - Every relocated word (`R_MIPS_32`, `26`, `HI16`/`LO16`, `GPREL16`, the DVP types) must equal the matching
   value moved by the target's displacement.
 - Every non-relocated word must be identical in both images (paired by containing symbol + offset).
+- Lesson from S2: hidden pointers often target addresses that have **no symbol** (`.L` code labels inside a
+  function, a string in the middle of a block). Compare against every address of the matching image's moved
+  sections, not only against symbol addresses.
 - **Suspects:** a non-relocated word whose value is an image address that moved: exact, or masked as a DMA tag
   (`& 0x7FFFFFF0`), a `jal` target, or a `lui`/`addiu`/`lw` pair. Reported with object, symbol and offset.
   Each suspect gets fixed (made symbolic) or goes into `config/SLUS_217.99/shift_allow.txt`, one line per word
@@ -280,7 +305,7 @@ whether that holds). The two ELFs are paired by symbol: every symbol of the matc
 | item | state | evidence / notes |
 |---|---|---|
 | S1 shift target + pin report | done 2026-11-10 | `ninja shift` links all 5 presets of `config/SLUS_217.99/shift.yaml` from the matching objects; each fails only on undefined symbols, and ld's 244 equal `shiftpins.py`'s 244. `assert_no_pins()` rejects `PROVIDE` and image-address assignments (tested on samples). `--no-check-sections` still on: revisit once a preset links. |
-| S2 compiled-code pins (66 after the Map merge) | open | |
+| S2 compiled-code pins (66 after the Map merge) | done except 11 (INCLUDE_ASM-dependent) | 244 -> 189 undefined in the shifted link; 29 hidden pointers restored as `.word`, 4 left (Camp `pStrNum.4452` -> unnamed C constants); `shiftblocks.py` total: 0 restorable left. check.sh exit 0. |
 | S3 asm-data pins, auto symbols, `_end`, crt0, `common.bss` alignment | `_end` done (S1) | |
 | S4 DLL exports (173) | open | |
 | S5 DLL imports (125 relocs, 120 raw) | open | |

@@ -2970,7 +2970,7 @@ INT CCardRevolver::calcPlutoMark() {
     }
     return m_nPlutoMark;
 }
-extern "C" char D_0047AC08[]; /* "%3d: [Card%03d:%d(%d)] iStock=%d, iHand=%d/%d, uiFlag=%08x, uiOwner=%d,\n" */
+
 static inline void _clearPrizeFlags(PRIZE_PARAM* p) {
     p->uiFlag = 0;
     p->uiPrizeFlag = 0;
@@ -2998,7 +2998,7 @@ void CCardRevolver::dropPlutoMarkCard(const FVECTOR* inPos) {
             CPrize* pPrize = (CPrize*)CEntityFactory::getInstance()->createPrize(param, 0);
             if (!pPrize) return;
             pPrize->enableReturnCard(TRUE);
-            TRACE(D_0047AC08, n, pData->m_nKind, pData->m_nNumber, card->getBaseCardNumber(),
+            TRACE("%3d: [Card%03d:%d(%d)] iStock=%d, iHand=%d/%d, uiFlag=%08x, uiOwner=%d,\n", n, pData->m_nKind, pData->m_nNumber, card->getBaseCardNumber(),
                   card->getStock(), card->getHand(), card->getHandMax(), card->getFlag(), card->getCardOwner());
             card->setCardOwner(2);
             card->resetPlutoON();
