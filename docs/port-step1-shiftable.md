@@ -455,3 +455,4 @@ Boot-test log:
 | 2026-11-10 | text128 | 6df533ff | movie playback correct (user) | none reported |
 | 2026-11-10 | text128 | 6df533ff | 30 minutes (user): tutorial world, boss fight | none reported |
 | 2026-11-10 | data128 | 6df533ff (disc C:\temp\recom-data128.iso) | 30 minutes (user): tutorial world, boss fight | none reported. The first boss (Guard Armor, `__15CBossGuardarmorP5CTask`) is a DLL import: if that was the fight, the DLL loader worked through the generated table in both layouts |
+| 2026-11-10 | mid | 6df533ff (disc C:\temp\recom-mid.iso) | works (user, with savestates) | open: counts only if the session booted from this disc; a savestate taken with another disc restores that build's code |
