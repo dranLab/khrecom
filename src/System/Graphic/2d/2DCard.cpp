@@ -72,9 +72,8 @@ void C2DCard::create(CARD inCard) {
     } else {
         C2DSeqObj* pObj = addSeq(seqName3, 0);
         if (pObj) {
-            const CARD_DATA* pData = &cardDataTbl[inCard.m_nKind];
-            UINT nTexPos = pData->nTexPos;
-            UINT nTexNo = pData->nTexNo;
+            UINT nTexPos = inCard.getTexPos();
+            UINT nTexNo = inCard.getTexNo();
             G_UV uvStart, uvEnd;
             CHAR szTex[16];
             USHORT u = ((nTexPos & 3) << 6) | 2;

@@ -77,21 +77,7 @@ CCard::~CCard() {}
 /* read through a reference: the original reloads m_pCardInfo after a store into it */
 template <class T> static inline T& _ref(T& v) { return v; }
 
-static inline void _setCard2(CARD& c, USHORT inKind, CHAR num) {
-    c.m_nId = 0;
-    c.m_nKind2 = inKind;
-    c.m_nNumber2 = num;
-    c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0;
-    c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1;
-}
-
-static inline void _setCard(CARD& c, USHORT kind, BYTE num) {
-    c.m_nId = 0;
-    c.m_nKind2 = kind;
-    c.m_nNumber2 = num;
-    c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0;
-    c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1;
-}
+#line 322
 
 void CCard::setCard(unsigned char (*pInitCardTbl)[2], INT cnt) {
     INT i;
@@ -101,7 +87,7 @@ void CCard::setCard(unsigned char (*pInitCardTbl)[2], INT cnt) {
             addCard(idxCard, pInitCardTbl[i][1]);
             if (idxCard >= 0x44 && CGame::isRikuGame()) continue;
             CARD card;
-            _setCard(card, idxCard, pInitCardTbl[i][1]);
+            card.init(idxCard, pInitCardTbl[i][1]);
             addDeck(card, 0);
         } else if (pInitCardTbl[i][1] < 20) {
             for (INT j = 0; j <= pInitCardTbl[i][1] - 10; j++) addCard(pInitCardTbl[i][0], j);
@@ -166,7 +152,7 @@ void CCard::initCardWorld() {
     setCard(pInitCardTbl, cnt);
     for (i = 99; i < 127; i++) {
         if (searchCard(i, 0)) {
-            _setCard(card, i, 0);
+            card.init(i, 0);
             addDeck(card, 0);
         }
     }
@@ -247,7 +233,7 @@ void CCard::initCard(USHORT inNo, WORLD_ID inDebugWorldID, SHORT inCurrentFloorN
 }
 INT CCard::deleteCard(USHORT inID, SHORT inNumber) {
     CARD card;
-    _setCard(card, inID, inNumber);
+    card.init(inID, inNumber);
     USHORT fgPremium = card.m_fgPremium;
     USHORT id;
     switch (card.m_nCategory0) {
@@ -313,7 +299,7 @@ INT CCard::deleteCard(USHORT inID, SHORT inNumber) {
 
 INT CCard::searchCard(USHORT inID, SHORT inNumber) {
     CARD card;
-    _setCard(card, inID, inNumber);
+    card.init(inID, inNumber);
     USHORT fgPremium = card.m_fgPremium;
     USHORT id;
     INT nCard = 0;
@@ -696,12 +682,12 @@ void CCard::getCardTexInfo(CARD inCard, CHAR* outTexName, FVECTOR& outST) {
 }
 
 void CCard::getCardTexInfo(CARD inCard, CHAR* outTexName, IVECTOR& outUV) {
-    INT iIdx = cardDataTbl[inCard.m_nKind].nTexPos;
+    INT iIdx = inCard.getTexPos();
     outUV.x = (iIdx & 3) * 64 + 1;
     outUV.y = (iIdx & 0xC) * 16 + 1;
     outUV.z = (iIdx & 3) * 64 + 63;
     outUV.w = (iIdx & 0xC) * 16 + 63;
-    sprintf(outTexName, "card:%02d", ((CARD_DATA*)cardDataTbl)[inCard.m_nKind].nTexNo);
+    sprintf(outTexName, "card:%02d", inCard.getTexNo());
 }
 
 TexInfo* CCard::getCardTexInfo(CARD inCARD, FVECTOR& outST) {
@@ -727,13 +713,13 @@ TexInfo* CCard::getCardTexInfo(CARD inCARD, FVECTOR& outST) {
 }
 
 TexInfo* CCard::getCardTexInfo(CARD inCard, IVECTOR& outUV) {
-    INT iIdx = cardDataTbl[inCard.m_nKind].nTexPos;
+    INT iIdx = inCard.getTexPos();
     char buf[16];
     outUV.x = (iIdx & 3) * 64 + 1;
     outUV.y = (iIdx & 0xC) * 16 + 1;
     outUV.z = (iIdx & 3) * 64 + 63;
     outUV.w = (iIdx & 0xC) * 16 + 63;
-    sprintf(buf, "card:%02d", ((CARD_DATA*)cardDataTbl)[inCard.m_nKind].nTexNo);
+    sprintf(buf, "card:%02d", inCard.getTexNo());
     return CRsrcDB::getRsrcTex(buf, NAME_CASE_SENSITIVE);
 }
 BOOL CCard::addCard(CARD card) { return addCard(card.m_nKind2, card.m_nNumber2); }
@@ -742,7 +728,7 @@ BOOL CCard::addCard(USHORT inID, SHORT inNumber) {
     if (!canAddCard(inID, inNumber)) return FALSE;
     if (inNumber < 0) inNumber = 0;
     CARD card;
-    _setCard(card, inID, inNumber);
+    card.init(inID, inNumber);
     USHORT fgPremium = card.m_fgPremium;
     USHORT id;
     switch (card.m_nCategory0) {
@@ -822,7 +808,7 @@ BOOL CCard::canAddCard(USHORT inID, SHORT inNumber) {
     if (isBattleTotalMaxUpCard(inID)) return TRUE;
     if (inNumber < 0) inNumber = 0;
     CARD card;
-    _setCard(card, inID, inNumber);
+    card.init(inID, inNumber);
     USHORT fgPremium = card.m_fgPremium;
     USHORT id;
     switch (card.m_nCategory0) {
@@ -869,9 +855,9 @@ BOOL CCard::isAddCardValid(USHORT inID, SHORT inNumber) {
     USHORT kind = inID & 0xFF;
     CARD card;
     if (inNumber < 0) {
-        _setCard(card, inID, 0);
+        card.init(inID, 0);
     } else {
-        _setCard(card, inID, inNumber);
+        card.init(inID, inNumber);
     }
     switch (card.m_nCategory0) {
     case 0:
@@ -947,22 +933,22 @@ CARD CCard::correctCardRank(CARD card) {
     nKind = card.m_nKind2;
     if (nRank != 0) {
         for (i = nRank - 1; i > 0; i--) {
-            _setCard(card, nKind, i);
+            card.init(nKind, i);
             if (canAddCard(card)) return card;
         }
         for (i = nRank + 1; i < 10; i++) {
-            _setCard(card, nKind, i);
+            card.init(nKind, i);
             if (canAddCard(card)) return card;
         }
-        _setCard(card, nKind, 0);
+        card.init(nKind, 0);
         if (canAddCard(card)) return card;
     } else {
         for (i = 9; i > 0; i--) {
-            _setCard(card, nKind, i);
+            card.init(nKind, i);
             if (canAddCard(card)) return card;
         }
     }
-    _setCard(card, 0, 0);
+    card.init(0, 0);
     return card;
 }
 BOOL CCard::isHaveMapCard(INT nRank) {
@@ -997,7 +983,7 @@ BOOL CCard::canPremium(USHORT inID) { return cardDataTbl[(BYTE)inID].nFlag & 1; 
 LPCSTR CCard::getName(USHORT inID) {
     static char dummy[4] = "-";
     CARD card;
-    _setCard(card, inID, 0);
+    card.init(inID, 0);
     LPCSTR p = card.getName();
     if (!p) p = dummy;
     return p;
@@ -1031,7 +1017,7 @@ void CCard::setCardPossible(USHORT usKind2) {
     if (!isValid(usKind2)) return;
     if (getCardAppearance(usKind2)) return;
     CARD card;
-    _setCard(card, usKind2, 0);
+    card.init(usKind2, 0);
     if (0) TRACE("\x83J\x81[\x83h\x82\xaa\x89\xf0\x8b\xd6\x82\xb3\x82\xea\x82\xdc\x82\xb5\x82\xbd\x81I [Kind %3d: %s]\n", card.m_nKind2, card.getName());
     setCardAppearance(kind, 1);
     usKind2 = kind | 0x100;
@@ -1193,7 +1179,7 @@ BOOL CCard::tryAddBattleCardAppearance(USHORT usKind2) {
     if (isBattleTotalMaxUpCard(usKind2)) {
         m_pCardInfo->_nBattleTotalMax++;
         CARD card;
-        _setCard(card, usKind2, 0);
+        card.init(usKind2, 0);
         TRACE("\x8f\x8a\x8e\x9d\x89\xc2\x94\\\x82\xc8\x83o\x83g\x83\x8b\x83J\x81[\x83h\x82\xcc\x8d\xc5\x91\xe5\x92l\x82\xaa\x91\x9d\x82\xa6\x82\xdc\x82\xb5\x82\xbd\x81I [BattleTotalMax = %4d] [Kind %3d: %s]\n",
               m_pCardInfo->_nBattleTotalMax, card.m_nKind2, card.getName());
         if (m_pCardInfo->_nBattleTotalMax >= 1000) {

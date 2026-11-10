@@ -280,7 +280,7 @@ void CHumanBoss::endStateDead() {
 
 /* MATCH: m_pEnemyParam read directly (friend in BattleEnemy.h; the getEnemyParam() inline loses the register copy of the param pointer in the
    loops); the id % 10000 in a local, UINT search index, one INT i per loop, `cards = deck` before ASSERT(deck) */
-static inline void _setCard(CARD& c, USHORT kind, BYTE num) { c.m_nId = 0; c.m_nKind2 = kind; c.m_nNumber2 = num; c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0; c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1; }
+#line 421
 void CHumanBoss::setupCardRevolver() {
     CARD_DATA* cardData;
     INT cardNum;
@@ -352,19 +352,19 @@ void CHumanBoss::setupCardRevolver() {
             INT k;
             for (k = 0; k < card->bNumber[j]; k++) {
                 if (DebugWork::g_dw.enemy.uiFlag & 0x4000) {
-                    _setCard(*cards, cardKind, DebugWork::g_dw.enemy.iCardNumber);
+                    cards->init(cardKind, DebugWork::g_dw.enemy.iCardNumber);
                 } else {
-                    _setCard(*cards, cardKind, j);
+                    cards->init(cardKind, j);
                 }
                 cards++;
             }
         }
     }
     for (INT i = 0; i < m_pEnemyParam->iEnemyCard; i++) {
-        _setCard(*cards, m_pEnemyParam->byEnemyCards[i], 0xFF);
+        cards->init(m_pEnemyParam->byEnemyCards[i], 0xFF);
         cards++;
     }
-    _setCard(*cards, 0xFF, 0);
+    cards->init(0xFF, 0);
     for (INT i = cardNum - 2; i > 0; i--) {
         INT j = (INT)((FLOAT)(i + 1) * RND::genrand_real1());
         CARD v = deck[i];

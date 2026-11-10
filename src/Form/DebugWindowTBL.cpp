@@ -157,15 +157,7 @@ static INT _HEAP_SIZE = 0x2000000 - 0x40000 - _HEAP_START;
 
 
 
-#line 388
-
-static inline void _setCard(CARD& c, USHORT kind, BYTE num) {
-    c.m_nId = 0;
-    c.m_nNumber2 = num;
-    c.m_nKind2 = kind;
-    c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0;
-    c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1;
-}
+#line 396
 
 
 namespace DWT {
@@ -2744,9 +2736,9 @@ static BOOL debugWCAddCardSora(CDebugWindow* pObj, INT inY, INT inParam) {
         if (CCard::canPremium(usKind) && DebugWork::g_dw.menu.nSoraCardPremium) {
             usKind += 0x100;
         }
-        _setCard(card, usKind, DebugWork::g_dw.menu.nSoraCardRank);
+        card.init(usKind, DebugWork::g_dw.menu.nSoraCardRank);
         if (card.m_nCategory20 == 7 || card.m_nCategory20 == 10) {
-            _setCard(card, usKind, 0);
+            card.init(usKind, 0);
         }
         for (INT i = 0; i < DebugWork::g_dw.menu.nSoraCardNum; i++) {
             nRet += CCard::addCard(card);
@@ -2765,9 +2757,9 @@ static BOOL debugWCAddCardRiku(CDebugWindow* pObj, INT inY, INT inParam) {
         USHORT usKind = s_MenuRikuCardKindTbl[DebugWork::g_dw.menu.nRikuCardIdx];
         INT nRet = 0;
         CARD card;
-        _setCard(card, usKind, DebugWork::g_dw.menu.nRikuCardRank);
+        card.init(usKind, DebugWork::g_dw.menu.nRikuCardRank);
         if (card.m_nCategory20 == 7 || card.m_nCategory20 == 10) {
-            _setCard(card, usKind, 0);
+            card.init(usKind, 0);
         }
         for (INT i = 0; i < DebugWork::g_dw.menu.nRikuCardNum; i++) {
             nRet += CCard::addCard(card);

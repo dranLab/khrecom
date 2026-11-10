@@ -49,13 +49,7 @@ inline void _emptyStringPlaceholder() {
 
 
 
-static inline void _setCard(CARD& c, USHORT kind, BYTE num) {
-    c.m_nId = 0;
-    c.m_nNumber2 = num;
-    c.m_nKind2 = kind;
-    c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0;
-    c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1;
-}
+#line 286
 
 namespace WorldCard {
 
@@ -295,7 +289,7 @@ void CWorldCardSeq::WorldWndOne(INT in_CardKind, const CHAR* in_pStr) {
     m_pStrings[0]->start();
     m_pStrings[1] = createSeq(1, 0, 0, 11, NULL);
     m_pStrings[1]->start();
-    _setCard(card, in_CardKind, 0);
+    card.init(in_CardKind, 0);
 #line 473
     m_pCard[0] = new (__FILE__ "(473)") C2DCard;
     m_pCard[0]->create(card);
@@ -310,7 +304,7 @@ void CWorldCardSeq::WorldWndFour(INT* in_CardKindTable, const CHAR* in_pStr) {
     for (INT i = 0; i < 4; i++) {
         m_pStrings[i + 1] = createSeq(i + 1, 1, 1, 11, NULL);
         m_pStrings[i + 1]->start();
-        _setCard(card, in_CardKindTable[i], 0);
+        card.init(in_CardKindTable[i], 0);
 #line 497
         m_pCard[i] = new (__FILE__ "(497)") C2DCard;
         m_pCard[i]->create(card);
@@ -326,7 +320,7 @@ void CWorldCardSeq::WorldWndFive(INT* in_CardKindTable, const CHAR* in_pStr) {
     for (INT i = 0; i < 5; i++) {
         m_pStrings[i + 1] = createSeq(i + 1, 1, 2, 11, NULL);
         m_pStrings[i + 1]->start();
-        _setCard(card, in_CardKindTable[i], 0);
+        card.init(in_CardKindTable[i], 0);
 #line 522
         m_pCard[i] = new (__FILE__ "(522)") C2DCard;
         m_pCard[i]->create(card);

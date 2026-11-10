@@ -2361,15 +2361,10 @@ CMemo2DCard::CMemo2DCard(const CHAR* inEmptySeqName) {
 }
 CMemo2DCard::~CMemo2DCard() {}
 __asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
-/* CardKind.h's inline lookup (line 561 in the original header) */
-static inline const CARD_DATA* getCardData(CARD inCard) {
-    const CARD_DATA* p = cardDataTbl;
-    return &p[inCard.m_nKind];
-}
+#line 3432
 void CMemo2DCard::create(CARD inCard, INT inMode) {
     if (inCard.m_nCategory0 == 0xC) return;
-    const CARD_DATA* pData = getCardData(inCard);
-    createPicture(pData->nTexNo, pData->nTexPos);
+    createPicture(inCard.getTexNo(), inCard.getTexPos());
     if (inMode > 0) {
         BYTE frameSeqTbl[15] = { 0, 7, 5, 5, 6, 6, 6, 4, 0x2f, 2, 1, 0, 3, 9, 7 };
         m_iFrameSeqNo = (inCard.m_nKind == 0xB9) ? 0x14 : frameSeqTbl[inCard.m_nCategory1];
@@ -4134,13 +4129,7 @@ INT CJiminyMemo::getPrevStoryId(INT inId) {
 INT CJiminyMemo::getNextStoryId(INT inId) {
     return getNextContentId(inId, work(0x178), work(0x170));
 }
-static inline void _setCard(CARD& c, USHORT kind, BYTE num) {
-    c.m_nId = 0;
-    c.m_nNumber2 = num;
-    c.m_nKind2 = kind;
-    c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0;
-    c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1;
-}
+#line 5671
 namespace JiminyMemo {
 namespace Collect {
 namespace D {
@@ -4242,7 +4231,7 @@ void CJiminyMemo::contentCollection() {
                             pCard[no]->setLayer(0xF);
                             pCard[no]->enableColorCtrl(TRUE);
                             pCard[no]->setParent(pBase);
-                            _setCard(card, pCardEncyclTbl[kind][i], 0xFF);
+                            card.init(pCardEncyclTbl[kind][i], 0xFF);
                             pCard[no]->create(card, 1);
                         }
                     }
@@ -5491,7 +5480,7 @@ void CJiminyMemo::contentCardView() {
                 pCard->setLocalPosition();
                 pCard->enableDisp(TRUE);
                 pCard->setState(1);
-                _setCard(card, cardEncyclNo, 0xFF);
+                card.init(cardEncyclNo, 0xFF);
                 pCard->create(card, 1);
                 pCard->enableDisp(3, FALSE);
             }

@@ -169,13 +169,7 @@ void CRoulette::dispose() {
     m_pHelpButton = NULL;
 }
 
-static inline void _setCard(CARD& c, USHORT kind, BYTE num) {
-    c.m_nId = 0;
-    c.m_nKind2 = kind;
-    c.m_nNumber2 = num;
-    c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0;
-    c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1;
-}
+#line 411
 
 void CRoulette::main() {
     static LPCTSTR pStr[2] = { "Upgrade a card to a Premium Card.         : Cancel", "Choose a Map Card." };
@@ -226,9 +220,9 @@ void CRoulette::main() {
             for (INT i = 0; i < 22; i++) {
                 dorpPrize = pGimMan->DecideMapCardPrize(0);
                 if ((UINT)(dorpPrize.Kind - 0xA1) < 0x19) {
-                    _setCard(card[i], dorpPrize.Kind, dorpPrize.No);
+                    card[i].init(dorpPrize.Kind, dorpPrize.No);
                 } else {
-                    _setCard(card[i], 0xB6, 1);
+                    card[i].init(0xB6, 1);
                 }
             }
             pDeck = card;

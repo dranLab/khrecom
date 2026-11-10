@@ -268,8 +268,8 @@ struct CARD { // 0x4
         };
     };
 
-    // the .mdebug shows CARD* this and USHORT inKind; inNumber's type and the default are a guess
-    void init(USHORT inKind, CHAR inNumber = -1) {
+    // the .mdebug shows CARD* this and USHORT inKind; BYTE inNumber from the code (andi 0xff), its default a guess
+    void init(USHORT inKind, BYTE inNumber = 0xFF) {
         m_nId = 0;
         m_nNumber2 = inNumber;
         m_nKind2 = inKind;

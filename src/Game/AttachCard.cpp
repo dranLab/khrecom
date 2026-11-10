@@ -65,14 +65,6 @@ BOOL CAttachCard::setup(CARD_KIND inKind, CCoord* inParent, const FVECTOR* inPos
     return initCard_();
 }
 
-static inline void _setCard(CARD& c, USHORT kind, BYTE num) {
-    c.m_nId = 0;
-    c.m_nKind2 = kind;
-    c.m_nNumber2 = num;
-    c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0;
-    c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1;
-}
-
 #line 110
 BOOL CAttachCard::initCard_() {
     static const int g_iCardModelIndex[14] = { 0, 0, 1, 2, 3, 4, 4, 5, 0, 6, 7, 8, 9, 10 };
@@ -81,7 +73,7 @@ BOOL CAttachCard::initCard_() {
     INT count = CRsrcDB::getModelCount(groupID);
     if (count <= 0) return FALSE;
     CARD card;
-    _setCard(card, m_CardKind, 0);
+    card.init(m_CardKind, 0);
     INT mdlIndex;
     if (m_CardKind != 0xB9) mdlIndex = g_iCardModelIndex[card.m_nCategory21];
     else mdlIndex = 10;

@@ -119,14 +119,7 @@ CB_LAYOUT g_LayoutData[65] = {
     {356, 336, 2, 100}, // 64
 };
 }
-#line 348
-static inline void _setCard(CARD& c, USHORT inKind, BYTE num) {
-    c.m_nId = 0;
-    c.m_nKind2 = inKind;
-    c.m_nNumber2 = num;
-    c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0;
-    c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1;
-}
+#line 355
 namespace CardBattle {
 }
 FLOAT RotTransPersClipW(IVECTOR& out_v, const FVECTOR& in_v);
@@ -162,7 +155,7 @@ CardBattle::CBattleCard::CBattleCard(CTask* pParent, INT inIndex, INT inNumber, 
     m_State[4].set(this, &CBattleCard::preStateDuel, &CBattleCard::stateDuel, NULL);
     m_State[5].set(this, &CBattleCard::preStateSnatch, &CBattleCard::stateSnatch, NULL);
     m_State[6].set(this, &CBattleCard::preStatePronounce, &CBattleCard::statePronounce, NULL);
-    _setCard(m_cardData, inIndex, inNumber);
+    m_cardData.init(inIndex, inNumber);
     m_nNumberR = -1;
     m_nNumberE = -1;
     m_nNumber = inNumber;
@@ -392,7 +385,7 @@ void CBattleCard::stateUse() {
         m_tqTimer -= getFrameRate();
         if (m_tqTimer <= 0) {
             m_tqTimer = 0;
-            _setCard(m_cardData, 0x43, 0);
+            m_cardData.init(0x43, 0);
             m_pCard->destroy();
             m_pCard->create(m_cardData);
             m_iLayer = g_LayoutData[58].layer;
@@ -1410,7 +1403,7 @@ void CBattleCard::setSnatch(HANDLE inHandle) {
 }
 void CBattleCard::resetSnatch() {
     m_uiOwner = 2;
-    _setCard(m_cardData, 0, 0xff);
+    m_cardData.init(0, 0xff);
     m_uiFlag |= 0x20;
     m_uiFlag = (INT)m_uiFlag & ~0x1;
     m_uiFlag = (INT)m_uiFlag & ~0x2;

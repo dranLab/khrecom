@@ -612,13 +612,7 @@ void CPrize::flashing_() {
     }
 }
 
-static inline void _setCard(CARD& c, USHORT kind, BYTE num) {
-    c.m_nId = 0;
-    c.m_nKind2 = kind;
-    c.m_nNumber2 = num;
-    c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0;
-    c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1;
-}
+#line 825
 
 void CPrize::playerPrizeGet_() {
     if (!m_bReturnCard) {
@@ -626,7 +620,7 @@ void CPrize::playerPrizeGet_() {
         return;
     }
     CARD card;
-    _setCard(card, m_PrizeKind, m_iNumber);
+    card.init(m_PrizeKind, m_iNumber);
 #line 1113
     ASSERT(g_pPlayer);
     g_pPlayer->notifyReturnCard(&card);
@@ -662,7 +656,7 @@ BOOL CPrize::initCard_() {
     INT count = CRsrcDB::getModelCount(groupID);
     if (count <= 0) return FALSE;
     CARD card;
-    _setCard(card, m_PrizeKind, m_iNumber);
+    card.init(m_PrizeKind, m_iNumber);
     INT mdlIndex;
     if (m_PrizeKind != 0xB9) mdlIndex = Prize::g_iCardModelIndex[card.m_nCategory21];
     else mdlIndex = 10;
