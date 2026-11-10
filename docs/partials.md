@@ -161,17 +161,18 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-10 | cleanup/coord-unify-types: Coord.h unification step 1: FVECTOR/IVECTOR/FMATRIX and F_UL/G_* from Vector.h, CCoord from Camera.h (line markers 1009-1072, against the ref owner, user decision) into System/Coord.h on the original's lines; Vector.h keeps CVector; EventTrap.h includes Gprim.h first (MATCH) | 160 | 8 | 0 | 661 (0) | 1054 |
 | 2026-11-10 | cleanup/coord-unify-wrappers: Coord.h step 2: the ref's extern "C" sceVu0 block (64 local declarations gone), the ref's conversion operators of IVECTOR/FVECTOR/FMATRIX (FMATRIX's PARTIAL row operator replaced), the original's free inlines at 340-643 on their lines; unit-local copies in ~70 units replaced; Coord.h line markers 330-650 equal the original's in all 509 C++ units (partials.py counts the conversion operators as extra methods: superset +1) | 158 | 8 | 0 | 661 (0) | 1052 |
 | 2026-11-10 | cleanup/coord-unify-rest: Coord.h step 3: the remaining Coord.h inlines on the original's lines (init0, FMATRIX getTrans/getTransRef/setTrans/initWithScale, FVECTOR2 from 2DSprObj.h, G_*::set, set/zero/init, the operators, CCoord::setTrans); ~25 unit-local helpers gone; functions with differing Coord.h line markers 314 -> 50 | 158 | 8 | 0 | 661 (0) | 1051 |
+| 2026-11-10 | cleanup/coord-unify-vu0: Coord.h step 4: the original's System/Graphic/VuCode/vu0.h (inlines on its lines, included by Coord.h), FMATRIX::init = its unit matrix, 37 unit-matrix copies and Coord.cpp's 25 asm leaves replaced, VECTOR_H_SET_CALL gone; vu0.h marker diffs 125 -> 6, Coord.h 50 -> 26 | 158 | 8 | 0 | 659 (0) | 1053 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 158 (131 in 45 headers, 27 in 15 .cpp); MATCH: 1051
+PARTIAL: 158 (131 in 45 headers, 27 in 15 .cpp); MATCH: 1053
   by category: method 30, data member 9, type 12, fwd decl 2, #include 13, changed in place 40, padding 2, gate 5, guessed 9, header-level 22, stand-in 10, other 4
 stand-ins: 8 foreign in 5 files (6 names), 166 unattributed, 181 own
 duplicate class names across headers: 0
 padding: 2 arrays, 0 accessors
-mechanisms: 661 sites (0 untagged); #line: 1295
+mechanisms: 659 sites (0 untagged); #line: 1332
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
 classes: complete 1177, superset 17, partial 1, gated 3, missing 6, unattributed 8
 ```
@@ -191,7 +192,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 1.0 | `Game/Collision/CollObj.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R1 | 1.0 | `Game/Collision/CollUtil.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R1 | 1.0 | `Game/Collision/CollUtilA.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
-| R1 | 1.0 | `System/Coord.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R2 | 6.0 | `System/Graphic/Anim.h` | ready | 0 stand-in files, 0 dup headers, 6 gate users |  () | gated strings: ANIM_H_GETFLAG_DECL_ONLY |
 | R2 | 6.0 | `System/Graphic/modeldata.h` | ready | 0 stand-in files, 0 dup headers, 6 gate users |  () | gated strings: MODELDATA_H_TEXINFO |
 
@@ -277,14 +277,12 @@ or `untagged`.
 | feature | `GAME_COLLISION_COLLOBJ_H` | 1 | 1 | Game/Collision/CollUtil.h tests it (collideMap, see below) |
 | feature | `MODELDATA_H_TEXINFO` | 6 | 6 | TexInfoStub (the original has its assert strings) |
 | feature | `MODELDATA_H_TEXINFO_CTOR` | 2 | 2 | RSRC_NEW(TexInfo) in _setupTexData runs the constructor (memset) |
-| feature | `VECTOR_H_SET_CALL` | 1 | 1 | FVECTOR::setCall (the original calls FVECTOR::set out of line) |
 | feature site | `ANIM_H_GETFLAG_DECL_ONLY` | 2 | 2 | these units' originals call CAnim::getFlag out of line (Entity, EffectMotion, SEMotion, GimmickLotusLeaf) |
 | feature site | `COLLOBJ_H_INFO_AS_INT` | 1 | 1 | System/Graphic/TriangleIK was written against an INT result: with the union its else branch schedules the TRACE arguments differently |
 | feature site | `ENTITY_H_SETFLAG_DIRECT` | 2 | 2 | the plain form, for Game/Atel/Atel (createAvatar) and Game/Atel/Avatar (ctor, InitAvatar) |
 | feature site | `GAME_COLLISION_COLLOBJ_H` | 1 | 1 | the collision classes' collideMap, when Game/Collision/CollObj.h came first (see there) |
 | feature site | `MODELDATA_H_TEXINFO` | 1 | 1 | only includers whose original .rodata has TexInfoStub's assert strings |
 | feature site | `MODELDATA_H_TEXINFO_CTOR` | 1 | 1 | only System/RsrcData (new TexInfo) has the constructor; the other units memset their locals themselves |
-| feature site | `VECTOR_H_SET_CALL` | 1 | 1 | setCall is defined before set, so it keeps a call (ModelMan calls FVECTOR::set out of line) |
 | guard pre-define | `SYSTEM_GRAPHIC_ANIM_H` | 2 | 2 | the original's includes don't bring in Anim.h (no "2 > idx" in .rodata) |
 | guard skip | `GAME_COLLISION_COLLUTILA_H` | 1 | 1 | the accessor only for includers that have the class (see above) |
 | guard skip | `GAME_ENTITY_H` | 1 | 1 | only for includers that have CEntity (see below) |

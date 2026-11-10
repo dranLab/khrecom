@@ -401,7 +401,7 @@ log in `build/progress/cleanup-<name>.md`; merge with the `--summary` deltas; ad
 
 **Queue state (2026-11-07):** the R1 "gate" items are feature macros a unit defines before the include. Dropping each
 one's `#define`s and rebuilding: ENTITY_H_SETFLAG_DIRECT, MODELDATA_H_TEXINFO_CTOR, GAME_COLLISION_COLLOBJ_H (CollUtil)
-and VECTOR_H_SET_CALL all change the image, so they stay. The global operators are done (cleanup/heapman-operators, 2026-11-07): System/HeapMan.h has new, delete, delete[], new(size_t, char*), new[] and placement new, all
+all change the image, so they stay (VECTOR_H_SET_CALL is gone: cleanup/coord-unify-vu0, 2026-11-10). The global operators are done (cleanup/heapman-operators, 2026-11-07): System/HeapMan.h has new, delete, delete[], new(size_t, char*), new[] and placement new, all
 throw(); new(size_t, char*)/new[] read ra into a function-level `UINT nRA` by inline asm (__builtin_return_address
 reloads ra), the ref's form (cleanup/heapman-nra, 2026-11-09: RET_ADDR is gone, 73 direct com_malloc_d calls became
 new-expressions by their HeapMan.h:153/159 line labels). The sites are `new (__FILE__ "(N)") T` (Camp's setWorldmap
@@ -463,6 +463,8 @@ header split the original didn't have, or make a class a template to hide its st
 | a sceVu0 address kept in a saved register, the original recomputes it | pass `.m`/`.v`, not the conversion operator: coord-free-inlines-map |
 | a statement's instructions carry the line marker of a later line | a multi-line statement gets the line it ends on: coord-free-inlines-map |
 | chained-assignment stores in reverse order (w first) | `x = y = z = w = f` (FVECTOR::setAll): coord-free-inlines-map |
+| an inline's parameter setup on another line than its body | the setup carries the inline's first (declarator) line; .mdebug shows pointer parameters, not references: coord-free-inlines-map |
+| an asm temporary in a callee-saved register the original keeps from entry | an input operand the asm overwrites (live from entry, one use): coord-free-inlines-map |
 | struct argument built from four `lhu` + dsll/or | `_NORMA_PIECES` in `System/Graphic/2d/2DCard.h` |
 | a register dies, then seems to hold the same value again | ref-locals-reveal-shape (local assigned twice, or read into a local before a branch) |
 | `li 1` + `movn`/`movz` where ours branches or uses xori | cmov-operand-order |
@@ -570,6 +572,15 @@ Keep output small: one function's assembly at a time; `funcdiff` without `--full
   Movement ctor, MSVideo _setXYZ, Anim _exeRootMove); 1124 = effect.h's getCoords PARTIAL; 160 = getTransRef
   overload constness unknown; 1019-1020 (Model link/setLocal: a CCoord member the ref lacks; left as is, user decision 2026-11-10).
   Guesses: init(FLOAT inW = 1.0f), the _FVECTOR overloads' parameter types, unary minus as -1.0f * *this.
+- **Done (cleanup/coord-unify-vu0, merged 2026-11-10, step 4):** the original's System/Graphic/VuCode/vu0.h (no ref
+  file: inlines only, names ours) with its inlines on lines 15-820, included by Coord.h after the classes and the
+  sceVu0 block (so ModelMan's FVECTOR::set calls stay out of line: VECTOR_H_SET_CALL gone). FMATRIX::init at 910 calls
+  the 383-391 unit matrix; 37 unit-matrix copies, Coord.cpp's 25 asm leaves and DispList/ModelMan/EffectMan helpers
+  replaced. Differing vu0.h markers 125 -> 6 (Map init/disp, Math3D InvMatrix parked; EffectMan _updateCoord 535 code
+  equal; Model checkBBox kept with a note; resultCheckBBox(CCoord&) 94 = branching asm kept in C), Coord.h 50 -> 26
+  (build/vu/clfw.py --file vu0.h). Kept in asm with MATCH: the mfc1 of ScaleVector/ScaleVectorXYZ (Sony's libvu0
+  form), vu0LengthSq's mtc1 (no GPR -> FPR move in C). Next: Math3D.h's _sqrtf (Math3D.h:129, local copies in 6+
+  units); PackMan.h's free inlines 117-128.
 - **Done (cleanup/vector-types, merged 2026-11-07; superseded 2026-11-10, now in Coord.h):** F_UL, G_XY, G_XYZ, G_RGBA, G_UV,
   G_ST at the end of System/Vector.h and the C++ QWdata after khtypes.h's u_int128 (the original's .mdebug type order,
   against the ref's placement; user decision). The former `D2MAN_H_PATH`/`RSRCDATA_H_FULL` entry is settled (checked 2026-11-07): RSRCDATA_H_FULL was dropped
