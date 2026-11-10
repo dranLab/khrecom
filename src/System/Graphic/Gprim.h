@@ -5,7 +5,7 @@
 #include "khtypes.h"
 #include "System/MainApp.h"
 #include "System/HeapMan.h"
-#include "System/Vector.h" /* FVECTOR and the basic graphics types (G_XY ... G_ST) */
+#include "System/Vector.h" /* CVector; FVECTOR and the basic graphics types (G_XY ... G_ST) through System/Coord.h */
 #include "System/Graphic/TexInfo.h"
 
 /* __FILE__ of this header in the original differs per includer ("System/Graphic/Gprim.h" in most, also
