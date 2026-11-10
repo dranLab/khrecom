@@ -4367,7 +4367,7 @@ INT CCamp::setButtonHelp(INT nSetCmd, INT nMode, INT nKind) {
     return 1;
 }
 
-/* Parked: 27 of 612 lines (2026-11-09; drop the data block after the INCLUDE_ASM to build the draft): only the s-register
+/* Parked: 27 of 612 lines (2026-11-10; drop the data block after the INCLUDE_ASM to build the draft): only the s-register
    roles in the sleight-list loop differ (original s3 nTechKind, s4 i, s5 nTechSeqIdx, s6 nTechSelectTop, i + 1 in s7;
    this draft s3 nTechSelectTop, s4 nTechKind, s5 i, s6 nTechSeqIdx, nTechSelectTop + 1 in s7). 2026-11-09: 36 -> 27 by
    `C2DFnt* pFnt = m_pTechCategoryFnt[nTechCateCnt++] = new ...; addFntShift(m_pSeqName, pFnt, ...)`: the nTechCateCnt
@@ -4393,7 +4393,13 @@ INT CCamp::setButtonHelp(INT nSetCmd, INT nMode, INT nKind) {
    pseudo, slots ret/-204 pTechCateTbl/-200 nTechCateCnt/-196 as here), the ref's G_RGBA techColorTbl[7] (kept),
    split nTechKind/nTechSeqIdx declarations, `(x & 1) == 0`, `nTechSeqIdx /= 2`; .mdebug block tree (applied):
    pTechCateTbl/nTechSelectTop/nTechCateCnt/nLine in the switch body, scrollBarSeqTbl in the if block, len before pBF;
-   permuter runs 6 + 15 + 15 min. */
+   permuter runs 6 + 15 + 15 min. 2026-11-10 (sched1 -dS dump, vt.py: stabs registers per variant, target
+   nTechKind/19 i/20 nTechSeqIdx/21 nTechSelectTop/22, ours 20/21/22/19): the PRE increments are issued at t=2 of
+   bb 50 because the m_pTechButton[i] store -> getName call latency leaves that cycle empty (same in the original's
+   final code); with refs 9 the original order needs nTechSelectTop live >= 77 (or refs 7 at 41), and i above
+   nTechSeqIdx needs nTechSeqIdx live > 87. Init above the ternary (against line 5470) gives nTechKind s3,
+   nTechSelectTop s4 (one step); compare operand swap, *pTechCateTbl[..], [1] load first, 2 + i, ++ forms, != 9,
+   <= 8: registers unchanged. */
 #if 0
 INT CCamp::setTechWin(INT nSetCmd) {
     FVECTOR vec;
@@ -4682,7 +4688,7 @@ INT CCamp::setDeckSetWin(INT nSetCmd) {
     return ret;
 }
 
-/* Parked: 23 of 1407 lines (2026-11-08; drop the data block after the INCLUDE_ASM to build the draft): only the spill
+/* Parked: 23 of 1407 lines (2026-11-10; drop the data block after the INCLUDE_ASM to build the draft): only the spill
    slots of seven PRE-hoisted values differ (orig 0x74 &m_pMCInfoNumFnt, 0x78 &m_nMapKind, 0x7c i + 1, 0x80 nKind - 161,
    0x84 &m_pMCCard, 0x88 &m_pMCFnt, 0x8c &m_pMCInfoNumCtrl; ours 0x74 NumCtrl first, i + 1 before MapKind). Slots follow
    the PRE pseudo numbers = gcse expression-hash bucket order (-dG: raw hash of (plus (reg R) C) = 13258 + R + C, this
@@ -4715,7 +4721,15 @@ INT CCamp::setDeckSetWin(INT nSetCmd) {
    i r303): no help here, and a global header change (not made). 2026-11-09 (-dr dump): the 184 pseudos before the outer
    i are about 6 per operator new, 4 per new-expression's null check/ctor, 11 per virtual call (vtable load, delta,
    float constants), 14 per CCtdMan::getText; the 10 missing ones are one such construct's worth with no code of its
-   own (in setTechWin a used but .mdebug-invisible local, pFnt, was the missing piece). */
+   own (in setTechWin a used but .mdebug-invisible local, pFnt, was the missing piece). 2026-11-10: our max_cuid is
+   exactly 1400 (1-3 empty asms keep S 701, 4 give 703); a wider solve (S 601-1001, this fixed) still allows only
+   S 703 with i in r313..~420 (any nKind). Block trees equal except cardOld and the CARD inline's names. Tested
+   without effect on S/i: CARD::init(USHORT inKind, BYTE inNumber = 0xFF) as a CARD member for both case-9 uses
+   (the .mdebug's "CARD *this; USHORT inKind", CardKind.h:553-558; cardDataTbl would then belong in CardKind.h),
+   vec.set with 4 arguments, `= NULL` on the three pointer locals; separate `p2DFnt = new ...; m_pMCInfoFnt[0] =
+   p2DFnt;` gives S 699/i r301 (the chain is +2 pseudos, ~+4 insns), the 5731/5753 chains +1 pseudo each. Original
+   line markers: each C2DFnt new statement ends one line below its "(N)" line (5737-5738, 5740-5741, 5743-5744,
+   5747-5748), 5746/5749 carry no code, and vec.set is an inline at Coord.h:730 (not Vector.h). */
 #if 0
 INT CCamp::setMapCardWin(INT nSetCmd) {
     static char* pStrNum[4] = { "%02d/99", "%02d", "\x81~%02d", "" };
