@@ -105,10 +105,10 @@ static void _getPowColor(FVECTOR& color, FLOAT dv, const POINTLIGHT* l) {
     FLOAT end = l->end * l->end;
     if (!(dv <= start)) {
         FLOAT pow = 1.0f - (dv - start) / (end - start);
-        color.x *= pow;
-        color.y *= pow;
-        color.z *= pow;
-        color.w *= pow;
+        color *= pow;
+
+
+
     }
 }
 
@@ -230,15 +230,15 @@ void CLightUnit::_calc(const FVECTOR& ctr) {
     }
     Normalize(vlight[3], vlight[3]);
     Normalize(vlight[4], vlight[4]);
-    vlight[3].x += vlight[4].x;
-    vlight[3].y += vlight[4].y;
-    vlight[3].z += vlight[4].z;
-    vlight[3].w += vlight[4].w;
+    vlight[3] += vlight[4];
+
+
+
     Normalize(vlight[3], vlight[3]);
-    vcolor[3].x = (vcolor[3].x + vcolor[4].x) * 0.5f;
-    vcolor[3].y = (vcolor[3].y + vcolor[4].y) * 0.5f;
-    vcolor[3].z = (vcolor[3].z + vcolor[4].z) * 0.5f;
-    vcolor[3].w = (vcolor[3].w + vcolor[4].w) * 0.5f;
+    vcolor[3] += vcolor[4]; vcolor[3] *= 0.5f;
+
+
+
     for (i = 0; i < 4; i++) {
         setLight(i, vlight[i], vcolor[i]);
     }

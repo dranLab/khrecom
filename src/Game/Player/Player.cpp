@@ -123,12 +123,12 @@ static inline FLOAT _limitPI2(FLOAT d) {
     return r;
 }
 void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
-static inline void _addAssign(FVECTOR& a, const FVECTOR& b) {
-    a.x += b.x;
-    a.y += b.y;
-    a.z += b.z;
-    a.w += b.w;
-}
+
+
+
+
+
+
 
 
 #include "System/RsrcDB.h"
@@ -1405,10 +1405,10 @@ void CPlayer::stateField() {
         UnitMatrix(mat);
         RotMatrixY(mat, mat, dir);
         ApplyMatrix(vec, mat, vec);
-        pos.x = pos.x + vec.x;
-        pos.y = pos.y + vec.y;
-        pos.z = pos.z + vec.z;
-        pos.w = pos.w + vec.w;
+        pos += vec;
+
+
+
         m_pMove->setPos(pos);
         m_pMove->setOldPos(pos);
         vec.init();
@@ -1587,10 +1587,10 @@ void CPlayer::stateBattle() {
         UnitMatrix(mat);
         RotMatrixY(mat, mat, dir);
         ApplyMatrix(vec, mat, vec);
-        pos.x = pos.x + vec.x;
-        pos.y = pos.y + vec.y;
-        pos.z = pos.z + vec.z;
-        pos.w = pos.w + vec.w;
+        pos += vec;
+
+
+
         m_pMove->setPos(pos);
         m_pMove->setOldPos(pos);
         vec.init();
@@ -2460,15 +2460,15 @@ void CPlayer::exeWall() {
     m_fJumpSpdY = vel.y;
     m_pMove->setVel(vel);
 }
-/* FVECTOR::operator-(const FVECTOR&) of the original (ref locals: FVECTOR* this, FVECTOR vec). */
-static inline FVECTOR _subVec(const FVECTOR& a, const FVECTOR& inV) {
-    FVECTOR vec = a;
-    vec.x -= inV.x;
-    vec.y -= inV.y;
-    vec.z -= inV.z;
-    vec.w -= inV.w;
-    return vec;
-}
+
+
+
+
+
+
+
+
+
 INT CPlayer::chkLadderStepNow(BOOL inAir) {
     const FVECTOR* pos;
     const FVECTOR* nor;
@@ -2480,7 +2480,7 @@ INT CPlayer::chkLadderStepNow(BOOL inAir) {
     pos = m_pMove->getLadderPos();
     nor = m_pMove->getLadderNormal();
     if (!pos || !nor) return -1;
-    dif = _subVec(*pos, getPos());
+    dif = (*pos - getPos());
     dif.y = 0.0f;
     dif.w = 1.0f;
     if (Math3D::VectorLength(dif) > 0.75f) return -1;
@@ -3056,7 +3056,7 @@ BOOL CPlayer::chkHang() {
     RotMatrixY(m, m, dir);
     ApplyMatrixXYZ(ofs, m, ofs);
     ApplyMatrixXYZ(pos, m, PL::HANG_HAND_LOCAL_OFS);
-    _addAssign(pos, getPos());
+    pos += getPos();
     pos.y = m_vCenterPos.y + 0.05f + vel.y;
     FVECTOR vStart = {{ pos.x, pos.y, pos.z, 1.0f }};
     FVECTOR vEnd = {{ pos.x + ofs.x, pos.y + ofs.y, pos.z + ofs.z, 1.0f }};

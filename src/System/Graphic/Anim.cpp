@@ -61,21 +61,21 @@ MODELDATA* AMFfromMDL(INT nGrpID, INT index);
 
 extern FVECTOR ONE_VECTOR;
 extern "C" float atan2f(float y, float x);
-static inline FVECTOR _subVector(const FVECTOR& v0, const FVECTOR& v1) {
-    FVECTOR vec = v0;
-    vec.x -= v1.x;
-    vec.y -= v1.y;
-    vec.z -= v1.z;
-    vec.w -= v1.w;
-    return vec;
-}
 
-static inline void _addVector(FVECTOR& v0, const FVECTOR& v1) {
-    v0.x += v1.x;
-    v0.y += v1.y;
-    v0.z += v1.z;
-    v0.w += v1.w;
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 static inline FLOAT _limitRot(FLOAT r) {
     return (r < -3.1415927f) ? r + 6.2831855f : (r > 3.1415927f) ? r - 6.2831855f : r; // MATCH: one ternary (the if/return form keeps the sum in another FP register)
@@ -732,7 +732,7 @@ void CAnim::_exeRootMove() {
         m_vRootMoveRot.init();
         m_vRootMovePreRot.y = rot1;
     }
-    trs2 = _subVector(trs1, m_vRootMovePreTrs);
+    trs2 = (trs1 - m_vRootMovePreTrs);
     rot2 = rot0 + (rot1 - m_vRootMovePreRot.y);
     m_vRootMoveRot.y = _limitRot(rot2);
     FMATRIX tmp0;
@@ -740,7 +740,7 @@ void CAnim::_exeRootMove() {
     UnitMatrix(tmp0);
     RotMatrixY(tmp1, tmp0, _limitRot(rot0 - m_vRootMovePreRot.y));
     ApplyMatrix(m_vRootMoveTrs, tmp1, trs2);
-    _addVector(m_vRootMoveTrs, trs0);
+    m_vRootMoveTrs += trs0;
     m_vRootMovePreTrs = trs1;
     m_vRootMovePreRot.y = rot1;
     crd.getLocalMatrix() = m_BufRootMtx;

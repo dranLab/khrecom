@@ -138,14 +138,14 @@ void LIGHTDATA::set(const ALF_DATA* pData) {
 }
 void RotMatrixZ(FMATRIX& out, FMATRIX& in) {
     FMATRIX tmp = in;
-    tmp.m[0][0] = -tmp.m[0][0];
-    tmp.m[0][1] = -tmp.m[0][1];
-    tmp.m[0][2] = -tmp.m[0][2];
-    tmp.m[0][3] = -tmp.m[0][3];
-    tmp.m[1][0] = -tmp.m[1][0];
-    tmp.m[1][1] = -tmp.m[1][1];
-    tmp.m[1][2] = -tmp.m[1][2];
-    tmp.m[1][3] = -tmp.m[1][3];
+    tmp.v[0] *= -1.0f;
+
+
+
+    tmp.v[1] *= -1.0f;
+
+
+
     out = tmp;
 }
 INT CMap::_checkEffId(ZONEPARTS* parts, BOOL bUseMapUnit) {

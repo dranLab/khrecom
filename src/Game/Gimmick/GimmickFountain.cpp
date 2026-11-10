@@ -154,10 +154,10 @@ BOOL CGimmickFountain::loockAtPlayer() {
     vec = pTask->Crd(0).getWorldMatrix().v[3];
     {
         const FVECTOR& pos = getPos();
-        vec.x -= pos.x;
-        vec.y -= pos.y;
-        vec.z -= pos.z;
-        vec.w -= pos.w;
+        vec -= pos;
+
+
+
     }
     if (!dbgCheckUser(KKIKUCHI)) {
         if (vec.y > 0.5f) return FALSE;

@@ -137,10 +137,10 @@ BOOL CGimmickHitFlying::moveFly() {
     getSysTask(17);
     pos = getPos();
     ScaleVector(v, m_FlyDir, getFrameRateF());
-    pos.x += v.x;
-    pos.y += v.y;
-    pos.z += v.z;
-    pos.w += v.w;
+    pos += v;
+
+
+
     setPos(pos);
     return FALSE;
 }
