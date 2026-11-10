@@ -5,6 +5,7 @@
 #include "khtypes.h"
 #include "System/Graphic/Gprim.h"
 #include "System/Coord.h"
+#include "System/Graphic/Camera.h"
 #include "System/Tsin.h"
 #include "System/VramMan.h"
 
