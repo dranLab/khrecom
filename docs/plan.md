@@ -568,7 +568,7 @@ Keep output small: one function's assembly at a time; `funcdiff` without `--full
   asm unit matrix) and ModelMan's setCall (vu0.h 18/19/38): the vu0.h step; parked drafts (they still use the old
   forms); sites kept with a note (EventTrap setData, Player procAttackMove/setCure/exeDead, Camp setStatusWin1,
   Movement ctor, MSVideo _setXYZ, Anim _exeRootMove); 1124 = effect.h's getCoords PARTIAL; 160 = getTransRef
-  overload constness unknown; 1019-1020 (Model link/setLocal: a CCoord member the ref lacks, user question).
+  overload constness unknown; 1019-1020 (Model link/setLocal: a CCoord member the ref lacks; left as is, user decision 2026-11-10).
   Guesses: init(FLOAT inW = 1.0f), the _FVECTOR overloads' parameter types, unary minus as -1.0f * *this.
 - **Done (cleanup/vector-types, merged 2026-11-07; superseded 2026-11-10, now in Coord.h):** F_UL, G_XY, G_XYZ, G_RGBA, G_UV,
   G_ST at the end of System/Vector.h and the C++ QWdata after khtypes.h's u_int128 (the original's .mdebug type order,
