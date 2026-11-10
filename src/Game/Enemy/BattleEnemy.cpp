@@ -1336,7 +1336,7 @@ void CBattleEnemy::stateStop() {
                 stopDmg->vDetectPos = *hit->getDetectPos();
                 stopDmg->vDetectPos.w = 1.0f;
                 FMATRIX m;
-                sceVu0InversMatrix(m.m, Crd(0).m_World.m);
+                InverseMatrix(m, Crd(0).m_World);
                 ApplyMatrix(stopDmg->vDetectPos, m, stopDmg->vDetectPos);
                 if (hit->getHitEffectNo() >= 0) {
                     if (CGame::isSoraGame()) {
@@ -2142,13 +2142,13 @@ HANDLE CBattleEnemy::recover(INT inPoint, const CHAR* inEffectName, INT inEffect
         stopDmg->hitEffectObjType = getEntityType();
         FMATRIX m;
         if (inParent) {
-            sceVu0InversMatrix(m.m, (float(*)[4])inParent->m_World.m);
+            InverseMatrix(m, inParent->m_World);
             stopDmg->vDetectPos = m.getTrans();
             goto fail;
         }
         stopDmg->vDetectPos = inPos;
         stopDmg->vDetectPos.w = 1.0f;
-        sceVu0InversMatrix(m.m, Crd(0).m_World.m);
+        InverseMatrix(m, Crd(0).m_World);
         ApplyMatrix(stopDmg->vDetectPos, m, stopDmg->vDetectPos);
         goto fail; /* MATCH: the shared return-0 stub */
     }
@@ -3373,7 +3373,7 @@ void CBattleEnemy::enableConfuse_(BOOL inSw) {
         m_ullBtlEnemyFlag |= 0x40000;
         m_tqConfuseTimer = 21000;
         _unitMatrixVu0(m);
-        sceVu0RotMatrixY(m.m, m.m, Math3D::LimitPI(DEG2RAD(RND::genrand_real1() * 360.0f)));
+        RotMatrixY(m, m, Math3D::LimitPI(DEG2RAD(RND::genrand_real1() * 360.0f)));
         m_vConfusePlayerPos.set(0.0f, 0.0f, RND::genrand_real1() * 3.0f + 2.0f);
         ApplyMatrix(m_vConfusePlayerPos, m, m_vConfusePlayerPos);
         AddVectorXYZ(m_vConfusePlayerPos, m_vConfusePlayerPos, getPos());
@@ -3599,8 +3599,8 @@ void CBattleEnemy::updateSpotLight_() {
     FVECTOR n = m_pMove->getDetectNormal();
     FMATRIX m;
     _unitMatrixVu0(m);
-    sceVu0RotMatrixX(m.m, m.m, atan2f(_sqrtf(n.z * n.z + n.x * n.x), n.y));
-    sceVu0RotMatrixY(m.m, m.m, atan2f(n.x, n.z));
+    RotMatrixX(m, m, atan2f(_sqrtf(n.z * n.z + n.x * n.x), n.y));
+    RotMatrixY(m, m, atan2f(n.x, n.z));
     FVECTOR pos = getPos();
     pos.w = 1.0f;
     m.getTrans() = pos;

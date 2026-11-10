@@ -214,8 +214,8 @@ void CCameraMan::main() {
                     }
                     vec1.y = fR0;
                     _unitMatrixVu0(mat0);
-                    sceVu0RotMatrixX(mat0.m, mat0.m, vec1.x);
-                    sceVu0RotMatrixY(mat0.m, mat0.m, vec1.y);
+                    RotMatrixX(mat0, mat0, vec1.x);
+                    RotMatrixY(mat0, mat0, vec1.y);
                     mat0.v[3] = pDt->m_currentTargetPos;
                     vec0.set(0.0f, 0.0f, vec1.z);
                     ApplyMatrix(vec0, mat0, vec0);

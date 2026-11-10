@@ -67,13 +67,6 @@ FLOAT InnerProduct(const FVECTOR& v0, const FVECTOR& v1);
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 void ApplyMatrixXYZ(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 
-static inline void _unitMatrix(FMATRIX& m) {
-    sceVu0UnitMatrix(m.m);
-}
-static inline void _rotMatrixY(FMATRIX& m0, FMATRIX& m1, float ry) {
-    sceVu0RotMatrixY(m0.m, m1.m, ry);
-}
-
 static inline void _unitMatrixVu0(FMATRIX& m) {
     asm volatile("vmr32.xyzw $vf1, $vf0\n"
                  "sqc2 $vf0, 0x30(%0)\n"
@@ -229,8 +222,8 @@ void CGimmickSearchLaserCircle::stateMain() {
             v.y = 0.0f;
             v.z = 3.0f;
             v.w = 1.0f;
-            _unitMatrix(m);
-            _rotMatrixY(m, m, (RND::genrand_int31() % 360 - 180) * 0.017453292f);
+            UnitMatrix(m);
+            RotMatrixY(m, m, (RND::genrand_int31() % 360 - 180) * 0.017453292f);
             ApplyMatrix(v, m, v);
             AddVector(v, m_ParentPos, v);
             CSphereCollision cColl;
@@ -353,7 +346,7 @@ BOOL CGimmickSearchLaserCircle::setMoveTargetPos() {
         FVECTOR dirPl;
         FMATRIX m;
         _unitMatrixVu0(m);
-        sceVu0RotMatrixY(m.m, m.m, g_pPlayer->getRot().y);
+        RotMatrixY(m, m, g_pPlayer->getRot().y);
         v.x = 0.0f;
         v.y = 0.0f;
         v.z = 1.0f;
@@ -381,7 +374,7 @@ BOOL CGimmickSearchLaserCircle::setMoveTargetPos() {
         FVECTOR dirPl;
         FMATRIX m;
         _unitMatrixVu0(m);
-        sceVu0RotMatrixY(m.m, m.m, g_pPlayer->getRot().y);
+        RotMatrixY(m, m, g_pPlayer->getRot().y);
         v.x = 0.0f;
         v.y = 0.0f;
         v.z = 1.0f;

@@ -83,7 +83,7 @@ void CEventBox::setupVertexes() {
     matV.v[2].set(fW, 0.0f, fD);
     matV.v[3].set(-fW, 0.0f, fD);
     _unitMatrixVu0(mat);
-    sceVu0RotMatrixY(mat.m, mat.m, m_srcData._fRotY);
+    RotMatrixY(mat, mat, m_srcData._fRotY);
     mat.setTrans(m_srcData._vPos);
     MulMatrix(m_matVert, mat, matV);
     _resetCoord(m_Crd);

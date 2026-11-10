@@ -546,7 +546,7 @@ void CMapEnemy::getRandomTargetPos(FVECTOR& outTarget, FLOAT inDistance, BOOL in
         FVECTOR dir;
         FLOAT dist;
         _unitMatrixVu0(m);
-        sceVu0RotMatrixY(m.m, m.m, Math3D::LimitPI(startRot + rotDir * deg * 0.017453292f));
+        RotMatrixY(m, m, Math3D::LimitPI(startRot + rotDir * deg * 0.017453292f));
         dir.set(0.0f, 0.0f, 1.0f, 1.0f);
         ApplyMatrix(dir, m, dir);
         ScaleVectorXYZ(target, dir, inDistance);
@@ -613,7 +613,7 @@ void CMapEnemy::getWarpPos(FVECTOR& outPos) {
         FVECTOR target;
         FVECTOR dir;
         _unitMatrixVu0(m);
-        sceVu0RotMatrixY(m.m, m.m, Math3D::LimitPI(getRot().y + rotDir * deg * 0.017453292f));
+        RotMatrixY(m, m, Math3D::LimitPI(getRot().y + rotDir * deg * 0.017453292f));
         dir.set(0.0f, 0.0f, 1.0f, 1.0f);
         ApplyMatrix(dir, m, dir);
         ScaleVectorXYZ(target, dir, 10.0f);

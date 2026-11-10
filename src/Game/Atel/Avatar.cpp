@@ -470,7 +470,7 @@ void CAvatar::calcAvatarMoveSpeed(FVECTOR& vOut) {
         _unitMatrixVu0(m);
         v._q = 0;
         v.z = getAvatarSpeed();
-        sceVu0RotMatrix(m.m, m.m, getRot().v);
+        RotMatrix(m, m, getRot());
         ApplyMatrix(vOut, m, v);
         vOut.w = 0.0f;
         break;
@@ -479,7 +479,7 @@ void CAvatar::calcAvatarMoveSpeed(FVECTOR& vOut) {
         FMATRIX m;
         FVECTOR v;
         _unitMatrixVu0(m);
-        sceVu0RotMatrixY(m.m, m.m, getAvatarDirY2Target(NULL, NULL));
+        RotMatrixY(m, m, getAvatarDirY2Target(NULL, NULL));
         v._q = 0;
         v.z = getAvatarSpeed();
         ApplyMatrix(vOut, m, v);

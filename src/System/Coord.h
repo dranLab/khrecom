@@ -353,10 +353,8 @@ inline void SetRotTransPersMatrix(const FMATRIX& m) {
                  :
                  : "r"(&m));
 }
-#line 612
-inline void InverseMatrix(FMATRIX& m0, const FMATRIX& m1) {
-    sceVu0InversMatrix(m0.m, (float(*)[4])m1.m);
-}
+#line 613
+inline void InverseMatrix(FMATRIX& m0, const FMATRIX& m1) { sceVu0InversMatrix(m0.m, (float(*)[4])m1.m); }
 #line 632
 inline FVECTOR ApplyMatrix(const FMATRIX& m, const FVECTOR& a) {
     FVECTOR b;

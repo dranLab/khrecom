@@ -119,7 +119,7 @@ void CEnemyWyvern::stateMain() {
         m_fRot = Math3D::LimitPI(m_fRot);
         FMATRIX m;
         _unitMatrix(m);
-        sceVu0RotMatrixY(m.m, m.m, m_fRot);
+        RotMatrixY(m, m, m_fRot);
         FVECTOR vVel;
         vVel.set(0.0f, 0.0f, m_fSpeed);
         ApplyMatrix(vVel, m, vVel);
