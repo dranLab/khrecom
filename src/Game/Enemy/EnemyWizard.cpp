@@ -34,11 +34,11 @@ void Normalize(FVECTOR& v0, const FVECTOR& v1);
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 extern "C" float atan2f(float y, float x);
 
-static inline FLOAT _sqrtf(FLOAT x) {
-    FLOAT ret;
-    asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));
-    return ret;
-}
+
+
+
+
+
 
 namespace Wizard {
 static CHAR* IdlingMotion = "e025_001";

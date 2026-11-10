@@ -68,11 +68,11 @@ FVECTOR getPlayerPos(BOOL flag);
 void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 FLOAT InnerProduct(const FVECTOR& inV0, const FVECTOR& inV1);
 FLOAT RotTransPersClipW(IVECTOR& out_v, const FVECTOR& in_v);
-static inline FLOAT _sqrtf(FLOAT x) {
-    FLOAT ret;
-    asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));
-    return ret;
-}
+#include "System/Math3D.h"
+
+
+
+
 #line 317
 template <class T> static inline T& _ref(T& v) { return v; }
 

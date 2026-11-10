@@ -69,7 +69,7 @@ void Normalize(FVECTOR& v0, const FVECTOR& v1);
 void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
 void AddVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m, const FVECTOR& v1);
-extern "C" float fabsf(float x);
+
 extern "C" float sinf(float x);
 extern "C" float cosf(float x);
 extern "C" int rand();
@@ -482,7 +482,7 @@ BOOL CMapEnemy::canAppear() const {
 }
 BOOL CMapEnemy::canPlayerChase(FLOAT inHeight, BOOL inGround) {
     FVECTOR target = getPlayerPos(FALSE);
-    if (g_pPlayer && g_pPlayer->isGround() && fabsf(target.y - getPos().y) > inHeight) {
+    if (g_pPlayer && g_pPlayer->isGround() && _fabsf(target.y - getPos().y) > inHeight) {
         setMapEnemyFlag(0, 4);
         return FALSE;
     }

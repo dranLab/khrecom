@@ -17,17 +17,17 @@ void Normalize(FVECTOR& v0, const FVECTOR& v1);
 
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 
-static inline FLOAT _fabsf(FLOAT x) {
-    FLOAT ret;
-    asm volatile("abs.s %0, %1" : "=f"(ret) : "f"(x));
-    return ret;
-}
 
-static inline FLOAT _sqrtf(FLOAT x) {
-    FLOAT ret;
-    asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));
-    return ret;
-}
+
+
+
+
+
+
+
+
+
+
 
 CHermitePath::CHermitePath() {
     m_pPathData = 0;

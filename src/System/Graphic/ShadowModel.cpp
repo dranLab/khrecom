@@ -79,11 +79,11 @@ template <class T> static inline T& _ref(T& v) {
     return v;
 }
 
-static inline FLOAT _sqrtf(FLOAT x) {
-    FLOAT ret;
-    asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));
-    return ret;
-}
+
+
+
+
+
 
 void CShadowModelMan::initialize() {
     m_iStatus = 0;

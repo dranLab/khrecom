@@ -40,11 +40,11 @@ static inline FLOAT _limitPI(FLOAT a) {
     return r;
 }
 
-static inline FLOAT _sqrtf(FLOAT x) {
-    FLOAT ret;
-    asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));
-    return ret;
-}
+#include "System/Math3D.h"
+
+
+
+
 
 namespace CollAttack {
 FLOAT DelayHitEffectFrame = 3.0f;
@@ -219,10 +219,10 @@ BOOL CCollAttack::chkGuardSuccess(CCollBody* pBody) {
     SubVectorXYZ(vDir, vEnemy, vPos);
     FLOAT fDir = _limitPI(atan2f(vDir.x, vDir.z));
     FLOAT fDiff = _limitPI(fDir - pObj->getRot().y);
-    __asm__ volatile(""); /* MATCH: reorg cannot take the abs.s for the wrap's bc1f slot */
-    if (fabsf(fDiff) > pBody->getGuardDir()) return FALSE;
+    if (_fabsf(fDiff) > pBody->getGuardDir()) return FALSE;
     return TRUE;
 }
+
 
 BOOL CCollAttack::chkMutekiSuccess(CCollBody* pBody) {
     if (!pBody->isMuteki()) return FALSE;
@@ -235,10 +235,10 @@ BOOL CCollAttack::chkMutekiSuccess(CCollBody* pBody) {
     SubVectorXYZ(vDir, vEnemy, vPos);
     FLOAT fDir = _limitPI(atan2f(vDir.x, vDir.z));
     FLOAT fDiff = _limitPI(fDir - pObj->getRot().y);
-    __asm__ volatile(""); /* MATCH: reorg cannot take the abs.s for the wrap's bc1f slot */
-    if (fabsf(fDiff) > pBody->getMutekiDir()) return FALSE;
+    if (_fabsf(fDiff) > pBody->getMutekiDir()) return FALSE;
     return TRUE;
 }
+
 
 INT CCollAttack::chkBackAttack(CCollBody* pBody) {
     if (!m_BackAttack) return 0;
@@ -251,11 +251,11 @@ INT CCollAttack::chkBackAttack(CCollBody* pBody) {
     SubVectorXYZ(vDir, vEnemy, vPos);
     FLOAT fDir = _limitPI(atan2f(vDir.x, vDir.z));
     FLOAT fDiff = _limitPI(fDir - pObj->getRot().y);
-    __asm__ volatile(""); /* MATCH: reorg cannot take the abs.s for the wrap's bc1f slot */
-    if (fabsf(fDiff) <= 1.5707964f) return 0;
+    if (_fabsf(fDiff) <= 1.5707964f) return 0;
     m_BackAttack = m_Attack;
     return 1;
 }
+
 
 
 void CCollAttack::updateAttackID() {

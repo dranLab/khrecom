@@ -8,21 +8,21 @@ float atan2f(float y, float x);
 
 #include "System/Coord.h"
 // from System/Math3D.h
-namespace Math3D {
-FLOAT PointToPointDistance(const FVECTOR& inP0, const FVECTOR& inP1);
-}
+#include "System/Math3D.h"
 
-static inline FLOAT _sqrtf(FLOAT x) {
-    FLOAT ret;
-    asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));
-    return ret;
-}
 
-static inline FLOAT _fabsf(FLOAT x) {
-    FLOAT ret;
-    asm volatile("abs.s %0, %1" : "=f"(ret) : "f"(x));
-    return ret;
-}
+
+
+
+
+
+
+
+
+
+
+
+
 
 void CInterpolateMove::_setup(INT nType, FLOAT fFrame) {
     m_nType = nType;

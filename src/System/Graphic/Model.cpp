@@ -92,11 +92,11 @@ struct MAD_HEADER {
 INT getModelAttachData(const MODEL_ATTACH_DATA** outMad, INT iRId);
 }
 
-static inline FLOAT _sqrtf(FLOAT x) {
-    FLOAT ret;
-    asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));
-    return ret;
-}
+
+
+
+
+
 union FIVECTOR { /* PARTIAL: stand-in for FIVECTOR: owner not written */
     FVECTOR f;
     IVECTOR i;

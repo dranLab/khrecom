@@ -26,36 +26,12 @@ extern "C" void AssertApp(char* pszFile, int nLine, char* pszMsg, char* pszExp);
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 
 #include "System/Graphic/WorldEnv.h"
-#line 35
-
-/* The original's Math3D.h:133-137 inline (parameter setup on 133, abs.s on 137; ref locals inValue, ret). MATCH: asm
- * volatile keeps InvMatrix's first abs.s next to its load. */
-static inline FLOAT _fabsf(FLOAT inValue) {
-    FLOAT ret;
-    asm volatile("abs.s %0, %1" : "=f"(ret) : "f"(inValue));
-    return ret;
-}
-
-
-
-
-
-
-
-
-
-
-
+#line 54
 static inline void _initTrans(FMATRIX& m) {
     m.v[3].init0();
 }
 
-static inline FLOAT _sqrtf(FLOAT x) {
-    FLOAT ret;
-    asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));
-    return ret;
-}
-
+#line 64
 void CFrustum::initialize(FLOAT inE, FLOAT inA, FLOAT inN, FLOAT inF, BOOL inInit) {
     FLOAT d;
     FLOAT leftRightX;

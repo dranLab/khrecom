@@ -11,11 +11,11 @@ float atan2f(float y, float x);
 #include "System/Coord.h"
 #include "System/Graphic/WorldEnv.h"
 
-static inline FLOAT _sqrtf(FLOAT x) {
-    FLOAT ret;
-    asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));
-    return ret;
-}
+#include "System/Math3D.h"
+
+
+
+
 
 CPlayerPad::CPlayerPad() : m_uiPadFlag(1) {
     m_fDir = 0.0f;
