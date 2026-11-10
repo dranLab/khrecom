@@ -107,7 +107,7 @@ union FMATRIX {
         FLOAT z;
         FLOAT w;
     };
-    void init(/* parameters unknown */);
+    void init();
     void initWithScale(const FVECTOR& vScale);
     void initC3(/* parameters unknown */);
     void initTrans(/* parameters unknown */);
@@ -243,6 +243,7 @@ int sceVu0ClipAll(float *minv, float *maxv, float (*ms)[4], float (*vm)[4], int 
 
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1); // System/Coord
 void MulMatrix(FMATRIX& res, const FMATRIX& m0, const FMATRIX& m1);   // System/Coord
+#include "System/Graphic/VuCode/vu0.h"
 
 /* The original's free inlines at 340-643 (its line markers). Names ours (the .mdebug has none for inlined
  * functions); parameter and local names from its inline blocks where they are visible: m1 (340, 613), m0 (613), v0
@@ -475,6 +476,8 @@ inline FVECTOR FVECTOR::operator-() const { return -1.0f * *this; }
 inline FVECTOR::operator _FVECTOR*() { return &v; }
 inline FVECTOR::operator const _FVECTOR*() const { return &v; }
 inline FVECTOR::operator _FVECTOR&() const { return *(_FVECTOR*)&v; }
+#line 910
+inline void FMATRIX::init() { vu0UnitMatrix(*this); }
 #line 919
 inline void FMATRIX::initWithScale(const FVECTOR& vScale) {
     /* MATCH: the scale diagonal as one asm on fixed registers with only input operands (outputs or C stores make
