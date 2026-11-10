@@ -7189,10 +7189,10 @@ const unsigned char CCamp::m_techRikuCateTbl[14][2] = {
     { 95, 8 }, { 96, 9 }, { 97, 9 }, { 98, 10 }, { 99, 11 }, { 100, 11 }, { 101, 11 }, { 102, 12 },
     { 105, 13 }, { 103, 13 }, { 106, 13 }, { 104, 13 }, { 107, 13 }, { 109, 16 },
 };
+/* (A stopgap stood here: D_004E5374 = 0x004E5374 for string bytes in .sndata that splat had disassembled as a
+ * reference. tools/sndll.py now generates .sndata with only real pointers symbolic, so nothing refers to it.)
+ */
 
-/* STOPGAP: other units' data (cod 0x3E1F64, 0x3E4520) holds the bytes 0x004E5374 (string text), which splat
- * disassembled as references to D_004E5374, inside this object's card name strings. Until
- * config/SLUS_217.99/symbol_addrs.txt defines "D_004E5374 = 0x004E5374;", define it here. */
-asm(".globl D_004E5374\nD_004E5374 = 0x004E5374");
+
 
 // SOURCE DATA: .data .rodata

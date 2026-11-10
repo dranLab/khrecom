@@ -310,42 +310,42 @@ private:
     UBYTE _m_0x220[0x220 - 0x220];
 };
 
-/* Ps2EeAs makes undefined weak symbols global (the link would fail), so define them as weak absolute 0: the
- * same "jal 0" as the original (whose relocation names func_0, hence the overview's "NOT matching"). */
-__asm__(
-    ".weak __23CGimmickTreasureBoxPoohP5CTask\n__23CGimmickTreasureBoxPoohP5CTask = 0\n"
-    ".weak __17CGimmickBJFStand1P5CTask\n__17CGimmickBJFStand1P5CTask = 0\n"
-    ".weak __17CGimmickBJFStand2P5CTask\n__17CGimmickBJFStand2P5CTask = 0\n"
-    ".weak __17CGimmickBJFStand3P5CTask\n__17CGimmickBJFStand3P5CTask = 0\n"
-    ".weak __17CGimmickBJFStand4P5CTask\n__17CGimmickBJFStand4P5CTask = 0\n"
-    ".weak __17CGimmickBJFStand5P5CTask\n__17CGimmickBJFStand5P5CTask = 0\n"
-    ".weak __17CGimmickBJFStand6P5CTask\n__17CGimmickBJFStand6P5CTask = 0\n"
-    ".weak __16CGimmickBBGKnifeP5CTask\n__16CGimmickBBGKnifeP5CTask = 0\n"
-    ".weak __14CGimmickBBGSawP5CTask\n__14CGimmickBBGSawP5CTask = 0\n"
-    ".weak __19CGimmickBBGRecoveryP5CTask\n__19CGimmickBBGRecoveryP5CTask = 0\n"
-    ".weak __16CGimmickBBGHedgeP5CTask\n__16CGimmickBBGHedgeP5CTask = 0\n"
-    ".weak __17CGimmickBDSStand1P5CTask\n__17CGimmickBDSStand1P5CTask = 0\n"
-    ".weak __17CGimmickBDSStand2P5CTask\n__17CGimmickBDSStand2P5CTask = 0\n"
-    ".weak __17CGimmickBDSStand3P5CTask\n__17CGimmickBDSStand3P5CTask = 0\n"
-    ".weak __17CGimmickBDSStand4P5CTask\n__17CGimmickBDSStand4P5CTask = 0\n"
-    ".weak __17CGimmickBDSStand5P5CTask\n__17CGimmickBDSStand5P5CTask = 0\n"
-    ".weak __17CGimmickBDSStand6P5CTask\n__17CGimmickBDSStand6P5CTask = 0\n"
-    ".weak __16CGimmickBTMChairP5CTask\n__16CGimmickBTMChairP5CTask = 0\n"
-    ".weak __16CGimmickBTMTableP5CTask\n__16CGimmickBTMTableP5CTask = 0\n"
-    ".weak __14CGimmickIsLandP5CTaski\n__14CGimmickIsLandP5CTaski = 0\n"
-    ".weak __18CGimmickBossIsLandP5CTask\n__18CGimmickBossIsLandP5CTask = 0\n"
-    ".weak __12CGimmickAcidP5CTask\n__12CGimmickAcidP5CTask = 0\n"
-    ".weak __15CGimmickPinokioP5CTask\n__15CGimmickPinokioP5CTask = 0\n"
-    ".weak __12CGimmickShipP5CTask\n__12CGimmickShipP5CTask = 0\n"
-    ".weak __14CGimmickBottleP5CTask\n__14CGimmickBottleP5CTask = 0\n"
-    ".weak __18CGimmickBombBarrelP5CTask\n__18CGimmickBombBarrelP5CTask = 0\n"
-    ".weak __17CGimmickMDFootingP5CTask\n__17CGimmickMDFootingP5CTask = 0\n"
-    ".weak __21CGimmick100Acre01BushP5CTask\n__21CGimmick100Acre01BushP5CTask = 0\n"
-    ".weak __16CGimmickChasePooP5CTask\n__16CGimmickChasePooP5CTask = 0\n"
-    ".weak __20CGimmick100Acre02VegP5CTask\n__20CGimmick100Acre02VegP5CTask = 0\n"
-    ".weak __21CGimmick100Acre02CollP5CTask\n__21CGimmick100Acre02CollP5CTask = 0\n"
-    ".weak __21CGimmick100AcreBBWallP5CTask\n__21CGimmick100AcreBBWallP5CTask = 0\n"
-);
+/* DLL imports: undefined here, 0 for the link (config/SLUS_217.99/dll_imports.ld): the same "jal 0" as the
+ * original, and each use keeps its relocation (tools/sndll.py lists them in the DLL table). */
+/* DLL imports, 0 in config/SLUS_217.99/dll_imports.ld (the loader patches their uses):
+ * __23CGimmickTreasureBoxPoohP5CTask
+ * __17CGimmickBJFStand1P5CTask
+ * __17CGimmickBJFStand2P5CTask
+ * __17CGimmickBJFStand3P5CTask
+ * __17CGimmickBJFStand4P5CTask
+ * __17CGimmickBJFStand5P5CTask
+ * __17CGimmickBJFStand6P5CTask
+ * __16CGimmickBBGKnifeP5CTask
+ * __14CGimmickBBGSawP5CTask
+ * __19CGimmickBBGRecoveryP5CTask
+ * __16CGimmickBBGHedgeP5CTask
+ * __17CGimmickBDSStand1P5CTask
+ * __17CGimmickBDSStand2P5CTask
+ * __17CGimmickBDSStand3P5CTask
+ * __17CGimmickBDSStand4P5CTask
+ * __17CGimmickBDSStand5P5CTask
+ * __17CGimmickBDSStand6P5CTask
+ * __16CGimmickBTMChairP5CTask
+ * __16CGimmickBTMTableP5CTask
+ * __14CGimmickIsLandP5CTaski
+ * __18CGimmickBossIsLandP5CTask
+ * __12CGimmickAcidP5CTask
+ * __15CGimmickPinokioP5CTask
+ * __12CGimmickShipP5CTask
+ * __14CGimmickBottleP5CTask
+ * __18CGimmickBombBarrelP5CTask
+ * __17CGimmickMDFootingP5CTask
+ * __21CGimmick100Acre01BushP5CTask
+ * __16CGimmickChasePooP5CTask
+ * __20CGimmick100Acre02VegP5CTask
+ * __21CGimmick100Acre02CollP5CTask
+ * __21CGimmick100AcreBBWallP5CTask
+ */
 
 
 

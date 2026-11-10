@@ -42,12 +42,12 @@ public:
     CTitle(CTask* pParent);
 };
 
-/* Ps2EeAs makes undefined weak symbols global (the link would fail), so define them as weak absolute 0. */
-__asm__(
-    ".weak __Q212BattleReport10CBtlReportP5CTaski\n__Q212BattleReport10CBtlReportP5CTaski = 0\n"
-    ".weak __6CTitleP5CTask\n__6CTitleP5CTask = 0\n"
-    ".weak _Q212BattleReport10CBtlReport$m_EndFlag\n_Q212BattleReport10CBtlReport$m_EndFlag = 0\n"
-    ".weak _6CTitle$m_EndFlag\n_6CTitle$m_EndFlag = 0\n");
+/* DLL imports: undefined here, 0 for the link (config/SLUS_217.99/dll_imports.ld), so each use keeps its relocation. */
+/* DLL imports, 0 in config/SLUS_217.99/dll_imports.ld (the loader patches their uses):
+ * __Q212BattleReport10CBtlReportP5CTaski
+ * __6CTitleP5CTask
+ * _Q212BattleReport10CBtlReport$m_EndFlag, _6CTitle$m_EndFlag
+ */
 
 #line 20 "c:/KHCOM/MainApp/Form/Menu/TitleReportDllStarter.cpp"
 CTitleReportDllStarter* CTitleReportDllStarter::m_pInstance = NULL;

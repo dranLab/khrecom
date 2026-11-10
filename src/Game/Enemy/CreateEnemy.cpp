@@ -353,51 +353,51 @@ public:
     virtual ~CBossUrsulaTentacle4();
 };
 
-/* Ps2EeAs makes undefined weak symbols global (the link would fail), so define them as weak absolute 0: the
- * same "jal 0" as the original (whose relocation names func_0); the Tentacles' vtables are also at 0. */
-__asm__(
-    ".weak __23CEnemy100AcreBB_BeehiveP5CTask\n__23CEnemy100AcreBB_BeehiveP5CTask = 0\n"
-    ".weak __19CEnemy100AcreBB_BeeP5CTask\n__19CEnemy100AcreBB_BeeP5CTask = 0\n"
-    ".weak __13CTutorialHoodP5CTask\n__13CTutorialHoodP5CTask = 0\n"
-    ".weak __13CTutorialLeonP5CTask\n__13CTutorialLeonP5CTask = 0\n"
-    ".weak __15CBossGuardarmorP5CTask\n__15CBossGuardarmorP5CTask = 0\n"
-    ".weak __10CBossCloudP5CTask\n__10CBossCloudP5CTask = 0\n"
-    ".weak __10CBossHadesP5CTask\n__10CBossHadesP5CTask = 0\n"
-    ".weak __16CEnemyOverlay110P5CTask\n__16CEnemyOverlay110P5CTask = 0\n"
-    ".weak __16CEnemyOverlay112P5CTask\n__16CEnemyOverlay112P5CTask = 0\n"
-    ".weak __10CBossVexenP5CTask\n__10CBossVexenP5CTask = 0\n"
-    ".weak __9CBossRikuP5CTask\n__9CBossRikuP5CTask = 0\n"
-    ".weak __12CBossLarxeneP5CTask\n__12CBossLarxeneP5CTask = 0\n"
-    ".weak __9CBossAxelP5CTask\n__9CBossAxelP5CTask = 0\n"
-    ".weak __16CEnemyOverlay105P5CTask\n__16CEnemyOverlay105P5CTask = 0\n"
-    ".weak __16CEnemyOverlay108P5CTask\n__16CEnemyOverlay108P5CTask = 0\n"
-    ".weak __16CEnemyOverlay125P5CTask\n__16CEnemyOverlay125P5CTask = 0\n"
-    ".weak __16CEnemyOverlay126P5CTask\n__16CEnemyOverlay126P5CTask = 0\n"
-    ".weak __16CEnemyOverlay109P5CTask\n__16CEnemyOverlay109P5CTask = 0\n"
-    ".weak __16CEnemyOverlay209P5CTask\n__16CEnemyOverlay209P5CTask = 0\n"
-    ".weak __11CBossUrsulaP5CTask\n__11CBossUrsulaP5CTask = 0\n"
-    ".weak __16CEnemyOverlay113P5CTask\n__16CEnemyOverlay113P5CTask = 0\n"
-    ".weak __16CEnemyOverlay115P5CTask\n__16CEnemyOverlay115P5CTask = 0\n"
-    ".weak __14CBossMarluxia2P5CTask\n__14CBossMarluxia2P5CTask = 0\n"
-    ".weak __20CBossMarluxia2FunnelP5CTask\n__20CBossMarluxia2FunnelP5CTask = 0\n"
-    ".weak __20CBossMarluxia2ScytheP5CTask\n__20CBossMarluxia2ScytheP5CTask = 0\n"
-    ".weak __14CBossMarluxia3P5CTask\n__14CBossMarluxia3P5CTask = 0\n"
-    ".weak __21CBossMarluxia3SpecterP5CTask\n__21CBossMarluxia3SpecterP5CTask = 0\n"
-    ".weak __13CBossMarluxiaP5CTask\n__13CBossMarluxiaP5CTask = 0\n"
-    ".weak __12CBossLexaeusP5CTask\n__12CBossLexaeusP5CTask = 0\n"
-    ".weak __11CBossZexionP5CTask\n__11CBossZexionP5CTask = 0\n"
-    ".weak __15CBossZexionBookP5CTask\n__15CBossZexionBookP5CTask = 0\n"
-    ".weak __16CEnemyOverlay122P5CTask\n__16CEnemyOverlay122P5CTask = 0\n"
-    ".weak __19CBossUrsulaTentacleP5CTask\n__19CBossUrsulaTentacleP5CTask = 0\n"
-    ".weak _vt$20CBossUrsulaTentacle1\n_vt$20CBossUrsulaTentacle1 = 0\n"
-    ".weak _vt$20CBossUrsulaTentacle1$4CFSM\n_vt$20CBossUrsulaTentacle1$4CFSM = 0\n"
-    ".weak _vt$20CBossUrsulaTentacle2\n_vt$20CBossUrsulaTentacle2 = 0\n"
-    ".weak _vt$20CBossUrsulaTentacle2$4CFSM\n_vt$20CBossUrsulaTentacle2$4CFSM = 0\n"
-    ".weak _vt$20CBossUrsulaTentacle3\n_vt$20CBossUrsulaTentacle3 = 0\n"
-    ".weak _vt$20CBossUrsulaTentacle3$4CFSM\n_vt$20CBossUrsulaTentacle3$4CFSM = 0\n"
-    ".weak _vt$20CBossUrsulaTentacle4\n_vt$20CBossUrsulaTentacle4 = 0\n"
-    ".weak _vt$20CBossUrsulaTentacle4$4CFSM\n_vt$20CBossUrsulaTentacle4$4CFSM = 0\n"
-);
+/* DLL imports: undefined here, 0 for the link (config/SLUS_217.99/dll_imports.ld): the same "jal 0" as the
+ * original, and each use keeps its relocation (tools/sndll.py); the Tentacles' vtables are imports too. */
+/* DLL imports, 0 in config/SLUS_217.99/dll_imports.ld (the loader patches their uses):
+ * __23CEnemy100AcreBB_BeehiveP5CTask
+ * __19CEnemy100AcreBB_BeeP5CTask
+ * __13CTutorialHoodP5CTask
+ * __13CTutorialLeonP5CTask
+ * __15CBossGuardarmorP5CTask
+ * __10CBossCloudP5CTask
+ * __10CBossHadesP5CTask
+ * __16CEnemyOverlay110P5CTask
+ * __16CEnemyOverlay112P5CTask
+ * __10CBossVexenP5CTask
+ * __9CBossRikuP5CTask
+ * __12CBossLarxeneP5CTask
+ * __9CBossAxelP5CTask
+ * __16CEnemyOverlay105P5CTask
+ * __16CEnemyOverlay108P5CTask
+ * __16CEnemyOverlay125P5CTask
+ * __16CEnemyOverlay126P5CTask
+ * __16CEnemyOverlay109P5CTask
+ * __16CEnemyOverlay209P5CTask
+ * __11CBossUrsulaP5CTask
+ * __16CEnemyOverlay113P5CTask
+ * __16CEnemyOverlay115P5CTask
+ * __14CBossMarluxia2P5CTask
+ * __20CBossMarluxia2FunnelP5CTask
+ * __20CBossMarluxia2ScytheP5CTask
+ * __14CBossMarluxia3P5CTask
+ * __21CBossMarluxia3SpecterP5CTask
+ * __13CBossMarluxiaP5CTask
+ * __12CBossLexaeusP5CTask
+ * __11CBossZexionP5CTask
+ * __15CBossZexionBookP5CTask
+ * __16CEnemyOverlay122P5CTask
+ * __19CBossUrsulaTentacleP5CTask
+ * _vt$20CBossUrsulaTentacle1
+ * _vt$20CBossUrsulaTentacle1$4CFSM
+ * _vt$20CBossUrsulaTentacle2
+ * _vt$20CBossUrsulaTentacle2$4CFSM
+ * _vt$20CBossUrsulaTentacle3
+ * _vt$20CBossUrsulaTentacle3$4CFSM
+ * _vt$20CBossUrsulaTentacle4
+ * _vt$20CBossUrsulaTentacle4$4CFSM
+ */
 
 
 

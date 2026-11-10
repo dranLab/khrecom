@@ -32,7 +32,7 @@ public:
     void setLightCount(INT count) { m_LightCount = count; }
     void setActiveLight(INT idx, const void* l, INT kind);
 };
-asm(".weak setActiveLight__10CMapVieweriPCvi\nsetActiveLight__10CMapVieweriPCvi = 0\n");
+/* DLL import setActiveLight__10CMapVieweriPCvi: 0 in config/SLUS_217.99/dll_imports.ld */
 
 union _LIGHT_POWER {
     struct {

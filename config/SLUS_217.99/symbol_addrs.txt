@@ -419,8 +419,8 @@ _vt$t7CVector1Z7G_STRIP_00481140 = 0x00481140; // size:0x18
 
 // port step 1 (docs/port-step1-shiftable.md S3): linker-defined values of the original (Sony linker script; also
 // in the SN DLL export table), used by crt0 and .sndata. linker_script_extra.ld defines them for every link.
-_end = 0x006A0EF8;
-_stack_size = 0x00040000;
+_end = 0x006A0EF8; // absolute:True
+_stack_size = 0x00040000; // absolute:True
 
 // port step 1 (S3): VU microprograms in the DVP data (lib/nodebug/__CTOR_LIST__): instruction words, never pointers
 // (splat took some for references: D_004005A8, D_00449CD8, ...). My_dma_start, a real DMA chain, keeps its references.
@@ -428,3 +428,4 @@ My_VU0_start = 0x003BB760; // can_reference:False
 vu1mpg_start = 0x003BC1A0; // can_reference:False
 vu1mpg2_start = 0x003BF790; // can_reference:False
 pppVu1FogShapeProg = 0x003C1B10; // can_reference:False
+pppVu1ShapeProg = 0x003C2320; // can_reference:False

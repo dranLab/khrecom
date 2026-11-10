@@ -62,6 +62,9 @@ def main() -> None:
         sys.exit(f"error: {script.relative_to(ROOT)} missing: run configure.py")
     text = script.read_text(encoding="utf-8")
     extra = (ROOT / "config" / version / "linker_script_extra.ld").read_text(encoding="utf-8")
+    imports = ROOT / "config" / version / "dll_imports.ld"  # the shifted links use it too (S5)
+    if imports.exists():
+        extra += imports.read_text(encoding="utf-8").replace('"', "")
 
     objects = sorted(set(re.findall(r"^\s*(\S+\.o)\(", text, re.M)))
     missing = [o for o in objects if not (ROOT / o).exists()]

@@ -53,8 +53,8 @@ using namespace D2;
 
 /* PARTIAL: the 2D viewer's SeqControl is not linked into the game: lui/addiu of address 0 (name unknown) */
 extern SeqControl s_ViewerSeqControl;
-/* Ps2EeAs makes undefined weak symbols global: define it as weak absolute 0 (as Game/Enemy/CreateEnemy does) */
-__asm__(".weak s_ViewerSeqControl\ns_ViewerSeqControl = 0\n");
+/* DLL import (data): undefined here, 0 for the link (config/SLUS_217.99/dll_imports.ld) */
+/* DLL import s_ViewerSeqControl: 0 in config/SLUS_217.99/dll_imports.ld */
 
 extern "C" float sinf(float x);
 extern "C" float cosf(float x);

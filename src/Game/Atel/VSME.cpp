@@ -3187,7 +3187,7 @@ public:
     CMoogleShopCore(CTask* pParent);
 };
 }
-__asm__(".weak __Q210MoogleShop15CMoogleShopCoreP5CTask\n__Q210MoogleShop15CMoogleShopCoreP5CTask = 0\n");
+/* DLL import __Q210MoogleShop15CMoogleShopCoreP5CTask: 0 in config/SLUS_217.99/dll_imports.ld */
 #line 2551
 /* CollUtil.h:194/245 in the original */
 static inline CCollUtil* collUtilInstance() {

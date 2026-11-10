@@ -140,28 +140,28 @@ DLL_TASK(CEffectViewer, 0x351A0);
 DLL_TASK(C2DViewer, 0x3F650);
 DLL_TASK(CMovieTest, 0x170);
 
-/* Ps2EeAs makes undefined weak symbols global (the link would fail), so define them as weak absolute 0: the
- * same "jal 0" as the original (whose relocation names func_0, hence funcdiff's "differs"). */
-__asm__(
-    ".weak __14CKishiwadaTestP5CTask\n__14CKishiwadaTestP5CTask = 0\n"
-    ".weak __12CKikuchiTestP5CTask\n__12CKikuchiTestP5CTask = 0\n"
-    ".weak __8CKouTestP5CTask\n__8CKouTestP5CTask = 0\n"
-    ".weak __9CGotoTestP5CTask\n__9CGotoTestP5CTask = 0\n"
-    ".weak __14CNakamichiTestP5CTask\n__14CNakamichiTestP5CTask = 0\n"
-    ".weak __13CMatsuokaTestP5CTask\n__13CMatsuokaTestP5CTask = 0\n"
-    ".weak __12CKataokaTestP5CTask\n__12CKataokaTestP5CTask = 0\n"
-    ".weak __11CKaharaTestP5CTask\n__11CKaharaTestP5CTask = 0\n"
-    ".weak __14CNakashimaTestP5CTask\n__14CNakashimaTestP5CTask = 0\n"
-    ".weak __Q215CollisionEditor16CCollisionEditorP5CTask\n__Q215CollisionEditor16CCollisionEditorP5CTask = 0\n"
-    ".weak __Q29SetEditor10CSetEditorP5CTask\n__Q29SetEditor10CSetEditorP5CTask = 0\n"
-    ".weak __Q212AttachEditor13CAttachEditorP5CTask\n__Q212AttachEditor13CAttachEditorP5CTask = 0\n"
-    ".weak __11CFontViewerP5CTask\n__11CFontViewerP5CTask = 0\n"
-    ".weak __10CMapViewerP5CTask\n__10CMapViewerP5CTask = 0\n"
-    ".weak __12CModelViewerP5CTask\n__12CModelViewerP5CTask = 0\n"
-    ".weak __13CEffectViewerP5CTask\n__13CEffectViewerP5CTask = 0\n"
-    ".weak __9C2DViewerP5CTask\n__9C2DViewerP5CTask = 0\n"
-    ".weak __10CMovieTestP5CTask\n__10CMovieTestP5CTask = 0\n"
-);
+/* DLL imports: undefined here, 0 for the link (config/SLUS_217.99/dll_imports.ld): the same "jal 0" as the
+ * original, and each use keeps its relocation (tools/sndll.py lists them in the DLL table). */
+/* DLL imports, 0 in config/SLUS_217.99/dll_imports.ld (the loader patches their uses):
+ * __14CKishiwadaTestP5CTask
+ * __12CKikuchiTestP5CTask
+ * __8CKouTestP5CTask
+ * __9CGotoTestP5CTask
+ * __14CNakamichiTestP5CTask
+ * __13CMatsuokaTestP5CTask
+ * __12CKataokaTestP5CTask
+ * __11CKaharaTestP5CTask
+ * __14CNakashimaTestP5CTask
+ * __Q215CollisionEditor16CCollisionEditorP5CTask
+ * __Q29SetEditor10CSetEditorP5CTask
+ * __Q212AttachEditor13CAttachEditorP5CTask
+ * __11CFontViewerP5CTask
+ * __10CMapViewerP5CTask
+ * __12CModelViewerP5CTask
+ * __13CEffectViewerP5CTask
+ * __9C2DViewerP5CTask
+ * __10CMovieTestP5CTask
+ */
 
 namespace CollisionEditor {
 static INT MENU_BASE_POX_Y = -(SCREEN_HEIGHT / 2) + 24;
