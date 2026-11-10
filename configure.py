@@ -316,6 +316,94 @@ def write_original_labels(opts: dict) -> str:
     return out.as_posix()
 
 
+# Shifted links (docs/port-step1-shiftable.md): the same objects as the matching build, linked with padding objects
+# inserted and without any label pinned to its original address, to prove that nothing depends on where it is.
+# config/<VERSION>/shift.yaml lists the presets; each one is linked by `ninja shift-<preset>` (`ninja shift`: all).
+SHIFT_SECTIONS = {".text": "TEXT", ".data": "DATA", ".rodata": "RODATA", ".sdata": "SDATA", ".sbss": "SBSS",
+                  ".bss": "BSS"}
+# Absolute addresses a shifted link may assign: none inside the image area (load address up to the end of RAM).
+SHIFT_PINNED_RANGE = (0x00100000, 0x02000000)
+
+
+def shift_script(base: str, pads: list[tuple[str, str, str]]) -> str:
+    """splat's linker script with padding objects inserted. pads: (section, after, object); `after` is a unit name
+    (the padding follows that unit's input line of the section) or "start" (first in the section)."""
+    lines = base.splitlines()
+    for section, after, obj in pads:
+        label = SHIFT_SECTIONS[section]
+        start = next(i for i, line in enumerate(lines) if line.strip() == f"cod_{label}_START = .;")
+        end = next(i for i, line in enumerate(lines) if line.strip() == f"cod_{label}_END = .;")
+        if after == "start":
+            pos = start + 1
+        else:
+            unit = re.compile(rf"/(?:src|asm/[^/]+(?:/data)?)/{re.escape(after)}(?:\.\w+)?\.o\(")
+            hits = [i for i in range(start, end) if unit.search(lines[i])]
+            if len(hits) != 1:
+                sys.exit(f"error: shift.yaml: {after} has {len(hits)} input lines in {section} (needs exactly 1)")
+            pos = hits[0] + 1
+        indent = re.match(r"\s*", lines[start]).group(0)
+        lines.insert(pos, f"{indent}{obj}({section});")
+    return "\n".join(lines) + "\n"
+
+
+def assert_no_pins(scripts: dict[str, str]) -> None:
+    """A shifted link must not place anything at a fixed address: no PROVIDE, no assignment of an address in the
+    image area. Stops configure instead of producing a link that only works because of a pin."""
+    for name, text in scripts.items():
+        if re.search(r"\bPROVIDE(?:_HIDDEN)?\s*\(", text):
+            sys.exit(f"error: shifted link script {name} uses PROVIDE")
+        for m in re.finditer(r"([^\s;{}()]+)\s*=\s*(0x[0-9A-Fa-f]+|\d+)\s*;", text):
+            value = int(m.group(2), 0)
+            if SHIFT_PINNED_RANGE[0] <= value < SHIFT_PINNED_RANGE[1]:
+                sys.exit(f"error: shifted link script {name} pins {m.group(1)} = {m.group(2)}")
+
+
+def write_shift_links(n, cfg_dir: str, opts: dict, objects: list[str]) -> None:
+    shift_cfg = ROOT / cfg_dir / "shift.yaml"
+    if not shift_cfg.exists():
+        return
+    presets = yaml.safe_load(shift_cfg.read_text(encoding="utf-8"))["presets"]
+    build_dir = opts["build_path"]
+    base = (ROOT / opts["ld_script_path"]).read_text(encoding="utf-8")
+    extra = f"{cfg_dir}/linker_script_extra.ld"
+    n.rule(
+        "ld_shift",
+        f"{CROSS}ld -EL -nostdlib --no-check-sections --emit-relocs -Map $mapfile -T $ldscript -T {extra} -o $out",
+        description="LD (shifted) $out",
+    )
+    # Padding objects only contribute the section they are listed under; alignment 1, so the padding is exact.
+    pad_align = " ".join(f"--set-section-alignment {s}=1" for s in sorted(SHIFT_SECTIONS))
+    elves = []
+    for preset, entries in presets.items():
+        out_dir = f"{build_dir}/shift/{preset}"
+        (ROOT / out_dir).mkdir(parents=True, exist_ok=True)
+        pads, pad_objects = [], []
+        for i, entry in enumerate(entries):
+            section, after, size = entry["section"], str(entry["after"]), int(entry["size"])
+            if section not in SHIFT_SECTIONS or size <= 0:
+                sys.exit(f"error: shift.yaml: preset {preset}: bad entry {entry}")
+            src, obj = f"{out_dir}/pad{i}.s", f"{out_dir}/pad{i}.o"
+            text = f"# shift.yaml preset {preset}: {size:#x} bytes in {section} after {after}\n" \
+                   f".section {section}\n.space {size}\n"
+            if not (ROOT / src).exists() or (ROOT / src).read_text(encoding="utf-8") != text:
+                (ROOT / src).write_text(text, encoding="utf-8")
+            n.build(obj, "as", src, variables={"align_flags": pad_align})
+            pads.append((section, after, obj))
+            pad_objects.append(obj)
+        script = f"{out_dir}/link.ld"
+        script_text = shift_script(base, pads)
+        assert_no_pins({script: script_text, extra: (ROOT / extra).read_text(encoding="utf-8")})
+        if not (ROOT / script).exists() or (ROOT / script).read_text(encoding="utf-8") != script_text:
+            (ROOT / script).write_text(script_text, encoding="utf-8")
+        elf = f"{out_dir}/{Path(opts['elf_path']).name}"
+        n.build(elf, "ld_shift", objects + pad_objects, implicit=[script, extra],
+                variables={"ldscript": script, "mapfile": str(Path(elf).with_suffix(".map"))})
+        n.build(f"shift-{preset}", "phony", elf)
+        elves.append(elf)
+    n.build("shift", "phony", elves)
+    n.newline()
+
+
 def toolchain_variables(tc: dict) -> dict[str, str]:
     """The cc rule's per-toolchain variables (see unit_toolchain()): compiler command, flags, assembler command
     (without -o) and the extra arguments for ee_asm_compat.py."""
@@ -345,7 +433,9 @@ def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg
     symbols = f"{cfg_dir}/elf_symbol_addrs.txt"
     default_tc = toolchain_variables(unit_toolchain({**build_cfg, "overrides": []}, ""))
 
-    extra_scripts = [f"{cfg_dir}/linker_script_extra.ld"] + [
+    # linker_script_matching.ld: checks that only hold for the original layout (e.g. where _end lands); the shifted
+    # links (write_shift_links) leave it out.
+    extra_scripts = [f"{cfg_dir}/linker_script_extra.ld", f"{cfg_dir}/linker_script_matching.ld"] + [
         f"{cfg_dir}/{name}" for name in ("undefined_funcs_auto.txt", "undefined_syms_auto.txt")
         if (ROOT / cfg_dir / name).exists()
     ] + [write_original_labels(opts)]
@@ -448,6 +538,8 @@ def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg
         n.build("iso", "phony", f"{build_dir}/{version}.iso")
         n.newline()
 
+        write_shift_links(n, cfg_dir, opts, objects)
+
         # objdiff targets (see expected_config()): every unit's code and data assembled from the original, merged
         # into one object like a compiled source file. Built on demand by objdiff or with `ninja expected`.
         n.rule("as_expected", f"{CROSS}as $asflags -o $out $in", description="AS $in")
@@ -475,6 +567,7 @@ def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg
             "build.ninja", "configure",
             implicit=["configure.py", splat_yaml.relative_to(ROOT).as_posix(), f"{cfg_dir}/build.yaml",
                       *(p.relative_to(ROOT).as_posix() for p in (ROOT / cfg_dir).glob("*_addrs.txt")),
+                      *(p.relative_to(ROOT).as_posix() for p in (ROOT / cfg_dir).glob("shift.yaml")),
                       # new sources switch files to C/C++ (see source_config); a directory changes when one is added
                       *(p.relative_to(ROOT).as_posix() for p in [ROOT / "src", *(ROOT / "src").rglob("*")]
                         if p.is_dir())],

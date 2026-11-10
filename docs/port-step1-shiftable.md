@@ -64,23 +64,32 @@ very hard to trace.
 
 ### Which pins the link really needs
 
-Undefined symbols of the 701 link objects that only the pin files define (`nm`, 2026-11-10): **261**
-(255 `D_`, 4 `cardDataTbl_`, 2 `jtbl_`) from `original_labels.ld` plus 3 from splat's auto files. The other
-16,360 `PROVIDE`s are unused. Users:
+`tools/shiftpins.py` (S1) lists them; `ninja shift-<preset>` fails on exactly the same symbols. After merging main
+on 2026-11-10 (Map finished): **244** undefined symbols (241 from `original_labels.ld`, 2 from
+`undefined_syms_auto.txt`, 1 from `undefined_funcs_auto.txt`). The other ~16,380 `PROVIDE`s are unused. Users
+(`shiftpins.py --by-object`):
 
 | user | pins |
 |---|---:|
 | `cod/2C2B00` (`.sndata`, the SN DLL table, see below) | 173 |
 | `Form/Menu/Camp` | 31 |
-| `Game/Map` | 21 |
 | `Game/Debug/DebugPathData` | 17 |
 | `System/Graphic/DispList` | 6 |
 | `Game/Enemy/BattleEnemy`, `System/Graphic/WorldEnv` | 3 each |
 | `lib/nodebug/impure_data` (.data) | 3 |
 | `Game/SceneInfo`, `libppp/draw/shape`, `crt0`, `lib/nodebug/lconv` (.rodata) | 2 each |
-| `Game/CardRevolver`, `lib/graphdev_checkModelVersion`, and the data-only objects `PlayerAnim` (.data), `PlayerAttack` (.data, .rodata), `libppp/draw/md1`, `libppp/pppfunctbl`, `lib/table`, `lib/nodebug/{__CTOR_LIST__, SN_LOADED_RELMODS, _GLOBAL__F_0build.cppF7aaaa, __FRAME_BEGIN__0, sn___infinity}`, `libm/{s_infconst, s_lib_ver}` | 1 each |
+| `Game/CardRevolver`, `lib/graphdev_checkModelVersion`, `cod/3FF680` (.sdata), and the data-only objects `PlayerAnim` (.data), `PlayerAttack` (.data, .rodata), `libppp/draw/md1`, `libppp/pppfunctbl`, `lib/table`, `lib/nodebug/{__CTOR_LIST__, SN_LOADED_RELMODS, _GLOBAL__F_0build.cppF7aaaa, __FRAME_BEGIN__0, sn___infinity}`, `libm/{s_infconst, s_lib_ver}` | 1 each |
 
-The script that produced this is not in the repo (a scratch script of the session); S1 turns it into a tool.
+Some of these are `func_0` (zero words splat wrote as a relocation against `func_0`); they need a plain `0`, not
+a name.
+
+### Alignment the original layout hides
+
+Every link warns: `alignment 8 of symbol _15CShadowModelMan$m_vParam in .../data/common.bss.o is smaller than 16
+in .../ShadowModel.o` (also `m_vCamPos`, `m_mWorldTexture`, `m_mWorldScreen`, `m_mProjectionTexture`,
+`m_mProjectionScreen`, `_9CSceneEnv$m_vOutColor`). `common.bss` is splat assembly, and it declares these FVECTOR /
+FMATRIX statics with 8-byte alignment. In the original layout they land 16-aligned anyway. In a shifted `.bss`
+they may not, and VU0 `lqc2`/`sqc2` on them would raise an address error. See S3.
 
 ### The SN DLL table (`.sndata`, `cod/2C2B00`, 0x3C2B00, 622,656 bytes)
 
@@ -142,9 +151,9 @@ The script that produced this is not in the repo (a scratch script of the sessio
 - Done when: `ninja shift` runs, and fails only on the undefined symbols that `shiftpins.py` lists (ld's
   error list and the tool agree). `ninja` and `tools/check.sh` are unchanged.
 
-### S2 - pins in compiled code (87 references, 10 objects)
+### S2 - pins in compiled code (66 references, 9 objects; 87 in 10 before Map was finished)
 
-Camp, Map, DebugPathData, DispList, BattleEnemy, WorldEnv, SceneInfo, shape, CardRevolver,
+Camp, DebugPathData, DispList, BattleEnemy, WorldEnv, SceneInfo, shape, CardRevolver,
 graphdev_checkModelVersion. Mostly strings and tables that an INCLUDE_ASM'd function or a `.rdata` owner block
 names as `extern D_xxx`. For each one, *define* the label where its data is emitted: a plain label in the
 existing `__asm__(".rdata ...")` block (plain labels are fine for Ps2EeAs, only aliases crash it), or the C
@@ -161,9 +170,17 @@ the shifted link proves it is symbolic. These edits touch matched units, so CLAU
   or, for a constant taken for an address, by making it a constant again. Check each one by hand.
 - `undefined_*_auto.txt`: the 3 used entries the same way. The constants among them are fine as constants,
   but in the shifted link nothing may come from these files.
-- `_end`: replace `_end = 0x006A0EF8;` with `_end = .;` after the last `.bss` input (in the generated script, or
-  as a `linker_script_extra.ld` expression on splat's end symbol), and in the matching build add
-  `ASSERT(_end == 0x006A0EF8, "...")`. That keeps the check real.
+- `_end`: **done in S1.** `linker_script_extra.ld` has `_end = cod_BSS_END;`, and
+  `linker_script_matching.ld` (matching link only) has `ASSERT(_end == 0x006A0EF8, ...)`.
+- `crt0`: splat's crt0 uses splat names for what Sony's crt0.s calls `_fbss`/`_end`/`_stack_size`/`_args`:
+  the `.bss` clear runs from `_15CShadowModelMan$m_fADensity` (the first `.bss` variable) to `D_6A0EF8`
+  (`_end`); `D_40000` (a constant, the stack size) and `D_004FF800` come from the auto file. Write
+  `src/crt0.s` by hand (the build supports a hand-written `.s` in place of splat's, like `src/lib/klib.s`), with
+  the real symbols: `_fbss` = start of `.sbss`/`.bss` from the linker script, `_end`, the constants as
+  constants. The matching SHA-1 proves the bytes.
+- `common.bss` alignment: give the 16-byte statics their 16-byte alignment. That means `common.bss` from source
+  (the owning units' statics defined in C, `ld_bss_contains_common`), or, until then, whatever keeps the
+  original bytes and states the alignment. The warnings must be gone, in every preset too.
 
 ### S4 - SN DLL exports
 
@@ -262,9 +279,9 @@ whether that holds). The two ELFs are paired by symbol: every symbol of the matc
 
 | item | state | evidence / notes |
 |---|---|---|
-| S1 shift target + pin report | open | |
-| S2 compiled-code pins (87) | open | |
-| S3 asm-data pins, auto symbols, `_end` | open | |
+| S1 shift target + pin report | done 2026-11-10 | `ninja shift` links all 5 presets of `config/SLUS_217.99/shift.yaml` from the matching objects; each fails only on undefined symbols, and ld's 244 equal `shiftpins.py`'s 244. `assert_no_pins()` rejects `PROVIDE` and image-address assignments (tested on samples). `--no-check-sections` still on: revisit once a preset links. |
+| S2 compiled-code pins (66 after the Map merge) | open | |
+| S3 asm-data pins, auto symbols, `_end`, crt0, `common.bss` alignment | `_end` done (S1) | |
 | S4 DLL exports (173) | open | |
 | S5 DLL imports (125 relocs, 120 raw) | open | |
 | S6 shiftcheck | open | |
