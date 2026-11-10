@@ -106,6 +106,8 @@ shows a draft's diff after you switch its `#if 0` to `#if 1` (the permuters swit
   inside it, 65 insns) delays the hoist to loop.c's second pass and decides which value is spilled (`imdct`).
 - The original's .mdebug locals (register, slot, scope blocks; `build/gat/mdsyms.py`) exist for the Sony units
   with debug info, not for libat3dec (names only).
+- Two loads issued in the wrong order with no source order helping: read one through a union member (alias set 0):
+  it then conflicts with later stores, gains dependents and wins sched2's tie (`imdct`, 2026-11-10).
 
 ## Notes per unit
 
@@ -161,12 +163,13 @@ shows a draft's diff after you switch its `#if 0` to `#if 1` (the permuters swit
 - **timer** (`TimerBusClock2Freq`, `TimerFreq2BusClock`, matched 2026-11-07 with the Sony group on 991111-01): both match as they stand under ee-gcc2.9-991111-01 (its `div.s`
   erratum padding keeps it out of the call's delay slot); the `lib/*` override covers it. Unit done 36/36 (2026-11-08):
   `cbTimerHandler` (GET_TIME brace-block macro, `volatile` overflow field) and `SetNextComp` (break in the else arm).
-- **libat3dec** (2026-11-08: 11/12, unpack_mddata, f2t_nodata, channel_conv_joint, at3dec_proc matched): only
-  `imdct` is left, 2 lines (2026-11-09, was 334; same size as the original): with the draft on, the image differs
-  only at `imdct+0x5ac..0x5b7`, two swapped loads in the window loop's last block (sched1 ranks the a_wind load
-  higher because it ends its base register's life). The `gain` lead was right (`gain = gain + shift - 1`). The old
-  "80 bytes short" causes were wrong: the missing insns were the band copy's memcpy alignment test and the window
-  loop's shape. Forms sweeps and decomp-permuter 3 x 20 min found no order that keeps the product in v0.
+- **libat3dec** DONE 12/12 (2026-11-10: imdct matched; 2026-11-08: unpack_mddata, f2t_nodata, channel_conv_joint,
+  at3dec_proc). imdct's last 2 lines (two swapped loads in the window loop's last block) were a sched2 tie, not
+  sched1's: reading the overlap word through a union member (`union { int i; short s[2]; } *ov`, alias set 0) gives
+  the s[1] load two more dependents (it conflicts with the two stores after it), so sched2 issues it before the
+  a_wind load; the product must be written `ov->s[1] * a_wind[mi]`. sched1 still ranks a_wind first (register
+  weight 0). The `gain` lead was right (`gain = gain + shift - 1`); the missing insns of the old "80 bytes short"
+  were the band copy's memcpy alignment test and the window loop's shape.
   `build/fastcmp.py` / `build/mnemdiff.py`: ~1 s per variant without ninja.
 - **lib/init**: a `j $31` left unfilled where the original filled it: the last statement and `}` on one line.
 - **nodebug/__assert**, **libgcc2___umoddi3** (.rodata from source 2026-11-07): needed a split and a link change,
@@ -223,7 +226,6 @@ Sorted by unit, then size. `instr`: instructions in the original.
 | `lib/mpc` | `_rix_100` | 39 | hand-written | MMI reference-copy routines (_rix_*: luminance, _ri0_*: chrominance) |
 | `lib/mpc` | `_ri0_000` | 37 | hand-written | MMI reference-copy routines (_rix_*: luminance, _ri0_*: chrominance) |
 | `lib/mpc` | `_rix_000` | 29 | hand-written | MMI reference-copy routines (_rix_*: luminance, _ri0_*: chrominance) |
-| `lib/libat3dec` | `imdct` | 389 | parked | 2 of 457 lines (2026-11-09): the whole image matches except two loads in the window loop's last block: ours issues a_wind[mi] first (into v0, the product's register) and ((short *)ov)[1] second (a2), the original ov[1] first into v0. In sched1 the a_wind load kills its base register (reg weight 0) … |
 | `lib/nodebug/__errno` | `memmove` | 63 | parked | memcpy 11 of 43 lines, memmove 31 of 68 (2026-11-08): registers only, one cause in both: the original keeps the first parameter in t0, gives the quadword loop lq v1/sltiu a0/lq v0 (ours v0/v1/v0) and copies the byte loop's -1 from the entry test's register (li v0,-1; beq; move a0,v0; ours li … |
 | `lib/nodebug/__errno` | `memset` | 46 | parked | memset 12 of 47 lines, same size (2026-11-08): registers only, in the fill-pattern block: the original has andi t1 / move t0,t1 / dsll v1,t0,8 / or t0,v1,t1 / pcpyh v1,t0 (the masked byte in two registers, a copy this C never produces: cse merges every same-mode copy, ours is andi t0 / dsll v0 / … |
 | `lib/nodebug/__errno` | `memcpy` | 43 | parked | memcpy 11 of 43 lines, memmove 31 of 68 (2026-11-08): registers only, one cause in both: the original keeps the first parameter in t0, gives the quadword loop lq v1/sltiu a0/lq v0 (ours v0/v1/v0) and copies the byte loop's -1 from the entry test's register (li v0,-1; beq; move a0,v0; ours li … |
@@ -244,7 +246,7 @@ Not listed in the unit's `// SOURCE DATA:` line.
 | unit | sections |
 |---|---|
 
-Totals: 16 units without a source file (1 with code); 7 units with INCLUDE_ASM functions: 6 parked, 0 not attempted, 26 hand-written; 0 units take a data section from assembly.
+Totals: 16 units without a source file (1 with code); 6 units with INCLUDE_ASM functions: 5 parked, 0 not attempted, 26 hand-written; 0 units take a data section from assembly.
 
 Generated by `tools/leftovers.py lib`.
 <!-- leftovers:lib:end -->
