@@ -16,12 +16,12 @@
 void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
 void FTOI0Vector(IVECTOR& v0, const FVECTOR& v1);
 
-/* G_XYZ's two-coordinate setter (z at the screen depth) */
-static inline void _setXYZ(G_XYZ& xyz, FIX4 _x, FIX4 _y) {
-    xyz.x = _x;
-    xyz.y = _y;
-    xyz.z = 0xffff280;
-}
+
+
+
+
+
+
 
 /* SCREEN_HEIGHT read through a reference (the original reloads it after the preceding member stores) */
 static inline INT& _screenHeight() { return SCREEN_HEIGHT; }
@@ -976,8 +976,8 @@ void CText::_main(FLOAT frameRateF) {
     size.m_x = sz.m_w;
     size.m_y = sz.m_h;
     G_XY xy0;
-    xy0.x = (pos0.m_x - 256) << 4;
-    xy0.y = (-SCREEN_HEIGHT / 2 + pos0.m_y) << 4;
+    xy0.set((pos0.m_x - 256) << 4, (-SCREEN_HEIGHT / 2 + pos0.m_y) << 4);
+
     G_XY xy = xy0;
     INT styleRC = m_pFnt->m_Style & 3;
     BOOL bBottom = FALSE;
@@ -1084,8 +1084,8 @@ BOOL CText::isDispLineMax() { return m_dispLineMax >= m_lines && m_nAlphaIdx >= 
 void CText::getPosLF(G_XY& xy) {
     CPointI pos0 = getPosition();
     G_XY xy0;
-    xy0.x = (pos0.m_x - 256) << 4;
-    xy0.y = (-SCREEN_HEIGHT / 2 + pos0.m_y) << 4;
+    xy0.set((pos0.m_x - 256) << 4, (-SCREEN_HEIGHT / 2 + pos0.m_y) << 4);
+
     xy.x = xy0.x + m_textSize.x;
     xy.y = xy0.y + m_textSize.y;
 }
@@ -1243,10 +1243,10 @@ void CImageWnd::mainImpl() {
         fvec0.z += fvec0.x;
         fvec0.w += fvec0.y;
         FTOI0Vector(ivec, fvec0);
-        _setXYZ(m_pPolyGT4->m_P0, ivec.x, ivec.y);
-        _setXYZ(m_pPolyGT4->m_P1, ivec.z, ivec.y);
-        _setXYZ(m_pPolyGT4->m_P2, ivec.x, ivec.w);
-        _setXYZ(m_pPolyGT4->m_P3, ivec.z, ivec.w);
+        m_pPolyGT4->m_P0.set(ivec.x, ivec.y, 0xffff280);
+        m_pPolyGT4->m_P1.set(ivec.z, ivec.y, 0xffff280);
+        m_pPolyGT4->m_P2.set(ivec.x, ivec.w, 0xffff280);
+        m_pPolyGT4->m_P3.set(ivec.z, ivec.w, 0xffff280);
         fvec0.set(m_initColor.a, m_initColor.b, m_initColor.g, m_initColor.r);
         fvec1.set(m_targetColor.a, m_targetColor.b, m_targetColor.g, m_targetColor.r);
         InterVector(fvec0, fvec1, fvec0, m_fCurrentRate);

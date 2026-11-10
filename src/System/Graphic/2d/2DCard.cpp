@@ -306,10 +306,10 @@ void C2DCard::create(CARD inCard) {
             CHAR szTex[16];
             USHORT u = ((nTexPos & 3) << 6) | 2;
             USHORT v = ((nTexPos & 0xC) << 4) | 1;
-            uvEnd.u = u | 0x3C;
-            uvEnd.v = v | 0x3E;
-            uvStart.u = u;
-            uvStart.v = v;
+            uvEnd.set(u | 0x3C, v | 0x3E);
+
+            uvStart.set(u, v);
+
             if (nTexNo < 22) sprintf(szTex, texName[0], nTexNo);
             else if (nTexNo < 26) sprintf(szTex, texName[1], nTexNo - 22);
             else if (nTexNo < 27) sprintf(szTex, texName[2], nTexNo - 26);

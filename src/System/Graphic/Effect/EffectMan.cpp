@@ -1168,10 +1168,10 @@ void CEffectMan::_setDebugBBOXLine(const FVECTOR* pV) {
     INT j;
     INT i;
 
-    Line.C.r = 0xFF;
-    Line.C.g = 0;
-    Line.C.b = 0;
-    Line.C.a = 0x80;
+    Line.C.set(0xFF, 0, 0, 0x80);
+
+
+
     for (i = 0; i < 2; i++) {
         for (j = 0; j < 8; j++) {
             Line.P = pV[idx[i][j]];

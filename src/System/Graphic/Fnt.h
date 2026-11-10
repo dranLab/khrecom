@@ -76,8 +76,8 @@ public:
     void setAlphaTbl(const UBYTE* p) { m_pAlphaTbl = (BYTE*)p; }
     const UBYTE* getAlphaTbl() const { return (const UBYTE*)m_pAlphaTbl; }
     void setSpace(INT x, INT y) {
-        m_Space.x = x;
-        m_Space.y = y;
+        m_Space.set(x, y);
+
     }
 private:
     virtual FIX4 calcZ() { return m_P0.z; }

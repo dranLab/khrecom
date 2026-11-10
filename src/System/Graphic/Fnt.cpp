@@ -38,8 +38,8 @@ void CFntM2::initialize() {
     m_P0.set(0, 0, 0xFFFF280);
     m_exC0.set(1, 1, 1, 0x70);
     m_pAlphaTbl = NULL;
-    m_Space.x = 0;
-    m_Space.y = 0;
+    m_Space.set(0, 0);
+
     m_nDispChars = 0;
     m_pTextBuf = NULL;
     m_fgReplaceWord = 0;

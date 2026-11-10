@@ -224,14 +224,14 @@ void C2DSprObj::initSprite(INT inNum, SPR_GROUP* pSprGroupe, SPR_PARTS* pSprPart
         m_pScissoring->setLayerFG(nLayerFG);
         m_pScissoring->setSemiTrans(ALPHA_BLEND);
     }
-    pSprPrim->polyGT4.m_P0.x = 0;
-    pSprPrim->polyGT4.m_P0.y = 0;
-    pSprPrim->polyGT4.m_P1.x = 0;
-    pSprPrim->polyGT4.m_P1.y = 0;
-    pSprPrim->polyGT4.m_P2.x = 0;
-    pSprPrim->polyGT4.m_P2.y = 0;
-    pSprPrim->polyGT4.m_P3.x = 0;
-    pSprPrim->polyGT4.m_P3.y = 0;
+    pSprPrim->polyGT4.m_P0.set(0, 0);
+
+    pSprPrim->polyGT4.m_P1.set(0, 0);
+
+    pSprPrim->polyGT4.m_P2.set(0, 0);
+
+    pSprPrim->polyGT4.m_P3.set(0, 0);
+
     pSprPrim->polyGT4.m_C0.col = 0;
     pSprPrim->polyGT4.m_C1.col = 0;
     pSprPrim->polyGT4.m_C2.col = 0;

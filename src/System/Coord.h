@@ -149,7 +149,7 @@ struct G_XYZ {
 #line 245
     void set(FIX4 _x, FIX4 _y, FIX4 _z) { x = _x; y = _y; z = _z; }
     void set(FIX4 _x, FIX4 _y) { x = _x; y = _y; }
-    void bufferZ(/* parameters unknown */);
+    UINT bufferZ() { return z; }
 };
 
 struct G_RGBA {
