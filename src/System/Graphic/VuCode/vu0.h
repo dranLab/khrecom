@@ -6,6 +6,36 @@
 #define SYSTEM_GRAPHIC_VUCODE_VU0_H
 
 /* BEGIN GEN */
+#line 15
+inline void vu0SetClipRange() {
+    FVECTOR vMax;
+    FVECTOR vMin;
+    vMax.set(4096.0f, 4096.0f, 0.0f, 65535.0f);
+    vMin.set(0.0f, 0.0f, 0.0f, 0.0f);
+
+
+
+
+
+    asm volatile("lqc2 $vf1, 0x0(%0)\n"
+                 "lqc2 $vf2, 0x0(%1)\n"
+                 "viaddi $vi1, $vi0, 1\n"
+                 "vsqi.xyzw $vf1, ($vi1++)\n"
+                 "vsqi.xyzw $vf2, ($vi1++)" : : "r"(&vMax), "r"(&vMin));
+}
+#line 36
+inline void vu0SetFogParam(FLOAT fFar) {
+    FVECTOR vFogParam;
+    vFogParam.set(0.0f, fFar, 0.0f, 0.0f);
+
+
+
+
+
+    asm volatile("lqc2 $vf1, 0x0(%0)\n"
+                 "viaddi $vi1, $vi0, 0\n"
+                 "vsqi.xyzw $vf1, ($vi1++)" : : "r"(&vFogParam));
+}
 #line 114
 inline void vu0LoadMatrixVF20(const FMATRIX* m) {
 
@@ -16,6 +46,15 @@ inline void vu0LoadMatrixVF20(const FMATRIX* m) {
                  "lqc2 $vf21, 0x10(%0)\n"
                  "lqc2 $vf22, 0x20(%0)\n"
                  "lqc2 $vf23, 0x30(%0)" : : "r"(m));
+}
+#line 129
+inline void vu0LoadMatrixVF28(const FMATRIX* m) {
+
+
+    asm volatile("lqc2 $vf28, 0x0(%0)\n"
+                 "lqc2 $vf29, 0x10(%0)\n"
+                 "lqc2 $vf30, 0x20(%0)\n"
+                 "lqc2 $vf31, 0x30(%0)" : : "r"(m));
 }
 #line 190
 inline void vu0StoreMatrixVF16(FMATRIX* m) {

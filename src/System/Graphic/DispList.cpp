@@ -38,14 +38,14 @@ extern "C" void qsort(void* base, size_t num, size_t size, int (*cmp)(const void
 
 
 
-static inline void _loadMatrixVf28(const FMATRIX& m) {
-    asm volatile("lqc2 $vf28, 0x0(%0)\n"
-                 "lqc2 $vf29, 0x10(%0)\n"
-                 "lqc2 $vf30, 0x20(%0)\n"
-                 "lqc2 $vf31, 0x30(%0)\n"
-                 :
-                 : "r"(&m));
-}
+
+
+
+
+
+
+
+
 
 /* clears memory in quadwords (through the uncached segment if asked), then bytes (original name unknown) */
 static inline void _memclr(void* pDst, UINT nSize, BOOL bUncached) {
@@ -453,7 +453,7 @@ void CDispListSemi::insert(CDrawable& inPrim, FIX4 inZ) {
 UINT CDispListSemiSingleSort::draw(SEMI_PACKET_LIST* pList) {
     INT nIdx = 0;
     CModel::setSendCtrl(0xe01);
-    _loadMatrixVf28(CWorldEnv::getWorldScreenMatrix());
+    vu0LoadMatrixVF28(&CWorldEnv::getWorldScreenMatrix());
     OTtag* pOT = getOTtagTbl();
 #line 421
     ASSERT(pOT);

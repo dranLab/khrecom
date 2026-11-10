@@ -29,9 +29,6 @@ union FVECTOR {
                      : : "r"(this));
     }
     void init(FLOAT inW = 1.0f); /* the parameter: Camera init clears w through it (line 729 stores 0) */
-#ifdef VECTOR_H_SET_CALL /* MATCH: setCall is defined before set, so it keeps a call (ModelMan calls FVECTOR::set out of line) */
-    void setCall(FLOAT inX, FLOAT inY, FLOAT inZ, FLOAT inW) { set(inX, inY, inZ, inW); }
-#endif
     void set(FLOAT inX, FLOAT inY, FLOAT inZ, FLOAT inW = 1.0f);
     void set(const FVECTOR& inV);
     void set(const _FVECTOR& inV);
