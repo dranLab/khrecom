@@ -3,7 +3,7 @@
 #define SYSTEM_COORD_H
 
 #include "khtypes.h"
-// PARTIAL: FVECTOR/FMATRIX layouts shared by all units; the inline operators are added as units need them.
+// The vector and matrix types (the ref: FVECTOR in types.h, IVECTOR and FMATRIX in System/Coord.h).
 typedef float _FVECTOR[4] __attribute__((aligned(16)));
 union FVECTOR;
 void roundPI(FVECTOR& vInOut, INT nInClip); // System/Coord
