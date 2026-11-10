@@ -90,6 +90,9 @@ union FVECTOR {
         vec.w *= inV.w;
         return vec;
     }
+    operator _FVECTOR*() { return &v; }
+    operator const _FVECTOR*() const { return &v; }
+    operator _FVECTOR&() const { return *(_FVECTOR*)&v; }
 };
 
 typedef int _IVECTOR[4] __attribute__((aligned(16)));
@@ -118,7 +121,6 @@ union IVECTOR {
 };
 
 typedef float _FMATRIX[4][4] __attribute__((aligned(16)));
-typedef float (*_FMATRIX_ROWP)[4];
 union FMATRIX {
     _FMATRIX m;
     FVECTOR v[4];
@@ -150,8 +152,9 @@ union FMATRIX {
     void set(/* parameters unknown */);
     BOOL operator!=(const FMATRIX& inM) const;
     BOOL operator==(const FMATRIX& inM) const { return v[0] == inM.v[0] && v[1] == inM.v[1] && v[2] == inM.v[2] && v[3] == inM.v[3]; }
-    // PARTIAL: the ref's conversions are to _FMATRIX* / float(*)[4][4] / _FMATRIX& (Game/Bullet/Bullet needs the row pointer for sceVu0)
-    operator _FMATRIX_ROWP() { return m; }
+    operator _FMATRIX*() { return &m; }
+    operator const _FMATRIX*() const { return &m; }
+    operator _FMATRIX&() const { return *(_FMATRIX*)&m; }
 };
 
 /* The basic graphics types: in every original that has FVECTOR (274) they come right after the vector types and
