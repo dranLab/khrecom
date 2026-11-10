@@ -39,18 +39,29 @@ every change that is merged without regenerating. Regenerating all four takes ab
   | `docs/partials.md` trend table | one row per cleanup merge (`partials.py --summary` before and after) |
   | `CLAUDE.md` | a tool, rule or toolchain fact changes |
 
-## Where things stand (2026-11-09)
+## Where things stand (2026-11-10)
 
-- **Progress:** 12107 of 12311 functions matched: game 11306 of 11323, libraries 801 of 988 (plus 151 hand-written).
-  `tools/check.sh` counts the 151 hand-written units as done too: its total is these matched functions plus 151
-  (fixed 2026-11-07: it used to count a parked `#if 0 ... #else INCLUDE_ASM #endif` as done).
-- **Game:** 12 functions still `INCLUDE_ASM` in 10 units, all parked (C draft under `#if 0` with a note).
-  1 unit takes a data section from assembly (sddrv_ee's `.bss`, blocked: see docs/asm-leftovers.md).
-- **Libraries:** 6 parked, 0 not attempted, 26 hand-written (stay assembly), no unit with data from assembly;
-  details in `docs/sdk-leftovers.md`.
+- **Progress (`tools/check.sh`):** 12262 functions decompiled in 662 files, 648 files complete; libraries 954 of 985
+  in 153 files, 147 complete. (Its totals count hand-written library units as done.)
+- **Game:** 10 functions still `INCLUDE_ASM` in 8 units, all parked (C draft under `#if 0` with a note): Camp 2,
+  Map 2, DispList, shape, Math3D, and the blocked WorldEnv, Rcf, RcfCD. 1 unit takes a data section from assembly
+  (sddrv_ee's `.bss`, blocked: see docs/asm-leftovers.md).
+- **Libraries:** 5 parked (memcpy, memset, memmove, graphdev sceGsSetDefDispEnv, kprintf2 _sceSnprintf), 0 not
+  attempted, 26 hand-written (stay assembly), no unit with data from assembly; details in `docs/sdk-leftovers.md`.
 - **Header cleanup:** PARTIAL 162 (134 in 44 headers, 28 in 15 .cpp), 8 foreign stand-ins in 5 files, 0
-  duplicate classes, 0 untagged mechanisms; classes complete 1177, superset 16, partial 1, gated 3, missing 6.
+  duplicate classes, 0 untagged mechanisms; classes complete 1178, superset 16, partial 1, gated 3, missing 6.
   `tools/partials.py --queue` has the ready items (the R1/R2 gate items there stay, see "Queue state").
+- **2026-11-10: pool run (3 workers, 6 units) + one coordinator match.** Matched: HumanBoss setupAct (a function-scope
+  `FLOAT none = -1` the ref lacks, accepted by the user after a no-behaviour-change proof: same image, single
+  assignment, -1.0f -> SHORT exact; memory humanboss-unit-lessons), Model CBBox::makePkt (no padding: the original's
+  `CGPrim::isSemiTrans` is a one-line `? TRUE : FALSE` ternary, Gprim.h:110, whose larger RTL gives gcse the original's
+  189 buckets), libat3dec imdct (the overlap word read through a union member: alias set 0 wins sched2's dependents
+  tie). HumanBoss, Model and libat3dec are complete. Unchanged with extended notes: Camp setTechWin 27 /
+  setMapCardWin 23, shape pppVu1ShapeDraw 4 (an `asm("" : "+r"(sp))` on line 408 fixes the call argument but moves
+  tag 0's id store: 7 lines; tried by the coordinator, not kept). The cleanup slot was skipped (only gate items in
+  the queue). Next (user decision 2026-11-10): the Coord.h unification, step by step (build/coordh/NOTES.md): the
+  original Coord.h (~87-1124) holds IVECTOR/FVECTOR/FMATRIX (our Vector.h), CCoord (our Camera.h), CCoords and free
+  matrix inlines at 340-643 (unit-local stand-ins in ModelMan, Map, HermitePathCamera, Math3D, WorldEnv, ...).
 - **2026-11-09 (day): cleanups and a pool run (3 workers, 20 units).** Cleanups first, approved by the user:
   System/HeapMan.h `operator new`/`new[]` with the ref's function-level `UINT nRA` (73 debug allocations and the last
   local return-address asm copies became new-expressions), and one System/Graphic/Gprim.h on the original's line
