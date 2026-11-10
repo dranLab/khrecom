@@ -36,6 +36,23 @@ inline void vu0SetFogParam(FLOAT fFar) {
                  "viaddi $vi1, $vi0, 0\n"
                  "vsqi.xyzw $vf1, ($vi1++)" : : "r"(&vFogParam));
 }
+#line 55
+inline void vu0CheckBBox(FVECTOR* v, const FMATRIX* m) {
+
+
+
+
+
+
+
+    asm volatile("lqc2 $vf20, 0x0(%0)\n"
+                 "lqc2 $vf27, 0x10(%0)\n"
+                 "lqc2 $vf21, 0x0(%1)\n"
+                 "lqc2 $vf22, 0x10(%1)\n"
+                 "lqc2 $vf23, 0x20(%1)\n"
+                 "lqc2 $vf24, 0x30(%1)\n"
+                 "vcallms 0x20" : : "r"(v), "r"(m));
+}
 #line 114
 inline void vu0LoadMatrixVF20(const FMATRIX* m) {
 
@@ -66,6 +83,33 @@ inline void vu0StoreMatrixVF16(FMATRIX* m) {
                  "sqc2 $vf17, 0x10(%0)\n"
                  "sqc2 $vf18, 0x20(%0)\n"
                  "sqc2 $vf19, 0x30(%0)" : : "r"(m) : "memory");
+}
+#line 246
+inline void vu0StoreVF2(FVECTOR* v) {
+
+
+
+
+
+    asm volatile("sqc2 $vf2, 0x0(%0)" : : "r"(v) : "memory");
+}
+#line 256
+inline void vu0StoreVF3(FVECTOR* v) {
+
+
+
+
+
+    asm volatile("sqc2 $vf3, 0x0(%0)" : : "r"(v) : "memory");
+}
+#line 331
+inline void vu0WaitMicro() {
+
+
+
+
+
+    asm volatile("qmfc2.i $0, $vf0");
 }
 #line 348
 inline void vu0MulMatrixVF28VF20() {
