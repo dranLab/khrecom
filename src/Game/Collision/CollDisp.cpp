@@ -270,8 +270,8 @@ FLOAT CCollDisp::setColmMatrix(CCoord* inpCrd, const FVECTOR& refPos1, const FVE
     if (fHeight > 0.0f) {
         FLOAT rx = atan2f(_sqrtf(tmp.x * tmp.x + tmp.z * tmp.z), tmp.y);
         FLOAT ry = atan2f(tmp.x, tmp.z);
-        sceVu0RotMatrixX(inpCrd->m_Local.m, inpCrd->m_Local.m, rx);
-        sceVu0RotMatrixY(inpCrd->m_Local.m, inpCrd->m_Local.m, ry);
+        RotMatrixX(inpCrd->m_Local, inpCrd->m_Local, rx);
+        RotMatrixY(inpCrd->m_Local, inpCrd->m_Local, ry);
     }
     inpCrd->m_Local.v[3] = refPos1;
     inpCrd->m_Local.v[3].w = 1.0f;

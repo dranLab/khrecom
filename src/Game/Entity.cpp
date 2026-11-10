@@ -47,15 +47,6 @@ inline void _entityEmptyStringPlaceholder() { TRACE(""); } /* MATCH: placeholder
 extern "C" unsigned int strlen(const char*);
 extern "C" int sprintf(char*, const char*, ...);
 void RotTransPersClipW(IVECTOR& iVec, const FVECTOR& fVec);
-static inline void _loadRotTransPersMatrix(const FMATRIX& m) {
-    asm volatile("vsub.xyzw $vf3, $vf0, $vf0\n"
-                 "lqc2 $vf4, 0x0(%0)\n"
-                 "lqc2 $vf5, 0x10(%0)\n"
-                 "lqc2 $vf6, 0x20(%0)\n"
-                 "lqc2 $vf7, 0x30(%0)\n"
-                 :
-                 : "r"(&m));
-}
 #include "System/RsrcDB.h"
 
 
@@ -710,13 +701,13 @@ void CEntity::updateCoord() {
                      "sqc2 $vf9, 0x30(%0)"
                      : : "r"(&m), "r"(&mat) : "memory");
     } else if (m_uiEntityFlag & 0x2000) {
-        if (!(m_uiEntityFlag & 0x200)) sceVu0RotMatrixZ(m.m, m.m, m_pMove->getRot().z);
-        if (!(m_uiEntityFlag & 0x100)) sceVu0RotMatrixY(m.m, m.m, m_pMove->getRot().y);
-        if (!(m_uiEntityFlag & 0x80)) sceVu0RotMatrixX(m.m, m.m, m_pMove->getRot().x);
+        if (!(m_uiEntityFlag & 0x200)) RotMatrixZ(m, m, m_pMove->getRot().z);
+        if (!(m_uiEntityFlag & 0x100)) RotMatrixY(m, m, m_pMove->getRot().y);
+        if (!(m_uiEntityFlag & 0x80)) RotMatrixX(m, m, m_pMove->getRot().x);
     } else {
-        if (!(m_uiEntityFlag & 0x80)) sceVu0RotMatrixX(m.m, m.m, m_pMove->getRot().x);
-        if (!(m_uiEntityFlag & 0x100)) sceVu0RotMatrixY(m.m, m.m, m_pMove->getRot().y);
-        if (!(m_uiEntityFlag & 0x200)) sceVu0RotMatrixZ(m.m, m.m, m_pMove->getRot().z);
+        if (!(m_uiEntityFlag & 0x80)) RotMatrixX(m, m, m_pMove->getRot().x);
+        if (!(m_uiEntityFlag & 0x100)) RotMatrixY(m, m, m_pMove->getRot().y);
+        if (!(m_uiEntityFlag & 0x200)) RotMatrixZ(m, m, m_pMove->getRot().z);
     }
     FVECTOR pos = getPos();
     pos.w = 1.0f;
@@ -963,7 +954,7 @@ void CEntity::setDamageNumber(const FVECTOR& inPos, INT inDamage) {
     if (!DebugWork::g_dw.sys.m_iDagameNumber) return;
     if (!m_pDamageString) return;
     IVECTOR ivec;
-    _loadRotTransPersMatrix(CWorldEnv::getWorldScreenMatrix());
+    SetRotTransPersMatrix(CWorldEnv::getWorldScreenMatrix());
     RotTransPersClipW(ivec, inPos);
     if (ivec.w) return;
     sprintf(m_szNumberString, "%d", inDamage);

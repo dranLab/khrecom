@@ -272,7 +272,7 @@ void CSceneEnvColor::update(FLOAT fr) {
             m_fPar = 1.0f;
             m_vColor = m_vAim;
         } else {
-            sceVu0InterVector(m_vColor.v, m_vAim.v, m_vOrg.v, m_fPar);
+            InterVector(m_vColor, m_vAim, m_vOrg, m_fPar);
         }
     } else if (m_iStatus & 1) {
         m_iStatus &= ~1;

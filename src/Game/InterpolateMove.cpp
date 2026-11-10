@@ -78,7 +78,7 @@ BOOL CInterpolateVector::update(FLOAT fR, BOOL bNoLimit) {
         m_vPos = m_vAim;
         bRet = TRUE;
     } else {
-        sceVu0InterVector(m_vPos.v, m_vAim.v, m_vOld.v, fRate);
+        InterVector(m_vPos, m_vAim, m_vOld, fRate);
         bRet = FALSE;
     }
     return bRet;

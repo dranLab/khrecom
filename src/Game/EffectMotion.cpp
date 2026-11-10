@@ -280,9 +280,9 @@ BOOL CEffectMotionCtrl::updateAttachEffect_(TIMEQ inCurrentTime) {
                 } else {
                     FMATRIX m;
                     _unitMatrixVu0(m);
-                    sceVu0RotMatrixX(m.m, m.m, rot.x);
-                    sceVu0RotMatrixY(m.m, m.m, rot.y);
-                    sceVu0RotMatrixZ(m.m, m.m, rot.z);
+                    RotMatrixX(m, m, rot.x);
+                    RotMatrixY(m, m, rot.y);
+                    RotMatrixZ(m, m, rot.z);
                     m.v[3] = offset;
                     MulMatrix(m, m_pOwner->Crd(m_pAttachEffectData->iBoneIndex).getWorldMatrix(), m);
                     m_hHandle = m_pOwner->setEffect(m_pAttachEffectData->szDpxName, m_pAttachEffectData->iEffectNo,

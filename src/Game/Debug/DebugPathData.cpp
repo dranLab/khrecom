@@ -1160,7 +1160,7 @@ void CDebugPathData::disp() {
                          :
                          : "r"(&mMat)
                          : "memory");
-            sceVu0RotMatrixZ(mMat.m, mMat.m, _getPathVectorConvWRoll(m_vActivePathPos.w));
+            RotMatrixZ(mMat, mMat, _getPathVectorConvWRoll(m_vActivePathPos.w));
             ApplyMatrix(*(FVECTOR*)&m_gpPArrowPoly.m_V[0], mMat, v.v[0]);
             ApplyMatrix(*(FVECTOR*)&m_gpPArrowPoly.m_V[1], mMat, v.v[1]);
             ApplyMatrix(*(FVECTOR*)&m_gpPArrowPoly.m_V[2], mMat, v.v[2]);
