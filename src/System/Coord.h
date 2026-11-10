@@ -185,7 +185,84 @@ union FMATRIX {
     operator _FMATRIX_ROWP() { return m; }
 };
 
-#include "System/Vector.h"
+/* The basic graphics types: in every original that has FVECTOR (274) they come right after the vector types and
+ * before CCoord, in this order (the .mdebug type order; the ref spreads them over Fnt.h, Wnd.h, 2DSeqObj.h, Gprim.h
+ * and VSME.h). */
+union F_UL {
+    FLOAT f;
+    ULONG ul;
+};
+
+struct G_XY {
+    FIX4 x;
+    FIX4 y;
+    void set(FIX4 _x, FIX4 _y) {
+        x = _x;
+        y = _y;
+    }
+};
+
+struct G_XYZ {
+    FIX4 x;
+    FIX4 y;
+    FIX4 z;
+    void set(FIX4 _x, FIX4 _y, FIX4 _z) {
+        x = _x;
+        y = _y;
+        z = _z;
+    }
+    void set(FIX4 _x, FIX4 _y) {
+        x = _x;
+        y = _y;
+    }
+    void bufferZ(/* parameters unknown */);
+};
+
+struct G_RGBA {
+    union {
+        struct {
+            UBYTE r;
+            UBYTE g;
+            UBYTE b;
+            UBYTE a;
+        };
+        UINT col;
+        UINT c;
+        unsigned char v[4];
+    };
+
+    void set(UBYTE _r, UBYTE _g, UBYTE _b, UBYTE _a) {
+        r = _r;
+        g = _g;
+        b = _b;
+        a = _a;
+    }
+
+    void set(UBYTE _r, UBYTE _g, UBYTE _b) {
+        r = _r;
+        g = _g;
+        b = _b;
+    }
+};
+
+struct G_UV {
+    USHORT u;
+    USHORT v;
+
+    void set(USHORT _u, USHORT _v) {
+        u = _u;
+        v = _v;
+    }
+};
+
+struct G_ST {
+    FLOAT s;
+    FLOAT t;
+    void set(FLOAT _s, FLOAT _t) {
+        s = _s;
+        t = _t;
+    }
+};
 
 /* MATCH: CCoord is in System/Coord.h, not in Camera.h as the ref says: the original's line markers put its
  * constructor at Coord.h:1009-1016 and its accessors at Coord.h:1043-1072 (user decision 2026-11-10). */
