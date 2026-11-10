@@ -881,4 +881,4 @@ void CLevelUp::moveCursor(FLOAT fFrameRate) {
     m_pLightCtrl->setPos(m_vPosLightCurrent);
 }
 // SOURCE DATA: .data .rodata .bss
-// SOURCE DATA SLUS_217.99_retail: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .data .rodata

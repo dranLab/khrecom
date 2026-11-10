@@ -202,3 +202,4 @@ void CGimmickUpFloor::changeState(INT in_Stat) {
     saveStat(m_Stat);
 }
 // SOURCE DATA: .rodata
+// SOURCE DATA SLUS_217.99_retail: .rodata

@@ -72,6 +72,9 @@ def source_selected(build_cfg: dict, unit: str) -> bool:
     """Whether this version builds the unit from its source in src/ (build.yaml `sources:`, fnmatch patterns, `!`
     excludes; all when absent). A version whose sources aren't adapted yet keeps splat's assembly of its own image."""
     patterns = build_cfg.get("sources", ["*"])
+    if isinstance(patterns, str):  # a file: one pattern per line (tools/retail_units.py writes it)
+        patterns = [l.strip() for l in (ROOT / patterns).read_text(encoding="utf-8").splitlines()
+                    if l.strip() and not l.startswith("#")]
     if any(p.startswith("!") and fnmatch.fnmatchcase(unit, p[1:]) for p in patterns):
         return False  # "!lib/nodebug/__errno": excluded (the unit differs in this version)
     return any(fnmatch.fnmatchcase(unit, p) for p in patterns if not p.startswith("!"))
@@ -232,8 +235,9 @@ def source_config(splat_yaml: Path, opts: dict, build_cfg: dict) -> tuple[Path, 
         # A data-only unit (no code, e.g. libppp/draw/draw_w) may have a source too, if it gives its data from it.
         # A version with a `sources:` filter (not the reference) may lack the unit (debug code the retail ELF
         # doesn't have, lib/nodebug/vprintf): its source doesn't apply there.
-        if count == 0 and "sources" in build_cfg and not re.search(rf", {name}\]| name: {name} \}}", text):
-            continue
+        if count == 0 and "sources" in build_cfg and (not sections or
+                                                      not re.search(rf", {name}\]| name: {name} \}}", text)):
+            continue  # (a data-only unit without this version's data marker: nothing from source)
         if count != 1 and not (count == 0 and sections and kind != "asm"):
             sys.exit(f"error: {path.relative_to(ROOT)}: no code subsegment named {unit} in {splat_yaml.name}"
                      + (" (a data-only unit needs SOURCE DATA)" if count == 0 else ""))
@@ -830,6 +834,7 @@ def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg
             implicit=["configure.py", splat_yaml.relative_to(ROOT).as_posix(), f"{cfg_dir}/build.yaml",
                       *(p.relative_to(ROOT).as_posix() for p in (ROOT / cfg_dir).glob("*_addrs.txt")),
                       *(p.relative_to(ROOT).as_posix() for p in (ROOT / cfg_dir).glob("shift.yaml")),
+                      *(p.relative_to(ROOT).as_posix() for p in (ROOT / cfg_dir).glob("sources.txt")),
                       # new sources switch files to C/C++ (see source_config); a directory changes when one is added
                       *(p.relative_to(ROOT).as_posix() for p in [ROOT / "src", *(ROOT / "src").rglob("*")]
                         if p.is_dir())],

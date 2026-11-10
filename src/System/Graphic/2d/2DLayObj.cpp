@@ -118,3 +118,4 @@ void C2DLayObj::enableDisp(HANDLE handle, BOOL bEnable) {
 }  // namespace D2
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data

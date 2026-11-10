@@ -282,3 +282,4 @@ void CSceneEnvColor::update(FLOAT fr) {
     }
 }
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data

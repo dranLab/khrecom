@@ -218,17 +218,18 @@ def drop_foreign_linkonce(lines: list[str], symbols_path: str, linkonce: str) ->
         return lines
     addrs = symbol_addresses(symbols_path, names)
     foreign = {n for n, a in addrs.items() if not any(lo <= a < hi for lo, hi in own)}
-    out, dropping = [], False
+    out, dropping = [], None
     for line in lines:
         m = LINKONCE.match(line)
+        w = WEAK.match(line)
         if m:
-            dropping = m.group(1) in foreign
+            dropping = m.group(1) if m.group(1) in foreign else None
             if dropping and out and out[-1] == f"\t.weak\t{m.group(1)}":
                 out.pop()
             if dropping:
                 continue
-        elif dropping and SECTION_DIRECTIVE.match(line):
-            dropping = False
+        elif dropping and (SECTION_DIRECTIVE.match(line) or (w and w.group(1) != dropping)):
+            dropping = None  # the next section, or the .weak gcc writes before the next vtable's section
         if not dropping:
             out.append(line)
     return out

@@ -222,3 +222,4 @@ BOOL MovieScriptUnit::isEnd(INT nNowFrame) const {
     return bRes;
 }
 // SOURCE DATA: .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .rodata

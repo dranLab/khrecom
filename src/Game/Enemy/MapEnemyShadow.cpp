@@ -173,3 +173,4 @@ void CMapEnemyShadow::endStateDisappear() {
     m_pMove->enableGravity(TRUE);
 }
 // SOURCE DATA: .rodata
+// SOURCE DATA SLUS_217.99_retail: .rodata

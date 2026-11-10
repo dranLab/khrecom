@@ -363,3 +363,4 @@ INT CCollMap::checkWaterSurface(FVECTOR& inPos, FLOAT inHeight) {
 }
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

@@ -1,7 +1,7 @@
 # Retail ELF: Phase 0 results (beta → retail map, classification)
 
 Phase 0 of `docs/retail-plan.md`, done 2026-11-10 (read-only: no build input changed). Tools: `tools/version_map.py`
-(the map and the classification), `tools/helpers/retail_try.py` (compile one unit with other flags and compare
+(the map and the classification), `tools/retail_units.py` (compile units as retail does and compare
 each function with its retail pair). Data: `build/SLUS_217.99_retail/version_map/` (`functions.tsv`, `data.tsv`,
 `units.tsv`, `layout.tsv`; regenerated in ~15 s).
 
@@ -75,7 +75,7 @@ retail changes, decompiled as `#ifdef` variants in Phase 3.
 
 ## Compile test: our source, beta flags without `-g`
 
-`tools/helpers/retail_try.py <unit> "-O2 -G0 -fno-exceptions -fno-rtti"` on all 497 complete game units (no
+`retail_try.py <unit> "-O2 -G0 -fno-exceptions -fno-rtti"` (now `tools/retail_units.py try`) on all 497 complete game units (no
 INCLUDE_ASM; no source change, debug forms still in):
 
 | Class | Match retail | Differ |
@@ -129,7 +129,7 @@ How and what changed in the tools: `docs/retail-plan.md`, Phase 1.
 ## Phase 2 (2026-11-10): the pilot - go
 
 With the version switches in headers only (include/khversion.h, below), the 497 complete units compiled with
-`-DKH_RETAIL` match retail for ~94 % of their functions (tools/helpers/retail_try.py): 820/925 `debug`,
+`-DKH_RETAIL` match retail for ~94 % of their functions (tools/retail_units.py try): 820/925 `debug`,
 1355/1439 `layout`, 112/194 `header`, 5679/5680 `same`. Pilot units Buf 14/14, TexCtrl 13/13, LevelUp 11/11 (and
 its data: one retail text change, "MAX HP" -> "Max HP"), WorldWarp 8/9, Fsm 12/15, CoordMan 13/15, FifoFpl 5/8.
 The first three now build from source in the retail image (the checksum holds).
@@ -162,7 +162,23 @@ Taken without the user (who asked for exactly that); revisit as needed.
 4. A unit compiled for retail always gives its .gnu.linkonce code and vtables from source (configure.py replaces its
    `<unit>.linkonce` assembly objects); linkonce copies the original kept in another object are removed
    (ee_asm_compat.py --linkonce).
-5. Exact data starts of compiled retail units come from their relocations (retail_try.py --record ->
+5. Exact data starts of compiled retail units come from their relocations (retail_units.py switch ->
    config/SLUS_217.99_retail/unit_starts.txt, applied by split_version.py); a gap after a unit goes to the next one.
 6. Global data definitions outside a compiled object's data from source are removed (ee_asm_compat.py
    drop_foreign_globals, objects only), like the existing weak-data rule: the assembly's copy defines them.
+
+## Phase 3 (from 2026-11-11): units from source in the retail image
+
+`tools/retail_units.py` (scan / switch / verify; see its docstring) brings complete units over. First batch: 292
+eligible of 505 complete units, 282 build from source after `verify` (10 switched back: 2DSeqCtrl, PathCamera,
+FriendDonald, Fnt, MonstroEventBattle, SummonGenie, GimmickHitReturn, GimmickPlantBullet, MonstroGauge, Pause - to
+look at). State: config/SLUS_217.99_retail/sources.txt, unit_starts.txt; the sources carry
+`// SOURCE DATA SLUS_217.99_retail: ...` where their data comes from source.
+
+Not eligible (scan of 505): ~90 with code sizes that differ from the split's ranges (the split's unit starts are
+heuristics; or retail has functions we don't), 58 with differing functions, ~20 linkonce sizes, 12 `.rodata` bytes
+(text changes like LevelUp's), debug inline functions retail lacks (e.g. CComponentObj::dbgButtonTrg).
+
+7. (decision) `verify` blames, per output section, the compiled object placed last before the first difference,
+   data sections first; it switches those back and repeats. It may throw out an innocent neighbour; `scan` +
+   `switch` restore a unit once fixed.

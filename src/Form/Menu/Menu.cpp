@@ -161,3 +161,4 @@ BOOL CMenu::_isTrgNEXT(UINT nInPad) {
     return CPadHandler::isTrgNEXT(nInPad);
 }
 // SOURCE DATA: .rodata
+// SOURCE DATA SLUS_217.99_retail: .rodata

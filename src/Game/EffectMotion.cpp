@@ -710,3 +710,4 @@ void CEffectMotion::releaseObserveEffect_() {
 }
 
 // SOURCE DATA: .rodata
+// SOURCE DATA SLUS_217.99_retail: .rodata

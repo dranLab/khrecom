@@ -204,3 +204,4 @@ BOOL CCollMapCamera::checkBGforCamera(FVECTOR& vPos, FVECTOR& vAim, FVECTOR& vOu
 }
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data
