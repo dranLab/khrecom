@@ -64,11 +64,11 @@ void ApplyMatrixXYZ(FVECTOR& v0, const FMATRIX& m, const FVECTOR& v1);
 
 
 
-static inline FLOAT _sqrtf(FLOAT x) {
-    FLOAT ret;
-    asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));
-    return ret;
-}
+#include "System/Math3D.h"
+
+
+
+
 
 /* the parameter block of the camera commands (original name unknown) */
 struct ATEL_CAMERA_PARAM {

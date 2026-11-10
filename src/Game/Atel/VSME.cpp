@@ -2597,8 +2597,8 @@ struct AvatarMotionParamEx2 {
     UINT _nHokanFrame;
     AvatarMotionParamEx2() { _nRsrcID = 0; _nInfo = 0; _nMotionID = 0; _fPlaySpeed = 1.0f; _nHokanFrame = 0; }
 };
-/* Math3D.h:137 and coord.h:730 in the original ($LM tags); the volatile abs.s keeps the original order (a scheduling barrier) */
-static inline FLOAT FABS(FLOAT f) { FLOAT r; __asm__ volatile("abs.s %0, %1" : "=f"(r) : "f"(f)); return r; }
+
+#include "System/Math3D.h"
 
 INT CVSM::execExt2Code(INT op, eATEL_REQ_RET& ret) {
     INT nID;
@@ -2924,9 +2924,9 @@ INT CVSM::execExt2Code(INT op, eATEL_REQ_RET& ret) {
             FLOAT y1 = m_S[m_SP--].F;
             FLOAT x1 = m_S[m_SP].F;
             BoxTrapSrc src;
-            src._fWidth = FABS(x2 - x1);
-            src._fHeight = FABS(y2 - y1);
-            src._fDepth = FABS(z2 - z1);
+            src._fWidth = _fabsf(x2 - x1);
+            src._fHeight = _fabsf(y2 - y1);
+            src._fDepth = _fabsf(z2 - z1);
             src._vPos.x = (x1 + x2) * 0.5f;
             src._vPos.y = y1;
             src._vPos.z = (z1 + z2) * 0.5f;

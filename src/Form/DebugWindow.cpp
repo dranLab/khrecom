@@ -37,11 +37,11 @@ namespace DWT {
 extern DEBUG_WINDOW_TBL debugWinTop;
 }
 
-static inline FLOAT _sqrtf(FLOAT x) {
-    FLOAT ret;
-    asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));
-    return ret;
-}
+#include "System/Math3D.h"
+
+
+
+
 
 
 
