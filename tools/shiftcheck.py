@@ -36,6 +36,22 @@ import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
 CROSS = "mips-linux-gnu-"
+# Instructions that take the low half of an address after a lui (opcode -> name).
+LOW_HALF_OPS = {0x09: "addiu", 0x20: "lb", 0x21: "lh", 0x23: "lw", 0x24: "lbu", 0x25: "lhu",
+                0x27: "lwu", 0x28: "sb", 0x29: "sh", 0x2B: "sw", 0x1E: "lq", 0x1F: "sq", 0x37: "ld", 0x3F: "sd",
+                0x31: "lwc1", 0x39: "swc1", 0x36: "lqc2", 0x3E: "sqc2"}
+
+
+def writes_reg(w: int):
+    """The GPR an instruction writes (rd for SPECIAL/MMI R-type, rt for immediates and loads), else None."""
+    op = w >> 26
+    if op in (0x00, 0x1C):  # SPECIAL, MMI
+        return (w >> 11) & 31
+    if op in (0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x18, 0x19) or 0x20 <= op <= 0x27 or op in (0x1E, 0x37):
+        return (w >> 16) & 31
+    return None
+
+
 MAP_LINE = re.compile(r"^ (\.\w+|COMMON)\s+0x([0-9a-f]+)\s+0x([0-9a-f]+)\s+(\S+\.o)$", re.M)
 
 
@@ -144,6 +160,14 @@ def main() -> None:
     generated = set(re.findall(r"^build (\S+\.o): as \S+/sndll/sndata\.s$",
                                (ROOT / "build.ninja").read_text(encoding="utf-8"), re.M))
     errors, suspects, review, cleared, compiled_hits = [], [], Counter(), 0, []
+    code_hits = []  # addresses built in code without relocation (any object: code is never "a constant")
+
+    def add_code_hit(obj: str, sec: str, off: int, text: str) -> None:
+        nonlocal cleared
+        if (obj.replace(f"build/{version}/", ""), sec, off) in allow:
+            cleared += 1
+        else:
+            code_hits.append(f"{obj} {sec} 0x{off:X}: {text}")
     review_lines = []
     checked = Counter()
     for m_start, size, s_start, obj, sec in pieces:
@@ -173,6 +197,26 @@ def main() -> None:
                     target = (a & 0xF0000000) | ((wm & 0x3FFFFFF) << 2)
                     if moved(target) not in (None, target):
                         hit = f"{'jal' if wm >> 26 == 3 else 'j'} {target:#x} without relocation"
+                        add_code_hit(obj, sec, off, hit)
+                        continue
+                elif sec == ".text" and (wm >> 26) == 0x0F:  # lui without relocation: an address built by hand?
+                    rt, hi = (wm >> 16) & 31, (wm & 0xFFFF) << 16
+                    for k in range(1, 9):  # its use: addiu/ori/load/store with rt as base, also unrelocated
+                        w2 = mi.word(a + 4 * k)
+                        if w2 is None:
+                            break
+                        op, rs = w2 >> 26, (w2 >> 21) & 31
+                        if relocs.get(b + 4 * k) or rs != rt or op not in LOW_HALF_OPS:
+                            if writes_reg(w2) == rt:
+                                break  # rt redefined before any use as an address
+                            continue
+                        lo = w2 & 0xFFFF
+                        value = (hi + (lo - 0x10000 if lo & 0x8000 else lo)) & 0xFFFFFFFF
+                        if moved(value) not in (None, value):
+                            add_code_hit(obj, sec, off, f"lui + {LOW_HALF_OPS[op]} at +{4 * k:#x} build "
+                                                        f"{value:#010x}, an address that moved, without relocation")
+                        break
+                    continue
                 if hit and obj in generated:
                     hit = None  # every pointer field of the generated table is symbolic by construction
                 if hit and "/asm/" not in obj:
@@ -264,22 +308,24 @@ def main() -> None:
              f"errors: {len(errors)}", f"suspects: {len(suspects)} (+{cleared} cleared by shift_allow.txt)",
              f"compiled constants in the image range (not failed): {len(compiled_hits)}",
              f"lost alignment: {len(misaligned)}",
+             f"addresses built in code without relocation: {len(code_hits)}",
              f"symbol + offset into another section: {len(crossing)}",
              f"review: {sum(review.values())} R_MIPS_32 words in splat data pointing into the middle of data "
              f"({dict(review.most_common(8))})"]
     detail = []
     for title, items in (("errors", errors), ("suspects", suspects), ("lost alignment", misaligned),
-                         ("crossing", crossing), ("review", review_lines), ("compiled constants", compiled_hits)):
+                         ("crossing", crossing), ("code", code_hits), ("review", review_lines),
+                         ("compiled constants", compiled_hits)):
         if items:
             detail += [f"\n== {title}"] + items
     report.write_text("\n".join(lines + detail) + "\n", encoding="utf-8")
     print("\n".join(lines))
     for title, items in (("errors", errors), ("suspects", suspects), ("lost alignment", misaligned),
-                         ("crossing", crossing)):
+                         ("crossing", crossing), ("code", code_hits)):
         for item in items[: args.details]:
             print(f"  [{title}] {item}")
     print(f"full report: {report.relative_to(ROOT)}")
-    sys.exit(1 if errors or suspects or misaligned or crossing else 0)
+    sys.exit(1 if errors or suspects or misaligned or crossing or code_hits else 0)
 
 
 if __name__ == "__main__":

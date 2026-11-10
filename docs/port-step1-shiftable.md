@@ -233,6 +233,7 @@ build only. Decide when everything else is done (S5/S6 first).
   which is only `_gp` at the original addresses. Writing crt0 also exposed a false reference to crt0's first
   label in `lib/table` (`chswTable`'s 16-bit values 0x00100000): `can_reference:False`, 2 allow lines. No preset
   moved crt0 before; new preset `text0` pads `.text` before it (entry 0x100088).
+- **shiftcheck: addresses built in code (after the first boot test):** every unrelocated `lui` in `.text`, of any object, whose value plus a following unrelocated `addiu`/load/store on the same register (until the register is redefined) is a moved image address, and every unrelocated `j`/`jal`, fails the check. The movie bug (`mpc.c` raw `.word` code building 0x3706C0) is exactly the one hit before the fix (tested), 0 after, in all presets. `ori` is left out: compiled code builds many constants that way (Rnd's 0x19660D, `"COM"` tags), and gcc always relocates the addresses it builds itself.
 - **shiftcheck: symbol + offset into another input section** (new): for every `R_MIPS_32` and HI16/LO16 pair the
   final target and the symbol's address must lie in the same input section, or the two could drift apart (the
   crt0 `$gp` case). Section symbols (`.cod`, --emit-relocs' form of local references) and linker symbols are
@@ -443,10 +444,11 @@ itself (newlib's `_reent` pointing at its own `__sf[]` streams).
 | S5 DLL imports (125 relocs, 120 raw) | done 2026-11-10 | imports undefined in sources + `dll_imports.ld`; all 125 sites checked against object relocations. `shiftpins.py` 0/0; all 5 presets link. check.sh exit 0 |
 | S6 shiftcheck | done 2026-11-10 | all 5 presets: 0 errors, 0 suspects (92 cleared individually), 0 lost alignment |
 | S7 presets | done 2026-11-10 | text128, text0, data128, all8, mid, big link and pass shiftcheck (incl. the section-crossing check). `--no-check-sections` dropped (ELFs identical). |
-| S8 boot tests | prepared, **not run** (no PCSX2 in this environment) | `ninja shift-iso-<preset>` builds the disc (`build_iso.py --shifted`: image comparison skipped and said so); text128's disc built 2026-11-10 (`build/SLUS_217.99/shift/text128/SLUS_217.99.iso`, ELF 0x60CF38 bytes at sector 631, entry 0x100008). Runs and the DLL list from the original are the user's. |
+| S8 boot tests | first run by the user 2026-11-10 (text128: boots, tutorial; movie bug found and fixed, see the log) | `ninja shift-iso-<preset>` builds the disc (`build_iso.py --shifted`: image comparison skipped and said so); text128's disc built 2026-11-10 (`build/SLUS_217.99/shift/text128/SLUS_217.99.iso`, ELF 0x60CF38 bytes at sector 631, entry 0x100008). Runs and the DLL list from the original are the user's. |
 | S9 check.sh/CLAUDE.md | done 2026-11-10 | `tools/check.sh --shift` (all presets: shiftpins + shiftcheck), exit 0; CLAUDE.md section "Shifted build" on this branch. CI unchanged (branch unmerged). |
 
 Boot-test log:
 
 | date | preset | build (commit) | reached | problems |
 |---|---|---|---|---|
+| 2026-11-10 | text128 | 252c1623 (disc C:\temp\recom.iso) | boots; the tutorial level entered | user: movie playback full of green blocks (picture shapes visible, chroma and block texture wrong). Cause: `src/lib/mpc.c`'s hand-written `_copyRefImage` (raw `.word` instructions) loaded its 0x00FF00FF mask with `lui $t2, 0x37` / `addiu $t2, $t2, 0x6C0`: the hard-coded address 0x3706C0, which the shifted code no longer has there. Fixed: `%hi/%lo($Lcopy_mask)` (same words in the matching build). Not booted again yet. |
