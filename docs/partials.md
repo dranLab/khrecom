@@ -163,17 +163,18 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-10 | cleanup/coord-unify-rest: Coord.h step 3: the remaining Coord.h inlines on the original's lines (init0, FMATRIX getTrans/getTransRef/setTrans/initWithScale, FVECTOR2 from 2DSprObj.h, G_*::set, set/zero/init, the operators, CCoord::setTrans); ~25 unit-local helpers gone; functions with differing Coord.h line markers 314 -> 50 | 158 | 8 | 0 | 661 (0) | 1051 |
 | 2026-11-10 | cleanup/coord-unify-vu0: Coord.h step 4: the original's System/Graphic/VuCode/vu0.h (inlines on its lines, included by Coord.h), FMATRIX::init = its unit matrix, 37 unit-matrix copies and Coord.cpp's 25 asm leaves replaced, VECTOR_H_SET_CALL gone; vu0.h marker diffs 125 -> 6, Coord.h 50 -> 26 | 158 | 8 | 0 | 659 (0) | 1053 |
 | 2026-11-10 | cleanup/cardkind-h: Game/CardKind.h on the original's lines (static cardDataTbl, CARD::init/getTexNo/getTexPos at 553-564); 23 local table copies and the card helpers in 22 units replaced; CardKind.h marker differences 80 -> 1 | 158 | 8 | 0 | 659 (0) | 1051 |
+| 2026-11-10 | cleanup/math3d-h: System/Math3D.h on the original's lines (isInit 59, _sqrtf 125-129, _fabsf 133-137); 38 local sqrt/fabs copies in 37 units replaced, builtin fabsf sites at 137 use the inline; Math3D.h marker differences 102 -> 1 | 158 | 8 | 0 | 659 (0) | 1046 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 158 (131 in 45 headers, 27 in 15 .cpp); MATCH: 1051
+PARTIAL: 158 (131 in 45 headers, 27 in 15 .cpp); MATCH: 1046
   by category: method 30, data member 9, type 12, fwd decl 2, #include 13, changed in place 40, padding 2, gate 5, guessed 9, header-level 22, stand-in 10, other 4
 stand-ins: 8 foreign in 5 files (6 names), 166 unattributed, 181 own
 duplicate class names across headers: 0
 padding: 2 arrays, 0 accessors
-mechanisms: 659 sites (0 untagged); #line: 1405
+mechanisms: 659 sites (0 untagged); #line: 1408
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
 classes: complete 1177, superset 17, partial 1, gated 3, missing 6, unattributed 8
 ```

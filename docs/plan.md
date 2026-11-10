@@ -60,8 +60,7 @@ every change that is merged without regenerating. Regenerating all four takes ab
   314 -> 26, vu0.h 125 -> 6 (the rest: parked drafts, sites kept with a note, 1019-1020 left as is by the user).
   PARTIAL 160 -> 158, mechanisms 661 -> 659 (VECTOR_H_SET_CALL gone). No function matches; parked drafts unchanged
   (Camp 27/23, Math3D 90, DispList 59, Map 82/709; WorldEnv still matches with the original namespace name). Details:
-  the four "Done (cleanup/coord-unify-...)" entries. Next cleanup candidates: Math3D.h's `_sqrtf`/`_fabsf` (129-137; local copies in 19 units, must go in one step),
-  PackMan.h's free inlines 117-128; the parked drafts could now use the new inlines.
+  the four "Done (cleanup/coord-unify-...)" entries. Next cleanup candidates: PackMan.h's free inlines 117-128; the parked drafts could now use the new inlines.
 - **2026-11-10: pool run (3 workers, 6 units) + one coordinator match.** Matched: HumanBoss setupAct (a function-scope
   `FLOAT none = -1` the ref lacks, accepted by the user after a no-behaviour-change proof: same image, single
   assignment, -1.0f -> SHORT exact; memory humanboss-unit-lessons), Model CBBox::makePkt (no padding: the original's
@@ -586,6 +585,13 @@ Keep output small: one function's assembly at a time; `funcdiff` without `--full
   Movement ctor, MSVideo _setXYZ, Anim _exeRootMove); 1124 = effect.h's getCoords PARTIAL; 160 = getTransRef
   overload constness unknown; 1019-1020 (Model link/setLocal: a CCoord member the ref lacks; left as is, user decision 2026-11-10).
   Guesses: init(FLOAT inW = 1.0f), the _FVECTOR overloads' parameter types, unary minus as -1.0f * *this.
+- **Done (cleanup/math3d-h, merged 2026-11-10):** System/Math3D.h on the original's lines: CFrustum (isInit 59),
+  `_sqrtf` (125-129) and `_fabsf` (133-137), asm volatile with `ret` (names ours, parameter `inValue` from the .mdebug).
+  38 local copies in 37 units replaced (22 units now include Math3D.h, strings unchanged); builtin fabsf calls the
+  original attributes to 137 (JiminyMemo, MapEnemy, LockOnManager, Movement Approach, CollAttack: its three reorg
+  barrier asms gone) use the inline. Math3D.h marker differences 102 -> 1 (CollUtilO distanceLineO keeps an
+  early-clobber copy with a note). Left: CollDisp's local _sqrtf (its sqrt.s is CollDisp.cpp:352, not the header);
+  CollDisp, DispList, Gprim still declare `namespace Math3D` locally (strings not checked).
 - **Done (cleanup/cardkind-h, merged 2026-11-10, user request):** Game/CardKind.h on the original's lines: the
   `static const CARD_DATA cardDataTbl[224]` (gcc emits it, with its strings at the end of .rodata, only in units that
   reference it: the image's 23 copies) and CARD::init(USHORT inKind, BYTE inNumber = 0xFF) at 553-558 (default a
