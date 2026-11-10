@@ -10,7 +10,12 @@
 
     .text
     .align 3
+    # a 4-byte function before _start; the original has no symbol for it, splat calls it func_00100000
+    .globl func_00100000
+    .type func_00100000, @function
+func_00100000:
     nop
+    .size func_00100000, 4
     nop
 
     .align 3
