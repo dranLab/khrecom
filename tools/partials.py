@@ -483,6 +483,23 @@ class Source:
             files.append(tuple(cands))
         code = blank_pp(strcode)
         tranges = self.template_ranges()
+        if self.rel.endswith(".h"):
+            # A header's `static const` initializer: gcc emits the object (and its strings) only in the units that
+            # reference it (CardKind.h's cardDataTbl), so its literals are not every includer's.
+            for m in re.finditer(r"\bstatic\s+const\b[^;{}()]*=\s*\{", code):
+                level, i = 0, m.end() - 1
+                while i < len(code):
+                    if code[i] == '"':  # skip literals: SJIS second bytes include '}' (0x7D)
+                        i += 1
+                        while i < len(code) and code[i] != '"':
+                            i += 2 if code[i] == "\\" else 1
+                        i += 1
+                        continue
+                    level += {"{": 1, "}": -1}.get(code[i], 0)
+                    if level == 0:
+                        break
+                    i += 1
+                tranges.append((m.start(), i))
         offsets = [0]
         for line in code.split("\n"):
             offsets.append(offsets[-1] + len(line) + 1)
