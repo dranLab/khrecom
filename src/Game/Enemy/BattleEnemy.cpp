@@ -3603,7 +3603,7 @@ void CBattleEnemy::updateSpotLight_() {
     RotMatrixY(m, m, atan2f(n.x, n.z));
     FVECTOR pos = getPos();
     pos.w = 1.0f;
-    m.getTransRef() = pos;
+    m.setTrans(pos);
     effect->getCoords()->Crd(0).m_Local = m;
     effect->getCoords()->Crd(0).m_Flag = 1;
 }

@@ -178,7 +178,7 @@ void CMenuModel::changeLocalWS() {
     FMATRIX mWV;
     _unitMatrixVu0(mWV);
     RotMatrixY(mWV, mWV, 3.1415927f);
-    mWV.v[3] = m_vPosWSC;
+    mWV.setTrans(m_vPosWSC);
     InversMatrix(mWV, mWV);
     mWV.m[0][0] = -mWV.m[0][0];
     mWV.m[1][0] = -mWV.m[1][0];

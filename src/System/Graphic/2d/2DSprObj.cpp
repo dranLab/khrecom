@@ -488,10 +488,10 @@ void C2DSprObj::move() {
     mat.m[1][1] = m_vScl.y;
     RotMatrix(mat, mat, m_vRot);
     AddVector2(fVec, m_vPos, m_vSwy);
-    mat.v[3] = fVec;
+    mat.setTrans(fVec);
     _unitMatrixVu0(mat2);
     *(FVECTOR2*)&fVec = m_vOfs;
-    mat2.v[3] = fVec;
+    mat2.setTrans(fVec);
     MulMatrix(mat, mat, mat2);
     vCol = m_vCol;
     if (m_pSeqControl) {

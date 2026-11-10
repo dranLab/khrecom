@@ -283,7 +283,7 @@ BOOL CEffectMotionCtrl::updateAttachEffect_(TIMEQ inCurrentTime) {
                     RotMatrixX(m, m, rot.x);
                     RotMatrixY(m, m, rot.y);
                     RotMatrixZ(m, m, rot.z);
-                    m.v[3] = offset;
+                    m.setTrans(offset);
                     MulMatrix(m, m_pOwner->Crd(m_pAttachEffectData->iBoneIndex).getWorldMatrix(), m);
                     m_hHandle = m_pOwner->setEffect(m_pAttachEffectData->szDpxName, m_pAttachEffectData->iEffectNo,
                                                     &m, 0.0f);

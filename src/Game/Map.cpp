@@ -1187,7 +1187,7 @@ void CSky::disp() {
     if (DebugWork::g_dw.sys.m_iSkyDisp < 0) return;
     CCamera* pCamera = CWorldEnv::getActiveCamera();
     if (!pCamera) return;
-    Crd(0).m_Local.v[3] = pCamera->Crd(0).m_World.v[3];
+    Crd(0).m_Local.setTrans(pCamera->Crd(0).m_World.v[3]);
     adjustCoord();
     FVECTOR vColor;
     FVECTOR* pSceneColor = CSceneEnv::getTypeColor((ObjType::eObjType)0xC);

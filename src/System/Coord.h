@@ -522,7 +522,8 @@ public:
         }
     }
     void updateLocal(/* parameters unknown */);
-    void setTrans(/* parameters unknown */);
+#line 1032
+    void setTrans(const FVECTOR& vecIn) { m_Local.v[3] = vecIn; }
     void updateTrans(/* parameters unknown */);
 #line 1043
     CCoord* getParent() { return m_pParent; }

@@ -170,7 +170,7 @@ void Movement::CalcPlaneMatrix(FMATRIX& outMat, const FVECTOR& inNormal, const F
     outMat.v[0] = vecRight;
     outMat.v[1] = vecUp;
     outMat.v[2] = inNormal;
-    outMat.v[3] = inPos;
+    outMat.setTrans(inPos);
 }
 
 CMovement::CMovement(CEntity* inOwner) {

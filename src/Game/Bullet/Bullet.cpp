@@ -568,7 +568,7 @@ HANDLE CBullet::makeEffect(INT inID) {
         ScaleVector(normal, normal, -(m_pMove->getRadius() - 0.001f));
         AddVectorXYZ(pos, pos, normal);
         pos.w = 1.0f;
-        m.v[3] = pos;
+        m.setTrans(pos);
         hEffect = setEffect(info->pEffectName, info->iNo, &m, 0.0f);
         if (infoEx && infoEx->pEffectName) {
             setEffect(infoEx->pEffectName, infoEx->iNo, &m, 0.0f);
@@ -586,7 +586,7 @@ HANDLE CBullet::makeEffect(INT inID) {
             MulMatrix(m, m, mat);
         }
         pos.w = 1.0f;
-        m.v[3] = pos;
+        m.setTrans(pos);
         hEffect = setEffect(info->pEffectName, info->iNo, &m, 0.0f);
         if (infoEx && infoEx->pEffectName) {
             setEffect(infoEx->pEffectName, infoEx->iNo, &m, 0.0f);
@@ -669,7 +669,7 @@ void CBullet::updateShadow() {
         ScaleVector(normal, normal, -0.005f);
         AddVectorXYZ(pos, *coll->getOutPos(), normal);
         pos.w = 1.0f;
-        m.v[3] = pos;
+        m.setTrans(pos);
         effect->getCoords()->Crd(0).getLocalMatrix() = m;
         effect->getCoords()->Crd(0).touch();
     }

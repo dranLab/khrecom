@@ -593,14 +593,14 @@ void CNaviMap::main() {
         }
         RotMatrixY(crd.m_Local, crd.m_Local, rot.y);
         RotMatrixX(crd.m_Local, crd.m_Local, rot.x);
-        crd.m_Local.v[3] = m_vPos;
+        crd.m_Local.setTrans(m_vPos);
         crd.touch();
         if (m_nModelCount >= 22) {
             CCoord& crd1 = Crd(1);
             _unitMatrixVu0(crd1.m_Local);
             rot.y = _roundRot(g_pPlayer->getRot().y - 0.7853982f + m_fRotOfs);
             RotMatrixY(crd1.m_Local, crd1.m_Local, rot.y);
-            crd1.m_Local.v[3] = m_vPos;
+            crd1.m_Local.setTrans(m_vPos);
             Crd(1).touch();
         }
     }

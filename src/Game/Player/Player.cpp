@@ -6861,7 +6861,7 @@ void CPlayer::updateSpotLight(HANDLE inHandle) {
         RotMatrixY(m, m, atan2f(n.x, n.z));
         FVECTOR pos = getPos();
         pos.w = 1.0f;
-        m.v[3] = pos;
+        m.setTrans(pos);
         effect->getCoords()->getLocalMatrix(0) = m;
         effect->getCoords()->Crd(0).m_Flag = 1;
     }

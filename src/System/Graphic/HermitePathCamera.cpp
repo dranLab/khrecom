@@ -501,7 +501,7 @@ FLOAT CHermitePathCamera::updatePos(FVECTOR& vPos, FVECTOR& vLook, FLOAT fr, BOO
 }
 
 void CHermitePathCamera::updateMatrix(FVECTOR& vPos, FVECTOR& vLook, FLOAT fRoll) {
-    setPos(vPos);
+    Crd(0).m_Local.setTrans(vPos);
     Crd(0).fix(0);
     if (m_iStatus & 1) {
         lookAt(vLook, (const FVECTOR*)NULL);

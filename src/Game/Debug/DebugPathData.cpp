@@ -144,7 +144,7 @@ void CHermitePathMoveS::main() {
     m_vRot.z = m_HPath.getNowRoll();
     m_vRot.w = 5.0f;
     m_DDPathCamArrow.setCoord(NULL, &m_vRot);
-    Crd(0).m_Local.v[3] = vPos;
+    Crd(0).m_Local.setTrans(vPos);
     Crd(0).m_Flag = 1;
 }
 void CHermitePathMoveS::disp() { m_DDPathCamArrow.disp(); }

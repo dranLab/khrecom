@@ -1037,7 +1037,7 @@ void CDbgCube::setCoord(FVECTOR* pvPos, FVECTOR* pvRot) {
         ScaleVectorXYZ(m_Coord.m_Local.v[1], m_Coord.m_Local.v[1], pvRot->w);
         ScaleVectorXYZ(m_Coord.m_Local.v[2], m_Coord.m_Local.v[2], pvRot->w);
     }
-    m_Coord.m_Local.v[3] = vPos;
+    m_Coord.m_Local.setTrans(vPos);
 }
 
 void CDbgCube::disp() {
@@ -1100,7 +1100,7 @@ void CDbgArrow::setCoord(FVECTOR* pvPos, FVECTOR* pvRot) {
         ScaleVectorXYZ(m_Coord.m_Local.v[1], m_Coord.m_Local.v[1], pvRot->w);
         ScaleVectorXYZ(m_Coord.m_Local.v[2], m_Coord.m_Local.v[2], pvRot->w);
     }
-    m_Coord.m_Local.v[3] = vPos;
+    m_Coord.m_Local.setTrans(vPos);
 }
 void CDbgArrow::disp() {
     m_Coord.m_Flag = 1;

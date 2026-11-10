@@ -711,7 +711,7 @@ void CEntity::updateCoord() {
     }
     FVECTOR pos = getPos();
     pos.w = 1.0f;
-    m.v[3] = pos;
+    m.setTrans(pos);
     Crd(0).m_Flag = 1;
 }
 void CEntity::coordFix() {
@@ -947,7 +947,7 @@ void CEntity::updateBadStatusEffect(HANDLE inHandle) {
     ApplyMatrix(ofs, *(FMATRIX*)((BYTE*)&Crd(other->BadStatusPos.iBoneIndex) + 0x90), ofs);
     FVECTOR pos = *(FVECTOR*)((BYTE*)&Crd(other->BadStatusPos.iBoneIndex) + 0xc0);
     pos.y += Math3D::PointToPointDistance(ofs, pos);
-    effect->Crd(0).m_Local.v[3] = pos;
+    effect->Crd(0).m_Local.setTrans(pos);
     effect->Crd(0).m_Flag = 1;
 }
 void CEntity::setDamageNumber(const FVECTOR& inPos, INT inDamage) {

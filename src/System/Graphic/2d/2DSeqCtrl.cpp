@@ -358,19 +358,19 @@ void C2DSeqCtrl::setMatrix() {
     mat.m[1][1] = m_seqControl.vScl.y;
     mat.m[2][2] = m_seqControl.vScl.z;
     RotMatrix(m_seqControl.matrix, mat, m_seqControl.vRot);
-    m_seqControl.matrix.v[3] = m_seqControl.vPos;
+    m_seqControl.matrix.setTrans(m_seqControl.vPos);
 }
 
 void C2DSeqCtrl::setPos(FVECTOR& vPos) {
     m_seqControl.vPos.x = vPos.x - 256.0f;
     m_seqControl.vPos.y = vPos.y - _ref(SCREEN_HEIGHT) / 2;
-    m_seqControl.matrix.v[3] = m_seqControl.vPos;
+    m_seqControl.matrix.setTrans(m_seqControl.vPos);
 }
 
 void C2DSeqCtrl::setLocalPos(FVECTOR& vPos) {
     m_seqControl.vPos.x = vPos.x;
     m_seqControl.vPos.y = vPos.y;
-    m_seqControl.matrix.v[3] = m_seqControl.vPos;
+    m_seqControl.matrix.setTrans(m_seqControl.vPos);
 }
 
 void C2DSeqCtrl::set3DPos(FVECTOR& vPos) {
@@ -397,12 +397,12 @@ void C2DSeqCtrl::setCol(FVECTOR& vCol) { m_seqControl.vCol = vCol; }
 
 void C2DSeqCtrl::addPosX(FLOAT fPosX) {
     m_seqControl.vPos.x += fPosX;
-    m_seqControl.matrix.v[3] = m_seqControl.vPos;
+    m_seqControl.matrix.setTrans(m_seqControl.vPos);
 }
 
 void C2DSeqCtrl::addPosY(FLOAT fPosY) {
     m_seqControl.vPos.y += fPosY;
-    m_seqControl.matrix.v[3] = m_seqControl.vPos;
+    m_seqControl.matrix.setTrans(m_seqControl.vPos);
 }
 
 void C2DSeqCtrl::addRotX(FLOAT fRotX) {

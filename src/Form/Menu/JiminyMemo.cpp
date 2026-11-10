@@ -1907,7 +1907,7 @@ void CMemo3DObj::calcLocalMatrix() {
     posi.y += m_vPosition.y * rate;
     _unitMatrixVu0(crd.getLocalMatrix());
     RotMatrixY(crd.getLocalMatrix(), crd.getLocalMatrix(), m_fRotY);
-    crd.getLocalMatrix().setTrans(posi);
+    crd.getLocalMatrix().v[3].set(posi);
     CCamera* pCamera = CWorldEnv::getActiveCamera();
     if (pCamera && pCamera->getCoordNum() > 0) {
         MulMatrix(crd.getLocalMatrix(), pCamera->Crd(0).getLocalMatrix(), crd.getLocalMatrix());

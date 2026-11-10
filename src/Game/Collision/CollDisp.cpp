@@ -256,7 +256,7 @@ void CCollDisp::setBBMatrix(CCoord* inpCrd, const FVECTOR& inrefPos, FLOAT infSh
     } else {
         _unitMatrix(refMat);
     }
-    refMat.v[3] = pos;
+    refMat.setTrans(pos);
     refMat.v[3].w = 1.0f;
     inpCrd->recalcWorldMatrix();
 }
@@ -273,7 +273,7 @@ FLOAT CCollDisp::setColmMatrix(CCoord* inpCrd, const FVECTOR& refPos1, const FVE
         RotMatrixX(inpCrd->m_Local, inpCrd->m_Local, rx);
         RotMatrixY(inpCrd->m_Local, inpCrd->m_Local, ry);
     }
-    inpCrd->m_Local.v[3] = refPos1;
+    inpCrd->m_Local.setTrans(refPos1);
     inpCrd->m_Local.v[3].w = 1.0f;
     inpCrd->m_Local.v[3].y += infShiftY;
     inpCrd->recalcWorldMatrix();

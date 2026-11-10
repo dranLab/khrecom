@@ -95,7 +95,7 @@ CRideModel::~CRideModel() {
 #line 109
 void CRideModel::init(void* pOCDData, CTask* pBFObj) {
     FMATRIX* lMat = NULL;
-    if (pBFObj) lMat = &pBFObj->Crd(0).m_World;
+    if (pBFObj) lMat = &pBFObj->Crd(0).getWorldMatrix();
     if (!lMat) return;
     m_MCDInfo.pMatrix = lMat;
     if (m_pMatIOld) com_free(m_pMatIOld);
@@ -120,7 +120,7 @@ void CRideModel::init(void* pOCDData, CTask* pBFObj) {
             RotMatrixX(*pPartsMat, *pPartsMat, pChip->r.x);
             RotMatrixY(*pPartsMat, *pPartsMat, pChip->r.y);
             RotMatrixZ(*pPartsMat, *pPartsMat, pChip->r.z);
-            pPartsMat->setTrans(pChip->t);
+            pPartsMat->v[3] = pChip->t;
             pPartsMat->v[3].w = 1.0f;
             MC_DATA* pMCData = (MC_DATA*)pChip->data;
             FVECTOR vMin = *(FVECTOR*)&pMCData->x_min;
