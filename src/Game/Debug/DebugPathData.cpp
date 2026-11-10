@@ -101,7 +101,7 @@ INT CDebugPathData::m_iActivePath = 0;
 INT CDebugPathData::m_iActivePathNum = 0;
 FLOAT CDebugPathData::m_fValuePlus = 1.0f;
 CPDFrameTime* CDebugPathData::m_pFrame = NULL;
-UINT CDebugPathData::m_iCtrlFlg = 2;
+UINT CDebugPathData::m_iCtrlFlg = 2; /* COMMON in the original (linker-placed): */ FVECTOR CDebugPathData::m_vActivePathPos; PATH_PARAM CDebugPathData::m_sParam; FVECTOR CDebugPathData::m_vBackUpPos; char CDebugPathData::m_szPathName[64]; char CDebugPathData::m_szPathActName[64]; char CDebugPathData::m_szNames[128][16];
 
 CHermitePathMoveS::CHermitePathMoveS(CTask* p, const CPathVector* pVec) : CTask(p, 0x4000) {
     ignorePause(TRUE);

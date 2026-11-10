@@ -1,5 +1,5 @@
 #include "draw.h"
-
+OS_FOG OsFog; /* COMMON in the original (linker-placed) */
 /* The original builds its DMA/GS packets with small inline-asm store macros: each store is an asm statement
    (a scheduling barrier), and some tag values are passed in a fixed register (not hoisted out of loops). */
 #define SQ(v, p, off) __asm__ volatile("sq %0, " #off "(%1)" : : "r"(v), "r"(p))

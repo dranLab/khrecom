@@ -353,7 +353,7 @@ void (CBattleEnemy::*CBattleEnemy::m_pEndStateTbl[])() = {
     &CBattleEnemy::endStateDead_,
 };
 INT CBattleEnemy::m_iDuelCardNum = 0;
-INT CBattleEnemy::m_iDuelCardPtr = 0;
+INT CBattleEnemy::m_iDuelCardPtr = 0; int CBattleEnemy::m_iDuelCardArray[10]; /* COMMON in the original (linker-placed) */
 
 INT BattleEnemy::GameModeHp(INT inHp) {
     return inHp * GameModeParamHp[CGameWork::getByte(0, 0x61)] / 100;

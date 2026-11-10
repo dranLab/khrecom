@@ -79,7 +79,9 @@ def main() -> None:
         for line in out.splitlines():
             parts = line.split()
             if len(parts) == 2 and parts[0] in "Uw":
-                if parts[0] == "U":
+                # gcc's markers (gcc2_compiled., __gnu_compiled_c) lose their section when configure removes the .text
+                # of a data-only unit; nothing references them
+                if parts[0] == "U" and parts[1] != "gcc2_compiled." and not parts[1].startswith("__gnu_compiled_"):
                     users[parts[1]].add(obj)
             elif len(parts) == 3 and (parts[1].isupper() or parts[1] in "vw"):
                 defined.add(parts[2])  # global or weak; a local symbol of another object resolves nothing
