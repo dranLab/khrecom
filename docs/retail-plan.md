@@ -11,7 +11,9 @@ DLL table, what port step 1 brings, and Phase 0/1 revised accordingly.
 
 The project matches the **US translation beta** `iso/SLUS_217.99` (SHA-1 9bd4535c…), chosen for its debug info
 (symbols, `.mdebug`, from which `ref/`, the object split and the line markers come). The user wants the work to also
-produce the **US retail** executable, `iso/SLUS_217.99_retail` (SHA-1 865450e0…, 3.4 MB, dated 2008-10-21).
+produce the **US retail** executable, `iso/SLUS_217.99_retail` (SHA-1 865450e0…, 3.4 MB, dated 2008-10-21; the
+boot ELF of the retail disc `iso/khrecom_retail.iso`, `SYSTEM.CNF` `VER = 1.00`, at sector 631 like the beta's:
+`tools/extract_iso.py --name`, and `ninja iso` for the retail version picks that disc by its boot ELF).
 Decision (user, 2026-11-10): **keep both**. Retail becomes a second target built from the same `src/`, the beta stays
 the reference and keeps its checksum and CI.
 

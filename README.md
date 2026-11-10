@@ -51,6 +51,8 @@ disc image and the toolchain.
    ```sh
    python3 tools/extract_iso.py iso/khrecom.iso        # writes iso/SLUS_217.99 + iso/SYSTEM.CNF
    ```
+   The US retail disc (second target, `docs/retail-plan.md`) boots an ELF of the same name: extract it with
+   `--name`, e.g. `tools/extract_iso.py iso/khrecom_retail.iso --name SLUS_217.99_retail`.
 3. **Get the compilers and wibo.** The game's compiler is SN Systems' Windows build of ee-gcc 2.95.3; the
    libraries need four older ee-gcc packages (all listed in `config/SLUS_217.99/build.yaml`). They run under
    [wibo](https://github.com/decompals/wibo), which `download_compiler.py` puts at `tools/wibo/wibo`.
@@ -120,7 +122,7 @@ ninja iso        # -> build/SLUS_XXX.XX/SLUS_XXX.XX.iso (the first run copies th
 ```
 
 `tools/build_iso.py` writes the built ELF into the original ELF's sectors of a copy of the disc
-image and updates its size in the ISO9660 and UDF directories; every other file keeps its sector.
+image (the image in `iso/` whose boot ELF is the version's original ELF, `build.yaml`'s `elf:`) and updates its size in the ISO9660 and UDF directories; every other file keeps its sector.
 The boot copy of the ELF gets `PhysAddr = VirtAddr` (splat's linker script sets it to the ROM
 offset), and its loadable image is compared with the original's. Boot the result in PCSX2 or on
 hardware. PCSX2 identifies games by serial *and* ELF CRC: settings and patches keyed by the CRC of

@@ -104,6 +104,31 @@ def boot_name(f) -> str:
     sys.exit("error: no BOOT2 line in SYSTEM.CNF")
 
 
+def disc_boot_elf(path: Path) -> bytes | None:
+    """The boot ELF's bytes on a disc image (None when it isn't a PS2 disc with ISO9660)."""
+    with path.open("rb") as f:
+        pvd = read_sector(f, 16)
+        if pvd[1:6] != b"CD001":
+            return None
+        _, extent, size = find_iso9660_record(f, boot_name(f))
+        f.seek(extent * SECTOR)
+        return f.read(size)
+
+
+def find_disc(original_elf: Path) -> Path:
+    """The disc image in iso/ whose boot ELF is the version's original ELF (build.yaml `elf:`): iso/ may hold the
+    discs of several versions (the beta's, the retail one), all booting an ELF of the same name."""
+    if not original_elf.exists():
+        sys.exit(f"error: {original_elf.relative_to(ROOT)} (build.yaml `elf:`) doesn't exist: pass --iso")
+    wanted = original_elf.read_bytes()
+    isos = sorted((ROOT / "iso").glob("*.iso"))
+    hits = [p for p in isos if disc_boot_elf(p) == wanted]
+    if len(hits) != 1:
+        sys.exit(f"error: {len(hits)} of the disc images {[p.name for p in isos]} boot "
+                 f"{original_elf.relative_to(ROOT)}: pass --iso")
+    return hits[0]
+
+
 # --- UDF (ECMA-167 / UDF 1.02) ---------------------------------------------------------------------------------------
 
 def crc_itu(data: bytes) -> int:
@@ -205,7 +230,7 @@ def patch_udf_file_entry(f, fe_lba: int, size: int) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("version", help="folder name under config/")
-    parser.add_argument("--iso", type=Path, help="original disc image (default: the only *.iso in iso/)")
+    parser.add_argument("--iso", type=Path, help="original disc image (default: the *.iso in iso/ whose boot ELF is build.yaml's `elf:`)")
     parser.add_argument("--elf", type=Path, help="ELF to put on the disc (default: the build output)")
     parser.add_argument("--out", type=Path, help="output image (default: build/<VERSION>/<VERSION>.iso)")
     parser.add_argument("--fresh", action="store_true", help="copy the original image again instead of patching the last output")
@@ -216,8 +241,7 @@ def main() -> None:
     cfg_dir = ROOT / "config" / args.version
     opts = yaml.safe_load((cfg_dir / f"{args.version}.yaml").read_text(encoding="utf-8"))["options"]
     build_cfg = yaml.safe_load((cfg_dir / "build.yaml").read_text(encoding="utf-8"))
-    isos = sorted((ROOT / "iso").glob("*.iso"))
-    original_iso = args.iso or (isos[0] if len(isos) == 1 else sys.exit(f"error: pass --iso; found {isos}"))
+    original_iso = args.iso or find_disc(ROOT / build_cfg["elf"])
     built_elf = ROOT / args.elf if args.elf else ROOT / opts["elf_path"]  # relative paths: from the repo root
     out_iso = ROOT / args.out if args.out else ROOT / opts["build_path"] / f"{args.version}.iso"
     boot_copy = out_iso.with_suffix(".boot.elf")
