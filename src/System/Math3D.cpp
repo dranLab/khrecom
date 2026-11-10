@@ -185,14 +185,14 @@ void Quaternion::QuaternionMultiply(QUATERNION& outQ, const QUATERNION& inQ0, co
 
 void Quaternion::QuaternionRotationAxis(QUATERNION& outQuat, const FVECTOR& inAxis, FLOAT inRad) {
     FLOAT theta = inRad * 0.5f;
-    asm volatile("lqc2 $vf4, 0x0(%1)\n"
-                 "mfc1 $v1, %2\n"
-                 "qmtc2 $v1, $vf5\n"
-                 "vmulx.xyzw $vf4, $vf4, $vf5x\n"
-                 "sqc2 $vf4, 0x0(%0)\n"
-                 :
-                 : "r"(&outQuat), "r"(&inAxis), "f"(vu0Sinf(theta))
-                 : "memory", "$3");
+    vu0ScaleVector(outQuat, inAxis, vu0Sinf(theta));
+
+
+
+
+
+
+
     outQuat.w = vu0Cosf(theta);
 }
 
@@ -489,13 +489,13 @@ FLOAT Math3D::PointToPointDistanceSq(const FVECTOR& inP0, const FVECTOR& inP1) {
     FVECTOR v;
     INT iTmp;
     FLOAT ret;
-    asm volatile("lqc2 $vf4, 0x0(%1)\n"
-                 "lqc2 $vf5, 0x0(%2)\n"
-                 "vsub.xyzw $vf4, $vf4, $vf5\n"
-                 "sqc2 $vf4, 0x0(%0)\n"
-                 :
-                 : "r"(&v), "r"(&inP1), "r"(&inP0)
-                 : "memory");
+    vu0SubVector(v, inP1, inP0);
+
+
+
+
+
+
     asm volatile("lqc2 $vf4, 0x0(%1)\n"
                  "vaddy.x $vf6, $vf0, $vf4y\n"
                  "vaddz.x $vf7, $vf0, $vf4z\n"

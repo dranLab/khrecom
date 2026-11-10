@@ -213,9 +213,9 @@ inline void vu0ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT t) {
 
 
 
-
-
-    asm volatile("lqc2 $vf4, 0x0(%0)" : : "r"(&v1)); register FLOAT t3 asm("$3") = t; asm volatile("qmtc2.ni %0, $vf5\n" "vmulx.xyzw $vf4, $vf4, $vf5x\n" "sqc2 $vf4, 0x0(%1)" : : "r"(t3), "r"(&v0) : "memory");
+    /* MATCH: the mfc1 stays in the asm: from C (a $3 register local) the scheduler moves the caller's parameter
+     * copies (Math3D QuaternionRotationAxis) */
+    asm volatile("lqc2 $vf4, 0x0(%1)\n" "mfc1 $3, %2\n" "qmtc2.ni $3, $vf5\n" "vmulx.xyzw $vf4, $vf4, $vf5x\n" "sqc2 $vf4, 0x0(%0)" : : "r"(&v0), "r"(&v1), "f"(t) : "$3", "memory");
 }
 #line 679
 inline void vu0ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT t) {
