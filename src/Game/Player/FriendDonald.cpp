@@ -33,8 +33,6 @@ inline void _emptyStringPlaceholder2() { /* MATCH: placeholder: an inline functi
 #include "System/Graphic/Camera.h"
 
 extern "C" {
-void sceVu0UnitMatrix(FMATRIX& m);
-void sceVu0RotMatrixY(FMATRIX& m0, FMATRIX& m1, float ry);
 float sinf(float);
 float cosf(float);
 }
@@ -49,10 +47,10 @@ extern BULLET_EFFECT_INFO g_EffTbl_Skill[67][4]; /* Game/Player/PlayerAttack.h *
 
 /* Through inline wrappers (as in FriendKing): the original recomputes the matrix address for each call. */
 static inline void _unitMatrix(FMATRIX& m) {
-    sceVu0UnitMatrix(m);
+    sceVu0UnitMatrix(m.m);
 }
 static inline void _rotMatrixY(FMATRIX& m, FLOAT r) {
-    sceVu0RotMatrixY(m, m, r);
+    sceVu0RotMatrixY(m.m, m.m, r);
 }
 
 namespace Friend {

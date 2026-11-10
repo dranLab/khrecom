@@ -249,13 +249,12 @@ void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
 void Normalize(FVECTOR& v0, const FVECTOR& v1);
-extern "C" void sceVu0InversMatrix(FMATRIX& m0, const FMATRIX& m1);
 namespace Math3D {
 FLOAT VectorLength(const FVECTOR& inVector);
 }
 // MATCH: the original's inline wrapper (Coord.h:340 in its line markers; the .mdebug shows a third inline block in
 // both mInv scopes): its parameters take the stack address, so the caller keeps no register copy of &mInv
-static inline void _inversMatrix(FMATRIX& m0, const FMATRIX& m1) { sceVu0InversMatrix(m0, m1); }
+static inline void _inversMatrix(FMATRIX& m0, const FMATRIX& m1) { sceVu0InversMatrix(m0.m, (float(*)[4])m1.m); }
 // the original's Math3D.h:137 _fabs (ref locals inValue/ret); MATCH: volatile keeps the abs.s after the fAdd mul
 static inline FLOAT _fabs(FLOAT inValue) {
     FLOAT ret;

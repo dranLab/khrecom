@@ -39,9 +39,6 @@ inline void _emptyStringPlaceholder1() { /* MATCH: placeholder: an inline functi
 
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" float atan2f(float y, float x);
-extern "C" void sceVu0UnitMatrix(FMATRIX& m);
-extern "C" void sceVu0RotMatrixX(FMATRIX& m0, FMATRIX& m1, float rx);
-extern "C" void sceVu0RotMatrixY(FMATRIX& m0, FMATRIX& m1, float ry);
 void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, float s);
@@ -49,7 +46,6 @@ void Normalize(FVECTOR& v0, const FVECTOR& v1);
 float InnerProduct(const FVECTOR& v0, const FVECTOR& v1);
 void ApplyMatrixXYZ(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 void ApplyMatrix33(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
-extern "C" void sceVu0InversMatrix(FMATRIX& m0, const FMATRIX& m1);
 extern "C" float sinf(float x);
 extern "C" float cosf(float x);
 
@@ -75,16 +71,16 @@ static inline FLOAT _limitPI(FLOAT inValue) {
 /* Through inline wrappers (a header's, in the original): called directly, cse keeps the matrix address in a saved
  * register across the calls; the original recomputes it for each call. */
 static inline void _unitMatrix(FMATRIX& m) {
-    sceVu0UnitMatrix(m);
+    sceVu0UnitMatrix(m.m);
 }
 static inline void _rotMatrixX(FMATRIX& m, FLOAT r) {
-    sceVu0RotMatrixX(m, m, r);
+    sceVu0RotMatrixX(m.m, m.m, r);
 }
 static inline void _inversMatrix(FMATRIX& m0, const FMATRIX& m1) {
-    sceVu0InversMatrix(m0, m1);
+    sceVu0InversMatrix(m0.m, (float(*)[4])m1.m);
 }
 static inline void _rotMatrixY(FMATRIX& m, FLOAT r) {
-    sceVu0RotMatrixY(m, m, r);
+    sceVu0RotMatrixY(m.m, m.m, r);
 }
 
 static inline FLOAT _sqrtf(FLOAT x) {
@@ -656,9 +652,9 @@ void CPlayerCamera::recalcNearMove() {
     m_vDir.x = _limitPI(m_vDir.x + y * 3.1415927f / 180.0f);
     if (m_vDir.x < m_fXLimitHi) m_vDir.x = m_fXLimitHi;
     FMATRIX mat;
-    sceVu0UnitMatrix(mat);
-    sceVu0RotMatrixX(mat, mat, m_vDir.x);
-    sceVu0RotMatrixY(mat, mat, m_vDir.y);
+    sceVu0UnitMatrix(mat.m);
+    sceVu0RotMatrixX(mat.m, mat.m, m_vDir.x);
+    sceVu0RotMatrixY(mat.m, mat.m, m_vDir.y);
     ApplyMatrixXYZ(m_vEye, mat, m_vLocal);
     AddVectorXYZ(m_vEye, m_vFinalAim, m_vEye);
     calcMapHit(m_vEye, m_vAim, m_pData->fSize, 0.0f);

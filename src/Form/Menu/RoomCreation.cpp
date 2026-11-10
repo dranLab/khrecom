@@ -281,7 +281,6 @@ char* strcpy(char*, const char*);
 char* strcat(char*, const char*);
 char* strchr(const char*, int);
 float powf(float, float);
-void sceVu0InterVectorXYZ(float* v0, float* v1, float* v2, float t);
 }
 
 using namespace D2;

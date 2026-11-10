@@ -74,7 +74,6 @@ void pppSetReferenceMatrix(void* list, int num);
 void pppSetDrawFirst(void* mng, int priority);
 void pppSetDrawLast(void* mng, int priority);
 char* pppPrintProf(void* mng);
-void sceVu0ClampVector(float* v0, float* v1, float min, float max);
 int strncasecmp(const char* s1, const char* s2, size_t n);
 }
 

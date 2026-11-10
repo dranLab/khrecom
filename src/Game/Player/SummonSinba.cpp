@@ -27,17 +27,13 @@ inline void _emptyStringPlaceholder2() { /* MATCH: placeholder: an inline functi
 #include "Game/Movement.h"
 #include "Game/Collision/CollMap.h"
 
-extern "C" {
-void sceVu0UnitMatrix(FMATRIX& m);
-void sceVu0RotMatrixY(FMATRIX& m0, FMATRIX& m1, float ry);
-}
 void ApplyMatrixXYZ(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 
 static inline void _unitMatrix(FMATRIX& m) {
-    sceVu0UnitMatrix(m);
+    sceVu0UnitMatrix(m.m);
 }
 static inline void _rotMatrixY(FMATRIX& m, FLOAT r) {
-    sceVu0RotMatrixY(m, m, r);
+    sceVu0RotMatrixY(m.m, m.m, r);
 }
 
 static inline FVECTOR _makeVector(FLOAT inX, FLOAT inY, FLOAT inZ) {

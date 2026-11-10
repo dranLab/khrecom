@@ -36,7 +36,6 @@ inline void _emptyStringPlaceholder2() { /* MATCH: placeholder: an inline functi
 #include "System/Sound/SoundMan.h"
 #line 49
 
-extern "C" void sceVu0InterVectorXYZ(float* v0, float* v1, float* v2, float t);
 extern "C" float powf(float, float);
 
 using namespace D2;

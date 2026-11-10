@@ -30,11 +30,6 @@ inline void _emptyStringPlaceholder1() { /* MATCH: placeholder: an inline functi
 #include "include_asm.h"
 
 #include "System/Coord.h"
-extern "C" {
-void sceVu0CameraMatrix(float m[4][4], float p[4], float zd[4], float yd[4]);
-void sceVu0UnitMatrix(float m[4][4]);
-void sceVu0InversMatrix(float m0[4][4], float m1[4][4]);
-}
 
 #include "System/Graphic/PackMan.h"
 

@@ -99,11 +99,6 @@ inline BOOL EET_HEADER::addrMapping() {
 
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 void MulMatrix(FMATRIX& m0, const FMATRIX& m1, const FMATRIX& m2);
-extern "C" {
-void sceVu0RotMatrixX(FMATRIX& m0, FMATRIX& m1, float rx);
-void sceVu0RotMatrixY(FMATRIX& m0, FMATRIX& m1, float ry);
-void sceVu0RotMatrixZ(FMATRIX& m0, FMATRIX& m1, float rz);
-}
 
 inline void UnitMatrix(FMATRIX& m) {
     __asm__ volatile(
@@ -285,9 +280,9 @@ BOOL CEffectMotionCtrl::updateAttachEffect_(TIMEQ inCurrentTime) {
                 } else {
                     FMATRIX m;
                     UnitMatrix(m);
-                    sceVu0RotMatrixX(m, m, rot.x);
-                    sceVu0RotMatrixY(m, m, rot.y);
-                    sceVu0RotMatrixZ(m, m, rot.z);
+                    sceVu0RotMatrixX(m.m, m.m, rot.x);
+                    sceVu0RotMatrixY(m.m, m.m, rot.y);
+                    sceVu0RotMatrixZ(m.m, m.m, rot.z);
                     m.v[3] = offset;
                     MulMatrix(m, m_pOwner->Crd(m_pAttachEffectData->iBoneIndex).getWorldMatrix(), m);
                     m_hHandle = m_pOwner->setEffect(m_pAttachEffectData->szDpxName, m_pAttachEffectData->iEffectNo,

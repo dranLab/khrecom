@@ -10,7 +10,6 @@
 extern "C" int sprintf(char* s, const char* fmt, ...);
 
 extern INT SCREEN_HEIGHT;
-extern "C" void sceVu0RotMatrix(FMATRIX& m0, FMATRIX& m1, FVECTOR& rot);
 
 namespace D2 {
 
@@ -358,7 +357,7 @@ void C2DSeqCtrl::setMatrix() {
     mat.m[0][0] = m_seqControl.vScl.x;
     mat.m[1][1] = m_seqControl.vScl.y;
     mat.m[2][2] = m_seqControl.vScl.z;
-    sceVu0RotMatrix(m_seqControl.matrix, mat, m_seqControl.vRot);
+    sceVu0RotMatrix(m_seqControl.matrix.m, mat.m, m_seqControl.vRot.v);
     m_seqControl.matrix.v[3] = m_seqControl.vPos;
 }
 

@@ -106,20 +106,16 @@ static inline void _unitMatrixVu0(FMATRIX& m) {
                  : "r"(&m)
                  : "memory");
 }
-extern "C" void sceVu0RotMatrixX(FMATRIX& m0, FMATRIX& m1, float rx);
-extern "C" void sceVu0RotMatrixY(FMATRIX& m0, FMATRIX& m1, float ry);
-extern "C" void sceVu0UnitMatrix(FMATRIX& m);
-extern "C" void sceVu0InversMatrix(FMATRIX& m0, FMATRIX& m1);
 /* Through inline wrappers: called directly, cse keeps the matrix address in a saved register across the
  * calls; the original recomputes it for each call (as in Game/Player/FriendKing). */
 static inline void _unitMatrix(FMATRIX& m) {
-    sceVu0UnitMatrix(m);
+    sceVu0UnitMatrix(m.m);
 }
 static inline void _inversMatrix(FMATRIX& m) {
-    sceVu0InversMatrix(m, m);
+    sceVu0InversMatrix(m.m, m.m);
 }
 static inline void _rotMatrixY(FMATRIX& m, FLOAT r) {
-    sceVu0RotMatrixY(m, m, r);
+    sceVu0RotMatrixY(m.m, m.m, r);
 }
 extern "C" float atan2f(float y, float x); extern "C" int rand();
 static inline FLOAT _limitPI(FLOAT r) {
@@ -6872,8 +6868,8 @@ void CPlayer::updateSpotLight(HANDLE inHandle) {
         FVECTOR n = m_pMove->getDetectNormal();
         FMATRIX m;
         _unitMatrixVu0(m);
-        sceVu0RotMatrixX(m, m, atan2f(_sqrtf(n.z * n.z + n.x * n.x), n.y));
-        sceVu0RotMatrixY(m, m, atan2f(n.x, n.z));
+        sceVu0RotMatrixX(m.m, m.m, atan2f(_sqrtf(n.z * n.z + n.x * n.x), n.y));
+        sceVu0RotMatrixY(m.m, m.m, atan2f(n.x, n.z));
         FVECTOR pos = getPos();
         pos.w = 1.0f;
         m.v[3] = pos;

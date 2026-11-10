@@ -1,12 +1,6 @@
 #include "Billboard.h"
 #include "System/HeapMan.h"
 
-extern "C" {
-void sceVu0UnitMatrix(FMATRIX& m);
-void sceVu0RotMatrixX(FMATRIX& m0, FMATRIX& m1, float rx);
-void sceVu0RotMatrixY(FMATRIX& m0, FMATRIX& m1, float ry);
-void sceVu0RotMatrixZ(FMATRIX& m0, FMATRIX& m1, float rz);
-}
 
 static const float s_matEyeFix[4][4] = {
     {-1.f, 0.f, 0.f, 0.f},
@@ -45,10 +39,10 @@ CBillboardHelper::CBillboardHelper() {
 CBillboardHelper::~CBillboardHelper() {}
 
 void CBillboardHelper::setEyeMatrixImpl(FMATRIX& inMat, const FVECTOR& vInRot) {
-    sceVu0UnitMatrix(inMat);
-    sceVu0RotMatrixX(inMat, inMat, vInRot.x);
-    sceVu0RotMatrixY(inMat, inMat, vInRot.y);
-    sceVu0RotMatrixZ(inMat, inMat, vInRot.z);
+    sceVu0UnitMatrix(inMat.m);
+    sceVu0RotMatrixX(inMat.m, inMat.m, vInRot.x);
+    sceVu0RotMatrixY(inMat.m, inMat.m, vInRot.y);
+    sceVu0RotMatrixZ(inMat.m, inMat.m, vInRot.z);
 }
 
 void CBillboardHelper::calcBillboardMatrix(FMATRIX& inMat, const FVECTOR& vInPos, const FVECTOR& vInEyePos,

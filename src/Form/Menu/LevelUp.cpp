@@ -74,7 +74,6 @@ inline void _emptyStringPlaceholder() {
 extern "C" {
 int sprintf(char*, const char*, ...);
 float powf(float, float);
-void sceVu0InterVectorXYZ(float* v0, float* v1, float* v2, float t);
 }
 
 using namespace D2;

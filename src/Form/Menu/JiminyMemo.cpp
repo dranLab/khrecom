@@ -1887,7 +1887,6 @@ void CMemo3DObj::disp() {
 }
 void MulMatrix(FMATRIX& m0, const FMATRIX& m1, const FMATRIX& m2);
 void scaleMatrixSelf(FMATRIX& m, FLOAT fScale);
-extern "C" void sceVu0RotMatrixY(FMATRIX& m0, FMATRIX& m1, float ry);
 static inline void _unitMatrixVu0(FMATRIX& m) {
     asm volatile("vmr32.xyzw $vf1, $vf0\n"
                  "sqc2 $vf0, 0x30(%0)\n"
@@ -1907,7 +1906,7 @@ void CMemo3DObj::calcLocalMatrix() {
     posi.x += m_vPosition.x * -rate;
     posi.y += m_vPosition.y * rate;
     _unitMatrixVu0(crd.getLocalMatrix());
-    sceVu0RotMatrixY(crd.getLocalMatrix(), crd.getLocalMatrix(), m_fRotY);
+    sceVu0RotMatrixY(crd.getLocalMatrix().m, crd.getLocalMatrix().m, m_fRotY);
     crd.getLocalMatrix().setTrans(posi);
     CCamera* pCamera = CWorldEnv::getActiveCamera();
     if (pCamera && pCamera->getCoordNum() > 0) {
@@ -2207,7 +2206,6 @@ void CMemo2DSequence::setLocalPosition() {
     setLocalPos(v);
 }
 void SubVectorXYZ(FVECTOR& out, const FVECTOR& a, const FVECTOR& b);
-extern "C" void sceVu0InterVectorXYZ(FVECTOR& out, FVECTOR& v0, FVECTOR& v1, float r);
 extern "C" float powf(float x, float y);
 void CMemo2DSequence::main(FLOAT inFrameRate) {
     if (m_iStateFlag & 1) {
@@ -2236,7 +2234,7 @@ void CMemo2DSequence::main(FLOAT inFrameRate) {
         FVECTOR aim = m_vAimPosition;
         FVECTOR shift = m_vShiftPosition;
         SubVectorXYZ(aim, aim, shift);
-        sceVu0InterVectorXYZ(m_vPosition, aim, posi, 1.0f - powf(1.0f - m_fMoveTimer / 30.0f, 2.5f));
+        sceVu0InterVectorXYZ(m_vPosition.v, aim.v, posi.v, 1.0f - powf(1.0f - m_fMoveTimer / 30.0f, 2.5f));
         setLocalPos(m_vPosition);
     }
 }
@@ -2402,7 +2400,7 @@ void CMemo2DCursor::main() {
         aim = m_vAimPosi;
         shift = m_vShiftPosi;
         SubVectorXYZ(aim, aim, shift);
-        sceVu0InterVectorXYZ(posi, aim, posi, 1.0f - powf(1.0f - m_fMoveTimer / 30.0f, 2.5f));
+        sceVu0InterVectorXYZ(posi.v, aim.v, posi.v, 1.0f - powf(1.0f - m_fMoveTimer / 30.0f, 2.5f));
         limx0 = m_ScreenLimit[0].x + m_fSpacing[0] * m_fScale;
         FLOAT limx1 = m_ScreenLimit[1].x + m_fSpacing[2] * m_fScale;
         if (posi.x > limx1) {

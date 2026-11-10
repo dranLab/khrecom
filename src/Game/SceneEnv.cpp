@@ -8,7 +8,6 @@
 #include "System/HeapMan.h"
 
 
-extern "C" void sceVu0InterVector(float* v0, float* v1, float* v2, float t);
 
 #define CH_MAX 4
 

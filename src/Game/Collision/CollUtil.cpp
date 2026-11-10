@@ -24,14 +24,8 @@
 
 
 
-extern "C" void sceVu0UnitMatrix(FMATRIX& m);
-extern "C" void sceVu0RotMatrixX(FMATRIX& m0, FMATRIX& m1, float rx);
-extern "C" void sceVu0RotMatrixY(FMATRIX& m0, FMATRIX& m1, float ry);
-extern "C" void sceVu0RotMatrixZ(FMATRIX& m0, FMATRIX& m1, float rz);
-extern "C" void sceVu0TransMatrix(FMATRIX& m0, FMATRIX& m1, FVECTOR& tv);
-extern "C" void sceVu0InversMatrix(FMATRIX& m0, FMATRIX& m1);
 void MulMatrix(FMATRIX& m0, const FMATRIX& m1, const FMATRIX& m2);
-static inline void _unitMatrix(FMATRIX& m) { sceVu0UnitMatrix(m); }
+static inline void _unitMatrix(FMATRIX& m) { sceVu0UnitMatrix(m.m); }
 void SubVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 FLOAT InnerProduct(const FVECTOR& v0);
@@ -172,12 +166,12 @@ void CCollUtil::recalcChipCollision(MC_CHIP* pChip) {
     mat0.m[0][0] = pChip->s.x;
     mat0.m[1][1] = pChip->s.y;
     mat0.m[2][2] = pChip->s.z;
-    sceVu0RotMatrixX(mat0, mat0, pChip->r.x);
-    sceVu0RotMatrixY(mat0, mat0, pChip->r.y);
-    sceVu0RotMatrixZ(mat0, mat0, pChip->r.z);
-    sceVu0TransMatrix(mat0, mat0, pChip->t);
+    sceVu0RotMatrixX(mat0.m, mat0.m, pChip->r.x);
+    sceVu0RotMatrixY(mat0.m, mat0.m, pChip->r.y);
+    sceVu0RotMatrixZ(mat0.m, mat0.m, pChip->r.z);
+    sceVu0TransMatrix(mat0.m, mat0.m, pChip->t.v);
     pChip->matLW = mat0;
-    sceVu0InversMatrix(mat0, mat0);
+    sceVu0InversMatrix(mat0.m, mat0.m);
     mat1.m[0][0] = 1.0f / (pChip->s.x * pChip->s.x);
     mat1.m[1][1] = 1.0f / (pChip->s.y * pChip->s.y);
     mat1.m[2][2] = 1.0f / (pChip->s.z * pChip->s.z);
@@ -402,7 +396,7 @@ INT CCollUtil::_detectOCD(CCollision& collision, MCD_INFO* pMCDInfo, OCD_WORK* p
                 for (iCnt = 0; iCnt < iChipSuu; iCnt++, pChip++, pOcdW++, pChipMat++) {
                     if (m_pOCDInfo->pMatrix && pOcdW->fgEnable) {
                         _mulMatrix(pChip->matLW, *m_pOCDInfo->pMatrix, *pChipMat);
-                        sceVu0InversMatrix(pChip->matWL, pChip->matLW);
+                        sceVu0InversMatrix(pChip->matWL.m, pChip->matLW.m);
                         iArea = __detectMCInitInit(pChip);
                         if (iArea >= 0) detectMCInit(pChip, iArea);
                     }

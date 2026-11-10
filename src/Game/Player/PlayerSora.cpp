@@ -109,16 +109,12 @@ void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 void ApplyMatrixXYZ(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 void ScaleVectorXYZ(FVECTOR& outV, const FVECTOR& inV, FLOAT inScale);
 void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
-extern "C" {
-void sceVu0UnitMatrix(FMATRIX& m);
-void sceVu0RotMatrixY(FMATRIX& m0, FMATRIX& m1, float ry);
-}
 /* FMATRIX inlines of Coord.h */
 static inline void _unitMatrix(FMATRIX& m) {
-    sceVu0UnitMatrix(m);
+    sceVu0UnitMatrix(m.m);
 }
 static inline void _rotMatrixY(FMATRIX& m, FLOAT r) {
-    sceVu0RotMatrixY(m, m, r);
+    sceVu0RotMatrixY(m.m, m.m, r);
 }
 extern "C" void* memset(void* s, int c, unsigned int n);
 /* the inline unit matrix of vu0.h */

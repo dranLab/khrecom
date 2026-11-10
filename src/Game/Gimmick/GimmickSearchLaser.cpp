@@ -66,8 +66,6 @@ void OuterProduct(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 FLOAT InnerProduct(const FVECTOR& v0, const FVECTOR& v1);
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 void ApplyMatrixXYZ(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
-extern "C" void sceVu0UnitMatrix(float m[4][4]);
-extern "C" void sceVu0RotMatrixY(float m0[4][4], float m1[4][4], float ry);
 
 static inline void _unitMatrix(FMATRIX& m) {
     sceVu0UnitMatrix(m.m);

@@ -308,7 +308,6 @@ static const CARD_DATA cardDataTbl[224] = {
 
 extern "C" {
 float powf(float, float);
-void sceVu0InterVectorXYZ(float* v0, float* v1, float* v2, float t);
 }
 
 using namespace D2;

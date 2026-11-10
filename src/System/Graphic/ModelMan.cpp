@@ -19,7 +19,6 @@
 
 #include "System/Coord.h"
 // from the sce libraries
-extern "C" void sceVu0InversMatrix(FMATRIX& m0, const FMATRIX& m1);
 
 
 
@@ -207,7 +206,7 @@ void CModelMan::reset() {
 
 // the original's inline wrapper (Coord.h:613 in its line markers): its parameters take the addresses, so the
 // caller keeps no register copy of &wv_i
-static inline void _inversMatrix(FMATRIX& m0, const FMATRIX& m1) { sceVu0InversMatrix(m0, m1); }
+static inline void _inversMatrix(FMATRIX& m0, const FMATRIX& m1) { sceVu0InversMatrix(m0.m, (float(*)[4])m1.m); }
 static inline void _unitMatrix(FMATRIX& m) {
     asm volatile("vmr32.xyzw $vf1, $vf0\n"
                  "sqc2 $vf0, 0x30(%0)\n"

@@ -820,8 +820,6 @@ void setTransparency(CModel& model) {
    registers in both and jump2 cross-jumps them into one; the rest is register allocation. */
 #if 0
 void MulVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
-extern "C" void sceVu0InversMatrix(FMATRIX& m0, FMATRIX& m1);
-extern "C" void sceVu0ApplyMatrix(FVECTOR& v0, FMATRIX& m0, FVECTOR& v1);
 INT checkBBox(const FMATRIX& mWorldMatrix, const BBOX* bbox);
 INT resultCheckBBox(CCoord& crd, const BBOX* bbox);
 void ITOF0Vector(FVECTOR& v0, const IVECTOR& v1);
@@ -1177,8 +1175,6 @@ CSky::~CSky() {
     if (m_pRotShift) delete m_pRotShift;
     m_pRotShift = NULL;
 }
-extern "C" void sceVu0UnitMatrix(FMATRIX& m);
-extern "C" void sceVu0RotMatrix(FMATRIX& m0, FMATRIX& m1, FVECTOR& rot);
 void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT t);
 void CSky::main() {
     if (CSceneEnv::getStopTypeBit() & 0x1000) return;
@@ -1190,8 +1186,8 @@ void CSky::main() {
         if ((*(FVECTOR*)(ofs + (INT)m_pRotShift))._ul[0] == 0 && (*(FVECTOR*)(ofs + (INT)m_pRotShift))._ul[1] == 0) continue;
         ScaleVector(vAddRot, (*(FVECTOR*)(ofs + (INT)m_pRotShift)), fRate);
         (*(FVECTOR*)(ofs + (INT)m_pRot)).addRot(vAddRot);
-        sceVu0UnitMatrix(lMat);
-        sceVu0RotMatrix(Crd(i + 1).m_Local, lMat, (*(FVECTOR*)(ofs + (INT)m_pRot)));
+        sceVu0UnitMatrix(lMat.m);
+        sceVu0RotMatrix(Crd(i + 1).m_Local.m, lMat.m, ((FVECTOR*)(ofs + (INT)m_pRot))->v);
     }
 }
 void MulVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);

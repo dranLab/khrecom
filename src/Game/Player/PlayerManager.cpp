@@ -184,10 +184,6 @@ static inline FLOAT _roundPI(FLOAT inR) {
     return inR;
 }
 
-extern "C" {
-void sceVu0UnitMatrix(FMATRIX& m);
-void sceVu0RotMatrixY(FMATRIX& m0, FMATRIX& m1, float ry);
-}
 void ApplyMatrixXYZ(FVECTOR& outV, const FMATRIX& inM, const FVECTOR& inV);
 
 namespace PLM {
@@ -658,8 +654,8 @@ void CPlayerManager::calcFieldStartPos() {
         r = rotY;
         if (3.1415927f < r) r -= 6.2831855f;
     }
-    sceVu0UnitMatrix(mat);
-    sceVu0RotMatrixY(mat, mat, r);
+    sceVu0UnitMatrix(mat.m);
+    sceVu0RotMatrixY(mat.m, mat.m, r);
     ApplyMatrixXYZ(pos, mat, pos);
     AddVectorXYZ(pos, pos, pDoor->getPos());
     pos.y += 0.0035f;

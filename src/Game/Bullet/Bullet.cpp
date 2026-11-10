@@ -33,10 +33,6 @@ extern "C" {
 float sinf(float x);
 float cosf(float x);
 float atan2f(float y, float x);
-void sceVu0InversMatrix(FMATRIX& m0, const FMATRIX& m1);
-void sceVu0RotMatrixX(FMATRIX& m0, const FMATRIX& m1, float rx);
-void sceVu0RotMatrixY(FMATRIX& m0, const FMATRIX& m1, float ry);
-void sceVu0RotMatrixZ(FMATRIX& m0, const FMATRIX& m1, float rz);
 }
 void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
 void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
@@ -76,7 +72,7 @@ static inline FMATRIX& _rematAddr(FMATRIX& m) {
 
 static inline FMATRIX& _mref(FMATRIX& m) { return m; }
 static inline FMATRIX* _mptr(FMATRIX& m) { return &m; }
-static inline void _inverse(FMATRIX& m0, FMATRIX& m1) { sceVu0InversMatrix(m0, m1); }
+static inline void _inverse(FMATRIX& m0, FMATRIX& m1) { sceVu0InversMatrix(m0.m, m1.m); }
 static inline void _apply33(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1) { ApplyMatrix33(v0, m0, v1); }
 
 static inline BOOL _collDispRef() {
@@ -576,9 +572,9 @@ HANDLE CBullet::makeEffect(INT inID) {
         m.v[1] = vecUp;
         m.v[2] = normal;
         if (rot) {
-            sceVu0RotMatrixX(m, m, rot->x);
-            sceVu0RotMatrixY(m, m, rot->y);
-            sceVu0RotMatrixZ(m, m, rot->z);
+            sceVu0RotMatrixX(m.m, m.m, rot->x);
+            sceVu0RotMatrixY(m.m, m.m, rot->y);
+            sceVu0RotMatrixZ(m.m, m.m, rot->z);
         }
         ScaleVector(normal, normal, -(m_pMove->getRadius() - 0.001f));
         AddVectorXYZ(pos, pos, normal);
@@ -595,9 +591,9 @@ HANDLE CBullet::makeEffect(INT inID) {
         m = Crd(0).getWorldMatrix();
         if (rot) {
             _unitMatrixVu0(mat);
-            sceVu0RotMatrixX(mat, mat, rot->x);
-            sceVu0RotMatrixY(mat, mat, rot->y);
-            sceVu0RotMatrixZ(mat, mat, rot->z);
+            sceVu0RotMatrixX(mat.m, mat.m, rot->x);
+            sceVu0RotMatrixY(mat.m, mat.m, rot->y);
+            sceVu0RotMatrixZ(mat.m, mat.m, rot->z);
             MulMatrix(m, m, mat);
         }
         pos.w = 1.0f;
@@ -677,9 +673,9 @@ void CBullet::updateShadow() {
         m.v[0] = vecRight;
         m.v[1] = vecUp;
         m.v[2] = normal;
-        sceVu0RotMatrixX(m, m, 1.5707964f);
+        sceVu0RotMatrixX(m.m, m.m, 1.5707964f);
         if (!isAttachNoRot()) {
-            sceVu0RotMatrixY(m, m, getRot().y);
+            sceVu0RotMatrixY(m.m, m.m, getRot().y);
         }
         ScaleVector(normal, normal, -0.005f);
         AddVectorXYZ(pos, *coll->getOutPos(), normal);
@@ -1151,7 +1147,7 @@ BOOL CHomingBullet::bound_() {
             FLOAT dir = calcDirection(target);
             FMATRIX m;
             _unitMatrixVu0(m);
-            sceVu0RotMatrixY(m, m, dir);
+            sceVu0RotMatrixY(m.m, m.m, dir);
             ApplyMatrix33(reflect, m, reflect);
         }
     }

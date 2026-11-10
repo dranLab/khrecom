@@ -1142,7 +1142,6 @@ BOOL CDebugPathData::create(CTask* p, BOOL bEnd) {
 void CDebugPathData::main() {
     if (isEnd()) out();
 }
-extern "C" void sceVu0RotMatrixZ(FMATRIX& m0, FMATRIX& m1, float rz);
 struct _ArrowVecs { FVECTOR v[3]; };
 void CDebugPathData::disp() {
     m_pFrame->disp(getFrameRateF());
@@ -1161,7 +1160,7 @@ void CDebugPathData::disp() {
                          :
                          : "r"(&mMat)
                          : "memory");
-            sceVu0RotMatrixZ(mMat, mMat, _getPathVectorConvWRoll(m_vActivePathPos.w));
+            sceVu0RotMatrixZ(mMat.m, mMat.m, _getPathVectorConvWRoll(m_vActivePathPos.w));
             ApplyMatrix(*(FVECTOR*)&m_gpPArrowPoly.m_V[0], mMat, v.v[0]);
             ApplyMatrix(*(FVECTOR*)&m_gpPArrowPoly.m_V[1], mMat, v.v[1]);
             ApplyMatrix(*(FVECTOR*)&m_gpPArrowPoly.m_V[2], mMat, v.v[2]);

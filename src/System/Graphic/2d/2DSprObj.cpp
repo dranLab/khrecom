@@ -58,7 +58,6 @@ __asm__(".weak s_ViewerSeqControl\ns_ViewerSeqControl = 0\n");
 
 extern "C" float sinf(float x);
 extern "C" float cosf(float x);
-extern "C" void sceVu0InterVector(float* v0, float* v1, float* v2, float t);
 extern INT SCREEN_HEIGHT;
 void RotTransPersClipW(IVECTOR& iVec, const FVECTOR& fVec);
 void ITOF4Vector(FVECTOR& fVec, const IVECTOR& iVec);
@@ -443,8 +442,6 @@ void C2DSprObj::_main(TIMEQ qTime) {
 void MulMatrix(FMATRIX& m0, const FMATRIX& m1, const FMATRIX& m2);
 void MulVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void FTOI0Vector(IVECTOR& v0, const FVECTOR& v1);
-extern "C" void sceVu0RotMatrix(FMATRIX& m0, const FMATRIX& m1, const FVECTOR& rot);
-extern "C" void sceVu0ClampVector(FVECTOR& v0, const FVECTOR& v1, float fMin, float fMax);
 
 static inline void _unitMatrixVu0(FMATRIX& m) {
     asm volatile("vmr32.xyzw $vf1, $vf0\n"
@@ -498,7 +495,7 @@ void C2DSprObj::move() {
     _unitMatrixVu0(mat);
     mat.m[0][0] = m_vScl.x;
     mat.m[1][1] = m_vScl.y;
-    sceVu0RotMatrix(mat, mat, m_vRot);
+    sceVu0RotMatrix(mat.m, mat.m, m_vRot.v);
     AddVector2(fVec, m_vPos, m_vSwy);
     mat.v[3] = fVec;
     _unitMatrixVu0(mat2);
@@ -561,7 +558,7 @@ void C2DSprObj::move() {
         if (mat.m[0][0] != 1.0f || mat.m[1][1] != 1.0f || mat.m[2][2] != 1.0f) setBilinear(TRUE);
     }
     ScaleVector(vCol, vCol, 128.0f);
-    sceVu0ClampVector(vCol, vCol, 0.0f, 255.0f);
+    sceVu0ClampVector(vCol.v, vCol.v, 0.0f, 255.0f);
     FTOI0Vector(*(IVECTOR*)&lCol, vCol);
     bBilinear = isBilinear();
     if (m_Flg & 8) {

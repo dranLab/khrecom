@@ -20,7 +20,6 @@ inline void _enemyWyvernEmptyString() {
 
 extern CEntity* g_pPlayer; /* a CPlayer (Game/Player/Player.h) */
 extern "C" float atan2f(float y, float x);
-extern "C" void sceVu0RotMatrixY(float m0[4][4], float m1[4][4], float ry);
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 
 /* (original form unknown: written inline, the constants load in another order) */

@@ -51,7 +51,6 @@
 
 
 
-extern "C" void sceVu0InterVectorXYZ(float* v0, float* v1, float* v2, float t);
 extern "C" float powf(float, float);
 
 using namespace D2;

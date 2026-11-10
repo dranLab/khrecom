@@ -4,7 +4,6 @@ extern "C" {
 float sinf(float x);
 float cosf(float x);
 float atan2f(float y, float x);
-void sceVu0InterVector(float* v0, float* v1, float* v2, float t);
 }
 
 #include "System/Coord.h"

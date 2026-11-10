@@ -26,8 +26,6 @@ inline void _emptyStringPlaceholder() {
 #include "System/Debug.h"
 
 extern "C" {
-void sceVu0UnitMatrix(FMATRIX& m);
-void sceVu0RotMatrixY(FMATRIX& m0, FMATRIX& m1, float ry);
 float atan2f(float y, float x);
 }
 void Normalize(FVECTOR& v0, const FVECTOR& v1);
@@ -37,10 +35,10 @@ void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 void MulMatrix(FMATRIX& res, const FMATRIX& m0, const FMATRIX& m1);
 
 static inline void _unitMatrix(FMATRIX& m) {
-    sceVu0UnitMatrix(m);
+    sceVu0UnitMatrix(m.m);
 }
 static inline void _rotMatrixY(FMATRIX& m, FLOAT r) {
-    sceVu0RotMatrixY(m, m, r);
+    sceVu0RotMatrixY(m.m, m.m, r);
 }
 
 static BULLET_EFFECT_INFO g_GimFountainEffTbl[4] = {
@@ -239,7 +237,7 @@ void CGimmickFountain::lastUpdate() {
         m_addRot -= 6.28f;
     }
     _unitMatrixVu0(mMat);
-    sceVu0RotMatrixY(mMat, mMat, m_addRot);
+    sceVu0RotMatrixY(mMat.m, mMat.m, m_addRot);
     MulMatrix(Crd(getBoneIndex("pl_rot", 0)).getLocalMatrix(), Crd(getBoneIndex("pl_rot", 0)).getLocalMatrix(), mMat);
     Crd(0).m_Flag = 1;
 }

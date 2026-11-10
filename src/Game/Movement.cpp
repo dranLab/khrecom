@@ -45,10 +45,6 @@ void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
 void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void ApplyMatrix33(FVECTOR& v0, const FMATRIX& m, const FVECTOR& v1);
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m, const FVECTOR& v1);
-extern "C" void sceVu0RotMatrixX(FMATRIX& m0, const FMATRIX& m1, float rx);
-extern "C" void sceVu0RotMatrixY(FMATRIX& m0, const FMATRIX& m1, float ry);
-extern "C" void sceVu0RotMatrixZ(FMATRIX& m0, const FMATRIX& m1, float rz);
-extern "C" void sceVu0TransMatrix(FMATRIX& m0, const FMATRIX& m1, const FVECTOR& tv);
 void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
 void Normalize(FVECTOR& v0, const FVECTOR& v1);
 void OuterProduct(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
@@ -632,7 +628,7 @@ void CMovement::calcPos_() {
                                  m_vDetectNormal.y);
             a.set(0.0f, 0.0f, m_fMass * 0.008166667f * sinf(Math3D::LimitPI(theta)), 1.0f);
             _unitMatrixVu0(m);
-            sceVu0RotMatrixY(m, m, atan2f(m_vDetectNormal.x, m_vDetectNormal.z));
+            sceVu0RotMatrixY(m.m, m.m, atan2f(m_vDetectNormal.x, m_vDetectNormal.z));
             ApplyMatrix(a, m, a);
             AddVector(acc, acc, a);
         }
@@ -853,10 +849,10 @@ INT CMovement::detectWall_() {
         FVECTOR diff;
         FLOAT rad = Math3D::LimitPI(theta * 0.017453292f + m_vRot.y);
         _unitMatrixVu0(m);
-        sceVu0RotMatrixX(m, m, m_vRot.x);
-        sceVu0RotMatrixY(m, m, rad);
-        sceVu0RotMatrixZ(m, m, m_vRot.z);
-        sceVu0TransMatrix(m, m, m_vPos);
+        sceVu0RotMatrixX(m.m, m.m, m_vRot.x);
+        sceVu0RotMatrixY(m.m, m.m, rad);
+        sceVu0RotMatrixZ(m.m, m.m, m_vRot.z);
+        sceVu0TransMatrix(m.m, m.m, m_vPos.v);
         ApplyMatrix(end, m, v);
         if (rideCollisionDetect_(m_vPos, end, &pos, &normal)) {
             COLL_INFO_UNION info = m_pMapCollision->getDetectInfoO();
@@ -901,10 +897,10 @@ INT CMovement::detectWall_() {
         FVECTOR diff;
         FLOAT rad = Math3D::LimitPI(theta * 0.017453292f + m_vRot.y);
         _unitMatrixVu0(m);
-        sceVu0RotMatrixX(m, m, m_vRot.x);
-        sceVu0RotMatrixY(m, m, rad);
-        sceVu0RotMatrixZ(m, m, m_vRot.z);
-        sceVu0TransMatrix(m, m, m_vPos);
+        sceVu0RotMatrixX(m.m, m.m, m_vRot.x);
+        sceVu0RotMatrixY(m.m, m.m, rad);
+        sceVu0RotMatrixZ(m.m, m.m, m_vRot.z);
+        sceVu0TransMatrix(m.m, m.m, m_vPos.v);
         ApplyMatrix(end, m, v);
         if (rideCollisionDetect_(end, m_vPos, &pos, &normal)) {
             COLL_INFO_UNION info = m_pMapCollision->getDetectInfoO();
@@ -1133,9 +1129,9 @@ void CMovement::calcVelocity_(FLOAT inSpeed) {
 void CMovement::calcVelocity_(FLOAT inSpeed, const FVECTOR& inDir) {
     FMATRIX m;
     _unitMatrixVu0(m);
-    sceVu0RotMatrixX(m, m, m_vRot.x);
-    sceVu0RotMatrixY(m, m, m_vRot.y);
-    sceVu0RotMatrixZ(m, m, m_vRot.z);
+    sceVu0RotMatrixX(m.m, m.m, m_vRot.x);
+    sceVu0RotMatrixY(m.m, m.m, m_vRot.y);
+    sceVu0RotMatrixZ(m.m, m.m, m_vRot.z);
     ApplyMatrix33(m_vVel, m, inDir);
     ScaleVector(m_vVel, m_vVel, inSpeed);
 }
@@ -1149,7 +1145,7 @@ void CMovement::calcVelocityXZ_(FLOAT inSpeed, const FVECTOR& inDir) {
     FMATRIX m;
     FVECTOR v;
     _unitMatrixVu0(m);
-    sceVu0RotMatrixY(m, m, m_vRot.y);
+    sceVu0RotMatrixY(m.m, m.m, m_vRot.y);
     ApplyMatrix33(v, m, inDir);
     ScaleVector(v, v, inSpeed);
     m_vVel.x = v.x;

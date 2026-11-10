@@ -34,8 +34,6 @@ FLOAT InnerProduct(const FVECTOR& v0);
 void OuterProduct(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void Normalize(FVECTOR& v0, const FVECTOR& v1);
 extern "C" float atan2f(float y, float x);
-extern "C" void sceVu0RotMatrixX(float m0[4][4], float m1[4][4], float rx);
-extern "C" void sceVu0RotMatrixY(float m0[4][4], float m1[4][4], float ry);
 
 static inline void _unitMatrix(FMATRIX& m) {
     asm volatile("vmr32.xyzw $vf1, $vf0\n"

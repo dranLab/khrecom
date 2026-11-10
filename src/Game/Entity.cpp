@@ -47,9 +47,6 @@ inline void _entityEmptyStringPlaceholder() { TRACE(""); } /* MATCH: placeholder
 extern "C" unsigned int strlen(const char*);
 extern "C" int sprintf(char*, const char*, ...);
 void RotTransPersClipW(IVECTOR& iVec, const FVECTOR& fVec);
-extern "C" void sceVu0RotMatrixX(float m0[4][4], float m1[4][4], float rx);
-extern "C" void sceVu0RotMatrixY(float m0[4][4], float m1[4][4], float ry);
-extern "C" void sceVu0RotMatrixZ(float m0[4][4], float m1[4][4], float rz);
 static inline void _loadRotTransPersMatrix(const FMATRIX& m) {
     asm volatile("vsub.xyzw $vf3, $vf0, $vf0\n"
                  "lqc2 $vf4, 0x0(%0)\n"

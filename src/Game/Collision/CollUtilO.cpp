@@ -8,7 +8,6 @@
 
 #include "System/Coord.h"
 
-extern "C" void sceVu0InversMatrix(float m0[4][4], float m1[4][4]);
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 
 static inline void _inversMatrix(FMATRIX& m0, FMATRIX& m1) {

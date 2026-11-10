@@ -78,7 +78,6 @@ void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
 
-extern "C" void sceVu0RotMatrixY(FMATRIX& m0, const FMATRIX& m1, float ry);
 
 static inline void _unitMatrixVu0(FMATRIX& m) {
     asm volatile("vmr32.xyzw $vf1, $vf0\n"
@@ -547,7 +546,7 @@ void CMapEnemy::getRandomTargetPos(FVECTOR& outTarget, FLOAT inDistance, BOOL in
         FVECTOR dir;
         FLOAT dist;
         _unitMatrixVu0(m);
-        sceVu0RotMatrixY(m, m, Math3D::LimitPI(startRot + rotDir * deg * 0.017453292f));
+        sceVu0RotMatrixY(m.m, m.m, Math3D::LimitPI(startRot + rotDir * deg * 0.017453292f));
         dir.set(0.0f, 0.0f, 1.0f, 1.0f);
         ApplyMatrix(dir, m, dir);
         ScaleVectorXYZ(target, dir, inDistance);
@@ -614,7 +613,7 @@ void CMapEnemy::getWarpPos(FVECTOR& outPos) {
         FVECTOR target;
         FVECTOR dir;
         _unitMatrixVu0(m);
-        sceVu0RotMatrixY(m, m, Math3D::LimitPI(getRot().y + rotDir * deg * 0.017453292f));
+        sceVu0RotMatrixY(m.m, m.m, Math3D::LimitPI(getRot().y + rotDir * deg * 0.017453292f));
         dir.set(0.0f, 0.0f, 1.0f, 1.0f);
         ApplyMatrix(dir, m, dir);
         ScaleVectorXYZ(target, dir, 10.0f);
