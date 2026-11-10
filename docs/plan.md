@@ -586,6 +586,14 @@ Keep output small: one function's assembly at a time; `funcdiff` without `--full
   Movement ctor, MSVideo _setXYZ, Anim _exeRootMove); 1124 = effect.h's getCoords PARTIAL; 160 = getTransRef
   overload constness unknown; 1019-1020 (Model link/setLocal: a CCoord member the ref lacks; left as is, user decision 2026-11-10).
   Guesses: init(FLOAT inW = 1.0f), the _FVECTOR overloads' parameter types, unary minus as -1.0f * *this.
+- **Done (cleanup/cardkind-h, merged 2026-11-10, user request):** Game/CardKind.h on the original's lines: the
+  `static const CARD_DATA cardDataTbl[224]` (gcc emits it, with its strings at the end of .rodata, only in units that
+  reference it: the image's 23 copies) and CARD::init(USHORT inKind, BYTE inNumber = 0xFF) at 553-558 (default a
+  guess; BYTE from andi 0xff), getTexNo 561, getTexPos 564. 23 local table copies and the card helpers (_setCard*,
+  _makeCardNK, VSME setCard, JiminyMemo getCardData) in 22 units replaced; CardKind.h marker differences 80 -> 1 (Camp
+  setMapCardWin, parked: it keeps _setCardNK). partials.py now skips a header's static const initializer in the
+  string check. Open (user question, not asked yet): CARD_KIND/CARD_CATEGORY0/1 probably sat in the original's
+  CardKind.h below 534; ours in Game/CardKindEnum.h (PARTIAL), the ref puts CARD_KIND in BattleEnemy.h.
 - **Done (cleanup/coord-unify-vu0, merged 2026-11-10, step 4):** the original's System/Graphic/VuCode/vu0.h (no ref
   file: inlines only, names ours) with its inlines on lines 15-820, included by Coord.h after the classes and the
   sceVu0 block (so ModelMan's FVECTOR::set calls stay out of line: VECTOR_H_SET_CALL gone). FMATRIX::init at 910 calls
