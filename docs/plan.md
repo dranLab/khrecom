@@ -61,7 +61,7 @@ every change that is merged without regenerating. Regenerating all four takes ab
   PARTIAL 160 -> 158, mechanisms 661 -> 659 (VECTOR_H_SET_CALL gone). No function matches; parked drafts unchanged
   (Camp 27/23, Math3D 90, DispList 59, Map 82/709; WorldEnv still matches with the original namespace name). Details:
   the four "Done (cleanup/coord-unify-...)" entries. Next cleanup candidates: Math3D.h's `_sqrtf` (6+ local copies),
-  PackMan.h's free inlines 117-128, G_RGBA::set; the parked drafts could now use the new inlines.
+  PackMan.h's free inlines 117-128; the parked drafts could now use the new inlines.
 - **2026-11-10: pool run (3 workers, 6 units) + one coordinator match.** Matched: HumanBoss setupAct (a function-scope
   `FLOAT none = -1` the ref lacks, accepted by the user after a no-behaviour-change proof: same image, single
   assignment, -1.0f -> SHORT exact; memory humanboss-unit-lessons), Model CBBox::makePkt (no padding: the original's
