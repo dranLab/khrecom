@@ -18,6 +18,9 @@ very hard to trace.
   `configure.py`/`tools/` in a decompilation task" for this plan only). It may also add names to
   `config/SLUS_217.99/symbol_addrs.txt`. It still never edits the generated `SLUS_217.99.yaml`, never runs
   `tools/split_objects.py`, and never commits game data.
+- **Matched code:** the user allowed changes to already-matched code for this plan (2026-11-10), including the
+  S2/S5 edits (literals for `extern D_` strings, DLL imports undefined, `&g_Gimmick...`). Conditions stay: the
+  SHA-1 holds, edits are line-neutral where `__LINE__` or line markers can matter, and each one says why.
 - **The matching build stays matching:** `tools/check.sh` exits 0 on every commit. Plain `ninja` keeps building
   and checking the original image with the original SHA-1. Shifted builds are separate, opt-in targets.
 - **No faked success.** None of these are allowed, in either build:
