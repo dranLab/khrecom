@@ -125,15 +125,20 @@ def find_blocks(paths: list[Path]) -> list[Block]:
     return blocks
 
 
+LABEL_UNIT: dict[str, str] = {}  # label name -> the unit whose original data listing defines it
+
+
 def load_listing():
-    """address -> listed .word token; label address -> name; and the listing's line addresses."""
+    """address -> listed .word token; label address -> name (and LABEL_UNIT)."""
     words, labels = {}, {}
     for path in LISTING.rglob("*.s"):
         pending = None
+        unit = re.sub(r"\.(data|rodata|bss|sdata|sbss)\.s$", "", path.relative_to(LISTING).as_posix())
         for line in path.read_text(encoding="latin-1").splitlines():
             m = DLABEL.match(line)
             if m:
                 pending = m.group(1)
+                LABEL_UNIT[pending] = unit
                 continue
             m = LISTED_LINE.match(line)
             if m:
@@ -197,11 +202,19 @@ def select_labels(runs: list[dict], needed: dict, unit_object: str) -> None:
     Words pointing at an address-named target elsewhere (a string literal the compiled C emits under gcc's own
     $LC label) stay bytes and are listed in r["unnamed"]: they go away when the asm'd function becomes C."""
     in_blocks = {name for r in runs for _, name in r["labels"]}
+    # Labels configure.py adds to the object itself (tools/name_data_labels.py) can be pointed at, too.
+    label_file = ROOT / "build" / VERSION / "src" / f"{unit_object}.labels"
+    if label_file.exists():
+        in_blocks |= {line.split()[2] for line in label_file.read_text(encoding="utf-8").splitlines()}
+    # A label in this unit's own original data: once a restored word mentions it, configure.py names it in the
+    # object (data_label_lines), so it can be pointed at as well.
+    unit = unit_object[: -len(".o")]
     for r in runs:
         keep, unnamed = [], []
         for a, sym in r["symbolic"]:
             base = re.split(r"[+-]", sym)[0]
-            (unnamed if ADDRESS_NAME.match(base) and base not in in_blocks else keep).append((a, sym))
+            nameable = base in in_blocks or LABEL_UNIT.get(base) == unit or not ADDRESS_NAME.match(base)
+            (keep if nameable else unnamed).append((a, sym))
         r["symbolic"], r["unnamed"] = keep, unnamed
     targets = {re.split(r"[+-]", s)[0] for r in runs for _, s in r["symbolic"]}
     for r in runs:

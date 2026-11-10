@@ -70,6 +70,7 @@ def main() -> None:
 
     defined = {m.group(1) for m in ASSIGNED.finditer(text + extra)}
     users = defaultdict(set)
+    absolute = []  # pins inside objects: absolute symbols with an image address (asm "X = 0x004E5374" in a source)
     for obj in objects:
         out = subprocess.run([NM, obj], cwd=ROOT, capture_output=True, text=True, check=True).stdout
         for line in out.splitlines():
@@ -79,6 +80,8 @@ def main() -> None:
                     users[parts[1]].add(obj)
             elif len(parts) == 3 and (parts[1].isupper() or parts[1] in "vw"):
                 defined.add(parts[2])  # global or weak; a local symbol of another object resolves nothing
+            if len(parts) == 3 and parts[1] in "Aa" and 0x100000 <= int(parts[0], 16) < 0x2000000:
+                absolute.append((parts[2], int(parts[0], 16), obj))
 
     pins = pin_files(version, opts["build_path"])
     needed = {sym: objs for sym, objs in users.items() if sym not in defined}
@@ -103,7 +106,11 @@ def main() -> None:
             print(f"    {sym}  [{pins.get(sym, '-')}]  {where}")
         if limit and len(needed) > limit:
             print(f"    ... {len(needed) - limit} more (--all)")
-    sys.exit(1 if needed else 0)
+    if absolute:
+        print(f"{len(absolute)} absolute symbols at image addresses, defined inside objects (pins in sources):")
+        for name, value, obj in sorted(absolute):
+            print(f"    {name} = 0x{value:08X}  {short(obj)}")
+    sys.exit(1 if needed or absolute else 0)
 
 
 if __name__ == "__main__":

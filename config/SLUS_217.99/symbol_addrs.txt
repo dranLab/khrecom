@@ -416,3 +416,8 @@ __getSize__t7CVector1Z7G_STRIPi_00206010 = 0x00206010; // type:func size:0x18
 __alloc__t7CVector1Z7G_STRIPi_00206028 = 0x00206028; // type:func size:0xCC
 _$_t7CVector1Z7G_STRIP_002060F8 = 0x002060F8; // type:func size:0x8C
 _vt$t7CVector1Z7G_STRIP_00481140 = 0x00481140; // size:0x18
+
+// port step 1 (docs/port-step1-shiftable.md S3): linker-defined values of the original (Sony linker script; also
+// in the SN DLL export table), used by crt0 and .sndata. linker_script_extra.ld defines them for every link.
+_end = 0x006A0EF8;
+_stack_size = 0x00040000;

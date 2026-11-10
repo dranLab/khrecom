@@ -204,7 +204,44 @@ build only. Decide when everything else is done (S5/S6 first).
   (the owning units' statics defined in C, `ld_bss_contains_common`), or, until then, whatever keeps the
   original bytes and states the alignment. The warnings must be gone, in every preset too.
 
+### S3 progress (2026-11-10)
+
+- **Data labels named in compiled objects** (`tools/name_data_labels.py`, `configure.py` `data_label_lines()`):
+  every original address-named label that something mentions (asm, splat data, sources) and that lies in a
+  compiled object's data from source becomes a global symbol of that object, at its offset in the section
+  (`<obj>.labels`). The object's section is that range of the original, so the offset is exact; the matching
+  link no longer needs `original_labels.ld` for them, and the SHA-1 proves each address. In a shifted link they
+  move with their section. This resolved the S2 leftovers (constants the INCLUDE_ASM'd functions use), the S3
+  data-to-data pins (`lconv`, `impure_data`, `cod/3FF680`) and the export table's 173 references (S4).
+  Limitation: valid while the object's data equals the original's (every matching unit; checked by the SHA-1
+  on every build). A non-matching port must give such data real names in C.
+- `shiftblocks.py` now also points at labels of the unit's own data: Camp's last 4 raw pointers
+  (`pStrNum.4452`) are `.word` labels; no hidden pointers left in source blocks.
+- `func_0 = 0;` (zero words splat wrote as references), `_stack_size = 0x40000;` in `linker_script_extra.ld`;
+  `symbol_addrs.txt` names `_end` (0x6A0EF8) and `_stack_size` (0x40000), so crt0 and `.sndata` use the names.
+- `shiftpins.py` also reports absolute symbols at image addresses defined inside objects.
+- **Result:** the shifted link has 1 undefined symbol (`D_00696E6F`) and 3 source pins (`D_004E5374` in Camp,
+  `D_00504D20`/`D_00504D4D` in dlmalloc). All four are false references: string bytes in `.sndata` that splat
+  read as pointers. They go with the generated table (S4/S5).
+- Still open in S3: `src/crt0.s` with `_fbss` (crt0 clears `.bss` from the first variable,
+  `_15CShadowModelMan$m_fADensity`: correct in every preset, because padding at the start of `.bss` needs no
+  clearing, but not what Sony's crt0 says); `common.bss` alignment (below).
+- **`common.bss` alignment, confirmed:** its section has alignment 8 and the FVECTOR/FMATRIX statics sit at
+  offsets 0x88, 0x108, 0x4228 (8 mod 16): they are 16-aligned only because the section starts at 8 mod 16 in the
+  original. A shift that moves the section start by 8 mod 16 misaligns them (VU0 `lqc2` faults; EE `lq` silently
+  reads the rounded-down address). The presets only pad by multiples of 16; S6 must check every symbol's
+  alignment anyway. The fix is `common.bss` from source (a matching task: the original linker's COMMON order).
+
 ### S4 - SN DLL exports
+
+**Finding (2026-11-10):** not only the 173 `D_` references: most **name pointers** of the export table are raw
+too (`.word 0x003CB8D5`: they point into the middle of the name strings, where splat has no label), and string
+bytes inside the table were taken for references (`D_00696E6F` = `"oni"`, `D_004E5374`, `D_00504D20`; worse,
+string bytes that equal a real symbol's address become relocated words). A shifted build would corrupt the names
+the DLL loader looks up. The table must be generated: original bytes, with the pointer fields written
+symbolically: name pointers as `sn_dll_header_root + offset`, values as `.word <the entry's own name>` (each
+entry carries its symbol's name; `_gp`, `_end`, `end` by name; true absolutes like `_stack = -1` as numbers),
+header pointers likewise. The matching SHA-1 checks it. The value fields then no longer need the S3 data labels.
 
 The 173 `D_` references in the export table. For each: the address's real symbol in the matching ELF (`nm`;
 compiled units name statics, vtables, strings their own way) goes into the table in place of the `D_` name. The
@@ -218,6 +255,13 @@ Goal: the import relocations come out of the link itself, like SN's linker did.
 1. Find out what Ps2EeAs emits for a `jal` to a weak absolute-0 symbol: an `R_MIPS_26` against the symbol, or a
    resolved `jal 0` without one (`mips-linux-gnu-readelf -r` on `MainTaskFactory.o`). Same for the `HI16`/`LO16`
    imports of data (`_9C2DViewer$m_seqControl`).
+   **Answer (2026-11-10): no relocation.** `MainTaskFactory.o` has no reloc against `__14CKishiwadaTestP5CTask`
+   (nm: `00000000 W`): the assembler resolves the weak absolute completely. So step 3 needs step 4's change
+   first: the imports undefined in the sources (no `.weak X\nX = 0` asm in the 11 files) and `X = 0;` for the
+   109 imports in a linker script that both links use (an absolute 0, not an image address). The assembler then
+   keeps `R_MIPS_26`/`HI16`/`LO16` at each site, the bytes stay `jal 0`, and the generator reads the sites from
+   the objects' relocations: object + offset -> `.word <containing global function> + delta`, in the original
+   table's order (each original offset checked against an import relocation of the object at that address).
 2. Read the order of the original's 125 relocs (by address? by symbol?) and the format of the root header
    fields around them (`relocs`, `nrelocs`, `packed_relocs`).
 3. With relocations available: `tools/sndll.py` generates the `.sndata` object from the original's symbol list
@@ -306,8 +350,8 @@ whether that holds). The two ELFs are paired by symbol: every symbol of the matc
 |---|---|---|
 | S1 shift target + pin report | done 2026-11-10 | `ninja shift` links all 5 presets of `config/SLUS_217.99/shift.yaml` from the matching objects; each fails only on undefined symbols, and ld's 244 equal `shiftpins.py`'s 244. `assert_no_pins()` rejects `PROVIDE` and image-address assignments (tested on samples). `--no-check-sections` still on: revisit once a preset links. |
 | S2 compiled-code pins (66 after the Map merge) | done except 11 (INCLUDE_ASM-dependent) | 244 -> 189 undefined in the shifted link; 29 hidden pointers restored as `.word`, 4 left (Camp `pStrNum.4452` -> unnamed C constants); `shiftblocks.py` total: 0 restorable left. check.sh exit 0. |
-| S3 asm-data pins, auto symbols, `_end`, crt0, `common.bss` alignment | `_end` done (S1) | |
-| S4 DLL exports (173) | open | |
+| S3 asm-data pins, auto symbols, `_end`, crt0, `common.bss` alignment | mostly done 2026-11-10 | shifted link: 189 -> 1 undefined (+3 source pins), all `.sndata` false references (S4/S5). Data labels named in compiled objects (`name_data_labels.py`), `func_0`, `_end`, `_stack_size`. Open: `src/crt0.s` (`_fbss`), `common.bss` alignment (from source). check.sh exit 0. |
+| S4 DLL exports (173) | references resolved by S3's data labels; table must be generated (raw name pointers) | |
 | S5 DLL imports (125 relocs, 120 raw) | open | |
 | S6 shiftcheck | open | |
 | S7 presets | open | |
