@@ -597,7 +597,7 @@ void CRoomCreation::main() {
             if (!CRcf::isCompleteLoadRCF(1, m_iPlayerRsrc)) break;
             if (!CRcf::isCompleteLoadRCF(3, m_iEffectRsrc)) return;
         }
-        vColor._q = 0;
+        vColor.zero();
         CSceneEnv::setColor((ObjType::eObjBit)m_iObjType, 15.0f, vColor, NULL, 0);
         m_nStep++;
         break;
@@ -709,7 +709,7 @@ void CRoomCreation::main() {
             pColor2->w = 1.0f;
         } else {
             vColor.init();
-            vColor2._q = 0;
+            vColor2.zero();
         }
         m_pAttachCard->setup((CARD_KIND)m_card.m_nKind, pCoord, &vColor, &vColor2, 0.25f);
         CSound::playSE(m_doorStat == 1 ? 0x29 : 0x1F, -1, 0x40);

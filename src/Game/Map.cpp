@@ -1129,7 +1129,7 @@ CSky::CSky(CTask* pInParent, void* pAZF, ZONEDATA* pZone) : CTaskSecondary(pInPa
         CModelBG& model = m_pModel[i];
         ZONEPARTS* pZoneparts = &pZone->parts[i];
         m_pRot[i].set(0.0f, 0.0f, 0.0f, 0.0f);
-        m_pRotShift[i]._q = 0;
+        m_pRotShift[i].zero();
         if (pZoneparts->rot.x) {
             FVECTOR& v = *(FVECTOR*)((i << 4) + (INT)m_pRotShift); // MATCH: offset + base (addu s0,s1,s0); &m_pRotShift[i] adds base first
             v.x = sinf(Math3D::LimitPI(pZoneparts->rot.x * 0.01f * 0.017453292f)) * 0.1f;

@@ -612,7 +612,7 @@ INT CCameraMan::onChangeCamTarget(INT nCmd, void* pParam, INT nID) {
         FLOAT f = lenMid.z / mid.z;
         if (m_pActiveCameraDt->m_fMidFrame < f) m_pActiveCameraDt->m_fMidFrame = f;
     }
-    m_pActiveCameraDt->m_camStEdSpeed._q = 0;
+    m_pActiveCameraDt->m_camStEdSpeed.zero();
     m_pActiveCameraDt->m_fFrameCnt = 0.0f;
     return 1;
 }

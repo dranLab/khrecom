@@ -236,9 +236,9 @@ void CRideModel::changeListRC() {
 CRider::CRider(HANDLE hTask, FLOAT shiftY, FLOAT radius, COLL_KIND kind, BOOL fgHang) {
     m_hTask = hTask;
     m_shiftY = shiftY;
-    m_Rotate._q = 0;
+    m_Rotate.zero();
     m_Radius = radius;
-    m_Position._q = 0;
+    m_Position.zero();
     m_Kind = kind;
     m_fgHang = fgHang;
 }

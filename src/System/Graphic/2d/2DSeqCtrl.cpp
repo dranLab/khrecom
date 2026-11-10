@@ -74,7 +74,7 @@ static inline void _initSeqControl(SeqControl& sc) {
     _set(sc.controlColor, 1.0f, 1.0f, 1.0f, 1.0f);
     _unitVector(sc.vPos);
     sc.vScl.set(1.0f, 1.0f, 1.0f, 0.0f);
-    sc.vRot._q = 0;
+    sc.vRot.zero();
     _set(sc.vCol, 1.0f, 1.0f, 1.0f, 1.0f);
 }
 

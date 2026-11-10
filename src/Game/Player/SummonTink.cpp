@@ -262,8 +262,8 @@ void CSummonTink::fadeEffRecover(INT inFlag) {
 void CSummonTink::initRecover() {
     m_tqEffRecover = 1000;
     if (m_hEffRecover > 0) return;
-    FVECTOR pos;
-    pos.init();
+    FVECTOR pos = {0.0f, 0.0f, 0.0f, 1.0f};
+
     /* MATCH: the barriers and register locals keep the original's issue order around the two calls */
     __asm__ volatile("");
     register const CCoord* crd asm("$2") = &Crd(1);

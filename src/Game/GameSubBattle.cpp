@@ -532,8 +532,8 @@ void CEncountEffectTask::main() {
     case 2:
         if (!CGame::isBlackBeforeEncount()) {
             FVECTOR vColor;
-            vColor._q = 0;
-            vColor.w = 1.0f;
+            vColor.init();
+
             FLOAT fTime = CSceneInfo::isEventScene() ? 30.0f : 60.0f;
             CSceneEnv::setColor((ObjType::eObjBit)(INT)0x80000000, fTime, vColor, NULL, 0);
             CPackMan::enableDraw(4);

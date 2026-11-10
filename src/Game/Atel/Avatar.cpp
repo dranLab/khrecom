@@ -468,7 +468,7 @@ void CAvatar::calcAvatarMoveSpeed(FVECTOR& vOut) {
         FVECTOR v;
         FMATRIX m;
         _unitMatrixVu0(m);
-        v._q = 0;
+        v.zero();
         v.z = getAvatarSpeed();
         RotMatrix(m, m, getRot());
         ApplyMatrix(vOut, m, v);
@@ -480,14 +480,14 @@ void CAvatar::calcAvatarMoveSpeed(FVECTOR& vOut) {
         FVECTOR v;
         _unitMatrixVu0(m);
         RotMatrixY(m, m, getAvatarDirY2Target(NULL, NULL));
-        v._q = 0;
+        v.zero();
         v.z = getAvatarSpeed();
         ApplyMatrix(vOut, m, v);
         vOut.w = 0.0f;
         break;
     }
     default:
-        vOut._q = 0;
+        vOut.zero();
         break;
     }
 }
@@ -636,7 +636,7 @@ INT CAvatar::onRotate(INT nCmd, void* pParam, INT nID) {
         break;
     }
     if (bPos2Rot) {
-        vRot._q = 0;
+        vRot.zero();
         vRot.y = getAvatarDirY2Target(&vTargetPos, NULL);
     }
     if (bShortest) {

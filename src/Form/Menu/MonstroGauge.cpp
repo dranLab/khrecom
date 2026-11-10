@@ -80,8 +80,8 @@ void CMostroGauge::main() {
     case 0:
         break;
     case 1:
-        vec._q = 0;
-        vec.w = 1.0f;
+        vec.init();
+
 #line 79
         m_pGaugeCtrl = new (__FILE__ "(79)") C2DSeqCtrl;
         m_pGaugeCtrl->enableColorCtrl(TRUE);

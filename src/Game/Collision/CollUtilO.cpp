@@ -382,15 +382,15 @@ INT CCollUtil::distanceLineO(FVECTOR* pP0, FVECTOR* pP1, INT fg) {
                 m = m * f1;
             } else {
                 m = m_Radius;
-                su._q = 0;
+                su.zero();
             }
             Normalize(qs, m_vCkVec);
             ScaleVector(qs, qs, -m);
             SubVector(qs, qs, su);
         }
     } else {
-        qs._q = 0;
-        su._q = 0;
+        qs.zero();
+        su.zero();
     }
     AddVector(vec0, qs, su);
     AddVector(u, s1, vec0);

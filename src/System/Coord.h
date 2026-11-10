@@ -28,7 +28,7 @@ union FVECTOR {
         asm volatile("sqc2 $vf0, 0x0(%0)"
                      : : "r"(this));
     }
-    void init();
+    void init(FLOAT inW = 1.0f); /* the parameter: Camera init clears w through it (line 729 stores 0) */
 #ifdef VECTOR_H_SET_CALL /* MATCH: setCall is defined before set, so it keeps a call (ModelMan calls FVECTOR::set out of line) */
     void setCall(FLOAT inX, FLOAT inY, FLOAT inZ, FLOAT inW) { set(inX, inY, inZ, inW); }
 #endif
@@ -366,7 +366,7 @@ inline void IVECTOR::set(INT _x, INT _y, INT _z, INT _w) { x = _x; y = _y; z = _
 inline void IVECTOR::set(const IVECTOR& inV) { *this = inV; }
 #line 728
 inline void FVECTOR::zero() { _q = 0; }
-inline void FVECTOR::init() { _q = 0; w = 1.0f; }
+inline void FVECTOR::init(FLOAT inW) { _q = 0; w = inW; }
 inline void FVECTOR::set(FLOAT inX, FLOAT inY, FLOAT inZ, FLOAT inW) { x = inX; y = inY; z = inZ; w = inW; }
 inline void FVECTOR::set(const FVECTOR& inV) { *this = inV; }
 inline void FVECTOR::set(const _FVECTOR& inV) { *this = *(const FVECTOR*)inV; }

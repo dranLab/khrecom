@@ -123,8 +123,8 @@ void CEnemyLoudness::stateAttack2() {
             CBattleEnemy* target = (CBattleEnemy*)CTaskMan::getTask(searchRecoverEnemy_());
             if (!target) target = this;
             FVECTOR pos;
-            pos._q = 0;
-            pos.w = 1.0f;
+            pos.init();
+
             INT point = (INT)getAttackPoint(1, (ATK_KIND)25, 0, NULL, 0);
             CEffect* effect = CEffectMan::getEffect(target->recover(point, "m_ex740", 8, pos, &target->Crd(1)));
             if (effect) effect->setAttachNoRot(TRUE);

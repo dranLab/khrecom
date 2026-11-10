@@ -177,7 +177,7 @@ void CLightUnit::_calc(const FVECTOR& ctr) {
         FVECTOR light;
         FVECTOR color;
         if (ll[i].pow <= 0.0f) {
-            light._q = 0;
+            light.zero();
             color._q = 0;
             if (m_Kind == 1) {
                 CMapViewer* pViewer = (CMapViewer*)CTaskMan::getSysTask(0x31);

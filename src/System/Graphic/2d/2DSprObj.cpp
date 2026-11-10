@@ -154,7 +154,7 @@ void InterVector2(FVECTOR& v0, const FVECTOR2& v1, const FVECTOR2& v2, float t) 
 }
 C2DSprObj::C2DSprObj(SeqControl* pSeqControl, const TexInfo* pTexInfo) {
     m_pSprPrim = NULL;
-    m_vRot._q = 0;
+    m_vRot.zero();
     m_nPoly = 0;
     m_fgDisp = 0;
     m_Flg = 0;

@@ -5768,7 +5768,7 @@ void CPlayer::exeDead() {
         FVECTOR rot;
         setPlayerFlag(1, 0);
         clearSpeed();
-        pos.init();
+        pos.init(); /* the original: a brace init on the declaration line; that form changes the code here */
         warp(pos);
         rot = getRot();
         rot.y = -1.5707964f;
@@ -6266,8 +6266,8 @@ void CPlayer::setCastEffect(const CHAR* inName, INT inNo, CCoord* inCrd, FVECTOR
     if (inOfs) {
         pos = *inOfs;
     } else {
-        pos._q = 0;
-        pos.w = 1.0f;
+        pos.init();
+
     }
     m_hEffCast = attachEffect(inName, inNo, inCrd, &pos, NULL, 0.0f);
     CEffect* effect = CEffectMan::getEffect(m_hEffCast);
@@ -6844,8 +6844,8 @@ void CPlayer::setEffAttack(INT inNum, const CHAR* inName, INT inNo, INT inBone, 
     if (inOfs) {
         pos = *inOfs;
     } else {
-        pos._q = 0;
-        pos.w = 1.0f;
+        pos.init();
+
     }
     m_hEffAttack[inNum] = attachEffect(inName, inNo, &Crd(inBone), &pos, NULL, 0.0f);
     CEffect* effect = CEffectMan::getEffect(m_hEffAttack[inNum]);

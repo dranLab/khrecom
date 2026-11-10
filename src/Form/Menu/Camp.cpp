@@ -5455,7 +5455,7 @@ INT CCamp::setWorldmap(INT nSetCmd) {
             m_pWMMoveCtrl->enableColorCtrl(TRUE);
             m_nRoomCurrent = CSceneInfo::getCurrentRoomID() - 1;
             m_pWMNormaCtrl = new (operator new(sizeof(C2DSeqCtrl), __FILE__ "(6580)")) C2DSeqCtrl;
-            vec._q = 0;
+            vec.zero();
             m_pWMNormaCtrl->setCol(vec);
             m_pWMNormaCtrl->setLayer(0xD);
             m_pWMNormaCtrl->setParent(m_pWMMoveCtrl);

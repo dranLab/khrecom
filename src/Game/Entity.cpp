@@ -517,8 +517,8 @@ void CEntity::endStateProc() {
 }
 void CEntity::clearSpeed() {
     if (m_pMove) {
-        FVECTOR v;
-        v.init();
+        FVECTOR v = {0.0f, 0.0f, 0.0f, 1.0f};
+
         m_pMove->setVel(v);
     }
 }

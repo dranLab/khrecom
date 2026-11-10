@@ -389,7 +389,7 @@ public:
     void clearAvatarScaleSpeed() {
 #line 582 AVATAR_H_PATH
         if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);
-        m_pScaleStruct->_vScaleSpeed._q = 0;
+        m_pScaleStruct->_vScaleSpeed.zero();
     }
     void ScaleAvatarEnd();
     void cancelScaleAvatar();
@@ -475,7 +475,7 @@ public:
     void clearAvatarRotSpeed() {
 #line 645 AVATAR_H_PATH
         if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);
-        m_pRotateStruct->_vRotSpeed._q = 0;
+        m_pRotateStruct->_vRotSpeed.zero();
     }
     void countAvatarRotTime(INT t) {
 #line 647 AVATAR_H_PATH

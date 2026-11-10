@@ -43,9 +43,9 @@ void CCamera::init(INT nPri) {
     Crd(0).touch();
     setCameraPriority(nPri);
     FLOAT fDist = CWorldEnv::getScreenZ();
-    m_vOffset._q = 0;
-    m_vLook._q = 0;
-    m_vOffset.w = 0.0f;
+    m_vOffset.init(0.0f);
+    m_vLook.zero();
+
     setProjectionDist(fDist);
     ignorePlaySpeed(TRUE);
     setEnable(TRUE);

@@ -697,8 +697,8 @@ void CNaviMap::initRoomName(const CHAR* inFile, UINT inIdxSeq) {
         return;
     }
     C2DSeqCtrl* pSeq = m_pRoomName;
-    FVECTOR pos;
-    pos.init();
+    FVECTOR pos = {0.0f, 0.0f, 0.0f, 1.0f};
+
     pSeq->destroy();
     pSeq->setLayer(2);
     pSeq->addSeq((LPCTSTR)inFile, 0, inIdxSeq);
