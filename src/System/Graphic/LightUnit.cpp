@@ -384,12 +384,6 @@ void CMapLightUnit::setAnchor(const CCoord* p, const MODELDATA& modeldata, INT k
     setAnchor(p, *modeldata.m_pBBox, kind);
 }
 
-static inline FVECTOR operator*(const FMATRIX& m, const FVECTOR& v) {
-    FVECTOR r;
-    ApplyMatrix(r, m, v);
-    return r;
-}
-
 void CMapLightUnit::calcCenter(const FMATRIX& m) {
     int i;
     for (i = 0; i < 2; i++) {
@@ -397,7 +391,7 @@ void CMapLightUnit::calcCenter(const FMATRIX& m) {
         ctr[i].y = m_bbox->y[i];
         ctr[i].z = m_bbox->z[i];
         ctr[i].w = 1.0f;
-        ctr[i] = m * ctr[i];
+        ctr[i] = ApplyMatrix(m, ctr[i]);
     }
 }
 

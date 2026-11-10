@@ -106,7 +106,7 @@ void CRideModel::init(void* pOCDData, CTask* pBFObj) {
 #line 124
     m_pMatIOld = new (__FILE__ "(124)") FMATRIX[m_MCDInfo.iChipSuu + 1];
     ASSERT(m_pMatIOld);
-    sceVu0InversMatrix(m_pMatIOld->m, lMat->m);
+    InverseMatrix(*m_pMatIOld, *lMat);
     m_fBSRadius2 = 0;
     m_MCDInfo.pMatrixIOld = m_pMatIOld;
     if (m_MCDInfo.iChipSuu > 0) {
@@ -117,9 +117,9 @@ void CRideModel::init(void* pOCDData, CTask* pBFObj) {
         for (INT i = 0; i < m_MCDInfo.iChipSuu; i++, pPartsMat++, pChip++) {
             m_pOCDWork[i].fgEnable = 0;
             _unitMatrixVu0(*pPartsMat);
-            sceVu0RotMatrixX(pPartsMat->m, pPartsMat->m, pChip->r.x);
-            sceVu0RotMatrixY(pPartsMat->m, pPartsMat->m, pChip->r.y);
-            sceVu0RotMatrixZ(pPartsMat->m, pPartsMat->m, pChip->r.z);
+            RotMatrixX(*pPartsMat, *pPartsMat, pChip->r.x);
+            RotMatrixY(*pPartsMat, *pPartsMat, pChip->r.y);
+            RotMatrixZ(*pPartsMat, *pPartsMat, pChip->r.z);
             pPartsMat->setTrans(pChip->t);
             pPartsMat->v[3].w = 1.0f;
             MC_DATA* pMCData = (MC_DATA*)pChip->data;
@@ -151,7 +151,7 @@ void CRideModel::init(void* pOCDData, CTask* pBFObj) {
 void CRideModel::setAttachMatrix(const FMATRIX* inMat) {
     ASSERT(inMat&&m_pMatIOld);
     m_MCDInfo.pMatrix = (FMATRIX*)inMat;
-    sceVu0InversMatrix(m_pMatIOld->m, (float(*)[4])inMat->m);
+    InverseMatrix(*m_pMatIOld, *inMat);
 }
 
 FMATRIX* CRideModel::getAttachMatrix() {
@@ -183,7 +183,7 @@ void CRideModel::enableChipCollision(INT inIdx, BOOL inSw) {
 #line 227
 void CRideModel::setOldMatrix() {
     ASSERT((m_pMatIOld)&&(m_MCDInfo.pMatrix));
-    sceVu0InversMatrix(m_pMatIOld->m, m_MCDInfo.pMatrix->m);
+    InverseMatrix(*m_pMatIOld, *m_MCDInfo.pMatrix);
 }
 
 void CRideModel::hoseiRiders(FVECTOR& diffRot) {
@@ -194,7 +194,7 @@ void CRideModel::hoseiRiders(FVECTOR& diffRot) {
     FMATRIX invMat;
     INT fgAdjustTrans;
     INT fgAdjustRot;
-    sceVu0InversMatrix(invMat.m, pNew->m);
+    InverseMatrix(invMat, *pNew);
     if (*pIOld == invMat) {
         m_fgMove = 0;
         return;
