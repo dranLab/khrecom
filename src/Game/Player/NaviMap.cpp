@@ -306,10 +306,6 @@ static inline void _unitVectorVu0(FVECTOR& v) {
     asm volatile("sqc2 $vf0, 0x0(%0)" : : "r"(&v) : "memory");
 }
 
-static inline void _viewScreenMatrix(FMATRIX& matOut, FLOAT fInAx, FLOAT fInAy) {
-    sceVu0ViewScreenMatrix(matOut.m, 512.0f, ASPECT_RATE_X, ASPECT_RATE_Y, fInAx, fInAy, 1.0f, 16777000.0f, 0.1f, 100.0f);
-}
-
 static inline FLOAT _deg2rad(FLOAT r) { return r * 3.1415927f / 180.0f; }
 
 static inline FLOAT _roundRot(FLOAT fInRot) {
@@ -427,7 +423,7 @@ void CNaviMap::_initialize() {
             }
             CCoord& crd = Crd(0);
             _unitMatrixVu0(crd.m_Local);
-            sceVu0RotMatrixY(crd.m_Local.m, crd.m_Local.m, 3.1415927f);
+            RotMatrixY(crd.m_Local, crd.m_Local, 3.1415927f);
             crd.m_Local.m[3][0] = m_vPos.x;
             crd.m_Local.m[3][1] = m_vPos.y;
             crd.m_Local.m[3][2] = m_vPos.z;
@@ -595,15 +591,15 @@ void CNaviMap::main() {
             rot = DebugWork::g_dw.player.vTemp;
             rot.x = _roundRot(_deg2rad(rot.x * 100.0f));
         }
-        sceVu0RotMatrixY(crd.m_Local.m, crd.m_Local.m, rot.y);
-        sceVu0RotMatrixX(crd.m_Local.m, crd.m_Local.m, rot.x);
+        RotMatrixY(crd.m_Local, crd.m_Local, rot.y);
+        RotMatrixX(crd.m_Local, crd.m_Local, rot.x);
         crd.m_Local.v[3] = m_vPos;
         crd.touch();
         if (m_nModelCount >= 22) {
             CCoord& crd1 = Crd(1);
             _unitMatrixVu0(crd1.m_Local);
             rot.y = _roundRot(g_pPlayer->getRot().y - 0.7853982f + m_fRotOfs);
-            sceVu0RotMatrixY(crd1.m_Local.m, crd1.m_Local.m, rot.y);
+            RotMatrixY(crd1.m_Local, crd1.m_Local, rot.y);
             crd1.m_Local.v[3] = m_vPos;
             Crd(1).touch();
         }
@@ -640,9 +636,9 @@ void CNaviMap::changeLocalWS() {
     FMATRIX mVS;
     FMATRIX mWV;
     _unitMatrixVu0(mWV);
-    sceVu0RotMatrixY(mWV.m, mWV.m, 3.1415927f);
+    RotMatrixY(mWV, mWV, 3.1415927f);
     mWV.m[3][2] = m_vPosWSC.z;
-    sceVu0InversMatrix(mWV.m, mWV.m);
+    InversMatrix(mWV, mWV);
     mWV.m[0][0] = -mWV.m[0][0];
     mWV.m[1][0] = -mWV.m[1][0];
     mWV.m[2][0] = -mWV.m[2][0];
@@ -651,7 +647,7 @@ void CNaviMap::changeLocalWS() {
     mWV.m[1][1] = -mWV.m[1][1];
     mWV.m[2][1] = -mWV.m[2][1];
     mWV.m[3][1] = -mWV.m[3][1];
-    _viewScreenMatrix(mVS, m_PosScreen.x + 0x800, 0x800 - m_PosScreen.y);
+    ViewScreenMatrix(mVS, 512.0f, ASPECT_RATE_X, ASPECT_RATE_Y, m_PosScreen.x + 0x800, 0x800 - m_PosScreen.y, 100.0f);
     MulMatrix(m_mWS, mVS, mWV);
     for (INT i = 0; i < m_nModelCount; i++) {
         m_pModels[i].setWorldScreenMatrix(&m_mWS);

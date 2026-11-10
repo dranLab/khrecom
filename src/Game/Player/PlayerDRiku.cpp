@@ -126,18 +126,6 @@ namespace Math3D {
 FLOAT LimitPI(FLOAT pai);
 }
 
-/* Coord.h's matrix wrappers (setMagic): called directly, cse keeps the matrix address in a saved register
- * across the calls; the original recomputes it for each call. */
-static inline void _unitMatrix(FMATRIX& m) {
-    sceVu0UnitMatrix(m.m);
-}
-static inline void _rotMatrixX(FMATRIX& m, FLOAT r) {
-    sceVu0RotMatrixX(m.m, m.m, r);
-}
-static inline void _rotMatrixY(FMATRIX& m, FLOAT r) {
-    sceVu0RotMatrixY(m.m, m.m, r);
-}
-
 static inline void _unitMatrixVu0(FMATRIX& m) {
     asm volatile("vmr32.xyzw $vf1, $vf0\n"
                  "sqc2 $vf0, 0x30(%0)\n"
@@ -829,7 +817,7 @@ void CPlayerDRiku::exeJump2nd() {
         FMATRIX m;
         _unitMatrixVu0(m);
         vec.set(0.0f, 0.0f, 1.0f, 1.0f);
-        sceVu0RotMatrixY(m.m, m.m, m_fJumpDir);
+        RotMatrixY(m, m, m_fJumpDir);
         ApplyMatrix33(vec, m, vec);
         ScaleVector(vec, vec, m_fMoveSpdXZ);
         vel.x = vec.x;
@@ -2068,12 +2056,12 @@ void CPlayerDRiku::setMagic(INT inState, INT inCardID, INT inSkillID) {
             FVECTOR ofs = {{0.0f, 0.0f, 1.2f, 1.0f}};
             FMATRIX m;
             FLOAT r = _limitPI(inCardID * -6.2831855f / 7.0f);
-            _unitMatrix(m);
-            _rotMatrixY(m, r);
-            _rotMatrixX(m, -0.7853982f);
+            UnitMatrix(m);
+            RotMatrixY(m, m, r);
+            RotMatrixX(m, m, -0.7853982f);
             ApplyMatrixXYZ(ofs, m, ofs);
-            _unitMatrix(m);
-            _rotMatrixY(m, m_fDir);
+            UnitMatrix(m);
+            RotMatrixY(m, m, m_fDir);
             ApplyMatrixXYZ(ofs, m, ofs);
             AddVectorXYZ(param.vPos, m_vWarpPos[0], ofs);
             calcDirection(param.vRot, m_vAppearPos);
@@ -2189,7 +2177,7 @@ void CPlayerDRiku::searchWarpPos(FLOAT inDir) {
     if (pos.y < 0.1f) pos.y = 0.1f;
     m_vEnemyPos = pos;
     _unitMatrixVu0(m);
-    sceVu0RotMatrixY(m.m, m.m, inDir);
+    RotMatrixY(m, m, inDir);
     for (INT i = 0; i < 2; i++) {
         ApplyMatrix33(dir, m, g_vDir[i]);
         AddVectorXYZ(dir, pos, dir);

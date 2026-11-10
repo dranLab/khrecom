@@ -68,20 +68,6 @@ static inline FLOAT _limitPI(FLOAT inValue) {
     return ret;
 }
 
-/* Through inline wrappers (a header's, in the original): called directly, cse keeps the matrix address in a saved
- * register across the calls; the original recomputes it for each call. */
-static inline void _unitMatrix(FMATRIX& m) {
-    sceVu0UnitMatrix(m.m);
-}
-static inline void _rotMatrixX(FMATRIX& m, FLOAT r) {
-    sceVu0RotMatrixX(m.m, m.m, r);
-}
-static inline void _inversMatrix(FMATRIX& m0, const FMATRIX& m1) {
-    sceVu0InversMatrix(m0.m, (float(*)[4])m1.m);
-}
-static inline void _rotMatrixY(FMATRIX& m, FLOAT r) {
-    sceVu0RotMatrixY(m.m, m.m, r);
-}
 
 static inline FLOAT _sqrtf(FLOAT x) {
     FLOAT ret;
@@ -379,15 +365,15 @@ void CPlayerCamera::initCamera(INT inMode, INT inReset, FVECTOR* inDir) {
                 dir.z = 0.0f;
                 dir.w = 1.0f;
             }
-            _unitMatrix(mat);
-            _rotMatrixX(mat, dir.x);
-            _rotMatrixY(mat, dir.y);
+            UnitMatrix(mat);
+            RotMatrixX(mat, mat, dir.x);
+            RotMatrixY(mat, mat, dir.y);
             ApplyMatrixXYZ(m_vFinalAim, mat, aim);
             AddVectorXYZ(m_vFinalAim, pos, m_vFinalAim);
             m_vAim.set(m_vFinalAim.x, m_vFinalAim.y, m_vFinalAim.z);
-            _unitMatrix(mat);
-            _rotMatrixX(mat, dir.x);
-            _rotMatrixY(mat, dir.y);
+            UnitMatrix(mat);
+            RotMatrixX(mat, mat, dir.x);
+            RotMatrixY(mat, mat, dir.y);
             ApplyMatrixXYZ(m_vFinalEye, mat, m_vLocal);
             AddVectorXYZ(m_vFinalEye, m_vFinalAim, m_vFinalEye);
             m_vEye.set(m_vFinalEye.x, m_vFinalEye.y, m_vFinalEye.z);
@@ -399,13 +385,13 @@ void CPlayerCamera::initCamera(INT inMode, INT inReset, FVECTOR* inDir) {
     case 5: {
         FMATRIX mat;
         FLOAT r = _limitPI(getNowPlayerDir() - 3.1415927f);
-        _unitMatrix(mat);
-        _rotMatrixY(mat, r);
+        UnitMatrix(mat);
+        RotMatrixY(mat, mat, r);
         ApplyMatrixXYZ(m_vFinalAim, mat, aim);
         AddVectorXYZ(m_vFinalAim, pos, m_vFinalAim);
         m_vAim.set(m_vFinalAim.x, m_vFinalAim.y, m_vFinalAim.z);
-        _unitMatrix(mat);
-        _rotMatrixY(mat, r);
+        UnitMatrix(mat);
+        RotMatrixY(mat, mat, r);
         ApplyMatrixXYZ(m_vFinalEye, mat, m_vLocal);
         AddVectorXYZ(m_vFinalEye, m_vFinalAim, m_vFinalEye);
         m_vEye.set(m_vFinalEye.x, m_vFinalEye.y, m_vFinalEye.z);
@@ -424,17 +410,17 @@ void CPlayerCamera::initCamera(INT inMode, INT inReset, FVECTOR* inDir) {
         calcDirection(m_vDir, m_vAim, m_vEye);
         FVECTOR dir;
         calcDirection(dir, aim, eye);
-        _unitMatrix(mat);
-        _rotMatrixY(mat, m_vDir.y);
+        UnitMatrix(mat);
+        RotMatrixY(mat, mat, m_vDir.y);
         ApplyMatrixXYZ(eye, mat, eye);
         AddVectorXYZ(eye, pos, eye);
         FVECTOR rot;
         calcDirection(rot, m_vAim, eye);
         SubVectorXYZ(rot, rot, dir);
         m_vDir.x = -rot.x;
-        _unitMatrix(mat);
-        _rotMatrixX(mat, m_vDir.x);
-        _rotMatrixY(mat, m_vDir.y);
+        UnitMatrix(mat);
+        RotMatrixX(mat, mat, m_vDir.x);
+        RotMatrixY(mat, mat, m_vDir.y);
         ApplyMatrixXYZ(m_vFinalEye, mat, m_vLocal);
         AddVectorXYZ(m_vFinalEye, pos, m_vFinalEye);
         m_vEye.set(m_vFinalEye.x, m_vFinalEye.y, m_vFinalEye.z);
@@ -470,7 +456,7 @@ void CPlayerCamera::initCamera(INT inMode, INT inReset, FVECTOR* inDir) {
         m_pLines = new (__FILE__ "(608)") C3DLines;
         if (!(m_pLines)) AssertApp(__FILE__, __LINE__, "m_pLines", 0);
         m_pLines->m_pCrd = &Crd(0);
-        _inversMatrix(m, Crd(0).getWorldMatrix());
+        InverseMatrix(m, Crd(0).getWorldMatrix());
         ApplyMatrix33(ofs, m, m_vEye);
         line.C0.col = 0xFF00FF00;
         line.C1.col = 0xFF00FF00;
@@ -652,9 +638,9 @@ void CPlayerCamera::recalcNearMove() {
     m_vDir.x = _limitPI(m_vDir.x + y * 3.1415927f / 180.0f);
     if (m_vDir.x < m_fXLimitHi) m_vDir.x = m_fXLimitHi;
     FMATRIX mat;
-    sceVu0UnitMatrix(mat.m);
-    sceVu0RotMatrixX(mat.m, mat.m, m_vDir.x);
-    sceVu0RotMatrixY(mat.m, mat.m, m_vDir.y);
+    UnitMatrix(mat);
+    RotMatrixX(mat, mat, m_vDir.x);
+    RotMatrixY(mat, mat, m_vDir.y);
     ApplyMatrixXYZ(m_vEye, mat, m_vLocal);
     AddVectorXYZ(m_vEye, m_vFinalAim, m_vEye);
     calcMapHit(m_vEye, m_vAim, m_pData->fSize, 0.0f);
@@ -775,9 +761,9 @@ void CPlayerCamera::procFieldNormal() {
 
 #line 1163
     FMATRIX mat;
-    _unitMatrix(mat);
-    _rotMatrixX(mat, m_vDir.x);
-    _rotMatrixY(mat, m_vDir.y + rot.y);
+    UnitMatrix(mat);
+    RotMatrixX(mat, mat, m_vDir.x);
+    RotMatrixY(mat, mat, m_vDir.y + rot.y);
     eye.x = 0.0f;
     eye.z *= 1.41421f;
     ApplyMatrixXYZ(eye, mat, eye);
@@ -897,8 +883,8 @@ void CPlayerCamera::procBattleNormal() {
 
 #line 1337
     FLOAT r = _limitPI(getNowPlayerDir() - 3.1415927f);
-    _unitMatrix(mat);
-    _rotMatrixY(mat, r);
+    UnitMatrix(mat);
+    RotMatrixY(mat, mat, r);
     ApplyMatrixXYZ(m_vFinalAim, mat, aim);
     AddVectorXYZ(m_vFinalAim, pos, m_vFinalAim);
 
@@ -977,9 +963,9 @@ void CPlayerCamera::procBattleNormal() {
         }
     }
 #line 1465
-    _unitMatrix(mat);
-    _rotMatrixX(mat, m_vDir.x);
-    _rotMatrixY(mat, m_vDir.y);
+    UnitMatrix(mat);
+    RotMatrixX(mat, mat, m_vDir.x);
+    RotMatrixY(mat, mat, m_vDir.y);
     ApplyMatrixXYZ(m_vFinalEye, mat, m_vLocal);
     AddVectorXYZ(m_vFinalEye, m_vFinalAim, m_vFinalEye);
     if (isFlag(0x1000)) {
@@ -1032,8 +1018,8 @@ void CPlayerCamera::procBattleLockon() {
 #line 1539
     FVECTOR dir;
     calcDirection(dir, aim, eye);
-    _unitMatrix(mat);
-    _rotMatrixY(mat, m_vDir.y);
+    UnitMatrix(mat);
+    RotMatrixY(mat, mat, m_vDir.y);
     ApplyMatrixXYZ(eye, mat, eye);
     AddVectorXYZ(eye, pos, eye);
     FVECTOR rot;
@@ -1075,9 +1061,9 @@ void CPlayerCamera::procBattleLockon() {
         }
     }
 #line 1600
-    _unitMatrix(mat);
-    _rotMatrixX(mat, m_vDir.x);
-    _rotMatrixY(mat, m_vDir.y);
+    UnitMatrix(mat);
+    RotMatrixX(mat, mat, m_vDir.x);
+    RotMatrixY(mat, mat, m_vDir.y);
     ApplyMatrixXYZ(m_vFinalEye, mat, ofs);
     AddVectorXYZ(m_vFinalEye, m_vFinalAim, m_vFinalEye);
     adjustCamera(m_vEye, m_vFinalEye, m_pData->fAdjust);
@@ -1087,8 +1073,8 @@ void CPlayerCamera::procBattleLockon() {
     }
 #line 1614
     setFlag(0, 0x400);
-    _unitMatrix(mat);
-    _rotMatrixY(mat, m_vDir.y);
+    UnitMatrix(mat);
+    RotMatrixY(mat, mat, m_vDir.y);
     ApplyMatrixXYZ(aim, mat, aim);
     AddVectorXYZ(aim, pos, aim);
 #line 1628
