@@ -28,24 +28,24 @@
 /* The battle report and title tasks live in a DLL: their constructors and static flags are not linked into the
  * main program (the original refers to address 0). Sizes from the allocations. */
 namespace BattleReport {
-class CBtlReport : public CTask {
-    BYTE _pad[0x2E0 - sizeof(CTask)];
-public:
-    static BYTE m_EndFlag;
-    CBtlReport(CTask* pParent, INT nParam);
-};
-}
-class CTitle : public CTask {
+class CBtlReport : public CTask { /* 0x1A0 (types.h); names and sizes: the DLL table's imports (tools/sndll.py) */
     BYTE _pad[0x1A0 - sizeof(CTask)];
 public:
     static BYTE m_EndFlag;
-    CTitle(CTask* pParent);
+    CBtlReport(CTask* pParent);
+};
+}
+class CTitle : public CTask { /* 0x2E0 (types.h) */
+    BYTE _pad[0x2E0 - sizeof(CTask)];
+public:
+    static BYTE m_EndFlag;
+    CTitle(CTask* pParent, INT nParam);
 };
 
 /* DLL imports: undefined here, 0 for the link (config/SLUS_217.99/dll_imports.ld), so each use keeps its relocation. */
 /* DLL imports, 0 in config/SLUS_217.99/dll_imports.ld (the loader patches their uses):
- * __Q212BattleReport10CBtlReportP5CTaski
- * __6CTitleP5CTask
+ * __6CTitleP5CTaski
+ * __Q212BattleReport10CBtlReportP5CTask
  * _Q212BattleReport10CBtlReport$m_EndFlag, _6CTitle$m_EndFlag
  */
 
@@ -97,13 +97,13 @@ void CTitleReportDllStarter::stateDllLoad() {
         case 0:
 #line 126
             m_hChildTask = (new (__FILE__ "(126)")
-                                BattleReport::CBtlReport(this, m_nParam))->getHandle();
+                                CTitle(this, m_nParam))->getHandle();
             break;
         case 1:
             break;
         case 2:
 #line 128
-            new (__FILE__ "(128)") CTitle(this);
+            new (__FILE__ "(128)") BattleReport::CBtlReport(this);
             break;
         }
         changeState(2);
@@ -117,12 +117,12 @@ void CTitleReportDllStarter::beginStateMain() {}
 void CTitleReportDllStarter::stateMain() {
     switch (m_LaunchMode) {
     case 0:
-        if (BattleReport::CBtlReport::m_EndFlag) out();
+        if (CTitle::m_EndFlag) out();
         break;
     case 1:
         break;
     case 2:
-        if (CTitle::m_EndFlag) {
+        if (BattleReport::CBtlReport::m_EndFlag) {
             CMainApp::reqSoftReset(SOFTRESET_SKIP_LOGO);
             out();
         }

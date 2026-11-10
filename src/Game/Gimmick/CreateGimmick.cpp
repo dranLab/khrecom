@@ -214,9 +214,9 @@ private:
     UBYTE _m_0x220[0x240 - 0x220];
 };
 
-class CGimmickBossIsLand : public CBaseGimmick {
+class CGimmickPinokio : public CBaseGimmick {
 public:
-    CGimmickBossIsLand(CTask* inParent);
+    CGimmickPinokio(CTask* inParent);
 
 private:
     UBYTE _m_0x220[0x230 - 0x220];
@@ -230,9 +230,9 @@ private:
     UBYTE _m_0x220[0x230 - 0x220];
 };
 
-class CGimmickPinokio : public CBaseGimmick {
+class CGimmickBossIsLand : public CBaseGimmick {
 public:
-    CGimmickPinokio(CTask* inParent);
+    CGimmickBossIsLand(CTask* inParent);
 
 private:
     UBYTE _m_0x220[0x230 - 0x220];
@@ -270,9 +270,9 @@ private:
     UBYTE _m_0x220[0x240 - 0x220];
 };
 
-class CGimmick100Acre01Bush : public CBaseGimmick {
+class CGimmick100AcreBBWall : public CBaseGimmick {
 public:
-    CGimmick100Acre01Bush(CTask* inParent);
+    CGimmick100AcreBBWall(CTask* inParent);
 
 private:
     UBYTE _m_0x220[0x220 - 0x220];
@@ -286,6 +286,14 @@ private:
     UBYTE _m_0x220[0x290 - 0x220];
 };
 
+class CGimmick100Acre01Bush : public CBaseGimmick {
+public:
+    CGimmick100Acre01Bush(CTask* inParent);
+
+private:
+    UBYTE _m_0x220[0x220 - 0x220];
+};
+
 class CGimmick100Acre02Veg : public CBaseGimmick {
 public:
     CGimmick100Acre02Veg(CTask* inParent);
@@ -297,14 +305,6 @@ private:
 class CGimmick100Acre02Coll : public CBaseGimmick {
 public:
     CGimmick100Acre02Coll(CTask* inParent);
-
-private:
-    UBYTE _m_0x220[0x220 - 0x220];
-};
-
-class CGimmick100AcreBBWall : public CBaseGimmick {
-public:
-    CGimmick100AcreBBWall(CTask* inParent);
 
 private:
     UBYTE _m_0x220[0x220 - 0x220];
@@ -333,18 +333,18 @@ private:
  * __16CGimmickBTMChairP5CTask
  * __16CGimmickBTMTableP5CTask
  * __14CGimmickIsLandP5CTaski
- * __18CGimmickBossIsLandP5CTask
- * __12CGimmickAcidP5CTask
  * __15CGimmickPinokioP5CTask
+ * __12CGimmickAcidP5CTask
+ * __18CGimmickBossIsLandP5CTask
  * __12CGimmickShipP5CTask
  * __14CGimmickBottleP5CTask
  * __18CGimmickBombBarrelP5CTask
  * __17CGimmickMDFootingP5CTask
- * __21CGimmick100Acre01BushP5CTask
+ * __21CGimmick100AcreBBWallP5CTask
  * __16CGimmickChasePooP5CTask
+ * __21CGimmick100Acre01BushP5CTask
  * __20CGimmick100Acre02VegP5CTask
  * __21CGimmick100Acre02CollP5CTask
- * __21CGimmick100AcreBBWallP5CTask
  */
 
 
@@ -448,13 +448,13 @@ CEntity* CEntityFactory::createGimmick(INT inRsrcID, CTask* inParent, void* inEx
         gimmick = new (__FILE__ "(254)") CGimmickIsLand(parent, inRsrcID);
         break;
     case 0x22b:
-        gimmick = new (__FILE__ "(258)") CGimmickBossIsLand(parent);
+        gimmick = new (__FILE__ "(258)") CGimmickPinokio(parent);
         break;
     case 0x228 ... 0x229:
         gimmick = new (__FILE__ "(263)") CGimmickAcid(parent);
         break;
     case 0x22a:
-        gimmick = new (__FILE__ "(267)") CGimmickPinokio(parent);
+        gimmick = new (__FILE__ "(267)") CGimmickBossIsLand(parent);
         break;
     case 0x352:
         gimmick = new (__FILE__ "(275)") CGimmickShip(parent);
@@ -574,19 +574,19 @@ CEntity* CEntityFactory::createGimmick(INT inRsrcID, CTask* inParent, void* inEx
         gimmick = new (__FILE__ "(794)") CGimmickWindowLid(parent);
         break;
     case 0x423:
-        gimmick = new (__FILE__ "(798)") CGimmick100Acre01Bush(parent);
+        gimmick = new (__FILE__ "(798)") CGimmick100AcreBBWall(parent);
         break;
     case 0x424:
         gimmick = new (__FILE__ "(801)") CGimmickChasePoo(parent);
         break;
     case 0x435:
-        gimmick = new (__FILE__ "(804)") CGimmick100Acre02Veg(parent);
+        gimmick = new (__FILE__ "(804)") CGimmick100Acre01Bush(parent);
         break;
     case 0x442 ... 0x443:
-        gimmick = new (__FILE__ "(808)") CGimmick100Acre02Coll(parent);
+        gimmick = new (__FILE__ "(808)") CGimmick100Acre02Veg(parent);
         break;
     case 0x444:
-        gimmick = new (__FILE__ "(811)") CGimmick100AcreBBWall(parent);
+        gimmick = new (__FILE__ "(811)") CGimmick100Acre02Coll(parent);
         break;
     default:
         gimmick = new (__FILE__ "(815)") CSampleGimmick(parent);

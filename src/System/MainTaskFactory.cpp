@@ -133,9 +133,9 @@ DLL_TASK(CSetEditor, 0x4940);
 namespace AttachEditor {
 DLL_TASK(CAttachEditor, 0x4230);
 }
-DLL_TASK(CFontViewer, 0x40);
-DLL_TASK(CMapViewer, 0x60);
-DLL_TASK(CModelViewer, 0x19700);
+DLL_TASK(CFontTest, 0x40);
+DLL_TASK(CMapViewerMan, 0x60);
+DLL_TASK(CModelViewerMenu, 0x19700);
 DLL_TASK(CEffectViewer, 0x351A0);
 DLL_TASK(C2DViewer, 0x3F650);
 DLL_TASK(CMovieTest, 0x170);
@@ -155,9 +155,9 @@ DLL_TASK(CMovieTest, 0x170);
  * __Q215CollisionEditor16CCollisionEditorP5CTask
  * __Q29SetEditor10CSetEditorP5CTask
  * __Q212AttachEditor13CAttachEditorP5CTask
- * __11CFontViewerP5CTask
- * __10CMapViewerP5CTask
- * __12CModelViewerP5CTask
+ * __9CFontTestP5CTask
+ * __13CMapViewerManP5CTask
+ * __16CModelViewerMenuP5CTask
  * __13CEffectViewerP5CTask
  * __9C2DViewerP5CTask
  * __10CMovieTestP5CTask
@@ -225,11 +225,11 @@ CTask* CMainTaskFactory::createMainTask(MAINTASK_ID nID, CTask* pParent) {
     case MAINTASK_ID_DEBUG_ATTACH_EDITOR:
         return new (__FILE__ "(91)") AttachEditor::CAttachEditor(pParent);
     case MAINTASK_ID_DEBUG_FONT_VIEWER:
-        return new (__FILE__ "(92)") CFontViewer(pParent);
+        return new (__FILE__ "(92)") CFontTest(pParent);
     case MAINTASK_ID_MAPVIEWER:
-        return new (__FILE__ "(94)") CMapViewer(pParent);
+        return new (__FILE__ "(94)") CMapViewerMan(pParent);
     case MAINTASK_ID_MODELVIEWER:
-        return new (__FILE__ "(95)") CModelViewer(pParent);
+        return new (__FILE__ "(95)") CModelViewerMenu(pParent);
     case MAINTASK_ID_EFFECTVIEWER:
         return new (__FILE__ "(96)") CEffectViewer(pParent);
     case MAINTASK_ID_2DVIEWER:

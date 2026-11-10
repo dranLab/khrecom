@@ -133,6 +133,8 @@ def main() -> None:
     parser.add_argument("--start", required=True, type=lambda s: int(s, 0))
     parser.add_argument("--end", required=True, type=lambda s: int(s, 0))
     parser.add_argument("-o", "--output", required=True)
+    parser.add_argument("--names", action="store_true",
+                        help="also print each import whose source name differs from the table's (original) name")
     args = parser.parse_args()
 
     rom = Path(args.rom).read_bytes()
@@ -181,6 +183,7 @@ def main() -> None:
             else:
                 fields[entry + 4 - start] = expr
 
+    renames = set()
     for i in range(nrelocs):
         entry = relocs + 12 * i
         site, info = word(entry), word(entry + 4)
@@ -200,7 +203,11 @@ def main() -> None:
             errors.append(f"reloc {i}: no global symbol before {obj} {section}+{offset:#x}")
             continue
         fields[entry - start] = expr
+        if args.names and found[1] != import_name:
+            renames.add((found[1], import_name, obj))
 
+    for ours, original, obj in sorted(renames):
+        print(f"name: {ours} -> {original}  ({obj})")
     if errors:
         for e in errors[:40]:
             print(f"error: {e}", file=sys.stderr)

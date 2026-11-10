@@ -3179,15 +3179,15 @@ struct FadeCreateParam {
     FLOAT fRate;
     INT layer;
 };
-namespace MoogleShop {
-/* A DLL class: its constructor is not linked into the main program (the original calls address 0). */
+/* A DLL class (global, not in MoogleShop: the DLL table's import __15CMoogleShopCoreP5CTask; 0x2F0, types.h):
+   its constructor is not linked into the main program (the original calls address 0). */
 class CMoogleShopCore : public CTask {
     BYTE _pad[0x2F0 - sizeof(CTask)];
 public:
     CMoogleShopCore(CTask* pParent);
 };
-}
-/* DLL import __Q210MoogleShop15CMoogleShopCoreP5CTask: 0 in config/SLUS_217.99/dll_imports.ld */
+
+/* DLL import __15CMoogleShopCoreP5CTask: 0 in config/SLUS_217.99/dll_imports.ld */
 #line 2551
 /* CollUtil.h:194/245 in the original */
 static inline CCollUtil* collUtilInstance() {
@@ -3564,7 +3564,7 @@ INT CVSM::execExt3Code(INT op, eATEL_REQ_RET& ret) {
                 break;
             }
             case 56:
-                new (__FILE__ "(3000)") MoogleShop::CMoogleShopCore(CTaskMan::getSysTask(1));
+                new (__FILE__ "(3000)") CMoogleShopCore(CTaskMan::getSysTask(1));
                 break;
             case 57:
                 if (!CGameWork::getFlag(1, 0x33)) {
