@@ -60,7 +60,7 @@ every change that is merged without regenerating. Regenerating all four takes ab
   314 -> 26, vu0.h 125 -> 6 (the rest: parked drafts, sites kept with a note, 1019-1020 left as is by the user).
   PARTIAL 160 -> 158, mechanisms 661 -> 659 (VECTOR_H_SET_CALL gone). No function matches; parked drafts unchanged
   (Camp 27/23, Math3D 90, DispList 59, Map 82/709; WorldEnv still matches with the original namespace name). Details:
-  the four "Done (cleanup/coord-unify-...)" entries. Next cleanup candidates: Math3D.h's `_sqrtf` (6+ local copies),
+  the four "Done (cleanup/coord-unify-...)" entries. Next cleanup candidates: Math3D.h's `_sqrtf`/`_fabsf` (129-137; local copies in 19 units, must go in one step),
   PackMan.h's free inlines 117-128; the parked drafts could now use the new inlines.
 - **2026-11-10: pool run (3 workers, 6 units) + one coordinator match.** Matched: HumanBoss setupAct (a function-scope
   `FLOAT none = -1` the ref lacks, accepted by the user after a no-behaviour-change proof: same image, single
@@ -474,6 +474,9 @@ header split the original didn't have, or make a class a template to hide its st
 | a sceVu0 address kept in a saved register, the original recomputes it | pass `.m`/`.v`, not the conversion operator: coord-free-inlines-map |
 | a statement's instructions carry the line marker of a later line | a multi-line statement gets the line it ends on: coord-free-inlines-map |
 | chained-assignment stores in reverse order (w first) | `x = y = z = w = f` (FVECTOR::setAll): coord-free-inlines-map |
+| nested constant-bound loops: ours strength-reduces `i++`, the original copies the inner start (`i = t3`) | the bound as a local `INT n = 4` in every loop (ask the user): loop-bound-variable-pre |
+| `mflo v1; move s6,v1` (or its reverse) around a division/inline result | mention the variable before that cse block: an initialiser on the ref's local (ask the user): early-mention-cse-canonical |
+| a far-off draft (hundreds of lines) | lay it out on the original's line markers with `#line`, then rebuild blocks from the ref's locals: map-unit-lessons |
 | an inline's parameter setup on another line than its body | the setup carries the inline's first (declarator) line; .mdebug shows pointer parameters, not references: coord-free-inlines-map |
 | an asm temporary in a callee-saved register the original keeps from entry | an input operand the asm overwrites (live from entry, one use): coord-free-inlines-map |
 | struct argument built from four `lhu` + dsll/or | `_NORMA_PIECES` in `System/Graphic/2d/2DCard.h` |
@@ -590,7 +593,7 @@ Keep output small: one function's assembly at a time; `funcdiff` without `--full
   replaced. Differing vu0.h markers 125 -> 6 (Map init/disp, Math3D InvMatrix parked; EffectMan _updateCoord 535 code
   equal; Model checkBBox kept with a note; resultCheckBBox(CCoord&) 94 = branching asm kept in C), Coord.h 50 -> 26
   (build/vu/clfw.py --file vu0.h). Kept in asm with MATCH: the mfc1 of ScaleVector/ScaleVectorXYZ (Sony's libvu0
-  form), vu0LengthSq's mtc1 (no GPR -> FPR move in C). Next: Math3D.h's _sqrtf (Math3D.h:129, local copies in 6+
+  form), vu0LengthSq's mtc1 (no GPR -> FPR move in C). Next: Math3D.h's _sqrtf/_fabsf (Math3D.h:129-137, local copies in 19
   units); PackMan.h's free inlines 117-128.
 - **Done (cleanup/vector-types, merged 2026-11-07; superseded 2026-11-10, now in Coord.h):** F_UL, G_XY, G_XYZ, G_RGBA, G_UV,
   G_ST at the end of System/Vector.h and the C++ QWdata after khtypes.h's u_int128 (the original's .mdebug type order,

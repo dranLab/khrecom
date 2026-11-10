@@ -700,13 +700,22 @@ static BOOL chackBBOX(const FVECTOR& vMax, const FVECTOR& vMin, const FVECTOR& v
     if (vMin.z > vSMMax.z) return FALSE;
     return TRUE;
 }
-/* Parked: 59 of 289 lines (2026-11-09): only loop.c on the draw loop over pBuf[j] (line 940) differs: the original
- * keeps `li 12; mult` in the loop, ours strength-reduces it to a pointer, so the registers shift (ours spills i, the
- * original keeps i in s6 and spills hHnd; s6/s7/s8 renamed throughout). Mechanism (tested with -dL): the constant-12
- * movable is "not desirable" once that loop has more than about 61 real insns at loop time (threshold measured: 60
- * moved, 66 not), and then the mult is no giv and stays, exactly the original's code; ours has 28. So the original's
- * loop held about 35 more RTL insns at loop time that later passes deleted; what source made them is unknown (lines
- * 942-943, 945-950 and 952-954 keep no code). Shape from the .mdebug block tree and the line markers (this draft
+/* Parked: 59 of 289 lines (2026-11-10): two independent differences. (1) The draw loop over pBuf[j] (line 940): the
+ * original keeps `li 12; mult` in the loop, ours strength-reduces it to a pointer. (2) Allocation: ours spills i and
+ * keeps hHnd in s8, the original keeps i in s6 and spills hHnd (s6/s7/s8 renamed throughout). (2) does not follow from
+ * (1): with the mult kept (draw loop padded to 148 insns with empty asms) i stays spilled. Global-alloc priorities
+ * (-dl): hHnd 8 refs / live 106 = 2264, i 15 refs / live 262 = 1717; one more i use (an `asm("" : : "r"(i))` after
+ * sortCShadowModel) plus 40 memory-clobber asms in the draw loop gave the original's allocation (53 lines, the rest
+ * the giv), either alone did not. For (1) (-dL): the `li 12` movable is "not desirable" in the draw loop from about
+ * 64 real insns (ours 28), but then loop pass 1 of the outer loop combines it with the outer `li 12` of
+ * `&pSdwBuf[i]` (savings 2, life 2: hoisted while the outer loop has fewer than about 252 insns, ours 163) and pass 2
+ * reduces the giv anyway; only above that (120 pads) the mult stays. So the original's loops held far more RTL at
+ * loop and flow time (tens of insns in the draw loop, ~90 in the outer one) that combine/reload deleted, or the
+ * draw loop's 12 was not a movable at all (pseudo set twice); the source of either is unknown (lines 942-943,
+ * 945-946, 948-950, 952, 954 have no note; 947 (break) and 953 have code-less notes, 953 at the j++: nDispNum++ after
+ * _draw fits, codegen-neutral). Tried 2026-11-10 without change: nDispNum++ after _draw, braces on the break,
+ * pSdwBuf[i] for nNum/hHnd, pSdwBuf + i, a dead FVECTOR set (survives: worse), a dead counter, j = nNum before break
+ * (becomes a biv increment), goto loop (mult stays, layout and allocation differ: 75). Shape from the .mdebug block tree and the line markers (this draft
  * follows them): i/j/bFirst function-level, the outer loop's body block at depth 1 (while), the then-block of
  * `if (pBuf[j].pModel)` holds a local .mdebug omits (a `CShadowModel&` reproduces the block, a pointer local would be
  * listed), the map loop as nested ifs with one _getNextDrawable at the end (966/967/968 separate lines). Codegen-neutral
