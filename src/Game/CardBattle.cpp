@@ -82,241 +82,7 @@ public:
 namespace PL {
 extern FLOAT g_fDefAttr[18][6];
 }
-/* file-scope constant table (deferred: emitted after the vtables, as in the original) */
-static const CARD_DATA cardDataTbl[224] = {
-    {{0}, 0, 0, 0, ""},
-    {{17}, 2, 0, 3, "Kingdom Key"},
-    {{17}, 2, 1, 3, "Three Wishes"},
-    {{17}, 2, 2, 3, "Crabclaw"},
-    {{17}, 2, 3, 3, "Pumpkinhead"},
-    {{17}, 2, 4, 3, "Fairy Harp"},
-    {{17}, 2, 5, 3, "Wishing Star"},
-    {{17}, 2, 6, 3, "Spellbinder"},
-    {{17}, 2, 7, 3, "Metal Chocobo"},
-    {{17}, 3, 0, 3, "Olympia"},
-    {{17}, 3, 1, 3, "Lionheart"},
-    {{17}, 3, 2, 3, "Lady Luck"},
-    {{17}, 3, 3, 3, "Divine Rose"},
-    {{17}, 3, 4, 3, "Oathkeeper"},
-    {{17}, 3, 5, 3, "Oblivion"},
-    {{17}, 3, 6, 3, "Ultima Weapon"},
-    {{17}, 3, 7, 3, "Diamond Dust"},
-    {{17}, 4, 0, 3, "One-Winged Angel"},
-    {{17}, 4, 1, 4, "Soul Eater"},
-    {{17}, 4, 2, 3, "Star Seeker"},
-    {{17}, 4, 3, 3, "Monochrome"},
-    {{17}, 4, 4, 3, "Follow the Wind"},
-    {{17}, 4, 5, 3, "Hidden Dragon"},
-    {{17}, 4, 6, 3, "Photon Debugger"},
-    {{17}, 4, 7, 3, "Bond of Flame"},
-    {{17}, 26, 0, 0, "-"},
-    {{34}, 5, 0, 3, "Fire"},
-    {{34}, 5, 1, 3, "Blizzard"},
-    {{34}, 5, 2, 3, "Thunder"},
-    {{34}, 5, 3, 3, "Cure"},
-    {{34}, 5, 4, 3, "Gravity"},
-    {{34}, 5, 5, 3, "Stop"},
-    {{34}, 5, 6, 3, "Aero"},
-    {{34}, 26, 2, 0, "-"},
-    {{34}, 26, 1, 0, "-"},
-    {{51}, 5, 7, 3, "Simba"},
-    {{51}, 6, 0, 3, "Genie"},
-    {{51}, 6, 1, 3, "Bambi"},
-    {{51}, 6, 2, 3, "Dumbo"},
-    {{51}, 6, 3, 3, "Tinker Bell"},
-    {{51}, 6, 4, 3, "Mushu"},
-    {{51}, 6, 5, 3, "Cloud"},
-    {{68}, 6, 6, 6, "Potion"},
-    {{68}, 6, 7, 6, "Hi-Potion"},
-    {{68}, 7, 0, 2, "Mega-Potion"},
-    {{68}, 7, 1, 2, "Ether"},
-    {{68}, 7, 2, 2, "Mega-Ether"},
-    {{68}, 7, 3, 2, "Elixir"},
-    {{68}, 7, 4, 2, "Megalixir"},
-    {{85}, 7, 5, 2, "Donald Duck"},
-    {{85}, 7, 6, 2, "Goofy"},
-    {{85}, 7, 7, 2, "Aladdin"},
-    {{85}, 8, 0, 2, "Ariel"},
-    {{85}, 8, 1, 2, "Jack"},
-    {{85}, 8, 2, 2, "Peter Pan"},
-    {{85}, 8, 3, 2, "The Beast"},
-    {{85}, 8, 4, 4, "The King"},
-    {{85}, 8, 5, 2, "Pluto"},
-    {{102}, 8, 6, 6, "Guard Armor"},
-    {{102}, 8, 6, 6, "Trickmaster"},
-    {{102}, 8, 6, 6, "Jafar"},
-    {{102}, 8, 6, 6, "Oogie Boogie"},
-    {{102}, 8, 6, 6, "Parasite Cage"},
-    {{102}, 8, 6, 6, "Ursula"},
-    {{102}, 8, 6, 6, "Dragon Maleficent"},
-    {{102}, 8, 6, 6, "Darkside"},
-    {{230}, 8, 7, 4, "-"},
-    {{230}, 9, 0, 0, "-"},
-    {{119}, 9, 1, 6, "Shadow"},
-    {{119}, 9, 2, 2, "Soldier"},
-    {{119}, 9, 3, 6, "Large Body"},
-    {{119}, 9, 4, 2, "Red Nocturne"},
-    {{119}, 9, 5, 2, "Blue Rhapsody"},
-    {{119}, 9, 6, 2, "Yellow Opera"},
-    {{119}, 9, 7, 2, "Green Requiem"},
-    {{119}, 10, 0, 6, "Powerwild"},
-    {{119}, 10, 1, 2, "Bouncywild"},
-    {{119}, 10, 2, 2, "Air Soldier"},
-    {{119}, 10, 3, 2, "Bandit"},
-    {{119}, 10, 4, 6, "Fat Bandit"},
-    {{119}, 10, 5, 2, "Barrel Spider"},
-    {{119}, 10, 6, 6, "Search Ghost"},
-    {{119}, 10, 7, 6, "Sea Neon"},
-    {{119}, 11, 0, 2, "Screwdiver"},
-    {{119}, 11, 1, 2, "Aquatank"},
-    {{119}, 11, 2, 6, "Wight Knight"},
-    {{119}, 11, 3, 2, "Gargoyle"},
-    {{119}, 11, 4, 6, "Pirate"},
-    {{119}, 11, 5, 2, "Air Pirate"},
-    {{119}, 11, 6, 4, "Darkball"},
-    {{119}, 11, 7, 6, "Defender"},
-    {{119}, 12, 0, 2, "Wyvern"},
-    {{119}, 12, 1, 2, "Wizard"},
-    {{119}, 12, 2, 2, "Neoshadow"},
-    {{119}, 12, 3, 2, "White Mushroom"},
-    {{119}, 12, 4, 2, "Black Fungus"},
-    {{119}, 12, 5, 2, "Creeper Plant"},
-    {{119}, 12, 6, 2, "Tornado Step"},
-    {{119}, 12, 7, 2, "Crescendo"},
-    {{119}, 13, 0, 6, "Guard Armor"},
-    {{119}, 13, 1, 6, "Parasite Cage"},
-    {{119}, 13, 2, 6, "Trickmaster"},
-    {{119}, 13, 3, 6, "Darkside"},
-    {{119}, 13, 4, 2, "Card Soldier"},
-    {{119}, 13, 5, 6, "Hades"},
-    {{119}, 13, 6, 6, "Jafar"},
-    {{119}, 13, 7, 6, "Oogie Boogie"},
-    {{119}, 14, 0, 6, "Ursula"},
-    {{119}, 14, 1, 6, "Hook"},
-    {{119}, 14, 2, 6, "Dragon Maleficent"},
-    {{119}, 14, 3, 2, "Riku"},
-    {{119}, 14, 4, 2, "Axel"},
-    {{119}, 14, 5, 2, "Larxene"},
-    {{119}, 14, 6, 2, "Vexen"},
-    {{119}, 14, 7, 2, "Marluxia"},
-    {{119}, 15, 0, 6, "Lexaeus"},
-    {{119}, 15, 1, 2, "Ansem"},
-    {{119}, 15, 3, 6, "Zexion"},
-    {{119}, 15, 4, 2, "Xemnas"},
-    {{119}, 15, 5, 2, "Xigbar"},
-    {{119}, 15, 6, 2, "Xaldin"},
-    {{119}, 15, 7, 2, "Sa\x83\xc7x"},
-    {{119}, 16, 0, 2, "Demyx"},
-    {{119}, 16, 1, 2, "Luxord"},
-    {{119}, 16, 2, 2, "Roxas"},
-    {{119}, 21, 6, 2, "Gold Card"},
-    {{119}, 21, 7, 2, "Platinum Card"},
-    {{119}, 15, 2, 0, "Card Soldier Spade"},
-    {{119}, 13, 4, 0, "Card Soldier Heart"},
-    {{23}, 22, 0, 0, "\x83N\x83\x89\x83" "E\x83hA"},
-    {{23}, 22, 1, 0, "\x83N\x83\x89\x83" "E\x83hB"},
-    {{23}, 22, 2, 0, "\x83n\x83" "f\x83XA"},
-    {{39}, 22, 3, 0, "\x83n\x83" "f\x83XB"},
-    {{23}, 22, 4, 0, "\x83t\x83" "b\x83NA"},
-    {{23}, 22, 5, 0, "\x83t\x83" "b\x83NB"},
-    {{23}, 22, 6, 0, "\x83t\x83" "b\x83NC"},
-    {{39}, 22, 7, 0, "\x83t\x83" "b\x83ND"},
-    {{23}, 23, 0, 0, "\x83" "A\x83N\x83Z\x83\x8b" "A"},
-    {{23}, 23, 1, 0, "\x83" "A\x83N\x83Z\x83\x8b" "B"},
-    {{23}, 23, 2, 0, "\x83\x89\x83N\x83V\x81[\x83kA"},
-    {{23}, 23, 3, 0, "\x83\x89\x83N\x83V\x81[\x83kB"},
-    {{39}, 23, 4, 0, "\x83\x89\x83N\x83V\x81[\x83kC"},
-    {{23}, 23, 5, 0, "\x83\x8a\x83NA"},
-    {{23}, 23, 6, 0, "\x83\x8a\x83NB"},
-    {{23}, 23, 7, 0, "\x83\x8a\x83NC"},
-    {{23}, 24, 0, 0, "\x83\x8a\x83ND"},
-    {{23}, 24, 1, 0, "\x83\x94\x83" "B\x83N\x83Z\x83\x93" "A"},
-    {{39}, 24, 2, 0, "\x83\x94\x83" "B\x83N\x83Z\x83\x93" "B"},
-    {{23}, 24, 3, 0, "\x83}\x81[\x83\x8b\x81[\x83V\x83\x83" "A"},
-    {{23}, 24, 4, 0, "\x83}\x81[\x83\x8b\x81[\x83V\x83\x83" "B"},
-    {{39}, 24, 5, 0, "\x83}\x81[\x83\x8b\x81[\x83V\x83\x83" "C"},
-    {{119}, 24, 6, 0, "\x83}\x81[\x83\x8b\x81[\x83V\x83\x83" "2"},
-    {{119}, 24, 7, 0, "\x83}\x81[\x83\x8b\x81[\x83V\x83\x83" "3"},
-    {{23}, 25, 0, 0, "\x83\x8c\x83N\x83Z\x83" "E\x83XA"},
-    {{23}, 25, 1, 0, "\x83\x8c\x83N\x83Z\x83" "E\x83XB"},
-    {{39}, 25, 2, 0, "\x83\x8c\x83N\x83Z\x83" "E\x83XC"},
-    {{23}, 25, 3, 0, "\x83" "A\x83\x93\x83Z\x83\x80" "A"},
-    {{39}, 25, 4, 0, "\x83" "A\x83\x93\x83Z\x83\x80" "B"},
-    {{39}, 25, 5, 0, "\x83[\x83N\x83V\x83I\x83\x93" "A"},
-    {{119}, 26, 3, 0, "-"},
-    {{136}, 0, 0, 6, "\x83\x8a\x83\x8d\x81[\x83h"},
-    {{153}, 16, 3, 6, "Tranquil Darkness"},
-    {{153}, 16, 4, 6, "Teeming Darkness"},
-    {{153}, 16, 5, 6, "Feeble Darkness"},
-    {{153}, 16, 6, 6, "Almighty Darkness"},
-    {{153}, 16, 7, 6, "Sleeping Darkness"},
-    {{153}, 17, 0, 6, "Looming Darkness"},
-    {{153}, 17, 1, 2, "Premium Room"},
-    {{153}, 17, 2, 2, "White Room"},
-    {{153}, 17, 3, 6, "Black Room"},
-    {{153}, 17, 4, 6, "Bottomless Darkness"},
-    {{153}, 17, 5, 6, "Roulette Room"},
-    {{169}, 17, 6, 6, "Martial Waking"},
-    {{169}, 17, 7, 2, "Sorcerous Waking"},
-    {{169}, 18, 0, 2, "Alchemic Waking"},
-    {{169}, 18, 1, 6, "Meeting Ground"},
-    {{169}, 18, 2, 6, "Stagnant Space"},
-    {{169}, 18, 3, 6, "Strong Initiative"},
-    {{169}, 18, 4, 6, "Lasting Daze"},
-    {{185}, 18, 5, 2, "Calm Bounty"},
-    {{185}, 18, 6, 2, "Guarded Trove"},
-    {{185}, 18, 7, 2, "False Bounty"},
-    {{185}, 19, 0, 6, "Moment's Reprieve"},
-    {{185}, 19, 1, 6, "Mingling Worlds"},
-    {{185}, 19, 2, 2, "Moogle Room"},
-    {{185}, 19, 3, 6, "Random Joker"},
-    {{202}, 19, 4, 6, "Key of Beginnings"},
-    {{202}, 19, 5, 6, "Key of Guidance"},
-    {{202}, 19, 6, 6, "Key to Truth"},
-    {{202}, 19, 7, 2, "Key to Rewards"},
-    {{219}, 20, 0, 6, "Traverse Town"},
-    {{219}, 20, 3, 6, "Agrabah"},
-    {{219}, 20, 2, 6, "Olympus Coliseum"},
-    {{219}, 20, 1, 6, "Wonderland"},
-    {{219}, 20, 5, 6, "Monstro"},
-    {{219}, 20, 4, 6, "Halloween Town"},
-    {{219}, 20, 6, 6, "Atlantica"},
-    {{219}, 20, 7, 6, "Neverland"},
-    {{219}, 21, 0, 6, "Hollow Bastion"},
-    {{219}, 21, 1, 2, "100 Acre Woods"},
-    {{219}, 21, 2, 6, "Twilight Town"},
-    {{219}, 21, 3, 6, "Destiny Islands"},
-    {{219}, 21, 4, 4, "Castle Oblivion"},
-    {{13}, 0, 0, 0, "EXP\x90\xc2\x8f\xac"},
-    {{13}, 0, 1, 0, "EXP\x90\xc2\x92\x86"},
-    {{13}, 0, 2, 0, "EXP\x90\xc2\x91\xe5"},
-    {{13}, 0, 3, 0, "EXP\x90\xd4\x8f\xac"},
-    {{13}, 0, 4, 0, "EXP\x90\xd4\x92\x86"},
-    {{13}, 0, 5, 0, "EXP\x90\xd4\x91\xe5"},
-    {{13}, 0, 6, 0, "EXP\x8b\xe2"},
-    {{13}, 1, 0, 0, "HP\x8f\xac"},
-    {{13}, 1, 1, 0, "HP\x91\xe5"},
-    {{13}, 2, 0, 0, "MP\x8f\xac"},
-    {{13}, 2, 1, 0, "MP\x91\xe5"},
-    {{13}, 3, 0, 0, "P"},
-    {{13}, 4, 0, 0, "R"},
-    {{12}, 0, 0, 0, "Unknown Room"},
-    {{12}, 0, 0, 0, "Conqueror's Respite"},
-    {{12}, 0, 0, 0, "Room of Rewards"},
-    {{12}, 0, 0, 0, ""},
-    {{12}, 0, 0, 0, ""},
-    {{0}, 0, 0, 0, ""},
-    {{0}, 0, 0, 0, ""},
-    {{0}, 0, 0, 0, ""},
-};
-/* CARD's inline constructor (Game/Card.cpp's _setCard) */
-static inline void _setCard(CARD& c, USHORT nKind, BYTE nNumber) {
-    c.m_nId = 0;
-    c.m_nNumber2 = nNumber;
-    c.m_nKind2 = nKind;
-    c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0;
-    c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1;
-}
+#line 320
 
 
 
@@ -467,16 +233,16 @@ void CCardBattle::init() {
         m_mesCardInfo[i].m_nWork0 = 0;
         m_mesCardInfo[i].m_nWork1 = 0;
         for (j = 0; j < 7; j++) {
-            _setCard(m_cardData[i][j], 0, 0);
+            m_cardData[i][j].init(0, 0);
             m_pCard[i][j] = NULL;
-            _setCard(m_mesCardInfo[i].m_cardData[j], 0, 0);
+            m_mesCardInfo[i].m_cardData[j].init(0, 0);
         }
         m_iCount[i] = 0;
         m_iPoint[i] = 0;
         m_iStock[i] = 0;
         m_iExtra[i] = 0;
         m_iFirst[i] = 0;
-        _setCard(m_cardEnchant[i], 0, 0);
+        m_cardEnchant[i].init(0, 0);
         m_pEnchantGauge[i] = NULL;
         m_nEnchantTime[i] = 0;
         m_pEnchant[i] = NULL;
@@ -487,7 +253,7 @@ void CCardBattle::init() {
     m_iCountGimmick = 0;
     m_iCountFriend = 0;
     m_iCountPluto = 0;
-    _setCard(m_cardGimmick, 0, 0);
+    m_cardGimmick.init(0, 0);
     m_tqMainTimer = 0;
     m_tqSubTimer = 0;
     m_uiFlag = 0;
@@ -501,7 +267,7 @@ void CCardBattle::init() {
         cardID = pRoom->getCardID();
         cardNum = pRoom->getCardNumber();
     }
-    _setCard(m_cardRoom, cardID, cardNum);
+    m_cardRoom.init(cardID, cardNum);
     if (!m_pSeqCtrlEnemy) {
         m_pSeqCtrlEnemy = new (__FILE__ "(237)") D2::C2DSeqCtrl(2);
     }
@@ -985,7 +751,7 @@ void CCardBattle::exePlaying(INT inUser) {
         }
         if (iCount >= 2) decEnchantTime(inUser, 0x2A, 0);
         for (i = 0; i < iCount; i++) {
-            _setCard(m_cardData[_PLAYER][i], 0, 0);
+            m_cardData[_PLAYER][i].init(0, 0);
             if (m_pCard[_PLAYER][i]) m_pCard[_PLAYER][i] = NULL;
         }
         m_iCount[_PLAYER] = 0;
@@ -1058,7 +824,7 @@ void CCardBattle::exePlaying(INT inUser) {
         uiResult = 0;
         uiState = 0;
         hPlayer = 0;
-        _setCard(m_cardData[_PLAYER][0], 0, 0);
+        m_cardData[_PLAYER][0].init(0, 0);
         m_pCard[_PLAYER][0] = NULL;
         m_iCount[_PLAYER] = 0;
         m_tqPlayTimer[_PLAYER] = 0;
@@ -1106,7 +872,7 @@ void CCardBattle::exePlaying(INT inUser) {
         uiResult = 0;
         uiState = 0;
         hPlayer = 0;
-        _setCard(m_cardData[_PLAYER][0], 0, 0);
+        m_cardData[_PLAYER][0].init(0, 0);
         m_pCard[_PLAYER][0] = NULL;
         m_iCount[_PLAYER] = 0;
         m_tqPlayTimer[_PLAYER] = 0;
@@ -1274,7 +1040,7 @@ INT CCardBattle::setPlayStock(HANDLE inHandle, INT inUser, CBattleCard** inCard,
             m_cardData[_PLAYER][i] = *m_pCard[_PLAYER][i]->getCardData();
             m_pCard[_PLAYER][i]->setPlayStock(count);
         } else {
-            _setCard(m_cardData[_PLAYER][i], 0, 0);
+            m_cardData[_PLAYER][i].init(0, 0);
         }
         inCard++;
     }
@@ -1391,7 +1157,7 @@ void CCardBattle::resetNowPlaying(INT inUser) {
         } else {
             CGameWork::setFlag(1, 0x14, TRUE);
         }
-        _setCard(m_cardGimmick, 0, 0);
+        m_cardGimmick.init(0, 0);
         m_uiFlag &= ~0x8000;
     }
     if (m_iStock[_PLAYER] > 0) decEnchantTime(inUser, 0x2A, 0);
@@ -1399,7 +1165,7 @@ void CCardBattle::resetNowPlaying(INT inUser) {
     m_uiState[_PLAYER] = 0;
     m_hOwner[_PLAYER] = 0;
     for (INT i = 0; i < 7; i++) {
-        _setCard(m_cardData[_PLAYER][i], 0, 0);
+        m_cardData[_PLAYER][i].init(0, 0);
         if (m_pCard[_PLAYER][i]) {
             m_pCard[_PLAYER][i]->setUseEnd();
             m_pCard[_PLAYER][i] = NULL;
@@ -1419,7 +1185,7 @@ void CCardBattle::resetEnchantCard(INT inUser) {
     }
     m_uiFlag &= ~(0x400 << _PLAYER);
     m_uiFlag &= ~(0x1000 << (_PLAYER ^ 1));
-    _setCard(m_cardEnchant[_PLAYER], 0, 0);
+    m_cardEnchant[_PLAYER].init(0, 0);
     m_nEnchantTime[_PLAYER] = 0;
     if (m_pEnchantGauge[_PLAYER]) m_pEnchantGauge[_PLAYER]->destroy();
     m_pEnchantGauge[_PLAYER] = NULL;
@@ -1591,14 +1357,14 @@ void CCardBattle::notifyMakeGimmick(CARD* inData, INT inFlag) {
     mesInfo.m_nExtra = 0;
     mesInfo.m_nFirst = 0;
     mesInfo.m_cardData[0] = p->m_cardGimmick;
-    _setCard(mesInfo.m_cardData[1], 0, 0);
-    _setCard(mesInfo.m_cardData[2], 0, 0);
+    mesInfo.m_cardData[1].init(0, 0);
+    mesInfo.m_cardData[2].init(0, 0);
     p->m_pMesage->sendMessage(0, p->getHandle(), p->m_hGimmickOwner, 6, &mesInfo);
 }
 void CCardBattle::notifyCompleteGimmick() {
     if (m_pInstance) {
         TRACE("CB:: notifyCompleteGimmick() =%d,\n", m_pInstance->m_cardGimmick.m_nKind);
-        _setCard(m_pInstance->m_cardGimmick, 0, 0);
+        m_pInstance->m_cardGimmick.init(0, 0);
         _ref(m_pInstance)->m_uiFlag &= ~0x8000;
     }
 }
@@ -1721,7 +1487,7 @@ INT CCardBattle::setEnemyCard(HANDLE inEnemy, INT inKind, INT inNumber) {
     if (m_cardGimmick.m_nKind) return 0;
     if (m_uiDuelState >= 2) return 0;
     CARD card;
-    _setCard(card, inKind, inNumber);
+    card.init(inKind, inNumber);
     INT result = setPlayCard(inEnemy, 2, NULL, &card, 0);
     if (result > 0) initPlayingEnemy(inEnemy);
     return result;
@@ -2111,7 +1877,7 @@ void CCardBattle::exeBio() {
     }
 }
 void CardBattle::getDropFriendCard(CARD& outData, INT inRate) {
-    _setCard(outData, 0, 0);
+    outData.init(0, 0);
     if (getDropPlutoCard(outData)) return;
     if (CCardBattle::getFriendCount() >= 5) return;
     INT worldID = CSceneInfo::getCurrentWorldID(0);
@@ -2180,7 +1946,7 @@ void CardBattle::getDropFriendCard(CARD& outData, INT inRate) {
             }
         }
     } while (!flag);
-    _setCard(outData, g_DropFriendCardList[worldID][no], RND::genrand_int31() % 10);
+    outData.init(g_DropFriendCardList[worldID][no], RND::genrand_int31() % 10);
 }
 INT CardBattle::getDropPlutoCard(CARD& outData) {
     if (CGame::isRikuGame()) return 0;
@@ -2203,7 +1969,7 @@ INT CardBattle::getDropPlutoCard(CARD& outData) {
     if (r >= 200) return 0;
     if (bCheck && !(CGameWork::getInt(0, 0x22) & 0x100)) return 0;
     if (bCheck2 && pRev->getHave(0, 1, 1, 0, 0) >= 10) return 0;
-    _setCard(outData, 0x39, RND::genrand_int31() % 10);
+    outData.init(0x39, RND::genrand_int31() % 10);
     return 1;
 }
 void CCardBattle::exeDuel() {
@@ -2400,7 +2166,7 @@ BOOL CCardBattle::setEnemyDuelCard(HANDLE inHandle, INT inIndex, INT inNumber) {
     if (m_uiState[0]) return 0;
     if (m_uiState[1]) return 0;
     CARD card;
-    _setCard(card, inIndex, inNumber);
+    card.init(inIndex, inNumber);
     INT result = setPlayCard(inHandle, 2, NULL, &card, 0);
     if (result > 0) initPlayingEnemy(inHandle);
     return result;
@@ -2438,7 +2204,7 @@ INT CCardBattle::setDuelPlayStock(CBattleCard** inCard, INT inSkill) {
             m_cardData[0][i] = *pCard->getCardData();
             pCard->setPlayDuelStock(m_nDuelBreakCountMax);
         } else {
-            _setCard(m_cardData[0][i], 0, 0);
+            m_cardData[0][i].init(0, 0);
         }
     }
     m_iStock[0] = inSkill;
