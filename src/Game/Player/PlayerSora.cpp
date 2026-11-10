@@ -111,19 +111,19 @@ void ScaleVectorXYZ(FVECTOR& outV, const FVECTOR& inV, FLOAT inScale);
 void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 /* FMATRIX inlines of Coord.h */
 extern "C" void* memset(void* s, int c, unsigned int n);
-/* the inline unit matrix of vu0.h */
-static inline void _unitMatrixVu0(FMATRIX& m) {
-    asm volatile("vmr32.xyzw $vf1, $vf0\n"
-                 "sqc2 $vf0, 0x30(%0)\n"
-                 "vmr32.xyzw $vf2, $vf1\n"
-                 "sqc2 $vf1, 0x20(%0)\n"
-                 "vmr32.xyzw $vf3, $vf2\n"
-                 "sqc2 $vf2, 0x10(%0)\n"
-                 "sqc2 $vf3, 0x0(%0)\n"
-                 :
-                 : "r"(&m)
-                 : "memory");
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* the angle wrap of Com.h, with a separate result variable (the original's mov.s copy) */
 static inline FLOAT _limitPI2(FLOAT d) {
@@ -2436,7 +2436,7 @@ void CPlayerSora::exeStockSkill() {
                     FLOAT speed = m_pAtkData->MAX_SPEED * 0.1f / 60.0f;
                     FVECTOR v = {{0.0f, -0.1f, 1.0f, 1.0f}};
                     FMATRIX m;
-                    _unitMatrixVu0(m);
+                    m.init();
                     RotMatrixY(m, m, rot.y);
                     ApplyMatrixXYZ(v, m, v);
                     ScaleVectorXYZ(v, v, speed);

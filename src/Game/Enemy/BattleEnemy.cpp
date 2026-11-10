@@ -143,18 +143,18 @@ static inline FLOAT _sqrtf(FLOAT x) {
     asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));
     return ret;
 }
-static inline void _unitMatrixVu0(FMATRIX& m) {
-    asm volatile("vmr32.xyzw $vf1, $vf0\n"
-                 "sqc2 $vf0, 0x30(%0)\n"
-                 "vmr32.xyzw $vf2, $vf1\n"
-                 "sqc2 $vf1, 0x20(%0)\n"
-                 "vmr32.xyzw $vf3, $vf2\n"
-                 "sqc2 $vf2, 0x10(%0)\n"
-                 "sqc2 $vf3, 0x0(%0)\n"
-                 :
-                 : "r"(&m)
-                 : "memory");
-}
+
+
+
+
+
+
+
+
+
+
+
+
 extern "C" float sinf(float);
 extern "C" float cosf(float);
 extern "C" float atan2f(float, float);
@@ -3372,7 +3372,7 @@ void CBattleEnemy::enableConfuse_(BOOL inSw) {
         }
         m_ullBtlEnemyFlag |= 0x40000;
         m_tqConfuseTimer = 21000;
-        _unitMatrixVu0(m);
+        vu0UnitMatrix(m);
         RotMatrixY(m, m, Math3D::LimitPI(DEG2RAD(RND::genrand_real1() * 360.0f)));
         m_vConfusePlayerPos.set(0.0f, 0.0f, RND::genrand_real1() * 3.0f + 2.0f);
         ApplyMatrix(m_vConfusePlayerPos, m, m_vConfusePlayerPos);
@@ -3598,7 +3598,7 @@ void CBattleEnemy::updateSpotLight_() {
     if (!effect) return;
     FVECTOR n = m_pMove->getDetectNormal();
     FMATRIX m;
-    _unitMatrixVu0(m);
+    vu0UnitMatrix(m);
     RotMatrixX(m, m, atan2f(_sqrtf(n.z * n.z + n.x * n.x), n.y));
     RotMatrixY(m, m, atan2f(n.x, n.z));
     FVECTOR pos = getPos();

@@ -64,18 +64,18 @@ static inline FLOAT _sqrtf(FLOAT h) {
     return ret;
 }
 
-static inline void _unitMatrixVu0(FMATRIX& m) {
-    asm volatile("vmr32.xyzw $vf1, $vf0\n"
-                 "sqc2 $vf0, 0x30(%0)\n"
-                 "vmr32.xyzw $vf2, $vf1\n"
-                 "sqc2 $vf1, 0x20(%0)\n"
-                 "vmr32.xyzw $vf3, $vf2\n"
-                 "sqc2 $vf2, 0x10(%0)\n"
-                 "sqc2 $vf3, 0x0(%0)\n"
-                 :
-                 : "r"(&m)
-                 : "memory");
-}
+
+
+
+
+
+
+
+
+
+
+
+
 
 #define CARRY_GRAVITY 0.32666668f
 #define CARRY_HALF_PI 1.5707964f
@@ -433,7 +433,7 @@ void CGimmickCarry::CarryThrow() {
     } else {
         ang = pCGimMan->getThrowMaxAngle();
     }
-    _unitMatrixVu0(m);
+    m.init();
     RotMatrixX(m, m, -ang * 0.017453292f);
     RotMatrixY(m, m, g_pPlayer->getRot().y);
     v.set(0.0f, 0.0f, pCGimMan->getThrowDirPow(), 0.0f);

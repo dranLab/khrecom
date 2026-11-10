@@ -261,7 +261,7 @@ CMap::~CMap() {
     m_pTexAnm = NULL;
     CGame::stopConstEnvSE(-1);
 }
-static inline void _unitMatrixVu0(FMATRIX& m) {
+static inline void _unitMatrixVu0(FMATRIX& m) { /* the parked init draft's (live code: vu0.h's vu0UnitMatrix) */
     asm volatile("vmr32.xyzw $vf1, $vf0\n"
                  "sqc2 $vf0, 0x30(%0)\n"
                  "vmr32.xyzw $vf2, $vf1\n"
@@ -291,7 +291,7 @@ static inline void* _getAZFTbl(void* pInAZF, INT nIndex) {
 }
 static inline void _rotMatrixZ(FMATRIX& m, const TDEG& a) {
     FMATRIX rz;
-    _unitMatrixVu0(rz);
+    vu0UnitMatrix(rz);
     rz.m[0][0] = rz.m[1][1] = tcos(a);
     FLOAT s = tsin(a);
     rz.m[0][1] = s;
@@ -300,7 +300,7 @@ static inline void _rotMatrixZ(FMATRIX& m, const TDEG& a) {
 }
 static inline void _rotMatrixY(FMATRIX& m, const TDEG& a) {
     FMATRIX ry;
-    _unitMatrixVu0(ry);
+    vu0UnitMatrix(ry);
     ry.m[2][2] = ry.m[0][0] = tcos(a);
     FLOAT s = tsin(a);
     ry.m[2][0] = s;
@@ -309,7 +309,7 @@ static inline void _rotMatrixY(FMATRIX& m, const TDEG& a) {
 }
 static inline void _rotMatrixX(FMATRIX& m, const TDEG& a) {
     FMATRIX rx;
-    _unitMatrixVu0(rx);
+    vu0UnitMatrix(rx);
     rx.m[1][1] = rx.m[2][2] = tcos(a);
     FLOAT s = tsin(a);
     rx.m[1][2] = s;
@@ -1122,7 +1122,7 @@ CSky::CSky(CTask* pInParent, void* pAZF, ZONEDATA* pZone) : CTaskSecondary(pInPa
     m_vColor.setAll(1.0f);
     addCoord(m_modelSuu + 1);
     CCoord& crd = Crd(0);
-    _unitMatrixVu0(crd.m_Local);
+    vu0UnitMatrix(crd.m_Local);
     crd.touch();
     USHORT nLayer = 3;
     for (INT i = 0; i < m_modelSuu; i++) {
@@ -1149,7 +1149,7 @@ CSky::CSky(CTask* pInParent, void* pAZF, ZONEDATA* pZone) : CTaskSecondary(pInPa
         if (!pAZF) d = NULL;
         else d = ((MODELDATA**)pAZF)[nIndex];
         if (!d) AssertApp(D_00480CE8, 1846, D_00480D08, 0);
-        _unitMatrixVu0(Crd(i + 1).m_Local);
+        vu0UnitMatrix(Crd(i + 1).m_Local);
         Crd(i + 1).m_pParent = &Crd(0);
         Crd(i + 1).touch();
         model.assign(this, d, i + 1);

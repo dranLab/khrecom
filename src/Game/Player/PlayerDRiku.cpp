@@ -126,18 +126,18 @@ namespace Math3D {
 FLOAT LimitPI(FLOAT pai);
 }
 
-static inline void _unitMatrixVu0(FMATRIX& m) {
-    asm volatile("vmr32.xyzw $vf1, $vf0\n"
-                 "sqc2 $vf0, 0x30(%0)\n"
-                 "vmr32.xyzw $vf2, $vf1\n"
-                 "sqc2 $vf1, 0x20(%0)\n"
-                 "vmr32.xyzw $vf3, $vf2\n"
-                 "sqc2 $vf2, 0x10(%0)\n"
-                 "sqc2 $vf3, 0x0(%0)\n"
-                 :
-                 : "r"(&m)
-                 : "memory");
-}
+
+
+
+
+
+
+
+
+
+
+
+
 
 #include "Game/GameWork.h"
 
@@ -815,7 +815,7 @@ void CPlayerDRiku::exeJump2nd() {
         if (speed > 0.0f) m_fMoveSpdXZ = Movement::Approach(m_fMoveSpdXZ, speed, 0.2f, m_fFrameRate);
         else m_fMoveSpdXZ = Movement::Approach(m_fMoveSpdXZ, speed, 0.4f, m_fFrameRate);
         FMATRIX m;
-        _unitMatrixVu0(m);
+        m.init();
         vec.set(0.0f, 0.0f, 1.0f, 1.0f);
         RotMatrixY(m, m, m_fJumpDir);
         ApplyMatrix33(vec, m, vec);
@@ -2176,7 +2176,7 @@ void CPlayerDRiku::searchWarpPos(FLOAT inDir) {
     pos.y -= shiftY;
     if (pos.y < 0.1f) pos.y = 0.1f;
     m_vEnemyPos = pos;
-    _unitMatrixVu0(m);
+    m.init();
     RotMatrixY(m, m, inDir);
     for (INT i = 0; i < 2; i++) {
         ApplyMatrix33(dir, m, g_vDir[i]);

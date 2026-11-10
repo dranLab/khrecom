@@ -27,18 +27,18 @@ static inline FLOAT _frameRate(const CTask* inTask) {
     return inTask->getFrameRate() * 0.020000001f;
 }
 
-static inline void _unitMatrix(FMATRIX& m) {
-    __asm__ volatile("vmr32.xyzw $vf1, $vf0\n"
-                     "sqc2 $vf0, 0x30(%0)\n"
-                     "vmr32.xyzw $vf2, $vf1\n"
-                     "sqc2 $vf1, 0x20(%0)\n"
-                     "vmr32.xyzw $vf3, $vf2\n"
-                     "sqc2 $vf2, 0x10(%0)\n"
-                     "sqc2 $vf3, 0x0(%0)"
-                     :
-                     : "r"(&m)
-                     : "memory");
-}
+
+
+
+
+
+
+
+
+
+
+
+
 
 namespace Wyvern {
 static CHAR* IdlingMotion = "e024_001";
@@ -118,7 +118,7 @@ void CEnemyWyvern::stateMain() {
         m_fRot += m_fRotDir * 2.5f * 0.017453292f * (getFrameRate() * 0.020000001f);
         m_fRot = Math3D::LimitPI(m_fRot);
         FMATRIX m;
-        _unitMatrix(m);
+        m.init();
         RotMatrixY(m, m, m_fRot);
         FVECTOR vVel;
         vVel.set(0.0f, 0.0f, m_fSpeed);
