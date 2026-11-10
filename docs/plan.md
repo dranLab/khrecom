@@ -455,7 +455,7 @@ header split the original didn't have, or make a class a template to hide its st
 | ours repeats `...; jal x`, the original branches into the other copy (or the reverse) | crossjump-block-end-call |
 | one-line `por/sq` + `swc1 w`, wrong store order around an FVECTOR | fvector-brace-init-aligned |
 | delay slot of a call and the v0/v1 pair after it | void-callee-v0 |
-| spill slots / regs of hoisted `this+off` addresses | gcse-bucket-count-lever, gcse-pre-hash-order |
+| spill slots / regs of hoisted `this+off` addresses | gcse-bucket-count-lever (missing insns: a called header inline's body form, e.g. a `? TRUE : FALSE` ternary; Model makePkt), gcse-pre-hash-order |
 | registers swapped, same instructions | scheduling-mismatch-techniques, global-alloc-priority-lreg, local-alloc-three-quantities, asm-barrier-death-note-levers, loop-const-merge-and-load-order, asymmetric-giv-overloads, gcse-pre-hash-order |
 | a hoisted constant issued before a loop pointer's init (ours), after it (original) | ppp-eidrawshipoly-unit-lessons (the base was a pointer variable, invisible in the .mdebug, not a cast literal) |
 | a different value spilled out of a loop than in the original; loop.c dump says "savings 1 not desirable" | libat3dec-unit-lessons (loop.c move threshold: one insn more in the loop body delays the hoist to pass 2) |

@@ -1412,8 +1412,6 @@ void CModelBG::makePkt() {
     CPackMan::pkOpenDirectCode(0);
 }
 FIX4 CBBox::calcZ() { return 0x640; }
-/* Parked: 18 of 448 lines (2026-11-09): only the spill slots of PRE's hoisted addresses (sp+256..280: this+52, sp+208, sp+64, sp+80, x+1, this+32, this+36 in the original's order): gcse bucket count 185, the original needs 189 = 376-379 insns at gcse (ours 367); the nine empty asms at the end match it (rejected by the user as padding, 2026-11-09). The rest is the original's shape: m_C0.set() inlines (block tree equal), the corner as `IVECTOR& p` (one pointer giv; approved like posv). Tried for the missing insns (count unchanged): colour/PRIM inline helpers, the four screen-test inlines (PackMan.h:117/118), ternary min/max, INT set() parameters, by-value/reference _rgba; earlier: x[0] > x[1] compare, (&c[x][y][z])->x reads (202). */
-#if 0
 static inline u_long _xyz(const IVECTOR& v) { return (u_long)v.x | ((u_long)v.y << 16) | ((u_long)v.z << 32); }
 void CBBox::makePkt() {
     int abort;
@@ -1516,9 +1514,6 @@ void CBBox::makePkt() {
     CPackMan::pkAddGsData(_xyz(c[1][0][0]));
     CPackMan::pkCloseGifTag();
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", makePkt__5CBBox);
-#endif
 
 void CModel::linkTexAnm(CTexAnm* pATbl, INT nANum) {
     INT nTexMax;

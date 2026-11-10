@@ -194,7 +194,7 @@ public:
         if (nNearest) m_nAttribute |= 8;
         else m_nAttribute &= ~8;
     }
-    INT isSemiTrans() { return m_nAttribute & 1; }
+    INT isSemiTrans() { return (m_nAttribute & 1) ? TRUE : FALSE; } /* the original's form: its larger RTL gives CBBox::makePkt (Model) the gcse table size of the original */
     INT isShading() { return ((INT)m_nAttribute >> 1) & 1; }
     INT isBackClip() { return ((INT)m_nAttribute >> 2) & 1; }
     INT isTexNearest() { return ((INT)m_nAttribute >> 3) & 1; }

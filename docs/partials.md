@@ -170,7 +170,7 @@ duplicate class names across headers: 0
 padding: 2 arrays, 0 accessors
 mechanisms: 662 sites (0 untagged); #line: 1239
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 1177, superset 16, partial 1, gated 3, missing 6, unattributed 8
+classes: complete 1178, superset 16, partial 1, gated 3, missing 6, unattributed 8
 ```
 
 ## Queue (top 20)
@@ -252,7 +252,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/Effect/libppp/keProg/pppKeTh.h` | 0 | 6/0/1/0 | 1 |
 | `System/Graphic/Effect/libppp/pppPart.h` | 25 | 21/0/0/0 | 216 |
 | `System/Graphic/Gprim.h` | 1 | 56/0/0/0 | 232 |
-| `System/Graphic/Model.h` | 2 | 8/0/0/0 | 70 |
+| `System/Graphic/Model.h` | 2 | 9/0/0/0 | 70 |
 | `System/Graphic/Str.h` | 1 | 0/0/0/0 | 141 |
 | `System/Graphic/TexInfo.h` | 1 | 2/0/0/0 | 235 |
 | `System/Graphic/modeldata.h` | 2 | 3/0/0/1 | 82 |
