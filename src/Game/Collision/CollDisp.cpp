@@ -34,8 +34,6 @@ FLOAT InnerProduct(const FVECTOR& v0);
 void OuterProduct(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void Normalize(FVECTOR& v0, const FVECTOR& v1);
 extern "C" float atan2f(float y, float x);
-extern "C" void sceVu0RotMatrixX(float m0[4][4], float m1[4][4], float rx);
-extern "C" void sceVu0RotMatrixY(float m0[4][4], float m1[4][4], float ry);
 
 static inline void _unitMatrix(FMATRIX& m) {
     asm volatile("vmr32.xyzw $vf1, $vf0\n"
@@ -272,8 +270,8 @@ FLOAT CCollDisp::setColmMatrix(CCoord* inpCrd, const FVECTOR& refPos1, const FVE
     if (fHeight > 0.0f) {
         FLOAT rx = atan2f(_sqrtf(tmp.x * tmp.x + tmp.z * tmp.z), tmp.y);
         FLOAT ry = atan2f(tmp.x, tmp.z);
-        sceVu0RotMatrixX(inpCrd->m_Local.m, inpCrd->m_Local.m, rx);
-        sceVu0RotMatrixY(inpCrd->m_Local.m, inpCrd->m_Local.m, ry);
+        RotMatrixX(inpCrd->m_Local, inpCrd->m_Local, rx);
+        RotMatrixY(inpCrd->m_Local, inpCrd->m_Local, ry);
     }
     inpCrd->m_Local.v[3] = refPos1;
     inpCrd->m_Local.v[3].w = 1.0f;

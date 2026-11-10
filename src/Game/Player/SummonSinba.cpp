@@ -27,18 +27,8 @@ inline void _emptyStringPlaceholder2() { /* MATCH: placeholder: an inline functi
 #include "Game/Movement.h"
 #include "Game/Collision/CollMap.h"
 
-extern "C" {
-void sceVu0UnitMatrix(FMATRIX& m);
-void sceVu0RotMatrixY(FMATRIX& m0, FMATRIX& m1, float ry);
-}
 void ApplyMatrixXYZ(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 
-static inline void _unitMatrix(FMATRIX& m) {
-    sceVu0UnitMatrix(m);
-}
-static inline void _rotMatrixY(FMATRIX& m, FLOAT r) {
-    sceVu0RotMatrixY(m, m, r);
-}
 
 static inline FVECTOR _makeVector(FLOAT inX, FLOAT inY, FLOAT inZ) {
     FVECTOR v;
@@ -79,8 +69,8 @@ void CSummonSinba::stateAppear() {
     ofs.w = 1.0f;
     FVECTOR rot = getRot();
     FMATRIX m;
-    _unitMatrix(m);
-    _rotMatrixY(m, rot.y);
+    UnitMatrix(m);
+    RotMatrixY(m, m, rot.y);
     ApplyMatrixXYZ(ofs, m, ofs);
     FVECTOR vStart = { { pos.x, pos.y, pos.z, 1.0f } };
     FVECTOR vEnd = { { pos.x + ofs.x, pos.y + ofs.y, pos.z + ofs.z, 1.0f } };

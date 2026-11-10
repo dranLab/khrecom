@@ -147,8 +147,6 @@ struct G_STRIP {
 typedef CVector<G_LINE> G_LINE_VECTOR;
 typedef CVector<G_STRIP> G_STRIP_VECTOR;
 
-extern "C" void sceVu0ITOF4Vector(FVECTOR& v0, IVECTOR& v1);
-extern "C" void sceVu0FTOI4Vector(IVECTOR& v0, FVECTOR& v1);
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 
 /* The classes of System/Graphic/Gprim. Their vtables and out-of-line inline functions come out in Gprim.o, the
@@ -629,9 +627,9 @@ public:
     FLOAT getRot(/* parameters unknown */);
     void calcVert(IVECTOR& iv) {
         FVECTOR v;
-        sceVu0ITOF4Vector(v, iv);
+        sceVu0ITOF4Vector(v.v, iv.v);
         ApplyMatrix(v, m_Matrix, v);
-        sceVu0FTOI4Vector(iv, v);
+        sceVu0FTOI4Vector(iv.v, v.v);
     }
 };
 

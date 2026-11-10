@@ -24,48 +24,6 @@ void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT t);
 void DivVector(FVECTOR& v0, const FVECTOR& v1, FLOAT q);
 void MulMatrix33(FMATRIX& m0, const FMATRIX& m1, const FMATRIX& m2);
-extern "C" {
-void sceVu0ApplyMatrix(float *v0, float (*m0)[4], float *v1);
-void sceVu0MulMatrix(float (*m0)[4], float (*m1)[4], float (*m2)[4]);
-void sceVu0OuterProduct(float *v0, float *v1, float *v2);
-float sceVu0InnerProduct(float *v0, float *v1);
-void sceVu0Normalize(float *v0, float *v1);
-void sceVu0TransposeMatrix(float (*m0)[4], float (*m1)[4]);
-void sceVu0InversMatrix(float (*m0)[4], float (*m1)[4]);
-void sceVu0DivVector(float *v0, float *v1, float q);
-void sceVu0DivVectorXYZ(float *v0, float *v1, float q);
-void sceVu0InterVector(float *v0, float *v1, float *v2, float t);
-void sceVu0AddVector(float *v0, float *v1, float *v2);
-void sceVu0SubVector(float *v0, float *v1, float *v2);
-void sceVu0MulVector(float *v0, float *v1, float *v2);
-void sceVu0ScaleVector(float *v0, float *v1, float t);
-void sceVu0TransMatrix(float (*m0)[4], float (*m1)[4], float *tv);
-void sceVu0CopyVector(float *v0, float *v1);
-void sceVu0CopyMatrix(float (*m0)[4], float (*m1)[4]);
-void sceVu0FTOI4Vector(int *v0, float *v1);
-void sceVu0FTOI0Vector(int *v0, float *v1);
-void sceVu0ITOF4Vector(float *v0, int *v1);
-void sceVu0ITOF0Vector(float *v0, int *v1);
-void sceVu0UnitMatrix(float (*m0)[4]);
-void sceVu0RotMatrixZ(float (*m0)[4], float (*m1)[4], float rz);
-void sceVu0RotMatrixX(float (*m0)[4], float (*m1)[4], float rx);
-void sceVu0RotMatrixY(float (*m0)[4], float (*m1)[4], float ry);
-void sceVu0RotMatrix(float (*m0)[4], float (*m1)[4], float *rot);
-void sceVu0ClampVector(float *v0, float *v1, float min, float max);
-void sceVu0CameraMatrix(float (*m)[4], float *p, float *zd, float *yd);
-void sceVu0NormalLightMatrix(float (*m)[4], float *l0, float *l1, float *l2);
-void sceVu0LightColorMatrix(float (*m)[4], float *c0, float *c1, float *c2, float *a);
-void sceVu0ViewScreenMatrix(float (*m)[4], float scrz, float ax, float ay, float cx, float cy, float zmin, float zmax, float nearz, float farz);
-void sceVu0DropShadowMatrix(float (*m)[4], float *lp, float a, float b, float c, int mode);
-void sceVu0RotTransPersN(int (*v0)[4], float (*m0)[4], float (*v1)[4], int n, int mode);
-void sceVu0RotTransPers(int *v0, float (*m0)[4], float *v1, int mode);
-void sceVu0CopyVectorXYZ(float *v0, float *v1);
-void sceVu0InterVectorXYZ(float *v0, float *v1, float *v2, float r);
-void sceVu0ScaleVectorXYZ(float *v0, float *v1, float s);
-int sceVu0ClipScreen(float *v0);
-int sceVu0ClipScreen3(float *v0, float *v1, float *v2);
-int sceVu0ClipAll(float *minv, float *maxv, float (*ms)[4], float (*vm)[4], int n);
-}
 extern "C" float sinf(float x);
 extern "C" float cosf(float x);
 extern "C" float atan2f(float y, float x);
@@ -370,9 +328,9 @@ void CCoord::recalcLocalMatrix() {
         DivVector(m_Rot.v[0], m_World.v[0], m_fScaleX);
         DivVector(m_Rot.v[1], m_World.v[1], m_fScaleY);
         DivVector(m_Rot.v[2], m_World.v[2], m_fScaleZ);
-        sceVu0InversMatrix(mMat.m, pParent->m_Rot.m);
+        InversMatrix(mMat, pParent->m_Rot);
         MulMatrix33(m_Local, mMat, m_Rot);
-        sceVu0InversMatrix(mMat.m, pParent->m_World.m);
+        InversMatrix(mMat, pParent->m_World);
         ApplyMatrix(m_Local.v[3], mMat, m_World.v[3]);
     } else {
         m_Local = m_World;
@@ -656,7 +614,7 @@ void scaleMatrixSelf(FMATRIX& self, FVECTOR& v) {
 void World2Local(FVECTOR& out_v, const FMATRIX& world, const FVECTOR& in_v) {
     FMATRIX t;
 
-    sceVu0InversMatrix(t.m, (float(*)[4])world.m);
+    InverseMatrix(t, world);
     ApplyMatrix(out_v, t, in_v);
 }
 TDEG cossin2deg(FLOAT cs, FLOAT sn) {
@@ -719,29 +677,7 @@ void roundPI(FVECTOR& vInOut, INT nInClip) {
     }
 }
 void getMaxMinToVector8(FVECTOR* p0, const FVECTOR& p1, const FVECTOR& p2) {
-    asm volatile(
-                 "lqc2 $vf4, 0x0($5)\n"
-                 "lqc2 $vf5, 0x0($6)\n"
-                 "vadd.yz $vf6, $vf4, $vf0\n"
-                 "vadd.y $vf7, $vf4, $vf0\n"
-                 "vadd.xy $vf8, $vf4, $vf0\n"
-                 "vadd.xz $vf9, $vf4, $vf0\n"
-                 "vadd.z $vf10, $vf4, $vf0\n"
-                 "vadd.x $vf11, $vf4, $vf0\n"
-                 "vmulw.xw $vf6, $vf5, $vf0w\n"
-                 "vmulw.xzw $vf7, $vf5, $vf0w\n"
-                 "vmulw.zw $vf8, $vf5, $vf0w\n"
-                 "vmulw.yw $vf9, $vf5, $vf0w\n"
-                 "vmulw.xyw $vf10, $vf5, $vf0w\n"
-                 "vmulw.yzw $vf11, $vf5, $vf0w\n"
-                 "sqc2 $vf4, 0x0($4)\n"
-                 "sqc2 $vf6, 0x10($4)\n"
-                 "sqc2 $vf7, 0x20($4)\n"
-                 "sqc2 $vf8, 0x30($4)\n"
-                 "sqc2 $vf9, 0x40($4)\n"
-                 "sqc2 $vf10, 0x50($4)\n"
-                 "sqc2 $vf5, 0x60($4)\n"
-                 "sqc2 $vf11, 0x70($4)\n");
+    GetMaxMinToVector8(p0, p1, p2);
 }
 void ViewClipMatrix(FMATRIX& outVC, FLOAT scrw, FLOAT scrh, FLOAT scrz, FLOAT zmin, FLOAT zmax) {
     asm volatile("sq $0, 0x0(%0)\n"

@@ -36,7 +36,6 @@ inline void _emptyStringPlaceholder2() { /* MATCH: placeholder: an inline functi
 #include "System/Sound/SoundMan.h"
 #line 49
 
-extern "C" void sceVu0InterVectorXYZ(float* v0, float* v1, float* v2, float t);
 extern "C" float powf(float, float);
 
 using namespace D2;
@@ -224,7 +223,7 @@ void CGameOver::moveCursor() {
             m_fgLightMove = 0;
         }
         FLOAT fRate = 1.0f - powf(1.0f - m_fLightTimer / 30.0f, 2.5f);
-        sceVu0InterVectorXYZ(m_vPosLightCurrent.v, m_vPosLightTarget.v, m_vPosLightOld.v, fRate);
+        InterVectorXYZ(m_vPosLightCurrent, m_vPosLightTarget, m_vPosLightOld, fRate);
         m_pLightCtrl->setPos(m_vPosLightCurrent);
     }
 }

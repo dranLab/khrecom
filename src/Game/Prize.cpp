@@ -53,9 +53,6 @@ typedef int MODELTAG[4];
 extern "C" {
 float sinf(float x);
 float cosf(float x);
-void sceVu0RotMatrixX(FMATRIX& m0, const FMATRIX& m1, float rx);
-void sceVu0RotMatrixY(FMATRIX& m0, const FMATRIX& m1, float ry);
-void sceVu0RotMatrixZ(FMATRIX& m0, const FMATRIX& m1, float rz);
 }
 FVECTOR getPlayerPos(BOOL flag);
 void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
@@ -463,9 +460,9 @@ void CPrize::flyHigh(BOOL bAll) {
     v.set(0.0f, 0.0f, 1.0f, 1.0f);
     FMATRIX m;
     _unitMatrixVu0(m);
-    sceVu0RotMatrixX(m, m, rot.x);
-    sceVu0RotMatrixY(m, m, rot.y);
-    sceVu0RotMatrixZ(m, m, rot.z);
+    RotMatrixX(m, m, rot.x);
+    RotMatrixY(m, m, rot.y);
+    RotMatrixZ(m, m, rot.z);
     ApplyMatrix33(v, m, v);
     if (m_PrizeKind != 0xA0 || bAll) {
         setupFade(1.0f, 0.0f, 3000, -1);
@@ -551,7 +548,7 @@ void CPrize::prizeMain_() {
                 FVECTOR v;
                 FMATRIX m;
                 _unitMatrixVu0(m);
-                sceVu0RotMatrixY(m, m, 0.5934119f);
+                RotMatrixY(m, m, 0.5934119f);
                 ApplyMatrix(m_vGetVel, m, m_vGetVel);
                 ScaleVectorXYZ(v, m_vGetVel, s);
                 m_pMove->setVel(v);
@@ -671,7 +668,7 @@ void CPrize::cardMain_() {
                 FVECTOR v;
                 FMATRIX m;
                 _unitMatrixVu0(m);
-                sceVu0RotMatrixY(m, m, 0.5934119f);
+                RotMatrixY(m, m, 0.5934119f);
                 ApplyMatrix(m_vGetVel, m, m_vGetVel);
                 ScaleVectorXYZ(v, m_vGetVel, s);
                 m_pMove->setVel(v);
@@ -782,7 +779,7 @@ void CPrize::cardMainSpecial_() {
                 FVECTOR v;
                 FMATRIX m;
                 _unitMatrixVu0(m);
-                sceVu0RotMatrixY(m, m, 0.5934119f);
+                RotMatrixY(m, m, 0.5934119f);
                 ApplyMatrix(m_vGetVel, m, m_vGetVel);
                 ScaleVectorXYZ(v, m_vGetVel, s);
                 m_pMove->setVel(v);

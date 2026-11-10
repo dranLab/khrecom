@@ -283,16 +283,6 @@ void MulMatrix(FMATRIX& m0, const FMATRIX& m1, const FMATRIX& m2);
 
 
 
-static inline FVECTOR _applyMatrix(FMATRIX& m, FVECTOR& v) {
-    FVECTOR b;
-    ApplyMatrix(b, m, v);
-    return b;
-}
-static inline FMATRIX _mulMatrix(FMATRIX& m, FMATRIX& r) {
-    FMATRIX b;
-    MulMatrix(b, m, r);
-    return b;
-}
 static inline void* _getAZFTbl(void* pInAZF, INT nIndex) {
     void* pTbl;
     if (!pInAZF) pTbl = NULL;
@@ -306,7 +296,7 @@ static inline void _rotMatrixZ(FMATRIX& m, const TDEG& a) {
     FLOAT s = tsin(a);
     rz.m[0][1] = s;
     rz.m[1][0] = -s;
-    m = _mulMatrix(m, rz);
+    m = MulMatrix(m, rz);
 }
 static inline void _rotMatrixY(FMATRIX& m, const TDEG& a) {
     FMATRIX ry;
@@ -315,7 +305,7 @@ static inline void _rotMatrixY(FMATRIX& m, const TDEG& a) {
     FLOAT s = tsin(a);
     ry.m[2][0] = s;
     ry.m[0][2] = -s;
-    m = _mulMatrix(m, ry);
+    m = MulMatrix(m, ry);
 }
 static inline void _rotMatrixX(FMATRIX& m, const TDEG& a) {
     FMATRIX rx;
@@ -324,7 +314,7 @@ static inline void _rotMatrixX(FMATRIX& m, const TDEG& a) {
     FLOAT s = tsin(a);
     rx.m[1][2] = s;
     rx.m[2][1] = -s;
-    m = _mulMatrix(m, rx);
+    m = MulMatrix(m, rx);
 }
 /* Parked: 82 of 1190 lines, 8 bytes short (2026-11-09) - only xmin/xmax/zmin/zmax's registers and the division block's
    schedule differ: the original keeps xmax's quotient apart (mflo v1; move s6,v1: cse kept the variable canonical, so
@@ -332,8 +322,8 @@ static inline void _rotMatrixX(FMATRIX& m, const TDEG& a) {
    quotient (local-alloc ties them: xmin s2, xmax s1, zmax s3). make_regs_eqv keeps the variable only when it is
    referenced outside the cse path (from the qq loop's end to the else label), not visible in the original's code;
    the 8 bytes are that copy and its schedule.
-   Worked: ApplyMatrix through the Coord.h-style by-value inline (line markers Coord.h:634-635; 87 -> 82), by-value
-   _mulMatrix, _getAZFTbl inline, angles by const TDEG&, vec in its own scope, min/max init before v[], zero-store
+   Worked: ApplyMatrix through Coord.h's by-value inline (line markers Coord.h:634-635; 87 -> 82), Coord.h's by-value
+   MulMatrix (642-643), _getAZFTbl inline, angles by const TDEG&, vec in its own scope, min/max init before v[], zero-store
    order. Tried: division block in line order / per-coordinate / one-line forms, xmax if/ternary/compare forms, int
    declarations before the floats, v[] in its own block; permuter 15 min on this draft (11.9k, no gain); earlier
    for/do/while/goto loop shapes, 10 min permuter. */
@@ -491,7 +481,7 @@ void CMap::init(BOOL bUseMapUnit, BOOL bTexClampRepeat) {
             }
         }
         for (int qq = 0; qq < 4; qq++) {
-            FVECTOR p = _applyMatrix(Crd(i + 1).m_Local, v[qq]);
+            FVECTOR p = ApplyMatrix(Crd(i + 1).m_Local, v[qq]);
             if (p.x < xminf) xminf = p.x;
             if (xmaxf < p.x) xmaxf = p.x;
             if (p.z < zminf) zminf = p.z;
@@ -820,8 +810,6 @@ void setTransparency(CModel& model) {
    registers in both and jump2 cross-jumps them into one; the rest is register allocation. */
 #if 0
 void MulVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
-extern "C" void sceVu0InversMatrix(FMATRIX& m0, FMATRIX& m1);
-extern "C" void sceVu0ApplyMatrix(FVECTOR& v0, FMATRIX& m0, FVECTOR& v1);
 INT checkBBox(const FMATRIX& mWorldMatrix, const BBOX* bbox);
 INT resultCheckBBox(CCoord& crd, const BBOX* bbox);
 void ITOF0Vector(FVECTOR& v0, const IVECTOR& v1);
@@ -1177,8 +1165,6 @@ CSky::~CSky() {
     if (m_pRotShift) delete m_pRotShift;
     m_pRotShift = NULL;
 }
-extern "C" void sceVu0UnitMatrix(FMATRIX& m);
-extern "C" void sceVu0RotMatrix(FMATRIX& m0, FMATRIX& m1, FVECTOR& rot);
 void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT t);
 void CSky::main() {
     if (CSceneEnv::getStopTypeBit() & 0x1000) return;
@@ -1190,8 +1176,8 @@ void CSky::main() {
         if ((*(FVECTOR*)(ofs + (INT)m_pRotShift))._ul[0] == 0 && (*(FVECTOR*)(ofs + (INT)m_pRotShift))._ul[1] == 0) continue;
         ScaleVector(vAddRot, (*(FVECTOR*)(ofs + (INT)m_pRotShift)), fRate);
         (*(FVECTOR*)(ofs + (INT)m_pRot)).addRot(vAddRot);
-        sceVu0UnitMatrix(lMat);
-        sceVu0RotMatrix(Crd(i + 1).m_Local, lMat, (*(FVECTOR*)(ofs + (INT)m_pRot)));
+        sceVu0UnitMatrix(lMat.m);
+        sceVu0RotMatrix(Crd(i + 1).m_Local.m, lMat.m, ((FVECTOR*)(ofs + (INT)m_pRot))->v);
     }
 }
 void MulVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);

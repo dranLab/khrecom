@@ -29,8 +29,6 @@ inline void _emptyStringPlaceholder2() { /* MATCH: placeholder: an inline functi
 #include "System/Debug.h"
 
 extern "C" {
-void sceVu0UnitMatrix(FMATRIX& m);
-void sceVu0RotMatrixY(FMATRIX& m0, FMATRIX& m1, float ry);
 float atan2f(float y, float x);
 }
 void Normalize(FVECTOR& v0, const FVECTOR& v1);
@@ -39,12 +37,6 @@ FLOAT InnerProduct(const FVECTOR& v0, const FVECTOR& v1);
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 void MulMatrix(FMATRIX& res, const FMATRIX& m0, const FMATRIX& m1);
 
-static inline void _unitMatrix(FMATRIX& m) {
-    sceVu0UnitMatrix(m);
-}
-static inline void _rotMatrixY(FMATRIX& m, FLOAT r) {
-    sceVu0RotMatrixY(m, m, r);
-}
 
 static BULLET_EFFECT_INFO g_GimAngelArrowEffTbl[4] = {
     {"rec_he_common", 12, 0, 0},
@@ -216,8 +208,8 @@ BOOL CGimmickAngelArrow::loockAtPlayer() {
         ScaleVector(dir, dir, 5.0f);
         ScaleVector(vec, vec, 5.0f);
         errorcheck = InnerProduct(dir, vec);
-        _unitMatrix(tm);
-        _rotMatrixY(tm, 1.5707964f);
+        UnitMatrix(tm);
+        RotMatrixY(tm, tm, 1.5707964f);
         ApplyMatrix(dir, tm, dir);
         rty = InnerProduct(dir, vec);
         if (rty > 4.0f || (errorcheck < 0.0f && rty >= 0.0f)) {
@@ -255,7 +247,7 @@ void CGimmickAngelArrow::lastUpdate() {
         m_addRot -= 6.28f;
     }
     _unitMatrixVu0(mMat);
-    sceVu0RotMatrixY(mMat, mMat, m_addRot);
+    RotMatrixY(mMat, mMat, m_addRot);
     MulMatrix(Crd(getBoneIndex("pl_rot", 0)).getLocalMatrix(), Crd(getBoneIndex("pl_rot", 0)).getLocalMatrix(), mMat);
     Crd(0).m_Flag = 1;
 }

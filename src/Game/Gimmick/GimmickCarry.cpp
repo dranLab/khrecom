@@ -56,18 +56,7 @@ void Normalize(FVECTOR& v0, const FVECTOR& v1);
 FLOAT InnerProduct(const FVECTOR& v0, const FVECTOR& v1);
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 void MulMatrix(FMATRIX& m0, const FMATRIX& m1, const FMATRIX& m2);
-extern "C" void sceVu0UnitMatrix(FMATRIX& m);
-extern "C" void sceVu0RotMatrixX(FMATRIX& m0, FMATRIX& m1, float rx);
-extern "C" void sceVu0RotMatrixY(FMATRIX& m0, FMATRIX& m1, float ry);
-extern "C" void sceVu0CopyVector(float v0[4], const float v1[4]);
 
-static inline void _unitMatrix(FMATRIX& m) {
-    sceVu0UnitMatrix(m);
-}
-
-static inline void _rotMatrixY(FMATRIX& m0, FMATRIX& m1, float ry) {
-    sceVu0RotMatrixY(m0, m1, ry);
-}
 
 static inline FLOAT _sqrtf(FLOAT h) {
     FLOAT ret;
@@ -309,7 +298,7 @@ void CGimmickCarry::CarryStand() {
 }
 
 void CGimmickCarry::ThrowGimmick(const FVECTOR& in_TargetPos) {
-    sceVu0CopyVector(m_targetPos.v, in_TargetPos.v);
+    sceVu0CopyVector(m_targetPos.v, (float*)in_TargetPos.v);
     m_Stat = 7;
 }
 
@@ -445,8 +434,8 @@ void CGimmickCarry::CarryThrow() {
         ang = pCGimMan->getThrowMaxAngle();
     }
     _unitMatrixVu0(m);
-    sceVu0RotMatrixX(m, m, -ang * 0.017453292f);
-    sceVu0RotMatrixY(m, m, g_pPlayer->getRot().y);
+    RotMatrixX(m, m, -ang * 0.017453292f);
+    RotMatrixY(m, m, g_pPlayer->getRot().y);
     v.set(0.0f, 0.0f, pCGimMan->getThrowDirPow(), 0.0f);
     ApplyMatrix(m_throwDir, m, v);
     if ((UINT)getID() % 10000 == 607) {
@@ -517,8 +506,8 @@ void CGimmickCarry::CancelCarry() {
     } else {
         changeMotionEx(0x1ADCF, 7, 0, FALSE, 0, 0, 0);
     }
-    _unitMatrix(m);
-    _rotMatrixY(m, m, getRot().y);
+    UnitMatrix(m);
+    RotMatrixY(m, m, getRot().y);
     v.set(0.0f, 0.0f, 0.005f, 0.0f);
     ApplyMatrix(m_throwDir, m, v);
     if ((UINT)getID() % 10000 == 607) {

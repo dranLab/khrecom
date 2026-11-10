@@ -2,7 +2,6 @@
 #include "Game/Atel/EventTrap.h"
 #include "Game/Collision/CollUtil.h"
 
-extern "C" void sceVu0RotMatrixY(FMATRIX& m0, FMATRIX& m1, float ry);
 void MulMatrix(FMATRIX& res, const FMATRIX& m0, const FMATRIX& m1);
 
 static inline void _unitMatrixVu0(FMATRIX& m) {
@@ -84,7 +83,7 @@ void CEventBox::setupVertexes() {
     matV.v[2].set(fW, 0.0f, fD);
     matV.v[3].set(-fW, 0.0f, fD);
     _unitMatrixVu0(mat);
-    sceVu0RotMatrixY(mat, mat, m_srcData._fRotY);
+    RotMatrixY(mat, mat, m_srcData._fRotY);
     mat.setTrans(m_srcData._vPos);
     MulMatrix(m_matVert, mat, matV);
     _resetCoord(m_Crd);

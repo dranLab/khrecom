@@ -8,12 +8,7 @@
 
 #include "System/Coord.h"
 
-extern "C" void sceVu0InversMatrix(float m0[4][4], float m1[4][4]);
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
-
-static inline void _inversMatrix(FMATRIX& m0, FMATRIX& m1) {
-    sceVu0InversMatrix(m0.m, m1.m);
-}
 
 static inline FLOAT _sqrtf(FLOAT x) {
     FLOAT ret;
@@ -598,7 +593,7 @@ INT CCollUtil::_detectBBoxPointEZ(COLL_CUBE& collCube, CCollision& collision) {
     v0 = collision.m_inWS;
     v1 = collision.m_inWE;
     if (collCube.pMatrix) {
-        _inversMatrix(invMat, *collCube.pMatrix);
+        InverseMatrix(invMat, *collCube.pMatrix);
         ApplyMatrix(v0, invMat, v0);
         ApplyMatrix(v1, invMat, v1);
     }

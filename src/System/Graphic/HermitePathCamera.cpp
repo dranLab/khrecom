@@ -249,13 +249,9 @@ void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
 void Normalize(FVECTOR& v0, const FVECTOR& v1);
-extern "C" void sceVu0InversMatrix(FMATRIX& m0, const FMATRIX& m1);
 namespace Math3D {
 FLOAT VectorLength(const FVECTOR& inVector);
 }
-// MATCH: the original's inline wrapper (Coord.h:340 in its line markers; the .mdebug shows a third inline block in
-// both mInv scopes): its parameters take the stack address, so the caller keeps no register copy of &mInv
-static inline void _inversMatrix(FMATRIX& m0, const FMATRIX& m1) { sceVu0InversMatrix(m0, m1); }
 // the original's Math3D.h:137 _fabs (ref locals inValue/ret); MATCH: volatile keeps the abs.s after the fAdd mul
 static inline FLOAT _fabs(FLOAT inValue) {
     FLOAT ret;
@@ -392,7 +388,7 @@ FLOAT CHermitePathCamera::updatePos(FVECTOR& vPos, FVECTOR& vLook, FLOAT fr, BOO
                 m_vPos = m_vWPos = vResult;
                 if (Crd(0).getParent()) {
                     FMATRIX mInv;
-                    _inversMatrix(mInv, Crd(0).getParent()->getWorldMatrix());
+                    InversMatrix(mInv, Crd(0).getParent()->getWorldMatrix());
                     ApplyMatrix(m_vPos, mInv, m_vWPos);
                 }
             }
@@ -455,7 +451,7 @@ FLOAT CHermitePathCamera::updatePos(FVECTOR& vPos, FVECTOR& vLook, FLOAT fr, BOO
         AddVectorXYZ(vPos, m_vLearpOldPos, vAdd);
         if (Crd(0).getParent()) {
             FMATRIX mInv;
-            _inversMatrix(mInv, Crd(0).getParent()->getWorldMatrix());
+            InversMatrix(mInv, Crd(0).getParent()->getWorldMatrix());
             ApplyMatrix(vPos, mInv, vPos);
         }
         SubVectorXYZ(vLen, m_vLearpAimLook, m_vLearpOldLook);

@@ -59,7 +59,6 @@ int pppPartCalc(void* mng, int view_clip);
 void pppPartCalcEnd();
 void pppStopParticle(void* mng, int b);
 FVECTOR* pppGetBbox(void* mng);
-void sceVu0InversMatrix(FMATRIX& m0, FMATRIX& m1);
 int pppIsDrawLast(void* mng);
 void qsort(void* base, size_t num, size_t size, int (*cmp)(const void*, const void*));
 void pppSetFogColor(u_char r, u_char g, u_char b);
@@ -94,12 +93,6 @@ public:
     C3DLineStrip* getDebugPrim() { return m_pDebugLine; }
 };
 
-extern "C" {
-void sceVu0RotMatrixX(FMATRIX& m0, FMATRIX& m1, float rx);
-void sceVu0RotMatrixY(FMATRIX& m0, FMATRIX& m1, float ry);
-void sceVu0RotMatrixZ(FMATRIX& m0, FMATRIX& m1, float rz);
-void sceVu0TransMatrix(FMATRIX& m0, FMATRIX& m1, const FVECTOR& tv);
-}
 
 static inline void _unitMatrixVu0(FMATRIX& m) {
     asm volatile("vmr32.xyzw $vf1, $vf0\n"
@@ -313,11 +306,11 @@ void CEffectMan::_setCoord(CEffect* pEff, INT nCNum, const CCoord* pParent, cons
     } else {
         _unitMatrixVu0(*pLocal);
         if (pvRot) {
-            sceVu0RotMatrixX(*pLocal, *pLocal, pvRot->x);
-            sceVu0RotMatrixY(*pLocal, *pLocal, pvRot->y);
-            sceVu0RotMatrixZ(*pLocal, *pLocal, pvRot->z);
+            RotMatrixX(*pLocal, *pLocal, pvRot->x);
+            RotMatrixY(*pLocal, *pLocal, pvRot->y);
+            RotMatrixZ(*pLocal, *pLocal, pvRot->z);
         }
-        if (pvPos) sceVu0TransMatrix(*pLocal, *pLocal, *pvPos);
+        if (pvPos) TransMatrix(*pLocal, *pLocal, *pvPos);
     }
     crd.m_Flag = 1;
     crd.fix();
@@ -823,7 +816,7 @@ void CEffectMan::_calc(FLOAT fFrameRate, const FMATRIX& mWV, const FMATRIX& mVS,
     }
     if (!pPos || !pLook) {
         applySignWorldViewMatrix(mCam, mWV);
-        sceVu0InversMatrix(mCam, mCam);
+        InversMatrix(mCam, mCam);
     }
     if (!pPos) {
         vPosTmp = mCam.v[3];

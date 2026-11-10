@@ -20,7 +20,6 @@ extern INT SCREEN_HEIGHT;
 
 template <class T> static inline T& _ref(T& v) { return v; }
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern "C" void sceVu0InterVectorXYZ(FVECTOR& v0, FVECTOR& v1, FVECTOR& v2, float t);
 
 C2DSeqAgent::C2DSeqAgent(CTask* pParent)
     : CTask(pParent, 0x8000), m_pszLad(NULL), m_pszSqd(NULL), m_hSeqSingle(0), m_pSeqGroup(NULL), m_nSeqUnit(-1),
@@ -217,7 +216,7 @@ void C2DSeqLightMarkAgent::updatePos() {
     if (m_pCtrl) {
         FLOAT fRate = (FLOAT)m_nMoveTime / 1500.0f;
         FVECTOR v;
-        sceVu0InterVectorXYZ(v, m_vBasePos, m_vTargetPos, fRate * fRate);
+        InterVectorXYZ(v, m_vBasePos, m_vTargetPos, fRate * fRate);
         m_pCtrl->setPos(v);
     }
 }

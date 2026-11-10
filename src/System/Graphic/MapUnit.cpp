@@ -21,7 +21,6 @@
 
 
 
-void MulMatrix(FMATRIX& res, const FMATRIX& m0, const FMATRIX& m1); /* System/Coord.h */
 
 /* (original names unknown) */
 static inline void* _getAZFData(void* pInAZF, INT nIndex) {
@@ -41,12 +40,6 @@ static inline void _unitMatrix(FMATRIX& m) {
                      :
                      : "r"(&m)
                      : "memory");
-}
-
-static inline FMATRIX operator*(const FMATRIX& m0, const FMATRIX& m1) {
-    FMATRIX b;
-    MulMatrix(b, m0, m1);
-    return b;
 }
 
 static inline void _scale(FVECTOR& v, FLOAT inF) {
@@ -85,7 +78,7 @@ public:
             rx.m[1][1] = rx.m[2][2] = tcos(fr.rot.x);
             rx.m[1][2] = tsin(fr.rot.x);
             rx.m[2][1] = -rx.m[1][2];
-            crd.m_Local = crd.m_Local * rx;
+            crd.m_Local = MulMatrix(crd.m_Local, rx);
         }
         if (fr.rot.y) {
             FMATRIX ry;
@@ -93,7 +86,7 @@ public:
             ry.m[2][2] = ry.m[0][0] = tcos(fr.rot.y);
             ry.m[2][0] = tsin(fr.rot.y);
             ry.m[0][2] = -ry.m[2][0];
-            crd.m_Local = crd.m_Local * ry;
+            crd.m_Local = MulMatrix(crd.m_Local, ry);
         }
         if (fr.rot.z) {
             FMATRIX rz;
@@ -101,7 +94,7 @@ public:
             rz.m[0][0] = rz.m[1][1] = tcos(fr.rot.z);
             rz.m[0][1] = tsin(fr.rot.z);
             rz.m[1][0] = -rz.m[0][1];
-            crd.m_Local = crd.m_Local * rz;
+            crd.m_Local = MulMatrix(crd.m_Local, rz);
         }
         _scale(crd.m_Local.v[0], fr.scale[0]);
         _scale(crd.m_Local.v[1], fr.scale[1]);

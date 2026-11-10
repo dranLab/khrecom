@@ -17,12 +17,6 @@ void AbsVector(FVECTOR& v0, const FVECTOR& v1);
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 void spinMatrixX(FMATRIX& m0, const FMATRIX& m1, INT deg);
 void spinMatrixY(FMATRIX& m0, const FMATRIX& m1, INT deg);
-extern "C" {
-float sceVu0InnerProduct(const float* v0, const float* v1);
-void sceVu0ClampVector(float* v0, const float* v1, float min, float max);
-void sceVu0SubVector(float* v0, const float* v1, const float* v2);
-void sceVu0DivVector(float* v0, const float* v1, float q);
-}
 namespace Math3D {
 FLOAT GetDistance2OfLimitedLineAndPoint(const FVECTOR& inP1, const FVECTOR& inP2, const FVECTOR& inP);
 }
@@ -74,7 +68,7 @@ static const FVECTOR lightVolumeVec = {0.299f, 0.587f, 0.114f, 0.0f};
 
 void CLightUnit::setAmbient(const FVECTOR& in_color) {
     m_Ambient = in_color;
-    m_Ambient.w = sceVu0InnerProduct(in_color.v, lightVolumeVec.v) + -1.0f;
+    m_Ambient.w = sceVu0InnerProduct((float*)in_color.v, (float*)lightVolumeVec.v) + -1.0f;
 }
 
 void CLightUnit::setAnchor(const CCoord* p, INT kind) {
@@ -106,7 +100,7 @@ LIGHTDATA* CLightUnit::getLightData() const {
 }
 
 static void _getPowColor(FVECTOR& color, FLOAT dv, const POINTLIGHT* l) {
-    sceVu0ClampVector(color.v, l->col.v, -2.0f, 2.0f);
+    sceVu0ClampVector(color.v, (float*)l->col.v, -2.0f, 2.0f);
     FLOAT start = l->start * l->start;
     FLOAT end = l->end * l->end;
     if (!(dv <= start)) {
@@ -195,7 +189,7 @@ void CLightUnit::_calc(const FVECTOR& ctr) {
             switch (ll[i].kind) {
             case 2: {
                 POINTLIGHT* l = &ld->point[ll[i].idx];
-                sceVu0SubVector(light.v, l->pos.v, ctr.v);
+                sceVu0SubVector(light.v, l->pos.v, (float*)ctr.v);
                 FLOAT dv = ll[i].dist2;
                 sceVu0DivVector(light.v, light.v, dv);
                 _getPowColor(color, dv, l);
@@ -221,7 +215,7 @@ void CLightUnit::_calc(const FVECTOR& ctr) {
             }
             case 5: {
                 POINTLIGHT* l = CWorldEnv::getEffLight(ll[i].idx);
-                sceVu0SubVector(light.v, l->pos.v, ctr.v);
+                sceVu0SubVector(light.v, l->pos.v, (float*)ctr.v);
                 FLOAT dv = ll[i].dist2;
                 sceVu0DivVector(light.v, light.v, dv);
                 _getPowColor(color, dv, l);
@@ -280,7 +274,7 @@ void CLightUnit::setLight(INT idx, FVECTOR in_light, FVECTOR in_color) {
         m_Color.m[idx][2] = in_color.z;
         FVECTOR vLCol;
         AbsVector(vLCol, in_color);
-        m_Color.m[idx][3] = sceVu0InnerProduct(vLCol.v, lightVolumeVec.v);
+        m_Color.m[idx][3] = sceVu0InnerProduct(vLCol.v, (float*)lightVolumeVec.v);
     }
 }
 
@@ -308,7 +302,7 @@ void CLightUnit::betaShade(FVECTOR& out, const FVECTOR& in) {
 static FLOAT getLightVolume(const FVECTOR& ctr, INFINITELIGHT* l) {
     FVECTOR vLCol;
     AbsVector(vLCol, l->col);
-    return sceVu0InnerProduct(vLCol.v, lightVolumeVec.v);
+    return sceVu0InnerProduct(vLCol.v, (float*)lightVolumeVec.v);
 }
 
 static FLOAT getLightVolume(FLOAT& dv, const FVECTOR& ctr, POINTLIGHT* l) {
@@ -336,7 +330,7 @@ static FLOAT getLightVolume(FLOAT& dv, const FVECTOR& ctr, POINTLIGHT* l) {
     }
     FVECTOR vLCol;
     AbsVector(vLCol, l->col);
-    FLOAT pow = sceVu0InnerProduct(vLCol.v, lightVolumeVec.v);
+    FLOAT pow = sceVu0InnerProduct(vLCol.v, (float*)lightVolumeVec.v);
     FLOAT start = l->start * l->start;
     if (dv <= start) {
         return pow;
@@ -390,12 +384,6 @@ void CMapLightUnit::setAnchor(const CCoord* p, const MODELDATA& modeldata, INT k
     setAnchor(p, *modeldata.m_pBBox, kind);
 }
 
-static inline FVECTOR operator*(const FMATRIX& m, const FVECTOR& v) {
-    FVECTOR r;
-    ApplyMatrix(r, m, v);
-    return r;
-}
-
 void CMapLightUnit::calcCenter(const FMATRIX& m) {
     int i;
     for (i = 0; i < 2; i++) {
@@ -403,7 +391,7 @@ void CMapLightUnit::calcCenter(const FMATRIX& m) {
         ctr[i].y = m_bbox->y[i];
         ctr[i].z = m_bbox->z[i];
         ctr[i].w = 1.0f;
-        ctr[i] = m * ctr[i];
+        ctr[i] = ApplyMatrix(m, ctr[i]);
     }
 }
 

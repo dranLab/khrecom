@@ -119,26 +119,11 @@ extern BCAM_PARAM g_HolyBurstCamParam;
 void ScaleVectorXYZ(FVECTOR& outV, const FVECTOR& inV, FLOAT inScale);
 void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void ApplyMatrix33(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
-extern "C" void sceVu0RotMatrixY(FMATRIX& m0, FMATRIX& m1, float ry);
-extern "C" void sceVu0RotMatrixX(FMATRIX& m0, FMATRIX& m1, float rx);
-extern "C" void sceVu0UnitMatrix(FMATRIX& m);
 extern "C" float sinf(float);
 extern "C" float cosf(float);
 void ApplyMatrixXYZ(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 namespace Math3D {
 FLOAT LimitPI(FLOAT pai);
-}
-
-/* Coord.h's matrix wrappers (setMagic): called directly, cse keeps the matrix address in a saved register
- * across the calls; the original recomputes it for each call. */
-static inline void _unitMatrix(FMATRIX& m) {
-    sceVu0UnitMatrix(m);
-}
-static inline void _rotMatrixX(FMATRIX& m, FLOAT r) {
-    sceVu0RotMatrixX(m, m, r);
-}
-static inline void _rotMatrixY(FMATRIX& m, FLOAT r) {
-    sceVu0RotMatrixY(m, m, r);
 }
 
 static inline void _unitMatrixVu0(FMATRIX& m) {
@@ -832,7 +817,7 @@ void CPlayerDRiku::exeJump2nd() {
         FMATRIX m;
         _unitMatrixVu0(m);
         vec.set(0.0f, 0.0f, 1.0f, 1.0f);
-        sceVu0RotMatrixY(m, m, m_fJumpDir);
+        RotMatrixY(m, m, m_fJumpDir);
         ApplyMatrix33(vec, m, vec);
         ScaleVector(vec, vec, m_fMoveSpdXZ);
         vel.x = vec.x;
@@ -2071,12 +2056,12 @@ void CPlayerDRiku::setMagic(INT inState, INT inCardID, INT inSkillID) {
             FVECTOR ofs = {{0.0f, 0.0f, 1.2f, 1.0f}};
             FMATRIX m;
             FLOAT r = _limitPI(inCardID * -6.2831855f / 7.0f);
-            _unitMatrix(m);
-            _rotMatrixY(m, r);
-            _rotMatrixX(m, -0.7853982f);
+            UnitMatrix(m);
+            RotMatrixY(m, m, r);
+            RotMatrixX(m, m, -0.7853982f);
             ApplyMatrixXYZ(ofs, m, ofs);
-            _unitMatrix(m);
-            _rotMatrixY(m, m_fDir);
+            UnitMatrix(m);
+            RotMatrixY(m, m, m_fDir);
             ApplyMatrixXYZ(ofs, m, ofs);
             AddVectorXYZ(param.vPos, m_vWarpPos[0], ofs);
             calcDirection(param.vRot, m_vAppearPos);
@@ -2192,7 +2177,7 @@ void CPlayerDRiku::searchWarpPos(FLOAT inDir) {
     if (pos.y < 0.1f) pos.y = 0.1f;
     m_vEnemyPos = pos;
     _unitMatrixVu0(m);
-    sceVu0RotMatrixY(m, m, inDir);
+    RotMatrixY(m, m, inDir);
     for (INT i = 0; i < 2; i++) {
         ApplyMatrix33(dir, m, g_vDir[i]);
         AddVectorXYZ(dir, pos, dir);

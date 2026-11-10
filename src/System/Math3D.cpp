@@ -21,7 +21,6 @@ void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT t);
 void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 float vu0Cosf(float x);
 float vu0Sinf(float x);
-extern "C" void sceVu0InterVector(float* v0, float* v1, float* v2, float t);
 extern "C" void TRACE(char* fmt, ...);
 extern "C" void AssertApp(char* pszFile, int nLine, char* pszMsg, char* pszExp);
 
@@ -333,7 +332,7 @@ void Quaternion::MatrixToQuaternion(QUATERNION& outQuat, const FMATRIX& inMatrix
 
 void Quaternion::QuaternionLerp(QUATERNION& outResult, const QUATERNION& inQuat0, const QUATERNION& inQuat1, FLOAT inT) {
     QUATERNION q;
-    sceVu0InterVector(q.v, (float*)inQuat1.v, (float*)inQuat0.v, inT);
+    InterVector(q, inQuat1, inQuat0, inT);
     QuaternionNormalize(outResult, q);
 }
 

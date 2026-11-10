@@ -6,7 +6,6 @@
 #include "Game/Collision/CollMapCamera.h"
 
 extern "C" float tanf(float);
-extern "C" void sceVu0InterVectorXYZ(float* v0, float* v1, float* v2, float t);
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 
 
@@ -150,7 +149,7 @@ void CPathCamera::move(TIMEQ timeq) {
     trans1 = &m_pTrans[next];
     vec0.set(trans0->tx, trans0->ty, trans0->tz);
     vec1.set(trans1->tx, trans1->ty, trans1->tz);
-    sceVu0InterVectorXYZ(vec0.v, vec1.v, vec0.v, racio);
+    InterVectorXYZ(vec0, vec1, vec0, racio);
     if (m_fLocal) {
         ApplyMatrix(vec0, getParent()->getWorld(0), vec0);
     }
@@ -159,7 +158,7 @@ void CPathCamera::move(TIMEQ timeq) {
     if (!m_fgTarget) {
         vec0.set(trans0->ox, trans0->oy, trans0->oz);
         vec1.set(trans1->ox, trans1->oy, trans1->oz);
-        sceVu0InterVectorXYZ(vec0.v, vec1.v, vec0.v, racio);
+        InterVectorXYZ(vec0, vec1, vec0, racio);
     } else {
         vec0 = m_exTargetPos;
     }

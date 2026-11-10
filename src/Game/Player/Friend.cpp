@@ -34,17 +34,6 @@ inline void _emptyStringPlaceholder0() {
 #include "System/Debug.h"
 #include "include_asm.h"
 
-extern "C" {
-void sceVu0UnitMatrix(FMATRIX& m);
-void sceVu0RotMatrixY(FMATRIX& m0, FMATRIX& m1, float ry);
-}
-/* Through inline wrappers (as in FriendKing): the original recomputes the matrix address for each call. */
-static inline void _unitMatrix(FMATRIX& m) {
-    sceVu0UnitMatrix(m);
-}
-static inline void _rotMatrixY(FMATRIX& m, FLOAT r) {
-    sceVu0RotMatrixY(m, m, r);
-}
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 void ApplyMatrixXYZ(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
@@ -646,8 +635,8 @@ void CFriend::calcCirclePos(FVECTOR& outPos, FLOAT inRadius, FLOAT inDir) {
     ofs.w = 1.0f;
     ofs.x = 0.0f;
     ofs.y = 0.0f;
-    _unitMatrix(mat);
-    _rotMatrixY(mat, inDir);
+    UnitMatrix(mat);
+    RotMatrixY(mat, mat, inDir);
     ApplyMatrix(outPos, mat, ofs);
 }
 

@@ -10,7 +10,6 @@ void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT t);
 void MulMatrix(FMATRIX& res, const FMATRIX& m0, const FMATRIX& m1);
 void MulVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void FTOI0Vector(IVECTOR& v0, const FVECTOR& v1);
-extern "C" void sceVu0ClampVector(FVECTOR& v0, FVECTOR& v1, float min, float max);
 
 namespace D2 {
 
@@ -18,10 +17,6 @@ namespace D2 {
 
 
 
-
-static inline void _clampVector(FVECTOR& v0, FVECTOR& v1, float min, float max) {
-    sceVu0ClampVector(v0, v1, min, max);
-}
 
 static inline void _unitMatrixVu0(FMATRIX& m) {
     asm volatile("vmr32.xyzw $vf1, $vf0\n"
@@ -75,7 +70,7 @@ void C2DFntObj::move() {
             }
             MulVector(vCol, vCol, m_pSeqControl->controlColor);
         }
-        _clampVector(vCol, vCol, 0.0f, 256.0f);
+        ClampVector(vCol, vCol, 0.0f, 256.0f);
         m_p2DFnt->setPositionF(mat.m[3][0] * 16.0f, mat.m[3][1] * 16.0f);
         FTOI0Vector(iVec, vCol);
         rgba.set(iVec.x, iVec.y, iVec.z, iVec.w);

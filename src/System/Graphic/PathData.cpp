@@ -31,9 +31,6 @@ static inline void _unitMatrixVu0(FMATRIX& m) {
 
 static inline void _zeroVectorVu0(FVECTOR& v) { asm volatile("sqc2 $vf0, 0x0(%0)" : : "r"(&v) : "memory"); }
 
-extern "C" void sceVu0RotMatrixX(FMATRIX& m0, const FMATRIX& m1, float rx);
-extern "C" void sceVu0RotMatrixY(FMATRIX& m0, const FMATRIX& m1, float ry);
-extern "C" void sceVu0RotMatrixZ(FMATRIX& m0, const FMATRIX& m1, float rz);
 void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
 void SubVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2); void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void AddVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
@@ -1033,9 +1030,9 @@ void CDbgCube::setCoord(FVECTOR* pvPos, FVECTOR* pvRot) {
     vPos.w = 1.0f;
     _unitMatrixVu0(m_Coord.m_Local);
     if (pvRot) {
-        sceVu0RotMatrixX(m_Coord.m_Local, m_Coord.m_Local, pvRot->x);
-        sceVu0RotMatrixY(m_Coord.m_Local, m_Coord.m_Local, pvRot->y);
-        sceVu0RotMatrixZ(m_Coord.m_Local, m_Coord.m_Local, pvRot->z);
+        RotMatrixX(m_Coord.m_Local, m_Coord.m_Local, pvRot->x);
+        RotMatrixY(m_Coord.m_Local, m_Coord.m_Local, pvRot->y);
+        RotMatrixZ(m_Coord.m_Local, m_Coord.m_Local, pvRot->z);
         ScaleVectorXYZ(m_Coord.m_Local.v[0], m_Coord.m_Local.v[0], pvRot->w);
         ScaleVectorXYZ(m_Coord.m_Local.v[1], m_Coord.m_Local.v[1], pvRot->w);
         ScaleVectorXYZ(m_Coord.m_Local.v[2], m_Coord.m_Local.v[2], pvRot->w);
@@ -1090,8 +1087,8 @@ void CDbgArrow::setCoord(FVECTOR* pvPos, FVECTOR* pvRot) {
     vPos.w = 1.0f;
     _unitMatrixVu0(m_Coord.m_Local);
     if (pvRot) {
-        sceVu0RotMatrixX(m_Coord.m_Local, m_Coord.m_Local, pvRot->x);
-        sceVu0RotMatrixY(m_Coord.m_Local, m_Coord.m_Local, pvRot->y);
+        RotMatrixX(m_Coord.m_Local, m_Coord.m_Local, pvRot->x);
+        RotMatrixY(m_Coord.m_Local, m_Coord.m_Local, pvRot->y);
         if (pvRot->z != 0.0f) {
             vAxis.set(0.0f, 0.0f, 1.0f);
             ApplyMatrix33(vAxis, m_Coord.m_Local, vAxis);

@@ -594,14 +594,11 @@ void CModel::getWorldBBox(FVECTOR& vMax, FVECTOR& vMin) {
     vMin.z = m_BBox.z[0];
 }
 INT checkBSphere(CCoord& crd, const FVECTOR& ctr, FLOAT rad) {
-    FVECTOR b; // MATCH: the copy of ctr2 has the lowest stack slot (an inline's temp in the original)
-    FVECTOR ctr2;
+    FVECTOR ctr2 = ApplyMatrix(crd.getWorldMatrix(), ctr);
     FVECTOR frustum[6];
     BOUNDING_SPHERE sphere;
-    ApplyMatrix(ctr2, crd.getWorldMatrix(), ctr);
-    b = ctr2;
     Math3D::CalcFrustum(frustum);
-    sphere.vCenter = b;
+    sphere.vCenter = ctr2;
     sphere.fR = rad;
     return Math3D::CheckVisibleBoundingSphere(sphere, frustum) ? 0 : 0x80000000;
 }

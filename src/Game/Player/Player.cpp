@@ -106,21 +106,6 @@ static inline void _unitMatrixVu0(FMATRIX& m) {
                  : "r"(&m)
                  : "memory");
 }
-extern "C" void sceVu0RotMatrixX(FMATRIX& m0, FMATRIX& m1, float rx);
-extern "C" void sceVu0RotMatrixY(FMATRIX& m0, FMATRIX& m1, float ry);
-extern "C" void sceVu0UnitMatrix(FMATRIX& m);
-extern "C" void sceVu0InversMatrix(FMATRIX& m0, FMATRIX& m1);
-/* Through inline wrappers: called directly, cse keeps the matrix address in a saved register across the
- * calls; the original recomputes it for each call (as in Game/Player/FriendKing). */
-static inline void _unitMatrix(FMATRIX& m) {
-    sceVu0UnitMatrix(m);
-}
-static inline void _inversMatrix(FMATRIX& m) {
-    sceVu0InversMatrix(m, m);
-}
-static inline void _rotMatrixY(FMATRIX& m, FLOAT r) {
-    sceVu0RotMatrixY(m, m, r);
-}
 extern "C" float atan2f(float y, float x); extern "C" int rand();
 static inline FLOAT _limitPI(FLOAT r) {
     if (r < -3.1415927f) r += 6.2831855f;
@@ -1417,8 +1402,8 @@ void CPlayer::stateField() {
         vec.y = 0.0f;
         vec.z = power * 0.5f;
         vec.w = 1.0f;
-        _unitMatrix(mat);
-        _rotMatrixY(mat, dir);
+        UnitMatrix(mat);
+        RotMatrixY(mat, mat, dir);
         ApplyMatrix(vec, mat, vec);
         pos.x = pos.x + vec.x;
         pos.y = pos.y + vec.y;
@@ -1599,8 +1584,8 @@ void CPlayer::stateBattle() {
         vec.y = 0.0f;
         vec.z = power * 0.5f;
         vec.w = 1.0f;
-        _unitMatrix(mat);
-        _rotMatrixY(mat, dir);
+        UnitMatrix(mat);
+        RotMatrixY(mat, mat, dir);
         ApplyMatrix(vec, mat, vec);
         pos.x = pos.x + vec.x;
         pos.y = pos.y + vec.y;
@@ -1840,8 +1825,8 @@ FLOAT CPlayer::getFrontAirHeight(FVECTOR* inPos, FLOAT inLength, FLOAT inHeight,
         if (r > 3.1415927f) r -= 6.2831855f;
     }
     FMATRIX m;
-    _unitMatrix(m);
-    _rotMatrixY(m, r);
+    UnitMatrix(m);
+    RotMatrixY(m, m, r);
     ApplyMatrixXYZ(ofs, m, ofs);
     FVECTOR vStart = {{ pos.x, pos.y, pos.z, 1.0f }};
     FVECTOR vEnd = {{ pos.x + ofs.x, pos.y + ofs.y, pos.z + ofs.z, 1.0f }};
@@ -2191,8 +2176,8 @@ INT CPlayer::chkWall(INT inStep) {
     FLOAT dir;
     BOOL bHit;
     dir = m_fDir;
-    _unitMatrix(m);
-    _rotMatrixY(m, dir);
+    UnitMatrix(m);
+    RotMatrixY(m, m, dir);
     ApplyMatrixXYZ(ofs, m, ofs);
     old = getOldPos();
     updateCoord();
@@ -2242,7 +2227,7 @@ INT CPlayer::chkWall(INT inStep) {
             ofs.z = 0.6f;
             ofs.x = 0.0f;
             ofs.w = 1.0f;
-            _rotMatrixY(m, 1.5707964f);
+            RotMatrixY(m, m, 1.5707964f);
             ApplyMatrixXYZ(ofs, m, ofs);
             vStart.set(pos.x - ofs.x, pos.y + ofs.y, pos.z - ofs.z);
             vEnd.set(pos.x + ofs.x, pos.y + ofs.y, pos.z + ofs.z);
@@ -2262,7 +2247,7 @@ INT CPlayer::chkWall(INT inStep) {
             ofs.z = 0.6f;
             ofs.x = 0.0f;
             ofs.w = 1.0f;
-            _rotMatrixY(m, 3.1415927f);
+            RotMatrixY(m, m, 3.1415927f);
             ApplyMatrixXYZ(ofs, m, ofs);
             vStart.set(pos.x - ofs.x, pos.y + ofs.y, pos.z - ofs.z);
             vEnd.set(pos.x + ofs.x, pos.y + ofs.y, pos.z + ofs.z);
@@ -2286,8 +2271,8 @@ INT CPlayer::chkWall(INT inStep) {
     ofs.y = 0.0f;
     ofs.z = 0.0f;
     ofs.w = 1.0f;
-    _unitMatrix(m);
-    _rotMatrixY(m, m_fWallDir);
+    UnitMatrix(m);
+    RotMatrixY(m, m, m_fWallDir);
     ApplyMatrixXYZ(ofs, m, ofs);
     vStart.set(pos.x + ofs.x, pos.y, pos.z + ofs.z);
     vEnd.set(pos.x - ofs.x, pos.y, pos.z - ofs.z);
@@ -2328,8 +2313,8 @@ INT CPlayer::chkWallBottom() {
     if (vNormal.y < 0.64278764f) return FALSE;
     m_vWallPos.y = m_pCollMap->getDetectPos()->y + 0.0035f;
     ofs.set(0.0f, 0.0f, 0.375f);
-    _unitMatrix(m);
-    _rotMatrixY(m, m_fWallDir);
+    UnitMatrix(m);
+    RotMatrixY(m, m, m_fWallDir);
     ApplyMatrixXYZ(ofs, m, ofs);
     vStart.set(m_vWallPos.x + ofs.x, m_vWallPos.y + 0.25f, m_vWallPos.z + ofs.z);
     vEnd.set(m_vWallPos.x + ofs.x, m_vWallPos.y - 0.25f, m_vWallPos.z + ofs.z);
@@ -2444,8 +2429,8 @@ void CPlayer::exeWall() {
     dir = getDir();
     pos = getPos();
     FVECTOR ofs = {{0.0f, 0.0f, 0.6f, 1.0f}};
-    _unitMatrix(m);
-    _rotMatrixY(m, dir);
+    UnitMatrix(m);
+    RotMatrixY(m, m, dir);
     ApplyMatrixXYZ(ofs, m, ofs);
     AddVectorXYZ(pos, pos, ofs);
     ofs.set(0.5f, 0.0f, 0.0f);
@@ -2536,8 +2521,8 @@ void CPlayer::initLadder(INT inStep) {
     v = getRot();
     v.y = m_fLadderDir;
     setRot(v);
-    _unitMatrix(m);
-    _rotMatrixY(m, m_fLadderDir);
+    UnitMatrix(m);
+    RotMatrixY(m, m, m_fLadderDir);
     ApplyMatrixXYZ(ofs, m, PL::LADDER_LOCAL_OFS);
     SubVectorXYZ(m_vLadderPos, *m_pLadderPos, ofs);
     pos = m_vLadderPos;
@@ -2605,9 +2590,9 @@ void CPlayer::exeLadder() {
         FMATRIX m;
         pos = m_vCenterPos;
         SubVectorXYZ(m_vHangHandPos, pos, getPos());
-        _unitMatrix(m);
-        _rotMatrixY(m, m_fDir);
-        _inversMatrix(m);
+        UnitMatrix(m);
+        RotMatrixY(m, m, m_fDir);
+        InversMatrix(m, m);
         ApplyMatrixXYZ(m_vHangHandPos, m, m_vHangHandPos);
     }
         if (isMotionEnd()) {
@@ -2617,8 +2602,8 @@ void CPlayer::exeLadder() {
             pos = getPos();
             FVECTOR ofs = {{0.0f, 1.8f, 1.3f, 1.0f}};
             FMATRIX m;
-            _unitMatrix(m);
-            _rotMatrixY(m, dir);
+            UnitMatrix(m);
+            RotMatrixY(m, m, dir);
             ApplyMatrixXYZ(ofs, m, ofs);
             AddVectorXYZ(pos, pos, ofs);
             setOldPos(pos);
@@ -2666,8 +2651,8 @@ INT CPlayer::isStartLadderJump() {
     FVECTOR ofs = { 0.0f, 0.0f, PL::LADDER_LOCAL_OFS.z, 1.0f };
     FMATRIX m;
 
-    _unitMatrix(m);
-    _rotMatrixY(m, dir);
+    UnitMatrix(m);
+    RotMatrixY(m, m, dir);
     ApplyMatrixXYZ(ofs, m, ofs);
     AddVectorXYZ(pos, pos, ofs);
     setPos(pos);
@@ -3067,8 +3052,8 @@ BOOL CPlayer::chkHang() {
     ofs.y = 0.0f;
     ofs.w = 1.0f;
     dir = m_fDir;
-    _unitMatrix(m);
-    _rotMatrixY(m, dir);
+    UnitMatrix(m);
+    RotMatrixY(m, m, dir);
     ApplyMatrixXYZ(ofs, m, ofs);
     ApplyMatrixXYZ(pos, m, PL::HANG_HAND_LOCAL_OFS);
     _addAssign(pos, getPos());
@@ -3100,8 +3085,8 @@ BOOL CPlayer::chkHang() {
     vec.y = 0.0f;
     vec.z = 1.0f;
     vec.w = 1.0f;
-    _unitMatrix(m);
-    _rotMatrixY(m, fInRot);
+    UnitMatrix(m);
+    RotMatrixY(m, m, fInRot);
     ApplyMatrixXYZ(vec, m, vec);
     vDetect = *m_pCollMap->getDetectPos();
     ScaleVectorXYZ(ofs, vec, 0.1f);
@@ -3162,8 +3147,8 @@ void CPlayer::initHang() {
     FLOAT dir = m_fDir;
     rot.y = dir;
     setRot(rot);
-    _unitMatrix(m);
-    _rotMatrixY(m, dir);
+    UnitMatrix(m);
+    RotMatrixY(m, m, dir);
     ApplyMatrixXYZ(ofs, m, PL::HANG_HAND_LOCAL_OFS);
     SubVectorXYZ(m_vHangPos, m_vHangPos, ofs);
     m_vHangPos.w = 1.0f;
@@ -3215,9 +3200,9 @@ void CPlayer::exeHang() {
             if (isMotionEnd()) {
                 pos = Crd(m_pModels->getBoneIndex(PL::g_szBoneLHand)).getWorldMatrix().v[3];
                 SubVectorXYZ(m_vHangHandPos, pos, getPos());
-                _unitMatrix(m);
-                _rotMatrixY(m, m_fDir);
-                _inversMatrix(m);
+                UnitMatrix(m);
+                RotMatrixY(m, m, m_fDir);
+                InversMatrix(m, m);
                 ApplyMatrixXYZ(m_vHangHandPos, m, m_vHangHandPos);
                 m_iSubState = 1;
                 setAnimForce(0xE, 400, 0, 0, 0, 0);
@@ -3230,8 +3215,8 @@ void CPlayer::exeHang() {
             r = getDir(); dir = r;
             pos = getPos();
             ofs.set(0.0f, 0.0f, -0.6f);
-            _unitMatrix(m);
-            _rotMatrixY(m, dir);
+            UnitMatrix(m);
+            RotMatrixY(m, m, dir);
             ApplyMatrixXYZ(ofs, m, ofs);
             AddVectorXYZ(pos, pos, ofs);
             ofs.set(0.5f, 0.0f, 0.0f);
@@ -3284,8 +3269,8 @@ void CPlayer::exeHang() {
         break;
     case 2:
         pos = getPos();
-        _unitMatrix(m);
-        _rotMatrixY(m, m_fDir);
+        UnitMatrix(m);
+        RotMatrixY(m, m, m_fDir);
         ofs.set(0.0f, 2.564f, -1.0f);
         ApplyMatrixXYZ(ofs, m, ofs);
         AddVectorXYZ(ofs, m_vHangPos, ofs);
@@ -3441,8 +3426,8 @@ void CPlayer::initTreasureBox() {
     pos = pTarget->getPos();
     FVECTOR ofs = {{0.0f, 0.0f, -1.457f, 1.0f}};
     FMATRIX m;
-    _unitMatrix(m);
-    _rotMatrixY(m, m_fDir);
+    UnitMatrix(m);
+    RotMatrixY(m, m, m_fDir);
     ApplyMatrixXYZ(ofs, m, ofs);
     AddVectorXYZ(pos, pos, ofs);
     pos.y += 0.0035f;
@@ -3488,8 +3473,8 @@ void CPlayer::initRoomCreation() {
     pos = pTarget->getPos();
     FVECTOR ofs = {{0.0f, 0.0f, -2.0f, 1.0f}};
     FMATRIX m;
-    _unitMatrix(m);
-    _rotMatrixY(m, m_fDir);
+    UnitMatrix(m);
+    RotMatrixY(m, m, m_fDir);
     ApplyMatrixXYZ(ofs, m, ofs);
     AddVectorXYZ(pos, pos, ofs);
     pos.y += 0.0035f;
@@ -3573,8 +3558,8 @@ void CPlayer::initWorldSelect() {
     pos = pTarget->getPos();
     FVECTOR ofs = {{0.0f, 0.0f, -2.0f, 1.0f}};
     FMATRIX m;
-    _unitMatrix(m);
-    _rotMatrixY(m, m_fDir);
+    UnitMatrix(m);
+    RotMatrixY(m, m, m_fDir);
     ApplyMatrixXYZ(ofs, m, ofs);
     AddVectorXYZ(pos, pos, ofs);
     pos.y += 0.0035f;
@@ -6292,8 +6277,8 @@ INT CPlayer::calcAppearPos(FLOAT inDist, FLOAT inRadius, FVECTOR* inCenter) {
     FVECTOR pos = inCenter ? *inCenter : m_vCenterPos;
     FMATRIX m;
     FVECTOR mpos;
-    _unitMatrix(m);
-    _rotMatrixY(m, m_fDir);
+    UnitMatrix(m);
+    RotMatrixY(m, m, m_fDir);
     m_pCollMap->setType(COLL_TYPE_SPHERE);
     m_pCollMap->enableSliding(0);
     pos.w = 1.0f;
@@ -6355,8 +6340,8 @@ void CPlayer::calcAppearPosFS(FLOAT inDist, FLOAT inRadius) {
     FVECTOR zero = {{m_vStartPos.x, pos.y, m_vStartPos.z, 1.0f}};
     FLOAT dir0 = calcDirection(zero);
     FMATRIX m;
-    _unitMatrix(m);
-    _rotMatrixY(m, dir0);
+    UnitMatrix(m);
+    RotMatrixY(m, m, dir0);
     FVECTOR start = {{0.0f, 0.0f, inDist, 1.0f}};
     ApplyMatrixXYZ(start, m, start);
     AddVectorXYZ(pos, pos, start);
@@ -6872,8 +6857,8 @@ void CPlayer::updateSpotLight(HANDLE inHandle) {
         FVECTOR n = m_pMove->getDetectNormal();
         FMATRIX m;
         _unitMatrixVu0(m);
-        sceVu0RotMatrixX(m, m, atan2f(_sqrtf(n.z * n.z + n.x * n.x), n.y));
-        sceVu0RotMatrixY(m, m, atan2f(n.x, n.z));
+        RotMatrixX(m, m, atan2f(_sqrtf(n.z * n.z + n.x * n.x), n.y));
+        RotMatrixY(m, m, atan2f(n.x, n.z));
         FVECTOR pos = getPos();
         pos.w = 1.0f;
         m.v[3] = pos;

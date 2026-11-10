@@ -90,6 +90,9 @@ union FVECTOR {
         vec.w *= inV.w;
         return vec;
     }
+    operator _FVECTOR*() { return &v; }
+    operator const _FVECTOR*() const { return &v; }
+    operator _FVECTOR&() const { return *(_FVECTOR*)&v; }
 };
 
 typedef int _IVECTOR[4] __attribute__((aligned(16)));
@@ -115,10 +118,12 @@ union IVECTOR {
     IVECTOR operator+(const IVECTOR& inV) const;
     IVECTOR operator-(const IVECTOR& inV) const;
     IVECTOR operator*(INT n) const;
+    operator _IVECTOR*() { return &v; }
+    operator const _IVECTOR*() const { return &v; }
+    operator _IVECTOR&() const { return *(_IVECTOR*)&v; }
 };
 
 typedef float _FMATRIX[4][4] __attribute__((aligned(16)));
-typedef float (*_FMATRIX_ROWP)[4];
 union FMATRIX {
     _FMATRIX m;
     FVECTOR v[4];
@@ -150,8 +155,9 @@ union FMATRIX {
     void set(/* parameters unknown */);
     BOOL operator!=(const FMATRIX& inM) const;
     BOOL operator==(const FMATRIX& inM) const { return v[0] == inM.v[0] && v[1] == inM.v[1] && v[2] == inM.v[2] && v[3] == inM.v[3]; }
-    // PARTIAL: the ref's conversions are to _FMATRIX* / float(*)[4][4] / _FMATRIX& (Game/Bullet/Bullet needs the row pointer for sceVu0)
-    operator _FMATRIX_ROWP() { return m; }
+    operator _FMATRIX*() { return &m; }
+    operator const _FMATRIX*() const { return &m; }
+    operator _FMATRIX&() const { return *(_FMATRIX*)&m; }
 };
 
 /* The basic graphics types: in every original that has FVECTOR (274) they come right after the vector types and
@@ -210,6 +216,157 @@ struct G_ST {
 #line 285
     void set(FLOAT _s, FLOAT _t) { s = _s; t = _t; }
 };
+
+/* The VU0 library (System/Coord defines it; the ref's Coord.h declares it, in this order). */
+extern "C" {
+void sceVu0ApplyMatrix(float *v0, float (*m0)[4], float *v1);
+void sceVu0MulMatrix(float (*m0)[4], float (*m1)[4], float (*m2)[4]);
+void sceVu0OuterProduct(float *v0, float *v1, float *v2);
+float sceVu0InnerProduct(float *v0, float *v1);
+void sceVu0Normalize(float *v0, float *v1);
+void sceVu0TransposeMatrix(float (*m0)[4], float (*m1)[4]);
+void sceVu0InversMatrix(float (*m0)[4], float (*m1)[4]);
+void sceVu0DivVector(float *v0, float *v1, float q);
+void sceVu0DivVectorXYZ(float *v0, float *v1, float q);
+void sceVu0InterVector(float *v0, float *v1, float *v2, float t);
+void sceVu0AddVector(float *v0, float *v1, float *v2);
+void sceVu0SubVector(float *v0, float *v1, float *v2);
+void sceVu0MulVector(float *v0, float *v1, float *v2);
+void sceVu0ScaleVector(float *v0, float *v1, float t);
+void sceVu0TransMatrix(float (*m0)[4], float (*m1)[4], float *tv);
+void sceVu0CopyVector(float *v0, float *v1);
+void sceVu0CopyMatrix(float (*m0)[4], float (*m1)[4]);
+void sceVu0FTOI4Vector(int *v0, float *v1);
+void sceVu0FTOI0Vector(int *v0, float *v1);
+void sceVu0ITOF4Vector(float *v0, int *v1);
+void sceVu0ITOF0Vector(float *v0, int *v1);
+void sceVu0UnitMatrix(float (*m0)[4]);
+void sceVu0RotMatrixZ(float (*m0)[4], float (*m1)[4], float rz);
+void sceVu0RotMatrixX(float (*m0)[4], float (*m1)[4], float rx);
+void sceVu0RotMatrixY(float (*m0)[4], float (*m1)[4], float ry);
+void sceVu0RotMatrix(float (*m0)[4], float (*m1)[4], float *rot);
+void sceVu0ClampVector(float *v0, float *v1, float min, float max);
+void sceVu0CameraMatrix(float (*m)[4], float *p, float *zd, float *yd);
+void sceVu0NormalLightMatrix(float (*m)[4], float *l0, float *l1, float *l2);
+void sceVu0LightColorMatrix(float (*m)[4], float *c0, float *c1, float *c2, float *a);
+void sceVu0ViewScreenMatrix(float (*m)[4], float scrz, float ax, float ay, float cx, float cy, float zmin, float zmax, float nearz, float farz);
+void sceVu0DropShadowMatrix(float (*m)[4], float *lp, float a, float b, float c, int mode);
+void sceVu0RotTransPersN(int (*v0)[4], float (*m0)[4], float (*v1)[4], int n, int mode);
+void sceVu0RotTransPers(int *v0, float (*m0)[4], float *v1, int mode);
+void sceVu0CopyVectorXYZ(float *v0, float *v1);
+void sceVu0InterVectorXYZ(float *v0, float *v1, float *v2, float r);
+void sceVu0ScaleVectorXYZ(float *v0, float *v1, float s);
+int sceVu0ClipScreen(float *v0);
+int sceVu0ClipScreen3(float *v0, float *v1, float *v2);
+int sceVu0ClipAll(float *minv, float *maxv, float (*ms)[4], float (*vm)[4], int n);
+}
+
+void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1); // System/Coord
+void MulMatrix(FMATRIX& res, const FMATRIX& m0, const FMATRIX& m1);   // System/Coord
+
+/* The original's free inlines at 340-643 (its line markers). Names ours (the .mdebug has none for inlined
+ * functions); parameter and local names from its inline blocks where they are visible: m1 (340, 613), m0 (613), v0
+ * (344), matOut (354-370, 407, 429), matIn and fInRot (361-370), vecInTrans (396), vecPos/vecV/vecDir/matWork
+ * (407-418), fInAx/fInAy (429), vecInB (477), vecOut (481), inT (477, 481), a and the result b (632-635), b
+ * (642-643). The bodies pass the array members (.m/.v): through the conversion operators (one more inline call) cse
+ * keeps the addresses in saved registers where the original recomputes them (FriendKing adjustPlayer). */
+#line 340
+inline void InversMatrix(FMATRIX& m0, const FMATRIX& m1) { sceVu0InversMatrix(m0.m, (float(*)[4])m1.m); }
+#line 344
+inline void ClampVector(FVECTOR& v0, const FVECTOR& v1, FLOAT fInMin, FLOAT fInMax) { sceVu0ClampVector(v0.v, (float*)v1.v, fInMin, fInMax); }
+#line 354
+inline void UnitMatrix(FMATRIX& matOut) { sceVu0UnitMatrix(matOut.m); }
+#line 358
+inline void RotMatrix(FMATRIX& matOut, const FMATRIX& matIn, const FVECTOR& vecInRot) { sceVu0RotMatrix(matOut.m, (float(*)[4])matIn.m, (float*)vecInRot.v); }
+#line 361
+inline void RotMatrixX(FMATRIX& matOut, const FMATRIX& matIn, FLOAT fInRot) {
+    sceVu0RotMatrixX(matOut.m, (float(*)[4])matIn.m, fInRot);
+}
+#line 365
+inline void RotMatrixY(FMATRIX& matOut, const FMATRIX& matIn, FLOAT fInRot) {
+    sceVu0RotMatrixY(matOut.m, (float(*)[4])matIn.m, fInRot);
+}
+#line 369
+inline void RotMatrixZ(FMATRIX& matOut, const FMATRIX& matIn, FLOAT fInRot) {
+    sceVu0RotMatrixZ(matOut.m, (float(*)[4])matIn.m, fInRot);
+}
+#line 396
+inline void TransMatrix(FMATRIX& matOut, const FMATRIX& matIn, const FVECTOR& vecInTrans) { sceVu0TransMatrix(matOut.m, (float(*)[4])matIn.m, (float*)vecInTrans.v); }
+#line 407
+inline void CameraMatrix(FMATRIX& matOut, const FVECTOR& vInPos, const FVECTOR& vInZd, const FVECTOR& vInYd, const FVECTOR& vInRot) {
+    FMATRIX matWork;
+    FVECTOR vecDir, vecV, vecPos;
+    UnitMatrix(matWork);
+    RotMatrixX(matWork, matWork, vInRot.x);
+    RotMatrixY(matWork, matWork, vInRot.y);
+    RotMatrixZ(matWork, matWork, vInRot.z);
+    ApplyMatrix(vecDir, matWork, vInZd);
+    ApplyMatrix(vecV, matWork, vInYd);
+    ApplyMatrix(vecPos, matWork, vInPos);
+    sceVu0CameraMatrix(matOut.m, vecPos.v, vecDir.v, vecV.v);
+}
+#line 429
+inline void ViewScreenMatrix(FMATRIX& matOut, FLOAT fInScrz, FLOAT fInAx, FLOAT fInAy, FLOAT fInCx, FLOAT fInCy, FLOAT fInFar) {
+    sceVu0ViewScreenMatrix(matOut.m, fInScrz, fInAx, fInAy, fInCx, fInCy, 1.0f, 16777000.0f, 0.1f, fInFar);
+}
+#line 477
+inline void InterVector(FVECTOR& vecOut, const FVECTOR& vecInA, const FVECTOR& vecInB, FLOAT inT) {
+    sceVu0InterVector(vecOut.v, (float*)vecInA.v, (float*)vecInB.v, inT);
+}
+#line 481
+inline void InterVectorXYZ(FVECTOR& vecOut, const FVECTOR& vecInA, const FVECTOR& vecInB, FLOAT inT) {
+    sceVu0InterVectorXYZ(vecOut.v, (float*)vecInA.v, (float*)vecInB.v, inT);
+}
+#line 498
+/* the asm names the argument registers (System/Coord getMaxMinToVector8 is this inline alone) */
+inline void GetMaxMinToVector8(FVECTOR* outV8, const FVECTOR& vMax, const FVECTOR& vMin) {
+    asm volatile("lqc2 $vf4, 0x0($5)\n"
+                 "lqc2 $vf5, 0x0($6)\n"
+                 "vadd.yz $vf6, $vf4, $vf0\n"
+                 "vadd.y $vf7, $vf4, $vf0\n"
+                 "vadd.xy $vf8, $vf4, $vf0\n"
+                 "vadd.xz $vf9, $vf4, $vf0\n"
+                 "vadd.z $vf10, $vf4, $vf0\n"
+                 "vadd.x $vf11, $vf4, $vf0\n"
+                 "vmulw.xw $vf6, $vf5, $vf0w\n"
+                 "vmulw.xzw $vf7, $vf5, $vf0w\n"
+                 "vmulw.zw $vf8, $vf5, $vf0w\n"
+                 "vmulw.yw $vf9, $vf5, $vf0w\n"
+                 "vmulw.xyw $vf10, $vf5, $vf0w\n"
+                 "vmulw.yzw $vf11, $vf5, $vf0w\n"
+                 "sqc2 $vf4, 0x0($4)\n"
+                 "sqc2 $vf6, 0x10($4)\n"
+                 "sqc2 $vf7, 0x20($4)\n"
+                 "sqc2 $vf8, 0x30($4)\n"
+                 "sqc2 $vf9, 0x40($4)\n"
+                 "sqc2 $vf10, 0x50($4)\n"
+                 "sqc2 $vf5, 0x60($4)\n"
+                 "sqc2 $vf11, 0x70($4)\n");
+}
+#line 563
+inline void SetRotTransPersMatrix(const FMATRIX& m) {
+    asm volatile("vsub.xyzw $vf3, $vf0, $vf0\n"
+                 "lqc2 $vf4, 0x0(%0)\n"
+                 "lqc2 $vf5, 0x10(%0)\n"
+                 "lqc2 $vf6, 0x20(%0)\n"
+                 "lqc2 $vf7, 0x30(%0)\n"
+                 :
+                 : "r"(&m));
+}
+#line 613
+inline void InverseMatrix(FMATRIX& m0, const FMATRIX& m1) { sceVu0InversMatrix(m0.m, (float(*)[4])m1.m); }
+#line 632
+inline FVECTOR ApplyMatrix(const FMATRIX& m, const FVECTOR& a) {
+    FVECTOR b;
+    ApplyMatrix(b, m, a);
+    return b;
+}
+#line 640
+inline FMATRIX MulMatrix(const FMATRIX& m0, const FMATRIX& m1) {
+    FMATRIX b;
+    MulMatrix(b, m0, m1);
+    return b;
+}
 
 /* The vector inlines with a place in the original's line markers, defined after the classes as there (IVECTOR::set
  * at 679 sits between FVECTOR's addRot 654-673 and init 729): addRot 654-673, IVECTOR::set 679, init 729, set 730,

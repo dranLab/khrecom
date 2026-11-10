@@ -109,17 +109,7 @@ void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 void ApplyMatrixXYZ(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 void ScaleVectorXYZ(FVECTOR& outV, const FVECTOR& inV, FLOAT inScale);
 void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
-extern "C" {
-void sceVu0UnitMatrix(FMATRIX& m);
-void sceVu0RotMatrixY(FMATRIX& m0, FMATRIX& m1, float ry);
-}
 /* FMATRIX inlines of Coord.h */
-static inline void _unitMatrix(FMATRIX& m) {
-    sceVu0UnitMatrix(m);
-}
-static inline void _rotMatrixY(FMATRIX& m, FLOAT r) {
-    sceVu0RotMatrixY(m, m, r);
-}
 extern "C" void* memset(void* s, int c, unsigned int n);
 /* the inline unit matrix of vu0.h */
 static inline void _unitMatrixVu0(FMATRIX& m) {
@@ -963,8 +953,8 @@ void CPlayerSora::exeStockSkill() {
             param.iAttackPoint = m_iAttackPower;
             param.fSpeed = 0.0f;
             param.fMaxDist = 0.0f;
-            _unitMatrix(mat);
-            _rotMatrixY(mat, getRot().y);
+            UnitMatrix(mat);
+            RotMatrixY(mat, mat, getRot().y);
             param.vPos.set(0.0f, -g_OffsetTbl_StockSkill[3].y, g_OffsetTbl_StockSkill[3].z);
             ApplyMatrix(param.vPos, mat, param.vPos);
             param.vPos += getPos();
@@ -1856,8 +1846,8 @@ void CPlayerSora::exeStockSkill() {
         m_pCollMap->setRadius(m_fWallRadius);
         pos = getPos();
         FVECTOR v = {{0.0f, 0.0f, -m_fWallRadius, 1.0f}};
-        _unitMatrix(m);
-        _rotMatrixY(m, m_fDir);
+        UnitMatrix(m);
+        RotMatrixY(m, m, m_fDir);
         ApplyMatrixXYZ(v, m, v);
         AddVectorXYZ(pos, pos, v);
         m_pCollMap->setStartPos(pos);
@@ -2447,7 +2437,7 @@ void CPlayerSora::exeStockSkill() {
                     FVECTOR v = {{0.0f, -0.1f, 1.0f, 1.0f}};
                     FMATRIX m;
                     _unitMatrixVu0(m);
-                    _rotMatrixY(m, rot.y);
+                    RotMatrixY(m, m, rot.y);
                     ApplyMatrixXYZ(v, m, v);
                     ScaleVectorXYZ(v, v, speed);
                     vel.x = v.x;

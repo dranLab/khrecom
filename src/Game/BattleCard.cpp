@@ -355,16 +355,6 @@ static inline void _setCard(CARD& c, USHORT inKind, BYTE num) {
 namespace CardBattle {
 }
 FLOAT RotTransPersClipW(IVECTOR& out_v, const FVECTOR& in_v);
-static inline void _setRotTransPersMatrix(FMATRIX& m) {
-    __asm__ volatile(
-        "vsub.xyzw $vf3, $vf0, $vf0\n"
-        "lqc2 $vf4, 0x0(%0)\n"
-        "lqc2 $vf5, 0x10(%0)\n"
-        "lqc2 $vf6, 0x20(%0)\n"
-        "lqc2 $vf7, 0x30(%0)\n"
-        :
-        : "r"(&m));
-}
 static inline FLOAT _adjustRad(FLOAT r) {
     return (r < -3.1415927f) ? r + 6.2831855f : (r > 3.1415927f) ? r - 6.2831855f : r; // MATCH: one ternary (stateSnatch's wrap keeps the sum in the m_vRot.y register)
 }
@@ -1701,7 +1691,7 @@ void CBattleCard::stateSnatch() {
             FVECTOR pos;
             IVECTOR out;
             pEntity->getLockOnPos(pos);
-            _setRotTransPersMatrix(CWorldEnv::getWorldScreenMatrix());
+            SetRotTransPersMatrix(CWorldEnv::getWorldScreenMatrix());
             RotTransPersClipW(out, pos);
             if (!out.w && out.x >= 0x5000 && out.x <= 0xb000 && out.y >= 0x5000 && out.y <= 0xb000) {
                 m_EndPos.x = (out.x >> 4) - 0x700;

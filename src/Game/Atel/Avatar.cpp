@@ -109,10 +109,6 @@ void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 
 
 
-extern "C" {
-void sceVu0RotMatrix(FMATRIX& m0, const FMATRIX& m1, const FVECTOR& rot);
-void sceVu0RotMatrixY(FMATRIX& m0, const FMATRIX& m1, FLOAT ry);
-}
 static inline void _unitMatrixVu0(FMATRIX& m) {
     asm volatile("vmr32.xyzw $vf1, $vf0\n"
                  "sqc2 $vf0, 0x30(%0)\n"
@@ -474,7 +470,7 @@ void CAvatar::calcAvatarMoveSpeed(FVECTOR& vOut) {
         _unitMatrixVu0(m);
         v._q = 0;
         v.z = getAvatarSpeed();
-        sceVu0RotMatrix(m, m, getRot());
+        RotMatrix(m, m, getRot());
         ApplyMatrix(vOut, m, v);
         vOut.w = 0.0f;
         break;
@@ -483,7 +479,7 @@ void CAvatar::calcAvatarMoveSpeed(FVECTOR& vOut) {
         FMATRIX m;
         FVECTOR v;
         _unitMatrixVu0(m);
-        sceVu0RotMatrixY(m, m, getAvatarDirY2Target(NULL, NULL));
+        RotMatrixY(m, m, getAvatarDirY2Target(NULL, NULL));
         v._q = 0;
         v.z = getAvatarSpeed();
         ApplyMatrix(vOut, m, v);

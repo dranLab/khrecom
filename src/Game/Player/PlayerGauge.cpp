@@ -68,16 +68,6 @@ FVECTOR getPlayerPos(BOOL flag);
 void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 FLOAT InnerProduct(const FVECTOR& inV0, const FVECTOR& inV1);
 FLOAT RotTransPersClipW(IVECTOR& out_v, const FVECTOR& in_v);
-static inline void _setRotTransPersMatrix(FMATRIX& m) {
-    __asm__ volatile(
-        "vsub.xyzw $vf3, $vf0, $vf0\n"
-        "lqc2 $vf4, 0x0(%0)\n"
-        "lqc2 $vf5, 0x10(%0)\n"
-        "lqc2 $vf6, 0x20(%0)\n"
-        "lqc2 $vf7, 0x30(%0)\n"
-        :
-        : "r"(&m));
-}
 static inline FLOAT _sqrtf(FLOAT x) {
     FLOAT ret;
     asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));
@@ -1361,7 +1351,7 @@ void CCommonGauge::dispSeqCtrl(INT inIndex, INT inFlag, INT inDisp) {
         return;
     }
     if (inFlag == 0x10 && !(m_uiFlag & 0x2000)) return;
-    _setRotTransPersMatrix(CWorldEnv::getWorldScreenMatrix());
+    SetRotTransPersMatrix(CWorldEnv::getWorldScreenMatrix());
     RotTransPersClipW(out, m_vPos[inIndex]);
     if (out.w) {
         if (m_uiFlag & inDisp) {

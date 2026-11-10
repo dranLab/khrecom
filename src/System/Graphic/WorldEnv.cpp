@@ -27,16 +27,6 @@ float tanf(float x);
 float sinf(float x);
 float cosf(float x);
 }
-extern "C" {
-void sceVu0UnitMatrix(FMATRIX& m);
-void sceVu0InversMatrix(FMATRIX& m0, const FMATRIX& m1);
-void sceVu0RotMatrixX(FMATRIX& m0, FMATRIX& m1, float rx);
-void sceVu0RotMatrixY(FMATRIX& m0, FMATRIX& m1, float ry);
-void sceVu0RotMatrixZ(FMATRIX& m0, FMATRIX& m1, float rz);
-void sceVu0CameraMatrix(FMATRIX& m, FVECTOR& p, FVECTOR& zd, FVECTOR& yd);
-void sceVu0ViewScreenMatrix(FMATRIX& m, float scrz, float ax, float ay, float cx, float cy, float zmin, float zmax,
-                            float nearz, float farz);
-}
 extern INT SCREEN_HEIGHT;
 extern FLOAT ASPECT_RATE_X;
 extern FLOAT ASPECT_RATE_Y;
@@ -70,25 +60,6 @@ CBillboardHelper* _pBBHelper;
 }
 
 static void _makeViewScreenMatrix();
-
-static inline void _setViewScreenMatrix(FLOAT fInScrz, FLOAT fInAx, FLOAT fInAy, FLOAT fInFar) {
-    sceVu0ViewScreenMatrix(_matViewScreen, fInScrz, fInAx, fInAy, 2048.0f, 2048.0f, 1.0f, 16777000.0f, 0.1f, fInFar);
-}
-
-static inline void _cameraMatrix(FMATRIX& matOut, FVECTOR& vInPos, FVECTOR& vInZd, FVECTOR& vInYd, FVECTOR& vInRot) {
-    FMATRIX matWork;
-    FVECTOR vecDir;
-    FVECTOR vecV;
-    FVECTOR vecPos;
-    sceVu0UnitMatrix(matWork);
-    sceVu0RotMatrixX(matWork, matWork, vInRot.x);
-    sceVu0RotMatrixY(matWork, matWork, vInRot.y);
-    sceVu0RotMatrixZ(matWork, matWork, vInRot.z);
-    ApplyMatrix(vecDir, matWork, vInZd);
-    ApplyMatrix(vecV, matWork, vInYd);
-    ApplyMatrix(vecPos, matWork, vInPos);
-    sceVu0CameraMatrix(matOut, vecPos, vecDir, vecV);
-}
 
 /* Parked: 0-8 of 177 lines (2026-11-08): this draft is the original source. Compiled with the original's own
  * anonymous-namespace name (c:/KHCOM/MainApp/System/Graphic/WorldEnv.cpp + suffix UPaaaa = pid 2588, via a rewritten .ii
@@ -235,12 +206,12 @@ static void _makeWorldViewMatrix(const FMATRIX* pInWorldMat, FLOAT fInXofs, FLOA
     FMATRIX& matWV = _matWorldView;
     CCamera* pCamera;
     if (pInWorldMat) {
-        sceVu0InversMatrix(matWV, *pInWorldMat);
+        InverseMatrix(matWV, *pInWorldMat);
         applySignWorldViewMatrix(matWV, matWV);
         matWV.m[3][0] += fInXofs;
         matWV.m[3][1] += fInYofs;
     } else {
-        _cameraMatrix(matWV, _vecFixCameraPos, _vecFixCameraZd, _vecFixCameraYd, _vecFixCameraRot);
+        CameraMatrix(matWV, _vecFixCameraPos, _vecFixCameraZd, _vecFixCameraYd, _vecFixCameraRot);
     }
     pCamera = CWorldEnv::getActiveCamera();
     if (pCamera) {
@@ -522,7 +493,7 @@ void getOrthoMatrix(FMATRIX& m, float left, float right, float bottom, float top
 static void _makeViewScreenMatrix() {
     FLOAT fSrrz = _fScreenZ + 512.0f;
 
-    _setViewScreenMatrix(fSrrz, ASPECT_RATE_X, ASPECT_RATE_Y, CWorldEnv::getDispFar());
+    ViewScreenMatrix(_matViewScreen, fSrrz, ASPECT_RATE_X, ASPECT_RATE_Y, 2048.0f, 2048.0f, CWorldEnv::getDispFar());
 }
 
 // SOURCE DATA: .rodata .bss

@@ -33,8 +33,6 @@ inline void _emptyStringPlaceholder2() { /* MATCH: placeholder: an inline functi
 #include "System/Graphic/Camera.h"
 
 extern "C" {
-void sceVu0UnitMatrix(FMATRIX& m);
-void sceVu0RotMatrixY(FMATRIX& m0, FMATRIX& m1, float ry);
 float sinf(float);
 float cosf(float);
 }
@@ -45,14 +43,6 @@ void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT s);
 namespace PL {
 extern BULLET_EFFECT_INFO g_EffTbl_HitMark[27]; /* Game/Player/PlayerAttack.h */
 extern BULLET_EFFECT_INFO g_EffTbl_Skill[67][4]; /* Game/Player/PlayerAttack.h */
-}
-
-/* Through inline wrappers (as in FriendKing): the original recomputes the matrix address for each call. */
-static inline void _unitMatrix(FMATRIX& m) {
-    sceVu0UnitMatrix(m);
-}
-static inline void _rotMatrixY(FMATRIX& m, FLOAT r) {
-    sceVu0RotMatrixY(m, m, r);
 }
 
 namespace Friend {
@@ -394,8 +384,8 @@ HANDLE CFriendDonald::setBlitz() {
     FVECTOR pos = { { 0.0f, 0.0f, m_pAtkData->WORK0 * 0.1f, 1.0f } };
     FMATRIX m;
 
-    _unitMatrix(m);
-    _rotMatrixY(m, m_pPlayer->getRot().y);
+    UnitMatrix(m);
+    RotMatrixY(m, m, m_pPlayer->getRot().y);
     ApplyMatrixXYZ(pos, m, pos);
     AddVectorXYZ(pos, pos, m_pPlayer->getPos());
     m_fDist = calcDistance(pos) - 1.0f;
@@ -564,8 +554,8 @@ void CFriendDonald::adjustPlayer(INT inWarp) {
 
     rot = m_pPlayer->getRot();
     setRot(rot);
-    _unitMatrix(m);
-    _rotMatrixY(m, rot.y);
+    UnitMatrix(m);
+    RotMatrixY(m, m, rot.y);
     ApplyMatrixXYZ(pos, m, pos);
     AddVectorXYZ(pos, pos, m_pPlayer->getPos());
     if (inWarp) {

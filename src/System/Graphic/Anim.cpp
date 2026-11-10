@@ -100,15 +100,7 @@ void SubVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void Normalize(FVECTOR& v0, const FVECTOR& v1);
 void MulMatrix(FMATRIX& m0, const FMATRIX& m1, const FMATRIX& m2);
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
-extern "C" {
-void sceVu0UnitMatrix(FMATRIX& m);
-void sceVu0RotMatrixX(FMATRIX& m0, FMATRIX& m1, float rx);
-void sceVu0RotMatrixY(FMATRIX& m0, FMATRIX& m1, float ry);
-void sceVu0RotMatrixZ(FMATRIX& m0, FMATRIX& m1, float rz);
-}
 
-static inline void _unitMatrix(FMATRIX& m) { sceVu0UnitMatrix(m); }
-static inline void _rotMatrixY(FMATRIX& m0, FMATRIX& m1, float ry) { sceVu0RotMatrixY(m0, m1, ry); }
 
 
 #include "System/RsrcDB.h"
@@ -745,8 +737,8 @@ void CAnim::_exeRootMove() {
     m_vRootMoveRot.y = _limitRot(rot2);
     FMATRIX tmp0;
     FMATRIX tmp1;
-    _unitMatrix(tmp0);
-    _rotMatrixY(tmp1, tmp0, _limitRot(rot0 - m_vRootMovePreRot.y));
+    UnitMatrix(tmp0);
+    RotMatrixY(tmp1, tmp0, _limitRot(rot0 - m_vRootMovePreRot.y));
     ApplyMatrix(m_vRootMoveTrs, tmp1, trs2);
     _addVector(m_vRootMoveTrs, trs0);
     m_vRootMovePreTrs = trs1;
@@ -940,8 +932,8 @@ void CAnim::_updateLookPosition(FLOAT fR) {
     }
     FMATRIX mMat;
     _unitMatrixVu0(mMat);
-    sceVu0RotMatrixZ(mMat, mMat, fvAng.x);
-    sceVu0RotMatrixX(mMat, mMat, fvAng.y);
+    RotMatrixZ(mMat, mMat, fvAng.x);
+    RotMatrixX(mMat, mMat, fvAng.y);
     MulMatrix(crd.getLocalMatrix(), crd.getLocalMatrix(), mMat);
     crdRoot.m_Flag = 1;
 }

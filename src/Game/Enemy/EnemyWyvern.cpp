@@ -20,7 +20,6 @@ inline void _enemyWyvernEmptyString() {
 
 extern CEntity* g_pPlayer; /* a CPlayer (Game/Player/Player.h) */
 extern "C" float atan2f(float y, float x);
-extern "C" void sceVu0RotMatrixY(float m0[4][4], float m1[4][4], float ry);
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 
 /* (original form unknown: written inline, the constants load in another order) */
@@ -120,7 +119,7 @@ void CEnemyWyvern::stateMain() {
         m_fRot = Math3D::LimitPI(m_fRot);
         FMATRIX m;
         _unitMatrix(m);
-        sceVu0RotMatrixY(m.m, m.m, m_fRot);
+        RotMatrixY(m, m, m_fRot);
         FVECTOR vVel;
         vVel.set(0.0f, 0.0f, m_fSpeed);
         ApplyMatrix(vVel, m, vVel);

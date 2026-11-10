@@ -23,21 +23,8 @@ inline void _emptyStringPlaceholder2() { /* MATCH: placeholder: an inline functi
 #include "Game/Player/PlayerAttack.h"
 #include "Game/Movement.h"
 
-extern "C" {
-void sceVu0UnitMatrix(FMATRIX& m);
-void sceVu0RotMatrixY(FMATRIX& m0, FMATRIX& m1, float ry);
-}
 void ApplyMatrixXYZ(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
-
-/* Through inline wrappers: called directly, cse keeps the matrix address in a saved register across the
- * calls; the original recomputes it for each call. */
-static inline void _unitMatrix(FMATRIX& m) {
-    sceVu0UnitMatrix(m);
-}
-static inline void _rotMatrixY(FMATRIX& m, FLOAT r) {
-    sceVu0RotMatrixY(m, m, r);
-}
 
 namespace Friend {
 
@@ -240,8 +227,8 @@ void CFriendKing::adjustPlayer(INT inWarp) {
 
     rot = m_pPlayer->getRot();
     setRot(rot);
-    _unitMatrix(m);
-    _rotMatrixY(m, rot.y);
+    UnitMatrix(m);
+    RotMatrixY(m, m, rot.y);
     ApplyMatrixXYZ(pos, m, pos);
     AddVectorXYZ(pos, pos, m_pPlayer->getPos());
     if (inWarp) {

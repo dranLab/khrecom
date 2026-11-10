@@ -4,7 +4,6 @@ extern "C" {
 float sinf(float x);
 float cosf(float x);
 float atan2f(float y, float x);
-void sceVu0InterVector(float* v0, float* v1, float* v2, float t);
 }
 
 #include "System/Coord.h"
@@ -79,7 +78,7 @@ BOOL CInterpolateVector::update(FLOAT fR, BOOL bNoLimit) {
         m_vPos = m_vAim;
         bRet = TRUE;
     } else {
-        sceVu0InterVector(m_vPos.v, m_vAim.v, m_vOld.v, fRate);
+        InterVector(m_vPos, m_vAim, m_vOld, fRate);
         bRet = FALSE;
     }
     return bRet;

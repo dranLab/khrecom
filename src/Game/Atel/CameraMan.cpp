@@ -50,9 +50,8 @@ template <class T> static inline T& _ref(T& v) { return v; }
 
 extern "C" float atan2f(float y, float x);
 extern "C" float powf(float x, float y);
-extern "C" float tanf(float x); extern "C" void sceVu0RotMatrixX(FMATRIX& m0, const FMATRIX& m1, float rx); extern "C" void sceVu0RotMatrixY(FMATRIX& m0, const FMATRIX& m1, float ry);
+extern "C" float tanf(float x);
 void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2); void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
-extern "C" float sceVu0InnerProduct(float* v0, float* v1);
 void SubVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void AddVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
@@ -215,8 +214,8 @@ void CCameraMan::main() {
                     }
                     vec1.y = fR0;
                     _unitMatrixVu0(mat0);
-                    sceVu0RotMatrixX(mat0, mat0, vec1.x);
-                    sceVu0RotMatrixY(mat0, mat0, vec1.y);
+                    RotMatrixX(mat0, mat0, vec1.x);
+                    RotMatrixY(mat0, mat0, vec1.y);
                     mat0.v[3] = pDt->m_currentTargetPos;
                     vec0.set(0.0f, 0.0f, vec1.z);
                     ApplyMatrix(vec0, mat0, vec0);

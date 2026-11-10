@@ -293,13 +293,6 @@ void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT t);
 void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void Normalize(FVECTOR& v0, const FVECTOR& v1);
-static inline void _loadRotTransPers(const FMATRIX& m) {
-    __asm__ volatile("vsub.xyzw $vf3, $vf0, $vf0\n"
-                     "lqc2 $vf4, 0x0(%0)\n"
-                     "lqc2 $vf5, 0x10(%0)\n"
-                     "lqc2 $vf6, 0x20(%0)\n"
-                     "lqc2 $vf7, 0x30(%0)\n" : : "r"(&m));
-}
 void CDeFocusPrim::_makePktDeFocus() {
     FVECTOR vPos;
     FVECTOR vLook;
@@ -359,7 +352,7 @@ void CDeFocusPrim::_makePktDeFocus() {
         ScaleVectorXYZ(vFar[1], vN, fFarLen);
         AddVectorXYZ(vFar[1], vLook, vFar[1]);
     }
-    _loadRotTransPers(CWorldEnv::getWorldScreenMatrix());
+    SetRotTransPersMatrix(CWorldEnv::getWorldScreenMatrix());
     if (!(m_iStatus & 1)) {
         qp = (QWdata*)CPackMan::pkOpenGifTag(_makeQW(0x1000000000000000UL, 0xE));
         /* A+D stores through a u_long* cast (not qp->ul64[]): the original's _FRAME0_START load waits for them */
@@ -509,7 +502,7 @@ void CBlurPrim::_makePktBlur() {
         Normalize(vN, vN);
         ScaleVectorXYZ(vFPos, vN, m_fLen);
         AddVectorXYZ(vFPos, vCam, vFPos);
-        _loadRotTransPers(CWorldEnv::getWorldScreenMatrix());
+        SetRotTransPersMatrix(CWorldEnv::getWorldScreenMatrix());
         RotTransPersClipW(vIPos, vFPos);
         if (vIPos.w) {
             m_iKind = Bak_iBlurKind;

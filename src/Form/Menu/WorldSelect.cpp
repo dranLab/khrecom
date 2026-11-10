@@ -307,7 +307,6 @@ float sinf(float);
 float cosf(float);
 float powf(float, float);
 int sprintf(char*, const char*, ...);
-void sceVu0RotMatrix(FMATRIX& m0, FMATRIX& m1, FVECTOR& rot);
 }
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 
@@ -866,7 +865,7 @@ INT CWorldSelect::menuMain() {
     _unitMatrixVu0(mat);
     vec2._q = 0;
     vec2.y = m_rotCircle.z;
-    sceVu0RotMatrix(mat, mat, m_rotCircle);
+    RotMatrix(mat, mat, m_rotCircle);
     for (INT i = 0; i < m_nSelectMax; i++) {
         ApplyMatrix(vec, mat, m_posLocal[i]);
         m_pCardCtrl[i]->setLocalPos(vec);

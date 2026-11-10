@@ -14,7 +14,6 @@ void SubVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void Normalize(FVECTOR& v0, const FVECTOR& v1);
 void OuterProduct(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void MulMatrix(FMATRIX& res, const FMATRIX& m0, const FMATRIX& m1);
-extern "C" void sceVu0RotMatrixZ(FMATRIX& m0, FMATRIX& m1, float rz);
 
 static inline void _unitMatrixVu0(FMATRIX& m) {
     asm volatile("vmr32.xyzw $vf1, $vf0\n"
@@ -97,7 +96,7 @@ void CCamera::lookAt(const FVECTOR& vTarget, FLOAT fBank) {
     lookAt(vTarget, (const FVECTOR*)NULL);
     FMATRIX& mat = Crd(0).getWorldMatrix();
     _unitMatrixVu0(matLocal);
-    sceVu0RotMatrixZ(matLocal, matLocal, fBank);
+    RotMatrixZ(matLocal, matLocal, fBank);
     MulMatrix(mat, mat, matLocal);
     Crd(0).recalcLocalMatrix();
 }
