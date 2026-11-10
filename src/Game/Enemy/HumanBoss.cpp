@@ -607,17 +607,10 @@ void CHumanBoss::setupCardRevolver() {
     m_iRemainCardNum = getAttackCardNum(3);
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/HumanBoss", setupAct__10CHumanBoss);
-/* placeholder for setupAct (INCLUDE_ASM): its strings */
-__attribute__((section(".sdata"))) void _setupAct_placeholder(void* p, void* q, void* r) {
-    if (!p) AssertApp(__FILE__, 0, "m_iStockNum <= 8", 0);
-    com_malloc_d(4, __FILE__ "(674)", (UINT)-1);
-    if (!q) AssertApp(__FILE__, 0, "m_pNormalActs", 0);
-    com_malloc_d(4, __FILE__ "(684)", (UINT)-1);
-    if (!r) AssertApp(__FILE__, 0, "m_pStockData", 0);
-}
-/* Parked: 18 of 205 lines (2026-11-09, fourth try; a match exists only with an invented FLOAT local, rejected by the user 2026-11-09): the normal arm's -1 (sMin/sMax, 656/657) must be its own pass-1 movable (li s4,-1; compares and stock arm share s2); ours merges it into the compares' SImode -1 (loop.c combine_movables: insn 150 "matches 53"), and the __FILE__ %hi/loop-align nop diffs follow from that. Exact MATCH (V1, block tree and line markers identical): a function-scope FLOAT (or long) local assigned -1 before the loop and stored only by the normal arm: `ENEMY_ACT* act; FLOAT none;` on 641, `act = m_pEnemyParam->pActs; none = -1;` on 642, normal arm `sMinNumber = none; sMaxNumber = none;`. Mechanism: the stores become (fix:HI none) / (truncate:HI none), which cse1 can't fold after the arm's join label, so loop hoists them as a separate non-constant movable; cse2 folds it to li -1 in the preheader and none dies without a hard register, so gcc leaves it out of the .mdebug. Not taken: a used but invented local with no ref pattern (memory no-filler-locals: the user decides). Ruled out 2026-11-09: INT/SHORT/CHAR/SBYTE locals (13-16 lines: a no-op subreg keeps the local live across the loop), double (8), the local in both arms (8) or the stock arm only (4), three or two separate ifs with copied normal arms (21-23), empty or wrapping do{}while(0) at 649/652/661 and around arm statements (18-79), if/else forms, constant-first and negated compares (18-20). Earlier (2026-11-08): a loop-top `long m = -1;` gives 8 lines but sits in the for body (an .mdebug block and s2 the original lacks); 30 spellings of the constant fold to one const_int; unsigned/USHORT constants give lui+ori/ori; chain/read-back, function-scope SHORT, inverted/nested/else-if conditions, permuter 15 min (3619 candidates, no gain). Draft: .mdebug block tree and line markers as the original (for-scope i, continue at 659, lines 635-743) */
-#if 0
+/* MATCH: `none` is not in the ref (user decision 2026-11-10): the normal arm stores a non-constant -1, so
+   loop.c (combine_movables) keeps it a separate movable from the compares' -1 (li s4,-1 in the preheader);
+   cse2 then folds it and none gets no hard register, which is why the .mdebug does not list it. Same values:
+   -1.0f converts exactly to the SHORT -1. */
 #line 635
 void CHumanBoss::setupAct()
 {
@@ -625,8 +618,8 @@ void CHumanBoss::setupAct()
 
     ACT_DATA tmp[8];
     ACT_DATA tmp2[8];
-    ENEMY_ACT* act;
-    act = m_pEnemyParam->pActs;
+    ENEMY_ACT* act; FLOAT none;
+    act = m_pEnemyParam->pActs; none = -1;
     for (INT i = 0; i < m_pEnemyParam->iActCount; i++, act++)
     {
         if (act->iCard[0] == -1 && act->iCard[1] == -1 && act->iCard[2] == -1)
@@ -640,8 +633,8 @@ void CHumanBoss::setupAct()
             tmp[m_iNormalActNum].iState = act->iActNo + 2;
             tmp[m_iNormalActNum].pAct = act;
             tmp[m_iNormalActNum].bEnable = TRUE;
-            tmp[m_iNormalActNum].sMinNumber = -1;
-            tmp[m_iNormalActNum].sMaxNumber = -1;
+            tmp[m_iNormalActNum].sMinNumber = none;
+            tmp[m_iNormalActNum].sMaxNumber = none;
             m_iNormalActNum++;
             continue;
         }
@@ -679,7 +672,6 @@ void CHumanBoss::setupAct()
     }
 #line 743
 }
-#endif
 #line 664
 
 void CHumanBoss::aiCardBattle() {
