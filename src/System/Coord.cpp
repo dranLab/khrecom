@@ -122,33 +122,10 @@ void CCoord::fix(TIMEQ tq) {
     }
     _ulFixTimestamp = tq;
 }
-void CCoord::getRotTransPersMatrix(FMATRIX& p0) {
-    asm volatile(
-                 "addiu $4, $4, 0x90\n"
-                 "lqc2 $vf20, 0x0($4)\n"
-                 "lqc2 $vf21, 0x10($4)\n"
-                 "lqc2 $vf22, 0x20($4)\n"
-                 "lqc2 $vf23, 0x30($4)\n"
-                 "vmulax.xyzw $ACC, $vf28, $vf20x\n"
-                 "vmadday.xyzw $ACC, $vf29, $vf20y\n"
-                 "vmaddaz.xyzw $ACC, $vf30, $vf20z\n"
-                 "vmaddw.xyzw $vf16, $vf31, $vf20w\n"
-                 "vmulax.xyzw $ACC, $vf28, $vf21x\n"
-                 "vmadday.xyzw $ACC, $vf29, $vf21y\n"
-                 "vmaddaz.xyzw $ACC, $vf30, $vf21z\n"
-                 "vmaddw.xyzw $vf17, $vf31, $vf21w\n"
-                 "vmulax.xyzw $ACC, $vf28, $vf22x\n"
-                 "vmadday.xyzw $ACC, $vf29, $vf22y\n"
-                 "vmaddaz.xyzw $ACC, $vf30, $vf22z\n"
-                 "vmaddw.xyzw $vf18, $vf31, $vf22w\n"
-                 "vmulax.xyzw $ACC, $vf28, $vf23x\n"
-                 "vmadday.xyzw $ACC, $vf29, $vf23y\n"
-                 "vmaddaz.xyzw $ACC, $vf30, $vf23z\n"
-                 "vmaddw.xyzw $vf19, $vf31, $vf23w\n"
-                 "sqc2 $vf16, 0x0($5)\n"
-                 "sqc2 $vf17, 0x10($5)\n"
-                 "sqc2 $vf18, 0x20($5)\n"
-                 "sqc2 $vf19, 0x30($5)\n");
+void CCoord::getRotTransPersMatrix(FMATRIX& outMat) {
+    vu0LoadMatrixVF20(&m_World);
+    vu0MulMatrixVF28VF20();
+    vu0StoreMatrixVF16(&outMat);
 }
 void CCoord::getRotTransPersMatrix_VF04_07() {
     asm volatile(
@@ -444,17 +421,7 @@ CCoord& CCoords::getExceptCoord() {
 CCoord& CCoords::getExceptCoord() const {
     return CCoordMan::getExceptCoord(TRUE);
 }
-void ApplyMatrix33(FVECTOR& p0, const FMATRIX& p1, const FVECTOR& p2) {
-    asm volatile(
-                 "lqc2 $vf8, 0x0($6)\n"
-                 "lqc2 $vf4, 0x0($5)\n"
-                 "lqc2 $vf5, 0x10($5)\n"
-                 "lqc2 $vf6, 0x20($5)\n"
-                 "vmulax.xyz $ACC, $vf4, $vf8x\n"
-                 "vmadday.xyz $ACC, $vf5, $vf8y\n"
-                 "vmaddz.xyz $vf8, $vf6, $vf8z\n"
-                 "sqc2 $vf8, 0x0($4)\n");
-}
+void ApplyMatrix33(FVECTOR& vecOut, const FMATRIX& matIn, const FVECTOR& vecIn) { vu0ApplyMatrix33(vecOut, matIn, vecIn); }
 void MulMatrix33(FMATRIX& p0, const FMATRIX& p1, const FMATRIX& p2) {
     asm volatile(
                  "lqc2 $vf2, 0x0($5)\n"
@@ -928,59 +895,9 @@ BOOL ClipDispBBoxMaxMin(const FMATRIX& wc, const FMATRIX& lw, const FVECTOR* v) 
                  : "r"(&wc), "r"(&lw));
     return ClipDispBBoxMaxMin(v);
 }
-void ApplyMatrix(FVECTOR& p0, const FMATRIX& p1, const FVECTOR& p2) {
-    asm volatile(
-                 "lqc2 $vf8, 0x0($6)\n"
-                 "lqc2 $vf4, 0x0($5)\n"
-                 "lqc2 $vf5, 0x10($5)\n"
-                 "lqc2 $vf6, 0x20($5)\n"
-                 "lqc2 $vf7, 0x30($5)\n"
-                 "vmulax.xyzw $ACC, $vf4, $vf8x\n"
-                 "vmadday.xyzw $ACC, $vf5, $vf8y\n"
-                 "vmaddaz.xyzw $ACC, $vf6, $vf8z\n"
-                 "vmaddw.xyzw $vf8, $vf7, $vf8w\n"
-                 "sqc2 $vf8, 0x0($4)\n");
-}
-void MulMatrix(FMATRIX& p0, const FMATRIX& p1, const FMATRIX& p2) {
-    asm volatile(
-                 "lqc2 $vf2, 0x0($5)\n"
-                 "lqc2 $vf3, 0x10($5)\n"
-                 "lqc2 $vf4, 0x20($5)\n"
-                 "lqc2 $vf5, 0x30($5)\n"
-                 "lqc2 $vf6, 0x0($6)\n"
-                 "lqc2 $vf7, 0x10($6)\n"
-                 "lqc2 $vf8, 0x20($6)\n"
-                 "lqc2 $vf9, 0x30($6)\n"
-                 "vmulax.xyzw $ACC, $vf2, $vf6x\n"
-                 "vmadday.xyzw $ACC, $vf3, $vf6y\n"
-                 "vmaddaz.xyzw $ACC, $vf4, $vf6z\n"
-                 "vmaddw.xyzw $vf6, $vf5, $vf6w\n"
-                 "vmulax.xyzw $ACC, $vf2, $vf7x\n"
-                 "vmadday.xyzw $ACC, $vf3, $vf7y\n"
-                 "vmaddaz.xyzw $ACC, $vf4, $vf7z\n"
-                 "vmaddw.xyzw $vf7, $vf5, $vf7w\n"
-                 "vmulax.xyzw $ACC, $vf2, $vf8x\n"
-                 "vmadday.xyzw $ACC, $vf3, $vf8y\n"
-                 "vmaddaz.xyzw $ACC, $vf4, $vf8z\n"
-                 "vmaddw.xyzw $vf8, $vf5, $vf8w\n"
-                 "vmulax.xyzw $ACC, $vf2, $vf9x\n"
-                 "vmadday.xyzw $ACC, $vf3, $vf9y\n"
-                 "vmaddaz.xyzw $ACC, $vf4, $vf9z\n"
-                 "vmaddw.xyzw $vf9, $vf5, $vf9w\n"
-                 "sqc2 $vf6, 0x0($4)\n"
-                 "sqc2 $vf7, 0x10($4)\n"
-                 "sqc2 $vf8, 0x20($4)\n"
-                 "sqc2 $vf9, 0x30($4)\n");
-}
-void OuterProduct(FVECTOR& p0, const FVECTOR& p1, const FVECTOR& p2) {
-    asm volatile(
-                 "lqc2 $vf4, 0x0($5)\n"
-                 "lqc2 $vf5, 0x0($6)\n"
-                 "vsub.w $vf6, $vf6, $vf6\n"
-                 "vopmula.xyz $ACC, $vf4, $vf5\n"
-                 "vopmsub.xyz $vf6, $vf5, $vf4\n"
-                 "sqc2 $vf6, 0x0($4)\n");
-}
+void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1) { vu0ApplyMatrix(v0, m0, v1); }
+void MulMatrix(FMATRIX& res, const FMATRIX& m0, const FMATRIX& m1) { vu0MulMatrix(res, m0, m1); }
+void OuterProduct(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2) { vu0OuterProduct(v0, v1, v2); }
 FLOAT InnerProduct(const FVECTOR& p0, const FVECTOR& p1) {
     asm volatile(
                  "lqc2 $vf4, 0x0($4)\n"
@@ -1030,159 +947,26 @@ FLOAT InnerProductPW1(const FVECTOR& p0, const FVECTOR& p1) {
                  "qmfc2.ni $2, $vf5\n"
                  "mtc1 $2, $f0\n");
 }
-void Normalize(FVECTOR& p0, const FVECTOR& p1) {
-    asm volatile(
-                 "lqc2 $vf4, 0x0($5)\n"
-                 "vaddy.x $vf5, $vf0, $vf4y\n"
-                 "vaddz.x $vf6, $vf0, $vf4z\n"
-                 "vmulax.x $ACC, $vf4, $vf4x\n"
-                 "vmadday.x $ACC, $vf5, $vf4y\n"
-                 "vmaddz.x $vf5, $vf6, $vf4z\n"
-                 "vrsqrt $Q, $vf0w, $vf5x\n"
-                 "vsub.xyzw $vf6, $vf0, $vf0\n"
-                 "vwaitq\n"
-                 "vmulq.xyz $vf6, $vf4, $Q\n"
-                 "sqc2 $vf6, 0x0($4)\n");
-}
-void DivVector(FVECTOR& p0, const FVECTOR& p1, float p2) {
-    asm volatile(
-                 "lqc2 $vf4, 0x0($5)\n"
-                 "mfc1 $8, $f12\n"
-                 "qmtc2.ni $8, $vf5\n"
-                 "vdiv $Q, $vf0w, $vf5x\n"
-                 "vwaitq\n"
-                 "vmulq.xyzw $vf4, $vf4, $Q\n"
-                 "sqc2 $vf4, 0x0($4)\n");
-}
-void DivVectorXYZ(FVECTOR& p0, const FVECTOR& p1, float p2) {
-    asm volatile(
-                 "lqc2 $vf4, 0x0($5)\n"
-                 "mfc1 $8, $f12\n"
-                 "qmtc2.ni $8, $vf5\n"
-                 "vdiv $Q, $vf0w, $vf5x\n"
-                 "vwaitq\n"
-                 "vmulq.xyz $vf4, $vf4, $Q\n"
-                 "sqc2 $vf4, 0x0($4)\n");
-}
-void AddVector(FVECTOR& p0, const FVECTOR& p1, const FVECTOR& p2) {
-    asm volatile(
-                 "lqc2 $vf4, 0x0($5)\n"
-                 "lqc2 $vf5, 0x0($6)\n"
-                 "vadd.xyzw $vf4, $vf4, $vf5\n"
-                 "sqc2 $vf4, 0x0($4)\n");
-}
-void SubVector(FVECTOR& p0, const FVECTOR& p1, const FVECTOR& p2) {
-    asm volatile(
-                 "lqc2 $vf4, 0x0($5)\n"
-                 "lqc2 $vf5, 0x0($6)\n"
-                 "vsub.xyzw $vf4, $vf4, $vf5\n"
-                 "sqc2 $vf4, 0x0($4)\n");
-}
-void MulVector(FVECTOR& p0, const FVECTOR& p1, const FVECTOR& p2) {
-    asm volatile(
-                 "lqc2 $vf4, 0x0($5)\n"
-                 "lqc2 $vf5, 0x0($6)\n"
-                 "vmul.xyzw $vf4, $vf4, $vf5\n"
-                 "sqc2 $vf4, 0x0($4)\n");
-}
-void ScaleVector(FVECTOR& p0, const FVECTOR& p1, float p2) {
-    asm volatile(
-                 "lqc2 $vf4, 0x0($5)\n"
-                 "mfc1 $3, $f12\n"
-                 "qmtc2.ni $3, $vf5\n"
-                 "vmulx.xyzw $vf4, $vf4, $vf5x\n"
-                 "sqc2 $vf4, 0x0($4)\n");
-}
-void ScaleVectorXYZ(FVECTOR& p0, const FVECTOR& p1, float p2) {
-    asm volatile(
-                 "lqc2 $vf4, 0x0($5)\n"
-                 "mfc1 $3, $f12\n"
-                 "qmtc2.ni $3, $vf5\n"
-                 "vmulx.xyz $vf4, $vf4, $vf5x\n"
-                 "sqc2 $vf4, 0x0($4)\n");
-}
-void FTOI0Vector(IVECTOR& p0, const FVECTOR& p1) {
-    asm volatile(
-                 "lqc2 $vf4, 0x0($5)\n"
-                 "vftoi0.xyzw $vf4, $vf4\n"
-                 "sqc2 $vf4, 0x0($4)\n");
-}
-void FTOI4Vector(IVECTOR& p0, const FVECTOR& p1) {
-    asm volatile(
-                 "lqc2 $vf4, 0x0($5)\n"
-                 "vftoi4.xyzw $vf4, $vf4\n"
-                 "sqc2 $vf4, 0x0($4)\n");
-}
-void FTOI12Vector(IVECTOR& p0, const FVECTOR& p1) {
-    asm volatile(
-                 "lqc2 $vf4, 0x0($5)\n"
-                 "vftoi12.xyzw $vf4, $vf4\n"
-                 "sqc2 $vf4, 0x0($4)\n");
-}
-void FTOI15Vector(IVECTOR& p0, const FVECTOR& p1) {
-    asm volatile(
-                 "lqc2 $vf4, 0x0($5)\n"
-                 "vftoi15.xyzw $vf4, $vf4\n"
-                 "sqc2 $vf4, 0x0($4)\n");
-}
-void ITOF0Vector(FVECTOR& p0, const IVECTOR& p1) {
-    asm volatile(
-                 "lqc2 $vf4, 0x0($5)\n"
-                 "vitof0.xyzw $vf4, $vf4\n"
-                 "sqc2 $vf4, 0x0($4)\n");
-}
-void ITOF4Vector(FVECTOR& p0, const IVECTOR& p1) {
-    asm volatile(
-                 "lqc2 $vf4, 0x0($5)\n"
-                 "vitof4.xyzw $vf4, $vf4\n"
-                 "sqc2 $vf4, 0x0($4)\n");
-}
-void ITOF12Vector(FVECTOR& p0, const IVECTOR& p1) {
-    asm volatile(
-                 "lqc2 $vf4, 0x0($5)\n"
-                 "vitof12.xyzw $vf4, $vf4\n"
-                 "sqc2 $vf4, 0x0($4)\n");
-}
-void ITOF15Vector(FVECTOR& p0, const IVECTOR& p1) {
-    asm volatile(
-                 "lqc2 $vf4, 0x0($5)\n"
-                 "vitof15.xyzw $vf4, $vf4\n"
-                 "sqc2 $vf4, 0x0($4)\n");
-}
-void AddVectorXYZ(FVECTOR& p0, const FVECTOR& p1, const FVECTOR& p2) {
-    asm volatile(
-                 "lqc2 $vf4, 0x0($5)\n"
-                 "lqc2 $vf5, 0x0($6)\n"
-                 "vadd.xyz $vf4, $vf4, $vf5\n"
-                 "sqc2 $vf4, 0x0($4)\n");
-}
-void SubVectorXYZ(FVECTOR& p0, const FVECTOR& p1, const FVECTOR& p2) {
-    asm volatile(
-                 "lqc2 $vf4, 0x0($5)\n"
-                 "lqc2 $vf5, 0x0($6)\n"
-                 "vsub.xyz $vf4, $vf4, $vf5\n"
-                 "sqc2 $vf4, 0x0($4)\n");
-}
-void MulVectorXYZ(FVECTOR& p0, const FVECTOR& p1, const FVECTOR& p2) {
-    asm volatile(
-                 "lqc2 $vf4, 0x0($5)\n"
-                 "lqc2 $vf5, 0x0($6)\n"
-                 "vmul.xyz $vf4, $vf4, $vf5\n"
-                 "sqc2 $vf4, 0x0($4)\n");
-}
-void ApplyMatrixXYZ(FVECTOR& p0, const FMATRIX& p1, const FVECTOR& p2) {
-    asm volatile(
-                 "lqc2 $vf4, 0x0($6)\n"
-                 "lqc2 $vf5, 0x0($5)\n"
-                 "lqc2 $vf6, 0x10($5)\n"
-                 "lqc2 $vf7, 0x20($5)\n"
-                 "lqc2 $vf8, 0x30($5)\n"
-                 "vmulax.xyzw $ACC, $vf5, $vf4x\n"
-                 "vmadday.xyzw $ACC, $vf6, $vf4y\n"
-                 "vmaddaz.xyzw $ACC, $vf7, $vf4z\n"
-                 "vmaddw.xyz $vf4, $vf8, $vf0w\n"
-                 "sqc2 $vf4, 0x0($4)\n");
-}
+void Normalize(FVECTOR& v0, const FVECTOR& v1) { vu0Normalize(v0, v1); }
+void DivVector(FVECTOR& v0, const FVECTOR& v1, FLOAT q) { vu0DivVector(v0, v1, q); }
+void DivVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT q) { vu0DivVectorXYZ(v0, v1, q); }
+void AddVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2) { vu0AddVector(v0, v1, v2); }
+void SubVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2) { vu0SubVector(v0, v1, v2); }
+void MulVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2) { vu0MulVector(v0, v1, v2); }
+void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT t) { vu0ScaleVector(v0, v1, t); }
+void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT t) { vu0ScaleVectorXYZ(v0, v1, t); }
+void FTOI0Vector(IVECTOR& v0, const FVECTOR& v1) { vu0FTOI0Vector(v0, v1); }
+void FTOI4Vector(IVECTOR& v0, const FVECTOR& v1) { vu0FTOI4Vector(v0, v1); }
+void FTOI12Vector(IVECTOR& v0, const FVECTOR& v1) { vu0FTOI12Vector(v0, v1); }
+void FTOI15Vector(IVECTOR& v0, const FVECTOR& v1) { vu0FTOI15Vector(v0, v1); }
+void ITOF0Vector(FVECTOR& v0, const IVECTOR& v1) { vu0ITOF0Vector(v0, v1); }
+void ITOF4Vector(FVECTOR& v0, const IVECTOR& v1) { vu0ITOF4Vector(v0, v1); }
+void ITOF12Vector(FVECTOR& v0, const IVECTOR& v1) { vu0ITOF12Vector(v0, v1); }
+void ITOF15Vector(FVECTOR& v0, const IVECTOR& v1) { vu0ITOF15Vector(v0, v1); }
+void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2) { vu0AddVectorXYZ(v0, v1, v2); }
+void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2) { vu0SubVectorXYZ(v0, v1, v2); }
+void MulVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2) { vu0MulVectorXYZ(v0, v1, v2); }
+void ApplyMatrixXYZ(FVECTOR& v0, const FMATRIX& m, const FVECTOR& v1) { vu0ApplyMatrixXYZ(v0, m, v1); }
 float vu0Cosf(float x) {
     x += 1.5707964f;
     if (x > 3.1415927f) {
