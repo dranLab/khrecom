@@ -459,6 +459,8 @@ header split the original didn't have, or make a class a template to hide its st
 | ours keeps a constant in a saved register, the original reloads it per call | pin it to the argument register in each call (setupFlick) |
 | ours if-converts one inline test, the original branches | empty asm in the arm (getRandomTargetPos) |
 | `lhu`, `sll 16`, `sra 16` split around a branch | sign-extension-by-hand |
+| a matched function holds a local/reference the ref lists only as an inline's nested local (vecOut, b) | it is the inline's parameter or result: coord-free-inlines-map |
+| a sceVu0 address kept in a saved register, the original recomputes it | pass `.m`/`.v`, not the conversion operator: coord-free-inlines-map |
 | struct argument built from four `lhu` + dsll/or | `_NORMA_PIECES` in `System/Graphic/2d/2DCard.h` |
 | a register dies, then seems to hold the same value again | ref-locals-reveal-shape (local assigned twice, or read into a local before a branch) |
 | `li 1` + `movn`/`movz` where ours branches or uses xori | cmov-operand-order |
