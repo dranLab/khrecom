@@ -1,6 +1,9 @@
 # Plan: align the decompilation with the US retail ELF (second build target)
 
-Status: proposed 2026-11-10, not started. Phase 0 is read-only; nothing below has been implemented.
+Status: Phase 0 done 2026-11-10: **go** (results in `docs/retail.md`: retail is the same source built without `-g`
+and with the debug configuration off; ~225 functions unexplained). Phases 1-4 not started; Phase 0's findings
+(weak functions and vtables in `.gnu.linkonce.*` sections, debug members removed from class layouts) change Phase
+1 and 2 as listed at the end of `docs/retail.md`.
 Updated 2026-11-10 (after port step 1 was merged into `main`, and merged into this branch): the retail ELF's SN
 DLL table, what port step 1 brings, and Phase 0/1 revised accordingly.
 
