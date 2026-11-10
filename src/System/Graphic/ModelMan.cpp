@@ -204,9 +204,6 @@ void CModelMan::reset() {
                  : "r"(&vMax), "r"(&vMin));
 }
 
-// the original's inline wrapper (Coord.h:613 in its line markers): its parameters take the addresses, so the
-// caller keeps no register copy of &wv_i
-static inline void _inversMatrix(FMATRIX& m0, const FMATRIX& m1) { sceVu0InversMatrix(m0.m, (float(*)[4])m1.m); }
 static inline void _unitMatrix(FMATRIX& m) {
     asm volatile("vmr32.xyzw $vf1, $vf0\n"
                  "sqc2 $vf0, 0x30(%0)\n"
@@ -218,18 +215,6 @@ static inline void _unitMatrix(FMATRIX& m) {
                  :
                  : "r"(&m)
                  : "memory");
-}
-
-static inline FMATRIX _mulMatrix(const FMATRIX& m0, const FMATRIX& m1) {
-    FMATRIX b;
-    MulMatrix(b, m0, m1);
-    return b;
-}
-
-static inline FVECTOR _applyMatrix(const FMATRIX& m, const FVECTOR& v) {
-    FVECTOR b;
-    ApplyMatrix(b, m, v);
-    return b;
 }
 
 void CModelMan::setupDrawEnv() {
@@ -262,7 +247,7 @@ void CModelMan::setupDrawEnv() {
     FMATRIX ws_i;
     FMATRIX& matWV = CWorldEnv::getWorldViewMatrix();
     FMATRIX& matVS = CWorldEnv::getViewScreenMatrix();
-    _inversMatrix(wv_i, matWV);
+    InverseMatrix(wv_i, matWV);
     _unitMatrix(vs_i);
     vs_i.m[0][0] = 1.0f / matVS.m[0][0];
     vs_i.m[3][0] = -matVS.m[2][0] / matVS.m[0][0];
@@ -272,7 +257,7 @@ void CModelMan::setupDrawEnv() {
     vs_i.m[3][2] = 1.0f;
     vs_i.m[2][3] = 1.0f / matVS.m[3][2];
     vs_i.m[3][3] = -matVS.m[2][2] / matVS.m[3][2];
-    ws_i = _mulMatrix(wv_i, vs_i);
+    ws_i = MulMatrix(wv_i, vs_i);
     FLOAT farZ = CWorldEnv::getDispFar();
     FLOAT XDISPMAX = 2304.0f;
     FLOAT XDISPMIN = 1792.0f;
@@ -281,7 +266,7 @@ void CModelMan::setupDrawEnv() {
     FLOAT ZBUFMAX = 16777000.0f;
     FVECTOR v[8] = {{XDISPMAX, YDISPMAX, ZBUFMAX, 1.0f}, {XDISPMIN, YDISPMAX, ZBUFMAX, 1.0f}, {XDISPMAX, YDISPMIN, ZBUFMAX, 1.0f}, {XDISPMIN, YDISPMIN, ZBUFMAX, 1.0f}, {XDISPMAX * farZ, YDISPMAX * farZ, farZ, farZ}, {XDISPMIN * farZ, YDISPMAX * farZ, farZ, farZ}, {XDISPMAX * farZ, YDISPMIN * farZ, farZ, farZ}, {XDISPMIN * farZ, YDISPMIN * farZ, farZ, farZ}};
     for (int i = 0; i < 8; i++) {
-        g_tmpView[i] = _applyMatrix(ws_i, v[i]);
+        g_tmpView[i] = ApplyMatrix(ws_i, v[i]);
     }
     asm volatile("lqc2 $vf1, 0x0(%0)\n"
                  "lqc2 $vf2, 0x10(%0)\n"

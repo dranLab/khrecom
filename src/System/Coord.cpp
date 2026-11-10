@@ -328,9 +328,9 @@ void CCoord::recalcLocalMatrix() {
         DivVector(m_Rot.v[0], m_World.v[0], m_fScaleX);
         DivVector(m_Rot.v[1], m_World.v[1], m_fScaleY);
         DivVector(m_Rot.v[2], m_World.v[2], m_fScaleZ);
-        sceVu0InversMatrix(mMat.m, pParent->m_Rot.m);
+        InversMatrix(mMat, pParent->m_Rot);
         MulMatrix33(m_Local, mMat, m_Rot);
-        sceVu0InversMatrix(mMat.m, pParent->m_World.m);
+        InversMatrix(mMat, pParent->m_World);
         ApplyMatrix(m_Local.v[3], mMat, m_World.v[3]);
     } else {
         m_Local = m_World;
@@ -614,7 +614,7 @@ void scaleMatrixSelf(FMATRIX& self, FVECTOR& v) {
 void World2Local(FVECTOR& out_v, const FMATRIX& world, const FVECTOR& in_v) {
     FMATRIX t;
 
-    sceVu0InversMatrix(t.m, (float(*)[4])world.m);
+    InverseMatrix(t, world);
     ApplyMatrix(out_v, t, in_v);
 }
 TDEG cossin2deg(FLOAT cs, FLOAT sn) {
@@ -677,29 +677,7 @@ void roundPI(FVECTOR& vInOut, INT nInClip) {
     }
 }
 void getMaxMinToVector8(FVECTOR* p0, const FVECTOR& p1, const FVECTOR& p2) {
-    asm volatile(
-                 "lqc2 $vf4, 0x0($5)\n"
-                 "lqc2 $vf5, 0x0($6)\n"
-                 "vadd.yz $vf6, $vf4, $vf0\n"
-                 "vadd.y $vf7, $vf4, $vf0\n"
-                 "vadd.xy $vf8, $vf4, $vf0\n"
-                 "vadd.xz $vf9, $vf4, $vf0\n"
-                 "vadd.z $vf10, $vf4, $vf0\n"
-                 "vadd.x $vf11, $vf4, $vf0\n"
-                 "vmulw.xw $vf6, $vf5, $vf0w\n"
-                 "vmulw.xzw $vf7, $vf5, $vf0w\n"
-                 "vmulw.zw $vf8, $vf5, $vf0w\n"
-                 "vmulw.yw $vf9, $vf5, $vf0w\n"
-                 "vmulw.xyw $vf10, $vf5, $vf0w\n"
-                 "vmulw.yzw $vf11, $vf5, $vf0w\n"
-                 "sqc2 $vf4, 0x0($4)\n"
-                 "sqc2 $vf6, 0x10($4)\n"
-                 "sqc2 $vf7, 0x20($4)\n"
-                 "sqc2 $vf8, 0x30($4)\n"
-                 "sqc2 $vf9, 0x40($4)\n"
-                 "sqc2 $vf10, 0x50($4)\n"
-                 "sqc2 $vf5, 0x60($4)\n"
-                 "sqc2 $vf11, 0x70($4)\n");
+    GetMaxMinToVector8(p0, p1, p2);
 }
 void ViewClipMatrix(FMATRIX& outVC, FLOAT scrw, FLOAT scrh, FLOAT scrz, FLOAT zmin, FLOAT zmax) {
     asm volatile("sq $0, 0x0(%0)\n"

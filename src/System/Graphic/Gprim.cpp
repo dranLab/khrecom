@@ -826,16 +826,6 @@ static inline void _setRotTransPersMatrix_VF04_07(CCoord* pCrd) {
         pCrd->getRotTransPersMatrix_VF04_07();
     }
 }
-static inline void setRotTransPersMatrix(FMATRIX& m) {
-    __asm__ volatile(
-        "vsub.xyzw $vf3, $vf0, $vf0\n"
-        "lqc2 $vf4, 0x0(%0)\n"
-        "lqc2 $vf5, 0x10(%0)\n"
-        "lqc2 $vf6, 0x20(%0)\n"
-        "lqc2 $vf7, 0x30(%0)\n"
-        :
-        : "r"(&m));
-}
 FIX4 C3DPolyFT4::calcZ() {
     FVECTOR c;
     FMATRIX rts;
@@ -849,7 +839,7 @@ FIX4 C3DPolyFT4::calcZ() {
     fv = &m_P0;
     iv = &p0;
     max = 0;
-    setRotTransPersMatrix(rts);
+    SetRotTransPersMatrix(rts);
     for (i = 0; i < 4; i++) {
         fW = RotTransPersClipW(iv[i], fv[i]);
         if (iv[i].w) {
@@ -899,7 +889,7 @@ FIX4 C3DPolyGT4::calcZ() {
     fv = &m_P0;
     iv = &p0;
     max = 0;
-    setRotTransPersMatrix(rts);
+    SetRotTransPersMatrix(rts);
     for (i = 0; i < 4; i++) {
         fW = RotTransPersClipW(iv[i], fv[i]);
         if (iv[i].w) {
@@ -949,7 +939,7 @@ FIX4 C3DPolyFT3::calcZ() {
     fv = &m_P0;
     iv = &p0;
     max = 0;
-    setRotTransPersMatrix(rts);
+    SetRotTransPersMatrix(rts);
     for (i = 0; i < 3; i++) {
         fW = RotTransPersClipW(iv[i], fv[i]);
         if (iv[i].w) {
@@ -995,7 +985,7 @@ FIX4 C3DPolyGT3::calcZ() {
     fv = &m_P0;
     iv = &p0;
     max = 0;
-    setRotTransPersMatrix(rts);
+    SetRotTransPersMatrix(rts);
     for (i = 0; i < 3; i++) {
         fW = RotTransPersClipW(iv[i], fv[i]);
         if (iv[i].w) {
@@ -1545,7 +1535,7 @@ FIX4 C3DPolyG4::calcZ() {
     fv = &m_P0;
     iv = &p0;
     max = 0;
-    setRotTransPersMatrix(rts);
+    SetRotTransPersMatrix(rts);
     for (i = 0; i < 4; i++) {
         RotTransPersClipW(iv[i], fv[i]);
         if (iv[i].w) {
@@ -1583,7 +1573,7 @@ FIX4 C3DPolyG3::calcZ() {
     fv = &m_P0;
     iv = &p0;
     max = 0;
-    setRotTransPersMatrix(rts);
+    SetRotTransPersMatrix(rts);
     for (i = 0; i < 3; i++) {
         RotTransPersClipW(iv[i], fv[i]);
         if (iv[i].w) {
@@ -1610,7 +1600,7 @@ void C3DPolyG3::makePkt() {
 FIX4 C3DLine::calcZ() {
     FMATRIX mat0;
     m_pCrd->getRotTransPersMatrix(mat0);
-    setRotTransPersMatrix(mat0);
+    SetRotTransPersMatrix(mat0);
     RotTransPersClipW(p0, m_P0);
     RotTransPersClipW(p1, m_P1);
     return p0.z;
@@ -1635,9 +1625,9 @@ FIX4 C3DLineCoord2::calcZ() {
     FMATRIX mat1;
     m_pCrd0->getRotTransPersMatrix(mat0);
     m_pCrd1->getRotTransPersMatrix(mat1);
-    setRotTransPersMatrix(mat0);
+    SetRotTransPersMatrix(mat0);
     RotTransPersClipW(p0, m_P0);
-    setRotTransPersMatrix(mat1);
+    SetRotTransPersMatrix(mat1);
     RotTransPersClipW(p1, m_P1);
     return p0.z;
 }
@@ -1668,7 +1658,7 @@ FIX4 C3DLines::calcZ() {
     } else {
         mat0 = CWorldEnv::getWorldScreenMatrix();
     }
-    setRotTransPersMatrix(mat0);
+    SetRotTransPersMatrix(mat0);
 
     for (it = m_vLINE.begin(); it != m_vLINE.end();) {
         RotTransPersClipW(it->p0, it->P0);

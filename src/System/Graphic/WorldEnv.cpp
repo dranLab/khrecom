@@ -61,25 +61,6 @@ CBillboardHelper* _pBBHelper;
 
 static void _makeViewScreenMatrix();
 
-static inline void _setViewScreenMatrix(FLOAT fInScrz, FLOAT fInAx, FLOAT fInAy, FLOAT fInFar) {
-    sceVu0ViewScreenMatrix(_matViewScreen.m, fInScrz, fInAx, fInAy, 2048.0f, 2048.0f, 1.0f, 16777000.0f, 0.1f, fInFar);
-}
-
-static inline void _cameraMatrix(FMATRIX& matOut, FVECTOR& vInPos, FVECTOR& vInZd, FVECTOR& vInYd, FVECTOR& vInRot) {
-    FMATRIX matWork;
-    FVECTOR vecDir;
-    FVECTOR vecV;
-    FVECTOR vecPos;
-    sceVu0UnitMatrix(matWork.m);
-    sceVu0RotMatrixX(matWork.m, matWork.m, vInRot.x);
-    sceVu0RotMatrixY(matWork.m, matWork.m, vInRot.y);
-    sceVu0RotMatrixZ(matWork.m, matWork.m, vInRot.z);
-    ApplyMatrix(vecDir, matWork, vInZd);
-    ApplyMatrix(vecV, matWork, vInYd);
-    ApplyMatrix(vecPos, matWork, vInPos);
-    sceVu0CameraMatrix(matOut.m, vecPos.v, vecDir.v, vecV.v);
-}
-
 /* Parked: 0-8 of 177 lines (2026-11-08): this draft is the original source. Compiled with the original's own
  * anonymous-namespace name (c:/KHCOM/MainApp/System/Graphic/WorldEnv.cpp + suffix UPaaaa = pid 2588, via a rewritten .ii
  * line marker and a chosen pid) it matches every time; our build names the namespace src_..._WorldEnv.cpp + a random
@@ -225,12 +206,12 @@ static void _makeWorldViewMatrix(const FMATRIX* pInWorldMat, FLOAT fInXofs, FLOA
     FMATRIX& matWV = _matWorldView;
     CCamera* pCamera;
     if (pInWorldMat) {
-        sceVu0InversMatrix(matWV.m, (float(*)[4])pInWorldMat->m);
+        InverseMatrix(matWV, *pInWorldMat);
         applySignWorldViewMatrix(matWV, matWV);
         matWV.m[3][0] += fInXofs;
         matWV.m[3][1] += fInYofs;
     } else {
-        _cameraMatrix(matWV, _vecFixCameraPos, _vecFixCameraZd, _vecFixCameraYd, _vecFixCameraRot);
+        CameraMatrix(matWV, _vecFixCameraPos, _vecFixCameraZd, _vecFixCameraYd, _vecFixCameraRot);
     }
     pCamera = CWorldEnv::getActiveCamera();
     if (pCamera) {
@@ -512,7 +493,7 @@ void getOrthoMatrix(FMATRIX& m, float left, float right, float bottom, float top
 static void _makeViewScreenMatrix() {
     FLOAT fSrrz = _fScreenZ + 512.0f;
 
-    _setViewScreenMatrix(fSrrz, ASPECT_RATE_X, ASPECT_RATE_Y, CWorldEnv::getDispFar());
+    ViewScreenMatrix(_matViewScreen, fSrrz, ASPECT_RATE_X, ASPECT_RATE_Y, 2048.0f, 2048.0f, CWorldEnv::getDispFar());
 }
 
 // SOURCE DATA: .rodata .bss
