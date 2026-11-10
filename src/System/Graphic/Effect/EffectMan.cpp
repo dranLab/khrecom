@@ -605,11 +605,11 @@ static inline u_long128 _rotTransPersVf4(const FVECTOR& v0) {
 
 
 
-static inline FLOAT _sqrtf(FLOAT x) { /* Math3D.h:129 (original name unknown) */
-    FLOAT ret;
-    asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));
-    return ret;
-}
+#include "System/Math3D.h"
+
+
+
+
 static inline FLOAT _lengthVf4(const FVECTOR& v0) { return _sqrtf(vu0LengthSq(v0)); } /* a Math3D.h inline (original name unknown) */
 
 

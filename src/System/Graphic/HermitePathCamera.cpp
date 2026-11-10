@@ -252,12 +252,12 @@ void Normalize(FVECTOR& v0, const FVECTOR& v1);
 namespace Math3D {
 FLOAT VectorLength(const FVECTOR& inVector);
 }
-// the original's Math3D.h:137 _fabs (ref locals inValue/ret); MATCH: volatile keeps the abs.s after the fAdd mul
-static inline FLOAT _fabs(FLOAT inValue) {
-    FLOAT ret;
-    asm volatile("abs.s %0, %1" : "=f"(ret) : "f"(inValue));
-    return ret;
-}
+
+#include "System/Math3D.h"
+
+
+
+
 
 FLOAT CHermitePathCamera::updatePos(FVECTOR& vPos, FVECTOR& vLook, FLOAT fr, BOOL bUpdate) {
     FLOAT fRoll;
@@ -469,8 +469,8 @@ FLOAT CHermitePathCamera::updatePos(FVECTOR& vPos, FVECTOR& vLook, FLOAT fr, BOO
         AddVectorXYZ(vLook, m_vLearpOldLook, vAdd);
         fLen = m_fLearpAimProj - m_fLearpOldProj;
         fAdd = fLen * fRate;
-        if (_fabs(fLen) >= 0.002f) {
-            if (_fabs(fAdd) < 0.002f) {
+        if (_fabsf(fLen) >= 0.002f) {
+            if (_fabsf(fAdd) < 0.002f) {
                 if (0.0f <= fAdd) fAdd = 0.002f;
                 else fAdd = -0.002f;
             }

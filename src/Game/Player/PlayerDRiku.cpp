@@ -91,21 +91,21 @@ static inline FLOAT _limitPI(FLOAT r) {
     return (r < -3.1415927f) ? r + 6.2831855f : (r > 3.1415927f) ? r - 6.2831855f : r;
 }
 
-static inline FLOAT _abs(FLOAT inValue) {
-    FLOAT ret;
-    __asm__ volatile("abs.s %0, %1" : "=f"(ret) : "f"(inValue));
-    return ret;
-}
+#include "System/Math3D.h"
+
+
+
+
 void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void Normalize(FVECTOR& v0, const FVECTOR& v1);
 FLOAT InnerProduct(const FVECTOR& v0, const FVECTOR& v1);
 void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT s);
 extern "C" float atan2f(float y, float x);
-static inline FLOAT _sqrtf(FLOAT inValue) {
-    FLOAT ret;
-    asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(inValue));
-    return ret;
-}
+
+
+
+
+
 static inline INT _getNowCamMode() {
     return PlayerCamera::CPlayerCamera::getNowCamMode();
 }
@@ -607,7 +607,7 @@ void CPlayerDRiku::setAttack() {
         distY -= 1.0f;
         dist = calcDistance(*pTarget);
         dir = calcDirection(*pTarget) - m_fDir;
-        dir = _abs(dir);
+        dir = _fabsf(dir);
         m_hMark = m_hTarget;
     } else {
         m_iSubState = 3;
@@ -772,7 +772,7 @@ void CPlayerDRiku::exeJump2nd() {
         m_fJumpSpdY += m_fJumpGravity * m_fFrameRate;
         if (m_hMark > 0) {
             SubVectorXYZ(vec, m_vMarkPos, getPos());
-            m_fDistY = _abs(vec.y);
+            m_fDistY = _fabsf(vec.y);
             if (vec.y < -1.0f) {
                 if (m_fJumpSpdY > 0.0f) {
                     if (m_fDistY < 3.0f) m_fJumpSpdY *= g_fJumpStopRate;

@@ -109,11 +109,11 @@ void CSummonDumbo::beginStateAction1() {
 
 } // namespace Summon
 
-static inline FLOAT _abs(FLOAT inValue) {
-    FLOAT ret;
-    __asm__ volatile("abs.s %0, %1" : "=f"(ret) : "f"(inValue));
-    return ret;
-}
+#include "System/Math3D.h"
+
+
+
+
 
 static inline FLOAT _limitPI(FLOAT r) {
     if (r < -3.1415927f) r += 6.2831855f;
@@ -143,7 +143,7 @@ void CSummonDumbo::stateAction1() {
     FVECTOR rot = getRot();
     FLOAT x = getAnalogLX(0) * (1.0f / 4096.0f);
     FLOAT speed = m_pAtkData->MAX_SPEED * 0.01f;
-    if (_abs(x) > 0.25f) {
+    if (_fabsf(x) > 0.25f) {
         if (x < 0.0f) x = (x + 0.25f) * m_pAtkData->WORK0 * 0.1f * getFrameRateF() * 0.017453292f;
         else x = (x - 0.25f) * m_pAtkData->WORK0 * 0.1f * getFrameRateF() * 0.017453292f;
         rot.y = _limitPI(rot.y - x);
