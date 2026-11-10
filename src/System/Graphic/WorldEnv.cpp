@@ -392,22 +392,22 @@ void applySignWorldViewMatrix(FMATRIX& m0, const FMATRIX& m1) {
                  : "memory");
 }
 
-static inline FMATRIX& _unitMatrix(FMATRIX& m) {
-    asm volatile("vmr32.xyzw $vf1, $vf0\n"
-                 "sqc2 $vf0, 0x30(%0)\n"
-                 "vmr32.xyzw $vf2, $vf1\n"
-                 "sqc2 $vf1, 0x20(%0)\n"
-                 "vmr32.xyzw $vf3, $vf2\n"
-                 "sqc2 $vf2, 0x10(%0)\n"
-                 "sqc2 $vf3, 0x0(%0)\n"
-                 :
-                 : "r"(&m)
-                 : "memory");
-    return m;
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 void getViewportMatrix(FMATRIX& matViewport, float cx, float cy, float width, float height, float maxz, float minz) {
-    FMATRIX& res = _unitMatrix(matViewport);
+    matViewport.init(); FMATRIX& res = matViewport; /* the ref: an FMATRIX inline (this), then res */
     res.m[3][0] = cx;
     res.m[3][1] = cy;
     res.m[0][0] = width * 0.5f;

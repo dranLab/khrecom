@@ -94,18 +94,18 @@ public:
 };
 
 
-static inline void _unitMatrixVu0(FMATRIX& m) {
-    asm volatile("vmr32.xyzw $vf1, $vf0\n"
-                 "sqc2 $vf0, 0x30(%0)\n"
-                 "vmr32.xyzw $vf2, $vf1\n"
-                 "sqc2 $vf1, 0x20(%0)\n"
-                 "vmr32.xyzw $vf3, $vf2\n"
-                 "sqc2 $vf2, 0x10(%0)\n"
-                 "sqc2 $vf3, 0x0(%0)\n"
-                 :
-                 : "r"(&m)
-                 : "memory");
-}
+
+
+
+
+
+
+
+
+
+
+
+
 
 typedef struct {
     u_int DIR : 1;
@@ -304,7 +304,7 @@ void CEffectMan::_setCoord(CEffect* pEff, INT nCNum, const CCoord* pParent, cons
     if (pMat) {
         *pLocal = *pMat;
     } else {
-        _unitMatrixVu0(*pLocal);
+        vu0UnitMatrix(*pLocal);
         if (pvRot) {
             RotMatrixX(*pLocal, *pLocal, pvRot->x);
             RotMatrixY(*pLocal, *pLocal, pvRot->y);

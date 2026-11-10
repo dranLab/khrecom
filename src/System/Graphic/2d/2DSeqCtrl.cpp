@@ -35,18 +35,18 @@ unsigned char C2DSeqCtrl::m_bitTbl[8] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x4
 
 template <class T> static inline T& _ref(T& v) { return v; }
 
-static inline void _unitMatrix(FMATRIX& m) {
-    asm volatile("vmr32.xyzw $vf1, $vf0\n"
-                 "sqc2 $vf0, 0x30(%0)\n"
-                 "vmr32.xyzw $vf2, $vf1\n"
-                 "sqc2 $vf1, 0x20(%0)\n"
-                 "vmr32.xyzw $vf3, $vf2\n"
-                 "sqc2 $vf2, 0x10(%0)\n"
-                 "sqc2 $vf3, 0x0(%0)\n"
-                 :
-                 : "r"(&m)
-                 : "memory");
-}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -62,7 +62,7 @@ static inline void _unitMatrix(FMATRIX& m) {
 
 /* SeqControl's inline constructor (original name unknown) */
 static inline void _initSeqControl(SeqControl& sc) {
-    _unitMatrix(sc.matrix);
+    vu0UnitMatrix(sc.matrix);
     sc.parentMatrix.m[3][3] = 0.0f;
     sc.controlMatrix.m[3][3] = 0.0f;
     sc.pParentSeqControl = NULL;
@@ -353,7 +353,7 @@ BOOL C2DSeqCtrl::isEnableDisp(INT nIdx) {
 
 void C2DSeqCtrl::setMatrix() {
     FMATRIX mat;
-    _unitMatrix(mat);
+    vu0UnitMatrix(mat);
     mat.m[0][0] = m_seqControl.vScl.x;
     mat.m[1][1] = m_seqControl.vScl.y;
     mat.m[2][2] = m_seqControl.vScl.z;

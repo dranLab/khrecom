@@ -29,18 +29,18 @@ extern "C" float cosf(float x);
 extern "C" float atan2f(float y, float x);
 
 
-static inline void _unitMatrixVu0(FMATRIX& m) {
-    asm volatile("vmr32.xyzw $vf1, $vf0\n"
-                 "sqc2 $vf0, 0x30(%0)\n"
-                 "vmr32.xyzw $vf2, $vf1\n"
-                 "sqc2 $vf1, 0x20(%0)\n"
-                 "vmr32.xyzw $vf3, $vf2\n"
-                 "sqc2 $vf2, 0x10(%0)\n"
-                 "sqc2 $vf3, 0x0(%0)\n"
-                 :
-                 : "r"(&m)
-                 : "memory");
-}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -498,7 +498,7 @@ void spinMatrixX(FMATRIX& matOut, const FMATRIX& matIn, FLOAT fInDeg) {
     FLOAT cs = cosf(fInDeg);
     FMATRIX t;
 
-    _unitMatrixVu0(t);
+    vu0UnitMatrix(t);
     t.m[1][1] = cs;
     t.m[1][2] = sn;
     t.m[2][1] = -sn;
@@ -510,7 +510,7 @@ void spinMatrixY(FMATRIX& matOut, const FMATRIX& matIn, FLOAT fInDeg) {
     FLOAT cs = cosf(fInDeg);
     FMATRIX t;
 
-    _unitMatrixVu0(t);
+    vu0UnitMatrix(t);
     t.m[2][2] = cs;
     t.m[2][0] = sn;
     t.m[0][0] = cs;
@@ -522,7 +522,7 @@ void spinMatrixZ(FMATRIX& matOut, const FMATRIX& matIn, FLOAT fInDeg) {
     FLOAT cs = cosf(fInDeg);
     FMATRIX t;
 
-    _unitMatrixVu0(t);
+    vu0UnitMatrix(t);
     t.m[0][0] = cs;
     t.m[0][1] = sn;
     t.m[1][0] = -sn;
@@ -534,7 +534,7 @@ void spinMatrixX(FMATRIX& matOut, const FMATRIX& matIn, INT nInDeg) {
     FLOAT cs = tcos(nInDeg);
     FMATRIX t;
 
-    _unitMatrixVu0(t);
+    vu0UnitMatrix(t);
     t.m[1][1] = cs;
     t.m[1][2] = sn;
     t.m[2][1] = -sn;
@@ -546,7 +546,7 @@ void spinMatrixY(FMATRIX& matOut, const FMATRIX& matIn, INT nInDeg) {
     FLOAT cs = tcos(nInDeg);
     FMATRIX t;
 
-    _unitMatrixVu0(t);
+    vu0UnitMatrix(t);
     t.m[2][2] = cs;
     t.m[2][0] = sn;
     t.m[0][0] = cs;
@@ -558,7 +558,7 @@ void spinMatrixZ(FMATRIX& matOut, const FMATRIX& matIn, INT nInDeg) {
     FLOAT cs = tcos(nInDeg);
     FMATRIX t;
 
-    _unitMatrixVu0(t);
+    vu0UnitMatrix(t);
     t.m[0][0] = cs;
     t.m[0][1] = sn;
     t.m[1][0] = -sn;
@@ -570,7 +570,7 @@ void rotMatrixX(FMATRIX& matOut, const FMATRIX& matIn, INT nInDeg) {
     FLOAT cs = tcos(nInDeg);
     FMATRIX t;
 
-    _unitMatrixVu0(t);
+    vu0UnitMatrix(t);
     t.m[1][1] = cs;
     t.m[1][2] = sn;
     t.m[2][1] = -sn;
@@ -582,7 +582,7 @@ void rotMatrixY(FMATRIX& matOut, const FMATRIX& matIn, INT nInDeg) {
     FLOAT cs = tcos(nInDeg);
     FMATRIX t;
 
-    _unitMatrixVu0(t);
+    vu0UnitMatrix(t);
     t.m[2][2] = cs;
     t.m[2][0] = sn;
     t.m[0][0] = cs;
@@ -594,7 +594,7 @@ void rotMatrixZ(FMATRIX& matOut, const FMATRIX& matIn, INT nInDeg) {
     FLOAT cs = tcos(nInDeg);
     FMATRIX t;
 
-    _unitMatrixVu0(t);
+    vu0UnitMatrix(t);
     t.m[0][0] = cs;
     t.m[0][1] = sn;
     t.m[1][0] = -sn;
@@ -627,7 +627,7 @@ void World2Eurar(TDEG& swivel, TDEG& tilt, const FMATRIX& world, const FVECTOR& 
 
     World2Local(v, world, in_v);
     swivel = cossin2deg(v.z, v.x);
-    _unitMatrixVu0(m);
+    m.init();
     spinMatrixY(m, m, -swivel);
     ApplyMatrix(t, m, v);
     tilt = -cossin2deg(t.z, t.y);

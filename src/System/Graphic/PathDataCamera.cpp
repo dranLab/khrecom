@@ -19,18 +19,18 @@
 
 
 
-static inline void _unitMatrixVu0(FMATRIX& m) {
-    asm volatile("vmr32.xyzw $vf1, $vf0\n"
-                 "sqc2 $vf0, 0x30(%0)\n"
-                 "vmr32.xyzw $vf2, $vf1\n"
-                 "sqc2 $vf1, 0x20(%0)\n"
-                 "vmr32.xyzw $vf3, $vf2\n"
-                 "sqc2 $vf2, 0x10(%0)\n"
-                 "sqc2 $vf3, 0x0(%0)\n"
-                 :
-                 : "r"(&m)
-                 : "memory");
-}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -116,7 +116,7 @@ void CPathDataCamera::_init(INT iKind, CTask* pTarget, INT iNum, CTask* pParent)
         m_iCNum = iIdx;
         m_pTarget = this;
         addCoord(1);
-        _unitMatrixVu0(Crd(0).m_Local);
+        vu0UnitMatrix(Crd(0).m_Local);
         if (pParent && pParent->getCoordNum() > 0) Crd(0).setParent(&pParent->Crd(0));
         if (m_pPathData->getPathVectorNum(m_iNum) >= 2) {
 #line 149

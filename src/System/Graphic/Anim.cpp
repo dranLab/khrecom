@@ -112,18 +112,18 @@ void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 /* Placeholders (in .sdata, stripped) for the strings of INCLUDE_ASM functions, at their position */
 __asm__(".section .sdata\n");
 
-static inline void _unitMatrixVu0(FMATRIX& m) {
-    asm volatile("vmr32.xyzw $vf1, $vf0\n"
-                 "sqc2 $vf0, 0x30(%0)\n"
-                 "vmr32.xyzw $vf2, $vf1\n"
-                 "sqc2 $vf1, 0x20(%0)\n"
-                 "vmr32.xyzw $vf3, $vf2\n"
-                 "sqc2 $vf2, 0x10(%0)\n"
-                 "sqc2 $vf3, 0x0(%0)\n"
-                 :
-                 : "r"(&m)
-                 : "memory");
-}
+
+
+
+
+
+
+
+
+
+
+
+
 
 void interpolateVector(FVECTOR& local, FVECTOR& from, FVECTOR& to, FLOAT racio) {
     Math3D::VectorLerp(local, from, to, racio);
@@ -156,7 +156,7 @@ CAnim::CAnim() {
     m_vRootMovePreRot.init();
     m_vRootMoveTrs.init();
     m_vRootMoveRot.init();
-    _unitMatrixVu0(m_BufRootMtx);
+    m_BufRootMtx.init();
 }
 CAnim::~CAnim() {
     _dispose();
@@ -931,7 +931,7 @@ void CAnim::_updateLookPosition(FLOAT fR) {
         m_fLookRot[1] = fvAng.y;
     }
     FMATRIX mMat;
-    _unitMatrixVu0(mMat);
+    mMat.init();
     RotMatrixZ(mMat, mMat, fvAng.x);
     RotMatrixX(mMat, mMat, fvAng.y);
     MulMatrix(crd.getLocalMatrix(), crd.getLocalMatrix(), mMat);

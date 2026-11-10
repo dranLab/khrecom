@@ -47,7 +47,7 @@ static inline void _initTrans(FMATRIX& m) {
     m.v[3].init0();
 }
 
-static inline void _unitMatrix(FMATRIX& m) {
+static inline void _unitMatrix(FMATRIX& m) { /* the parked InvMatrix draft's (vu0.h's vu0UnitMatrix) */
     asm volatile("vmr32.xyzw $vf1, $vf0\n"
                  "sqc2 $vf0, 0x30(%0)\n"
                  "vmr32.xyzw $vf2, $vf1\n"

@@ -204,18 +204,18 @@ void CModelMan::reset() {
                  : "r"(&vMax), "r"(&vMin));
 }
 
-static inline void _unitMatrix(FMATRIX& m) {
-    asm volatile("vmr32.xyzw $vf1, $vf0\n"
-                 "sqc2 $vf0, 0x30(%0)\n"
-                 "vmr32.xyzw $vf2, $vf1\n"
-                 "sqc2 $vf1, 0x20(%0)\n"
-                 "vmr32.xyzw $vf3, $vf2\n"
-                 "sqc2 $vf2, 0x10(%0)\n"
-                 "sqc2 $vf3, 0x0(%0)\n"
-                 :
-                 : "r"(&m)
-                 : "memory");
-}
+
+
+
+
+
+
+
+
+
+
+
+
 
 void CModelMan::setupDrawEnv() {
     FMATRIX& matWS = CWorldEnv::getWorldScreenMatrix();
@@ -248,7 +248,7 @@ void CModelMan::setupDrawEnv() {
     FMATRIX& matWV = CWorldEnv::getWorldViewMatrix();
     FMATRIX& matVS = CWorldEnv::getViewScreenMatrix();
     InverseMatrix(wv_i, matWV);
-    _unitMatrix(vs_i);
+    vu0UnitMatrix(vs_i);
     vs_i.m[0][0] = 1.0f / matVS.m[0][0];
     vs_i.m[3][0] = -matVS.m[2][0] / matVS.m[0][0];
     vs_i.m[1][1] = 1.0f / matVS.m[1][1];

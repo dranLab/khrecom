@@ -434,18 +434,18 @@ void MulMatrix(FMATRIX& m0, const FMATRIX& m1, const FMATRIX& m2);
 void MulVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void FTOI0Vector(IVECTOR& v0, const FVECTOR& v1);
 
-static inline void _unitMatrixVu0(FMATRIX& m) {
-    asm volatile("vmr32.xyzw $vf1, $vf0\n"
-                 "sqc2 $vf0, 0x30(%0)\n"
-                 "vmr32.xyzw $vf2, $vf1\n"
-                 "sqc2 $vf1, 0x20(%0)\n"
-                 "vmr32.xyzw $vf3, $vf2\n"
-                 "sqc2 $vf2, 0x10(%0)\n"
-                 "sqc2 $vf3, 0x0(%0)\n"
-                 :
-                 : "r"(&m)
-                 : "memory");
-}
+
+
+
+
+
+
+
+
+
+
+
+
 static inline void _applyMatrix2(FVECTOR& v0, const FMATRIX& m0, const FVECTOR2& v2) {
     /* MATCH: the original passes the FVECTOR2 to qmtc2 in t0 ($8); an unpinned temp gets another register */
     register ULONGLONG xy asm("$8") = v2._u64;
@@ -483,13 +483,13 @@ void C2DSprObj::move() {
     FVECTOR2 primPosBuf[9][4];
     fgBilinear = 0;
     setBilinear(m_status.bilinear_disable);
-    _unitMatrixVu0(mat);
+    mat.init();
     mat.m[0][0] = m_vScl.x;
     mat.m[1][1] = m_vScl.y;
     RotMatrix(mat, mat, m_vRot);
     AddVector2(fVec, m_vPos, m_vSwy);
     mat.setTrans(fVec);
-    _unitMatrixVu0(mat2);
+    mat2.init();
     *(FVECTOR2*)&fVec = m_vOfs;
     mat2.setTrans(fVec);
     MulMatrix(mat, mat, mat2);
