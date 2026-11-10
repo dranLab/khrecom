@@ -303,7 +303,7 @@ void CAnim::save_hokan_by_mtx() {
         crd.getScale(vScale);
         Quaternion::MatrixToQuaternion(q0->vQuatRotate, crd.getLocalMatrix());
         FVECTOR vTrans = crd.getLocalMatrix().v[3];
-        q0->vTrans = vTrans;
+        q0->vTrans.set(vTrans);
         q0->vScale.set(vScale.x, vScale.y, vScale.z);
     }
 }
@@ -483,7 +483,7 @@ void CAnim::setup(ANIMID id, TIMEQ tq) {
                     quat0.vScale.set(md->GetCmpData(6, i, 0.0f), md->GetCmpData(7, i, 0.0f),
                                      md->GetCmpData(8, i, 0.0f));
                 } else {
-                    quat0.vScale = ONE_VECTOR;
+                    quat0.vScale.set(ONE_VECTOR);
                 }
             }
         }
@@ -504,7 +504,7 @@ void CAnim::_setupRootMove(BOOL inRootMove, BOOL bContinue) {
         q0 = m_pQuatNow;
         q0->vQuatRotate.init();
         q0->vTrans.init();
-        q0->vScale = ONE_VECTOR;
+        q0->vScale.set(ONE_VECTOR);
         q1 = m_pQuatHokan;
         *q1 = *q0;
         m_BufRootMtx = m_pCrds->Crd(0).getLocalMatrix();

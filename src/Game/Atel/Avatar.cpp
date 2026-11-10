@@ -381,7 +381,7 @@ INT CAvatar::onSetNearClip(INT nCmd, void* pParam, INT nID) {
 }
 INT CAvatar::onSetPosistion(INT nCmd, void* pParam, INT nID) {
     if (!isAvatarMoving()) setAvatarState(0x30, FALSE);
-    FVECTOR v = *(FVECTOR*)pParam;
+    FVECTOR v; v.set(*(FVECTOR*)pParam);
     setPos(v);
     warp(getPos());
     if (m_pMove->isGravity()) m_pMove->land(5.0f, 1.0f, FALSE);
@@ -617,7 +617,7 @@ INT CAvatar::onRotate(INT nCmd, void* pParam, INT nID) {
     case 0:
     case 5:
     case 6:
-        vRot = p->_vTarget;
+        vRot.set(p->_vTarget);
         break;
     case 9:
     case 10:
@@ -631,7 +631,7 @@ INT CAvatar::onRotate(INT nCmd, void* pParam, INT nID) {
         break;
     }
     case 3:
-        vTargetPos = p->_vTarget;
+        vTargetPos.set(p->_vTarget);
         bPos2Rot = TRUE;
         break;
     }

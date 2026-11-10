@@ -83,7 +83,7 @@ void CLightUnit::setAnchor(const CCoord* p, INT kind) {
 }
 
 void CLightUnit::getCenter(FVECTOR& ctr) {
-    ctr = m_pCrd->m_World.v[3];
+    ctr.set(m_pCrd->m_World.v[3]);
 }
 
 LIGHTDATA* CLightUnit::getLightData() const {

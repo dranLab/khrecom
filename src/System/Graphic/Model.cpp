@@ -681,7 +681,7 @@ INT CModel::checkBBox() {
     m_BBoxFlag = ret;
     return ret;
 }
-void CModel::setColorScale(const FVECTOR& vColor) { getColorScale() = vColor; }
+void CModel::setColorScale(const FVECTOR& vColor) { getColorScale().set(vColor); }
 void CModel::setColorScale(FLOAT r, FLOAT g, FLOAT b, FLOAT a) { getColorScale().set(r, g, b, a); }
 void CModel::setAlphaScale(FLOAT inScale) { m_ColorScale.w = inScale; }
 void CModel::linksub() {

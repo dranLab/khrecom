@@ -2078,7 +2078,7 @@ void CSaveLoadUI::updateMemocaInfoBar() {
             INT n = (vScale.y * 128.0f + 0.5f) * 10.0f;
             nH = n / 10;
         }
-        v = m_pMemocaInfoBar[i]->m_seqControl.vPos;
+        v.set(m_pMemocaInfoBar[i]->m_seqControl.vPos);
         v.y = nY + (nH - 128.0f) * 0.5f;
         m_pMemocaInfoBar[i]->setScl(vScale);
         m_pMemocaInfoBar[i]->setLocalPos(v);
@@ -2338,7 +2338,7 @@ void CSaveLoadUI::callbackResultPlate(C2DSeqAgent& agent) {
     if (!agent.getSeqCtrl()) return;
     float ofsTbl[2][2] = {{136.0f, 48.0f}, {56.0f, -4.0f}};
     FLOAT* pTbl = ofsTbl[idx];
-    FVECTOR vPos = agent.getSeqCtrl()->m_seqControl.vPos;
+    FVECTOR vPos; vPos.set(agent.getSeqCtrl()->m_seqControl.vPos);
     vPos.x += pTbl[0];
     vPos.y += pTbl[1];
     C2DSeqAgent* pLight = pThis->m_pResultLightAgent[idx];

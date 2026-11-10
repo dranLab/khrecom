@@ -285,7 +285,7 @@ void CWorldEnv::setDefScreenZ(FLOAT z) { _fDefScreenZ = z; }
 
 FLOAT CWorldEnv::getDefScreenZ() { return _fDefScreenZ; }
 
-void CWorldEnv::getViewVector(FVECTOR& vecOut) { vecOut = _vecViewDir; }
+void CWorldEnv::getViewVector(FVECTOR& vecOut) { vecOut.set(_vecViewDir); }
 
 const FVECTOR& CWorldEnv::getViewVector() { return _vecViewDir; }
 

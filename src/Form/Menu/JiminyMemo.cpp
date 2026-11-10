@@ -250,16 +250,16 @@ public:
     void setOutState(INT inSeqId);
     void setSlideMoveParam(class CMemo2DCursor* inCursor);
     void main(FLOAT inFrameRate);
-    void setBasePosition(const FVECTOR& inPosi) { m_vBasePosition = inPosi; }
+    void setBasePosition(const FVECTOR& inPosi) { m_vBasePosition.set(inPosi); }
     FVECTOR& getBasePosition() { return m_vBasePosition; }
-    void setShiftPosition(const FVECTOR& inShift) { m_vShiftPosition = inShift; }
-    void setAimPosition(const FVECTOR& inAim) { m_vAimPosition = inAim; }
+    void setShiftPosition(const FVECTOR& inShift) { m_vShiftPosition.set(inShift); }
+    void setAimPosition(const FVECTOR& inAim) { m_vAimPosition.set(inAim); }
     void setPosition(const FVECTOR& inPosi) {
-        m_vPosition = inPosi;
+        m_vPosition.set(inPosi);
         setPos(m_vPosition);
     }
     void setLocalPosition(const FVECTOR& inPosi) {
-        m_vPosition = inPosi;
+        m_vPosition.set(inPosi);
         setLocalPos(m_vPosition);
     }
     void setState(INT inState) { m_iState = inState; }
@@ -309,7 +309,7 @@ public:
     void setScale(FLOAT inScale);
     void getSubVector(CursorPosition& outSub, INT inId0, INT inId1);
     void setLimitPosi(CursorPosition& inPosi, INT inId);
-    void setShiftVector(const FVECTOR& inShiftPosi) { m_vShiftPosi = inShiftPosi; }
+    void setShiftVector(const FVECTOR& inShiftPosi) { m_vShiftPosi.set(inShiftPosi); }
     FVECTOR& getShiftVector() { return m_vShiftPosi; }
     FVECTOR& getAimVector() { return m_vAimPosi; }
     FVECTOR& getPosition() { return m_vPosi; }
@@ -343,9 +343,9 @@ public:
     void changePicture(D2::C2DSeqObj* p2DSeqObj);
     void setState(INT inState);
     void main(FLOAT inFrameRate);
-    void setBasePosition(const FVECTOR& inPosition) { m_vBasePosition = inPosition; }
+    void setBasePosition(const FVECTOR& inPosition) { m_vBasePosition.set(inPosition); }
     FVECTOR& getBasePosition() { return m_vBasePosition; }
-    void setShiftPosition(const FVECTOR& inShift) { m_vShiftPosition = inShift; }
+    void setShiftPosition(const FVECTOR& inShift) { m_vShiftPosition.set(inShift); }
     FVECTOR& getShiftPosition() { return m_vShiftPosition; }
     void setScale(FLOAT inScale) {
         m_fScale = inScale;
@@ -2241,8 +2241,8 @@ void CMemo2DSequence::main(FLOAT inFrameRate) {
 void CMemo2DSequence::setSlideMoveParam(CMemo2DCursor* inCursor) {
     if (inCursor) {
         m_bMoveSlideEnable = TRUE;
-        m_vAimPosition = inCursor->getAimVector();
-        m_vShiftPosition = inCursor->getShiftVector();
+        m_vAimPosition.set(inCursor->getAimVector());
+        m_vShiftPosition.set(inCursor->getShiftVector());
         if (m_iStateFlag & 4) {
             m_vPosition = m_vAimPosition;
             setLocalPos(m_vPosition);
@@ -2419,8 +2419,8 @@ void CMemo2DCursor::main() {
             shift.y -= limy0 - posi.y;
             posi.y = limy0;
         }
-        m_vPosi = posi;
-        m_vShiftPosi = shift;
+        m_vPosi.set(posi);
+        m_vShiftPosi.set(shift);
         setLocalPos(m_vPosi);
     }
 }

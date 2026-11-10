@@ -30,26 +30,26 @@ void CEventLine::setData(const LineTrapSrc& inData) {
     INT i;
 
     for (i = 0; i < 2; i++) {
-        m_srcData._vP[i] = inData._vP[i];
+        m_srcData._vP[i] = inData._vP[i]; /* the original: FVECTOR::set (Coord.h:731); .set() here moves a store past the asm below */
     }
     setCheckData(0, m_srcData._vP[0]);
     _resetCoord(m_Crd);
     m_Shape.m_pCrd = &m_Crd;
 
-    Line.P0 = m_srcData._vP[0];
-    Line.P1 = m_srcData._vP[0];
+    Line.P0.set(m_srcData._vP[0]);
+    Line.P1.set(m_srcData._vP[0]);
     Line.P1.y = m_srcData._vP[1].y;
     Line.C0.set(0xFF, 0x40, 0x40, 0x80);
     Line.C1.set(0xFF, 0x40, 0x40, 0x80);
     m_Shape.m_vLINE.push_back(Line);
-    Line.P0 = m_srcData._vP[1];
+    Line.P0.set(m_srcData._vP[1]);
     m_Shape.m_vLINE.push_back(Line);
-    Line.P1 = m_srcData._vP[1];
+    Line.P1.set(m_srcData._vP[1]);
     Line.P1.y = m_srcData._vP[0].y;
     m_Shape.m_vLINE.push_back(Line);
-    Line.P0 = m_srcData._vP[0];
+    Line.P0.set(m_srcData._vP[0]);
     m_Shape.m_vLINE.push_back(Line);
-    Line.P1 = m_srcData._vP[1];
+    Line.P1.set(m_srcData._vP[1]);
     m_Shape.m_vLINE.push_back(Line);
 }
 
@@ -94,10 +94,10 @@ void CEventBox::setupVertexes() {
     m_Shape[0].m_C1 = m_Shape[0].m_C0;
     m_Shape[0].m_C2 = m_Shape[0].m_C0;
     m_Shape[0].m_C3 = m_Shape[0].m_C0;
-    m_Shape[0].m_P0 = m_matVert.v[0];
-    m_Shape[0].m_P1 = m_matVert.v[1];
-    m_Shape[0].m_P2 = m_matVert.v[3];
-    m_Shape[0].m_P3 = m_matVert.v[2];
+    m_Shape[0].m_P0.set(m_matVert.v[0]);
+    m_Shape[0].m_P1.set(m_matVert.v[1]);
+    m_Shape[0].m_P2.set(m_matVert.v[3]);
+    m_Shape[0].m_P3.set(m_matVert.v[2]);
     m_Shape[0].m_P1.y = m_matVert.v[0].y;
     m_Shape[0].m_P2.y = m_matVert.v[0].y;
     m_Shape[0].m_P3.y = m_matVert.v[0].y;
@@ -108,10 +108,10 @@ void CEventBox::setupVertexes() {
     m_Shape[1].m_C1 = m_Shape[0].m_C0;
     m_Shape[1].m_C2 = m_Shape[0].m_C0;
     m_Shape[1].m_C3 = m_Shape[0].m_C0;
-    m_Shape[1].m_P0 = m_matVert.v[0];
-    m_Shape[1].m_P1 = m_matVert.v[1];
-    m_Shape[1].m_P2 = m_matVert.v[3];
-    m_Shape[1].m_P3 = m_matVert.v[2];
+    m_Shape[1].m_P0.set(m_matVert.v[0]);
+    m_Shape[1].m_P1.set(m_matVert.v[1]);
+    m_Shape[1].m_P2.set(m_matVert.v[3]);
+    m_Shape[1].m_P3.set(m_matVert.v[2]);
     m_Shape[1].m_P0.y = m_matVert.v[1].y;
     m_Shape[1].m_P2.y = m_matVert.v[1].y;
     m_Shape[1].m_P3.y = m_matVert.v[1].y;
@@ -119,17 +119,17 @@ void CEventBox::setupVertexes() {
     m_Lines.m_pCrd = &m_Crd;
     Line.C0 = m_Shape[0].m_C0;
     Line.C1 = m_Shape[0].m_C0;
-    Line.P0 = m_Shape[0].m_P0;
-    Line.P1 = m_Shape[1].m_P0;
+    Line.P0.set(m_Shape[0].m_P0);
+    Line.P1.set(m_Shape[1].m_P0);
     m_Lines.m_vLINE.push_back(Line);
-    Line.P0 = m_Shape[0].m_P1;
-    Line.P1 = m_Shape[1].m_P1;
+    Line.P0.set(m_Shape[0].m_P1);
+    Line.P1.set(m_Shape[1].m_P1);
     m_Lines.m_vLINE.push_back(Line);
-    Line.P0 = m_Shape[0].m_P2;
-    Line.P1 = m_Shape[1].m_P2;
+    Line.P0.set(m_Shape[0].m_P2);
+    Line.P1.set(m_Shape[1].m_P2);
     m_Lines.m_vLINE.push_back(Line);
-    Line.P0 = m_Shape[0].m_P3;
-    Line.P1 = m_Shape[1].m_P3;
+    Line.P0.set(m_Shape[0].m_P3);
+    Line.P1.set(m_Shape[1].m_P3);
     m_Lines.m_vLINE.push_back(Line);
 }
 

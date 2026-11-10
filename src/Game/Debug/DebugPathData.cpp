@@ -535,8 +535,8 @@ BOOL debugWinPathEditPosCamGround(CDebugWindow* pObj, INT inY, INT inParam) {
                 FVECTOR vo;
                 CPointCollision cColl;
                 vPos.w = 1.0f;
-                v1 = vPos;
-                v2 = vPos;
+                v1.set(vPos);
+                v2.set(vPos);
                 v1.y += 0.5f;
                 v2.y -= 10.0f;
                 cColl.setStartPos(v1);
