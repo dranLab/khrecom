@@ -100,7 +100,7 @@ public:
     }
     void setLayerDepth(USHORT nInDepth) { m_LayerInfo._nDepth = nInDepth; }
     void setLayerFG(USHORT nDepth) { setLayer(3, nDepth); }
-    void setLayerBG(/* parameters unknown */);
+    void setLayerBG(USHORT nDepth) { setLayer(2, nDepth); }
     void setLayerDirect(/* parameters unknown */);
     USHORT getLayerID() const { return m_LayerInfo._nID; }
     USHORT getLayerDepth() const { return m_LayerInfo._nDepth; }
