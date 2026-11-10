@@ -1,5 +1,4 @@
 /* libat3dec.c (ATRAC3 decoder core, middleware) */
-#include "include_asm.h"
 
 void *memcpy(void *dst, const void *src, unsigned int n);
 
@@ -334,18 +333,6 @@ static void channel_conv_joint(At3Work *w)
     }
 }
 
-/* Parked: 2 of 457 lines (2026-11-09): the whole image matches except two loads in the window loop's last block: ours
-   issues a_wind[mi] first (into v0, the product's register) and ((short *)ov)[1] second (a2), the original ov[1] first
-   into v0. In sched1 the a_wind load kills its base register (reg weight 0) and wins the tie; ov[1]*a_wind[mi] keeps
-   v0 for ov[1] but issues a_wind first too (4 lines); the product in a separate variable live elsewhere (max) gives the
-   original order but puts the product in that variable's register. Tried: shapes from the original's register reuse
-   (step = the abs temp, p = odd-band source / butterfly pointer / window base, i = every counter and the butterfly's k,
-   the window's t1 reused for out), memcpy of two recomputed member addresses ((src|dst)&7 test), indexed loops (givs),
-   hi before lo (andi first), t1/t0 loads before mx[i]/cc[i] (giv order), const mx/cc/ca (rodata tables), n = step*2
-   inside the half loop (65 insns: loop.c moves n*4 only in its second pass, so n >> 1 is spilled as in the original),
-   w + 2 == p, ov as a pointer after the second if; forms of the last two statements, ternaries, do-while(0) barriers,
-   decomp-permuter 3x 20 min */
-#if 0
 typedef struct {
     int v[4];
 } At3Tbl4;
@@ -440,7 +427,9 @@ int imdct(char *ch, int band, int gain)
         int mi = mx[i];
         int ci = cc[i];
         int r, d, e, lo, hi;
-        int *ov;
+        /* MATCH: the overlap word read through a union member (alias set 0): the s[1] load conflicts with the two
+           stores after it, and that extra dependence issues it before the a_wind load in sched2 */
+        union { int i; short s[2]; } *ov;
         r = ci * (t1 >> 16) + ((ci * ((t1 >> 1) & 0x7FFF)) >> 15);
         d = (t0 - t1) >> 1;
         e = d - r;
@@ -452,16 +441,12 @@ int imdct(char *ch, int band, int gain)
         p[127 - mi] = ((p[mi + 256] >> 1) - a_wind[mi] * t1) >> 3;
         if (gain < 15) t1 = (hi << (15 - gain)) + (lo >> gain);
         else t1 = (hi >> (gain - 15)) + (lo >> gain);
-        ov = (int *)(mi * 4 + (int)p) + 256;
-        p[mi + 128] = t1 + ((a_wind[mi] * ((short *)ov)[1]) >> 3);
-        *ov = (d << (15 - shift)) + (d >> shift) * ca[mi];
+        ov = (void *)((int *)(mi * 4 + (int)p) + 256);
+        p[mi + 128] = t1 + ((ov->s[1] * a_wind[mi]) >> 3);
+        ov->i = (d << (15 - shift)) + (d >> shift) * ca[mi];
     }
     return 0;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/libat3dec", imdct);
-__asm__(".rdata\n.align 4\nD_004FCEF0:\n.word 0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF\n.text\n"); /* imdct's At3Tbl4 initializer */
-#endif
 
 #define GAINC_STEP()                                                    \
     *p = ((*p >> 11) * subgaintable[sh & 7]) >> ((sh >> 3) + 4);        \
