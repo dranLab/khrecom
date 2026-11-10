@@ -30,9 +30,9 @@ class CMapViewer {
 public:
     void setPlayerCrd(const CCoord* p) { m_pPlCrd = p; }
     void setLightCount(INT count) { m_LightCount = count; }
-    void setActiveLight(INT idx, const void* l, INT kind);
+    void setActiveLight(INT idx, void* l, INT kind); /* the DLL table's import: setActiveLight__10CMapVieweriPvi */
 };
-asm(".weak setActiveLight__10CMapVieweriPCvi\nsetActiveLight__10CMapVieweriPCvi = 0\n");
+/* DLL import setActiveLight__10CMapVieweriPvi: 0 in config/SLUS_217.99/dll_imports.ld */
 
 union _LIGHT_POWER {
     struct {

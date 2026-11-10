@@ -112,15 +112,15 @@ DLL_MINIGAME(CMini100AcreTiggerJump, 0x380);
 DLL_MINIGAME(CMini100AcreWildDive, 0x1C0);
 DLL_MINIGAME(CMini100AcreBeeBattleMain, 0x150);
 
-/* Ps2EeAs makes undefined weak symbols global (the link would fail), so define them as weak absolute 0: the
- * same "jal 0" as the original. */
-__asm__(
-    ".weak __24CMini100AcreVegPanicMainP5CTask\n__24CMini100AcreVegPanicMainP5CTask = 0\n"
-    ".weak __25CMini100AcreBalloonGliderP5CTask\n__25CMini100AcreBalloonGliderP5CTask = 0\n"
-    ".weak __22CMini100AcreTiggerJumpP5CTask\n__22CMini100AcreTiggerJumpP5CTask = 0\n"
-    ".weak __20CMini100AcreWildDiveP5CTask\n__20CMini100AcreWildDiveP5CTask = 0\n"
-    ".weak __25CMini100AcreBeeBattleMainP5CTask\n__25CMini100AcreBeeBattleMainP5CTask = 0\n"
-);
+/* DLL imports: undefined here, 0 for the link (config/SLUS_217.99/dll_imports.ld): the same "jal 0" as the
+ * original, and each use keeps its relocation (tools/sndll.py lists them in the DLL table). */
+/* DLL imports, 0 in config/SLUS_217.99/dll_imports.ld (the loader patches their uses):
+ * __24CMini100AcreVegPanicMainP5CTask
+ * __25CMini100AcreBalloonGliderP5CTask
+ * __22CMini100AcreTiggerJumpP5CTask
+ * __20CMini100AcreWildDiveP5CTask
+ * __25CMini100AcreBeeBattleMainP5CTask
+ */
 
 #include "System/Sound/SoundMan.h"
 #line 130

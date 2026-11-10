@@ -22,7 +22,7 @@ static void *NoEmptyRunCalcFunc[] = {
 };
 
 /* The .bss globals (initialized so that gcc emits them in this order, not in the order of the header's
-   declarations); ppvParLoc, ppvParAng and ppvParScl are common symbols in the original. */
+   declarations); ppvParLoc, ppvParAng and ppvParScl are common symbols in the original. */ sceVu0FVECTOR ppvParLoc; sceVu0FVECTOR ppvParAng; sceVu0FVECTOR ppvParScl;
 pppMngSt *ppvMng __attribute__((section(".bss"))) = 0;
 pppEnvSt *ppvEnv __attribute__((section(".bss"))) = 0;
 pppPObject *ppvPObj __attribute__((section(".bss"))) = 0;

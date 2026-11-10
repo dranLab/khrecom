@@ -826,7 +826,7 @@ void CDispListShadowDraw::_drawOT(OTtag& inOT) {
 }
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/DispList", _drawOT__19CDispListShadowDrawR5OTtag);
-__asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x7379532F\n.word 0x2F6D6574\n.word 0x70617247\n.word 0x2F636968\n.word 0x70736944\n.word 0x7473694C\n.word 0x7070632E\n.word 0x35393828\n.word 0x00000029\n.word 0x00000000\n.word 0x77645370\n.word 0x00667542\n.word 0x69282021\n.word 0x203D2120\n.word 0x746E456E\n.word 0x754E7972\n.word 0x0000296D\n.word 0xFF000000\n.word 0x7F000000\n.word 0x00000000\n.text\n");
+__asm__(".rdata\n" ".align 3\n" "D_0045FA20:\n" ".word 0x4B2F3A63\n" ".word 0x4D4F4348\n" ".word 0x69614D2F\n" ".word 0x7070416E\n" ".word 0x7379532F\n" ".word 0x2F6D6574\n" ".word 0x70617247\n" ".word 0x2F636968\n" ".word 0x70736944\n" ".word 0x7473694C\n" ".word 0x7070632E\n" ".word 0x35393828\n" ".word 0x00000029\n" ".word 0x00000000\n" "D_0045FA58:\n" ".word 0x77645370\n" ".word 0x00667542\n" "D_0045FA60:\n" ".word 0x69282021\n" ".word 0x203D2120\n" ".word 0x746E456E\n" ".word 0x754E7972\n" ".word 0x0000296D\n" "D_0045FA74:\n" ".word 0xFF000000\n" "D_0045FA78:\n" ".word 0x7F000000\n" ".word 0x00000000\n" ".text\n");
 #endif
 void CDispListShadowDraw::_endDraw() {
     CModelMan::clearTexCache();

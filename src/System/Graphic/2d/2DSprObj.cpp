@@ -51,10 +51,10 @@ using namespace D2;
 
 
 
-/* PARTIAL: the 2D viewer's SeqControl is not linked into the game: lui/addiu of address 0 (name unknown) */
-extern SeqControl s_ViewerSeqControl;
-/* Ps2EeAs makes undefined weak symbols global: define it as weak absolute 0 (as Game/Enemy/CreateEnemy does) */
-__asm__(".weak s_ViewerSeqControl\ns_ViewerSeqControl = 0\n");
+/* The 2D viewer's SeqControl (C2DViewer::m_seqControl, types.h): in the viewer DLL, lui/addiu of address 0 here */
+class C2DViewer { public: static SeqControl m_seqControl; };
+/* DLL import (data): undefined here, 0 for the link (config/SLUS_217.99/dll_imports.ld) */
+/* DLL import _9C2DViewer$m_seqControl: 0 in config/SLUS_217.99/dll_imports.ld */
 
 extern "C" float sinf(float x);
 extern "C" float cosf(float x);
@@ -181,7 +181,7 @@ void C2DSprObj::init(UINT nSpr) {
 #line 154
     m_pSprPrim = new (__FILE__ "(154)") SprPrim[nSpr];
     INT& rViewer = C2DMan::m_fg2DViewer;
-    if (rViewer) m_pSeqControl = &s_ViewerSeqControl;
+    if (rViewer) m_pSeqControl = &C2DViewer::m_seqControl;
 }
 void C2DSprObj::initSprite(INT inNum, SPR_GROUP* pSprGroupe, SPR_PARTS* pSprParts) {
     if (!m_pSprPrim) return;

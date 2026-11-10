@@ -214,9 +214,9 @@ private:
     UBYTE _m_0x220[0x240 - 0x220];
 };
 
-class CGimmickBossIsLand : public CBaseGimmick {
+class CGimmickPinokio : public CBaseGimmick {
 public:
-    CGimmickBossIsLand(CTask* inParent);
+    CGimmickPinokio(CTask* inParent);
 
 private:
     UBYTE _m_0x220[0x230 - 0x220];
@@ -230,9 +230,9 @@ private:
     UBYTE _m_0x220[0x230 - 0x220];
 };
 
-class CGimmickPinokio : public CBaseGimmick {
+class CGimmickBossIsLand : public CBaseGimmick {
 public:
-    CGimmickPinokio(CTask* inParent);
+    CGimmickBossIsLand(CTask* inParent);
 
 private:
     UBYTE _m_0x220[0x230 - 0x220];
@@ -270,9 +270,9 @@ private:
     UBYTE _m_0x220[0x240 - 0x220];
 };
 
-class CGimmick100Acre01Bush : public CBaseGimmick {
+class CGimmick100AcreBBWall : public CBaseGimmick {
 public:
-    CGimmick100Acre01Bush(CTask* inParent);
+    CGimmick100AcreBBWall(CTask* inParent);
 
 private:
     UBYTE _m_0x220[0x220 - 0x220];
@@ -284,6 +284,14 @@ public:
 
 private:
     UBYTE _m_0x220[0x290 - 0x220];
+};
+
+class CGimmick100Acre01Bush : public CBaseGimmick {
+public:
+    CGimmick100Acre01Bush(CTask* inParent);
+
+private:
+    UBYTE _m_0x220[0x220 - 0x220];
 };
 
 class CGimmick100Acre02Veg : public CBaseGimmick {
@@ -302,50 +310,42 @@ private:
     UBYTE _m_0x220[0x220 - 0x220];
 };
 
-class CGimmick100AcreBBWall : public CBaseGimmick {
-public:
-    CGimmick100AcreBBWall(CTask* inParent);
-
-private:
-    UBYTE _m_0x220[0x220 - 0x220];
-};
-
-/* Ps2EeAs makes undefined weak symbols global (the link would fail), so define them as weak absolute 0: the
- * same "jal 0" as the original (whose relocation names func_0, hence the overview's "NOT matching"). */
-__asm__(
-    ".weak __23CGimmickTreasureBoxPoohP5CTask\n__23CGimmickTreasureBoxPoohP5CTask = 0\n"
-    ".weak __17CGimmickBJFStand1P5CTask\n__17CGimmickBJFStand1P5CTask = 0\n"
-    ".weak __17CGimmickBJFStand2P5CTask\n__17CGimmickBJFStand2P5CTask = 0\n"
-    ".weak __17CGimmickBJFStand3P5CTask\n__17CGimmickBJFStand3P5CTask = 0\n"
-    ".weak __17CGimmickBJFStand4P5CTask\n__17CGimmickBJFStand4P5CTask = 0\n"
-    ".weak __17CGimmickBJFStand5P5CTask\n__17CGimmickBJFStand5P5CTask = 0\n"
-    ".weak __17CGimmickBJFStand6P5CTask\n__17CGimmickBJFStand6P5CTask = 0\n"
-    ".weak __16CGimmickBBGKnifeP5CTask\n__16CGimmickBBGKnifeP5CTask = 0\n"
-    ".weak __14CGimmickBBGSawP5CTask\n__14CGimmickBBGSawP5CTask = 0\n"
-    ".weak __19CGimmickBBGRecoveryP5CTask\n__19CGimmickBBGRecoveryP5CTask = 0\n"
-    ".weak __16CGimmickBBGHedgeP5CTask\n__16CGimmickBBGHedgeP5CTask = 0\n"
-    ".weak __17CGimmickBDSStand1P5CTask\n__17CGimmickBDSStand1P5CTask = 0\n"
-    ".weak __17CGimmickBDSStand2P5CTask\n__17CGimmickBDSStand2P5CTask = 0\n"
-    ".weak __17CGimmickBDSStand3P5CTask\n__17CGimmickBDSStand3P5CTask = 0\n"
-    ".weak __17CGimmickBDSStand4P5CTask\n__17CGimmickBDSStand4P5CTask = 0\n"
-    ".weak __17CGimmickBDSStand5P5CTask\n__17CGimmickBDSStand5P5CTask = 0\n"
-    ".weak __17CGimmickBDSStand6P5CTask\n__17CGimmickBDSStand6P5CTask = 0\n"
-    ".weak __16CGimmickBTMChairP5CTask\n__16CGimmickBTMChairP5CTask = 0\n"
-    ".weak __16CGimmickBTMTableP5CTask\n__16CGimmickBTMTableP5CTask = 0\n"
-    ".weak __14CGimmickIsLandP5CTaski\n__14CGimmickIsLandP5CTaski = 0\n"
-    ".weak __18CGimmickBossIsLandP5CTask\n__18CGimmickBossIsLandP5CTask = 0\n"
-    ".weak __12CGimmickAcidP5CTask\n__12CGimmickAcidP5CTask = 0\n"
-    ".weak __15CGimmickPinokioP5CTask\n__15CGimmickPinokioP5CTask = 0\n"
-    ".weak __12CGimmickShipP5CTask\n__12CGimmickShipP5CTask = 0\n"
-    ".weak __14CGimmickBottleP5CTask\n__14CGimmickBottleP5CTask = 0\n"
-    ".weak __18CGimmickBombBarrelP5CTask\n__18CGimmickBombBarrelP5CTask = 0\n"
-    ".weak __17CGimmickMDFootingP5CTask\n__17CGimmickMDFootingP5CTask = 0\n"
-    ".weak __21CGimmick100Acre01BushP5CTask\n__21CGimmick100Acre01BushP5CTask = 0\n"
-    ".weak __16CGimmickChasePooP5CTask\n__16CGimmickChasePooP5CTask = 0\n"
-    ".weak __20CGimmick100Acre02VegP5CTask\n__20CGimmick100Acre02VegP5CTask = 0\n"
-    ".weak __21CGimmick100Acre02CollP5CTask\n__21CGimmick100Acre02CollP5CTask = 0\n"
-    ".weak __21CGimmick100AcreBBWallP5CTask\n__21CGimmick100AcreBBWallP5CTask = 0\n"
-);
+/* DLL imports: undefined here, 0 for the link (config/SLUS_217.99/dll_imports.ld): the same "jal 0" as the
+ * original, and each use keeps its relocation (tools/sndll.py lists them in the DLL table). */
+/* DLL imports, 0 in config/SLUS_217.99/dll_imports.ld (the loader patches their uses):
+ * __23CGimmickTreasureBoxPoohP5CTask
+ * __17CGimmickBJFStand1P5CTask
+ * __17CGimmickBJFStand2P5CTask
+ * __17CGimmickBJFStand3P5CTask
+ * __17CGimmickBJFStand4P5CTask
+ * __17CGimmickBJFStand5P5CTask
+ * __17CGimmickBJFStand6P5CTask
+ * __16CGimmickBBGKnifeP5CTask
+ * __14CGimmickBBGSawP5CTask
+ * __19CGimmickBBGRecoveryP5CTask
+ * __16CGimmickBBGHedgeP5CTask
+ * __17CGimmickBDSStand1P5CTask
+ * __17CGimmickBDSStand2P5CTask
+ * __17CGimmickBDSStand3P5CTask
+ * __17CGimmickBDSStand4P5CTask
+ * __17CGimmickBDSStand5P5CTask
+ * __17CGimmickBDSStand6P5CTask
+ * __16CGimmickBTMChairP5CTask
+ * __16CGimmickBTMTableP5CTask
+ * __14CGimmickIsLandP5CTaski
+ * __15CGimmickPinokioP5CTask
+ * __12CGimmickAcidP5CTask
+ * __18CGimmickBossIsLandP5CTask
+ * __12CGimmickShipP5CTask
+ * __14CGimmickBottleP5CTask
+ * __18CGimmickBombBarrelP5CTask
+ * __17CGimmickMDFootingP5CTask
+ * __21CGimmick100AcreBBWallP5CTask
+ * __16CGimmickChasePooP5CTask
+ * __21CGimmick100Acre01BushP5CTask
+ * __20CGimmick100Acre02VegP5CTask
+ * __21CGimmick100Acre02CollP5CTask
+ */
 
 
 
@@ -448,13 +448,13 @@ CEntity* CEntityFactory::createGimmick(INT inRsrcID, CTask* inParent, void* inEx
         gimmick = new (__FILE__ "(254)") CGimmickIsLand(parent, inRsrcID);
         break;
     case 0x22b:
-        gimmick = new (__FILE__ "(258)") CGimmickBossIsLand(parent);
+        gimmick = new (__FILE__ "(258)") CGimmickPinokio(parent);
         break;
     case 0x228 ... 0x229:
         gimmick = new (__FILE__ "(263)") CGimmickAcid(parent);
         break;
     case 0x22a:
-        gimmick = new (__FILE__ "(267)") CGimmickPinokio(parent);
+        gimmick = new (__FILE__ "(267)") CGimmickBossIsLand(parent);
         break;
     case 0x352:
         gimmick = new (__FILE__ "(275)") CGimmickShip(parent);
@@ -574,19 +574,19 @@ CEntity* CEntityFactory::createGimmick(INT inRsrcID, CTask* inParent, void* inEx
         gimmick = new (__FILE__ "(794)") CGimmickWindowLid(parent);
         break;
     case 0x423:
-        gimmick = new (__FILE__ "(798)") CGimmick100Acre01Bush(parent);
+        gimmick = new (__FILE__ "(798)") CGimmick100AcreBBWall(parent);
         break;
     case 0x424:
         gimmick = new (__FILE__ "(801)") CGimmickChasePoo(parent);
         break;
     case 0x435:
-        gimmick = new (__FILE__ "(804)") CGimmick100Acre02Veg(parent);
+        gimmick = new (__FILE__ "(804)") CGimmick100Acre01Bush(parent);
         break;
     case 0x442 ... 0x443:
-        gimmick = new (__FILE__ "(808)") CGimmick100Acre02Coll(parent);
+        gimmick = new (__FILE__ "(808)") CGimmick100Acre02Veg(parent);
         break;
     case 0x444:
-        gimmick = new (__FILE__ "(811)") CGimmick100AcreBBWall(parent);
+        gimmick = new (__FILE__ "(811)") CGimmick100Acre02Coll(parent);
         break;
     default:
         gimmick = new (__FILE__ "(815)") CSampleGimmick(parent);

@@ -209,6 +209,8 @@ def main() -> None:
     parser.add_argument("--elf", type=Path, help="ELF to put on the disc (default: the build output)")
     parser.add_argument("--out", type=Path, help="output image (default: build/<VERSION>/<VERSION>.iso)")
     parser.add_argument("--fresh", action="store_true", help="copy the original image again instead of patching the last output")
+    parser.add_argument("--shifted", action="store_true",
+                        help="the ELF is a shifted link (docs/port-step1-shiftable.md): don't compare its image")
     args = parser.parse_args()
 
     cfg_dir = ROOT / "config" / args.version
@@ -216,12 +218,16 @@ def main() -> None:
     build_cfg = yaml.safe_load((cfg_dir / "build.yaml").read_text(encoding="utf-8"))
     isos = sorted((ROOT / "iso").glob("*.iso"))
     original_iso = args.iso or (isos[0] if len(isos) == 1 else sys.exit(f"error: pass --iso; found {isos}"))
-    built_elf = args.elf or ROOT / opts["elf_path"]
-    out_iso = args.out or ROOT / opts["build_path"] / f"{args.version}.iso"
+    built_elf = ROOT / args.elf if args.elf else ROOT / opts["elf_path"]  # relative paths: from the repo root
+    out_iso = ROOT / args.out if args.out else ROOT / opts["build_path"] / f"{args.version}.iso"
     boot_copy = out_iso.with_suffix(".boot.elf")
 
     boot_elf(built_elf, boot_copy)
-    compare_images(ROOT / build_cfg["elf"], boot_copy)
+    if args.shifted:
+        print("loadable image: NOT compared - a shifted build (docs/port-step1-shiftable.md) differs from the "
+              "original by design; tools/shiftcheck.py checks it against the matching build")
+    else:
+        compare_images(ROOT / build_cfg["elf"], boot_copy)
     new_elf = boot_copy.read_bytes()
 
     # Locations come from the untouched original, so repeated runs can patch the same output again.
