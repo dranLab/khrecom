@@ -481,3 +481,55 @@ Seventeenth batch (2026-11-11): **549 units from source in retail**, 151 functio
 - Helpers (build/, scratch): `wrap_lines.py FILE A-B ...` (line-neutral KH_DEBUG wrapping, multi-line statements as
   one call), `khcheck.py FILES` (KH_DEBUG/KH_RELEASE calls whose parentheses don't close on their line),
   `calls.sh <unit> <function>` (call targets ours vs retail by name).
+
+### Unattended run 2026-11-11 (night): 576 -> 601 units (user: "work through the rest of the plan unattended")
+
+Decisions taken alone (revisit as needed):
+
+13. (decision) `config/<VERSION>/unit_starts.manual.txt`: data starts measured by hand, each with its evidence;
+    `split_version.py` applies them with `unit_starts.txt`, `retail_units.py scan` prefers them to its votes. Used for
+    data-only units (pppfunctbl's .rodata), units still in assembly whose data begins before their first named
+    symbol (CardBattle, HumanBoss, LockOnManager, VSME: BattleEnemy.h's file-local statics come first), and votes that
+    split or pick the wrong copy (libpad2, thread, CreateGimmick, CreateEnemy).
+14. (decision) `!unit` lines in sources.txt keep a unit in assembly; `switch` honours them. CollMap is excluded: 16
+    zero bytes between CollBody's and CollMap's retail .rodata that neither object produces.
+15. (decision) Where the beta's assert read a pointer right after storing it, retail issues the store first; the
+    store (or the later global load) goes through `_ref()` with a `MATCH:` note (TaskMan initialize, DecknameEdit,
+    EffectMan, PlayerDRiku). Both builds match with it.
+16. (decision) The beta's build stamp before libgcc's frame.c data ("EEDO 2008/10/01 ...") is absent in retail:
+    `#ifndef KH_RETAIL`, and lib/src/gcc/frame gets `-DKH_RETAIL` in the retail build.yaml.
+
+Done besides: VramMan (`_allocSub`'s name parameter and the dump), TaskMan (debug play speed and stepping; the play
+speed call takes the raw frame lag), PackMan (`_checkDmaTag` is an assert helper; ZBUF stores chained, as the line
+markers and the ref show), MSStream (retail's ring buffer uses absolute counters), Memoca (debug save type, tests and
+unformat; retail's card titles "Re:CoM System Data"), FifoFpl (release checks; `getValidActiveBlock` ends in one
+ternary, which also matches the beta's single marker line), 2DMan (trace buffer), SaveLoadUI (update limit), partMng
+(retail computes texture/CLUT addresses with one formula; debugDpdCheckShapeData), Card, AttackMotion, Heartless,
+GameWork, CreateEnemy (its placeholder header string returned instead of traced: retail keeps the string),
+MapEnemyManager and GimmickCarry (getters that are class inlines, weak in the beta as well), ChatMan (retail adds an
+empty `main` override), PlaySpeedCtrl, dlmalloc (debug allocation API), SoundMan (`_getBgmName_withID` exists in
+retail, unnamed), libpad2, thread, frame, sddrv_ee (bind wait 0x10000).
+
+Tools: `split_version.py` unifies anonymous-namespace suffixes inside mangled type names; `ee_asm_compat.py`'s linkonce
+drop stops at the next `.globl`; `configure.py` takes a non-reference version's label address from its symbol file
+(`cardDataTbl_00474480` is the beta's address); `retail_units.py try` pairs retail-only weak copies at their symbol
+and unresolved functions by their offset in the unit; `verify` stops at a DLL-table failure or a repeated culprit
+(it had switched innocent units back ten times).
+
+Lessons: read the whole `verify` log (it may switch a unit back and still end "OK"); a variant test must check that
+it compiled (an edit that drops a brace scores 0 differences).
+
+Open, with what was tried:
+- The `""` of `CTask::getDebugInfo()` (retail): FrecFont, TriangleIK and SoundMan don't have it at Task.h's position
+  in retail, ~50 other units do (an experiment returning a Task.cpp array broke those). Most likely these three don't
+  include Task.h in the original; needs header evidence.
+- Register/scheduling ties, no lever found yet: Avatar RotateAvatarMain (this vs vRot), Game setupWorld (this vs
+  nState), SaveLoadUI's constructor (spill slots), GimmickManager DecideGimmickCard_PossibleNoCheck, JiminyMemo (3),
+  MSStream threadStream (`bTrayOpened` as li 1 + movn), Model getTexParam (retail copies the hoisted VRAM loads),
+  PathData getNearPath, LightUnit _calc (spill slots), CtdMan _sprintf, BattleEnemy makeCard, PlayerCamera (3),
+  WorldCard (2), the CPoolList constructors (MessageManager, LockOnManager), HumanBoss (3), CardBattle (3),
+  BattleEnemyManager (3), SceneInfo (5), CardRevolver (2).
+- Retail restructured: MainApp (_mainLoop, _warmReset), VSME (execExt2Code/execExt3Code), HeapMan, PlayerManager,
+  BattleCard, Entity, MapEnemy, ShadowModel, PlayerControl, pppDrawShapeX, pppPart, SaveLoadUtil.
+- Units without retail code: DebugMenu, DebugWindow, DebugWindowTBL, CollDisp, KisEnemy, System/Debug, DebugWork,
+  DebugPathData, vprintf, vsprintf.
