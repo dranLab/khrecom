@@ -350,6 +350,8 @@ System/Math3D .rodata 0x003FF948 0xc
 System/Memoca .bss 0x0043B240 0x6c0
 System/Memoca .rodata 0x004008A0 0x440
 System/Movie/AudioDec .data 0x0033B118 0x4
+System/Movie/MSStream .bss 0x005AE340 0x1048
+System/Movie/MSStream .data 0x0033B120 0x8
 System/Movie/MSVideo .rodata 0x00405580 0xa0
 System/Movie/Movie .bss 0x005AE300 0x24
 System/Movie/Movie .data 0x0033B11C 0x4

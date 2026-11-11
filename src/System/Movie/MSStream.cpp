@@ -167,17 +167,17 @@ static void threadStream(void* p) {
             nErrCnt = 0;
         } else {
             TRACE_USER(TGOTO, "stream read error... %d\n", r);
-            if (r < -1) {
-                if (r < -3) {
-                    nErrCnt++;
-                    bTrayOpened = nErrCnt >= 2;
-                } else {
-                    bTrayOpened = TRUE;
-                }
+            if (r < -1 && r > -4) { /* MATCH: the beta's markers: both tests on one line (427), TRUE (432), one count and test (434-435); retail's registers need this form */
+
+
+                bTrayOpened = TRUE;
             } else {
+
                 nErrCnt++;
-                bTrayOpened = nErrCnt >= 2;
+                if (nErrCnt >= 2) bTrayOpened = TRUE; else bTrayOpened = FALSE;
             }
+
+
             if (bTrayOpened) {
                 CFileIO::setTrayOpened();
                 s_nMssThreadStat = 2;
@@ -242,3 +242,4 @@ static UINT _readStream(void* pOutBuf) {
     return size;
 }
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .data

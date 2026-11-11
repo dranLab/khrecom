@@ -454,6 +454,7 @@ System/MainTaskFactory
 System/Math3D
 System/Memoca
 System/Movie/AudioDec
+System/Movie/MSStream
 System/Movie/MSVideo
 System/Movie/Movie
 System/Movie/MovieFiles

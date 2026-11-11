@@ -974,7 +974,7 @@ INT CCardBattle::testBreakingCard(UINT inPlayer) {
     INT iPointE = m_iPoint[_ENEMY];
     if (!iPointE) return 0;
     if (iPointE < iPoint) {
-        TRACE("CCardBattle::testBreakingCard \x81\xa6pCB->isPlayingCardStandNow==OK! \x81\xa6No.2779 \x91\xce\x8f\x88" "4\n");
+        TRACE("CCardBattle::testBreakingCard \x81\xa6pCB->isPlayingCardStandNow==OK! \x81\xa6No.2779 \x91\xce\x8f\x88" "4\n"); KH_RELEASE(__asm__ volatile("");) /* MATCH: retail keeps this arm branchy (if-conversion blocked) where the trace was */
         return 2;
     }
     return 0;

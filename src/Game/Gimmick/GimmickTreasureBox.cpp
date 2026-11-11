@@ -167,9 +167,9 @@ BOOL CGimmickTreasureBox::CardMaxWarningMain() {
         CWCP2.pos.setPoint(-1, -1);
 
         CWCP2.cyobiPos.setPoint(0x80, 0x100);
-        CWCP2.ctdID = 0x400000;
-        CWCP2.pCwswp = NULL;
+        CWCP2.pCwswp = NULL; /* MATCH: the beta's marker order (287 pCwswp, 289 ctdID) */
         CWCP2.waitFrame = 0;
+        CWCP2.ctdID = 0x400000;
         ATEL::CChatMan::instance().reqCommand(0x405, &CWCP2, 0);
         ATEL::CChatMan::instance().reqCommand(0x3EA, NULL, 0);
         CSound::playSE(3, -1, 0x40);
