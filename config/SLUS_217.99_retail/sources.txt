@@ -15,12 +15,14 @@ Form/Menu/SaveLoadCtrl
 Form/Menu/TechHelp
 Form/Menu/TitleReportDllStarter
 Form/Menu/WorldSelect
+Form/Menu/WorldWarp
 Form/SystemMessage
 Game/AtWater
 Game/Atel/Atel
 Game/Atel/AtelBlur
 Game/Atel/AtelCamera
 Game/Atel/AtelCrossFade
+Game/Atel/AtelFog
 Game/Atel/AtelTutorial
 Game/Atel/CameraMan
 Game/Atel/EventTrap
@@ -55,6 +57,7 @@ Game/Enemy/EnemyFatbandit
 Game/Enemy/EnemyGargoyle
 Game/Enemy/EnemyGreenrequiem
 Game/Enemy/EnemyLargebody
+Game/Enemy/EnemyLoudness
 Game/Enemy/EnemyNeoshadow
 Game/Enemy/EnemyPirate
 Game/Enemy/EnemyPowerwild
@@ -403,6 +406,7 @@ System/Movie/AudioDec
 System/Movie/MovieFiles
 System/Movie/MovieScript
 System/PadHandler
+System/PadIO
 System/Rnd
 System/RootTask
 System/Spad

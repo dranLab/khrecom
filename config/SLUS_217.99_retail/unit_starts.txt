@@ -20,6 +20,8 @@ Form/Menu/TechHelp .rodata 0x0042F320 0x120
 Form/Menu/TitleReportDllStarter .data 0x00340380 0x4
 Form/Menu/TitleReportDllStarter .rodata 0x0042F440 0x50
 Form/Menu/WorldSelect .rodata 0x004307B0 0x13a0
+Form/Menu/WorldWarp .data 0x00340388 0x38
+Form/Menu/WorldWarp .rodata 0x00431B50 0x1320
 Form/SystemMessage .bss 0x005BF3C0 0x100
 Form/SystemMessage .data 0x0033F9E0 0x14
 Form/SystemMessage .rodata 0x00424050 0x30
@@ -28,6 +30,7 @@ Game/Atel/Atel .data 0x0033C3F0 0x8
 Game/Atel/Atel .rodata 0x004107F0 0x80
 Game/Atel/AtelBlur .data 0x0033C3F8 0x4
 Game/Atel/AtelCrossFade .data 0x0033C3FC 0x4
+Game/Atel/AtelFog .data 0x0033C400 0x4
 Game/Atel/AtelTutorial .rodata 0x00410890 0x18
 Game/Atel/CameraMan .data 0x0033C404 0x8
 Game/Atel/CameraMan .rodata 0x004109C0 0x30
@@ -72,6 +75,8 @@ Game/Enemy/EnemyGreenrequiem .data 0x0033F0C0 0x14
 Game/Enemy/EnemyGreenrequiem .rodata 0x0041E7E8 0x160
 Game/Enemy/EnemyLargebody .data 0x0033F0E8 0x18
 Game/Enemy/EnemyLargebody .rodata 0x0041E998 0x60
+Game/Enemy/EnemyLoudness .data 0x0033F100 0x24
+Game/Enemy/EnemyLoudness .rodata 0x0041E9F8 0xe0
 Game/Enemy/EnemyNeoshadow .data 0x0033F124 0x30
 Game/Enemy/EnemyNeoshadow .rodata 0x0041EAE0 0x100
 Game/Enemy/EnemyPirate .data 0x0033F154 0x28
@@ -247,6 +252,7 @@ System/Movie/AudioDec .data 0x0033B118 0x4
 System/Movie/MovieFiles .bss 0x005AE324 0x8
 System/Movie/MovieScript .bss 0x005AE32C 0x4
 System/Movie/MovieScript .rodata 0x00405568 0x18
+System/PadIO .bss 0x0043B900 0x240
 System/Rnd .bss 0x00438710 0x9c0
 System/Rnd .data 0x003328C8 0x10
 System/RootTask .data 0x0033B360 0x4

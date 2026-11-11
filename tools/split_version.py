@@ -202,6 +202,7 @@ def main() -> None:
     data_lines[".bss"] = [x for x in data_lines[".bss"] if x[0] < common_start] + [(common_start, "bss", "common")]
     # exact starts measured from compiled units (tools/retail_units.py switch): config/<VERSION>/unit_starts.txt
     starts_file = cfg / "unit_starts.txt"
+    pushed = set()  # (section, unit) moved to the end of the unit before it: yields when it lands on a real start
     if starts_file.exists():
         recorded = []
         for line in starts_file.read_text(encoding="utf-8").splitlines():
@@ -223,6 +224,7 @@ def main() -> None:
             nxt = rows[k + 1][0] if k + 1 < len(rows) else None
             if nxt is not None and nxt < addr + size and (rows[k + 1][2], section) not in fixed:
                 rows[k + 1] = (addr + size,) + rows[k + 1][1:]  # it started inside this unit: it follows it
+                pushed.add((section, rows[k + 1][2]))
                 nxt = addr + size
             align = min(128, nxt & -nxt) if nxt else 1  # configure.py gives an object its start's alignment
             gap_data = nxt and section != ".bss" and any(
@@ -241,9 +243,12 @@ def main() -> None:
                     rows.insert(k + 1, (addr + size, section.lstrip("."), between[0]))
                 elif (rows[k + 1][2], section) not in fixed:
                     rows[k + 1] = (addr + size,) + rows[k + 1][1:]
+                    pushed.add((section, rows[k + 1][2]))
             data_lines[section] = rows
     for s in (".data", ".rodata", ".bss"):
-        rows = sorted(data_lines[s])
+        # at one address a unit that starts there wins over one pushed there (retail: WorldWarp's .data takes the
+        # beta's __FRAME_BEGIN__0 bytes, which then lands on __do_global_dtors' start with nothing of its own)
+        rows = sorted(data_lines[s], key=lambda x: (x[0], (s, x[2]) in pushed, x[1], x[2]))
         if any(a == sec[s][0] for a, _, _ in rows) and rows[0][0] < sec[s][0]:
             # a library unit placed by offset before the section start is not in this version when another unit
             # starts the section (retail: lib/nodebug/_GLOBAL__F_0build.cpp's frame data; System/Coord's .data

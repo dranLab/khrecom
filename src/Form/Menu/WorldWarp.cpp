@@ -88,7 +88,11 @@ using namespace D2;
 /* Stand-in: in menuMain the original keeps m_pWinConfirm in $v1 next to CCtdMan::getText's instance check (the
  * local allocator gave the instance pointer $v0 first); the construct that did it is not known. Pinning the
  * pointer to $3 through an empty asm reproduces the allocation and emits nothing. */
+#ifdef KH_RETAIL
+#define PIN_V1(p) (p) /* retail: the plain pointer matches, only the debug build needs the pin */
+#else
 #define PIN_V1(p) ({ register typeof(p) _p asm("$3") = (p); __asm__("" : "+r"(_p)); _p; })
+#endif
 
 #line 333
 
@@ -849,3 +853,4 @@ INT CWorldWarp::changeWorldIdx(INT nSelect, BOOL bChangeOnly) {
 }
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

@@ -23,10 +23,10 @@ CAtelFog* CAtelFog::m_pInstance = NULL;
 
 CAtelFog::CAtelFog(CTask* pParent) : CTask(pParent, 0x8000) {
     m_nState = 0;
-    m_MinAnim._fTarget = 0;
-    m_MinAnim._fcalBuf = 0;
     m_MaxAnim._fTarget = 255.0f;
     m_MaxAnim._fcalBuf = 255.0f;
+    m_MinAnim._fTarget = 0;
+    m_MinAnim._fcalBuf = 0;
     TRACE("CAtelFog Create\n");
 }
 
@@ -225,3 +225,4 @@ INT CAtelFog::AnimMin() {
 } // namespace ATEL
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data

@@ -450,10 +450,10 @@ void CJoyPad2::init() {
     void* addr;
 
     nPort = getPortID();
+    addr = s_PadBuf[nPort];
     m_socket.option = 2;
     m_socket.port = nPort != 0;
     m_socket.slot = 0;
-    addr = s_PadBuf[nPort];
     m_nSocket = scePad2CreateSocket(&m_socket, addr);
     if (m_nSocket < 0) {
         TRACE("\x83p\x83" "b\x83h%d\x8f\x89\x8a\xfa\x89\xbb\x8e\xb8\x94s\n", nPort);
@@ -709,3 +709,4 @@ KH_DEBUG(void CRobotPad::setPadMode(INT nRobotPad) {)
 KH_DEBUG(})
 
 // SOURCE DATA: .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss
