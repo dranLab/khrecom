@@ -2,6 +2,7 @@
 # tools/retail_units.py switch/verify. One fnmatch pattern per line, `!` excludes.
 Form/Menu/BtlReportCtrl
 Form/Menu/GameOver
+Form/Menu/JMemoFlag
 Form/Menu/LevelUp
 Form/Menu/Menu
 Form/Menu/MenuModel
@@ -407,6 +408,7 @@ System/Graphic/ScreenMask
 System/Graphic/StrPrim
 System/Graphic/TexAnm
 System/Graphic/TexCtrl
+System/Graphic/TexUtil
 System/LinkedBuf
 System/MainTaskFactory
 System/Movie/AudioDec
@@ -418,6 +420,7 @@ System/PadHandler
 System/PadIO
 System/Rnd
 System/RootTask
+System/RsrcData
 System/Spad
 System/Task
 System/Thread

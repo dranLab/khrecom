@@ -293,9 +293,9 @@ BOOL CRsrcGroupTagList::delTagOpt(INT nFlag) {
     return bRes;
 }
 
-void CRsrcGroupTagList::dumpTag() const {
-    RSRC_SJ_FOREACH(CRsrcGroupTag, pEntry, *this) TRACE("[%d]", pEntry->getID());
-}
+KH_DEBUG(void CRsrcGroupTagList::dumpTag() const {)
+    KH_DEBUG(RSRC_SJ_FOREACH(CRsrcGroupTag, pEntry, *this) TRACE("[%d]", pEntry->getID());)
+KH_DEBUG(})
 
 void CRsrcData::init(const RsrcInfo& info) {
     if (info._pszName) {
@@ -827,8 +827,8 @@ void CRsrcDLL::_setupDLL() {
         TRACE_COL(_TTY_PURPLE, "DLL\x83" "C\x83\x93\x83X\x83g\x81[\x83\x8b\x83G\x83\x89\x81[\n");
         return;
     }
-    BYTE* pFree = (BYTE*)snDllGetFreeMemory(pDll);
-    TRACE_COL(_TTY_BLUE, "DLL \"%s\"(%07X:size=%d) is Loaded... (free-address:%07X)\n", m_szName, pDll, getDataSize(), pFree);
+    KH_DEBUG(BYTE* pFree = (BYTE*)snDllGetFreeMemory(pDll);)
+    KH_DEBUG(TRACE_COL(_TTY_BLUE, "DLL \"%s\"(%07X:size=%d) is Loaded... (free-address:%07X)\n", m_szName, pDll, getDataSize(), pFree);)
 }
 
 void CRsrcMEP::_setupMEP() { m_pMEP = (MEP_DATA*)getRsrcData(); }
@@ -955,3 +955,4 @@ void CRsrcALF::_setupALF() {
 }
 
 // SOURCE DATA: .rodata
+// SOURCE DATA SLUS_217.99_retail: .rodata

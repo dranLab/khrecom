@@ -1615,1299 +1615,1300 @@ USHORT CJiminyMemoFlag::getDownEnemyNum(INT inIndex) {
     return getMCWork().DownEnemyNum[inIndex];
 }
 
-void CJiminyMemoFlag::setDebugNewFlag(BOOL inIsSet, INT inIndex) {
-    if (inIsSet) {
-        setContentFlag(inIndex, 1, 6);
-    } else {
-        setContentFlag(inIndex, 0, 7);
-    }
-}
+KH_DEBUG(void CJiminyMemoFlag::setDebugNewFlag(BOOL inIsSet, INT inIndex) {)
+    KH_DEBUG(if (inIsSet) {)
+        KH_DEBUG(setContentFlag(inIndex, 1, 6);)
+    KH_DEBUG(} else {)
+        KH_DEBUG(setContentFlag(inIndex, 0, 7);)
+    KH_DEBUG(})
+KH_DEBUG(})
 
-void CJiminyMemoFlag::setDebugTalkFlag(BOOL inIsSet, INT inIndex) {
-    if (inIsSet) {
-        setContentFlag(inIndex, 16, 0);
-    } else {
-        setContentFlag(inIndex, 0, 16);
-    }
-}
-void CJiminyMemoFlag::debugEvent(BOOL inIsSet, INT inPlayer, INT inEvent, INT inParam0, INT inParam1) {
-    if (inPlayer == 0) {
-        switch (inEvent) {
-        case 0: debugSoraEvent_Default(inIsSet); break;
-        case 1: debugSoraEvent_WorldClear(inIsSet, inParam0); break;
-        case 2: debugSoraEvent_FloorClear(inIsSet, inParam0); break;
-        case 3: debugSoraEvent_DownEnemy(inIsSet, inParam0, inParam1); break;
-        case 4: debugSoraEvent_GetCard(inIsSet, inParam0); break;
-        case 5: debugSoraEvent_MoogleShop(inIsSet); break;
-        case 6: debugSoraEvent_Monstro(inIsSet); break;
-        case 8: debugSoraEvent_Minigame(inIsSet, inParam0); break;
-        case 9: debugSoraEvent_100AcreExit(inIsSet); break;
-        case 10: debugSoraEvent_100AcreTalk(inIsSet, inParam0); break;
-        case 11: debugSoraEvent_All(1); break;
-        case 12: debugSoraEvent_All(4); break;
-        case 13: debugSoraEvent_All(0); break;
-        }
-    } else {
-        switch (inEvent) {
-        case 0: debugRikuEvent_Default(inIsSet); break;
-        case 1: debugRikuEvent_WorldClear(inIsSet, inParam0); break;
-        case 2: debugRikuEvent_FloorClear(inIsSet, inParam0); break;
-        case 3: debugRikuEvent_DownEnemy(inIsSet, inParam0, inParam1); break;
-        case 4: debugRikuEvent_GetCard(inIsSet, inParam0); break;
-        case 11: debugRikuEvent_All(1); break;
-        case 12: debugRikuEvent_All(4); break;
-        case 13: debugRikuEvent_All(0); break;
-        }
-    }
-}
-void CJiminyMemoFlag::debugSoraEvent_Default(BOOL inIsSet) {
-    setDebugNewFlag(inIsSet, 23);
-    setDebugNewFlag(inIsSet, 24);
-    setDebugNewFlag(inIsSet, 25);
-    setDebugNewFlag(inIsSet, 26);
-    setDebugNewFlag(inIsSet, 28);
-    setDebugNewFlag(inIsSet, 29);
-    setDebugNewFlag(inIsSet, 183);
-}
-void CJiminyMemoFlag::debugSoraEvent_WorldClear(BOOL inIsSet, INT inWorldId) {
-    switch (inWorldId) {
-    case 1:
-        setDebugNewFlag(inIsSet, 4);
-        setDebugNewFlag(inIsSet, 41);
-        setDebugNewFlag(inIsSet, 42);
-        setDebugNewFlag(inIsSet, 43);
-        setDebugNewFlag(inIsSet, 44);
-        break;
-    case 2:
-        setDebugNewFlag(inIsSet, 7);
-        setDebugNewFlag(inIsSet, 55);
-        setDebugNewFlag(inIsSet, 56);
-        setDebugNewFlag(inIsSet, 57);
-        setDebugNewFlag(inIsSet, 58);
-        setDebugNewFlag(inIsSet, 59);
-        setDebugNewFlag(inIsSet, 60);
-        break;
-    case 3:
-        setDebugNewFlag(inIsSet, 6);
-        setDebugNewFlag(inIsSet, 51);
-        setDebugNewFlag(inIsSet, 52);
-        setDebugNewFlag(inIsSet, 53);
-        setDebugNewFlag(inIsSet, 54);
-        break;
-    case 4:
-        setDebugNewFlag(inIsSet, 5);
-        setDebugNewFlag(inIsSet, 45);
-        setDebugNewFlag(inIsSet, 46);
-        setDebugNewFlag(inIsSet, 47);
-        setDebugNewFlag(inIsSet, 48);
-        setDebugNewFlag(inIsSet, 49);
-        setDebugNewFlag(inIsSet, 50);
-        break;
-    case 5:
-        setDebugNewFlag(inIsSet, 9);
-        setDebugNewFlag(inIsSet, 68);
-        setDebugNewFlag(inIsSet, 69);
-        break;
-    case 6:
-        setDebugNewFlag(inIsSet, 8);
-        setDebugNewFlag(inIsSet, 61);
-        setDebugNewFlag(inIsSet, 62);
-        setDebugNewFlag(inIsSet, 63);
-        setDebugNewFlag(inIsSet, 64);
-        setDebugNewFlag(inIsSet, 65);
-        setDebugNewFlag(inIsSet, 66);
-        setDebugNewFlag(inIsSet, 67);
-        break;
-    case 7:
-        setDebugNewFlag(inIsSet, 10);
-        setDebugNewFlag(inIsSet, 70);
-        setDebugNewFlag(inIsSet, 71);
-        setDebugNewFlag(inIsSet, 72);
-        setDebugNewFlag(inIsSet, 73);
-        break;
-    case 8:
-        setDebugNewFlag(inIsSet, 11);
-        setDebugNewFlag(inIsSet, 74);
-        setDebugNewFlag(inIsSet, 75);
-        setDebugNewFlag(inIsSet, 76);
-        setDebugNewFlag(inIsSet, 77);
-        break;
-    case 9:
-        setDebugNewFlag(inIsSet, 12);
-        setDebugNewFlag(inIsSet, 78);
-        setDebugNewFlag(inIsSet, 79);
-        setDebugNewFlag(inIsSet, 80);
-        setDebugNewFlag(inIsSet, 81);
-        break;
-    case 10:
-        setDebugNewFlag(inIsSet, 13);
-        setDebugNewFlag(inIsSet, 82);
-        break;
-    case 11:
-        setDebugNewFlag(inIsSet, 14);
-        break;
-    case 12:
-        setDebugNewFlag(inIsSet, 15);
-        setDebugNewFlag(inIsSet, 89);
-        setDebugNewFlag(inIsSet, 90);
-        setDebugNewFlag(inIsSet, 91);
-        break;
-    case 13:
-        setDebugNewFlag(inIsSet, 16);
-        break;
-    }
-}
-void CJiminyMemoFlag::debugSoraEvent_FloorClear(BOOL inIsSet, INT inFloor) {
-    switch (inFloor) {
-    case 1:
-        setDebugNewFlag(inIsSet, 0);
-        setDebugNewFlag(inIsSet, 33);
-        break;
-    case 6:
-        setDebugNewFlag(inIsSet, 1);
-        setDebugNewFlag(inIsSet, 35);
-        break;
-    case 9:
-        setDebugNewFlag(inIsSet, 2);
-        break;
-    case 10:
-        setDebugNewFlag(inIsSet, 32);
-        break;
-    case 12:
-        setDebugNewFlag(inIsSet, 3);
-        setDebugNewFlag(inIsSet, 30);
-        setDebugNewFlag(inIsSet, 31);
-        break;
-    case 13:
-        setDebugNewFlag(inIsSet, 34);
-        break;
-    }
-}
-void CJiminyMemoFlag::debugSoraEvent_Monstro(BOOL inIsSet) {
-    setDebugNewFlag(inIsSet, 399);
-}
-void CJiminyMemoFlag::debugSoraEvent_DownEnemy(BOOL inIsSet, INT inKind, INT inNum) {
-    INT charaFlag = -1;
-    INT enemyFlag = -1;
-    switch (inKind) {
-    case 0:
-        break;
-    case 1:
-        charaFlag = 92;
-        enemyFlag = 0;
-        break;
-    case 2:
-        charaFlag = 93;
-        enemyFlag = 1;
-        break;
-    case 3:
-        charaFlag = 95;
-        enemyFlag = 3;
-        break;
-    case 4:
-        charaFlag = 96;
-        enemyFlag = 4;
-        break;
-    case 5:
-        charaFlag = 97;
-        enemyFlag = 5;
-        break;
-    case 6:
-        charaFlag = 98;
-        enemyFlag = 6;
-        break;
-    case 7:
-        charaFlag = 99;
-        enemyFlag = 7;
-        break;
-    case 8:
-        charaFlag = 100;
-        enemyFlag = 8;
-        break;
-    case 9:
-        charaFlag = 94;
-        enemyFlag = 2;
-        break;
-    case 10:
-        charaFlag = 103;
-        enemyFlag = 11;
-        break;
-    case 11:
-        charaFlag = 102;
-        enemyFlag = 10;
-        break;
-    case 12:
-        charaFlag = 109;
-        enemyFlag = 17;
-        break;
-    case 13:
-        charaFlag = 110;
-        enemyFlag = 18;
-        break;
-    case 14:
-        charaFlag = 105;
-        enemyFlag = 13;
-        break;
-    case 15:
-        charaFlag = 101;
-        enemyFlag = 9;
-        break;
-    case 16:
-        charaFlag = 118;
-        enemyFlag = 26;
-        break;
-    case 17:
-        charaFlag = 119;
-        enemyFlag = 27;
-        break;
-    case 18:
-        charaFlag = 106;
-        enemyFlag = 14;
-        break;
-    case 19:
-        charaFlag = 107;
-        enemyFlag = 15;
-        break;
-    case 20:
-        charaFlag = 108;
-        enemyFlag = 16;
-        break;
-    case 21:
-        charaFlag = 111;
-        enemyFlag = 19;
-        break;
-    case 22:
-        charaFlag = 112;
-        enemyFlag = 20;
-        break;
-    case 23:
-        charaFlag = 113;
-        enemyFlag = 21;
-        break;
-    case 24:
-        charaFlag = 115;
-        enemyFlag = 23;
-        break;
-    case 25:
-        charaFlag = 116;
-        enemyFlag = 24;
-        break;
-    case 26:
-        charaFlag = 114;
-        enemyFlag = 22;
-        break;
-    case 27:
-        charaFlag = 117;
-        enemyFlag = 25;
-        break;
-    case 28:
-        charaFlag = 104;
-        enemyFlag = 12;
-        break;
-    case 29:
-        charaFlag = 121;
-        enemyFlag = 29;
-        break;
-    case 30:
-        charaFlag = 122;
-        enemyFlag = 30;
-        break;
-    case 31:
-        charaFlag = 120;
-        enemyFlag = 28;
-        break;
-    case 100:
-        charaFlag = 123;
-        enemyFlag = 31;
-        break;
-    case 108:
-        charaFlag = 124;
-        enemyFlag = 32;
-        break;
-    case 103:
-        charaFlag = 125;
-        enemyFlag = 33;
-        break;
-    case 113:
-        charaFlag = 126;
-        enemyFlag = 34;
-        break;
-    default:
-        debugSoraEvent_13BossBattle(inIsSet, inKind);
-        break;
-    }
-    if (charaFlag >= 0) {
-        setDebugNewFlag(inIsSet, charaFlag);
-        if (enemyFlag >= 0 && inNum > 0) setDownEnemyNum(enemyFlag, inNum);
-    }
-}
-void CJiminyMemoFlag::debugSoraEvent_GetCard(BOOL inIsSet, INT inKind) {
-    INT cardFlag = -1;
-    INT charaFlag = -1;
-    switch ((BYTE)inKind) {
-    case 1:
-        cardFlag = 183;
-        break;
-    case 2:
-        cardFlag = 184;
-        break;
-    case 3:
-        cardFlag = 185;
-        break;
-    case 4:
-        cardFlag = 186;
-        break;
-    case 5:
-        cardFlag = 187;
-        break;
-    case 6:
-        cardFlag = 188;
-        break;
-    case 7:
-        cardFlag = 189;
-        break;
-    case 8:
-        cardFlag = 190;
-        break;
-    case 9:
-        cardFlag = 191;
-        break;
-    case 10:
-        cardFlag = 192;
-        break;
-    case 11:
-        cardFlag = 193;
-        break;
-    case 12:
-        cardFlag = 194;
-        break;
-    case 13:
-        cardFlag = 195;
-        break;
-    case 14:
-        cardFlag = 196;
-        break;
-    case 15:
-        cardFlag = 197;
-        break;
-    case 16:
-        cardFlag = 198;
-        break;
-    case 17:
-        cardFlag = 199;
-        break;
-    case 19:
-        cardFlag = 200;
-        break;
-    case 20:
-        cardFlag = 201;
-        break;
-    case 21:
-        cardFlag = 202;
-        break;
-    case 22:
-        cardFlag = 203;
-        break;
-    case 23:
-        cardFlag = 204;
-        break;
-    case 24:
-        cardFlag = 205;
-        break;
-    case 26:
-        cardFlag = 206;
-        break;
-    case 27:
-        cardFlag = 207;
-        break;
-    case 28:
-        cardFlag = 208;
-        break;
-    case 29:
-        cardFlag = 209;
-        break;
-    case 30:
-        cardFlag = 210;
-        break;
-    case 31:
-        cardFlag = 211;
-        break;
-    case 32:
-        cardFlag = 212;
-        break;
-    case 35:
-        cardFlag = 213;
-        charaFlag = 36;
-        break;
-    case 36:
-        cardFlag = 214;
-        break;
-    case 37:
-        cardFlag = 215;
-        charaFlag = 38;
-        break;
-    case 38:
-        cardFlag = 216;
-        charaFlag = 37;
-        break;
-    case 39:
-        cardFlag = 217;
-        break;
-    case 40:
-        cardFlag = 218;
-        charaFlag = 39;
-        break;
-    case 41:
-        cardFlag = 219;
-        break;
-    case 42:
-        cardFlag = 220;
-        break;
-    case 43:
-        cardFlag = 221;
-        break;
-    case 44:
-        cardFlag = 222;
-        break;
-    case 45:
-        cardFlag = 223;
-        break;
-    case 46:
-        cardFlag = 224;
-        break;
-    case 47:
-        cardFlag = 225;
-        break;
-    case 48:
-        cardFlag = 226;
-        break;
-    case 49:
-        cardFlag = 227;
-        break;
-    case 50:
-        cardFlag = 228;
-        break;
-    case 51:
-        cardFlag = 229;
-        break;
-    case 52:
-        cardFlag = 230;
-        break;
-    case 53:
-        cardFlag = 231;
-        break;
-    case 54:
-        cardFlag = 232;
-        break;
-    case 55:
-        cardFlag = 233;
-        break;
-    case 57:
-        cardFlag = 234;
-        break;
-    case 68:
-        cardFlag = 235;
-        break;
-    case 69:
-        cardFlag = 236;
-        break;
-    case 75:
-        cardFlag = 237;
-        break;
-    case 76:
-        cardFlag = 238;
-        break;
-    case 70:
-        cardFlag = 239;
-        break;
-    case 79:
-        cardFlag = 240;
-        break;
-    case 82:
-        cardFlag = 241;
-        break;
-    case 78:
-        cardFlag = 242;
-        break;
-    case 87:
-        cardFlag = 243;
-        break;
-    case 71:
-        cardFlag = 244;
-        break;
-    case 72:
-        cardFlag = 245;
-        break;
-    case 73:
-        cardFlag = 246;
-        break;
-    case 74:
-        cardFlag = 247;
-        break;
-    case 92:
-        cardFlag = 248;
-        break;
-    case 77:
-        cardFlag = 249;
-        break;
-    case 80:
-        cardFlag = 250;
-        break;
-    case 85:
-        cardFlag = 251;
-        break;
-    case 88:
-        cardFlag = 252;
-        break;
-    case 86:
-        cardFlag = 253;
-        break;
-    case 81:
-        cardFlag = 254;
-        break;
-    case 84:
-        cardFlag = 255;
-        break;
-    case 83:
-        cardFlag = 256;
-        break;
-    case 91:
-        cardFlag = 257;
-        break;
-    case 90:
-        cardFlag = 258;
-        break;
-    case 94:
-        cardFlag = 259;
-        break;
-    case 95:
-        cardFlag = 260;
-        break;
-    case 96:
-        cardFlag = 261;
-        break;
-    case 97:
-        cardFlag = 262;
-        break;
-    case 98:
-        cardFlag = 263;
-        break;
-    case 93:
-        cardFlag = 264;
-        break;
-    case 99:
-        cardFlag = 265;
-        break;
-    case 104:
-        cardFlag = 266;
-        break;
-    case 101:
-        cardFlag = 267;
-        break;
-    case 105:
-        cardFlag = 268;
-        break;
-    case 107:
-        cardFlag = 269;
-        break;
-    case 106:
-        cardFlag = 270;
-        break;
-    case 100:
-        cardFlag = 271;
-        break;
-    case 108:
-        cardFlag = 272;
-        break;
-    case 109:
-        cardFlag = 273;
-        break;
-    case 102:
-        cardFlag = 274;
-        break;
-    case 110:
-        cardFlag = 275;
-        break;
-    case 103:
-        cardFlag = 276;
-        break;
-    case 116:
-        cardFlag = 277;
-        break;
-    case 118:
-        cardFlag = 278;
-        break;
-    case 119:
-        cardFlag = 279;
-        break;
-    case 120:
-        cardFlag = 280;
-        break;
-    case 113:
-        cardFlag = 281;
-        break;
-    case 115:
-        cardFlag = 282;
-        break;
-    case 117:
-        cardFlag = 283;
-        break;
-    case 121:
-        cardFlag = 284;
-        break;
-    case 111:
-        cardFlag = 285;
-        break;
-    case 122:
-        cardFlag = 286;
-        break;
-    case 123:
-        cardFlag = 287;
-        break;
-    case 114:
-        cardFlag = 288;
-        break;
-    case 112:
-        cardFlag = 289;
-        break;
-    case 124:
-        cardFlag = 290;
-        break;
-    case 125:
-        cardFlag = 333;
-        break;
-    case 126:
-        cardFlag = 334;
-        break;
-    case 161:
-        cardFlag = 291;
-        break;
-    case 162:
-        cardFlag = 292;
-        break;
-    case 163:
-        cardFlag = 293;
-        break;
-    case 164:
-        cardFlag = 294;
-        break;
-    case 165:
-        cardFlag = 295;
-        break;
-    case 166:
-        cardFlag = 296;
-        break;
-    case 167:
-        cardFlag = 297;
-        break;
-    case 168:
-        cardFlag = 298;
-        break;
-    case 169:
-        cardFlag = 299;
-        break;
-    case 170:
-        cardFlag = 300;
-        break;
-    case 171:
-        cardFlag = 301;
-        break;
-    case 172:
-        cardFlag = 302;
-        break;
-    case 173:
-        cardFlag = 303;
-        break;
-    case 174:
-        cardFlag = 304;
-        break;
-    case 175:
-        cardFlag = 305;
-        break;
-    case 176:
-        cardFlag = 306;
-        break;
-    case 177:
-        cardFlag = 307;
-        break;
-    case 178:
-        cardFlag = 308;
-        break;
-    case 179:
-        cardFlag = 309;
-        break;
-    case 180:
-        cardFlag = 310;
-        break;
-    case 181:
-        cardFlag = 311;
-        break;
-    case 182:
-        cardFlag = 312;
-        break;
-    case 183:
-        cardFlag = 313;
-        break;
-    case 184:
-        cardFlag = 314;
-        break;
-    case 189:
-        cardFlag = 315;
-        break;
-    case 186:
-        cardFlag = 316;
-        break;
-    case 187:
-        cardFlag = 317;
-        break;
-    case 188:
-        cardFlag = 318;
-        break;
-    case 185:
-        cardFlag = 319;
-        break;
-    case 190:
-        cardFlag = 320;
-        break;
-    case 191:
-        cardFlag = 321;
-        break;
-    case 192:
-        cardFlag = 322;
-        break;
-    case 193:
-        cardFlag = 323;
-        break;
-    case 194:
-        cardFlag = 324;
-        break;
-    case 195:
-        cardFlag = 325;
-        break;
-    case 196:
-        cardFlag = 326;
-        break;
-    case 197:
-        cardFlag = 327;
-        break;
-    case 198:
-        cardFlag = 328;
-        break;
-    case 199:
-        cardFlag = 329;
-        break;
-    case 200:
-        cardFlag = 330;
-        break;
-    case 201:
-        cardFlag = 331;
-        break;
-    case 58:
-    case 59:
-    case 60:
-    case 61:
-    case 62:
-    case 63:
-    case 64:
-    case 65:
-        cardFlag = 332;
-        break;
-    }
-    if (cardFlag >= 0) setDebugNewFlag(inIsSet, cardFlag);
-    if (charaFlag >= 0) setDebugNewFlag(inIsSet, charaFlag);
-}
-void CJiminyMemoFlag::debugSoraEvent_13BossBattle(BOOL inIsSet, INT inKind) {
-    INT bossFlag = -1;
-    switch (inKind) {
-    case 112:
-        bossFlag = 32;
-        break;
-    case 116:
-        bossFlag = 33;
-        break;
-    case 117:
-        bossFlag = 34;
-        break;
-    case 115:
-        bossFlag = 35;
-        break;
-    }
-    if (bossFlag >= 0) setDebugNewFlag(inIsSet, bossFlag);
-}
+KH_DEBUG(void CJiminyMemoFlag::setDebugTalkFlag(BOOL inIsSet, INT inIndex) {)
+    KH_DEBUG(if (inIsSet) {)
+        KH_DEBUG(setContentFlag(inIndex, 16, 0);)
+    KH_DEBUG(} else {)
+        KH_DEBUG(setContentFlag(inIndex, 0, 16);)
+    KH_DEBUG(})
+KH_DEBUG(})
+KH_DEBUG(void CJiminyMemoFlag::debugEvent(BOOL inIsSet, INT inPlayer, INT inEvent, INT inParam0, INT inParam1) {)
+    KH_DEBUG(if (inPlayer == 0) {)
+        KH_DEBUG(switch (inEvent) {)
+        KH_DEBUG(case 0: debugSoraEvent_Default(inIsSet); break;)
+        KH_DEBUG(case 1: debugSoraEvent_WorldClear(inIsSet, inParam0); break;)
+        KH_DEBUG(case 2: debugSoraEvent_FloorClear(inIsSet, inParam0); break;)
+        KH_DEBUG(case 3: debugSoraEvent_DownEnemy(inIsSet, inParam0, inParam1); break;)
+        KH_DEBUG(case 4: debugSoraEvent_GetCard(inIsSet, inParam0); break;)
+        KH_DEBUG(case 5: debugSoraEvent_MoogleShop(inIsSet); break;)
+        KH_DEBUG(case 6: debugSoraEvent_Monstro(inIsSet); break;)
+        KH_DEBUG(case 8: debugSoraEvent_Minigame(inIsSet, inParam0); break;)
+        KH_DEBUG(case 9: debugSoraEvent_100AcreExit(inIsSet); break;)
+        KH_DEBUG(case 10: debugSoraEvent_100AcreTalk(inIsSet, inParam0); break;)
+        KH_DEBUG(case 11: debugSoraEvent_All(1); break;)
+        KH_DEBUG(case 12: debugSoraEvent_All(4); break;)
+        KH_DEBUG(case 13: debugSoraEvent_All(0); break;)
+        KH_DEBUG(})
+    KH_DEBUG(} else {)
+        KH_DEBUG(switch (inEvent) {)
+        KH_DEBUG(case 0: debugRikuEvent_Default(inIsSet); break;)
+        KH_DEBUG(case 1: debugRikuEvent_WorldClear(inIsSet, inParam0); break;)
+        KH_DEBUG(case 2: debugRikuEvent_FloorClear(inIsSet, inParam0); break;)
+        KH_DEBUG(case 3: debugRikuEvent_DownEnemy(inIsSet, inParam0, inParam1); break;)
+        KH_DEBUG(case 4: debugRikuEvent_GetCard(inIsSet, inParam0); break;)
+        KH_DEBUG(case 11: debugRikuEvent_All(1); break;)
+        KH_DEBUG(case 12: debugRikuEvent_All(4); break;)
+        KH_DEBUG(case 13: debugRikuEvent_All(0); break;)
+        KH_DEBUG(})
+    KH_DEBUG(})
+KH_DEBUG(})
+KH_DEBUG(void CJiminyMemoFlag::debugSoraEvent_Default(BOOL inIsSet) {)
+    KH_DEBUG(setDebugNewFlag(inIsSet, 23);)
+    KH_DEBUG(setDebugNewFlag(inIsSet, 24);)
+    KH_DEBUG(setDebugNewFlag(inIsSet, 25);)
+    KH_DEBUG(setDebugNewFlag(inIsSet, 26);)
+    KH_DEBUG(setDebugNewFlag(inIsSet, 28);)
+    KH_DEBUG(setDebugNewFlag(inIsSet, 29);)
+    KH_DEBUG(setDebugNewFlag(inIsSet, 183);)
+KH_DEBUG(})
+KH_DEBUG(void CJiminyMemoFlag::debugSoraEvent_WorldClear(BOOL inIsSet, INT inWorldId) {)
+    KH_DEBUG(switch (inWorldId) {)
+    KH_DEBUG(case 1:)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 4);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 41);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 42);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 43);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 44);)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 2:)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 7);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 55);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 56);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 57);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 58);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 59);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 60);)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 3:)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 6);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 51);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 52);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 53);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 54);)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 4:)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 5);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 45);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 46);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 47);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 48);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 49);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 50);)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 5:)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 9);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 68);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 69);)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 6:)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 8);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 61);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 62);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 63);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 64);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 65);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 66);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 67);)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 7:)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 10);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 70);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 71);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 72);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 73);)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 8:)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 11);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 74);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 75);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 76);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 77);)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 9:)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 12);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 78);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 79);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 80);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 81);)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 10:)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 13);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 82);)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 11:)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 14);)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 12:)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 15);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 89);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 90);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 91);)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 13:)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 16);)
+        KH_DEBUG(break;)
+    KH_DEBUG(})
+KH_DEBUG(})
+KH_DEBUG(void CJiminyMemoFlag::debugSoraEvent_FloorClear(BOOL inIsSet, INT inFloor) {)
+    KH_DEBUG(switch (inFloor) {)
+    KH_DEBUG(case 1:)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 0);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 33);)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 6:)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 1);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 35);)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 9:)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 2);)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 10:)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 32);)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 12:)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 3);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 30);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 31);)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 13:)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 34);)
+        KH_DEBUG(break;)
+    KH_DEBUG(})
+KH_DEBUG(})
+KH_DEBUG(void CJiminyMemoFlag::debugSoraEvent_Monstro(BOOL inIsSet) {)
+    KH_DEBUG(setDebugNewFlag(inIsSet, 399);)
+KH_DEBUG(})
+KH_DEBUG(void CJiminyMemoFlag::debugSoraEvent_DownEnemy(BOOL inIsSet, INT inKind, INT inNum) {)
+    KH_DEBUG(INT charaFlag = -1;)
+    KH_DEBUG(INT enemyFlag = -1;)
+    KH_DEBUG(switch (inKind) {)
+    KH_DEBUG(case 0:)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 1:)
+        KH_DEBUG(charaFlag = 92;)
+        KH_DEBUG(enemyFlag = 0;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 2:)
+        KH_DEBUG(charaFlag = 93;)
+        KH_DEBUG(enemyFlag = 1;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 3:)
+        KH_DEBUG(charaFlag = 95;)
+        KH_DEBUG(enemyFlag = 3;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 4:)
+        KH_DEBUG(charaFlag = 96;)
+        KH_DEBUG(enemyFlag = 4;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 5:)
+        KH_DEBUG(charaFlag = 97;)
+        KH_DEBUG(enemyFlag = 5;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 6:)
+        KH_DEBUG(charaFlag = 98;)
+        KH_DEBUG(enemyFlag = 6;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 7:)
+        KH_DEBUG(charaFlag = 99;)
+        KH_DEBUG(enemyFlag = 7;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 8:)
+        KH_DEBUG(charaFlag = 100;)
+        KH_DEBUG(enemyFlag = 8;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 9:)
+        KH_DEBUG(charaFlag = 94;)
+        KH_DEBUG(enemyFlag = 2;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 10:)
+        KH_DEBUG(charaFlag = 103;)
+        KH_DEBUG(enemyFlag = 11;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 11:)
+        KH_DEBUG(charaFlag = 102;)
+        KH_DEBUG(enemyFlag = 10;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 12:)
+        KH_DEBUG(charaFlag = 109;)
+        KH_DEBUG(enemyFlag = 17;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 13:)
+        KH_DEBUG(charaFlag = 110;)
+        KH_DEBUG(enemyFlag = 18;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 14:)
+        KH_DEBUG(charaFlag = 105;)
+        KH_DEBUG(enemyFlag = 13;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 15:)
+        KH_DEBUG(charaFlag = 101;)
+        KH_DEBUG(enemyFlag = 9;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 16:)
+        KH_DEBUG(charaFlag = 118;)
+        KH_DEBUG(enemyFlag = 26;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 17:)
+        KH_DEBUG(charaFlag = 119;)
+        KH_DEBUG(enemyFlag = 27;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 18:)
+        KH_DEBUG(charaFlag = 106;)
+        KH_DEBUG(enemyFlag = 14;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 19:)
+        KH_DEBUG(charaFlag = 107;)
+        KH_DEBUG(enemyFlag = 15;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 20:)
+        KH_DEBUG(charaFlag = 108;)
+        KH_DEBUG(enemyFlag = 16;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 21:)
+        KH_DEBUG(charaFlag = 111;)
+        KH_DEBUG(enemyFlag = 19;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 22:)
+        KH_DEBUG(charaFlag = 112;)
+        KH_DEBUG(enemyFlag = 20;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 23:)
+        KH_DEBUG(charaFlag = 113;)
+        KH_DEBUG(enemyFlag = 21;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 24:)
+        KH_DEBUG(charaFlag = 115;)
+        KH_DEBUG(enemyFlag = 23;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 25:)
+        KH_DEBUG(charaFlag = 116;)
+        KH_DEBUG(enemyFlag = 24;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 26:)
+        KH_DEBUG(charaFlag = 114;)
+        KH_DEBUG(enemyFlag = 22;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 27:)
+        KH_DEBUG(charaFlag = 117;)
+        KH_DEBUG(enemyFlag = 25;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 28:)
+        KH_DEBUG(charaFlag = 104;)
+        KH_DEBUG(enemyFlag = 12;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 29:)
+        KH_DEBUG(charaFlag = 121;)
+        KH_DEBUG(enemyFlag = 29;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 30:)
+        KH_DEBUG(charaFlag = 122;)
+        KH_DEBUG(enemyFlag = 30;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 31:)
+        KH_DEBUG(charaFlag = 120;)
+        KH_DEBUG(enemyFlag = 28;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 100:)
+        KH_DEBUG(charaFlag = 123;)
+        KH_DEBUG(enemyFlag = 31;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 108:)
+        KH_DEBUG(charaFlag = 124;)
+        KH_DEBUG(enemyFlag = 32;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 103:)
+        KH_DEBUG(charaFlag = 125;)
+        KH_DEBUG(enemyFlag = 33;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 113:)
+        KH_DEBUG(charaFlag = 126;)
+        KH_DEBUG(enemyFlag = 34;)
+        KH_DEBUG(break;)
+    KH_DEBUG(default:)
+        KH_DEBUG(debugSoraEvent_13BossBattle(inIsSet, inKind);)
+        KH_DEBUG(break;)
+    KH_DEBUG(})
+    KH_DEBUG(if (charaFlag >= 0) {)
+        KH_DEBUG(setDebugNewFlag(inIsSet, charaFlag);)
+        KH_DEBUG(if (enemyFlag >= 0 && inNum > 0) setDownEnemyNum(enemyFlag, inNum);)
+    KH_DEBUG(})
+KH_DEBUG(})
+KH_DEBUG(void CJiminyMemoFlag::debugSoraEvent_GetCard(BOOL inIsSet, INT inKind) {)
+    KH_DEBUG(INT cardFlag = -1;)
+    KH_DEBUG(INT charaFlag = -1;)
+    KH_DEBUG(switch ((BYTE)inKind) {)
+    KH_DEBUG(case 1:)
+        KH_DEBUG(cardFlag = 183;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 2:)
+        KH_DEBUG(cardFlag = 184;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 3:)
+        KH_DEBUG(cardFlag = 185;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 4:)
+        KH_DEBUG(cardFlag = 186;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 5:)
+        KH_DEBUG(cardFlag = 187;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 6:)
+        KH_DEBUG(cardFlag = 188;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 7:)
+        KH_DEBUG(cardFlag = 189;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 8:)
+        KH_DEBUG(cardFlag = 190;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 9:)
+        KH_DEBUG(cardFlag = 191;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 10:)
+        KH_DEBUG(cardFlag = 192;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 11:)
+        KH_DEBUG(cardFlag = 193;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 12:)
+        KH_DEBUG(cardFlag = 194;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 13:)
+        KH_DEBUG(cardFlag = 195;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 14:)
+        KH_DEBUG(cardFlag = 196;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 15:)
+        KH_DEBUG(cardFlag = 197;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 16:)
+        KH_DEBUG(cardFlag = 198;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 17:)
+        KH_DEBUG(cardFlag = 199;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 19:)
+        KH_DEBUG(cardFlag = 200;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 20:)
+        KH_DEBUG(cardFlag = 201;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 21:)
+        KH_DEBUG(cardFlag = 202;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 22:)
+        KH_DEBUG(cardFlag = 203;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 23:)
+        KH_DEBUG(cardFlag = 204;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 24:)
+        KH_DEBUG(cardFlag = 205;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 26:)
+        KH_DEBUG(cardFlag = 206;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 27:)
+        KH_DEBUG(cardFlag = 207;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 28:)
+        KH_DEBUG(cardFlag = 208;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 29:)
+        KH_DEBUG(cardFlag = 209;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 30:)
+        KH_DEBUG(cardFlag = 210;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 31:)
+        KH_DEBUG(cardFlag = 211;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 32:)
+        KH_DEBUG(cardFlag = 212;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 35:)
+        KH_DEBUG(cardFlag = 213;)
+        KH_DEBUG(charaFlag = 36;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 36:)
+        KH_DEBUG(cardFlag = 214;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 37:)
+        KH_DEBUG(cardFlag = 215;)
+        KH_DEBUG(charaFlag = 38;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 38:)
+        KH_DEBUG(cardFlag = 216;)
+        KH_DEBUG(charaFlag = 37;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 39:)
+        KH_DEBUG(cardFlag = 217;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 40:)
+        KH_DEBUG(cardFlag = 218;)
+        KH_DEBUG(charaFlag = 39;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 41:)
+        KH_DEBUG(cardFlag = 219;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 42:)
+        KH_DEBUG(cardFlag = 220;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 43:)
+        KH_DEBUG(cardFlag = 221;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 44:)
+        KH_DEBUG(cardFlag = 222;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 45:)
+        KH_DEBUG(cardFlag = 223;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 46:)
+        KH_DEBUG(cardFlag = 224;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 47:)
+        KH_DEBUG(cardFlag = 225;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 48:)
+        KH_DEBUG(cardFlag = 226;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 49:)
+        KH_DEBUG(cardFlag = 227;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 50:)
+        KH_DEBUG(cardFlag = 228;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 51:)
+        KH_DEBUG(cardFlag = 229;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 52:)
+        KH_DEBUG(cardFlag = 230;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 53:)
+        KH_DEBUG(cardFlag = 231;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 54:)
+        KH_DEBUG(cardFlag = 232;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 55:)
+        KH_DEBUG(cardFlag = 233;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 57:)
+        KH_DEBUG(cardFlag = 234;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 68:)
+        KH_DEBUG(cardFlag = 235;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 69:)
+        KH_DEBUG(cardFlag = 236;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 75:)
+        KH_DEBUG(cardFlag = 237;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 76:)
+        KH_DEBUG(cardFlag = 238;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 70:)
+        KH_DEBUG(cardFlag = 239;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 79:)
+        KH_DEBUG(cardFlag = 240;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 82:)
+        KH_DEBUG(cardFlag = 241;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 78:)
+        KH_DEBUG(cardFlag = 242;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 87:)
+        KH_DEBUG(cardFlag = 243;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 71:)
+        KH_DEBUG(cardFlag = 244;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 72:)
+        KH_DEBUG(cardFlag = 245;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 73:)
+        KH_DEBUG(cardFlag = 246;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 74:)
+        KH_DEBUG(cardFlag = 247;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 92:)
+        KH_DEBUG(cardFlag = 248;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 77:)
+        KH_DEBUG(cardFlag = 249;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 80:)
+        KH_DEBUG(cardFlag = 250;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 85:)
+        KH_DEBUG(cardFlag = 251;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 88:)
+        KH_DEBUG(cardFlag = 252;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 86:)
+        KH_DEBUG(cardFlag = 253;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 81:)
+        KH_DEBUG(cardFlag = 254;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 84:)
+        KH_DEBUG(cardFlag = 255;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 83:)
+        KH_DEBUG(cardFlag = 256;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 91:)
+        KH_DEBUG(cardFlag = 257;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 90:)
+        KH_DEBUG(cardFlag = 258;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 94:)
+        KH_DEBUG(cardFlag = 259;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 95:)
+        KH_DEBUG(cardFlag = 260;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 96:)
+        KH_DEBUG(cardFlag = 261;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 97:)
+        KH_DEBUG(cardFlag = 262;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 98:)
+        KH_DEBUG(cardFlag = 263;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 93:)
+        KH_DEBUG(cardFlag = 264;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 99:)
+        KH_DEBUG(cardFlag = 265;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 104:)
+        KH_DEBUG(cardFlag = 266;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 101:)
+        KH_DEBUG(cardFlag = 267;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 105:)
+        KH_DEBUG(cardFlag = 268;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 107:)
+        KH_DEBUG(cardFlag = 269;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 106:)
+        KH_DEBUG(cardFlag = 270;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 100:)
+        KH_DEBUG(cardFlag = 271;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 108:)
+        KH_DEBUG(cardFlag = 272;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 109:)
+        KH_DEBUG(cardFlag = 273;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 102:)
+        KH_DEBUG(cardFlag = 274;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 110:)
+        KH_DEBUG(cardFlag = 275;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 103:)
+        KH_DEBUG(cardFlag = 276;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 116:)
+        KH_DEBUG(cardFlag = 277;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 118:)
+        KH_DEBUG(cardFlag = 278;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 119:)
+        KH_DEBUG(cardFlag = 279;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 120:)
+        KH_DEBUG(cardFlag = 280;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 113:)
+        KH_DEBUG(cardFlag = 281;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 115:)
+        KH_DEBUG(cardFlag = 282;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 117:)
+        KH_DEBUG(cardFlag = 283;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 121:)
+        KH_DEBUG(cardFlag = 284;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 111:)
+        KH_DEBUG(cardFlag = 285;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 122:)
+        KH_DEBUG(cardFlag = 286;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 123:)
+        KH_DEBUG(cardFlag = 287;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 114:)
+        KH_DEBUG(cardFlag = 288;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 112:)
+        KH_DEBUG(cardFlag = 289;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 124:)
+        KH_DEBUG(cardFlag = 290;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 125:)
+        KH_DEBUG(cardFlag = 333;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 126:)
+        KH_DEBUG(cardFlag = 334;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 161:)
+        KH_DEBUG(cardFlag = 291;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 162:)
+        KH_DEBUG(cardFlag = 292;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 163:)
+        KH_DEBUG(cardFlag = 293;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 164:)
+        KH_DEBUG(cardFlag = 294;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 165:)
+        KH_DEBUG(cardFlag = 295;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 166:)
+        KH_DEBUG(cardFlag = 296;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 167:)
+        KH_DEBUG(cardFlag = 297;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 168:)
+        KH_DEBUG(cardFlag = 298;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 169:)
+        KH_DEBUG(cardFlag = 299;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 170:)
+        KH_DEBUG(cardFlag = 300;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 171:)
+        KH_DEBUG(cardFlag = 301;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 172:)
+        KH_DEBUG(cardFlag = 302;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 173:)
+        KH_DEBUG(cardFlag = 303;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 174:)
+        KH_DEBUG(cardFlag = 304;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 175:)
+        KH_DEBUG(cardFlag = 305;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 176:)
+        KH_DEBUG(cardFlag = 306;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 177:)
+        KH_DEBUG(cardFlag = 307;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 178:)
+        KH_DEBUG(cardFlag = 308;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 179:)
+        KH_DEBUG(cardFlag = 309;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 180:)
+        KH_DEBUG(cardFlag = 310;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 181:)
+        KH_DEBUG(cardFlag = 311;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 182:)
+        KH_DEBUG(cardFlag = 312;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 183:)
+        KH_DEBUG(cardFlag = 313;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 184:)
+        KH_DEBUG(cardFlag = 314;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 189:)
+        KH_DEBUG(cardFlag = 315;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 186:)
+        KH_DEBUG(cardFlag = 316;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 187:)
+        KH_DEBUG(cardFlag = 317;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 188:)
+        KH_DEBUG(cardFlag = 318;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 185:)
+        KH_DEBUG(cardFlag = 319;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 190:)
+        KH_DEBUG(cardFlag = 320;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 191:)
+        KH_DEBUG(cardFlag = 321;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 192:)
+        KH_DEBUG(cardFlag = 322;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 193:)
+        KH_DEBUG(cardFlag = 323;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 194:)
+        KH_DEBUG(cardFlag = 324;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 195:)
+        KH_DEBUG(cardFlag = 325;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 196:)
+        KH_DEBUG(cardFlag = 326;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 197:)
+        KH_DEBUG(cardFlag = 327;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 198:)
+        KH_DEBUG(cardFlag = 328;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 199:)
+        KH_DEBUG(cardFlag = 329;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 200:)
+        KH_DEBUG(cardFlag = 330;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 201:)
+        KH_DEBUG(cardFlag = 331;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 58:)
+    KH_DEBUG(case 59:)
+    KH_DEBUG(case 60:)
+    KH_DEBUG(case 61:)
+    KH_DEBUG(case 62:)
+    KH_DEBUG(case 63:)
+    KH_DEBUG(case 64:)
+    KH_DEBUG(case 65:)
+        KH_DEBUG(cardFlag = 332;)
+        KH_DEBUG(break;)
+    KH_DEBUG(})
+    KH_DEBUG(if (cardFlag >= 0) setDebugNewFlag(inIsSet, cardFlag);)
+    KH_DEBUG(if (charaFlag >= 0) setDebugNewFlag(inIsSet, charaFlag);)
+KH_DEBUG(})
+KH_DEBUG(void CJiminyMemoFlag::debugSoraEvent_13BossBattle(BOOL inIsSet, INT inKind) {)
+    KH_DEBUG(INT bossFlag = -1;)
+    KH_DEBUG(switch (inKind) {)
+    KH_DEBUG(case 112:)
+        KH_DEBUG(bossFlag = 32;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 116:)
+        KH_DEBUG(bossFlag = 33;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 117:)
+        KH_DEBUG(bossFlag = 34;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 115:)
+        KH_DEBUG(bossFlag = 35;)
+        KH_DEBUG(break;)
+    KH_DEBUG(})
+    KH_DEBUG(if (bossFlag >= 0) setDebugNewFlag(inIsSet, bossFlag);)
+KH_DEBUG(})
 
-void CJiminyMemoFlag::debugSoraEvent_Minigame(BOOL inIsSet, INT inKind) {
-    switch (inKind) {
-    case 0:
-        setDebugNewFlag(inIsSet, 398);
-        break;
-    case 1:
-        setDebugNewFlag(inIsSet, 394);
-        break;
-    case 2:
-        setDebugNewFlag(inIsSet, 397);
-        break;
-    case 3:
-        setDebugNewFlag(inIsSet, 395);
-        break;
-    case 4:
-        setDebugNewFlag(inIsSet, 396);
-        break;
-    }
-}
+KH_DEBUG(void CJiminyMemoFlag::debugSoraEvent_Minigame(BOOL inIsSet, INT inKind) {)
+    KH_DEBUG(switch (inKind) {)
+    KH_DEBUG(case 0:)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 398);)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 1:)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 394);)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 2:)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 397);)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 3:)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 395);)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 4:)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 396);)
+        KH_DEBUG(break;)
+    KH_DEBUG(})
+KH_DEBUG(})
 
-void CJiminyMemoFlag::debugSoraEvent_MoogleShop(BOOL inIsSet) {
-    setDebugNewFlag(inIsSet, 40);
-}
+KH_DEBUG(void CJiminyMemoFlag::debugSoraEvent_MoogleShop(BOOL inIsSet) {)
+    KH_DEBUG(setDebugNewFlag(inIsSet, 40);)
+KH_DEBUG(})
 
-void CJiminyMemoFlag::debugSoraEvent_100AcreExit(BOOL inIsSet) {
-    setDebugNewFlag(isContentTalk(83), 83);
-    setDebugNewFlag(isContentTalk(84), 84);
-    setDebugNewFlag(isContentTalk(85), 85);
-    setDebugNewFlag(isContentTalk(86), 86);
-    setDebugNewFlag(isContentTalk(87), 87);
-    setDebugNewFlag(isContentTalk(88), 88);
-}
+KH_DEBUG(void CJiminyMemoFlag::debugSoraEvent_100AcreExit(BOOL inIsSet) {)
+    KH_DEBUG(setDebugNewFlag(isContentTalk(83), 83);)
+    KH_DEBUG(setDebugNewFlag(isContentTalk(84), 84);)
+    KH_DEBUG(setDebugNewFlag(isContentTalk(85), 85);)
+    KH_DEBUG(setDebugNewFlag(isContentTalk(86), 86);)
+    KH_DEBUG(setDebugNewFlag(isContentTalk(87), 87);)
+    KH_DEBUG(setDebugNewFlag(isContentTalk(88), 88);)
+KH_DEBUG(})
 
-void CJiminyMemoFlag::debugSoraEvent_100AcreTalk(BOOL inIsSet, INT inKind) {
-    switch (inKind) {
-    case 11:
-        setDebugTalkFlag(inIsSet, 83);
-        break;
-    case 12:
-        setDebugTalkFlag(inIsSet, 84);
-        break;
-    case 13:
-        setDebugTalkFlag(inIsSet, 85);
-        break;
-    case 14:
-        setDebugTalkFlag(inIsSet, 86);
-        break;
-    case 15:
-        setDebugTalkFlag(inIsSet, 87);
-        break;
-    case 16:
-        setDebugTalkFlag(inIsSet, 88);
-        break;
-    }
-}
+KH_DEBUG(void CJiminyMemoFlag::debugSoraEvent_100AcreTalk(BOOL inIsSet, INT inKind) {)
+    KH_DEBUG(switch (inKind) {)
+    KH_DEBUG(case 11:)
+        KH_DEBUG(setDebugTalkFlag(inIsSet, 83);)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 12:)
+        KH_DEBUG(setDebugTalkFlag(inIsSet, 84);)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 13:)
+        KH_DEBUG(setDebugTalkFlag(inIsSet, 85);)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 14:)
+        KH_DEBUG(setDebugTalkFlag(inIsSet, 86);)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 15:)
+        KH_DEBUG(setDebugTalkFlag(inIsSet, 87);)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 16:)
+        KH_DEBUG(setDebugTalkFlag(inIsSet, 88);)
+        KH_DEBUG(break;)
+    KH_DEBUG(})
+KH_DEBUG(})
 
-void CJiminyMemoFlag::debugRikuEvent_Default(BOOL inIsSet) {
-    setDebugNewFlag(inIsSet, 127);
-    setDebugNewFlag(inIsSet, 129);
-    setDebugNewFlag(inIsSet, 131);
-    setDebugNewFlag(inIsSet, 132);
-    setDebugNewFlag(inIsSet, 136);
-    setDebugNewFlag(inIsSet, 17);
-    setDebugNewFlag(inIsSet, 335);
-}
-void CJiminyMemoFlag::debugRikuEvent_WorldClear(BOOL inIsSet, INT inWorldId) {
-    switch (inWorldId) {
-    case 2:
-        setDebugNewFlag(inIsSet, 144);
-        break;
-    case 3:
-        setDebugNewFlag(inIsSet, 146);
-        break;
-    case 6:
-        setDebugNewFlag(inIsSet, 128);
-        setDebugNewFlag(inIsSet, 130);
-        setDebugNewFlag(inIsSet, 147);
-        break;
-    case 7:
-        setDebugNewFlag(inIsSet, 145);
-        break;
-    case 8:
-        setDebugNewFlag(inIsSet, 148);
-        break;
-    case 9:
-        setDebugNewFlag(inIsSet, 143);
-        break;
-    case 1:
-    case 13:
-        break;
-    }
-}
-void CJiminyMemoFlag::debugRikuEvent_FloorClear(BOOL inIsSet, INT inFloor) {
-    switch (inFloor) {
-    case -12:
-        setDebugNewFlag(inIsSet, 18);
-        break;
-    case -10:
-        setDebugNewFlag(inIsSet, 137);
-        break;
-    case -8:
-        setDebugNewFlag(inIsSet, 19);
-        setDebugNewFlag(inIsSet, 134);
-        break;
-    case -4:
-        setDebugNewFlag(inIsSet, 20);
-        setDebugNewFlag(inIsSet, 138);
-        break;
-    case -3:
-        setDebugNewFlag(inIsSet, 21);
-        setDebugNewFlag(inIsSet, 139);
-        break;
-    case -2:
-        setDebugNewFlag(inIsSet, 22);
-        setDebugNewFlag(inIsSet, 133);
-        setDebugNewFlag(inIsSet, 140);
-        setDebugNewFlag(inIsSet, 141);
-        setDebugNewFlag(inIsSet, 142);
-        setDebugNewFlag(inIsSet, 135);
-        break;
-    case -1:
-        break;
-    }
-}
-void CJiminyMemoFlag::debugRikuEvent_DownEnemy(BOOL inIsSet, INT inKind, INT inNum) {
-    INT charaFlag = -1;
-    INT enemyFlag = -1;
-    switch (inKind) {
-    case 0:
-    case 16:
-        break;
-    case 1:
-        charaFlag = 149;
-        enemyFlag = 35;
-        break;
-    case 2:
-        charaFlag = 150;
-        enemyFlag = 36;
-        break;
-    case 3:
-        charaFlag = 152;
-        enemyFlag = 38;
-        break;
-    case 4:
-        charaFlag = 153;
-        enemyFlag = 39;
-        break;
-    case 5:
-        charaFlag = 154;
-        enemyFlag = 40;
-        break;
-    case 6:
-        charaFlag = 155;
-        enemyFlag = 41;
-        break;
-    case 7:
-        charaFlag = 156;
-        enemyFlag = 42;
-        break;
-    case 8:
-        charaFlag = 157;
-        enemyFlag = 43;
-        break;
-    case 9:
-        charaFlag = 151;
-        enemyFlag = 37;
-        break;
-    case 10:
-        charaFlag = 160;
-        enemyFlag = 46;
-        break;
-    case 11:
-        charaFlag = 159;
-        enemyFlag = 45;
-        break;
-    case 12:
-        charaFlag = 166;
-        enemyFlag = 52;
-        break;
-    case 13:
-        charaFlag = 167;
-        enemyFlag = 53;
-        break;
-    case 14:
-        charaFlag = 162;
-        enemyFlag = 48;
-        break;
-    case 15:
-        charaFlag = 158;
-        enemyFlag = 44;
-        break;
-    case 17:
-        charaFlag = 175;
-        enemyFlag = 61;
-        break;
-    case 18:
-        charaFlag = 163;
-        enemyFlag = 49;
-        break;
-    case 19:
-        charaFlag = 164;
-        enemyFlag = 50;
-        break;
-    case 20:
-        charaFlag = 165;
-        enemyFlag = 51;
-        break;
-    case 21:
-        charaFlag = 168;
-        enemyFlag = 54;
-        break;
-    case 22:
-        charaFlag = 169;
-        enemyFlag = 55;
-        break;
-    case 23:
-        charaFlag = 170;
-        enemyFlag = 56;
-        break;
-    case 24:
-        charaFlag = 172;
-        enemyFlag = 58;
-        break;
-    case 25:
-        charaFlag = 173;
-        enemyFlag = 59;
-        break;
-    case 26:
-        charaFlag = 171;
-        enemyFlag = 57;
-        break;
-    case 27:
-        charaFlag = 174;
-        enemyFlag = 60;
-        break;
-    case 28:
-        charaFlag = 161;
-        enemyFlag = 47;
-        break;
-    case 29:
-        charaFlag = 177;
-        enemyFlag = 63;
-        break;
-    case 30:
-        charaFlag = 178;
-        enemyFlag = 64;
-        break;
-    case 31:
-        charaFlag = 176;
-        enemyFlag = 62;
-        break;
-    case 100:
-        charaFlag = 179;
-        enemyFlag = 65;
-        break;
-    case 108:
-        charaFlag = 180;
-        enemyFlag = 66;
-        break;
-    case 103:
-        charaFlag = 181;
-        enemyFlag = 67;
-        break;
-    case 113:
-        charaFlag = 182;
-        enemyFlag = 68;
-        break;
-    }
-    if (charaFlag >= 0) {
-        setDebugNewFlag(inIsSet, charaFlag);
-        if (enemyFlag >= 0) setDownEnemyNum(enemyFlag, inNum);
-    }
-}
-void CJiminyMemoFlag::debugRikuEvent_GetCard(BOOL inIsSet, INT inKind) {
-    INT cardFlag = -1;
-    switch ((BYTE)inKind) {
-    case 18:
-        cardFlag = 335;
-        break;
-    case 42:
-        cardFlag = 336;
-        break;
-    case 43:
-        cardFlag = 337;
-        break;
-    case 56:
-        cardFlag = 338;
-        break;
-    case 68:
-        cardFlag = 340;
-        break;
-    case 75:
-        cardFlag = 342;
-        break;
-    case 70:
-        cardFlag = 341;
-        break;
-    case 79:
-        cardFlag = 343;
-        break;
-    case 82:
-        cardFlag = 345;
-        break;
-    case 87:
-        cardFlag = 347;
-        break;
-    case 85:
-        cardFlag = 346;
-        break;
-    case 81:
-        cardFlag = 344;
-        break;
-    case 90:
-        cardFlag = 348;
-        break;
-    case 89:
-        cardFlag = 349;
-        break;
-    case 99:
-        cardFlag = 350;
-        break;
-    case 104:
-        cardFlag = 354;
-        break;
-    case 101:
-        cardFlag = 352;
-        break;
-    case 105:
-        cardFlag = 355;
-        break;
-    case 107:
-        cardFlag = 357;
-        break;
-    case 106:
-        cardFlag = 356;
-        break;
-    case 100:
-        cardFlag = 351;
-        break;
-    case 108:
-        cardFlag = 358;
-        break;
-    case 109:
-        cardFlag = 359;
-        break;
-    case 102:
-        cardFlag = 353;
-        break;
-    case 115:
-        cardFlag = 360;
-        break;
-    case 117:
-        cardFlag = 361;
-        break;
-    case 161:
-        cardFlag = 362;
-        break;
-    case 162:
-        cardFlag = 363;
-        break;
-    case 163:
-        cardFlag = 364;
-        break;
-    case 164:
-        cardFlag = 365;
-        break;
-    case 165:
-        cardFlag = 366;
-        break;
-    case 166:
-        cardFlag = 367;
-        break;
-    case 169:
-        cardFlag = 368;
-        break;
-    case 170:
-        cardFlag = 369;
-        break;
-    case 171:
-        cardFlag = 370;
-        break;
-    case 172:
-        cardFlag = 371;
-        break;
-    case 175:
-        cardFlag = 372;
-        break;
-    case 176:
-        cardFlag = 373;
-        break;
-    case 177:
-        cardFlag = 374;
-        break;
-    case 178:
-        cardFlag = 375;
-        break;
-    case 182:
-        cardFlag = 376;
-        break;
-    case 183:
-        cardFlag = 377;
-        break;
-    case 186:
-        cardFlag = 378;
-        break;
-    case 187:
-        cardFlag = 379;
-        break;
-    case 188:
-        cardFlag = 380;
-        break;
-    case 185:
-        cardFlag = 381;
-        break;
-    case 190:
-        cardFlag = 382;
-        break;
-    case 191:
-        cardFlag = 383;
-        break;
-    case 192:
-        cardFlag = 384;
-        break;
-    case 193:
-        cardFlag = 385;
-        break;
-    case 194:
-        cardFlag = 386;
-        break;
-    case 195:
-        cardFlag = 387;
-        break;
-    case 196:
-        cardFlag = 388;
-        break;
-    case 197:
-        cardFlag = 389;
-        break;
-    case 198:
-        cardFlag = 390;
-        break;
-    case 200:
-        cardFlag = 391;
-        break;
-    case 201:
-        cardFlag = 392;
-        break;
-    case 202:
-        cardFlag = 393;
-        break;
-    case 58:
-    case 59:
-    case 60:
-    case 61:
-    case 62:
-    case 63:
-    case 64:
-    case 65:
-        cardFlag = 339;
-        break;
-    }
-    if (cardFlag >= 0) setDebugNewFlag(inIsSet, cardFlag);
-}
-void CJiminyMemoFlag::debugSoraEvent_All(INT inFlag) {
-    memset(&getMCWork().ViewState[0], inFlag, 17);
-    memset(&getMCWork().ViewState[183], inFlag, 152);
-    memset(&getMCWork().ViewState[23], inFlag, 104);
-    memset(&getMCWork().ViewState[394], inFlag, 6);
-}
+KH_DEBUG(void CJiminyMemoFlag::debugRikuEvent_Default(BOOL inIsSet) {)
+    KH_DEBUG(setDebugNewFlag(inIsSet, 127);)
+    KH_DEBUG(setDebugNewFlag(inIsSet, 129);)
+    KH_DEBUG(setDebugNewFlag(inIsSet, 131);)
+    KH_DEBUG(setDebugNewFlag(inIsSet, 132);)
+    KH_DEBUG(setDebugNewFlag(inIsSet, 136);)
+    KH_DEBUG(setDebugNewFlag(inIsSet, 17);)
+    KH_DEBUG(setDebugNewFlag(inIsSet, 335);)
+KH_DEBUG(})
+KH_DEBUG(void CJiminyMemoFlag::debugRikuEvent_WorldClear(BOOL inIsSet, INT inWorldId) {)
+    KH_DEBUG(switch (inWorldId) {)
+    KH_DEBUG(case 2:)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 144);)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 3:)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 146);)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 6:)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 128);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 130);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 147);)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 7:)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 145);)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 8:)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 148);)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 9:)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 143);)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 1:)
+    KH_DEBUG(case 13:)
+        KH_DEBUG(break;)
+    KH_DEBUG(})
+KH_DEBUG(})
+KH_DEBUG(void CJiminyMemoFlag::debugRikuEvent_FloorClear(BOOL inIsSet, INT inFloor) {)
+    KH_DEBUG(switch (inFloor) {)
+    KH_DEBUG(case -12:)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 18);)
+        KH_DEBUG(break;)
+    KH_DEBUG(case -10:)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 137);)
+        KH_DEBUG(break;)
+    KH_DEBUG(case -8:)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 19);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 134);)
+        KH_DEBUG(break;)
+    KH_DEBUG(case -4:)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 20);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 138);)
+        KH_DEBUG(break;)
+    KH_DEBUG(case -3:)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 21);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 139);)
+        KH_DEBUG(break;)
+    KH_DEBUG(case -2:)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 22);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 133);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 140);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 141);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 142);)
+        KH_DEBUG(setDebugNewFlag(inIsSet, 135);)
+        KH_DEBUG(break;)
+    KH_DEBUG(case -1:)
+        KH_DEBUG(break;)
+    KH_DEBUG(})
+KH_DEBUG(})
+KH_DEBUG(void CJiminyMemoFlag::debugRikuEvent_DownEnemy(BOOL inIsSet, INT inKind, INT inNum) {)
+    KH_DEBUG(INT charaFlag = -1;)
+    KH_DEBUG(INT enemyFlag = -1;)
+    KH_DEBUG(switch (inKind) {)
+    KH_DEBUG(case 0:)
+    KH_DEBUG(case 16:)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 1:)
+        KH_DEBUG(charaFlag = 149;)
+        KH_DEBUG(enemyFlag = 35;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 2:)
+        KH_DEBUG(charaFlag = 150;)
+        KH_DEBUG(enemyFlag = 36;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 3:)
+        KH_DEBUG(charaFlag = 152;)
+        KH_DEBUG(enemyFlag = 38;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 4:)
+        KH_DEBUG(charaFlag = 153;)
+        KH_DEBUG(enemyFlag = 39;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 5:)
+        KH_DEBUG(charaFlag = 154;)
+        KH_DEBUG(enemyFlag = 40;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 6:)
+        KH_DEBUG(charaFlag = 155;)
+        KH_DEBUG(enemyFlag = 41;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 7:)
+        KH_DEBUG(charaFlag = 156;)
+        KH_DEBUG(enemyFlag = 42;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 8:)
+        KH_DEBUG(charaFlag = 157;)
+        KH_DEBUG(enemyFlag = 43;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 9:)
+        KH_DEBUG(charaFlag = 151;)
+        KH_DEBUG(enemyFlag = 37;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 10:)
+        KH_DEBUG(charaFlag = 160;)
+        KH_DEBUG(enemyFlag = 46;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 11:)
+        KH_DEBUG(charaFlag = 159;)
+        KH_DEBUG(enemyFlag = 45;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 12:)
+        KH_DEBUG(charaFlag = 166;)
+        KH_DEBUG(enemyFlag = 52;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 13:)
+        KH_DEBUG(charaFlag = 167;)
+        KH_DEBUG(enemyFlag = 53;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 14:)
+        KH_DEBUG(charaFlag = 162;)
+        KH_DEBUG(enemyFlag = 48;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 15:)
+        KH_DEBUG(charaFlag = 158;)
+        KH_DEBUG(enemyFlag = 44;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 17:)
+        KH_DEBUG(charaFlag = 175;)
+        KH_DEBUG(enemyFlag = 61;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 18:)
+        KH_DEBUG(charaFlag = 163;)
+        KH_DEBUG(enemyFlag = 49;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 19:)
+        KH_DEBUG(charaFlag = 164;)
+        KH_DEBUG(enemyFlag = 50;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 20:)
+        KH_DEBUG(charaFlag = 165;)
+        KH_DEBUG(enemyFlag = 51;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 21:)
+        KH_DEBUG(charaFlag = 168;)
+        KH_DEBUG(enemyFlag = 54;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 22:)
+        KH_DEBUG(charaFlag = 169;)
+        KH_DEBUG(enemyFlag = 55;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 23:)
+        KH_DEBUG(charaFlag = 170;)
+        KH_DEBUG(enemyFlag = 56;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 24:)
+        KH_DEBUG(charaFlag = 172;)
+        KH_DEBUG(enemyFlag = 58;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 25:)
+        KH_DEBUG(charaFlag = 173;)
+        KH_DEBUG(enemyFlag = 59;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 26:)
+        KH_DEBUG(charaFlag = 171;)
+        KH_DEBUG(enemyFlag = 57;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 27:)
+        KH_DEBUG(charaFlag = 174;)
+        KH_DEBUG(enemyFlag = 60;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 28:)
+        KH_DEBUG(charaFlag = 161;)
+        KH_DEBUG(enemyFlag = 47;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 29:)
+        KH_DEBUG(charaFlag = 177;)
+        KH_DEBUG(enemyFlag = 63;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 30:)
+        KH_DEBUG(charaFlag = 178;)
+        KH_DEBUG(enemyFlag = 64;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 31:)
+        KH_DEBUG(charaFlag = 176;)
+        KH_DEBUG(enemyFlag = 62;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 100:)
+        KH_DEBUG(charaFlag = 179;)
+        KH_DEBUG(enemyFlag = 65;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 108:)
+        KH_DEBUG(charaFlag = 180;)
+        KH_DEBUG(enemyFlag = 66;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 103:)
+        KH_DEBUG(charaFlag = 181;)
+        KH_DEBUG(enemyFlag = 67;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 113:)
+        KH_DEBUG(charaFlag = 182;)
+        KH_DEBUG(enemyFlag = 68;)
+        KH_DEBUG(break;)
+    KH_DEBUG(})
+    KH_DEBUG(if (charaFlag >= 0) {)
+        KH_DEBUG(setDebugNewFlag(inIsSet, charaFlag);)
+        KH_DEBUG(if (enemyFlag >= 0) setDownEnemyNum(enemyFlag, inNum);)
+    KH_DEBUG(})
+KH_DEBUG(})
+KH_DEBUG(void CJiminyMemoFlag::debugRikuEvent_GetCard(BOOL inIsSet, INT inKind) {)
+    KH_DEBUG(INT cardFlag = -1;)
+    KH_DEBUG(switch ((BYTE)inKind) {)
+    KH_DEBUG(case 18:)
+        KH_DEBUG(cardFlag = 335;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 42:)
+        KH_DEBUG(cardFlag = 336;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 43:)
+        KH_DEBUG(cardFlag = 337;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 56:)
+        KH_DEBUG(cardFlag = 338;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 68:)
+        KH_DEBUG(cardFlag = 340;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 75:)
+        KH_DEBUG(cardFlag = 342;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 70:)
+        KH_DEBUG(cardFlag = 341;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 79:)
+        KH_DEBUG(cardFlag = 343;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 82:)
+        KH_DEBUG(cardFlag = 345;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 87:)
+        KH_DEBUG(cardFlag = 347;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 85:)
+        KH_DEBUG(cardFlag = 346;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 81:)
+        KH_DEBUG(cardFlag = 344;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 90:)
+        KH_DEBUG(cardFlag = 348;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 89:)
+        KH_DEBUG(cardFlag = 349;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 99:)
+        KH_DEBUG(cardFlag = 350;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 104:)
+        KH_DEBUG(cardFlag = 354;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 101:)
+        KH_DEBUG(cardFlag = 352;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 105:)
+        KH_DEBUG(cardFlag = 355;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 107:)
+        KH_DEBUG(cardFlag = 357;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 106:)
+        KH_DEBUG(cardFlag = 356;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 100:)
+        KH_DEBUG(cardFlag = 351;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 108:)
+        KH_DEBUG(cardFlag = 358;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 109:)
+        KH_DEBUG(cardFlag = 359;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 102:)
+        KH_DEBUG(cardFlag = 353;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 115:)
+        KH_DEBUG(cardFlag = 360;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 117:)
+        KH_DEBUG(cardFlag = 361;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 161:)
+        KH_DEBUG(cardFlag = 362;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 162:)
+        KH_DEBUG(cardFlag = 363;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 163:)
+        KH_DEBUG(cardFlag = 364;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 164:)
+        KH_DEBUG(cardFlag = 365;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 165:)
+        KH_DEBUG(cardFlag = 366;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 166:)
+        KH_DEBUG(cardFlag = 367;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 169:)
+        KH_DEBUG(cardFlag = 368;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 170:)
+        KH_DEBUG(cardFlag = 369;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 171:)
+        KH_DEBUG(cardFlag = 370;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 172:)
+        KH_DEBUG(cardFlag = 371;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 175:)
+        KH_DEBUG(cardFlag = 372;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 176:)
+        KH_DEBUG(cardFlag = 373;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 177:)
+        KH_DEBUG(cardFlag = 374;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 178:)
+        KH_DEBUG(cardFlag = 375;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 182:)
+        KH_DEBUG(cardFlag = 376;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 183:)
+        KH_DEBUG(cardFlag = 377;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 186:)
+        KH_DEBUG(cardFlag = 378;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 187:)
+        KH_DEBUG(cardFlag = 379;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 188:)
+        KH_DEBUG(cardFlag = 380;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 185:)
+        KH_DEBUG(cardFlag = 381;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 190:)
+        KH_DEBUG(cardFlag = 382;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 191:)
+        KH_DEBUG(cardFlag = 383;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 192:)
+        KH_DEBUG(cardFlag = 384;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 193:)
+        KH_DEBUG(cardFlag = 385;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 194:)
+        KH_DEBUG(cardFlag = 386;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 195:)
+        KH_DEBUG(cardFlag = 387;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 196:)
+        KH_DEBUG(cardFlag = 388;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 197:)
+        KH_DEBUG(cardFlag = 389;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 198:)
+        KH_DEBUG(cardFlag = 390;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 200:)
+        KH_DEBUG(cardFlag = 391;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 201:)
+        KH_DEBUG(cardFlag = 392;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 202:)
+        KH_DEBUG(cardFlag = 393;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 58:)
+    KH_DEBUG(case 59:)
+    KH_DEBUG(case 60:)
+    KH_DEBUG(case 61:)
+    KH_DEBUG(case 62:)
+    KH_DEBUG(case 63:)
+    KH_DEBUG(case 64:)
+    KH_DEBUG(case 65:)
+        KH_DEBUG(cardFlag = 339;)
+        KH_DEBUG(break;)
+    KH_DEBUG(})
+    KH_DEBUG(if (cardFlag >= 0) setDebugNewFlag(inIsSet, cardFlag);)
+KH_DEBUG(})
+KH_DEBUG(void CJiminyMemoFlag::debugSoraEvent_All(INT inFlag) {)
+    KH_DEBUG(memset(&getMCWork().ViewState[0], inFlag, 17);)
+    KH_DEBUG(memset(&getMCWork().ViewState[183], inFlag, 152);)
+    KH_DEBUG(memset(&getMCWork().ViewState[23], inFlag, 104);)
+    KH_DEBUG(memset(&getMCWork().ViewState[394], inFlag, 6);)
+KH_DEBUG(})
 
-void CJiminyMemoFlag::debugRikuEvent_All(INT inFlag) {
-    memset(&getMCWork().ViewState[17], inFlag, 6);
-    memset(&getMCWork().ViewState[335], inFlag, 59);
-    memset(&getMCWork().ViewState[127], inFlag, 56);
-}
+KH_DEBUG(void CJiminyMemoFlag::debugRikuEvent_All(INT inFlag) {)
+    KH_DEBUG(memset(&getMCWork().ViewState[17], inFlag, 6);)
+    KH_DEBUG(memset(&getMCWork().ViewState[335], inFlag, 59);)
+    KH_DEBUG(memset(&getMCWork().ViewState[127], inFlag, 56);)
+KH_DEBUG(})
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

@@ -169,7 +169,7 @@ public:
     BOOL hasGroupTag(INT nID) const { return m_refTagList.hasTag(nID); }
     BOOL hasGroupTagOpt(INT nFlag) const { return m_refTagList.hasTagOpt(nFlag); }
     BOOL isGroupTagEmpty() const { return m_refTagList.isEmpty(); }
-    const CRsrcGroupTagList& getGroupTagList() const { return m_refTagList; }
+    KH_DEBUG(const CRsrcGroupTagList& getGroupTagList() const { return m_refTagList; })
     HANDLE getHandle() const { return m_hThis; }
     HANDLE getParentHandle() const { return m_hParent; }
     BOOL hasChild() const { return m_nChildRest != 0; }

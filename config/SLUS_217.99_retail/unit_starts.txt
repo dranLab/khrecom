@@ -2,6 +2,8 @@
 # --record); tools/split_version.py applies them. <unit> <section> <address>
 Form/Menu/GameOver .data 0x0033FDB0 0x8
 Form/Menu/GameOver .rodata 0x004264F0 0xa0
+Form/Menu/JMemoFlag .data 0x00340000 0xc
+Form/Menu/JMemoFlag .rodata 0x00429F50 0xb90
 Form/Menu/LevelUp .bss 0x005BF4C8 0x50
 Form/Menu/LevelUp .data 0x00340010 0xd8
 Form/Menu/LevelUp .rodata 0x0042AAE0 0x370
@@ -263,6 +265,8 @@ System/Graphic/MotData .rodata 0x00400EE0 0x20
 System/Graphic/PathCamera .rodata 0x00400F08 0x10
 System/Graphic/PathDataCamera .rodata 0x00400F70 0x50
 System/Graphic/TexAnm .rodata 0x00400FD8 0x8
+System/Graphic/TexUtil .data 0x00332A68 0x20
+System/Graphic/TexUtil .rodata 0x00400FE0 0x50
 System/LinkedBuf .bss 0x0043BD38 0xc
 System/Movie/AudioDec .data 0x0033B118 0x4
 System/Movie/MSVideo .rodata 0x00405580 0xa0
@@ -275,6 +279,7 @@ System/PadIO .bss 0x0043B900 0x240
 System/Rnd .bss 0x00438710 0x9c0
 System/Rnd .data 0x003328C8 0x10
 System/RootTask .data 0x0033B360 0x4
+System/RsrcData .rodata 0x004058E0 0x110
 System/Spad .bss 0x0043BD44 0x4
 System/Task .rodata 0x00405CC0 0x8
 System/Tsin .rodata 0x003FF958 0xe18

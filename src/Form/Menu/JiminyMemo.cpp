@@ -770,7 +770,7 @@ struct ContentCharaModelViewWork {
     CMemo2DSequence* pDustyList; /* 0x04 */
     INT iStep; /* 0x08 */
     INT iState; /* 0x0c */
-    char ScaleStr[64]; /* 0x10 */
+    KH_DEBUG(char ScaleStr[64];) /* 0x10 (retail: none) */
 
     void init() {
         hObj = 0;
@@ -968,7 +968,7 @@ private:
     void contentMinigame();
     static void (CJiminyMemo::*m_pContentTbl[11])();
 };
-typedef char _check_jm_size[sizeof(CJiminyMemo) == 0x570 ? 1 : -1];
+typedef char _check_jm_size[sizeof(CJiminyMemo) == KH_VER(0x570, 0x530) ? 1 : -1]; /* retail: no ScaleStr */
 
 struct ILLUST_TEX_DATA {
     BYTE No;
@@ -1995,7 +1995,7 @@ void CMemo2DLayout::destroyLayer() {
 }
 D2::C2DSeqCtrl* CMemo2DLayout::createSequence(INT inSeqNo, INT inLayer) {
 #line 3011
-    KH_DEBUG(if (!(inSeqNo < 32)) AssertApp(__FILE__, __LINE__, "inSeqNo < SEQCTRL_MAX", 0);)
+    KH_DEBUG(if (!(inSeqNo < 32)) AssertApp(__FILE__, __LINE__, "inSeqNo < SEQCTRL_MAX", 0);) KH_RELEASE(if (!(inSeqNo < 32)) return NULL;) /* retail: the assert returns */
     D2::C2DSeqCtrl* pSeq = new KH_AT("(3017)")
         D2::C2DSeqCtrl;
 
@@ -2598,7 +2598,7 @@ void CJiminyMemo::main() {
                 break;
             default:
 #line 3934
-                AssertApp(__FILE__, __LINE__, "0", 0);
+                AssertApp(__FILE__, __LINE__, "0", 0); KH_RELEASE(m_iStep = 50;) /* retail: an unknown mode ends the menu like -1 */
                 break;
             }
         }

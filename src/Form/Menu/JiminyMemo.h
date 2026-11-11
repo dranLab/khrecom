@@ -30,7 +30,7 @@ public:
     CJiminyMemo(CTask* inParent, INT inMode);
 
 private:
-    BYTE _pad[0x570 - sizeof(CTask)]; // members not known yet
+    BYTE _pad[KH_VER(0x570, 0x530) - sizeof(CTask)]; // members not known yet (retail: no ScaleStr)
 };
 #endif
 
