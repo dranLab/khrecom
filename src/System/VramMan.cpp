@@ -135,7 +135,7 @@ volatile INT s_nTexTransStatus;
 static void _release(_MallocUnit** ppInPtr);
 static void _release(_MallocUnit** ppInPtr, UINT nPos);
 static _MallocUnit* _createUnit(UINT nStartPos, UINT nSize, _MallocUnit* pPrev, _MallocUnit* pNext);
-static INT _allocSub(_MallocUnit*& pAddr, UINT nStartPos, UINT nEndPos, UINT nSize, const CHAR* pszType);
+static INT _allocSub(_MallocUnit*& pAddr, UINT nStartPos, UINT nEndPos, UINT nSize KH_DEBUG(, const CHAR* pszType));
 static void _compact(_MallocUnit** ppUnit);
 static void _dbgReportAllocatedUnit(const _MallocUnit* pUnit);
 #line 146
@@ -374,7 +374,7 @@ static _MallocUnit* _createUnit(UINT nStartPos, UINT nSize, _MallocUnit* pPrev, 
     return pUnit;
 }
 
-static INT _allocSub(_MallocUnit*& pAddr, UINT nStartPos, UINT nEndPos, UINT nSize, const CHAR* pszType) {
+static INT _allocSub(_MallocUnit*& pAddr, UINT nStartPos, UINT nEndPos, UINT nSize KH_DEBUG(, const CHAR* pszType)) {
     if (nSize == 0) return -1;
     INT nPos = -1;
     _MallocUnit* pUnit;
@@ -398,10 +398,10 @@ static INT _allocSub(_MallocUnit*& pAddr, UINT nStartPos, UINT nEndPos, UINT nSi
         }
     }
     SignalSema(s_nAllocSema);
-    if (nPos < 0) {
-        TRACE("\x81\x49\x81\x49\x81\x49\x81\x49 %s \x97\xcc\x88\xe6\x8a\x6d\x95\xdb(size = 0x%x) \x82\xc9\x8e\xb8\x94\x73\x82\xb5\x82\xdc\x82\xb5\x82\xbd\x81\x42\x81\x49\x81\x49\x81\x49\x81\x49\n",
-              pszType, nSize);
-    }
+    KH_DEBUG(if (nPos < 0) {)
+        KH_DEBUG(TRACE("\x81\x49\x81\x49\x81\x49\x81\x49 %s \x97\xcc\x88\xe6\x8a\x6d\x95\xdb(size = 0x%x) \x82\xc9\x8e\xb8\x94\x73\x82\xb5\x82\xdc\x82\xb5\x82\xbd\x81\x42\x81\x49\x81\x49\x81\x49\x81\x49\n",
+              pszType, nSize);)
+    KH_DEBUG(})
     return nPos;
 }
 
@@ -430,7 +430,7 @@ static INT _allocTex(UINT nSize, INT nType) {
     }
 #line 466
     KH_DEBUG(if (!ppAddr) AssertApp(__FILE__, __LINE__, "ppAddr", 0);)
-    return _allocSub(*ppAddr, nStartPos, nEndPos, nSize, "TEX");
+    return _allocSub(*ppAddr, nStartPos, nEndPos, nSize KH_DEBUG(, "TEX"));
 }
 
 #line 485
@@ -457,7 +457,7 @@ static INT _allocClut(UINT nSize, INT nType) {
     }
 #line 503
     KH_DEBUG(if (!ppAddr) AssertApp(__FILE__, __LINE__, "ppAddr", 0);)
-    return _allocSub(*ppAddr, nStartPos, nEndPos, nSize, "CLUT");
+    return _allocSub(*ppAddr, nStartPos, nEndPos, nSize KH_DEBUG(, "CLUT"));
 }
 
 static void _compact(_MallocUnit** ppUnit) {
@@ -584,38 +584,38 @@ BOOL CVramMan::reqTransTex(const TexInfo& texInfo, CBuf& data) {
     return bResult;
 }
 
-INT CVramMan::getHeapSize() {
-    return VRAM::_TEX_FIX_SIZE;
-}
+KH_DEBUG(INT CVramMan::getHeapSize() {)
+    KH_DEBUG(return VRAM::_TEX_FIX_SIZE;)
+KH_DEBUG(})
 
-static void _dbgReportAllocatedUnit(const _MallocUnit* pUnit) {
-    if (!pUnit) {
-        TRACE(":  ** NO DATA **\n");
-        return;
-    }
-    TRACE("\n");
-    for (; pUnit; pUnit = pUnit->_pNext) {
-        TRACE("    UNIT[%07X] -> START:[%04X] END:[%04X] SIZE:[%04X] PREV:[%07X] NEXT:[%07X]\n", pUnit,
-              pUnit->_nStartPos, pUnit->_nEndPos, pUnit->_nSize, pUnit->_pPrev, pUnit->_pNext);
-    }
-}
+KH_DEBUG(static void _dbgReportAllocatedUnit(const _MallocUnit* pUnit) {)
+    KH_DEBUG(if (!pUnit) {)
+        KH_DEBUG(TRACE(":  ** NO DATA **\n");)
+        KH_DEBUG(return;)
+    KH_DEBUG(})
+    KH_DEBUG(TRACE("\n");)
+    KH_DEBUG(for (; pUnit; pUnit = pUnit->_pNext) {)
+        KH_DEBUG(TRACE("    UNIT[%07X] -> START:[%04X] END:[%04X] SIZE:[%04X] PREV:[%07X] NEXT:[%07X]\n", pUnit,
+              pUnit->_nStartPos, pUnit->_nEndPos, pUnit->_nSize, pUnit->_pPrev, pUnit->_pNext);)
+    KH_DEBUG(})
+KH_DEBUG(})
 
-void CVramMan::dbgReportAllocatedUnit() {
-    TRACE("------------------- occupied-vram report ------------------\n");
-    TRACE("< _pPreFixedTexPtr >  ");
-    _dbgReportAllocatedUnit(s_pPreFixedTexPtr);
-    TRACE("< _pFixedTexPtr >     ");
-    _dbgReportAllocatedUnit(s_pFixedTexPtr);
-    TRACE("< _pFontTexPtr >      ");
-    _dbgReportAllocatedUnit(s_pFontTexPtr);
-    TRACE("< _pPreFixedClutPtr > ");
-    _dbgReportAllocatedUnit(s_pPreFixedClutPtr);
-    TRACE("< _pFixedClutPtr >    ");
-    _dbgReportAllocatedUnit(s_pFixedClutPtr);
-    TRACE("< _pFontClutPtr >     ");
-    _dbgReportAllocatedUnit(s_pFontClutPtr);
-    TRACE("----------------- occupied-vram report end -----------------\n");
-}
+KH_DEBUG(void CVramMan::dbgReportAllocatedUnit() {)
+    KH_DEBUG(TRACE("------------------- occupied-vram report ------------------\n");)
+    KH_DEBUG(TRACE("< _pPreFixedTexPtr >  ");)
+    KH_DEBUG(_dbgReportAllocatedUnit(s_pPreFixedTexPtr);)
+    KH_DEBUG(TRACE("< _pFixedTexPtr >     ");)
+    KH_DEBUG(_dbgReportAllocatedUnit(s_pFixedTexPtr);)
+    KH_DEBUG(TRACE("< _pFontTexPtr >      ");)
+    KH_DEBUG(_dbgReportAllocatedUnit(s_pFontTexPtr);)
+    KH_DEBUG(TRACE("< _pPreFixedClutPtr > ");)
+    KH_DEBUG(_dbgReportAllocatedUnit(s_pPreFixedClutPtr);)
+    KH_DEBUG(TRACE("< _pFixedClutPtr >    ");)
+    KH_DEBUG(_dbgReportAllocatedUnit(s_pFixedClutPtr);)
+    KH_DEBUG(TRACE("< _pFontClutPtr >     ");)
+    KH_DEBUG(_dbgReportAllocatedUnit(s_pFontClutPtr);)
+    KH_DEBUG(TRACE("----------------- occupied-vram report end -----------------\n");)
+KH_DEBUG(})
 
 void CVramMan::mapping(BOOL bNTSC) {
     using namespace VRAM;
@@ -671,3 +671,4 @@ void CVramMan::mapping(BOOL bNTSC) {
     _CLUT_FIX_SIZE = _CLUT_AREA_END - _CLUT_FIX_START;
 }
 // SOURCE DATA: .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss

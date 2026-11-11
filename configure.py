@@ -477,17 +477,25 @@ def version_address_map(build_cfg: dict) -> dict[int, int]:
     return out
 
 
-def address_labels(opts: dict, address_map: dict[int, int] | None = None) -> dict[str, int]:
+def address_labels(opts: dict, address_map: dict[int, int] | None = None,
+                   symbols_path: Path | None = None) -> dict[str, int]:
     """Every address-named label (D_004E26D8, jtbl_..., cardDataTbl_004E5840) that the original's assembly, its
     data or the sources mention, with its address. The sources name the reference version's (the beta's) addresses:
     for another version (address_map given) they are translated through the version map, and labels without a
     mapping are left out (a use then fails to link instead of pointing at the wrong data)."""
     labels: dict[str, int] = {}
     if address_map is not None:
+        # the version's assembly also carries names the reference version gave address-like suffixes
+        # (cardDataTbl_00474480: the beta's copy at 0x474480, at 0x407E40 in retail): its symbol file knows them
+        known: dict[str, int] = {}
+        if symbols_path is not None and symbols_path.exists():
+            for line in symbols_path.read_text(encoding="utf-8").splitlines():
+                if m := re.match(r"^(\S+) = 0x([0-9A-Fa-f]+);", line):
+                    known[m.group(1)] = int(m.group(2), 16)
         for path in sorted([*(ROOT / opts["asm_path"] / "nonmatchings").rglob("*.s"),
                             *(ROOT / opts["asm_path"] / "data").rglob("*.s")]):
             for m in ADDRESS_LABEL.finditer(path.read_text(encoding="latin-1")):
-                labels[m.group(1)] = int(m.group(2), 16)
+                labels[m.group(1)] = known.get(m.group(1), int(m.group(2), 16))
         for path in sorted(p for p in (ROOT / "src").rglob("*") if p.suffix in (".c", ".cpp", ".h", ".s")):
             for m in ADDRESS_LABEL.finditer(path.read_text(encoding="latin-1")):
                 addr = address_map.get(int(m.group(2), 16))
@@ -634,7 +642,8 @@ def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg
 
     # linker_script_matching.ld: checks that only hold for the original layout (e.g. where _end lands); the shifted
     # links (write_shift_links) leave it out.
-    labels = address_labels(opts, None if version == versions()[0] else version_address_map(build_cfg))
+    labels = address_labels(opts, None if version == versions()[0] else version_address_map(build_cfg),
+                            ROOT / symbols)
     labels_by_addr = sorted((addr, name) for name, addr in labels.items())
     extra_scripts = [f"{cfg_dir}/linker_script_extra.ld", f"{cfg_dir}/dll_imports.ld",
                      f"{cfg_dir}/linker_script_matching.ld"] + [

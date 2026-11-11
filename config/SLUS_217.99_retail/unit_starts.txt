@@ -279,6 +279,7 @@ System/Graphic/MapUnit .rodata 0x00400EA0 0x10
 System/Graphic/ModelMan .bss 0x0043C2C0 0x200
 System/Graphic/ModelMan .rodata 0x00400ED0 0x10
 System/Graphic/MotData .rodata 0x00400EE0 0x20
+System/Graphic/PackMan .bss 0x0043C4C0 0x131140
 System/Graphic/PathCamera .rodata 0x00400F08 0x10
 System/Graphic/PathDataCamera .rodata 0x00400F70 0x50
 System/Graphic/TexAnm .rodata 0x00400FD8 0x8
@@ -302,7 +303,11 @@ System/RsrcDB .rodata 0x004059F0 0x2c0
 System/RsrcData .rodata 0x004058E0 0x110
 System/Spad .bss 0x0043BD44 0x4
 System/Task .rodata 0x00405CC0 0x8
+System/TaskMan .bss 0x005BD760 0x1d0
+System/TaskMan .data 0x0033B364 0x4
+System/TaskMan .rodata 0x00405CD0 0x60
 System/Tsin .rodata 0x003FF958 0xe18
+System/VramMan .bss 0x0043BD48 0xf8
 System/Wnd .data 0x003328D8 0x38
 System/Wnd .rodata 0x00400770 0xe0
 System/mcd .bss 0x0043A140 0x10e0

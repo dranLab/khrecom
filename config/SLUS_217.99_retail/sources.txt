@@ -409,6 +409,7 @@ System/Graphic/HermitePathCamera
 System/Graphic/MapUnit
 System/Graphic/ModelMan
 System/Graphic/MotData
+System/Graphic/PackMan
 System/Graphic/PathCamera
 System/Graphic/PathDataCamera
 System/Graphic/ScreenMask
@@ -432,9 +433,11 @@ System/RsrcDB
 System/RsrcData
 System/Spad
 System/Task
+System/TaskMan
 System/Thread
 System/Tsin
 System/Util
+System/VramMan
 System/Wnd
 System/mcd
 lib/alalc

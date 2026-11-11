@@ -1376,7 +1376,7 @@ segments:
       - [0x3058E0, rodata, System/RsrcData]
       - [0x3059F0, rodata, System/RsrcDB]
       - [0x305CC0, rodata, System/Task]
-      - [0x305CC8, rodata, System/TaskMan]
+      - [0x305CD0, rodata, System/TaskMan]
       - [0x305D30, rodata, System/Ctd/CtdMan]
       - [0x305D38, rodata, Game/AttachCard]
       - [0x306FC0, rodata, Game/AttackMotion]

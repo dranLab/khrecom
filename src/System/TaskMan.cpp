@@ -99,8 +99,8 @@ INT _nRemoveDllRsrc;
 INT _nRnd;
 SHORT _nTaskFlag;
 SHORT _nPauseReq;
-INT _nDebugPlaySpeed;
-BOOL _bSteppingMode;
+KH_DEBUG(INT _nDebugPlaySpeed;)
+KH_DEBUG(BOOL _bSteppingMode;)
 }
 
 static void _initForMainTask();
@@ -119,7 +119,7 @@ void CTaskMan::initialize() {
     _pRootList = new KH_AT("(137)") CTaskSLCList(*_pSLCManager);
     ASSERT(_pRootList);
 #line 140
-    _pRootTask = new KH_AT("(140)") CRootTask;
+    _ref(_pRootTask) = new KH_AT("(140)") CRootTask; /* MATCH: stores through _ref: retail issues them before the next loads (beta: the asserts read them) */
     ASSERT(_pRootTask);
     _pRootList->pushBack(*_pRootTask);
     _pRootTask->setHandle(0);
@@ -129,14 +129,14 @@ void CTaskMan::initialize() {
     pTop->declareSysTask(14);
     _initForMainTask();
 #line 155
-    _pSecondaryTaskArray = new KH_AT("(155)") CVector<int>;
+    _ref(_pSecondaryTaskArray) = new KH_AT("(155)") CVector<int>;
     ASSERT(_pSecondaryTaskArray);
     _pSecondaryTaskArray->reserve(8);
     _nRnd = rand() & 0xF;
     _nTaskFlag = 0;
     _nPauseReq = 0;
-    _nDebugPlaySpeed = 0;
-    _bSteppingMode = FALSE;
+    KH_DEBUG(_nDebugPlaySpeed = 0;)
+    KH_DEBUG(_bSteppingMode = FALSE;)
     CDebugProcInfo::initialize();
 }
 
@@ -177,7 +177,7 @@ ISLCManagerT<CTask>& CTaskMan::getSLCManager() {
 #line 223
 void CTaskMan::update(TIMEQ nTQ, TIMEQ nDispTQ, BOOL bPause) {
     ASSERT(_pRootTask && _pRootList);
-    TIMEQ nSysLag = CPlaySpeedCtrl::getSysProgressTime(nDispTQ);
+    TIMEQ nSysLag = KH_VER(CPlaySpeedCtrl::getSysProgressTime(nDispTQ), nDispTQ); /* retail: no debug play speed */
     TIMEQ nLag = CPlaySpeedCtrl::getProgressTime(nSysLag);
     INT nFlag = bPause ? (SHORT)(_nTaskFlag | 1) : (SHORT)(_nTaskFlag & ~1);
     _pSecondaryTaskArray->clear();
@@ -547,43 +547,44 @@ BOOL CTaskMan::reqSuspendGameTask() {
     return TRUE;
 }
 
-BOOL CTaskMan::setupDbgPlaySpeed() {
-    if (CPadIO::isButtonTrg(2, 1)) {
-        _bSteppingMode = TRUE;
-    }
-    if (_bSteppingMode && CPadIO::isButtonRpt(2, 1)) {
-        return FALSE;
-    }
-    if (CPadIO::isButtonDown(0x400, 1)) {
-        _bSteppingMode = FALSE;
-        FLOAT fValue = CPadIO::getAnalogRY(1) * 0.00024414062f;
-        if (fValue < -0.1f) {
-            CPlaySpeedCtrl::setDebugPlaySpeed(fValue * -2.5f + 1.0f);
-            CDebugProcInfo::changeProcCounterColor(0x60, 0x20, 0);
-        } else if (!(fValue > 0.1f)) {
-            resetDbgPlaySpeed();
-            return TRUE;
-        } else {
-            CPlaySpeedCtrl::setDebugPlaySpeed(1.0f - fValue * 0.8f);
-            CDebugProcInfo::changeProcCounterColor(0x20, 0x60, 0);
-        }
-    }
-    return _bSteppingMode || CPlaySpeedCtrl::getSysProgressTime(50) == 50;
-}
+KH_DEBUG(BOOL CTaskMan::setupDbgPlaySpeed() {)
+    KH_DEBUG(if (CPadIO::isButtonTrg(2, 1)) {)
+        KH_DEBUG(_bSteppingMode = TRUE;)
+    KH_DEBUG(})
+    KH_DEBUG(if (_bSteppingMode && CPadIO::isButtonRpt(2, 1)) {)
+        KH_DEBUG(return FALSE;)
+    KH_DEBUG(})
+    KH_DEBUG(if (CPadIO::isButtonDown(0x400, 1)) {)
+        KH_DEBUG(_bSteppingMode = FALSE;)
+        KH_DEBUG(FLOAT fValue = CPadIO::getAnalogRY(1) * 0.00024414062f;)
+        KH_DEBUG(if (fValue < -0.1f) {)
+            KH_DEBUG(CPlaySpeedCtrl::setDebugPlaySpeed(fValue * -2.5f + 1.0f);)
+            KH_DEBUG(CDebugProcInfo::changeProcCounterColor(0x60, 0x20, 0);)
+        KH_DEBUG(} else if (!(fValue > 0.1f)) {)
+            KH_DEBUG(resetDbgPlaySpeed();)
+            KH_DEBUG(return TRUE;)
+        KH_DEBUG(} else {)
+            KH_DEBUG(CPlaySpeedCtrl::setDebugPlaySpeed(1.0f - fValue * 0.8f);)
+            KH_DEBUG(CDebugProcInfo::changeProcCounterColor(0x20, 0x60, 0);)
+        KH_DEBUG(})
+    KH_DEBUG(})
+    KH_DEBUG(return _bSteppingMode || CPlaySpeedCtrl::getSysProgressTime(50) == 50;)
+KH_DEBUG(})
 
-void CTaskMan::setDbgSteppingMode(BOOL bMode) {
-    _bSteppingMode = bMode;
-}
+KH_DEBUG(void CTaskMan::setDbgSteppingMode(BOOL bMode) {)
+    KH_DEBUG(_bSteppingMode = bMode;)
+KH_DEBUG(})
 
-void CTaskMan::resetDbgPlaySpeed() {
-    CPlaySpeedCtrl::setDebugPlaySpeed(1.0f);
-    CDebugProcInfo::changeProcCounterColor(0x60, 0x60, 0);
-}
+KH_DEBUG(void CTaskMan::resetDbgPlaySpeed() {)
+    KH_DEBUG(CPlaySpeedCtrl::setDebugPlaySpeed(1.0f);)
+    KH_DEBUG(CDebugProcInfo::changeProcCounterColor(0x60, 0x60, 0);)
+KH_DEBUG(})
 
-void CTaskMan::debugDumpContainer(UINT nStartIndex, UINT nEndIndex) {
-    if (_pSLCManager) {
-        _pSLCManager->debugDump(nStartIndex, nEndIndex);
-    }
-}
+KH_DEBUG(void CTaskMan::debugDumpContainer(UINT nStartIndex, UINT nEndIndex) {)
+    KH_DEBUG(if (_pSLCManager) {)
+        KH_DEBUG(_pSLCManager->debugDump(nStartIndex, nEndIndex);)
+    KH_DEBUG(})
+KH_DEBUG(})
 
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .data .rodata

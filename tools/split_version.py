@@ -332,7 +332,8 @@ def main() -> None:
             syms[value] = (name, "")
     # anonymous-namespace / static constructor names carry a per-compile suffix: beta names added below get this
     # version's suffix for their file (from its table's names) so that every name of a file agrees
-    suffix_re = re.compile(r"((?:_\d+)?_GLOBAL_\$[NID]\$)(.*?\.(?:cpp|c))([0-9A-Za-z_]{6})(\$|$)")
+    # (in a mangled type the namespace is followed by the nested name's length: ...cppWHaaaa13_MainTaskInfo)
+    suffix_re = re.compile(r"((?:_\d+)?_GLOBAL_\$[NID]\$)(.*?\.(?:cpp|c))([0-9A-Za-z_]{6})(\$|\d|$)")
     version_suffix = {}
     for n, _ in syms.values():
         if m := suffix_re.search(n):

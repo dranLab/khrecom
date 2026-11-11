@@ -983,10 +983,10 @@ BOOL CSceneInfo::reqChangeBackupRoom() {
     SHORT nArea = getCurrentAreaNum();
     SHORT nScene = getCurrentSceneNum();
     CGameWork::rollback(CGameWork::BACKUP_SECONDARY);
-    if (nArea < 0 || nScene <= 0) {
-        TRACE_COL(_TTY_RED, "\x83\x8d\x81[\x83\x8b\x83o\x83" "b\x83N\x90\xe6\x82\xcc AREA or SCENE \x82\xaa\x95s\x90\xb3\x82\xc5\x82\xb7\x81i%d, %d\x81j\n", nArea, nScene);
-        return FALSE;
-    }
+    KH_DEBUG(if (nArea < 0 || nScene <= 0) {)
+        KH_DEBUG(TRACE_COL(_TTY_RED, "\x83\x8d\x81[\x83\x8b\x83o\x83" "b\x83N\x90\xe6\x82\xcc AREA or SCENE \x82\xaa\x95s\x90\xb3\x82\xc5\x82\xb7\x81i%d, %d\x81j\n", nArea, nScene);)
+        KH_DEBUG(return FALSE;)
+    KH_DEBUG(})
     BOOL bResult = reqChangeScene(nArea, nScene, -1, FALSE, 1);
     if (bResult) {
         s_nNextRoomID = nRoomID;

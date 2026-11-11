@@ -184,8 +184,8 @@ static inline void _checkSize(UINT iSize) {
     KH_DEBUG(if (!(!(iSize >= 0x10000))) AssertApp(__FILE__, __LINE__, "! (iSize >= 0x10000)", 0);)
 }
 static inline void _checkDmaTag() {
-    pacVif1Packet* pPkt = s_pPktVif1;
-    if (pPkt->pDmaTag) _checkSize((u_long128*)(((UINT)pPkt->pCurrent + 15) & ~15) - pPkt->pDmaTag - 1);
+    KH_DEBUG(pacVif1Packet* pPkt = s_pPktVif1;)
+    KH_DEBUG(if (pPkt->pDmaTag) _checkSize((u_long128*)(((UINT)pPkt->pCurrent + 15) & ~15) - pPkt->pDmaTag - 1);)
 }
 
 
@@ -532,11 +532,11 @@ void CPackMan::transFrame() {
     sceDmaSend(s_pDmaChanVif1, (void*)((u_int)s_pktVif1Frame.pBase & 0x0fffffff));
 }
 u_long128* CPackMan::initBGPacket(INT nInIdx) {
-    u_long nZ = (VRAM::_ZBUF_START / 32) | 0x31000000 | ((u_long)1 << 32);
     s_DefaultGpuRegs1._nTEST = 0x300fd;
     s_DefaultGpuRegs2._nTEST = 0x3000d;
-    s_DefaultGpuRegs2._nZBUF = nZ;
-    s_DefaultGpuRegs1._nZBUF = nZ;
+
+    s_DefaultGpuRegs1._nZBUF = s_DefaultGpuRegs2._nZBUF = (VRAM::_ZBUF_START / 32) | 0x31000000 | ((u_long)1 << 32);
+
     _pkInit(s_pPktBufVif1BG[nInIdx], &s_pktVif1BG, 0x600);
     sceVif1PkReset(s_pPktVif1);
     u_long128* pRet = s_pPktVif1->pBase;
@@ -557,11 +557,11 @@ u_long128* CPackMan::initBGPacket(INT nInIdx) {
 BOOL CPackMan::isPacketForBG() { return s_pPktVif1 == &s_pktVif1BG; }
 void CPackMan::terminateBGPacket() {
     changeLayer(1);
-    u_long nZ = (VRAM::_ZBUF_START / 32) | 0x31000000;
     s_DefaultGpuRegs1._nTEST = 0x500fd;
     s_DefaultGpuRegs2._nTEST = *(u_long*)&s_DBuf.clear0.testb;
-    s_DefaultGpuRegs2._nZBUF = nZ;
-    s_DefaultGpuRegs1._nZBUF = nZ;
+
+    s_DefaultGpuRegs1._nZBUF = s_DefaultGpuRegs2._nZBUF = (VRAM::_ZBUF_START / 32) | 0x31000000;
+
     _checkDmaTag();
     sceVif1PkCnt(s_pPktVif1, 0);
     sceVif1PkAddCode(s_pPktVif1, 0x13000000);
@@ -648,11 +648,11 @@ void CPackMan::initFGPacket() {
 }
 void CPackMan::terminateFGPacket() {
     changeLayer(2);
-    u_long nZ = (VRAM::_ZBUF_START / 32) | 0x31000000;
     s_DefaultGpuRegs1._nTEST = 0x500fd;
     s_DefaultGpuRegs2._nTEST = *(u_long*)&s_DBuf.clear0.testb;
-    s_DefaultGpuRegs2._nZBUF = nZ;
-    s_DefaultGpuRegs1._nZBUF = nZ;
+
+    s_DefaultGpuRegs1._nZBUF = s_DefaultGpuRegs2._nZBUF = (VRAM::_ZBUF_START / 32) | 0x31000000;
+
     _checkDmaTag();
     sceVif1PkCnt(s_pPktVif1, 0);
     sceVif1PkAddCode(s_pPktVif1, 0x13000000);
@@ -1572,3 +1572,4 @@ void sceVif1PkRefMpg(pacVif1Packet* pPacket, u_short vuaddr, u_long128* pMicro, 
     }
 }
 // SOURCE DATA: .bss .rodata
+// SOURCE DATA SLUS_217.99_retail: .bss

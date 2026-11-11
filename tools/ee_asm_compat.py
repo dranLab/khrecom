@@ -258,8 +258,11 @@ def drop_foreign_linkonce(lines: list[str], symbols_path: str, linkonce: str) ->
                 out.pop()
             if dropping:
                 continue
-        elif dropping and (SECTION_DIRECTIVE.match(line) or (w and w.group(1) != dropping)):
-            dropping = None  # the next section, or the .weak gcc writes before the next vtable's section
+        elif dropping and (SECTION_DIRECTIVE.match(line) or (w and w.group(1) != dropping)
+                           or line.startswith("\t.globl\t")):
+            # the next section, the .weak gcc writes before the next vtable's section, or the .globl it writes before
+            # the next global's section (TaskMan's _pRootList after a dropped weak destructor)
+            dropping = None
         if not dropping:
             out.append(line)
     return out
