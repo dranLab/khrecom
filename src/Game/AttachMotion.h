@@ -2,6 +2,7 @@
 #ifndef GAME_ATTACHMOTION_H
 #define GAME_ATTACHMOTION_H
 
+#include "System/Task.h" /* MATCH: retail's EffectMotion/SEMotion have Task.h's getDebugInfo "" before their own strings, FrecFont/SoundMan/TriangleIK none: of their headers only this one is theirs alone */
 #include "khtypes.h"
 
 class CEntity;

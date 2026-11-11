@@ -28,3 +28,6 @@ lib/libpad2 .rodata 0x00433260
 lib/thread .rodata 0x00436800
 # CreateGimmick's .rodata: the split's start matches its bytes exactly (no references to vote with)
 Game/Gimmick/CreateGimmick .rodata 0x00421440
+# FrecFont's .data (its colour table, the beta's 0x3921A0) is retail's 0x332950 byte for byte; the split's 0x33294C
+# is the previous unit's padding (the vote is off: its only reference is relocated against a symbol)
+System/Graphic/FrecFont .data 0x00332950

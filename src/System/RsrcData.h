@@ -11,9 +11,9 @@
 
 #include "System/Buf.h"
 #include "System/SJoint.h"
-#include "System/Task.h"
+#include "System/Debug.h" /* MATCH: Task.h's own includes, not Task.h (unused here): its getDebugInfo "" is missing from retail FrecFont/SoundMan */
+#include "System/SLContainer.h"
 #include <string.h>
-
 
 
 

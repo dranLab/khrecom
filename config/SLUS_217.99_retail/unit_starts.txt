@@ -296,6 +296,9 @@ System/Graphic/Effect/libppp/ryjProg/pppRyjMegaBirthModel .rodata 0x00403930 0xf
 System/Graphic/Effect/libppp/ryjProg/pppRyjMegaBirthModelFilter .bss 0x0057E160 0x10
 System/Graphic/Fnt .data 0x00332AC0 0x10
 System/Graphic/Fnt .rodata 0x004010B0 0x28
+System/Graphic/FrecFont .bss 0x0043BE40 0x280
+System/Graphic/FrecFont .data 0x00332950 0x40
+System/Graphic/FrecFont .rodata 0x00400DC0 0x60
 System/Graphic/Glare .data 0x00332990 0xc
 System/Graphic/Gprim .data 0x00332AD0 0x118
 System/Graphic/HermitePathCamera .rodata 0x00400E30 0x50
@@ -310,6 +313,8 @@ System/Graphic/PathDataCamera .rodata 0x00400F70 0x50
 System/Graphic/TexAnm .rodata 0x00400FD8 0x8
 System/Graphic/TexUtil .data 0x00332A68 0x20
 System/Graphic/TexUtil .rodata 0x00400FE0 0x50
+System/Graphic/TriangleIK .data 0x00332A88 0x38
+System/Graphic/TriangleIK .rodata 0x00401030 0x78
 System/LinkedBuf .bss 0x0043BD38 0xc
 System/Math3D .rodata 0x003FF948 0xc
 System/Memoca .bss 0x0043B240 0x6c0
@@ -329,6 +334,9 @@ System/RootTask .data 0x0033B360 0x4
 System/RsrcDB .bss 0x005BD640 0x120
 System/RsrcDB .rodata 0x004059F0 0x2c0
 System/RsrcData .rodata 0x004058E0 0x110
+System/Sound/SoundMan .bss 0x0057E200 0x300f8
+System/Sound/SoundMan .data 0x0033B060 0xb8
+System/Sound/SoundMan .rodata 0x00405210 0x350
 System/Sound/driver/sddrv_ee .rodata 0x00403A20 0x17f0
 System/Spad .bss 0x0043BD44 0x4
 System/Task .rodata 0x00405CC0 0x8

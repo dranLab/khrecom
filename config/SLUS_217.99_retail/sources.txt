@@ -418,6 +418,7 @@ System/Graphic/Effect/libppp/stdProg/pppGetRotMatrixZ
 System/Graphic/Effect/libppp/stdProg/pppGetRotMatrixZXY
 System/Graphic/Effect/libppp/stdProg/pppGetRotMatrixZYX
 System/Graphic/Fnt
+System/Graphic/FrecFont
 System/Graphic/Glare
 System/Graphic/Gprim
 System/Graphic/HermitePath
@@ -433,6 +434,7 @@ System/Graphic/StrPrim
 System/Graphic/TexAnm
 System/Graphic/TexCtrl
 System/Graphic/TexUtil
+System/Graphic/TriangleIK
 System/LinkedBuf
 System/MainTaskFactory
 System/Math3D
@@ -449,6 +451,7 @@ System/Rnd
 System/RootTask
 System/RsrcDB
 System/RsrcData
+System/Sound/SoundMan
 System/Sound/driver/sddrv_ee
 System/Spad
 System/Task
