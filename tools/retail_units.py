@@ -499,12 +499,17 @@ def main() -> None:
         return
 
     if args.command == "verify":
+        seen = set()
         for rnd in range(args.max):
             r = subprocess.run(["ninja", f"check-{v.name}"], cwd=ROOT, capture_output=True, text=True)
             log = r.stdout + r.stderr
             if r.returncode == 0:
                 print(f"OK: {v.name} matches with {len(sources_list(v))} units from source")
                 return
+            if re.search(r"FAILED: build/[^/]+/sndll/", log):
+                # the DLL table step: a missing or local symbol (a tool problem), no unit to blame
+                print(log[-3000:])
+                sys.exit("error: the SN DLL table step failed; no unit switched back")
             culprits = set()
             for m in re.finditer(r"FAILED: build/[^/]+/src/(\S+)\.o\b", log):
                 culprits.add(m.group(1))
@@ -518,6 +523,10 @@ def main() -> None:
             if not culprits:
                 print(log[-3000:])
                 sys.exit("error: no culprit found")
+            if frozenset(culprits) in seen:
+                print(log[-3000:])
+                sys.exit(f"error: {', '.join(sorted(culprits))} blamed again after being switched back")
+            seen.add(frozenset(culprits))
             current = [u for u in sources_list(v) if u not in culprits]
             print(f"round {rnd + 1}: switching back {len(culprits)}: {', '.join(sorted(culprits)[:8])}")
             for unit in culprits:
