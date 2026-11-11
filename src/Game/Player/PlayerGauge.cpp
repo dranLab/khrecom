@@ -123,7 +123,7 @@ void CPlayerGauge::_initialize() {
     m_pPrize = new KH_AT("(162)") CPrizeGauge(this);
     if (!CSceneInfo::isBattleScene() && !CSceneInfo::isMinigameScene()) {
         m_pNaviMap = new KH_AT("(166)") CNaviMap(this);
-        INT mode = CGame::getDbgGameMode();
+        INT mode = KH_DW(CGame::getDbgGameMode());
         if (mode >= 7) m_pFriend = new KH_AT("(178)") CFriendGauge(this);
         else if (mode < 4) m_pFriend = new KH_AT("(178)") CFriendGauge(this);
     }

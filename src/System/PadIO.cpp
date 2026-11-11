@@ -39,25 +39,25 @@ union _VIB_DATA {
     unsigned char _cVibDatas[2];
 };
 
-struct CRobotPad {
-protected:
-    BOOL m_bEnableFlag;
-    int m_nPadMode[ROBOT_PAD_MAX];
-    int m_nPadRate[ROBOT_PAD_MAX][3];
-    int m_nPadCount[ROBOT_PAD_MAX];
-    int m_nPadCountMax[ROBOT_PAD_MAX];
+KH_DEBUG(struct CRobotPad {)
+KH_DEBUG(protected:)
+    KH_DEBUG(BOOL m_bEnableFlag;)
+    KH_DEBUG(int m_nPadMode[ROBOT_PAD_MAX];)
+    KH_DEBUG(int m_nPadRate[ROBOT_PAD_MAX][3];)
+    KH_DEBUG(int m_nPadCount[ROBOT_PAD_MAX];)
+    KH_DEBUG(int m_nPadCountMax[ROBOT_PAD_MAX];)
 
-public:
-    CRobotPad();
-    virtual ~CRobotPad();
-    BOOL isEnable() const;
-    void setEnableFlag(BOOL bEnableFlag);
-    void setPadRate(INT nRobotPad, INT nTrgRate, INT nPressRate);
-    void setPadData(BYTE* pData);
+KH_DEBUG(public:)
+    KH_DEBUG(CRobotPad();)
+    KH_DEBUG(virtual ~CRobotPad();)
+    KH_DEBUG(BOOL isEnable() const;)
+    KH_DEBUG(void setEnableFlag(BOOL bEnableFlag);)
+    KH_DEBUG(void setPadRate(INT nRobotPad, INT nTrgRate, INT nPressRate);)
+    KH_DEBUG(void setPadData(BYTE* pData);)
 
-protected:
-    void setPadMode(INT nRobotPad);
-};
+KH_DEBUG(protected:)
+    KH_DEBUG(void setPadMode(INT nRobotPad);)
+KH_DEBUG(};)
 
 struct VIB_SLOT {
     USHORT _MotorL;
@@ -88,7 +88,7 @@ public:
     UINT m_nScan;
     int m_nAnalog[4];
     BOOL m_bBoot;
-    CRobotPad m_Robot;
+    KH_DEBUG(CRobotPad m_Robot;)
 
     CJoyPad(USHORT nPort);
     virtual ~CJoyPad() {}
@@ -288,17 +288,17 @@ BOOL CPadIO::isStandby(UINT nPad) {
     return nPad >= PAD_MAX ? FALSE : s_pJoyPad[nPad]->isStandby();
 }
 
-BOOL CPadIO::isRobotEnable(UINT nPad) {
-    return s_pJoyPad[nPad]->m_Robot.isEnable();
-}
+KH_DEBUG(BOOL CPadIO::isRobotEnable(UINT nPad) {)
+    KH_DEBUG(return s_pJoyPad[nPad]->m_Robot.isEnable();)
+KH_DEBUG(})
 
-void CPadIO::setRobotEnableFlag(BOOL bEnableFlag, UINT nPad) {
-    s_pJoyPad[nPad]->m_Robot.setEnableFlag(bEnableFlag);
-}
+KH_DEBUG(void CPadIO::setRobotEnableFlag(BOOL bEnableFlag, UINT nPad) {)
+    KH_DEBUG(s_pJoyPad[nPad]->m_Robot.setEnableFlag(bEnableFlag);)
+KH_DEBUG(})
 
-void CPadIO::setRobotPadRate(INT nRobotPad, INT nTrgRate, INT nPressRate, UINT nPad) {
-    s_pJoyPad[nPad]->m_Robot.setPadRate(nRobotPad, nTrgRate, nPressRate);
-}
+KH_DEBUG(void CPadIO::setRobotPadRate(INT nRobotPad, INT nTrgRate, INT nPressRate, UINT nPad) {)
+    KH_DEBUG(s_pJoyPad[nPad]->m_Robot.setPadRate(nRobotPad, nTrgRate, nPressRate);)
+KH_DEBUG(})
 
 CJoyPad::CJoyPad(USHORT nPort)
     : m_nPort(nPort), m_nBtnDown(0), m_nBtnDownOld(0), m_nBtnTrg(0), m_nBtnRTrg(0), m_nBtnRepeat(0),
@@ -493,7 +493,7 @@ void CJoyPad2::readProc() {
         m_nPhase = 2;
     case 2:
         m_nRdataLen = scePad2Read(m_nSocket, m_rdata);
-        m_Robot.setPadData(m_rdata);
+        KH_DEBUG(m_Robot.setPadData(m_rdata);)
         m_cMotorS = 0;
         m_cMotorL = 0;
         m_nScan = ((m_rdata[0] << 8) | m_rdata[1]) ^ 0xFFFF;
@@ -592,120 +592,120 @@ INT CJoyPad2::readAnalogButton(UINT nOfs) {
     return nRet;
 }
 
-CRobotPad::CRobotPad() {
-    INT i;
-    INT j;
+KH_DEBUG(CRobotPad::CRobotPad() {)
+    KH_DEBUG(INT i;)
+    KH_DEBUG(INT j;)
 
-    m_bEnableFlag = FALSE;
-    for (i = 0; i < ROBOT_PAD_MAX; i++) {
-        m_nPadMode[i] = -1;
-        for (j = 0; j < 3; j++) {
-            m_nPadRate[i][j] = 0;
-        }
-        m_nPadCount[i] = 0;
-        m_nPadCountMax[i] = 0;
-    }
-}
+    KH_DEBUG(m_bEnableFlag = FALSE;)
+    KH_DEBUG(for (i = 0; i < ROBOT_PAD_MAX; i++) {)
+        KH_DEBUG(m_nPadMode[i] = -1;)
+        KH_DEBUG(for (j = 0; j < 3; j++) {)
+            KH_DEBUG(m_nPadRate[i][j] = 0;)
+        KH_DEBUG(})
+        KH_DEBUG(m_nPadCount[i] = 0;)
+        KH_DEBUG(m_nPadCountMax[i] = 0;)
+    KH_DEBUG(})
+KH_DEBUG(})
 
-CRobotPad::~CRobotPad() {}
+KH_DEBUG(CRobotPad::~CRobotPad() {})
 
-BOOL CRobotPad::isEnable() const {
-    return m_bEnableFlag;
-}
+KH_DEBUG(BOOL CRobotPad::isEnable() const {)
+    KH_DEBUG(return m_bEnableFlag;)
+KH_DEBUG(})
 
-void CRobotPad::setEnableFlag(BOOL bEnableFlag) {
-    m_bEnableFlag = bEnableFlag;
-}
+KH_DEBUG(void CRobotPad::setEnableFlag(BOOL bEnableFlag) {)
+    KH_DEBUG(m_bEnableFlag = bEnableFlag;)
+KH_DEBUG(})
 
 #line 944
-void CRobotPad::setPadRate(INT nRobotPad, INT nTrgRate, INT nPressRate) {
-    ASSERT((nRobotPad >= 0) && (nRobotPad < ROBOT_PAD_MAX));
-    if (nTrgRate + nPressRate >= 1000) {
-        nTrgRate = 0;
-        nPressRate = 1000;
-    }
-    m_nPadRate[nRobotPad][1] = nTrgRate;
-    m_nPadRate[nRobotPad][2] = nPressRate;
-    m_nPadMode[nRobotPad] = -1;
-}
+KH_DEBUG(void CRobotPad::setPadRate(INT nRobotPad, INT nTrgRate, INT nPressRate) {)
+    KH_DEBUG(ASSERT((nRobotPad >= 0) && (nRobotPad < ROBOT_PAD_MAX));)
+    KH_DEBUG(if (nTrgRate + nPressRate >= 1000) {)
+        KH_DEBUG(nTrgRate = 0;)
+        KH_DEBUG(nPressRate = 1000;)
+    KH_DEBUG(})
+    KH_DEBUG(m_nPadRate[nRobotPad][1] = nTrgRate;)
+    KH_DEBUG(m_nPadRate[nRobotPad][2] = nPressRate;)
+    KH_DEBUG(m_nPadMode[nRobotPad] = -1;)
+KH_DEBUG(})
 
 #define PAD_MIN(n) { INT min = nMin; FLOAT len = RND::genrand_real1() * (0xFF - min); pData[n] = min + len; }
 #define PAD_MAX_(n) { INT max = nMax; FLOAT len = RND::genrand_real1() * max; pData[n] = 0 + len; }
 
-void CRobotPad::setPadData(BYTE* pData) {
-    INT i;
-    INT nMin;
-    INT nMax;
+KH_DEBUG(void CRobotPad::setPadData(BYTE* pData) {)
+    KH_DEBUG(INT i;)
+    KH_DEBUG(INT nMin;)
+    KH_DEBUG(INT nMax;)
 
-    if (!isEnable()) return;
-    for (i = 0; i < 18; i++) {
-        pData[i] = 0;
-    }
-    pData[2] = 0x80;
-    pData[3] = 0x80;
-    pData[4] = 0x80;
-    pData[5] = 0x80;
-    for (i = 0; i < ROBOT_PAD_MAX; i++) {
-        if (m_nPadMode[i] == -1) {
-            setPadMode(i);
-        } else if (m_nPadMode[i] != 0) {
-            if (i < 8) {
-                pData[1] |= 1 << i;
-            } else if (i < 16) {
-                pData[0] |= 1 << (i - 8);
-            }
-            nMax = 0x30;
-            nMin = 0xD0;
-            switch (i) {
-            case 0: PAD_MIN(0x10); break;
-            case 1: PAD_MIN(0x11); break;
-            case 2: PAD_MIN(0xE); break;
-            case 3: PAD_MIN(0xF); break;
-            case 12: PAD_MIN(0x8); break;
-            case 13: PAD_MIN(0x6); break;
-            case 14: PAD_MIN(0x9); break;
-            case 15: PAD_MIN(0x7); break;
-            case 4: PAD_MIN(0xA); break;
-            case 5: PAD_MIN(0xB); break;
-            case 6: PAD_MIN(0xC); break;
-            case 7: PAD_MIN(0xD); break;
-            case 16: PAD_MAX_(0x3); break;
-            case 17: PAD_MIN(0x2); break;
-            case 18: PAD_MIN(0x3); break;
-            case 19: PAD_MAX_(0x2); break;
-            case 20: PAD_MAX_(0x5); break;
-            case 21: PAD_MIN(0x4); break;
-            case 22: PAD_MIN(0x5); break;
-            case 23: PAD_MAX_(0x4); break;
-            }
-        }
-        m_nPadCount[i]++;
-        if (m_nPadCount[i] > m_nPadCountMax[i]) {
-            m_nPadMode[i] = -1;
-        }
-    }
-    pData[0] = ~pData[0];
-    pData[1] = ~pData[1];
-}
+    KH_DEBUG(if (!isEnable()) return;)
+    KH_DEBUG(for (i = 0; i < 18; i++) {)
+        KH_DEBUG(pData[i] = 0;)
+    KH_DEBUG(})
+    KH_DEBUG(pData[2] = 0x80;)
+    KH_DEBUG(pData[3] = 0x80;)
+    KH_DEBUG(pData[4] = 0x80;)
+    KH_DEBUG(pData[5] = 0x80;)
+    KH_DEBUG(for (i = 0; i < ROBOT_PAD_MAX; i++) {)
+        KH_DEBUG(if (m_nPadMode[i] == -1) {)
+            KH_DEBUG(setPadMode(i);)
+        KH_DEBUG(} else if (m_nPadMode[i] != 0) {)
+            KH_DEBUG(if (i < 8) {)
+                KH_DEBUG(pData[1] |= 1 << i;)
+            KH_DEBUG(} else if (i < 16) {)
+                KH_DEBUG(pData[0] |= 1 << (i - 8);)
+            KH_DEBUG(})
+            KH_DEBUG(nMax = 0x30;)
+            KH_DEBUG(nMin = 0xD0;)
+            KH_DEBUG(switch (i) {)
+            KH_DEBUG(case 0: PAD_MIN(0x10); break;)
+            KH_DEBUG(case 1: PAD_MIN(0x11); break;)
+            KH_DEBUG(case 2: PAD_MIN(0xE); break;)
+            KH_DEBUG(case 3: PAD_MIN(0xF); break;)
+            KH_DEBUG(case 12: PAD_MIN(0x8); break;)
+            KH_DEBUG(case 13: PAD_MIN(0x6); break;)
+            KH_DEBUG(case 14: PAD_MIN(0x9); break;)
+            KH_DEBUG(case 15: PAD_MIN(0x7); break;)
+            KH_DEBUG(case 4: PAD_MIN(0xA); break;)
+            KH_DEBUG(case 5: PAD_MIN(0xB); break;)
+            KH_DEBUG(case 6: PAD_MIN(0xC); break;)
+            KH_DEBUG(case 7: PAD_MIN(0xD); break;)
+            KH_DEBUG(case 16: PAD_MAX_(0x3); break;)
+            KH_DEBUG(case 17: PAD_MIN(0x2); break;)
+            KH_DEBUG(case 18: PAD_MIN(0x3); break;)
+            KH_DEBUG(case 19: PAD_MAX_(0x2); break;)
+            KH_DEBUG(case 20: PAD_MAX_(0x5); break;)
+            KH_DEBUG(case 21: PAD_MIN(0x4); break;)
+            KH_DEBUG(case 22: PAD_MIN(0x5); break;)
+            KH_DEBUG(case 23: PAD_MAX_(0x4); break;)
+            KH_DEBUG(})
+        KH_DEBUG(})
+        KH_DEBUG(m_nPadCount[i]++;)
+        KH_DEBUG(if (m_nPadCount[i] > m_nPadCountMax[i]) {)
+            KH_DEBUG(m_nPadMode[i] = -1;)
+        KH_DEBUG(})
+    KH_DEBUG(})
+    KH_DEBUG(pData[0] = ~pData[0];)
+    KH_DEBUG(pData[1] = ~pData[1];)
+KH_DEBUG(})
 
 #line 1076
-void CRobotPad::setPadMode(INT nRobotPad) {
-    ASSERT((nRobotPad >= 0) && (nRobotPad < ROBOT_PAD_MAX));
-    m_nPadRate[nRobotPad][0] = 1000 - (m_nPadRate[nRobotPad][1] + m_nPadRate[nRobotPad][2]);
-    m_nPadMode[nRobotPad] = lotProbability(m_nPadRate[nRobotPad], 3);
-    if (m_nPadMode[nRobotPad] == 1) {
-        FLOAT len = RND::genrand_real1() * 3.0f;
-        m_nPadCountMax[nRobotPad] = (INT)(len + 1.0f);
-    } else if (m_nPadMode[nRobotPad] == 2) {
-        FLOAT len = RND::genrand_real1() * 180.0f;
-        m_nPadCountMax[nRobotPad] = (INT)(len + 120.0f);
-    } else {
-        FLOAT len = RND::genrand_real1() * 119.0f;
-        m_nPadCountMax[nRobotPad] = (INT)(len + 1.0f);
-    }
+KH_DEBUG(void CRobotPad::setPadMode(INT nRobotPad) {)
+    KH_DEBUG(ASSERT((nRobotPad >= 0) && (nRobotPad < ROBOT_PAD_MAX));)
+    KH_DEBUG(m_nPadRate[nRobotPad][0] = 1000 - (m_nPadRate[nRobotPad][1] + m_nPadRate[nRobotPad][2]);)
+    KH_DEBUG(m_nPadMode[nRobotPad] = lotProbability(m_nPadRate[nRobotPad], 3);)
+    KH_DEBUG(if (m_nPadMode[nRobotPad] == 1) {)
+        KH_DEBUG(FLOAT len = RND::genrand_real1() * 3.0f;)
+        KH_DEBUG(m_nPadCountMax[nRobotPad] = (INT)(len + 1.0f);)
+    KH_DEBUG(} else if (m_nPadMode[nRobotPad] == 2) {)
+        KH_DEBUG(FLOAT len = RND::genrand_real1() * 180.0f;)
+        KH_DEBUG(m_nPadCountMax[nRobotPad] = (INT)(len + 120.0f);)
+    KH_DEBUG(} else {)
+        KH_DEBUG(FLOAT len = RND::genrand_real1() * 119.0f;)
+        KH_DEBUG(m_nPadCountMax[nRobotPad] = (INT)(len + 1.0f);)
+    KH_DEBUG(})
     // empty barrier: keeps gcse from reusing nRobotPad * 4 from above (the original recomputes it here)
-    __asm__ volatile("" : "+r"(nRobotPad));
-    m_nPadCount[nRobotPad] = 0;
-}
+    KH_DEBUG(__asm__ volatile("" : "+r"(nRobotPad));)
+    KH_DEBUG(m_nPadCount[nRobotPad] = 0;)
+KH_DEBUG(})
 
 // SOURCE DATA: .rodata .bss

@@ -462,7 +462,7 @@ private:
     void setLayerFG(BYTE nInDepth) { AssertApp(__FILE__, 675, "0", 0); }
 };
 
-class CBBox : public CGPrim {
+class CBBox KH_DEBUG(: public CGPrim) {
 public: // as in the ref (struct)
     CCoord* m_pCrd;  /* 0x1c */
     G_RGBA m_C0;     /* 0x20 */
@@ -470,10 +470,10 @@ public: // as in the ref (struct)
 
 public:
     CBBox() { m_C0.set(0xFF, 0, 0, 0x80); }
-    virtual UINT getPacketSize() const { return 0x10; }
-private:
-    virtual FIX4 calcZ();
-    virtual void makePkt();
+    KH_DEBUG(virtual UINT getPacketSize() const { return 0x10; })
+KH_DEBUG(private:)
+    KH_DEBUG(virtual FIX4 calcZ();)
+    KH_DEBUG(virtual void makePkt();)
 };
 
 struct CShader {

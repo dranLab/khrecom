@@ -126,6 +126,8 @@ Game/Gimmick/GimmickThunderTrap .rodata 0x00423BA0 0x1a0
 Game/Gimmick/GimmickTutorial .rodata 0x00423E60 0x140
 Game/Gimmick/GimmickUpFloor .rodata 0x00423FA0 0x50
 Game/Gimmick/GimmickWindowLid .rodata 0x00424000 0x10
+Game/Map .data 0x0033BD50 0x160
+Game/Map .rodata 0x0040EAB0 0xf0
 Game/MapCardDef .data 0x0033BEB0 0x20
 Game/MapCardDef .rodata 0x0040EBA0 0x8
 Game/MapUnitTable .data 0x0033BED0 0x358
@@ -174,6 +176,7 @@ Game/Player/SummonTink .data 0x0033E740 0x80
 Game/Player/SummonTink .rodata 0x0041CDC0 0x18
 Game/Prize .rodata 0x0040EDA0 0x13f0
 Game/SceneEnv .data 0x0033C300 0x28
+Game/Status .rodata 0x004105B8 0x28
 System/Coord .data 0x00332880 0x10
 System/Coord .rodata 0x003FF890 0x60
 System/CoordMan .data 0x00332890 0x10

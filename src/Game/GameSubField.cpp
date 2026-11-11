@@ -114,7 +114,7 @@ CGameSubField::CGameSubField() : CGameSub((CStateTemplate<CGameSub>*)m_State) {
     m_State[11].set(this, &CGameSubField::preToNextRoomDispose, &CGameSubField::toNextRoomDispose, NULL);
     m_State[12].set(this, &CGameSubField::preSleep, &CGameSubField::sleeping, NULL);
     nStartState = 0;
-    if (CGame::isDbgStartFromBattle()) {
+    if (KH_DW(CGame::isDbgStartFromBattle())) {
         nStartState = (USHORT)(CSceneInfo::getCurrentBattleSceneNum() - 1050) < 149;
     }
     changeState(nStartState);
@@ -288,7 +288,7 @@ void CGameSubField::preSetupTasks() {}
 
 #line 376
 void CGameSubField::setupTasks() {
-    if (CGame::isDbgStartFromBattle()) {
+    if (KH_DW(CGame::isDbgStartFromBattle())) {
         changeState(6);
         return;
     }
@@ -400,7 +400,7 @@ void CGameSubField::prePlay() {
         CWorldEnv::readyMike(1, 0);
     }
     CSceneInfo::doneChangeScene();
-    if (CGame::isDbgStartFromBattle()) {
+    if (KH_DW(CGame::isDbgStartFromBattle())) {
         CSceneInfo::reqEnterBattle(CSceneInfo::getCurrentBattleSceneNum());
     }
 }

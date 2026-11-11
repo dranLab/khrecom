@@ -1408,109 +1408,109 @@ void CModelBG::makePkt() {
     if (isAvailableSemiModel() && getSemiModel()) getSemiModel()->dispDirect();
     CPackMan::pkOpenDirectCode(0);
 }
-FIX4 CBBox::calcZ() { return 0x640; }
+KH_DEBUG(FIX4 CBBox::calcZ() { return 0x640; })
 static inline u_long _xyz(const IVECTOR& v) { return (u_long)v.x | ((u_long)v.y << 16) | ((u_long)v.z << 32); }
-void CBBox::makePkt() {
-    int abort;
-    FMATRIX rtp;
-    FVECTOR v;
-    IVECTOR c[2][2][2];
-    float w[2][2][2];
-    int x;
-    int y;
-    int z;
-    INT xmin;
-    INT xmax;
-    INT ymin;
-    INT ymax;
-    FLOAT wmax;
-    FLOAT wmin;
-    QWdata giftag;
-    if (m_bbox.x[0] > m_bbox.x[1]) return;
-    abort = 0;
-    m_pCrd->getRotTransPersMatrix(rtp);
-    m_C0.set(0xFF, 0, 0);
-    xmin = 0x10000;
-    xmax = 0;
-    ymin = 0x10000;
-    ymax = 0;
-    wmax = 0.0f;
-    wmin = 1.0f;
-    for (x = 0; x < 2; x++) {
-        for (y = 0; y < 2; y++) {
-            for (z = 0; z < 2; z++) {
+KH_DEBUG(void CBBox::makePkt() {)
+    KH_DEBUG(int abort;)
+    KH_DEBUG(FMATRIX rtp;)
+    KH_DEBUG(FVECTOR v;)
+    KH_DEBUG(IVECTOR c[2][2][2];)
+    KH_DEBUG(float w[2][2][2];)
+    KH_DEBUG(int x;)
+    KH_DEBUG(int y;)
+    KH_DEBUG(int z;)
+    KH_DEBUG(INT xmin;)
+    KH_DEBUG(INT xmax;)
+    KH_DEBUG(INT ymin;)
+    KH_DEBUG(INT ymax;)
+    KH_DEBUG(FLOAT wmax;)
+    KH_DEBUG(FLOAT wmin;)
+    KH_DEBUG(QWdata giftag;)
+    KH_DEBUG(if (m_bbox.x[0] > m_bbox.x[1]) return;)
+    KH_DEBUG(abort = 0;)
+    KH_DEBUG(m_pCrd->getRotTransPersMatrix(rtp);)
+    KH_DEBUG(m_C0.set(0xFF, 0, 0);)
+    KH_DEBUG(xmin = 0x10000;)
+    KH_DEBUG(xmax = 0;)
+    KH_DEBUG(ymin = 0x10000;)
+    KH_DEBUG(ymax = 0;)
+    KH_DEBUG(wmax = 0.0f;)
+    KH_DEBUG(wmin = 1.0f;)
+    KH_DEBUG(for (x = 0; x < 2; x++) {)
+        KH_DEBUG(for (y = 0; y < 2; y++) {)
+            KH_DEBUG(for (z = 0; z < 2; z++) {)
                 /* MATCH: the corner as a reference local: the RotTransPers argument and the .x/.y reads share one
                    pointer giv (c + x*64 + y*32, s0); c[x][y][z].x reads build a second one. Invisible in the
                    original's .mdebug as here (loop.c reduces it to a giv, the local gets no register). */
-                IVECTOR& p = c[x][y][z];
-                v.x = m_bbox.x[x];
-                v.y = m_bbox.y[y];
-                v.z = m_bbox.z[z];
-                v.w = 1.0f;
-                w[x][y][z] = RotTransPers(p, rtp, v);
-                if (w[x][y][z] < 0.0f) {
-                    m_C0.set(0, 0, 0xFF);
-                    abort = 1;
-                } else {
-                    if (wmax < w[x][y][z]) wmax = w[x][y][z];
-                    if (w[x][y][z] < wmin) wmin = w[x][y][z];
-                }
-                if (p.x < 0 || p.x > 0xFFFF || p.y < 0 || p.y > 0xFFFF) {
-                    m_C0.set(0, 0xFF, 0xFF);
-                    abort = 1;
-                }
-                if (p.x < xmin) xmin = p.x;
-                if (p.x > xmax) xmax = p.x;
-                if (p.y < ymin) ymin = p.y;
-                if (p.y > ymax) ymax = p.y;
-            }
-        }
-    }
-    if (abort) return;
-    if (wmax < 1.0f / CWorldEnv::getDispFar()) {
-        m_C0.set(0xFF, 0xFF, 0);
-    }
-    if (1.0f / CWorldEnv::getFogNear() < wmin) {
-        m_C0.set(0xFF, 0, 0xFF);
-    }
-    if (xmin > 0x9000 || xmax < 0x7000 || ymin > 0x8C00 || ymax < 0x7400) {
-        m_C0.set(0xFF, 0xFF, 0xFF);
-    }
-    giftag.ul64[0] = 0x6400000000008000;
-    giftag.ul64[1] = 0x444410;
-    CPackMan::pkOpenGifTag(giftag.ul128);
-    CPackMan::pkAddGsData(0x282 | ((u_long)isSemiTrans() << 6));
-    CPackMan::pkAddGsData(m_C0.col);
-    CPackMan::pkAddGsData(_xyz(c[0][0][0]));
-    CPackMan::pkAddGsData(_xyz(c[1][0][0]));
-    CPackMan::pkAddGsData(_xyz(c[1][1][0]));
-    CPackMan::pkAddGsData(_xyz(c[1][1][1]));
-    CPackMan::pkCloseGifTag();
-    CPackMan::pkOpenGifTag(giftag.ul128);
-    CPackMan::pkAddGsData(0x282 | ((u_long)isSemiTrans() << 6));
-    CPackMan::pkAddGsData(m_C0.col);
-    CPackMan::pkAddGsData(_xyz(c[1][1][0]));
-    CPackMan::pkAddGsData(_xyz(c[0][1][0]));
-    CPackMan::pkAddGsData(_xyz(c[0][0][0]));
-    CPackMan::pkAddGsData(_xyz(c[0][0][1]));
-    CPackMan::pkCloseGifTag();
-    CPackMan::pkOpenGifTag(giftag.ul128);
-    CPackMan::pkAddGsData(0x282 | ((u_long)isSemiTrans() << 6));
-    CPackMan::pkAddGsData(m_C0.col);
-    CPackMan::pkAddGsData(_xyz(c[1][0][1]));
-    CPackMan::pkAddGsData(_xyz(c[1][1][1]));
-    CPackMan::pkAddGsData(_xyz(c[0][1][1]));
-    CPackMan::pkAddGsData(_xyz(c[0][1][0]));
-    CPackMan::pkCloseGifTag();
-    CPackMan::pkOpenGifTag(giftag.ul128);
-    CPackMan::pkAddGsData(0x282 | ((u_long)isSemiTrans() << 6));
-    CPackMan::pkAddGsData(m_C0.col);
-    CPackMan::pkAddGsData(_xyz(c[0][1][1]));
-    CPackMan::pkAddGsData(_xyz(c[0][0][1]));
-    CPackMan::pkAddGsData(_xyz(c[1][0][1]));
-    CPackMan::pkAddGsData(_xyz(c[1][0][0]));
-    CPackMan::pkCloseGifTag();
-}
+                KH_DEBUG(IVECTOR& p = c[x][y][z];)
+                KH_DEBUG(v.x = m_bbox.x[x];)
+                KH_DEBUG(v.y = m_bbox.y[y];)
+                KH_DEBUG(v.z = m_bbox.z[z];)
+                KH_DEBUG(v.w = 1.0f;)
+                KH_DEBUG(w[x][y][z] = RotTransPers(p, rtp, v);)
+                KH_DEBUG(if (w[x][y][z] < 0.0f) {)
+                    KH_DEBUG(m_C0.set(0, 0, 0xFF);)
+                    KH_DEBUG(abort = 1;)
+                KH_DEBUG(} else {)
+                    KH_DEBUG(if (wmax < w[x][y][z]) wmax = w[x][y][z];)
+                    KH_DEBUG(if (w[x][y][z] < wmin) wmin = w[x][y][z];)
+                KH_DEBUG(})
+                KH_DEBUG(if (p.x < 0 || p.x > 0xFFFF || p.y < 0 || p.y > 0xFFFF) {)
+                    KH_DEBUG(m_C0.set(0, 0xFF, 0xFF);)
+                    KH_DEBUG(abort = 1;)
+                KH_DEBUG(})
+                KH_DEBUG(if (p.x < xmin) xmin = p.x;)
+                KH_DEBUG(if (p.x > xmax) xmax = p.x;)
+                KH_DEBUG(if (p.y < ymin) ymin = p.y;)
+                KH_DEBUG(if (p.y > ymax) ymax = p.y;)
+            KH_DEBUG(})
+        KH_DEBUG(})
+    KH_DEBUG(})
+    KH_DEBUG(if (abort) return;)
+    KH_DEBUG(if (wmax < 1.0f / CWorldEnv::getDispFar()) {)
+        KH_DEBUG(m_C0.set(0xFF, 0xFF, 0);)
+    KH_DEBUG(})
+    KH_DEBUG(if (1.0f / CWorldEnv::getFogNear() < wmin) {)
+        KH_DEBUG(m_C0.set(0xFF, 0, 0xFF);)
+    KH_DEBUG(})
+    KH_DEBUG(if (xmin > 0x9000 || xmax < 0x7000 || ymin > 0x8C00 || ymax < 0x7400) {)
+        KH_DEBUG(m_C0.set(0xFF, 0xFF, 0xFF);)
+    KH_DEBUG(})
+    KH_DEBUG(giftag.ul64[0] = 0x6400000000008000;)
+    KH_DEBUG(giftag.ul64[1] = 0x444410;)
+    KH_DEBUG(CPackMan::pkOpenGifTag(giftag.ul128);)
+    KH_DEBUG(CPackMan::pkAddGsData(0x282 | ((u_long)isSemiTrans() << 6));)
+    KH_DEBUG(CPackMan::pkAddGsData(m_C0.col);)
+    KH_DEBUG(CPackMan::pkAddGsData(_xyz(c[0][0][0]));)
+    KH_DEBUG(CPackMan::pkAddGsData(_xyz(c[1][0][0]));)
+    KH_DEBUG(CPackMan::pkAddGsData(_xyz(c[1][1][0]));)
+    KH_DEBUG(CPackMan::pkAddGsData(_xyz(c[1][1][1]));)
+    KH_DEBUG(CPackMan::pkCloseGifTag();)
+    KH_DEBUG(CPackMan::pkOpenGifTag(giftag.ul128);)
+    KH_DEBUG(CPackMan::pkAddGsData(0x282 | ((u_long)isSemiTrans() << 6));)
+    KH_DEBUG(CPackMan::pkAddGsData(m_C0.col);)
+    KH_DEBUG(CPackMan::pkAddGsData(_xyz(c[1][1][0]));)
+    KH_DEBUG(CPackMan::pkAddGsData(_xyz(c[0][1][0]));)
+    KH_DEBUG(CPackMan::pkAddGsData(_xyz(c[0][0][0]));)
+    KH_DEBUG(CPackMan::pkAddGsData(_xyz(c[0][0][1]));)
+    KH_DEBUG(CPackMan::pkCloseGifTag();)
+    KH_DEBUG(CPackMan::pkOpenGifTag(giftag.ul128);)
+    KH_DEBUG(CPackMan::pkAddGsData(0x282 | ((u_long)isSemiTrans() << 6));)
+    KH_DEBUG(CPackMan::pkAddGsData(m_C0.col);)
+    KH_DEBUG(CPackMan::pkAddGsData(_xyz(c[1][0][1]));)
+    KH_DEBUG(CPackMan::pkAddGsData(_xyz(c[1][1][1]));)
+    KH_DEBUG(CPackMan::pkAddGsData(_xyz(c[0][1][1]));)
+    KH_DEBUG(CPackMan::pkAddGsData(_xyz(c[0][1][0]));)
+    KH_DEBUG(CPackMan::pkCloseGifTag();)
+    KH_DEBUG(CPackMan::pkOpenGifTag(giftag.ul128);)
+    KH_DEBUG(CPackMan::pkAddGsData(0x282 | ((u_long)isSemiTrans() << 6));)
+    KH_DEBUG(CPackMan::pkAddGsData(m_C0.col);)
+    KH_DEBUG(CPackMan::pkAddGsData(_xyz(c[0][1][1]));)
+    KH_DEBUG(CPackMan::pkAddGsData(_xyz(c[0][0][1]));)
+    KH_DEBUG(CPackMan::pkAddGsData(_xyz(c[1][0][1]));)
+    KH_DEBUG(CPackMan::pkAddGsData(_xyz(c[1][0][0]));)
+    KH_DEBUG(CPackMan::pkCloseGifTag();)
+KH_DEBUG(})
 
 void CModel::linkTexAnm(CTexAnm* pATbl, INT nANum) {
     INT nTexMax;

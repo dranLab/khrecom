@@ -42,12 +42,22 @@ def balanced(code):
 
 args = [int(a) for a in sys.argv[2:]]
 for start, end in zip(args[::2], args[1::2]):
+    in_comment = False
     for i in range(start - 1, end):
         l = lines[i]
-        if not l.strip() or l.lstrip().startswith("KH_DEBUG("):
+        if in_comment:  # a comment's continuation line: nothing to wrap
+            if "*/" in l:
+                in_comment = False
+                if l.split("*/", 1)[1].strip():
+                    sys.exit(f"line {i + 1}: code after a block comment: {l}")
             continue
-        if l.lstrip().startswith("#") or "/*" in l and "*/" not in l:
-            sys.exit(f"line {i + 1}: directive or block comment: {l}")
+        if not l.strip() or l.lstrip().startswith(("KH_DEBUG(", "#")):
+            continue  # a preprocessor directive stays as it is (#line, #define: the same in both versions)
+        if "/*" in l and "*/" not in l.split("/*", 1)[1]:
+            if l.split("/*", 1)[0].strip():
+                sys.exit(f"line {i + 1}: code before a multi-line block comment: {l}")
+            in_comment = True
+            continue
         code, comment = split_comment(l)
         k = i
         while not balanced(code) and k + 1 < end and not comment:

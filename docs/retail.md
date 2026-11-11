@@ -313,6 +313,21 @@ retail assembly:
     beta's bytes are found there in retail (FrecFont's color table at 0x332950, LightUnit's .data at 0x3329A0):
     a wrong start in the split shows up as `SHORT` data in the unit before it.
 
+Eleventh batch (2026-11-11): **528 units from source in retail**, 275 functions differ.
+
+- CJoyPad::m_Robot and all of CRobotPad (PadIO), CBBox without its CGPrim base in retail (`class CBBox
+  KH_DEBUG(: public CGPrim)`: a plain 0x24-byte box in CMap's grid), CMap's m_gpPosDir and its `m_iMapBack`
+  shader block (with the switch read as 0 the `== 0` branch would still run: retail has no block at all), CSky's
+  debug writes, the name buffers that only feed a TRACE (CMap::_createEffIdProc, CSceneInfo::setSeRangeRatio:
+  their TRACE goes too, as retail evaluates TRACE arguments).
+- Debug-menu-only functions (CSceneInfo::getEventRoomSceneNum, setupCompleteFloorWorld, setEventDoorUnavailable,
+  setTmpCurrentRoomID; CGame's debug-mode constructor, getDbgGameMode, dbgStartFromBattle, isDbgStartFromBattle)
+  and their calls: `CGame::isDbgStartFromBattle()` and `CGame::getDbgGameMode()` reads are `KH_DW(...)` (0).
+- DoorInfo::isValidNormaIndex returns TRUE in retail (`return KH_VER(FALSE, TRUE)` after the debug-only check).
+- CGameMain: the world-map key's `getCurrentFloorIndex() < 16` test and the battle menu's TsSdDebugPrint() are
+  beta-only.
+- tools/helpers/retail_wrap_lines.py leaves preprocessor lines and block comments as they are.
+
 ### Where it stands (end of the unattended run)
 
 - 517/638 units of retail from source; 10,392 functions match retail, 480 differ, 689 are beta-only ("extra").

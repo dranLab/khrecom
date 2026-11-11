@@ -386,8 +386,8 @@ void CGameMain::checkStartFieldMenu() {
             camp(TRUE);
         }
     } else if (CPadHandler::isButtonTrg(0x100, 0)) {
-        if (!CGameWork::getFlag(1, 4) && !_isStartRoom(CSceneInfo::getCurrentRoomID()) && !bFlag &&
-            CSceneInfo::getCurrentFloorIndex() < 16) {
+        if (!CGameWork::getFlag(1, 4) && !_isStartRoom(CSceneInfo::getCurrentRoomID()) && !bFlag KH_DEBUG(&&)
+            KH_DEBUG(CSceneInfo::getCurrentFloorIndex() < 16)) {
             worldMap(TRUE);
         }
     }
@@ -423,7 +423,7 @@ void CGameMain::checkStartBattleMenu() {
                 nMode = 4;
                 if (CSceneInfo::getCurrentSceneNum() != 0x41b) nMode = 0;
             }
-            TsSdDebugPrint();
+            KH_DEBUG(TsSdDebugPrint();)
         }
         pause(TRUE, nMode);
         suspendTaskInGame(2);
@@ -629,7 +629,7 @@ void CGameMain::setupBattleRsrc() {
         }
         reqLoadInconstGameRsrc();
         if (!CSceneInfo::isBossBattleScene(-1)) {
-            if (!CGame::isDbgStartFromBattle() || (USHORT)(CSceneInfo::getCurrentBattleSceneNum() - 1050) >= 149) {
+            if (!KH_DW(CGame::isDbgStartFromBattle()) || (USHORT)(CSceneInfo::getCurrentBattleSceneNum() - 1050) >= 149) {
                 reqLoadInconstWorldRsrc();
             }
         }
@@ -729,7 +729,7 @@ check:
     if (CSceneInfo::hasReqChangeScene() || CSceneInfo::hasReqEnterBattle() || bFlag) {
         INT nSub;
         if (!bFlag && CSceneInfo::hasReqEnterBattle()) {
-            if (CGame::isDbgStartFromBattle()) CGameWork::backup(CGameWork::BACKUP_PRIMARY);
+            if (KH_DW(CGame::isDbgStartFromBattle())) CGameWork::backup(CGameWork::BACKUP_PRIMARY);
             CGame::setBlackBeforeEncount(CAtel::isFadeActive());
             nSub = 3;
         } else {
@@ -988,7 +988,7 @@ void CGameMain::endBattleSub() {
     BOOL bChangeArea = (nCurArea != nNextArea);
     if (bChangeArea && (nCurArea == 0 || nNextArea == 0)) bChangeWorld = TRUE;
     if (bNextEvent || bChangeFloor || bChangeArea ||
-        (!CGame::isDbgStartFromBattle() && (USHORT)(CSceneInfo::getCurrentSceneNum() - 1050) < 149)) {
+        (!KH_DW(CGame::isDbgStartFromBattle()) && (USHORT)(CSceneInfo::getCurrentSceneNum() - 1050) < 149)) {
         m_pSubBattle->terminate();
         delete m_pSubBattle;
         m_pSubBattle = NULL;
@@ -1034,7 +1034,7 @@ void CGameMain::endBattleSub() {
     CSceneInfo::update();
     CPlaySpeedCtrl::setPlaySpeed(1.0f);
     CPackMan::setFrameEffect(0, 0, 0, 0);
-    if (m_pSubField && CGame::isDbgStartFromBattle()) {
+    if (m_pSubField && KH_DW(CGame::isDbgStartFromBattle())) {
         CGameWork::rollback(CGameWork::BACKUP_PRIMARY);
     } else if (bChangeFloor) {
         removeConstFloorRsrc();
@@ -1348,21 +1348,21 @@ void CGameMain::exitTheaterMode() {
 }
 void CGameMain::setBlackBeforeEncount(BOOL bBlack) { m_bBlackBeforeEncount = bBlack; }
 BOOL CGameMain::isBlackBeforeEncount() const { return m_bBlackBeforeEncount; }
-CGame::CGame(CTask* pParent, INT nMode) : CTask(pParent, 0x8000) {
-    ignorePlaySpeed(TRUE);
-    CNowLoading::setMode(0);
+KH_DEBUG(CGame::CGame(CTask* pParent, INT nMode) : CTask(pParent, 0x8000) {)
+    KH_DEBUG(ignorePlaySpeed(TRUE);)
+    KH_DEBUG(CNowLoading::setMode(0);)
 #line 2505
-    ASSERT(__null == s_pMain);
-    s_nDbgGameMode = nMode;
-    s_nGameStep = 0;
-}
+    KH_DEBUG(ASSERT(__null == s_pMain);)
+    KH_DEBUG(s_nDbgGameMode = nMode;)
+    KH_DEBUG(s_nGameStep = 0;)
+KH_DEBUG(})
 CGame::CGame(CTask* pParent) : CTask(pParent, 0x8000) {
     ignorePlaySpeed(TRUE);
     CNowLoading::setMode(0);
 #line 2519
     ASSERT(__null == s_pMain);
     s_nGameStep = 0;
-    s_nDbgGameMode = 0;
+    KH_DEBUG(s_nDbgGameMode = 0;)
 }
 CGame::~CGame() {
     s_pFadeMask = NULL;
@@ -1568,7 +1568,7 @@ BOOL CGame::isExitTheaterMode() {
     if (bRes && CMainApp::isFpsHalf()) CMainApp::setFpsFull();
     return bRes;
 }
-INT CGame::getDbgGameMode() { return s_nDbgGameMode; }
-void CGame::dbgStartFromBattle(BOOL bBattle) { s_bDbgStartFromBattle = bBattle; }
-BOOL CGame::isDbgStartFromBattle() { return s_bDbgStartFromBattle; }
+KH_DEBUG(INT CGame::getDbgGameMode() { return s_nDbgGameMode; })
+KH_DEBUG(void CGame::dbgStartFromBattle(BOOL bBattle) { s_bDbgStartFromBattle = bBattle; })
+KH_DEBUG(BOOL CGame::isDbgStartFromBattle() { return s_bDbgStartFromBattle; })
 // SOURCE DATA: .data .rodata

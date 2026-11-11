@@ -110,6 +110,7 @@ Game/Gimmick/GimmickWallHole
 Game/Gimmick/GimmickWarpPoint
 Game/Gimmick/GimmickWindowLid
 Game/InterpolateMove
+Game/Map
 Game/MapCardDef
 Game/MapUnitTable
 Game/ModelObj
@@ -137,6 +138,7 @@ Game/Player/SummonSinba
 Game/Player/SummonTink
 Game/Prize
 Game/SceneEnv
+Game/Status
 Game/StorageWork
 Game/Technic
 System/Buf

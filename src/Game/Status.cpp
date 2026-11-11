@@ -172,11 +172,12 @@ INT CStatus::getLvExp(UINT inLV) {
 
 BOOL CStatus::isLevelUp() {
     INT exp;
-    if (CGame::getDbgGameMode() == 7) return FALSE;
-    if (CGame::getDbgGameMode() == 8) return FALSE;
+    if (KH_DW(CGame::getDbgGameMode()) == 7) return FALSE;
+    if (KH_DW(CGame::getDbgGameMode()) == 8) return FALSE;
     exp = getLvExp(getLV());
     if (exp < 0) return FALSE;
     return getEXP() >= exp;
 }
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .rodata
