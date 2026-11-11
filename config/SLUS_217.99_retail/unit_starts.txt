@@ -27,6 +27,8 @@ Game/AtWater .data 0x0033B390 0x4
 Game/Atel/AtelBlur .data 0x0033C3F8 0x4
 Game/Atel/AtelCrossFade .data 0x0033C3FC 0x4
 Game/Atel/AtelTutorial .rodata 0x00410890 0x18
+Game/Atel/CameraMan .data 0x0033C404 0x8
+Game/Atel/CameraMan .rodata 0x004109C0 0x30
 Game/AttachCard .rodata 0x00405D38 0x1280
 Game/Bullet/Bullet .rodata 0x00424020 0x20
 Game/CardKind .rodata 0x0040B160 0x1220
@@ -221,7 +223,10 @@ System/Graphic/Effect/libppp/ryjProg/pppRyjMegaBirthModelFilter .bss 0x0057E160 
 System/Graphic/Fnt .data 0x00332AC0 0x10
 System/Graphic/Fnt .rodata 0x004010B0 0x28
 System/Graphic/Glare .data 0x00332990 0xc
+System/Graphic/Gprim .data 0x00332AD0 0x118
 System/Graphic/HermitePathCamera .rodata 0x00400E30 0x50
+System/Graphic/ModelMan .bss 0x0043C2C0 0x200
+System/Graphic/ModelMan .rodata 0x00400ED0 0x10
 System/Graphic/MotData .rodata 0x00400EE0 0x20
 System/Graphic/PathCamera .rodata 0x00400F08 0x10
 System/Graphic/PathDataCamera .rodata 0x00400F70 0x50
@@ -233,6 +238,7 @@ System/Movie/MovieScript .bss 0x005AE32C 0x4
 System/Movie/MovieScript .rodata 0x00405568 0x18
 System/Rnd .bss 0x00438710 0x9c0
 System/Rnd .data 0x003328C8 0x10
+System/RootTask .data 0x0033B360 0x4
 System/Spad .bss 0x0043BD44 0x4
 System/Task .rodata 0x00405CC0 0x8
 System/Tsin .rodata 0x003FF958 0xe18

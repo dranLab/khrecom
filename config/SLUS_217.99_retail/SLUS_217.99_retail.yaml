@@ -1412,7 +1412,7 @@ segments:
       - [0x3107F8, rodata, Game/Atel/Atel]
       - [0x310890, rodata, Game/Atel/AtelTutorial]
       - [0x3108A8, rodata, Game/Atel/Avatar]
-      - [0x3109D0, rodata, Game/Atel/CameraMan]
+      - [0x3109C0, rodata, Game/Atel/CameraMan]
       - [0x310A00, rodata, Game/Atel/VSME]
       - [0x313420, rodata, Game/Player/Friend]
       - [0x313610, rodata, Game/Player/FriendAladdin]

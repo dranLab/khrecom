@@ -28,43 +28,43 @@ inline void _jiminyMemoCheckId(INT inId) {
     KH_DEBUG(if (!(inId < 8)) AssertApp(__FILE__, __LINE__, "inId < PARAM_NUM", 0);)
 }
 
-namespace CollisionEditor {
-class CCollPrim;
-struct ATK_COLL_DATA;
+KH_DEBUG(namespace CollisionEditor {)
+KH_DEBUG(class CCollPrim;)
+KH_DEBUG(struct ATK_COLL_DATA;)
 
 #line 1 "../Dlls/DebugDll/CollisionEditor.h"
-inline void _checkIndex8(INT inIndex) {
+KH_DEBUG(inline void _checkIndex8(INT inIndex) {)
     KH_DEBUG(if (!(0 <= inIndex && inIndex < 8)) AssertApp(__FILE__, __LINE__, "0 <= inIndex && inIndex < 8", 0);)
-}
-inline void* _alloc528() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
-    return com_malloc_d(4, __FILE__ "(528)", (UINT)-1);
-}
+KH_DEBUG(})
+KH_DEBUG(inline void* _alloc528() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */)
+    KH_DEBUG(return com_malloc_d(4, __FILE__ "(528)", (UINT)-1);)
+KH_DEBUG(})
 
-class CCollisionEditorModel {
-    CVector<CCollPrim*> m_BodyCollPrimContainer;
-    CVector<ATK_COLL_DATA*> m_AtkCollDataContainer;
+KH_DEBUG(class CCollisionEditorModel {)
+    KH_DEBUG(CVector<CCollPrim*> m_BodyCollPrimContainer;)
+    KH_DEBUG(CVector<ATK_COLL_DATA*> m_AtkCollDataContainer;)
 
-public:
-    INT getBodyCollPrimCount() { return m_BodyCollPrimContainer.size(); }
-    void checkBodyCollPrimIndex(INT inIndex) {
-        if (!(0 <= inIndex && inIndex < getBodyCollPrimCount()))
-            AssertApp(__FILE__, __LINE__, "0 <= inIndex && inIndex < getBodyCollPrimCount()", 0);
-    }
-    INT getAtkCollDataCount() { return m_AtkCollDataContainer.size(); }
-    void checkAtkCollDataIndex(INT inIndex) {
-        if (!(0 <= inIndex && inIndex < getAtkCollDataCount()))
-            AssertApp(__FILE__, __LINE__, "0 <= inIndex && inIndex < getAtkCollDataCount()", 0);
-    }
-    void formatNumber(INT n) {
-        TRACE("%d", n);
-        TRACE(" ");
-    }
-    CCollPrim* getBodyCollPrim(INT inIndex) { return m_BodyCollPrimContainer[inIndex]; }
-    ATK_COLL_DATA* getAtkCollData(INT inIndex) { return m_AtkCollDataContainer[inIndex]; }
-    void addBodyCollPrim(CCollPrim* pPrim) { m_BodyCollPrimContainer.push_back(pPrim); }
-    void addAtkCollPrim(ATK_COLL_DATA* pData) { m_AtkCollDataContainer.push_back(pData); }
-};
-}
+KH_DEBUG(public:)
+    KH_DEBUG(INT getBodyCollPrimCount() { return m_BodyCollPrimContainer.size(); })
+    KH_DEBUG(void checkBodyCollPrimIndex(INT inIndex) {)
+        KH_DEBUG(if (!(0 <= inIndex && inIndex < getBodyCollPrimCount())))
+            KH_DEBUG(AssertApp(__FILE__, __LINE__, "0 <= inIndex && inIndex < getBodyCollPrimCount()", 0);)
+    KH_DEBUG(})
+    KH_DEBUG(INT getAtkCollDataCount() { return m_AtkCollDataContainer.size(); })
+    KH_DEBUG(void checkAtkCollDataIndex(INT inIndex) {)
+        KH_DEBUG(if (!(0 <= inIndex && inIndex < getAtkCollDataCount())))
+            KH_DEBUG(AssertApp(__FILE__, __LINE__, "0 <= inIndex && inIndex < getAtkCollDataCount()", 0);)
+    KH_DEBUG(})
+    KH_DEBUG(void formatNumber(INT n) {)
+        KH_DEBUG(TRACE("%d", n);)
+        KH_DEBUG(TRACE(" ");)
+    KH_DEBUG(})
+    KH_DEBUG(CCollPrim* getBodyCollPrim(INT inIndex) { return m_BodyCollPrimContainer[inIndex]; })
+    KH_DEBUG(ATK_COLL_DATA* getAtkCollData(INT inIndex) { return m_AtkCollDataContainer[inIndex]; })
+    KH_DEBUG(void addBodyCollPrim(CCollPrim* pPrim) { m_BodyCollPrimContainer.push_back(pPrim); })
+    KH_DEBUG(void addAtkCollPrim(ATK_COLL_DATA* pData) { m_AtkCollDataContainer.push_back(pData); })
+KH_DEBUG(};)
+KH_DEBUG(})
 
 #line 1 "Game/OsdDef.h"
 inline void _osdCheckCategory(INT inCategory) {
@@ -163,17 +163,17 @@ DLL_TASK(CMovieTest, 0x170);
  * __10CMovieTestP5CTask
  */
 
-namespace CollisionEditor {
-static INT MENU_BASE_POX_Y = -(SCREEN_HEIGHT / 2) + 24;
-}
+KH_DEBUG(namespace CollisionEditor {)
+KH_DEBUG(static INT MENU_BASE_POX_Y = -(SCREEN_HEIGHT / 2) + 24;)
+KH_DEBUG(})
 
-namespace SetEditor {
-static INT MENU_BASE_POX_Y = -(SCREEN_HEIGHT / 2) + 22;
-}
+KH_DEBUG(namespace SetEditor {)
+KH_DEBUG(static INT MENU_BASE_POX_Y = -(SCREEN_HEIGHT / 2) + 22;)
+KH_DEBUG(})
 
-namespace AttachEditor {
-static INT MENU_BASE_POX_Y = -(SCREEN_HEIGHT / 2) + 24;
-}
+KH_DEBUG(namespace AttachEditor {)
+KH_DEBUG(static INT MENU_BASE_POX_Y = -(SCREEN_HEIGHT / 2) + 24;)
+KH_DEBUG(})
 
 #line 58
 CTask* CMainTaskFactory::createMainTask(MAINTASK_ID nID, CTask* pParent) {
@@ -186,56 +186,56 @@ CTask* CMainTaskFactory::createMainTask(MAINTASK_ID nID, CTask* pParent) {
     case MAINTASK_ID_GAME:
         return new KH_AT("(65)") CGame(pParent);
 #line 68
-    case MAINTASK_ID_GAME_JF_HALLOWEEN:
-        return new KH_AT("(68)") CGame(pParent, 7);
-    case MAINTASK_ID_GAME_TGS_NORMAL:
-        return new KH_AT("(69)") CGame(pParent, 5);
-    case MAINTASK_ID_GAME_JF_VEXEN:
-        return new KH_AT("(70)") CGame(pParent, 8);
-    case MAINTASK_ID_DEBUG_GAME:
-        return new KH_AT("(71)") CGame(pParent, 1);
-    case MAINTASK_ID_DEBUG_MENU:
-        return (CTask*)new KH_AT("(73)") CDebugMenu(pParent);
-    case MAINTASK_ID_DEBUG_COLOR:
-        return (CTask*)new KH_AT("(75)") CColorCheck(pParent);
-    case MAINTASK_ID_DEBUG_SCREEN:
-        return (CTask*)new KH_AT("(76)") CScreenCheck(pParent);
-    case MAINTASK_ID_DEBUG_KISIWADA:
-        return new KH_AT("(78)") CKishiwadaTest(pParent);
-    case MAINTASK_ID_DEBUG_KIKUCHI:
-        return new KH_AT("(79)") CKikuchiTest(pParent);
-    case MAINTASK_ID_DEBUG_KOU:
-        return new KH_AT("(80)") CKouTest(pParent);
-    case MAINTASK_ID_DEBUG_GOTO:
-        return new KH_AT("(81)") CGotoTest(pParent);
-    case MAINTASK_ID_DEBUG_NAKAMICHI:
-        return new KH_AT("(82)") CNakamichiTest(pParent);
-    case MAINTASK_ID_DEBUG_MATSUOKA:
-        return new KH_AT("(83)") CMatsuokaTest(pParent);
-    case MAINTASK_ID_DEBUG_KATAOKA:
-        return new KH_AT("(84)") CKataokaTest(pParent);
-    case MAINTASK_ID_DEBUG_KAHARA:
-        return new KH_AT("(85)") CKaharaTest(pParent);
-    case MAINTASK_ID_DEBUG_NAKASHIMA:
-        return new KH_AT("(86)") CNakashimaTest(pParent);
-    case MAINTASK_ID_DEBUG_COLLISIN_EDITOR:
-        return new KH_AT("(88)") CollisionEditor::CCollisionEditor(pParent);
-    case MAINTASK_ID_DEBUG_SET_EDITOR:
-        return new KH_AT("(89)") SetEditor::CSetEditor(pParent);
-    case MAINTASK_ID_DEBUG_ATTACH_EDITOR:
-        return new KH_AT("(91)") AttachEditor::CAttachEditor(pParent);
-    case MAINTASK_ID_DEBUG_FONT_VIEWER:
-        return new KH_AT("(92)") CFontTest(pParent);
-    case MAINTASK_ID_MAPVIEWER:
-        return new KH_AT("(94)") CMapViewerMan(pParent);
-    case MAINTASK_ID_MODELVIEWER:
-        return new KH_AT("(95)") CModelViewerMenu(pParent);
-    case MAINTASK_ID_EFFECTVIEWER:
-        return new KH_AT("(96)") CEffectViewer(pParent);
-    case MAINTASK_ID_2DVIEWER:
-        return new KH_AT("(97)") C2DViewer(pParent);
-    case MAINTASK_ID_MOVIE_TEST:
-        return new KH_AT("(98)") CMovieTest(pParent);
+    KH_DEBUG(case MAINTASK_ID_GAME_JF_HALLOWEEN:)
+        KH_DEBUG(return new KH_AT("(68)") CGame(pParent, 7);)
+    KH_DEBUG(case MAINTASK_ID_GAME_TGS_NORMAL:)
+        KH_DEBUG(return new KH_AT("(69)") CGame(pParent, 5);)
+    KH_DEBUG(case MAINTASK_ID_GAME_JF_VEXEN:)
+        KH_DEBUG(return new KH_AT("(70)") CGame(pParent, 8);)
+    KH_DEBUG(case MAINTASK_ID_DEBUG_GAME:)
+        KH_DEBUG(return new KH_AT("(71)") CGame(pParent, 1);)
+    KH_DEBUG(case MAINTASK_ID_DEBUG_MENU:)
+        KH_DEBUG(return (CTask*)new KH_AT("(73)") CDebugMenu(pParent);)
+    KH_DEBUG(case MAINTASK_ID_DEBUG_COLOR:)
+        KH_DEBUG(return (CTask*)new KH_AT("(75)") CColorCheck(pParent);)
+    KH_DEBUG(case MAINTASK_ID_DEBUG_SCREEN:)
+        KH_DEBUG(return (CTask*)new KH_AT("(76)") CScreenCheck(pParent);)
+    KH_DEBUG(case MAINTASK_ID_DEBUG_KISIWADA:)
+        KH_DEBUG(return new KH_AT("(78)") CKishiwadaTest(pParent);)
+    KH_DEBUG(case MAINTASK_ID_DEBUG_KIKUCHI:)
+        KH_DEBUG(return new KH_AT("(79)") CKikuchiTest(pParent);)
+    KH_DEBUG(case MAINTASK_ID_DEBUG_KOU:)
+        KH_DEBUG(return new KH_AT("(80)") CKouTest(pParent);)
+    KH_DEBUG(case MAINTASK_ID_DEBUG_GOTO:)
+        KH_DEBUG(return new KH_AT("(81)") CGotoTest(pParent);)
+    KH_DEBUG(case MAINTASK_ID_DEBUG_NAKAMICHI:)
+        KH_DEBUG(return new KH_AT("(82)") CNakamichiTest(pParent);)
+    KH_DEBUG(case MAINTASK_ID_DEBUG_MATSUOKA:)
+        KH_DEBUG(return new KH_AT("(83)") CMatsuokaTest(pParent);)
+    KH_DEBUG(case MAINTASK_ID_DEBUG_KATAOKA:)
+        KH_DEBUG(return new KH_AT("(84)") CKataokaTest(pParent);)
+    KH_DEBUG(case MAINTASK_ID_DEBUG_KAHARA:)
+        KH_DEBUG(return new KH_AT("(85)") CKaharaTest(pParent);)
+    KH_DEBUG(case MAINTASK_ID_DEBUG_NAKASHIMA:)
+        KH_DEBUG(return new KH_AT("(86)") CNakashimaTest(pParent);)
+    KH_DEBUG(case MAINTASK_ID_DEBUG_COLLISIN_EDITOR:)
+        KH_DEBUG(return new KH_AT("(88)") CollisionEditor::CCollisionEditor(pParent);)
+    KH_DEBUG(case MAINTASK_ID_DEBUG_SET_EDITOR:)
+        KH_DEBUG(return new KH_AT("(89)") SetEditor::CSetEditor(pParent);)
+    KH_DEBUG(case MAINTASK_ID_DEBUG_ATTACH_EDITOR:)
+        KH_DEBUG(return new KH_AT("(91)") AttachEditor::CAttachEditor(pParent);)
+    KH_DEBUG(case MAINTASK_ID_DEBUG_FONT_VIEWER:)
+        KH_DEBUG(return new KH_AT("(92)") CFontTest(pParent);)
+    KH_DEBUG(case MAINTASK_ID_MAPVIEWER:)
+        KH_DEBUG(return new KH_AT("(94)") CMapViewerMan(pParent);)
+    KH_DEBUG(case MAINTASK_ID_MODELVIEWER:)
+        KH_DEBUG(return new KH_AT("(95)") CModelViewerMenu(pParent);)
+    KH_DEBUG(case MAINTASK_ID_EFFECTVIEWER:)
+        KH_DEBUG(return new KH_AT("(96)") CEffectViewer(pParent);)
+    KH_DEBUG(case MAINTASK_ID_2DVIEWER:)
+        KH_DEBUG(return new KH_AT("(97)") C2DViewer(pParent);)
+    KH_DEBUG(case MAINTASK_ID_MOVIE_TEST:)
+        KH_DEBUG(return new KH_AT("(98)") CMovieTest(pParent);)
     default:
         TRACE("\x8a\x59\x93\x96\x82\xb7\x82\xe9\x81\x75\x83\x81\x83\x43\x83\x93TASK\x81\x76\x82\xaa\x91\xb6\x8d\xdd\x82\xb5\x82\xdc\x82\xb9\x82\xf1\x81\x69 ID = %d \x81\x6a\n", nID);
         return NULL;

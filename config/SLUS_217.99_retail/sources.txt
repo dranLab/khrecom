@@ -21,6 +21,7 @@ Game/Atel/AtelBlur
 Game/Atel/AtelCamera
 Game/Atel/AtelCrossFade
 Game/Atel/AtelTutorial
+Game/Atel/CameraMan
 Game/AttachCard
 Game/Bullet/Bullet
 Game/Bullet/BulletManager
@@ -374,8 +375,10 @@ System/Graphic/Effect/libppp/stdProg/pppGetRotMatrixZXY
 System/Graphic/Effect/libppp/stdProg/pppGetRotMatrixZYX
 System/Graphic/Fnt
 System/Graphic/Glare
+System/Graphic/Gprim
 System/Graphic/HermitePath
 System/Graphic/HermitePathCamera
+System/Graphic/ModelMan
 System/Graphic/MotData
 System/Graphic/PathCamera
 System/Graphic/PathDataCamera
@@ -384,11 +387,13 @@ System/Graphic/StrPrim
 System/Graphic/TexAnm
 System/Graphic/TexCtrl
 System/LinkedBuf
+System/MainTaskFactory
 System/Movie/AudioDec
 System/Movie/MovieFiles
 System/Movie/MovieScript
 System/PadHandler
 System/Rnd
+System/RootTask
 System/Spad
 System/Task
 System/Thread

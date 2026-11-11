@@ -164,7 +164,7 @@ ULONGLONG CGTexPrim::setTexture(const TexInfo* pInInfo, BOOL bOnly2D) {
             nTexPos = pInInfo->_TexInfo._nDistPos;
         } else {
             CPackMan::pkRefLoadImage(nTexPos, pInInfo->_TexInfo);
-            CModelMan::incTexSendCount(1);
+            KH_DEBUG(CModelMan::incTexSendCount(1);)
         }
         if (pInInfo->isFixClut()) {
             nClutPos = pInInfo->_ClutInfo._nDistPos;
@@ -194,7 +194,7 @@ ULONGLONG CGTexPrim2D::setTexture(const TexInfo* pInInfo, BOOL bOnly2D) {
         nClutPos += m_nCacheIdxOld * 4;
         CPackMan::pkRefLoadImage(nTexPos, pInInfo->_TexInfo);
         CPackMan::pkRefLoadImage(nClutPos, pInInfo->_ClutInfo);
-        CModelMan::incTexSendCount(1);
+        KH_DEBUG(CModelMan::incTexSendCount(1);)
         CPackMan::pkOpenDirectCode(0);
     } else {
         nTexPos += nID * 64;
@@ -1152,186 +1152,186 @@ void C3DRotSprt::makePkt() {
 
     CPackMan::pkCloseGifTag();
 }
-FIX4 C3DCircle::calcZ() {
-    FVECTOR c;
-    FMATRIX& vs = CWorldEnv::getViewScreenMatrix();
-    c = ApplyMatrix(m_pCrd->getWorldMatrix(), m_Center);
-    c = ApplyMatrix(CWorldEnv::getWorldViewMatrix(), c);
+KH_DEBUG(FIX4 C3DCircle::calcZ() {)
+    KH_DEBUG(FVECTOR c;)
+    KH_DEBUG(FMATRIX& vs = CWorldEnv::getViewScreenMatrix();)
+    KH_DEBUG(c = ApplyMatrix(m_pCrd->getWorldMatrix(), m_Center);)
+    KH_DEBUG(c = ApplyMatrix(CWorldEnv::getWorldViewMatrix(), c);)
 
-    c.x -= m_R0;
-    c.y -= m_R0;
+    KH_DEBUG(c.x -= m_R0;)
+    KH_DEBUG(c.y -= m_R0;)
 
-    RotTransPers(p0, vs, c);
+    KH_DEBUG(RotTransPers(p0, vs, c);)
 
-    c.x += m_R0 * 2.0f;
-    c.y += m_R0 * 2.0f;
-    RotTransPers(p1, vs, c);
+    KH_DEBUG(c.x += m_R0 * 2.0f;)
+    KH_DEBUG(c.y += m_R0 * 2.0f;)
+    KH_DEBUG(RotTransPers(p1, vs, c);)
 
-    if (m_Zoffset != 0.0f) {
-        IVECTOR p;
+    KH_DEBUG(if (m_Zoffset != 0.0f) {)
+        KH_DEBUG(IVECTOR p;)
 
-        c.x -= m_R0;
-        c.y -= m_R0;
+        KH_DEBUG(c.x -= m_R0;)
+        KH_DEBUG(c.y -= m_R0;)
 
-        c.z += m_Zoffset;
+        KH_DEBUG(c.z += m_Zoffset;)
 
-        RotTransPers(p, vs, c);
+        KH_DEBUG(RotTransPers(p, vs, c);)
 
-        p0.z = p.z;
-    }
+        KH_DEBUG(p0.z = p.z;)
+    KH_DEBUG(})
 
-    p1.z = p0.z;
+    KH_DEBUG(p1.z = p0.z;)
 
-    return p0.z;
-}
-void C3DCircle::makePkt() {
-    INT cx;
-    INT cy;
-    INT z;
-    FLOAT rx;
-    FLOAT ry;
-    INT dx;
-    INT dy;
-    QWdata giftag;
-    if (p0.z <= 0 || p0.z > 0xFFFF28 || p0.x < 0 || p0.x > 0xFFFF || p0.y < 0 || p0.y > 0xFFFF ||
-        p1.z > 0xFFFF28 || p1.z <= 0 || p1.x < 0 || p1.x > 0xFFFF || p1.y < 0 || p1.y > 0xFFFF) {
-        return;
-    }
+    KH_DEBUG(return p0.z;)
+KH_DEBUG(})
+KH_DEBUG(void C3DCircle::makePkt() {)
+    KH_DEBUG(INT cx;)
+    KH_DEBUG(INT cy;)
+    KH_DEBUG(INT z;)
+    KH_DEBUG(FLOAT rx;)
+    KH_DEBUG(FLOAT ry;)
+    KH_DEBUG(INT dx;)
+    KH_DEBUG(INT dy;)
+    KH_DEBUG(QWdata giftag;)
+    KH_DEBUG(if (p0.z <= 0 || p0.z > 0xFFFF28 || p0.x < 0 || p0.x > 0xFFFF || p0.y < 0 || p0.y > 0xFFFF || p1.z > 0xFFFF28 || p1.z <= 0 || p1.x < 0 || p1.x > 0xFFFF || p1.y < 0 || p1.y > 0xFFFF) {)
 
-    cx = (p0.x + p1.x) / 2;
-    rx = (p1.x - p0.x) / 2;
+        KH_DEBUG(return;)
+    KH_DEBUG(})
 
-    cy = (p0.y + p1.y) / 2;
-    ry = (p1.y - p0.y) / 2;
+    KH_DEBUG(cx = (p0.x + p1.x) / 2;)
+    KH_DEBUG(rx = (p1.x - p0.x) / 2;)
 
-    z = p0.z >> 4;
+    KH_DEBUG(cy = (p0.y + p1.y) / 2;)
+    KH_DEBUG(ry = (p1.y - p0.y) / 2;)
 
-    giftag.ul64[0] = 0x4400000000008000UL;
-    giftag.ul64[1] = 0x1410;
+    KH_DEBUG(z = p0.z >> 4;)
 
-    CPackMan::pkOpenGifTag(giftag.ul128);
-    CPackMan::pkAddGsData((u_long)0x20D | ((u_long)isSemiTrans() << 6));
-    CPackMan::pkAddGsData(m_C0.col);
-    CPackMan::pkAddGsData((u_long)cx | ((u_long)cy << 16) | ((u_long)z << 32));
-    CPackMan::pkAddGsData(m_C1.col);
-    CPackMan::pkCloseGifTag();
+    KH_DEBUG(giftag.ul64[0] = 0x4400000000008000UL;)
+    KH_DEBUG(giftag.ul64[1] = 0x1410;)
 
-    giftag.ul64[0] = 0x1400000000008000UL;
-    giftag.ul64[1] = 4;
+    KH_DEBUG(CPackMan::pkOpenGifTag(giftag.ul128);)
+    KH_DEBUG(CPackMan::pkAddGsData((u_long)0x20D | ((u_long)isSemiTrans() << 6));)
+    KH_DEBUG(CPackMan::pkAddGsData(m_C0.col);)
+    KH_DEBUG(CPackMan::pkAddGsData((u_long)cx | ((u_long)cy << 16) | ((u_long)z << 32));)
+    KH_DEBUG(CPackMan::pkAddGsData(m_C1.col);)
+    KH_DEBUG(CPackMan::pkCloseGifTag();)
 
-    CPackMan::pkOpenGifTag(giftag.ul128);
-    for (int deg = 0; deg <= 3600; deg += 200) {
-        dx = rx * tcos(deg);
-        dy = ry * tsin(deg);
-        CPackMan::pkAddGsData((u_long)(cx + dx) | ((u_long)(cy + dy) << 16) | ((u_long)z << 32));
-    }
-    CPackMan::pkCloseGifTag();
-}
-void C3DPointLight::makePkt() {
-    INT cx;
-    INT cy;
-    INT z;
-    FLOAT rx;
-    FLOAT ry;
-    INT dx;
-    INT dy;
-    FVECTOR c;
-    FLOAT rx0;
-    FLOAT ry0;
-    if (p0.z <= 0 || p0.z > 0xFFFF28 || p0.x < 0 || p0.x > 0xFFFF || p0.y < 0 || p0.y > 0xFFFF ||
-        p1.z > 0xFFFF28 || p1.z <= 0 || p1.x < 0 || p1.x > 0xFFFF || p1.y < 0 || p1.y > 0xFFFF) {
-        return;
-    }
+    KH_DEBUG(giftag.ul64[0] = 0x1400000000008000UL;)
+    KH_DEBUG(giftag.ul64[1] = 4;)
 
-    z = p0.z >> 4;
+    KH_DEBUG(CPackMan::pkOpenGifTag(giftag.ul128);)
+    KH_DEBUG(for (int deg = 0; deg <= 3600; deg += 200) {)
+        KH_DEBUG(dx = rx * tcos(deg);)
+        KH_DEBUG(dy = ry * tsin(deg);)
+        KH_DEBUG(CPackMan::pkAddGsData((u_long)(cx + dx) | ((u_long)(cy + dy) << 16) | ((u_long)z << 32));)
+    KH_DEBUG(})
+    KH_DEBUG(CPackMan::pkCloseGifTag();)
+KH_DEBUG(})
+KH_DEBUG(void C3DPointLight::makePkt() {)
+    KH_DEBUG(INT cx;)
+    KH_DEBUG(INT cy;)
+    KH_DEBUG(INT z;)
+    KH_DEBUG(FLOAT rx;)
+    KH_DEBUG(FLOAT ry;)
+    KH_DEBUG(INT dx;)
+    KH_DEBUG(INT dy;)
+    KH_DEBUG(FVECTOR c;)
+    KH_DEBUG(FLOAT rx0;)
+    KH_DEBUG(FLOAT ry0;)
+    KH_DEBUG(if (p0.z <= 0 || p0.z > 0xFFFF28 || p0.x < 0 || p0.x > 0xFFFF || p0.y < 0 || p0.y > 0xFFFF || p1.z > 0xFFFF28 || p1.z <= 0 || p1.x < 0 || p1.x > 0xFFFF || p1.y < 0 || p1.y > 0xFFFF) {)
 
-    m_C0.a = m_C1.a = 0x80;
+        KH_DEBUG(return;)
+    KH_DEBUG(})
 
-    cx = (p0.x + p1.x) / 2;
-    rx = (p1.x - p0.x) / 2;
+    KH_DEBUG(z = p0.z >> 4;)
 
-    cy = (p0.y + p1.y) / 2;
-    ry = (p1.y - p0.y) / 2;
+    KH_DEBUG(m_C0.a = m_C1.a = 0x80;)
 
-    FMATRIX& vs = CWorldEnv::getViewScreenMatrix();
-    c = ApplyMatrix(m_pCrd->getWorldMatrix(), m_Center);
-    c = ApplyMatrix(CWorldEnv::getWorldViewMatrix(), c);
-    IVECTOR p00;
-    IVECTOR p01;
+    KH_DEBUG(cx = (p0.x + p1.x) / 2;)
+    KH_DEBUG(rx = (p1.x - p0.x) / 2;)
 
-    c.x -= m_R00;
-    c.y -= m_R00;
+    KH_DEBUG(cy = (p0.y + p1.y) / 2;)
+    KH_DEBUG(ry = (p1.y - p0.y) / 2;)
 
-    RotTransPers(p00, vs, c);
+    KH_DEBUG(FMATRIX& vs = CWorldEnv::getViewScreenMatrix();)
+    KH_DEBUG(c = ApplyMatrix(m_pCrd->getWorldMatrix(), m_Center);)
+    KH_DEBUG(c = ApplyMatrix(CWorldEnv::getWorldViewMatrix(), c);)
+    KH_DEBUG(IVECTOR p00;)
+    KH_DEBUG(IVECTOR p01;)
 
-    c.x += m_R00 * 2.0f;
-    c.y += m_R00 * 2.0f;
-    RotTransPers(p01, vs, c);
-    rx0 = (p01.x - p00.x) / 2;
-    ry0 = (p01.y - p00.y) / 2;
+    KH_DEBUG(c.x -= m_R00;)
+    KH_DEBUG(c.y -= m_R00;)
 
-    QWdata giftag;
-    giftag.ul64[0] = 0x4400000000008000UL;
-    giftag.ul64[1] = 0x1410;
+    KH_DEBUG(RotTransPers(p00, vs, c);)
 
-    CPackMan::pkOpenGifTag(giftag.ul128);
-    CPackMan::pkAddGsData((u_long)0x20A | ((u_long)isSemiTrans() << 6));
-    CPackMan::pkAddGsData(m_C0.col);
-    CPackMan::pkAddGsData((u_long)cx | ((u_long)cy << 16) | ((u_long)z << 32));
-    CPackMan::pkAddGsData(m_C1.col);
-    CPackMan::pkCloseGifTag();
+    KH_DEBUG(c.x += m_R00 * 2.0f;)
+    KH_DEBUG(c.y += m_R00 * 2.0f;)
+    KH_DEBUG(RotTransPers(p01, vs, c);)
+    KH_DEBUG(rx0 = (p01.x - p00.x) / 2;)
+    KH_DEBUG(ry0 = (p01.y - p00.y) / 2;)
 
-    giftag.ul64[0] = 0x1400000000008000UL;
-    giftag.ul64[1] = 4;
+    KH_DEBUG(QWdata giftag;)
+    KH_DEBUG(giftag.ul64[0] = 0x4400000000008000UL;)
+    KH_DEBUG(giftag.ul64[1] = 0x1410;)
 
-    CPackMan::pkOpenGifTag(giftag.ul128);
+    KH_DEBUG(CPackMan::pkOpenGifTag(giftag.ul128);)
+    KH_DEBUG(CPackMan::pkAddGsData((u_long)0x20A | ((u_long)isSemiTrans() << 6));)
+    KH_DEBUG(CPackMan::pkAddGsData(m_C0.col);)
+    KH_DEBUG(CPackMan::pkAddGsData((u_long)cx | ((u_long)cy << 16) | ((u_long)z << 32));)
+    KH_DEBUG(CPackMan::pkAddGsData(m_C1.col);)
+    KH_DEBUG(CPackMan::pkCloseGifTag();)
 
-    int deg;
-    for (deg = 0; deg <= 3600; deg += 200) {
-        dy = -(INT)(ry * tcos(deg));
-        dx = rx * tsin(deg);
-        CPackMan::pkAddGsData((u_long)(cx + dx) | ((u_long)(cy + dy) << 16) | ((u_long)z << 32));
-    }
-    for (deg = 0; deg <= 3600; deg += 200) {
-        dy = -(INT)(ry0 * tcos(deg));
-        dx = rx0 * tsin(deg);
-        CPackMan::pkAddGsData((u_long)(cx + dx) | ((u_long)(cy + dy) << 16) | ((u_long)z << 32));
-    }
-    CPackMan::pkCloseGifTag();
+    KH_DEBUG(giftag.ul64[0] = 0x1400000000008000UL;)
+    KH_DEBUG(giftag.ul64[1] = 4;)
 
-    if (m_Active) {
-        int deg;
-        m_C0.a = m_C1.a = 0x40;
+    KH_DEBUG(CPackMan::pkOpenGifTag(giftag.ul128);)
 
-        giftag.ul64[0] = 0x4400000000008000UL;
-        giftag.ul64[1] = 0x1410;
+    KH_DEBUG(int deg;)
+    KH_DEBUG(for (deg = 0; deg <= 3600; deg += 200) {)
+        KH_DEBUG(dy = -(INT)(ry * tcos(deg));)
+        KH_DEBUG(dx = rx * tsin(deg);)
+        KH_DEBUG(CPackMan::pkAddGsData((u_long)(cx + dx) | ((u_long)(cy + dy) << 16) | ((u_long)z << 32));)
+    KH_DEBUG(})
+    KH_DEBUG(for (deg = 0; deg <= 3600; deg += 200) {)
+        KH_DEBUG(dy = -(INT)(ry0 * tcos(deg));)
+        KH_DEBUG(dx = rx0 * tsin(deg);)
+        KH_DEBUG(CPackMan::pkAddGsData((u_long)(cx + dx) | ((u_long)(cy + dy) << 16) | ((u_long)z << 32));)
+    KH_DEBUG(})
+    KH_DEBUG(CPackMan::pkCloseGifTag();)
 
-        CPackMan::pkOpenGifTag(giftag.ul128);
-        CPackMan::pkAddGsData((u_long)0x20D | ((u_long)isSemiTrans() << 6));
-        CPackMan::pkAddGsData(m_C0.col);
-        CPackMan::pkAddGsData((u_long)cx | ((u_long)cy << 16) | ((u_long)z << 32));
-        CPackMan::pkAddGsData(m_C1.col);
-        CPackMan::pkCloseGifTag();
+    KH_DEBUG(if (m_Active) {)
+        KH_DEBUG(int deg;)
+        KH_DEBUG(m_C0.a = m_C1.a = 0x40;)
 
-        giftag.ul64[0] = 0x1400000000008000UL;
-        giftag.ul64[1] = 4;
+        KH_DEBUG(giftag.ul64[0] = 0x4400000000008000UL;)
+        KH_DEBUG(giftag.ul64[1] = 0x1410;)
 
-        CPackMan::pkOpenGifTag(giftag.ul128);
-        for (deg = 0; deg <= 3600; deg += 200) {
-            dy = -(INT)(ry0 * tcos(deg));
-            dx = rx0 * tsin(deg);
-            CPackMan::pkAddGsData((u_long)(cx + dx) | ((u_long)(cy + dy) << 16) | ((u_long)z << 32));
-        }
-        CPackMan::pkCloseGifTag();
-    }
-}
-FIX4 C3DPointLight2::calcZ() {
-    FIX4 nRet = ((CGPrim&)m_Cl[0]).calcZ();
-    if (m_nType == 1) {
-        ((CGPrim&)m_Cl[1]).calcZ();
-    }
-    return nRet;
-}
+        KH_DEBUG(CPackMan::pkOpenGifTag(giftag.ul128);)
+        KH_DEBUG(CPackMan::pkAddGsData((u_long)0x20D | ((u_long)isSemiTrans() << 6));)
+        KH_DEBUG(CPackMan::pkAddGsData(m_C0.col);)
+        KH_DEBUG(CPackMan::pkAddGsData((u_long)cx | ((u_long)cy << 16) | ((u_long)z << 32));)
+        KH_DEBUG(CPackMan::pkAddGsData(m_C1.col);)
+        KH_DEBUG(CPackMan::pkCloseGifTag();)
+
+        KH_DEBUG(giftag.ul64[0] = 0x1400000000008000UL;)
+        KH_DEBUG(giftag.ul64[1] = 4;)
+
+        KH_DEBUG(CPackMan::pkOpenGifTag(giftag.ul128);)
+        KH_DEBUG(for (deg = 0; deg <= 3600; deg += 200) {)
+            KH_DEBUG(dy = -(INT)(ry0 * tcos(deg));)
+            KH_DEBUG(dx = rx0 * tsin(deg);)
+            KH_DEBUG(CPackMan::pkAddGsData((u_long)(cx + dx) | ((u_long)(cy + dy) << 16) | ((u_long)z << 32));)
+        KH_DEBUG(})
+        KH_DEBUG(CPackMan::pkCloseGifTag();)
+    KH_DEBUG(})
+KH_DEBUG(})
+KH_DEBUG(FIX4 C3DPointLight2::calcZ() {)
+    KH_DEBUG(FIX4 nRet = ((CGPrim&)m_Cl[0]).calcZ();)
+    KH_DEBUG(if (m_nType == 1) {)
+        KH_DEBUG(((CGPrim&)m_Cl[1]).calcZ();)
+    KH_DEBUG(})
+    KH_DEBUG(return nRet;)
+KH_DEBUG(})
 #define PI 3.1415927f
 extern "C" {
 float atan2f(float, float);
@@ -1341,188 +1341,188 @@ float sinf(float);
 namespace Math3D {
 FLOAT LimitPI(FLOAT pai);
 }
-void C3DPointLight2::makePkt() {
-    BOOL bRet;
-    FVECTOR c[2];
-    FVECTOR r[2];
-    FVECTOR r1[2];
-    INT z0;
-    INT z1;
-    QWdata giftag;
-    FLOAT ftheta;
-    IVECTOR ip;
-    INT j;
+KH_DEBUG(void C3DPointLight2::makePkt() {)
+    KH_DEBUG(BOOL bRet;)
+    KH_DEBUG(FVECTOR c[2];)
+    KH_DEBUG(FVECTOR r[2];)
+    KH_DEBUG(FVECTOR r1[2];)
+    KH_DEBUG(INT z0;)
+    KH_DEBUG(INT z1;)
+    KH_DEBUG(QWdata giftag;)
+    KH_DEBUG(FLOAT ftheta;)
+    KH_DEBUG(IVECTOR ip;)
+    KH_DEBUG(INT j;)
 
-    bRet = _makePktSub(0);
-    if (m_nType != 1) return;
-    if (!_makePktSub(1) || !bRet) return;
+    KH_DEBUG(bRet = _makePktSub(0);)
+    KH_DEBUG(if (m_nType != 1) return;)
+    KH_DEBUG(if (!_makePktSub(1) || !bRet) return;)
 
-    for (j = 0; j < 2; j++) {
-        c[j].x = (m_Cl[j].p0.x + m_Cl[j].p1.x) / 2;
-        r[j].x = (m_Cl[j].p1.x - m_Cl[j].p0.x) / 2;
-        c[j].y = (m_Cl[j].p0.y + m_Cl[j].p1.y) / 2;
-        r[j].y = (m_Cl[j].p1.y - m_Cl[j].p0.y) / 2;
+    KH_DEBUG(for (j = 0; j < 2; j++) {)
+        KH_DEBUG(c[j].x = (m_Cl[j].p0.x + m_Cl[j].p1.x) / 2;)
+        KH_DEBUG(r[j].x = (m_Cl[j].p1.x - m_Cl[j].p0.x) / 2;)
+        KH_DEBUG(c[j].y = (m_Cl[j].p0.y + m_Cl[j].p1.y) / 2;)
+        KH_DEBUG(r[j].y = (m_Cl[j].p1.y - m_Cl[j].p0.y) / 2;)
 
-        r1[j].x = (p01[j].x - p00[j].x) / 2;
-        r1[j].y = (p01[j].y - p00[j].y) / 2;
+        KH_DEBUG(r1[j].x = (p01[j].x - p00[j].x) / 2;)
+        KH_DEBUG(r1[j].y = (p01[j].y - p00[j].y) / 2;)
 
-        m_Cl[j].m_C0.a = m_Cl[j].m_C1.a = 0x80;
-    }
-    z0 = m_Cl[0].p0.z >> 4;
-    z1 = m_Cl[1].p0.z >> 4;
+        KH_DEBUG(m_Cl[j].m_C0.a = m_Cl[j].m_C1.a = 0x80;)
+    KH_DEBUG(})
+    KH_DEBUG(z0 = m_Cl[0].p0.z >> 4;)
+    KH_DEBUG(z1 = m_Cl[1].p0.z >> 4;)
 
-    giftag.ul64[0] = 0x1400000000008000UL;
-    giftag.ul64[1] = 0;
-    CPackMan::pkOpenGifTag(giftag.ul128);
-    CPackMan::pkAddGsData((u_long)0x209 | ((u_long)isSemiTrans() << 6));
-    CPackMan::pkCloseGifTag();
+    KH_DEBUG(giftag.ul64[0] = 0x1400000000008000UL;)
+    KH_DEBUG(giftag.ul64[1] = 0;)
+    KH_DEBUG(CPackMan::pkOpenGifTag(giftag.ul128);)
+    KH_DEBUG(CPackMan::pkAddGsData((u_long)0x209 | ((u_long)isSemiTrans() << 6));)
+    KH_DEBUG(CPackMan::pkCloseGifTag();)
 
-    giftag.ul64[0] = 0x2400000000008000UL;
-    giftag.ul64[1] = 0x41;
-    CPackMan::pkOpenGifTag(giftag.ul128);
+    KH_DEBUG(giftag.ul64[0] = 0x2400000000008000UL;)
+    KH_DEBUG(giftag.ul64[1] = 0x41;)
+    KH_DEBUG(CPackMan::pkOpenGifTag(giftag.ul128);)
 
-    CPackMan::pkAddGsData(m_Cl[0].m_C0.col);
-    CPackMan::pkAddGsData((u_long)(INT)c[0].x | ((u_long)(INT)c[0].y << 16) | ((u_long)z0 << 32));
-    CPackMan::pkAddGsData(m_Cl[1].m_C1.col);
-    CPackMan::pkAddGsData((u_long)(INT)c[1].x | ((u_long)(INT)c[1].y << 16) | ((u_long)z1 << 32));
+    KH_DEBUG(CPackMan::pkAddGsData(m_Cl[0].m_C0.col);)
+    KH_DEBUG(CPackMan::pkAddGsData((u_long)(INT)c[0].x | ((u_long)(INT)c[0].y << 16) | ((u_long)z0 << 32));)
+    KH_DEBUG(CPackMan::pkAddGsData(m_Cl[1].m_C1.col);)
+    KH_DEBUG(CPackMan::pkAddGsData((u_long)(INT)c[1].x | ((u_long)(INT)c[1].y << 16) | ((u_long)z1 << 32));)
 
-    ftheta = atan2f(c[1].y - c[0].y, c[1].x - c[0].x);
+    KH_DEBUG(ftheta = atan2f(c[1].y - c[0].y, c[1].x - c[0].x);)
 
-    ip.x = c[0].x + r[0].x * cosf(Math3D::LimitPI(ftheta + PI / 2));
-    ip.y = c[0].y + r[0].y * sinf(Math3D::LimitPI(ftheta + PI / 2));
-    CPackMan::pkAddGsData(m_Cl[0].m_C0.col);
-    CPackMan::pkAddGsData((u_long)ip.x | ((u_long)ip.y << 16) | ((u_long)z0 << 32));
-    ip.x = c[1].x + r[1].x * cosf(Math3D::LimitPI(ftheta + PI / 2));
-    ip.y = c[1].y + r[1].y * sinf(Math3D::LimitPI(ftheta + PI / 2));
-    CPackMan::pkAddGsData(m_Cl[1].m_C1.col);
-    CPackMan::pkAddGsData((u_long)ip.x | ((u_long)ip.y << 16) | ((u_long)z1 << 32));
-    ip.x = c[0].x + r[0].x * cosf(Math3D::LimitPI(ftheta - PI / 2));
-    ip.y = c[0].y + r[0].y * sinf(Math3D::LimitPI(ftheta - PI / 2));
-    CPackMan::pkAddGsData(m_Cl[0].m_C0.col);
-    CPackMan::pkAddGsData((u_long)ip.x | ((u_long)ip.y << 16) | ((u_long)z0 << 32));
-    ip.x = c[1].x + r[1].x * cosf(Math3D::LimitPI(ftheta - PI / 2));
-    ip.y = c[1].y + r[1].y * sinf(Math3D::LimitPI(ftheta - PI / 2));
-    CPackMan::pkAddGsData(m_Cl[1].m_C1.col);
-    CPackMan::pkAddGsData((u_long)ip.x | ((u_long)ip.y << 16) | ((u_long)z1 << 32));
+    KH_DEBUG(ip.x = c[0].x + r[0].x * cosf(Math3D::LimitPI(ftheta + PI / 2));)
+    KH_DEBUG(ip.y = c[0].y + r[0].y * sinf(Math3D::LimitPI(ftheta + PI / 2));)
+    KH_DEBUG(CPackMan::pkAddGsData(m_Cl[0].m_C0.col);)
+    KH_DEBUG(CPackMan::pkAddGsData((u_long)ip.x | ((u_long)ip.y << 16) | ((u_long)z0 << 32));)
+    KH_DEBUG(ip.x = c[1].x + r[1].x * cosf(Math3D::LimitPI(ftheta + PI / 2));)
+    KH_DEBUG(ip.y = c[1].y + r[1].y * sinf(Math3D::LimitPI(ftheta + PI / 2));)
+    KH_DEBUG(CPackMan::pkAddGsData(m_Cl[1].m_C1.col);)
+    KH_DEBUG(CPackMan::pkAddGsData((u_long)ip.x | ((u_long)ip.y << 16) | ((u_long)z1 << 32));)
+    KH_DEBUG(ip.x = c[0].x + r[0].x * cosf(Math3D::LimitPI(ftheta - PI / 2));)
+    KH_DEBUG(ip.y = c[0].y + r[0].y * sinf(Math3D::LimitPI(ftheta - PI / 2));)
+    KH_DEBUG(CPackMan::pkAddGsData(m_Cl[0].m_C0.col);)
+    KH_DEBUG(CPackMan::pkAddGsData((u_long)ip.x | ((u_long)ip.y << 16) | ((u_long)z0 << 32));)
+    KH_DEBUG(ip.x = c[1].x + r[1].x * cosf(Math3D::LimitPI(ftheta - PI / 2));)
+    KH_DEBUG(ip.y = c[1].y + r[1].y * sinf(Math3D::LimitPI(ftheta - PI / 2));)
+    KH_DEBUG(CPackMan::pkAddGsData(m_Cl[1].m_C1.col);)
+    KH_DEBUG(CPackMan::pkAddGsData((u_long)ip.x | ((u_long)ip.y << 16) | ((u_long)z1 << 32));)
 
-    ip.x = c[0].x + r1[0].x * cosf(Math3D::LimitPI(ftheta + PI / 2));
-    ip.y = c[0].y + r1[0].y * sinf(Math3D::LimitPI(ftheta + PI / 2));
-    CPackMan::pkAddGsData(m_Cl[0].m_C0.col);
-    CPackMan::pkAddGsData((u_long)ip.x | ((u_long)ip.y << 16) | ((u_long)z0 << 32));
-    ip.x = c[1].x + r1[1].x * cosf(Math3D::LimitPI(ftheta + PI / 2));
-    ip.y = c[1].y + r1[1].y * sinf(Math3D::LimitPI(ftheta + PI / 2));
-    CPackMan::pkAddGsData(m_Cl[1].m_C1.col);
-    CPackMan::pkAddGsData((u_long)ip.x | ((u_long)ip.y << 16) | ((u_long)z1 << 32));
-    ip.x = c[0].x + r1[0].x * cosf(Math3D::LimitPI(ftheta - PI / 2));
-    ip.y = c[0].y + r1[0].y * sinf(Math3D::LimitPI(ftheta - PI / 2));
-    CPackMan::pkAddGsData(m_Cl[0].m_C0.col);
-    CPackMan::pkAddGsData((u_long)ip.x | ((u_long)ip.y << 16) | ((u_long)z0 << 32));
-    ip.x = c[1].x + r1[1].x * cosf(Math3D::LimitPI(ftheta - PI / 2));
-    ip.y = c[1].y + r1[1].y * sinf(Math3D::LimitPI(ftheta - PI / 2));
-    CPackMan::pkAddGsData(m_Cl[1].m_C1.col);
-    CPackMan::pkAddGsData((u_long)ip.x | ((u_long)ip.y << 16) | ((u_long)z1 << 32));
+    KH_DEBUG(ip.x = c[0].x + r1[0].x * cosf(Math3D::LimitPI(ftheta + PI / 2));)
+    KH_DEBUG(ip.y = c[0].y + r1[0].y * sinf(Math3D::LimitPI(ftheta + PI / 2));)
+    KH_DEBUG(CPackMan::pkAddGsData(m_Cl[0].m_C0.col);)
+    KH_DEBUG(CPackMan::pkAddGsData((u_long)ip.x | ((u_long)ip.y << 16) | ((u_long)z0 << 32));)
+    KH_DEBUG(ip.x = c[1].x + r1[1].x * cosf(Math3D::LimitPI(ftheta + PI / 2));)
+    KH_DEBUG(ip.y = c[1].y + r1[1].y * sinf(Math3D::LimitPI(ftheta + PI / 2));)
+    KH_DEBUG(CPackMan::pkAddGsData(m_Cl[1].m_C1.col);)
+    KH_DEBUG(CPackMan::pkAddGsData((u_long)ip.x | ((u_long)ip.y << 16) | ((u_long)z1 << 32));)
+    KH_DEBUG(ip.x = c[0].x + r1[0].x * cosf(Math3D::LimitPI(ftheta - PI / 2));)
+    KH_DEBUG(ip.y = c[0].y + r1[0].y * sinf(Math3D::LimitPI(ftheta - PI / 2));)
+    KH_DEBUG(CPackMan::pkAddGsData(m_Cl[0].m_C0.col);)
+    KH_DEBUG(CPackMan::pkAddGsData((u_long)ip.x | ((u_long)ip.y << 16) | ((u_long)z0 << 32));)
+    KH_DEBUG(ip.x = c[1].x + r1[1].x * cosf(Math3D::LimitPI(ftheta - PI / 2));)
+    KH_DEBUG(ip.y = c[1].y + r1[1].y * sinf(Math3D::LimitPI(ftheta - PI / 2));)
+    KH_DEBUG(CPackMan::pkAddGsData(m_Cl[1].m_C1.col);)
+    KH_DEBUG(CPackMan::pkAddGsData((u_long)ip.x | ((u_long)ip.y << 16) | ((u_long)z1 << 32));)
 
-    CPackMan::pkCloseGifTag();
-}
-BOOL C3DPointLight2::_makePktSub(INT nIdx) {
-    C3DCircle& cl = m_Cl[nIdx];
-    INT cx;
-    INT cy;
-    INT z;
-    FLOAT rx;
-    FLOAT ry;
-    INT dx;
-    INT dy;
-    FVECTOR c;
-    FLOAT rx0;
-    FLOAT ry0;
-    if (cl.p0.z <= 0 || cl.p0.z > 0xFFFF28 || cl.p0.x < 0 || cl.p0.x > 0xFFFF || cl.p0.y < 0 || cl.p0.y > 0xFFFF ||
-        cl.p1.z > 0xFFFF28 || cl.p1.z <= 0 || cl.p1.x < 0 || cl.p1.x > 0xFFFF || cl.p1.y < 0 || cl.p1.y > 0xFFFF) {
-        return FALSE;
-    }
+    KH_DEBUG(CPackMan::pkCloseGifTag();)
+KH_DEBUG(})
+KH_DEBUG(BOOL C3DPointLight2::_makePktSub(INT nIdx) {)
+    KH_DEBUG(C3DCircle& cl = m_Cl[nIdx];)
+    KH_DEBUG(INT cx;)
+    KH_DEBUG(INT cy;)
+    KH_DEBUG(INT z;)
+    KH_DEBUG(FLOAT rx;)
+    KH_DEBUG(FLOAT ry;)
+    KH_DEBUG(INT dx;)
+    KH_DEBUG(INT dy;)
+    KH_DEBUG(FVECTOR c;)
+    KH_DEBUG(FLOAT rx0;)
+    KH_DEBUG(FLOAT ry0;)
+    KH_DEBUG(if (cl.p0.z <= 0 || cl.p0.z > 0xFFFF28 || cl.p0.x < 0 || cl.p0.x > 0xFFFF || cl.p0.y < 0 || cl.p0.y > 0xFFFF || cl.p1.z > 0xFFFF28 || cl.p1.z <= 0 || cl.p1.x < 0 || cl.p1.x > 0xFFFF || cl.p1.y < 0 || cl.p1.y > 0xFFFF) {)
 
-    z = cl.p0.z >> 4;
+        KH_DEBUG(return FALSE;)
+    KH_DEBUG(})
 
-    cl.m_C0.a = cl.m_C1.a = 0x80;
+    KH_DEBUG(z = cl.p0.z >> 4;)
 
-    cx = (cl.p0.x + cl.p1.x) / 2;
-    rx = (cl.p1.x - cl.p0.x) / 2;
+    KH_DEBUG(cl.m_C0.a = cl.m_C1.a = 0x80;)
 
-    cy = (cl.p0.y + cl.p1.y) / 2;
-    ry = (cl.p1.y - cl.p0.y) / 2;
+    KH_DEBUG(cx = (cl.p0.x + cl.p1.x) / 2;)
+    KH_DEBUG(rx = (cl.p1.x - cl.p0.x) / 2;)
 
-    FMATRIX& vs = CWorldEnv::getViewScreenMatrix();
-    c = ApplyMatrix(cl.m_pCrd->getWorldMatrix(), cl.m_Center);
-    c = ApplyMatrix(CWorldEnv::getWorldViewMatrix(), c);
+    KH_DEBUG(cy = (cl.p0.y + cl.p1.y) / 2;)
+    KH_DEBUG(ry = (cl.p1.y - cl.p0.y) / 2;)
 
-    c.x -= m_R00;
-    c.y -= m_R00;
+    KH_DEBUG(FMATRIX& vs = CWorldEnv::getViewScreenMatrix();)
+    KH_DEBUG(c = ApplyMatrix(cl.m_pCrd->getWorldMatrix(), cl.m_Center);)
+    KH_DEBUG(c = ApplyMatrix(CWorldEnv::getWorldViewMatrix(), c);)
 
-    RotTransPers(p00[nIdx], vs, c);
+    KH_DEBUG(c.x -= m_R00;)
+    KH_DEBUG(c.y -= m_R00;)
 
-    c.x += m_R00 * 2.0f;
-    c.y += m_R00 * 2.0f;
-    RotTransPers(p01[nIdx], vs, c);
+    KH_DEBUG(RotTransPers(p00[nIdx], vs, c);)
 
-    rx0 = (p01[nIdx].x - p00[nIdx].x) / 2;
-    ry0 = (p01[nIdx].y - p00[nIdx].y) / 2;
+    KH_DEBUG(c.x += m_R00 * 2.0f;)
+    KH_DEBUG(c.y += m_R00 * 2.0f;)
+    KH_DEBUG(RotTransPers(p01[nIdx], vs, c);)
 
-    QWdata giftag;
-    giftag.ul64[0] = 0x4400000000008000UL;
-    giftag.ul64[1] = 0x1410;
+    KH_DEBUG(rx0 = (p01[nIdx].x - p00[nIdx].x) / 2;)
+    KH_DEBUG(ry0 = (p01[nIdx].y - p00[nIdx].y) / 2;)
 
-    CPackMan::pkOpenGifTag(giftag.ul128);
-    CPackMan::pkAddGsData((u_long)0x20A | ((u_long)isSemiTrans() << 6));
-    CPackMan::pkAddGsData(cl.m_C0.col);
-    CPackMan::pkAddGsData((u_long)cx | ((u_long)cy << 16) | ((u_long)z << 32));
-    CPackMan::pkAddGsData(cl.m_C1.col);
-    CPackMan::pkCloseGifTag();
+    KH_DEBUG(QWdata giftag;)
+    KH_DEBUG(giftag.ul64[0] = 0x4400000000008000UL;)
+    KH_DEBUG(giftag.ul64[1] = 0x1410;)
 
-    giftag.ul64[0] = 0x1400000000008000UL;
-    giftag.ul64[1] = 4;
+    KH_DEBUG(CPackMan::pkOpenGifTag(giftag.ul128);)
+    KH_DEBUG(CPackMan::pkAddGsData((u_long)0x20A | ((u_long)isSemiTrans() << 6));)
+    KH_DEBUG(CPackMan::pkAddGsData(cl.m_C0.col);)
+    KH_DEBUG(CPackMan::pkAddGsData((u_long)cx | ((u_long)cy << 16) | ((u_long)z << 32));)
+    KH_DEBUG(CPackMan::pkAddGsData(cl.m_C1.col);)
+    KH_DEBUG(CPackMan::pkCloseGifTag();)
 
-    CPackMan::pkOpenGifTag(giftag.ul128);
+    KH_DEBUG(giftag.ul64[0] = 0x1400000000008000UL;)
+    KH_DEBUG(giftag.ul64[1] = 4;)
 
-    int deg;
-    for (deg = 0; deg <= 3600; deg += 200) {
-        dy = -(INT)(ry * tcos(deg));
-        dx = rx * tsin(deg);
-        CPackMan::pkAddGsData((u_long)(cx + dx) | ((u_long)(cy + dy) << 16) | ((u_long)z << 32));
-    }
-    for (deg = 0; deg <= 3600; deg += 200) {
-        dy = -(INT)(ry0 * tcos(deg));
-        dx = rx0 * tsin(deg);
-        CPackMan::pkAddGsData((u_long)(cx + dx) | ((u_long)(cy + dy) << 16) | ((u_long)z << 32));
-    }
-    CPackMan::pkCloseGifTag();
+    KH_DEBUG(CPackMan::pkOpenGifTag(giftag.ul128);)
 
-    if (m_Active) {
-        int deg;
-        cl.m_C0.a = cl.m_C1.a = 0x40;
+    KH_DEBUG(int deg;)
+    KH_DEBUG(for (deg = 0; deg <= 3600; deg += 200) {)
+        KH_DEBUG(dy = -(INT)(ry * tcos(deg));)
+        KH_DEBUG(dx = rx * tsin(deg);)
+        KH_DEBUG(CPackMan::pkAddGsData((u_long)(cx + dx) | ((u_long)(cy + dy) << 16) | ((u_long)z << 32));)
+    KH_DEBUG(})
+    KH_DEBUG(for (deg = 0; deg <= 3600; deg += 200) {)
+        KH_DEBUG(dy = -(INT)(ry0 * tcos(deg));)
+        KH_DEBUG(dx = rx0 * tsin(deg);)
+        KH_DEBUG(CPackMan::pkAddGsData((u_long)(cx + dx) | ((u_long)(cy + dy) << 16) | ((u_long)z << 32));)
+    KH_DEBUG(})
+    KH_DEBUG(CPackMan::pkCloseGifTag();)
 
-        giftag.ul64[0] = 0x4400000000008000UL;
-        giftag.ul64[1] = 0x1410;
+    KH_DEBUG(if (m_Active) {)
+        KH_DEBUG(int deg;)
+        KH_DEBUG(cl.m_C0.a = cl.m_C1.a = 0x40;)
 
-        CPackMan::pkOpenGifTag(giftag.ul128);
-        CPackMan::pkAddGsData((u_long)0x20D | ((u_long)isSemiTrans() << 6));
-        CPackMan::pkAddGsData(cl.m_C0.col);
-        CPackMan::pkAddGsData((u_long)cx | ((u_long)cy << 16) | ((u_long)z << 32));
-        CPackMan::pkAddGsData(cl.m_C1.col);
-        CPackMan::pkCloseGifTag();
+        KH_DEBUG(giftag.ul64[0] = 0x4400000000008000UL;)
+        KH_DEBUG(giftag.ul64[1] = 0x1410;)
 
-        giftag.ul64[0] = 0x1400000000008000UL;
-        giftag.ul64[1] = 4;
+        KH_DEBUG(CPackMan::pkOpenGifTag(giftag.ul128);)
+        KH_DEBUG(CPackMan::pkAddGsData((u_long)0x20D | ((u_long)isSemiTrans() << 6));)
+        KH_DEBUG(CPackMan::pkAddGsData(cl.m_C0.col);)
+        KH_DEBUG(CPackMan::pkAddGsData((u_long)cx | ((u_long)cy << 16) | ((u_long)z << 32));)
+        KH_DEBUG(CPackMan::pkAddGsData(cl.m_C1.col);)
+        KH_DEBUG(CPackMan::pkCloseGifTag();)
 
-        CPackMan::pkOpenGifTag(giftag.ul128);
-        for (deg = 0; deg <= 3600; deg += 200) {
-            dy = -(INT)(ry0 * tcos(deg));
-            dx = rx0 * tsin(deg);
-            CPackMan::pkAddGsData((u_long)(cx + dx) | ((u_long)(cy + dy) << 16) | ((u_long)z << 32));
-        }
-        CPackMan::pkCloseGifTag();
-    }
-    return TRUE;
-}
+        KH_DEBUG(giftag.ul64[0] = 0x1400000000008000UL;)
+        KH_DEBUG(giftag.ul64[1] = 4;)
+
+        KH_DEBUG(CPackMan::pkOpenGifTag(giftag.ul128);)
+        KH_DEBUG(for (deg = 0; deg <= 3600; deg += 200) {)
+            KH_DEBUG(dy = -(INT)(ry0 * tcos(deg));)
+            KH_DEBUG(dx = rx0 * tsin(deg);)
+            KH_DEBUG(CPackMan::pkAddGsData((u_long)(cx + dx) | ((u_long)(cy + dy) << 16) | ((u_long)z << 32));)
+        KH_DEBUG(})
+        KH_DEBUG(CPackMan::pkCloseGifTag();)
+    KH_DEBUG(})
+    KH_DEBUG(return TRUE;)
+KH_DEBUG(})
 FIX4 C3DPolyG4::calcZ() {
     FVECTOR c;
     FMATRIX rts;
@@ -1597,98 +1597,98 @@ void C3DPolyG3::makePkt() {
     p64[6] = _vecToXYZ(p2._q);
     CPackMan::pkCloseGifTagManual((UINT*)&p64[7]);
 }
-FIX4 C3DLine::calcZ() {
-    FMATRIX mat0;
-    m_pCrd->getRotTransPersMatrix(mat0);
-    SetRotTransPersMatrix(mat0);
-    RotTransPersClipW(p0, m_P0);
-    RotTransPersClipW(p1, m_P1);
-    return p0.z;
-}
-void C3DLine::makePkt() {
-    QWdata giftag;
-    if (p0.w || p1.w) {
-        return;
-    }
-    giftag.ul64[0] = 0x5400000000008000UL;
-    giftag.ul64[1] = 0x41410;
-    CPackMan::pkOpenGifTag(giftag.ul128);
-    CPackMan::pkAddGsData((u_long)0x209 | ((u_long)isSemiTrans() << 6));
-    CPackMan::pkAddGsData(m_C0.col);
-    CPackMan::pkAddGsData(_vecToXYZ(p0._q));
-    CPackMan::pkAddGsData(m_C1.col);
-    CPackMan::pkAddGsData(_vecToXYZ(p1._q));
-    CPackMan::pkCloseGifTag();
-}
-FIX4 C3DLineCoord2::calcZ() {
-    FMATRIX mat0;
-    FMATRIX mat1;
-    m_pCrd0->getRotTransPersMatrix(mat0);
-    m_pCrd1->getRotTransPersMatrix(mat1);
-    SetRotTransPersMatrix(mat0);
-    RotTransPersClipW(p0, m_P0);
-    SetRotTransPersMatrix(mat1);
-    RotTransPersClipW(p1, m_P1);
-    return p0.z;
-}
-void C3DLineCoord2::makePkt() {
-    QWdata giftag;
-    if (p0.w || p1.w) {
-        return;
-    }
-    giftag.ul64[0] = 0x5400000000008000UL;
-    giftag.ul64[1] = 0x41410;
-    CPackMan::pkOpenGifTag(giftag.ul128);
-    CPackMan::pkAddGsData((u_long)0x209 | ((u_long)isSemiTrans() << 6));
-    CPackMan::pkAddGsData(m_C0.col);
-    CPackMan::pkAddGsData(_vecToXYZ(p0._q));
-    CPackMan::pkAddGsData(m_C1.col);
-    CPackMan::pkAddGsData(_vecToXYZ(p1._q));
-    CPackMan::pkCloseGifTag();
-}
-FIX4 C3DLines::calcZ() {
-    FMATRIX mat0;
-    G_LINE* it;
-    if (m_vLINE.size() == 0) {
-        return 0;
-    }
+KH_DEBUG(FIX4 C3DLine::calcZ() {)
+    KH_DEBUG(FMATRIX mat0;)
+    KH_DEBUG(m_pCrd->getRotTransPersMatrix(mat0);)
+    KH_DEBUG(SetRotTransPersMatrix(mat0);)
+    KH_DEBUG(RotTransPersClipW(p0, m_P0);)
+    KH_DEBUG(RotTransPersClipW(p1, m_P1);)
+    KH_DEBUG(return p0.z;)
+KH_DEBUG(})
+KH_DEBUG(void C3DLine::makePkt() {)
+    KH_DEBUG(QWdata giftag;)
+    KH_DEBUG(if (p0.w || p1.w) {)
+        KH_DEBUG(return;)
+    KH_DEBUG(})
+    KH_DEBUG(giftag.ul64[0] = 0x5400000000008000UL;)
+    KH_DEBUG(giftag.ul64[1] = 0x41410;)
+    KH_DEBUG(CPackMan::pkOpenGifTag(giftag.ul128);)
+    KH_DEBUG(CPackMan::pkAddGsData((u_long)0x209 | ((u_long)isSemiTrans() << 6));)
+    KH_DEBUG(CPackMan::pkAddGsData(m_C0.col);)
+    KH_DEBUG(CPackMan::pkAddGsData(_vecToXYZ(p0._q));)
+    KH_DEBUG(CPackMan::pkAddGsData(m_C1.col);)
+    KH_DEBUG(CPackMan::pkAddGsData(_vecToXYZ(p1._q));)
+    KH_DEBUG(CPackMan::pkCloseGifTag();)
+KH_DEBUG(})
+KH_DEBUG(FIX4 C3DLineCoord2::calcZ() {)
+    KH_DEBUG(FMATRIX mat0;)
+    KH_DEBUG(FMATRIX mat1;)
+    KH_DEBUG(m_pCrd0->getRotTransPersMatrix(mat0);)
+    KH_DEBUG(m_pCrd1->getRotTransPersMatrix(mat1);)
+    KH_DEBUG(SetRotTransPersMatrix(mat0);)
+    KH_DEBUG(RotTransPersClipW(p0, m_P0);)
+    KH_DEBUG(SetRotTransPersMatrix(mat1);)
+    KH_DEBUG(RotTransPersClipW(p1, m_P1);)
+    KH_DEBUG(return p0.z;)
+KH_DEBUG(})
+KH_DEBUG(void C3DLineCoord2::makePkt() {)
+    KH_DEBUG(QWdata giftag;)
+    KH_DEBUG(if (p0.w || p1.w) {)
+        KH_DEBUG(return;)
+    KH_DEBUG(})
+    KH_DEBUG(giftag.ul64[0] = 0x5400000000008000UL;)
+    KH_DEBUG(giftag.ul64[1] = 0x41410;)
+    KH_DEBUG(CPackMan::pkOpenGifTag(giftag.ul128);)
+    KH_DEBUG(CPackMan::pkAddGsData((u_long)0x209 | ((u_long)isSemiTrans() << 6));)
+    KH_DEBUG(CPackMan::pkAddGsData(m_C0.col);)
+    KH_DEBUG(CPackMan::pkAddGsData(_vecToXYZ(p0._q));)
+    KH_DEBUG(CPackMan::pkAddGsData(m_C1.col);)
+    KH_DEBUG(CPackMan::pkAddGsData(_vecToXYZ(p1._q));)
+    KH_DEBUG(CPackMan::pkCloseGifTag();)
+KH_DEBUG(})
+KH_DEBUG(FIX4 C3DLines::calcZ() {)
+    KH_DEBUG(FMATRIX mat0;)
+    KH_DEBUG(G_LINE* it;)
+    KH_DEBUG(if (m_vLINE.size() == 0) {)
+        KH_DEBUG(return 0;)
+    KH_DEBUG(})
 
-    if (m_pCrd) {
-        m_pCrd->getRotTransPersMatrix(mat0);
-    } else {
-        mat0 = CWorldEnv::getWorldScreenMatrix();
-    }
-    SetRotTransPersMatrix(mat0);
+    KH_DEBUG(if (m_pCrd) {)
+        KH_DEBUG(m_pCrd->getRotTransPersMatrix(mat0);)
+    KH_DEBUG(} else {)
+        KH_DEBUG(mat0 = CWorldEnv::getWorldScreenMatrix();)
+    KH_DEBUG(})
+    KH_DEBUG(SetRotTransPersMatrix(mat0);)
 
-    for (it = m_vLINE.begin(); it != m_vLINE.end();) {
-        RotTransPersClipW(it->p0, it->P0);
-        RotTransPersClipW(it->p1, it->P1);
-        it++;
-    }
+    KH_DEBUG(for (it = m_vLINE.begin(); it != m_vLINE.end();) {)
+        KH_DEBUG(RotTransPersClipW(it->p0, it->P0);)
+        KH_DEBUG(RotTransPersClipW(it->p1, it->P1);)
+        KH_DEBUG(it++;)
+    KH_DEBUG(})
 
-    return m_vLINE.begin()->p0.z;
-}
-void C3DLines::makePkt() {
-    QWdata giftag;
-    G_LINE* it;
-    if (m_vLINE.size() == 0) {
-        return;
-    }
-    giftag.ul64[0] = 0x5400000000008000UL;
-    giftag.ul64[1] = 0x41410;
-    CPackMan::pkOpenGifTag(giftag.ul128);
-    for (it = m_vLINE.begin(); it != m_vLINE.end(); it++) {
-        if (it->p0.w) {
-            continue;
-        }
-        CPackMan::pkAddGsData((u_long)0x209 | ((u_long)isSemiTrans() << 6));
-        CPackMan::pkAddGsData(it->C0.col);
-        CPackMan::pkAddGsData(_vecToXYZ(it->p0._q));
-        CPackMan::pkAddGsData(it->C1.col);
-        CPackMan::pkAddGsData(_vecToXYZ(it->p1._q));
-    }
-    CPackMan::pkCloseGifTag();
-}
+    KH_DEBUG(return m_vLINE.begin()->p0.z;)
+KH_DEBUG(})
+KH_DEBUG(void C3DLines::makePkt() {)
+    KH_DEBUG(QWdata giftag;)
+    KH_DEBUG(G_LINE* it;)
+    KH_DEBUG(if (m_vLINE.size() == 0) {)
+        KH_DEBUG(return;)
+    KH_DEBUG(})
+    KH_DEBUG(giftag.ul64[0] = 0x5400000000008000UL;)
+    KH_DEBUG(giftag.ul64[1] = 0x41410;)
+    KH_DEBUG(CPackMan::pkOpenGifTag(giftag.ul128);)
+    KH_DEBUG(for (it = m_vLINE.begin(); it != m_vLINE.end(); it++) {)
+        KH_DEBUG(if (it->p0.w) {)
+            KH_DEBUG(continue;)
+        KH_DEBUG(})
+        KH_DEBUG(CPackMan::pkAddGsData((u_long)0x209 | ((u_long)isSemiTrans() << 6));)
+        KH_DEBUG(CPackMan::pkAddGsData(it->C0.col);)
+        KH_DEBUG(CPackMan::pkAddGsData(_vecToXYZ(it->p0._q));)
+        KH_DEBUG(CPackMan::pkAddGsData(it->C1.col);)
+        KH_DEBUG(CPackMan::pkAddGsData(_vecToXYZ(it->p1._q));)
+    KH_DEBUG(})
+    KH_DEBUG(CPackMan::pkCloseGifTag();)
+KH_DEBUG(})
 ULONGLONG* _makePkt_TexLine(ULONGLONG* p64, G_STRIP* it, G_STRIP* end) {
     IVECTOR p[3];
     FLOAT fW0;
@@ -3577,3 +3577,4 @@ QWdata* C3DCPrim::makePkt_TriangleFan1(QWdata* pQw) {
     return _makePkt_TriangleFan(pQw, it, end, &m_pObj->Crd(0), isBackClip());
 }
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data

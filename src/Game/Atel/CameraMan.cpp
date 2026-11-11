@@ -97,7 +97,7 @@ struct _MAP_FOG {
     FLOAT screenz; /* 0x18 */
 };
 struct _MAP_TASK {
-    UBYTE _m_0x0000[0x15e0];
+    UBYTE _m_0x0000[KH_VER(0x15e0, 0xee0)];
     _MAP_FOG* m_pFog; /* 0x15e0 */
 };
 
@@ -696,3 +696,4 @@ CCameraDt* CCameraMan::searchCameraDt(INT nID) {
 } // namespace ATEL
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

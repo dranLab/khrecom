@@ -129,8 +129,8 @@ SEMI_PACKET_LIST* s_pSemiList;
 INT s_nSemiListNum;
 G_LAYER s_sLayerInfo;
 INT s_iModelCount;
-INT s_iDrawCount;
-int s_iTexSendCount[2];
+KH_DEBUG(INT s_iDrawCount;)
+KH_DEBUG(int s_iTexSendCount[2];)
 MODEL_SEND_CACHE s_sModelCache __attribute__((aligned(64)));
 }
 
@@ -161,9 +161,9 @@ void CModelMan::initialize() {
     s_iModelCount = 0;
     changePrimMode(FALSE);
     CShadowModelMan::initialize();
-    s_iDrawCount = 0;
-    s_iTexSendCount[0] = 0;
-    s_iTexSendCount[1] = 0;
+    KH_DEBUG(s_iDrawCount = 0;)
+    KH_DEBUG(s_iTexSendCount[0] = 0;)
+    KH_DEBUG(s_iTexSendCount[1] = 0;)
 }
 
 void CModelMan::finalize() {
@@ -509,17 +509,17 @@ G_LAYER CModelMan::getLayerInfo() { return s_sLayerInfo; }
 
 void CModelMan::setLayerInfo(G_LAYER sLayerInfo) { s_sLayerInfo = sLayerInfo; }
 
-INT CModelMan::getDrawCount() { return s_iDrawCount; }
+KH_DEBUG(INT CModelMan::getDrawCount() { return s_iDrawCount; })
 
-void CModelMan::incDrawCount() { s_iDrawCount++; }
+KH_DEBUG(void CModelMan::incDrawCount() { s_iDrawCount++; })
 
-void CModelMan::clearDrawCount() { s_iDrawCount = 0; }
+KH_DEBUG(void CModelMan::clearDrawCount() { s_iDrawCount = 0; })
 
-INT CModelMan::getTexSendCount(INT i) { return s_iTexSendCount[i]; }
+KH_DEBUG(INT CModelMan::getTexSendCount(INT i) { return s_iTexSendCount[i]; })
 
-void CModelMan::incTexSendCount(INT i) { s_iTexSendCount[i]++; }
+KH_DEBUG(void CModelMan::incTexSendCount(INT i) { s_iTexSendCount[i]++; })
 
-void CModelMan::clearTexSendCount(INT i) { s_iTexSendCount[i] = 0; }
+KH_DEBUG(void CModelMan::clearTexSendCount(INT i) { s_iTexSendCount[i] = 0; })
 
 MODEL_SEND_CACHE& CModelMan::getModelCacheRef() { return s_sModelCache; }
 
@@ -540,3 +540,4 @@ void TexInfoStub::update(SHORT nInTexPos, SHORT nInClutPos) {
 
 
 // SOURCE DATA: .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .rodata

@@ -805,7 +805,7 @@ BOOL CModel::sendTexture(u_long* tex0) {
             if (bUpdate) {
                 CPackMan::pkRefLoadImage(nClutPos, t->_pTexInfo->_ClutInfo);
                 CPackMan::pkRefLoadImage(nTexPos, t->_pTexInfo->_TexInfo);
-                CModelMan::incTexSendCount(0);
+                KH_DEBUG(CModelMan::incTexSendCount(0);)
                 if (bTexAnm) m_pTexAnm->sendTexture(i, nTexPos, t->_pTexInfo->_TexInfo, nClutPos, t->_pTexInfo->_ClutInfo);
             }
             if (tex) {
@@ -1228,7 +1228,7 @@ void CModel::_disp0_SetPacket(UINT nMode, const int (*pData)[4], INT semikind, u
         CPackMan::pkCloseGifTagManual((UINT*)pQw);
         CPackMan::pkCloseDirectCode();
     }
-    CModelMan::incDrawCount();
+    KH_DEBUG(CModelMan::incDrawCount();)
 }
 void CSemiModel::link(CModel* m) {
     UINT rawMode;

@@ -354,6 +354,19 @@ Thirteenth batch (2026-11-11): **532 units from source in retail**, 224 function
 - Correction: `main`'s static initializer is not missing in retail; it pairs under another anonymous suffix
   (`...main.cpp00aaaa`), which `try` reports as "extra".
 
+Fourteenth batch (2026-11-11): **537 units from source in retail**, 209 functions differ.
+
+- CRootTask: the debug menu's settings load (steps 0-1, s_bDbgSettingLoaded, the dtor's check), the pad
+  shortcut to step 5 and _launchTitle's debug branch; CMainTaskFactory keeps only the title and game tasks (the
+  debug and viewer tasks, the editors' statics and the collision-editor placeholder class are beta-only).
+- CDispListBase::m_iDebugFlags (the vtable pointer is at 0x8 in retail) and the packet-size check in _draw;
+  CModelMan's draw/texture-send counters and their increments in Gprim and Model; the debug primitives
+  C3DCircle, C3DPointLight(2), C3DLine, C3DLineCoord2, C3DLines (their out-of-line functions in Gprim.cpp:
+  without them gcc emits neither vtables nor inlines).
+- CameraMan's CMap stand-in pads to the retail m_pFog offset (`KH_VER(0x15e0, 0xee0)`).
+- A beta-only global left in a unit's .data makes its recorded size too large and hides the next unit's data
+  (RootTask's s_bDbgSettingLoaded over TaskMan's _pSLCManager: an undefined symbol at link time).
+
 ### Where it stands (end of the unattended run)
 
 - 517/638 units of retail from source; 10,392 functions match retail, 480 differ, 689 are beta-only ("extra").
