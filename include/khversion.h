@@ -16,6 +16,10 @@
 #define KH_VER(beta, retail) retail
 /* KH_DW(DebugWork::g_dw.x): a read of a debug switch (retail has no DebugWork: every switch is off, 0) */
 #define KH_DW(x) 0
+/* KH_DW_ON(DebugWork::g_dw.x): a debug switch that is on by default (retail behaves as if it were set: 1) */
+#define KH_DW_ON(x) 1
+/* KH_DWV(DebugWork::g_dw.x, v): a debug switch whose default (DebugWork::initialize) is v */
+#define KH_DWV(x, v) (v)
 /* operator new(size KH_ATARG("(123)")): the debug operator new's message argument */
 #define KH_ATARG(line)
 /* The debug calls vanish with their arguments (no strings); an assert's condition stays an expression statement
@@ -45,6 +49,8 @@
 #define KH_AT(line) (__FILE__ line)
 #define KH_VER(beta, retail) beta
 #define KH_DW(x) (x)
+#define KH_DW_ON(x) (x)
+#define KH_DWV(x, v) (x)
 #define KH_ATARG(line) , __FILE__ line
 #endif
 

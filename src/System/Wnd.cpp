@@ -523,7 +523,7 @@ void CTextWnd::mainImpl() {
     }
 }
 void CTextWnd::dispImpl() {
-    if (m_pWnd && m_pWnd->isDispEnable() && KH_DW(DebugWork::g_dw.sys.m_iFukidasiDisp)) {
+    if (m_pWnd && m_pWnd->isDispEnable() && KH_DW_ON(DebugWork::g_dw.sys.m_iFukidasiDisp)) {
         INT fgDispText = FALSE;
         m_pWnd->_disp();
         if (m_pWnd->getSize() == m_targetSize && m_pText) {
@@ -1274,3 +1274,4 @@ void CImageWnd::dispImpl() {
     if (m_pPolyGT4) m_pPolyGT4->disp();
 }
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

@@ -23,6 +23,7 @@ Game/Atel/AtelCrossFade
 Game/Atel/AtelTutorial
 Game/Atel/CameraMan
 Game/AttachCard
+Game/BodyCollision
 Game/Bullet/Bullet
 Game/Bullet/BulletManager
 Game/Bullet/CreateBullet
@@ -36,6 +37,7 @@ Game/Collision/CollUtilF
 Game/Collision/CollUtilO
 Game/Collision/Ride
 Game/EffectMotion
+Game/Enemy/BossDeadDemo
 Game/Enemy/EnemyAirpirate
 Game/Enemy/EnemyAirsoldier
 Game/Enemy/EnemyAquatank
@@ -138,6 +140,7 @@ Game/Player/SummonGenie
 Game/Player/SummonSinba
 Game/Player/SummonTink
 Game/Prize
+Game/SEMotion
 Game/SceneEnv
 Game/Status
 Game/StorageWork
@@ -155,7 +158,11 @@ System/Graphic/2d/2DFnt
 System/Graphic/2d/2DFntObj
 System/Graphic/2d/2DLay
 System/Graphic/2d/2DLayObj
+System/Graphic/2d/2DSeq
 System/Graphic/2d/2DSeqCtrl
+System/Graphic/2d/2DSeqObj
+System/Graphic/2d/2DSpr
+System/Graphic/2d/2DSprObj
 System/Graphic/Anim
 System/Graphic/Billboard
 System/Graphic/Camera
@@ -164,6 +171,7 @@ System/Graphic/DeFocus
 System/Graphic/Effect/effect
 System/Graphic/Effect/libppp/draw/draw
 System/Graphic/Effect/libppp/draw/draw_w
+System/Graphic/Effect/libppp/draw/global
 System/Graphic/Effect/libppp/draw/global_w
 System/Graphic/Effect/libppp/draw/math_dr
 System/Graphic/Effect/libppp/draw/md
@@ -274,6 +282,7 @@ System/Graphic/Effect/libppp/eiProg/pppVertexApAt
 System/Graphic/Effect/libppp/eiProg/pppVertexApLc
 System/Graphic/Effect/libppp/eiProg/pppVertexAttend
 System/Graphic/Effect/libppp/eiProg/pppVtMime
+System/Graphic/Effect/libppp/keProg/Ke
 System/Graphic/Effect/libppp/keProg/KeBornRnd
 System/Graphic/Effect/libppp/keProg/KeDttSpr
 System/Graphic/Effect/libppp/keProg/KeLns
@@ -399,6 +408,7 @@ System/Task
 System/Thread
 System/Tsin
 System/Util
+System/Wnd
 System/mcd
 lib/alalc
 lib/alarm
@@ -486,6 +496,7 @@ lib/nodebug/strcasecmp
 lib/nodebug/strncasecmp
 lib/nodebug/strrchr
 lib/nodebug/strround
+lib/nodebug/strstr
 lib/output
 lib/pack
 lib/sifcmd

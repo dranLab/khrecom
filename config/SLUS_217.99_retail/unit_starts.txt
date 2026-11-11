@@ -30,6 +30,7 @@ Game/Atel/AtelTutorial .rodata 0x00410890 0x18
 Game/Atel/CameraMan .data 0x0033C404 0x8
 Game/Atel/CameraMan .rodata 0x004109C0 0x30
 Game/AttachCard .rodata 0x00405D38 0x1280
+Game/BodyCollision .data 0x0033B3C0 0x10
 Game/Bullet/Bullet .rodata 0x00424020 0x20
 Game/CardKind .rodata 0x0040B160 0x1220
 Game/CollParam .rodata 0x0040E4E8 0x60
@@ -37,6 +38,8 @@ Game/Collision/CollMap .data 0x0033C3C0 0x8
 Game/Collision/CollMap .rodata 0x00410710 0x70
 Game/Collision/CollMapCamera .data 0x0033C3C8 0x8
 Game/EffectMotion .rodata 0x0040E548 0x10
+Game/Enemy/BossDeadDemo .data 0x0033ED44 0x24
+Game/Enemy/BossDeadDemo .rodata 0x0041D730 0x3b0
 Game/Enemy/EnemyAirpirate .data 0x0033EDB4 0x18
 Game/Enemy/EnemyAirpirate .rodata 0x0041DF30 0x68
 Game/Enemy/EnemyAirsoldier .data 0x0033EDCC 0x1c
@@ -177,6 +180,8 @@ Game/Player/SummonSinba .rodata 0x0041CD80 0x40
 Game/Player/SummonTink .data 0x0033E740 0x80
 Game/Player/SummonTink .rodata 0x0041CDC0 0x18
 Game/Prize .rodata 0x0040EDA0 0x13f0
+Game/SEMotion .data 0x0033C390 0x20
+Game/SEMotion .rodata 0x00410470 0x148
 Game/SceneEnv .data 0x0033C300 0x28
 Game/Status .rodata 0x004105B8 0x28
 System/Coord .data 0x00332880 0x10
@@ -190,8 +195,11 @@ System/Graphic/2d/2DCard .data 0x00332BE8 0x68
 System/Graphic/2d/2DCard .rodata 0x004010E0 0x1278
 System/Graphic/2d/2DLay .rodata 0x00402360 0x18
 System/Graphic/2d/2DLayObj .data 0x00332C50 0x4
+System/Graphic/2d/2DSeq .data 0x00332C60 0x4
 System/Graphic/2d/2DSeqCtrl .data 0x00332C68 0x8
 System/Graphic/2d/2DSeqCtrl .rodata 0x00402390 0x18
+System/Graphic/2d/2DSeqObj .data 0x00332C70 0x4
+System/Graphic/2d/2DSpr .data 0x00332C78 0x18
 System/Graphic/Anim .data 0x00332938 0x10
 System/Graphic/Anim .rodata 0x00400CE8 0x28
 System/Graphic/Billboard .rodata 0x00400D10 0x60
@@ -207,6 +215,7 @@ System/Graphic/Effect/libppp/draw/md0_p3 .rodata 0x00403730 0x90
 System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly .bss 0x0057BFD0 0x2000
 System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly .data 0x0033AF50 0x20
 System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly .rodata 0x004037C0 0x20
+System/Graphic/Effect/libppp/keProg/Ke .data 0x0033AF70 0x90
 System/Graphic/Effect/libppp/keProg/KeTh .data 0x0033B000 0x10
 System/Graphic/Effect/libppp/keProg/pppKeHmg .rodata 0x004037E0 0x4
 System/Graphic/Effect/libppp/keProg/pppKeLns .bss 0x0057E090 0x80
@@ -242,6 +251,8 @@ System/RootTask .data 0x0033B360 0x4
 System/Spad .bss 0x0043BD44 0x4
 System/Task .rodata 0x00405CC0 0x8
 System/Tsin .rodata 0x003FF958 0xe18
+System/Wnd .data 0x003328D8 0x38
+System/Wnd .rodata 0x00400770 0xe0
 System/mcd .bss 0x0043A140 0x10e0
 System/mcd .data 0x00332920 0x4
 System/mcd .rodata 0x00400888 0x18

@@ -848,10 +848,10 @@ INT CCardRevolver::setPlayCard(INT inFlag, INT inTest) {
         pCB->resetNowPlaying(m_uiUser);
     }
     if (!bEnchant) {
-        if (KH_DW(DebugWork::g_dw.player.iCardNumLock) != -1) {
+        if (KH_DWV(DebugWork::g_dw.player.iCardNumLock, -1) != -1) {
             CARD dbug_card;
-            if (KH_DW(DebugWork::g_dw.player.iCardNumLock) < 10) {
-                dbug_card.init(data->m_nKind, KH_DW(DebugWork::g_dw.player.iCardNumLock));
+            if (KH_DWV(DebugWork::g_dw.player.iCardNumLock, -1) < 10) {
+                dbug_card.init(data->m_nKind, KH_DWV(DebugWork::g_dw.player.iCardNumLock, -1));
                 card->changeData(dbug_card);
             } else {
                 num = CCardBattle::getPlayingCardPoint(0);
@@ -2835,9 +2835,9 @@ INT CCardRevolver::setPlayerPronounceCard(INT inTest) {
     case 14:
         return 0;
     }
-    if (KH_DW(DebugWork::g_dw.player.iCardNumLock) != -1) {
-        if (KH_DW(DebugWork::g_dw.player.iCardNumLock) < 10) {
-            tmp.init(data->m_nKind, KH_DW(DebugWork::g_dw.player.iCardNumLock));
+    if (KH_DWV(DebugWork::g_dw.player.iCardNumLock, -1) != -1) {
+        if (KH_DWV(DebugWork::g_dw.player.iCardNumLock, -1) < 10) {
+            tmp.init(data->m_nKind, KH_DWV(DebugWork::g_dw.player.iCardNumLock, -1));
             card->changeData(tmp);
         } else {
             num = CCardBattle::getPlayingCardPoint(0);

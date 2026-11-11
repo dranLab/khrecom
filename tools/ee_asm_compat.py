@@ -151,10 +151,15 @@ def fix_short_loops(lines: list[str]) -> list[str]:
         elif m := LABEL.match(line):
             labels[m.group(1)] = len(out)
         elif (m := BRANCH.match(line)) and m.group(3) in labels and not (no_g and any(
-                re.match(r"^\t\.(?:p2)?align\b", l) for l in out[labels[m.group(3)] + 1:])):
-            # (built without -g, the retail build: an alignment between label and branch is no loop - a jump
-            # table's target block - and the distance isn't a constant for the assembler)
-            body = [l for l in out[labels[m.group(3)] + 1:] if INSN.match(l)]
+                OTHER_SECTION.match(l) or DATA_SECTION.match(l) for l in out[labels[m.group(3)] + 1:])):
+            # (built without -g, the retail build: a section switch between label and branch is a jump table's
+            # target block, no loop)
+            span = out[labels[m.group(3)] + 1:]
+            # an alignment (> 2: `.p2align 2` is a no-op in code) makes the distance no constant for the
+            # assembler: then the padding is counted from the instructions (the alignment taken as no padding)
+            aligned = no_g and any((a := re.match(r"^\t\.(?:p2)?align\s+(\d+)", l)) and int(a.group(1)) > 2
+                                   for l in span)
+            body = [l for l in span if INSN.match(l)]
             # gcc leaves the nop between an FP compare and its bc1t/bc1f to the assembler ("#nop"), even when it
             # puts the branch in a noreorder block; it is part of the loop, and the .word branch would hide the
             # hazard from Ps2EeAs, so it is counted and emitted here
@@ -162,7 +167,8 @@ def fix_short_loops(lines: list[str]) -> list[str]:
                       and INSN.match(body[-1]).group(1).startswith("c."))
             if len(body) + hazard + 1 <= SHORT_LOOP + 1:  # macros only make loops longer
                 label, pad, at = m.group(3), f"$LSLp{n}", f"$LSLb{n}"
-                count = f"{SHORT_LOOP} - (({pad} - {label}) >> 2) - 1"
+                count = (f"{SHORT_LOOP} - {len(body) + hazard} - 1" if aligned
+                         else f"{SHORT_LOOP} - (({pad} - {label}) >> 2) - 1")
                 word = f"\t.word 0x{branch_word(m.group(1), m.group(2)):08X} | ((({label} - {at} - 4) >> 2) & 0xFFFF)"
                 out += ([] if noreorder else ["\t.set\tnoreorder"]) + (["\tnop"] if hazard else []) + [
                     f"{pad}:", f"\t.if {count} > 0", f"\t.rept {count}", "\tnop", "\t.endr", "\t.endif",

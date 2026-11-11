@@ -180,8 +180,8 @@ void C2DSprObj::init(UINT nSpr) {
     m_nPoly = nSpr;
 #line 154
     m_pSprPrim = new KH_AT("(154)") SprPrim[nSpr];
-    INT& rViewer = C2DMan::m_fg2DViewer;
-    if (rViewer) m_pSeqControl = &C2DViewer::m_seqControl;
+    KH_DEBUG(INT& rViewer = C2DMan::m_fg2DViewer;)
+    KH_DEBUG(if (rViewer) m_pSeqControl = &C2DViewer::m_seqControl;)
 }
 void C2DSprObj::initSprite(INT inNum, SPR_GROUP* pSprGroupe, SPR_PARTS* pSprParts) {
     if (!m_pSprPrim) return;

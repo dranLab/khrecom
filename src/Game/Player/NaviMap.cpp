@@ -381,7 +381,7 @@ void CNaviMap::disp() {
     if (m_uiDispFlag & 0x800000) {
         return;
     }
-    if (!KH_DW(DebugWork::g_dw.sys.m_iFukidasiDisp)) {
+    if (!KH_DW_ON(DebugWork::g_dw.sys.m_iFukidasiDisp)) {
         return;
     }
     if (!m_pModels) {

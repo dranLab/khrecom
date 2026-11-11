@@ -35,7 +35,7 @@ C2DBaseList* C2DMan::m_p2DBaseList = NULL;
 C2DOSLCManager* C2DMan::m_p2DOSLCManager = NULL;
 TIMEQ C2DMan::m_qTimeD;
 INT C2DMan::m_nLayer;
-INT C2DMan::m_fg2DViewer;
+KH_DEBUG(INT C2DMan::m_fg2DViewer;)
 C2DMan::D2MAN_LEVEL C2DMan::m_nLevel;
 C2DMan::D2MAN_LEVEL C2DMan::m_nLevelReq;
 
@@ -47,7 +47,7 @@ C2DMan::C2DMan(CTask* p) : CTaskSecondary(p) {
     m_nLayer = 11;
     m_nLevel = D2MAN_LEVEL0;
     m_nLevelReq = D2MAN_LEVEL0;
-    m_fg2DViewer = 0;
+    KH_DEBUG(m_fg2DViewer = 0;)
     C2DSpr::initializeList();
     C2DBase::initialize();
     C2DLayObj::m_uiID = 0;
@@ -284,7 +284,7 @@ void C2DMan::main() {
 }
 
 void C2DMan::disp() {
-    if (m_pInstance && KH_DW(DebugWork::g_dw.sys.m_iFukidasiDisp)) C2DSpr::_disp(m_nLevel);
+    if (m_pInstance && KH_DW_ON(DebugWork::g_dw.sys.m_iFukidasiDisp)) C2DSpr::_disp(m_nLevel);
 }
 
 BOOL C2DMan::isEnd(HANDLE handle) {

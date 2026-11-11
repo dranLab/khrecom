@@ -614,3 +614,4 @@ BOOL CBodyCollision::collideBody_(FVECTOR* outPos, FVECTOR* outNormal, FVECTOR* 
     return FALSE;
 }
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data

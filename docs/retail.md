@@ -367,6 +367,20 @@ Fourteenth batch (2026-11-11): **537 units from source in retail**, 209 function
 - A beta-only global left in a unit's .data makes its recorded size too large and hides the next unit's data
   (RootTask's s_bDbgSettingLoaded over TaskMan's _pSLCManager: an undefined symbol at link time).
 
+Fifteenth batch (2026-11-11): **548 units from source in retail**, 176 functions differ.
+
+- The "error" texture fallbacks (2DSpr, 2DSeq, 2DSeqObj) and C2DMan::m_fg2DViewer (the 2D viewer) are beta-only.
+- Debug switches with a nonzero default (DebugWork::initialize): `KH_DW_ON(x)` (1 in retail: m_iFukidasiDisp, the
+  speech bubbles stay on) and `KH_DWV(x, v)` (v in retail: player.iCardNumLock is -1).
+- KeVu0Sqrt's asm has no `nop` after the lqc2 in retail (`KH_VER("nop\n", "")`).
+- ee_asm_compat --release, short loops: `.p2align 2` inside a loop is no alignment (no-op in code); a span with a
+  real alignment is padded with a count taken from its instructions (the alignment counted as no padding) instead
+  of being left to Ps2EeAs (which pads to 6, the original to 5); only a section switch in the span (a jump
+  table's block) is no loop. This fixed 13 units, lib/nodebug/strstr among them.
+
+24. (decision) Debug switches that are on by default read as their default in retail (KH_DW_ON, KH_DWV); the plain
+    KH_DW stays 0 (the default of every other switch).
+
 ### Where it stands (end of the unattended run)
 
 - 517/638 units of retail from source; 10,392 functions match retail, 480 differ, 689 are beta-only ("extra").

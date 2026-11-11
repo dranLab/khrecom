@@ -84,7 +84,7 @@ BOOL C2DSeq::init(void* pSqd, const CHAR* pBaseName) {
 HANDLE C2DSeq::create(UINT inNo) {
     if (inNo >= (UINT)m_nSequenceMax) return 0;
     m_pTexInfo = CRsrcDB::getRsrcTex(m_pTexName, NAME_CASE_SENSITIVE);
-    if (!m_pTexInfo) m_pTexInfo = CRsrcDB::getRsrcTex("error", NAME_CASE_SENSITIVE);
+    KH_DEBUG(if (!m_pTexInfo) m_pTexInfo = CRsrcDB::getRsrcTex("error", NAME_CASE_SENSITIVE);)
     SEQ_SEQUENCE* pSeqSequence = &m_pSeqSequence[inNo];
 #line 73
     C2DSeqObj* p2DSeqObj = new KH_AT("(73)") C2DSeqObj;
@@ -102,7 +102,7 @@ HANDLE C2DSeq::create(UINT inNo) {
 HANDLE C2DSeq::create(UINT inNo, SeqControl* pSeqControl) {
     if (inNo >= (UINT)m_nSequenceMax) return 0;
     m_pTexInfo = CRsrcDB::getRsrcTex(m_pTexName, NAME_CASE_SENSITIVE);
-    if (!m_pTexInfo) m_pTexInfo = CRsrcDB::getRsrcTex("error", NAME_CASE_SENSITIVE);
+    KH_DEBUG(if (!m_pTexInfo) m_pTexInfo = CRsrcDB::getRsrcTex("error", NAME_CASE_SENSITIVE);)
     SEQ_SEQUENCE* pSeqSequence = &m_pSeqSequence[inNo];
 #line 110
     C2DSeqObj* p2DSeqObj = new KH_AT("(110)") C2DSeqObj(pSeqControl);
@@ -119,7 +119,7 @@ HANDLE C2DSeq::create(UINT inNo, SeqControl* pSeqControl) {
 HANDLE C2DSeq::create(LAY_SCREEN* pLayScreen) {
     if (pLayScreen->sequence_id >= (UINT)m_nSequenceMax) return 0;
     m_pTexInfo = CRsrcDB::getRsrcTex(m_pTexName, NAME_CASE_SENSITIVE);
-    if (!m_pTexInfo) m_pTexInfo = CRsrcDB::getRsrcTex("error", NAME_CASE_SENSITIVE);
+    KH_DEBUG(if (!m_pTexInfo) m_pTexInfo = CRsrcDB::getRsrcTex("error", NAME_CASE_SENSITIVE);)
     SEQ_SEQUENCE* pSeqSequence = &m_pSeqSequence[pLayScreen->sequence_id];
 #line 145
     C2DSeqObj* p2DSeqObj = new KH_AT("(145)") C2DSeqObj;
@@ -137,7 +137,7 @@ HANDLE C2DSeq::create(LAY_SCREEN* pLayScreen) {
 HANDLE C2DSeq::createSeq(UINT inUnitNo, UINT inNo, SeqControl* pSeqControl) {
     if (inNo >= (UINT)m_nSequenceMax) return 0;
     m_pTexInfo = CRsrcDB::getRsrcTex(m_pTexName, NAME_CASE_SENSITIVE);
-    if (!m_pTexInfo) m_pTexInfo = CRsrcDB::getRsrcTex("error", NAME_CASE_SENSITIVE);
+    KH_DEBUG(if (!m_pTexInfo) m_pTexInfo = CRsrcDB::getRsrcTex("error", NAME_CASE_SENSITIVE);)
     SEQ_SEQUENCE* pSeqSequence = &m_pSeqSequence[inNo];
 #line 184
     C2DSeqObj* p2DSeqObj = new KH_AT("(184)") C2DSeqObj(pSeqControl);
@@ -171,7 +171,7 @@ HANDLE C2DSeq::replaceSeq(HANDLE hCurrent, UINT inNo, SeqControl* pSeqControl) {
     C2DSeqObj* pCurrent = (C2DSeqObj*)C2DMan::get2DOSLCManager().get2DO(hCurrent);
     if (!pCurrent) return 0;
     m_pTexInfo = CRsrcDB::getRsrcTex(m_pTexName, NAME_CASE_SENSITIVE);
-    if (!m_pTexInfo) m_pTexInfo = CRsrcDB::getRsrcTex("error", NAME_CASE_SENSITIVE);
+    KH_DEBUG(if (!m_pTexInfo) m_pTexInfo = CRsrcDB::getRsrcTex("error", NAME_CASE_SENSITIVE);)
     SEQ_SEQUENCE* pSeqSequence = &m_pSeqSequence[inNo];
 #line 245
     C2DSeqObj* p2DSeqObj = new KH_AT("(245)") C2DSeqObj(pSeqControl);
@@ -257,3 +257,4 @@ BOOL C2DSeq::isEnd(HANDLE handle) {
 }  // namespace D2
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data

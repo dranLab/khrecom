@@ -154,7 +154,7 @@ BOOL C2DSpr::deleteList(C2DO& Obj) {
 void C2DSpr::resetTexInfo() {
     if (m_pTexName[0]) {
         m_pTexInfo = CRsrcDB::getRsrcTex(m_pTexName, NAME_CASE_SENSITIVE);
-        if (!m_pTexInfo) m_pTexInfo = CRsrcDB::getRsrcTex("error", NAME_CASE_SENSITIVE);
+        KH_DEBUG(if (!m_pTexInfo) m_pTexInfo = CRsrcDB::getRsrcTex("error", NAME_CASE_SENSITIVE);)
     }
 }
 
@@ -209,7 +209,7 @@ BOOL C2DSpr::init(void* pSpd, const CHAR* pBaseName) {
 HANDLE C2DSpr::create(UINT inNo) {
     if (inNo >= (UINT)m_nSpriteMax) return 0;
     m_pTexInfo = CRsrcDB::getRsrcTex(m_pTexName, NAME_CASE_SENSITIVE);
-    if (!m_pTexInfo) m_pTexInfo = CRsrcDB::getRsrcTex("error", NAME_CASE_SENSITIVE);
+    KH_DEBUG(if (!m_pTexInfo) m_pTexInfo = CRsrcDB::getRsrcTex("error", NAME_CASE_SENSITIVE);)
     SPR_SPRITE* pSprSprite = &m_pSprSprite[inNo];
     INT nIndex = pSprSprite->pos;
     INT nSprite = pSprSprite->max;
@@ -221,7 +221,7 @@ HANDLE C2DSpr::create(UINT inNo) {
 HANDLE C2DSpr::createSpr(UINT inUnitNo, UINT inNo) {
     if (inNo >= (UINT)m_nSpriteMax) return 0;
     m_pTexInfo = CRsrcDB::getRsrcTex(m_pTexName, NAME_CASE_SENSITIVE);
-    if (!m_pTexInfo) m_pTexInfo = CRsrcDB::getRsrcTex("error", NAME_CASE_SENSITIVE);
+    KH_DEBUG(if (!m_pTexInfo) m_pTexInfo = CRsrcDB::getRsrcTex("error", NAME_CASE_SENSITIVE);)
     SPR_SPRITE* pSprSprite = &m_pSprSprite[inNo];
     INT nIndex = pSprSprite->pos;
     INT nSprite = pSprSprite->max;
@@ -249,3 +249,4 @@ void C2DSpr::enableDisp(HANDLE handle, BOOL bEnable) {
 }  // namespace D2
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data
