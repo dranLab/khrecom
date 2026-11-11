@@ -17,6 +17,7 @@ Form/Menu/SaveLoadCtrl
 Form/Menu/SaveLoadUtil
 Form/Menu/TechHelp
 Form/Menu/TitleReportDllStarter
+Form/Menu/WorldCard
 Form/Menu/WorldSelect
 Form/Menu/WorldWarp
 Form/SystemMessage

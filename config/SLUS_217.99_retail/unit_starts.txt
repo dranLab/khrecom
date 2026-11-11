@@ -26,6 +26,8 @@ Form/Menu/TechHelp .data 0x00340374 0xc
 Form/Menu/TechHelp .rodata 0x0042F320 0x120
 Form/Menu/TitleReportDllStarter .data 0x00340380 0x4
 Form/Menu/TitleReportDllStarter .rodata 0x0042F440 0x50
+Form/Menu/WorldCard .data 0x00340384 0x4
+Form/Menu/WorldCard .rodata 0x0042F490 0x1320
 Form/Menu/WorldSelect .rodata 0x004307B0 0x13a0
 Form/Menu/WorldWarp .data 0x00340388 0x38
 Form/Menu/WorldWarp .rodata 0x00431B50 0x1320

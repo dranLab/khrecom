@@ -303,7 +303,7 @@ void CWorldCardSeq::WorldWndFour(INT* in_CardKindTable, const CHAR* in_pStr) {
     m_pStrings[0]->start();
     for (INT i = 0; i < 4; i++) {
         m_pStrings[i + 1] = createSeq(i + 1, 1, 1, 11, NULL);
-        m_pStrings[i + 1]->start();
+        { m_pStrings[i + 1]->start(); } /* MATCH: a block (found by the retail permuter; the cause is not known): retail's registers need it, the beta matches either way */
         card.init(in_CardKindTable[i], 0);
 #line 497
         m_pCard[i] = new KH_AT("(497)") C2DCard;
@@ -319,7 +319,7 @@ void CWorldCardSeq::WorldWndFive(INT* in_CardKindTable, const CHAR* in_pStr) {
     m_pStrings[0]->start();
     for (INT i = 0; i < 5; i++) {
         m_pStrings[i + 1] = createSeq(i + 1, 1, 2, 11, NULL);
-        m_pStrings[i + 1]->start();
+        { m_pStrings[i + 1]->start(); }
         card.init(in_CardKindTable[i], 0);
 #line 522
         m_pCard[i] = new KH_AT("(522)") C2DCard;
@@ -330,3 +330,4 @@ void CWorldCardSeq::WorldWndFive(INT* in_CardKindTable, const CHAR* in_pStr) {
 
 }  // namespace WorldCard
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata
