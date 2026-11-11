@@ -684,20 +684,20 @@ static void dpd_set_object_data(pppMngSt *pMng) {
     dpd_set_vsf_data(pchDpdData, pMng->pEtc->abUseVsf);
 }
 
-void debugDpdCheckShapeData(int nShapeNum) {
-    u_char *pabUseId;
-    int nIdx;
-    int nId;
+KH_DEBUG(void debugDpdCheckShapeData(int nShapeNum) {)
+    KH_DEBUG(u_char *pabUseId;)
+    KH_DEBUG(int nIdx;)
+    KH_DEBUG(int nId;)
 
 #line 1296
-    ASSERTS((ppvMng), "(ppvMng)");
-    pabUseId = ppvMng->pEtc->abUseShape;
-    nIdx = nShapeNum >> 3;
-    nId = nShapeNum & 7;
+    KH_DEBUG(ASSERTS((ppvMng), "(ppvMng)");)
+    KH_DEBUG(pabUseId = ppvMng->pEtc->abUseShape;)
+    KH_DEBUG(nIdx = nShapeNum >> 3;)
+    KH_DEBUG(nId = nShapeNum & 7;)
 #line 1300
-    ASSERTS(nIdx < (16), "nIdx < (16)"); ASSERTS(0 <= nIdx, "0 <= nIdx");
-    ASSERTS(pabUseId[nIdx] & (1<<nId), "pabUseId[nIdx] & (1<<nId)");
-}
+    KH_DEBUG(ASSERTS(nIdx < (16), "nIdx < (16)"); ASSERTS(0 <= nIdx, "0 <= nIdx");)
+    KH_DEBUG(ASSERTS(pabUseId[nIdx] & (1<<nId), "pabUseId[nIdx] & (1<<nId)");)
+KH_DEBUG(})
 static char *dpd_set_monochrome_tex_data(char *data) {
     int num;
     int i;
@@ -1021,11 +1021,11 @@ static void set_texture(DPD_TEXTURE *pTex, short shTexDbpStart) {
     ASSERTS(((void *)0) != pTex, "((void *)0) != pTex");
     if (shTexDbp >= 0x3800) {
         shTexDbp = shTexDbp - 0x3800 + shTexDbpStart;
-    } else if (shTexDbpStart != 0x2600) {
-        TRACE("set_texture::\213\244\227LTEXTURE\202\252\223]\221\227\210\265\202\242\202\276\202\274 %08x\n", shTexDbp);
-        shTexDbp = shTexDbp - 0x3000;
+    KH_DEBUG(} else if (shTexDbpStart != 0x2600) {)
+        KH_DEBUG(TRACE("set_texture::\213\244\227LTEXTURE\202\252\223]\221\227\210\265\202\242\202\276\202\274 %08x\n", shTexDbp);)
+        KH_DEBUG(shTexDbp = shTexDbp - 0x3000;)
     } else {
-        shTexDbp = shTexDbp - 0x400;
+        shTexDbp = KH_VER(shTexDbp - 0x400, (short)(shTexDbp - 0x2A00) + shTexDbpStart); /* retail: one formula */
     }
     sceGsSetDefLoadImage(gs_load_image, shTexDbp, pTex->shDbw, pTex->shDpsm, pTex->shX, pTex->shY, pTex->shW, pTex->shH);
     sceGsExecLoadImage(gs_load_image, (u_long128 *)pTex->abData);
@@ -1042,11 +1042,11 @@ static void set_clut(DPD_TEXTURE *pTex, short shCltDbpStart) {
     }
     if (shCltDbp >= 0x3D40) {
         shCltDbp = shCltDbp - 0x3D40 + shCltDbpStart;
-    } else if (shCltDbpStart == 0x3E00) {
-        shCltDbp = shCltDbp + 0x100;
-    } else {
-        TRACE("set_clut::\213\244\227LCLUT\202\252\223]\221\227\210\265\202\242\202\276\202\274 %08x\n", shCltDbp);
-        return;
+    } else KH_DEBUG(if (shCltDbpStart == 0x3E00)) {
+        shCltDbp = KH_VER(shCltDbp + 0x100, shCltDbp - 0x3D00 + shCltDbpStart); /* retail: one formula */
+    KH_DEBUG(} else {)
+        KH_DEBUG(TRACE("set_clut::\213\244\227LCLUT\202\252\223]\221\227\210\265\202\242\202\276\202\274 %08x\n", shCltDbp);)
+        KH_DEBUG(return;)
     }
 #line 1793
     ASSERTS((0x3e00) <= shCltDbp, "(0x3e00) <= shCltDbp");
@@ -1090,9 +1090,9 @@ static void dpd_set_texture(char *pchDpdData, u_char *pabUseId, short shTexpStar
             bUseId = pabUseId[nIdx];
         }
         if (bUseId & 1) {
-            if (shTexpStart < 0x2800) {
-                shTexpStart = 0x2800;
-            }
+            KH_DEBUG(if (shTexpStart < 0x2800) {)
+                KH_DEBUG(shTexpStart = 0x2800;)
+            KH_DEBUG(})
             set_texture((DPD_TEXTURE *)pchBuf, shTexpStart);
         }
         bUseId >>= 1;
@@ -1856,3 +1856,4 @@ void pppSendTagVif1Packet(u_long128 *pkt_top) {
     D_REG(D1_CHCR) = 0x145;
 }
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .data .rodata

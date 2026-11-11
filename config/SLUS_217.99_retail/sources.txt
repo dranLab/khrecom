@@ -359,6 +359,7 @@ System/Graphic/Effect/libppp/keProg/pppKeThSft
 System/Graphic/Effect/libppp/keProg/pppKeTkFade
 System/Graphic/Effect/libppp/keProg/pppKeZCrct
 System/Graphic/Effect/libppp/keProg/pppKeZCrctShp
+System/Graphic/Effect/libppp/partMng
 System/Graphic/Effect/libppp/pppAlloc
 System/Graphic/Effect/libppp/pppDummy
 System/Graphic/Effect/libppp/ppplibdmy

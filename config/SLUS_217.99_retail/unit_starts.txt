@@ -261,6 +261,10 @@ System/Graphic/Effect/libppp/keProg/KeTh .data 0x0033B000 0x10
 System/Graphic/Effect/libppp/keProg/pppKeHmg .rodata 0x004037E0 0x4
 System/Graphic/Effect/libppp/keProg/pppKeLns .bss 0x0057E090 0x80
 System/Graphic/Effect/libppp/keProg/pppKeLns .data 0x0033B010 0x1
+System/Graphic/Effect/libppp/partMng .bss 0x0056D900 0x2c0
+System/Graphic/Effect/libppp/partMng .data 0x00332CC8 0x1a70
+System/Graphic/Effect/libppp/partMng .rodata 0x00402400 0x1f0
+System/Graphic/Effect/libppp/pppfunctbl .rodata 0x00402600
 System/Graphic/Effect/libppp/ryjProg/pppRyjDrawShipoly .data 0x0033B020 0x20
 System/Graphic/Effect/libppp/ryjProg/pppRyjDrawShipoly .rodata 0x004037F0 0x40
 System/Graphic/Effect/libppp/ryjProg/pppRyjDrawShipolyBone .data 0x0033B040 0x20

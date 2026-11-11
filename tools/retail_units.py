@@ -467,8 +467,10 @@ def main() -> None:
             if starts.exists():
                 keep = set(units)
                 lines = starts.read_text(encoding="utf-8").splitlines()
-                starts.write_text("\n".join(l for l in lines if not l or l.startswith("#") or l.split()[0] in keep)
-                                  + "\n", encoding="utf-8")
+                # starts of units without a source (data-only units such as libppp's pppfunctbl) are measured by
+                # hand and stay
+                starts.write_text("\n".join(l for l in lines if not l or l.startswith("#") or l.split()[0] in keep
+                                            or source_of(l.split()[0]) is None) + "\n", encoding="utf-8")
             current = ["!" + p for p in excluded]
         starts = v.cfg / "unit_starts.txt"
         lines = starts.read_text(encoding="utf-8").splitlines() if starts.exists() else []

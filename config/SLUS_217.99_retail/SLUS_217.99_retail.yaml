@@ -1358,6 +1358,7 @@ segments:
       - [0x3023A8, rodata, System/Graphic/2d/2DSeqObj]
       - [0x3023F0, rodata, System/Graphic/Effect/EffectMan]
       - [0x302400, rodata, System/Graphic/Effect/libppp/partMng]
+      - [0x302600, rodata, System/Graphic/Effect/libppp/pppfunctbl]
       - [0x3036D0, rodata, System/Graphic/Effect/libppp/draw/md0]
       - [0x3036F0, rodata, System/Graphic/Effect/libppp/draw/md0_one]
       - [0x303710, rodata, System/Graphic/Effect/libppp/draw/md0_onef]
