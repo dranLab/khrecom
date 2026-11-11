@@ -17,6 +17,7 @@ Form/Menu/TitleReportDllStarter
 Form/Menu/WorldSelect
 Form/SystemMessage
 Game/AtWater
+Game/Atel/Atel
 Game/Atel/AtelBlur
 Game/Atel/AtelCamera
 Game/Atel/AtelCrossFade

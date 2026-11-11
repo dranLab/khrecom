@@ -24,6 +24,8 @@ Form/SystemMessage .bss 0x005BF3C0 0x100
 Form/SystemMessage .data 0x0033F9E0 0x14
 Form/SystemMessage .rodata 0x00424050 0x30
 Game/AtWater .data 0x0033B390 0x4
+Game/Atel/Atel .data 0x0033C3F0 0x8
+Game/Atel/Atel .rodata 0x004107F0 0x80
 Game/Atel/AtelBlur .data 0x0033C3F8 0x4
 Game/Atel/AtelCrossFade .data 0x0033C3FC 0x4
 Game/Atel/AtelTutorial .rodata 0x00410890 0x18
