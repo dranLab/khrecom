@@ -34,8 +34,8 @@ public:
     virtual void disp();
     void setup();
     void initRoomCreate();
-    FLOAT getAppearDistance() const;
-    FLOAT getDisappearDistance() const;
+    FLOAT getAppearDistance() const { return m_fAppearDistance; }
+    FLOAT getDisappearDistance() const { return m_fDisappearDistance; }
     TIMEQ getFaintTime() const;
     TIMEQ getStopTime() const;
     TIMEQ getConfuseTime() const;

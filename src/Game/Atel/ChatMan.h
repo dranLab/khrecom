@@ -98,7 +98,7 @@ public:
         if (nCmd == 0x412) return onSetTextFadeOutTime(nCmd, pParam, nID);
         if (nCmd == 0x413) return onEnableLFDisp(nCmd, pParam, nID);
         return 0;
-    }
+    } KH_RELEASE(virtual void main() {}) /* retail: an empty main override */
 
 private:
     CChatWndDt* searchChatWndDt(INT nID);

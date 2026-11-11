@@ -27,6 +27,7 @@ Game/Atel/AtelCrossFade
 Game/Atel/AtelFog
 Game/Atel/AtelTutorial
 Game/Atel/CameraMan
+Game/Atel/ChatMan
 Game/Atel/EventTrap
 Game/AttachCard
 Game/AttackMotion
@@ -85,6 +86,7 @@ Game/Enemy/EnemyYellowopera
 Game/Enemy/Heartless
 Game/Enemy/MapEnemyAir
 Game/Enemy/MapEnemyGround
+Game/Enemy/MapEnemyManager
 Game/Enemy/MapEnemyMushroom
 Game/Enemy/MapEnemyShadow
 Game/Enemy/MonstroEventBattle
@@ -98,6 +100,7 @@ Game/Gimmick/BaseGimmick
 Game/Gimmick/GimmickAngelArrow
 Game/Gimmick/GimmickBell
 Game/Gimmick/GimmickBreakable
+Game/Gimmick/GimmickCarry
 Game/Gimmick/GimmickDeceive
 Game/Gimmick/GimmickDeceiveEnemy
 Game/Gimmick/GimmickDominoPillar

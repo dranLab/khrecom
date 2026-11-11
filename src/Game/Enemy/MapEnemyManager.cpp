@@ -280,11 +280,12 @@ BOOL CMapEnemyManager::canCreateMapEnemy_(BYTE inUniqueID) {
     return TRUE;
 }
 
-FLOAT CMapEnemyManager::getAppearDistance() const {
-    return m_fAppearDistance;
-}
 
-FLOAT CMapEnemyManager::getDisappearDistance() const {
-    return m_fDisappearDistance;
-}
+
+
+
+
+
+
 // SOURCE DATA: .rodata
+// SOURCE DATA SLUS_217.99_retail: .rodata

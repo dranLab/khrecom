@@ -44,7 +44,7 @@ public:
     void ThrowGimmick(const FVECTOR& in_TargetPos);
     void CancelCarry();
     virtual void lastUpdate();
-    void setFlagSetInfo(INT in_flag);
+    void setFlagSetInfo(INT in_flag) { m_FlagSetInfo = in_flag; }
 };
 
 #endif /* GAME_GIMMICK_GIMMICKCARRY_H */

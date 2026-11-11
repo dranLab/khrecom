@@ -36,6 +36,7 @@ Game/Atel/AtelFog .data 0x0033C400 0x4
 Game/Atel/AtelTutorial .rodata 0x00410890 0x18
 Game/Atel/CameraMan .data 0x0033C404 0x8
 Game/Atel/CameraMan .rodata 0x004109C0 0x30
+Game/Atel/ChatMan .data 0x0033C40C 0xc
 Game/AttachCard .rodata 0x00405D38 0x1280
 Game/AttackMotion .data 0x0033B370 0x20
 Game/AttackMotion .rodata 0x00406FC0 0x50
@@ -127,6 +128,7 @@ Game/Enemy/EnemyYellowopera .data 0x0033F378 0x28
 Game/Enemy/EnemyYellowopera .rodata 0x0041F6E0 0xf0
 Game/Enemy/Heartless .data 0x0033F3A0 0x10
 Game/Enemy/Heartless .rodata 0x0041F7D0 0xa0
+Game/Enemy/MapEnemyManager .rodata 0x004211B0 0x50
 Game/Enemy/MapEnemyShadow .rodata 0x00421210 0x28
 Game/Enemy/MonstroEventBattle .data 0x0033F870 0x1c
 Game/Enemy/MonstroEventBattle .rodata 0x00421240 0xb0
@@ -142,6 +144,7 @@ Game/GameWork .data 0x0033BCC8 0x70
 Game/Gimmick/BaseGimmick .rodata 0x00421340 0x100
 Game/Gimmick/GimmickAngelArrow .data 0x0033F8E0 0x40
 Game/Gimmick/GimmickAngelArrow .rodata 0x00421530 0x130
+Game/Gimmick/GimmickCarry .rodata 0x00421670 0x50
 Game/Gimmick/GimmickDeceiveEnemy .rodata 0x004216D0 0x40
 Game/Gimmick/GimmickDominoPillar .rodata 0x00421710 0x10
 Game/Gimmick/GimmickDoor .bss 0x005BEBD0 0x7e0

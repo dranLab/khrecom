@@ -182,6 +182,10 @@ def try_unit(v: Version, unit: str, show=(), data=True) -> dict:
             cand = [r for r in v.pairs.values() if r["unit"] == unit and r["other"] and r["name"] not in ours
                     and "__" in r["name"][1:] and r["name"][:r["name"].index("__", 1)] == base]
             pair = cand[0] if len(cand) == 1 else None
+        if not pair and linkonce and name in v.symbols:
+            # a weak copy only this version has (ChatMan's empty main override in retail): compare it at its symbol
+            pair = {"name": name, "other": f"{v.symbols[name]:#x}", "other_size": f"{size:#x}", "class": "",
+                    "unit": unit, "how": "version only", "status": "version only"}
         if not pair or not pair["other"]:
             res["functions"].append((name, "extra", ""))
             continue
