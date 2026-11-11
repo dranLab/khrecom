@@ -299,6 +299,9 @@ def try_unit(v: Version, unit: str, show=(), data=True) -> dict:
                     rest = v.image.data[v.image.off(end):v.image.off(end) + max(0, rng[1] - end)] if rng[1] > end else b""
                     if any(rest):  # retail has more data in this unit's range than the source gives
                         entry["bytes"] = f"SHORT (retail data up to {rng[1]:#x})"
+                    elif end > rng[1] and any(v.image.data[v.image.off(rng[1]):v.image.off(end)]):
+                        # the source's data runs into the next unit's (Game's beta-only debug statics did)
+                        entry["bytes"] = f"LONG (past the next unit's start {rng[1]:#x})"
             res["data"][name] = entry
     return res
 
