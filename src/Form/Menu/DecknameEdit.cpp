@@ -15,7 +15,7 @@
 #include "System/Graphic/2d/2DSeqCtrl.h"
 #include "System/Graphic/2d/2DFnt.h"
 #include "include_asm.h"
-
+template <class T> static inline T& _ref(T& v) { return v; }
 extern INT SCREEN_HEIGHT;
 static inline INT& _screenHeight() { return SCREEN_HEIGHT; }
 void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
@@ -364,17 +364,17 @@ void CDecknameEdit::_initialize() {
     m_State[1].set(this, &CDecknameEdit::beginStateMain, &CDecknameEdit::stateMain, &CDecknameEdit::endStateMain);
     m_State[2].set(this, &CDecknameEdit::beginStateLeave, &CDecknameEdit::stateLeave, &CDecknameEdit::endStateLeave);
     _getDeckName();
-    m_pDeckName = new KH_AT("(677)") CDnEditNamePlate(this, m_nDeckNo);
+    _ref(m_pDeckName) = new KH_AT("(677)") CDnEditNamePlate(this, m_nDeckNo); /* MATCH: stores through _ref: retail issues them right after the constructor (beta: the asserts read them) */
 #line 678
     ASSERT(m_pDeckName);
     m_pDeckName->setName(m_szNameBuf[m_nDeckNo]);
-    m_pWordPlate = new KH_AT("(681)") CDnEditWordPlate(this);
+    _ref(m_pWordPlate) = new KH_AT("(681)") CDnEditWordPlate(this);
 #line 682
     ASSERT(m_pWordPlate);
-    m_pCursor1 = new KH_AT("(684)") CDnEditCursor1(this, m_pWordPlate->_getSeq());
+    _ref(m_pCursor1) = new KH_AT("(684)") CDnEditCursor1(this, m_pWordPlate->_getSeq());
 #line 685
     ASSERT(m_pCursor1);
-    m_pCursor2 = new KH_AT("(687)") CDnEditCursor2(this, m_pWordPlate->_getSeq());
+    _ref(m_pCursor2) = new KH_AT("(687)") CDnEditCursor2(this, m_pWordPlate->_getSeq());
 #line 688
     ASSERT(m_pCursor2);
     changeState(0);
@@ -1004,7 +1004,7 @@ void CDnEditWordPlate::startLeave() {
 }
 
 /* read through a reference: the original loads _pszSeqName after the colour store */
-template <class T> static inline T& _ref(T& v) { return v; }
+
 void CDnEditWordPlate::chgType(INT inType, BOOL bSeOn) {
     G_RGBA stRGBA;
     INT i;
@@ -1164,3 +1164,4 @@ BOOL CDecknameEditWnd::isFinish() { return CDecknameEdit::isFinish(); }
 
 INT CDecknameEditWnd::getLastEditDeckNo() { return CDecknameEdit::getLastEditDeckNo(); }
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

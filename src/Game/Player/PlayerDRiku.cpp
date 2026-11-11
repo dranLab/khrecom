@@ -164,7 +164,7 @@ CPlayerDRiku::CPlayerDRiku(CTask* inParent, UINT inChara, INT inEx) : CPlayer(in
     _ref(m_pRiku) = NULL;
     _ref(m_hMagicCore) = 0;
     _ref(m_nAttackCount) = 0;
-    m_iBoneLHand = getBoneIndex(g_szBoneLxRot, 0);
+    m_iBoneLHand = getBoneIndex(_ref(g_szBoneLxRot), 0); /* MATCH: the bone name read through _ref: retail loads it after the member stores */
     for (INT i = 0; i < 2; i++) {
         m_vWarpPos[i].init();
         m_vWarpNormal[i].init();
@@ -2308,3 +2308,4 @@ void CPlayerDRiku::exeFriend() {
 
 } // namespace PL
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

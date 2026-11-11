@@ -18,7 +18,7 @@
 #include "System/Spad.h"
 #include "include_asm.h"
 #define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
-
+template <class T> static inline T& _ref(T& v) { return v; }
 
 #include "Game/SceneEnv.h"
 #line 36
@@ -724,8 +724,8 @@ BOOL CEffectMan::_updateCoord(CEffect* effect) {
             if (pCrd[i].getParent()) break;
         }
         if (i >= nNum) {
-            char* pszEffName = (char*)"\x83G\x83t\x83" "F\x83N\x83g\x96\xbc\x95s\x96\xbe";
-            if (effect->m_pEffName) pszEffName = effect->m_pEffName;
+            KH_DEBUG(char* pszEffName = (char*)"\x83G\x83t\x83" "F\x83N\x83g\x96\xbc\x95s\x96\xbe";)
+            KH_DEBUG(if (effect->m_pEffName) pszEffName = effect->m_pEffName;)
             KH_DEBUG(TRACE("CEffectMan::_updateCoord \x83" "A\x83^\x83" "b\x83`\x90\xe6\x82\xaa\x82\xa2\x82\xc8\x82\xad\x82\xc8\x82\xc1\x82\xc4\x82\xa2\x82\xdc\x82\xb7\x81" "B\x8e\xa9\x8e" "E\x82\xb5\x82\xdc\x82\xb7 eff:%08x crd:%08x (%s:%d)\n", effect, &effect->Crd(0), pszEffName, effect->m_nEffNo);)
 
             return FALSE;
@@ -1062,7 +1062,7 @@ void CEffectMan::initialize(CTask* p) {
     s_pEffectList = new KH_AT("(1869)") CEffectList(*s_pSLCManager);
     TRACE("sizeof(CEffect) == %dbyte\n", sizeof(CEffect));
 #line 1872
-    s_pExceptEffect = new KH_AT("(1872)") CEffect;
+    _ref(s_pExceptEffect) = new KH_AT("(1872)") CEffect; /* MATCH: store through _ref: retail issues it before the list reload (beta: the assert) */
     ASSERT(s_pEffectList && s_pExceptEffect);
     s_pEffectList->pushBack(*s_pExceptEffect);
     _effInitialize(0x80000, 0x30000);
@@ -1186,3 +1186,4 @@ KH_DEBUG(void CEffectMan::_setDebugBBOXLine(const FVECTOR* pV) {)
 KH_DEBUG(})
 
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .data .rodata
