@@ -268,3 +268,19 @@ sections they point into (string tables in .data), and accepts a clear majority 
 18. (decision) A data start is accepted with >= 80 % of its votes (one outlier is typically a pointer just past an
     array); `verify` would catch a wrong one.
 
+Eighth batch (2026-11-11): **517 units from source in retail** (of 648 complete units; 10 more are debug units retail
+lacks). "100 Acre Woods" -> "100 Acre Wood" (CardKind.h's table, 8 units), the 71 unit-local `ASSERT` macros vanish
+in retail (`KH_DEBUG` body), CCollUtil::_initDbg is empty in retail.
+
+### Where it stands (end of the unattended run)
+
+- 517/638 units of retail from source; 10,392 functions match retail, 480 differ, 689 are beta-only ("extra").
+- What blocks the rest (tools/retail_units.py scan, build/SLUS_217.99_retail/retail_units/scan.tsv):
+  - real retail code changes (`calls`/`shape`, and many `debug`/`header`/`inline` DIFFs: scheduling and registers
+    that the beta's matching tricks don't reproduce once the debug code is gone, or new code like
+    CAvatar::InitAvatar's case) - per function, `tools/retail_units.py try <unit> --show <function>`;
+  - VSME's debug tables (`&g_dw...`), the static initializers retail lacks (EnemyHeartsoldier, EnemySpadesoldier,
+    GimmickDoor, SampleGimmick, MapUnit, main), retail data that the source lacks (`SHORT`: GameWork, Summon,
+    FriendAriel, Glare, ...), CreateEnemy's unused "abnormal" (BattleEnemy.h's header static, absent in retail);
+  - 45 bare `AssertApp(...)` statements (default branches) are left as written: in retail they are empty statements.
+
