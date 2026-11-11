@@ -126,6 +126,7 @@ Game/InterpolateMove
 Game/Map
 Game/MapCardDef
 Game/MapUnitTable
+Game/MinigameManager
 Game/ModelObj
 Game/Movement
 Game/NowLoading
@@ -139,6 +140,7 @@ Game/Player/FriendJack
 Game/Player/FriendKing
 Game/Player/FriendPan
 Game/Player/FriendPluto
+Game/Player/NaviMap
 Game/Player/Player
 Game/Player/PlayerGauge
 Game/Player/PlayerRiku
@@ -412,6 +414,7 @@ System/Graphic/TexCtrl
 System/Graphic/TexUtil
 System/LinkedBuf
 System/MainTaskFactory
+System/Math3D
 System/Movie/AudioDec
 System/Movie/MSVideo
 System/Movie/Movie

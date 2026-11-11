@@ -108,8 +108,8 @@ inline void _tjPlaceholder(INT state, FLOAT& f) {
 
 DLL_MINIGAME(CMini100AcreVegPanicMain, 0x170);
 DLL_MINIGAME(CMini100AcreBalloonGlider, 0x190);
-DLL_MINIGAME(CMini100AcreTiggerJump, 0x380);
-DLL_MINIGAME(CMini100AcreWildDive, 0x1C0);
+DLL_MINIGAME(CMini100AcreTiggerJump, KH_VER(0x380, 0x300));
+DLL_MINIGAME(CMini100AcreWildDive, KH_VER(0x1C0, 0x150));
 DLL_MINIGAME(CMini100AcreBeeBattleMain, 0x150);
 
 /* DLL imports: undefined here, 0 for the link (config/SLUS_217.99/dll_imports.ld): the same "jal 0" as the
@@ -328,48 +328,48 @@ INT CMinigameManager::getMinigameType() {
         nRet = 4;
         break;
     }
-    if (nRet != -1) {
-        INT nOld = nRet;
-        if (CSceneInfo::getCurrentAreaNum() == 10) {
-            switch (CSceneInfo::getCurrentBattleSceneNum()) {
-            case 0x4B1:
-                if (nRet != 0) nRet = 0;
-                break;
-            case 0x4B2:
-                nRet = 1;
-                break;
-            case 0x4B3:
-                nRet = 2;
-                break;
-            case 0x4B4:
-                if (nRet != 3 && nRet != 4) nRet = 3;
-                if (CPadHandler::isButtonDown(0x800, 1)) {
-                    CGameWork::setByte(1, 0x142, 4);
-                    nRet = 4;
-                    nOld = 4;
-                }
-                break;
-            }
-        } else {
-            nRet = -1;
-            TRACE("\x82P\x82O\x82O\x83G\x81[\x83J\x81[\x82\xcc\x90X\x88\xc8\x8aO\x82\xc5\x83~\x83j\x83Q\x81[\x83\x80\x82\xf0\x8bN\x93\xae\x82\xb5\x82\xe6\x82\xa4\x82\xc6\x82\xb5\x82\xc4\x82\xa2\x82\xdc\x82\xb7\x81" "B\n");
-        }
-        if (nRet != nOld) {
-            TRACE("\x83~\x83j\x83Q\x81[\x83\x80\x8e\xed\x95\xca\x83\x8f\x81[\x83N (AGB_POOH_MINIGAME_KIND) \x82\xc9\x8c\xeb\x82\xc1\x82\xbd\x92l(%d)\x82\xaa\x83Z\x83" "b\x83g\x82\xb3\x82\xea\x82\xc4\x82\xa2\x82\xdc\x82\xb7\x81" "B\n", nOld);
-        }
-    }
+    KH_DEBUG(if (nRet != -1) {)
+        KH_DEBUG(INT nOld = nRet;)
+        KH_DEBUG(if (CSceneInfo::getCurrentAreaNum() == 10) {)
+            KH_DEBUG(switch (CSceneInfo::getCurrentBattleSceneNum()) {)
+            KH_DEBUG(case 0x4B1:)
+                KH_DEBUG(if (nRet != 0) nRet = 0;)
+                KH_DEBUG(break;)
+            KH_DEBUG(case 0x4B2:)
+                KH_DEBUG(nRet = 1;)
+                KH_DEBUG(break;)
+            KH_DEBUG(case 0x4B3:)
+                KH_DEBUG(nRet = 2;)
+                KH_DEBUG(break;)
+            KH_DEBUG(case 0x4B4:)
+                KH_DEBUG(if (nRet != 3 && nRet != 4) nRet = 3;)
+                KH_DEBUG(if (CPadHandler::isButtonDown(0x800, 1)) {)
+                    KH_DEBUG(CGameWork::setByte(1, 0x142, 4);)
+                    KH_DEBUG(nRet = 4;)
+                    KH_DEBUG(nOld = 4;)
+                KH_DEBUG(})
+                KH_DEBUG(break;)
+            KH_DEBUG(})
+        KH_DEBUG(} else {)
+            KH_DEBUG(nRet = -1;)
+            KH_DEBUG(TRACE("\x82P\x82O\x82O\x83G\x81[\x83J\x81[\x82\xcc\x90X\x88\xc8\x8aO\x82\xc5\x83~\x83j\x83Q\x81[\x83\x80\x82\xf0\x8bN\x93\xae\x82\xb5\x82\xe6\x82\xa4\x82\xc6\x82\xb5\x82\xc4\x82\xa2\x82\xdc\x82\xb7\x81" "B\n");)
+        KH_DEBUG(})
+        KH_DEBUG(if (nRet != nOld) {)
+            KH_DEBUG(TRACE("\x83~\x83j\x83Q\x81[\x83\x80\x8e\xed\x95\xca\x83\x8f\x81[\x83N (AGB_POOH_MINIGAME_KIND) \x82\xc9\x8c\xeb\x82\xc1\x82\xbd\x92l(%d)\x82\xaa\x83Z\x83" "b\x83g\x82\xb3\x82\xea\x82\xc4\x82\xa2\x82\xdc\x82\xb7\x81" "B\n", nOld);)
+        KH_DEBUG(})
+    KH_DEBUG(})
     return nRet;
 }
 
 UINT CMinigameManager::sendEvent(UINT nEvent, void* pParam) {
-    switch (nEvent) {
-    case 1:
-        TRACE("\x83~\x83j\x83Q\x81[\x83\x80\x81" "F\x81g\x82\xe2\x82\xdf\x82\xe9\x81h\x82\xaa\x92\xca\x92m\x82\xb3\x82\xea\x82\xdc\x82\xb5\x82\xbd\x81" "B\n");
-        break;
-    case 2:
-        TRACE("\x83~\x83j\x83Q\x81[\x83\x80\x81" "F\x81g\x83\x8a\x83g\x83\x89\x83" "C\x81h\x82\xaa\x92\xca\x92m\x82\xb3\x82\xea\x82\xdc\x82\xb5\x82\xbd\x81" "B\n");
-        break;
-    }
+    KH_DEBUG(switch (nEvent) {)
+    KH_DEBUG(case 1:)
+        KH_DEBUG(TRACE("\x83~\x83j\x83Q\x81[\x83\x80\x81" "F\x81g\x82\xe2\x82\xdf\x82\xe9\x81h\x82\xaa\x92\xca\x92m\x82\xb3\x82\xea\x82\xdc\x82\xb5\x82\xbd\x81" "B\n");)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 2:)
+        KH_DEBUG(TRACE("\x83~\x83j\x83Q\x81[\x83\x80\x81" "F\x81g\x83\x8a\x83g\x83\x89\x83" "C\x81h\x82\xaa\x92\xca\x92m\x82\xb3\x82\xea\x82\xdc\x82\xb5\x82\xbd\x81" "B\n");)
+        KH_DEBUG(break;)
+    KH_DEBUG(})
     if (nEvent == 1) _reqFinish();
     if (m_pGame) {
         switch (nEvent) {
@@ -521,3 +521,4 @@ void killMGSkill() {
 } // namespace MG_SKILL
 
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .data .rodata

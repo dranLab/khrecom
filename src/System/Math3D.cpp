@@ -793,26 +793,26 @@ void Math3D::HermiteTCBPosition(FVECTOR& outVec, const FVECTOR* v0, const FVECTO
     HermiteInterpolation(outVec, mMat, t);
 }
 
-INT Math3D::checkFloat(FLOAT pai) {
-    INT iPai = *(INT*)&pai;
-    INT iPaiE = (iPai >> 23) & 0xFF;
-    INT iPaiF = iPai & 0x7FFFFF;
-    if (iPaiE == 0xFF) {
-        if (iPaiF != 0) {
-            /* "FLOAT値の内容が非数です 0x%08x \n" (Shift-JIS) */
-            TRACE("FLOAT\222l\202\314\223\340\227e\202\252\224\361\220\224\202\305\202\267 0x%08x \n", iPai);
-        } else {
-            /* "FLOAT値の内容が無限大です 0x%08x \n" */
-            TRACE("FLOAT\222l\202\314\223\340\227e\202\252\226\263\214\300\221\345\202\305\202\267 0x%08x \n", iPai);
-        }
+KH_DEBUG(INT Math3D::checkFloat(FLOAT pai) {)
+    KH_DEBUG(INT iPai = *(INT*)&pai;)
+    KH_DEBUG(INT iPaiE = (iPai >> 23) & 0xFF;)
+    KH_DEBUG(INT iPaiF = iPai & 0x7FFFFF;)
+    KH_DEBUG(if (iPaiE == 0xFF) {)
+        KH_DEBUG(if (iPaiF != 0) {)
+            KH_DEBUG(/* "FLOAT値の内容が非数です 0x%08x \n" (Shift-JIS) */)
+            KH_DEBUG(TRACE("FLOAT\222l\202\314\223\340\227e\202\252\224\361\220\224\202\305\202\267 0x%08x \n", iPai);)
+        KH_DEBUG(} else {)
+            KH_DEBUG(/* "FLOAT値の内容が無限大です 0x%08x \n" */)
+            KH_DEBUG(TRACE("FLOAT\222l\202\314\223\340\227e\202\252\226\263\214\300\221\345\202\305\202\267 0x%08x \n", iPai);)
+        KH_DEBUG(})
 #line 1882
-        AssertApp(__FILE__, __LINE__, "iPai", 0);
-    } else if (iPaiE == 0 && iPaiF != 0) {
-        /* "FLOAT値の内容が非正規化数です 0x%08x \n" */
-        TRACE("FLOAT\222l\202\314\223\340\227e\202\252\224\361\220\263\213K\211\273\220\224\202\305\202\267 0x%08x \n", iPai);
-    }
-    return iPaiE;
-}
+        KH_DEBUG(AssertApp(__FILE__, __LINE__, "iPai", 0);)
+    KH_DEBUG(} else if (iPaiE == 0 && iPaiF != 0) {)
+        KH_DEBUG(/* "FLOAT値の内容が非正規化数です 0x%08x \n" */)
+        KH_DEBUG(TRACE("FLOAT\222l\202\314\223\340\227e\202\252\224\361\220\263\213K\211\273\220\224\202\305\202\267 0x%08x \n", iPai);)
+    KH_DEBUG(})
+    KH_DEBUG(return iPaiE;)
+KH_DEBUG(})
 
 FLOAT Math3D::GetIntersectionTimeOfFrontPlaneAndLine(FVECTOR& vOutHitPos, const FVECTOR& vPlaneNormal, const FVECTOR& vPlanePos, const FVECTOR& vSLine, const FVECTOR& vELine) {
     float bottom;
@@ -1278,14 +1278,14 @@ FLOAT Math3D::GetIntersectionOfLineAndPoint(FVECTOR& vOutI, const FVECTOR& p0, c
 }
 
 FLOAT Math3D::LimitPI(FLOAT pai) {
-    INT e = checkFloat(pai) - 127;
-    if (e > 32) {
+    KH_DEBUG(INT e = checkFloat(pai) - 127;)
+    KH_DEBUG(if (e > 32) {)
         /* "FLOAT値のPIの指数部が大きすぎます 2^%d (0x%08x) (%f)\n" */
-        TRACE("FLOAT\222l\202\314PI\202\314\216w\220\224\225\224\202\252\221\345\202\253\202\267\202\254\202\334\202\267 2^%d (0x%08x) (%f)\n", e,
-              *(INT*)&pai, pai);
+        KH_DEBUG(TRACE("FLOAT\222l\202\314PI\202\314\216w\220\224\225\224\202\252\221\345\202\253\202\267\202\254\202\334\202\267 2^%d (0x%08x) (%f)\n", e,
+              *(INT*)&pai, pai);)
 #line 3227
-        AssertApp(__FILE__, __LINE__, "e", 0);
-    }
+        KH_DEBUG(AssertApp(__FILE__, __LINE__, "e", 0);)
+    KH_DEBUG(})
     FLOAT fPI = 3.1415927f;
     if (pai > fPI) {
         FLOAT fPI8 = 25.132742f;
@@ -1620,3 +1620,4 @@ extern "C" float __ieee754_sqrtf(float x) {
     return _sqrtf(x);
 }
 // SOURCE DATA: .rodata
+// SOURCE DATA SLUS_217.99_retail: .rodata

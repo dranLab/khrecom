@@ -74,12 +74,12 @@ void CLightUnit::setAmbient(const FVECTOR& in_color) {
 void CLightUnit::setAnchor(const CCoord* p, INT kind) {
     m_pCrd = (CCoord*)p;
     m_Kind = kind;
-    if (kind == 1) {
-        CMapViewer* pViewer = (CMapViewer*)CTaskMan::getSysTask(0x31);
-        if (pViewer) {
-            pViewer->setPlayerCrd(p);
-        }
-    }
+    KH_DEBUG(if (kind == 1) {)
+        KH_DEBUG(CMapViewer* pViewer = (CMapViewer*)CTaskMan::getSysTask(0x31);)
+        KH_DEBUG(if (pViewer) {)
+            KH_DEBUG(pViewer->setPlayerCrd(p);)
+        KH_DEBUG(})
+    KH_DEBUG(})
 }
 
 void CLightUnit::getCenter(FVECTOR& ctr) {
@@ -145,12 +145,12 @@ void CLightUnit::_calc(const FVECTOR& ctr) {
     if (pMap) {
         ld = pMap->getLightData();
     }
-    if (m_Kind == 1) {
-        if (CTaskMan::getSysTask(0x31)) {
-            lbsuu = 16;
-        }
-    }
-    _LIGHT_POWER ll[lbsuu];
+    KH_DEBUG(if (m_Kind == 1) {)
+        KH_DEBUG(if (CTaskMan::getSysTask(0x31)) {)
+            KH_DEBUG(lbsuu = 16;)
+        KH_DEBUG(})
+    KH_DEBUG(})
+    _LIGHT_POWER ll[KH_VER(lbsuu, 5)]; /* retail: no map viewer, a fixed array */
     FVECTOR vlight[5];
     FVECTOR vcolor[5];
     count = 0;
@@ -179,12 +179,12 @@ void CLightUnit::_calc(const FVECTOR& ctr) {
         if (ll[i].pow <= 0.0f) {
             light.zero();
             color._q = 0;
-            if (m_Kind == 1) {
-                CMapViewer* pViewer = (CMapViewer*)CTaskMan::getSysTask(0x31);
-                if (pViewer) {
-                    pViewer->setActiveLight(i, NULL, 0);
-                }
-            }
+            KH_DEBUG(if (m_Kind == 1) {)
+                KH_DEBUG(CMapViewer* pViewer = (CMapViewer*)CTaskMan::getSysTask(0x31);)
+                KH_DEBUG(if (pViewer) {)
+                    KH_DEBUG(pViewer->setActiveLight(i, NULL, 0);)
+                KH_DEBUG(})
+            KH_DEBUG(})
         } else {
             switch (ll[i].kind) {
             case 2: {
@@ -193,24 +193,24 @@ void CLightUnit::_calc(const FVECTOR& ctr) {
                 FLOAT dv = ll[i].dist2;
                 sceVu0DivVector(light.v, light.v, dv);
                 _getPowColor(color, dv, l);
-                if (m_Kind == 1) {
-                    CMapViewer* pViewer = (CMapViewer*)CTaskMan::getSysTask(0x31);
-                    if (pViewer) {
-                        pViewer->setActiveLight(i, l, 2);
-                    }
-                }
+                KH_DEBUG(if (m_Kind == 1) {)
+                    KH_DEBUG(CMapViewer* pViewer = (CMapViewer*)CTaskMan::getSysTask(0x31);)
+                    KH_DEBUG(if (pViewer) {)
+                        KH_DEBUG(pViewer->setActiveLight(i, l, 2);)
+                    KH_DEBUG(})
+                KH_DEBUG(})
                 break;
             }
             case 1: {
                 INFINITELIGHT* l = &ld->infinite[ll[i].idx];
                 light = l->dir;
                 color = l->col;
-                if (m_Kind == 1) {
-                    CMapViewer* pViewer = (CMapViewer*)CTaskMan::getSysTask(0x31);
-                    if (pViewer) {
-                        pViewer->setActiveLight(i, l, 1);
-                    }
-                }
+                KH_DEBUG(if (m_Kind == 1) {)
+                    KH_DEBUG(CMapViewer* pViewer = (CMapViewer*)CTaskMan::getSysTask(0x31);)
+                    KH_DEBUG(if (pViewer) {)
+                        KH_DEBUG(pViewer->setActiveLight(i, l, 1);)
+                    KH_DEBUG(})
+                KH_DEBUG(})
                 break;
             }
             case 5: {
@@ -242,22 +242,22 @@ void CLightUnit::_calc(const FVECTOR& ctr) {
     for (i = 0; i < 4; i++) {
         setLight(i, vlight[i], vcolor[i]);
     }
-    if (!CTaskMan::getSysTask(2)) {
-        static INT debug_deg = 0;
-        static INT debug_deg2 = 0;
-        INT rx = dbgAnalogRX(USR_SYSTEM, 0);
-        INT ry = dbgAnalogRY(USR_SYSTEM, 0);
-        debug_deg += rx * 18 / 4096;
-        debug_deg2 += ry * 18 / 4096;
-        spinMatrixY(m_Light, m_Light, debug_deg);
-        spinMatrixX(m_Light, m_Light, debug_deg2);
-    }
-    if (m_Kind == 1) {
-        CMapViewer* pViewer = (CMapViewer*)CTaskMan::getSysTask(0x31);
-        if (pViewer) {
-            pViewer->setLightCount(count);
-        }
-    }
+    KH_DEBUG(if (!CTaskMan::getSysTask(2)) {)
+        KH_DEBUG(static INT debug_deg = 0;)
+        KH_DEBUG(static INT debug_deg2 = 0;)
+        KH_DEBUG(INT rx = dbgAnalogRX(USR_SYSTEM, 0);)
+        KH_DEBUG(INT ry = dbgAnalogRY(USR_SYSTEM, 0);)
+        KH_DEBUG(debug_deg += rx * 18 / 4096;)
+        KH_DEBUG(debug_deg2 += ry * 18 / 4096;)
+        KH_DEBUG(spinMatrixY(m_Light, m_Light, debug_deg);)
+        KH_DEBUG(spinMatrixX(m_Light, m_Light, debug_deg2);)
+    KH_DEBUG(})
+    KH_DEBUG(if (m_Kind == 1) {)
+        KH_DEBUG(CMapViewer* pViewer = (CMapViewer*)CTaskMan::getSysTask(0x31);)
+        KH_DEBUG(if (pViewer) {)
+            KH_DEBUG(pViewer->setLightCount(count);)
+        KH_DEBUG(})
+    KH_DEBUG(})
     setAmbient(ld->ambient->col);
 }
 

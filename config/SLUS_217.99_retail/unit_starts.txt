@@ -155,6 +155,9 @@ Game/Map .rodata 0x0040EAB0 0xf0
 Game/MapCardDef .data 0x0033BEB0 0x20
 Game/MapCardDef .rodata 0x0040EBA0 0x8
 Game/MapUnitTable .data 0x0033BED0 0x358
+Game/MinigameManager .bss 0x005BDB98 0x24
+Game/MinigameManager .data 0x0033C230 0x88
+Game/MinigameManager .rodata 0x0040EBC0 0xe0
 Game/Movement .data 0x0033C2C0 0x30
 Game/Movement .rodata 0x0040ECB0 0xb0
 Game/NowLoading .data 0x0033C2F0 0xc
@@ -178,6 +181,8 @@ Game/Player/FriendKing .rodata 0x004137D0 0x80
 Game/Player/FriendPan .data 0x0033C600 0x8
 Game/Player/FriendPluto .data 0x0033C608 0x18
 Game/Player/FriendPluto .rodata 0x00413858 0x10
+Game/Player/NaviMap .data 0x0033C620 0xf8
+Game/Player/NaviMap .rodata 0x00413870 0x1320
 Game/Player/Player .bss 0x005BEA40 0x8
 Game/Player/Player .data 0x0033C720 0x3b0
 Game/Player/Player .rodata 0x00414B90 0x1df0
@@ -271,6 +276,7 @@ System/Graphic/TexAnm .rodata 0x00400FD8 0x8
 System/Graphic/TexUtil .data 0x00332A68 0x20
 System/Graphic/TexUtil .rodata 0x00400FE0 0x50
 System/LinkedBuf .bss 0x0043BD38 0xc
+System/Math3D .rodata 0x003FF948 0xc
 System/Movie/AudioDec .data 0x0033B118 0x4
 System/Movie/MSVideo .rodata 0x00405580 0xa0
 System/Movie/Movie .bss 0x005AE300 0x24

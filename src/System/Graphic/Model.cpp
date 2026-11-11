@@ -872,12 +872,12 @@ void CModel::dispImpl() {
     setDispFlag(FALSE);
     if (!isDispOff()) {
         if (!isDataEmpty() && m_ColorScale.w > 0.0f) {
-            if (isDispWireframe() && MODELDATA::isCharacter(m_Mode)) {
-                disp0(-1, getTestFlag(), 0);
-                m_ShaderOption |= 0x80;
-                disp0(-1, getTestFlag(), 0);
-                m_ShaderOption &= ~0x80;
-            } else if (m_ColorScale.w >= 1.0f && m_Mode != 0x10) {
+            KH_DEBUG(if (isDispWireframe() && MODELDATA::isCharacter(m_Mode)) {)
+                KH_DEBUG(disp0(-1, getTestFlag(), 0);)
+                KH_DEBUG(m_ShaderOption |= 0x80;)
+                KH_DEBUG(disp0(-1, getTestFlag(), 0);)
+                KH_DEBUG(m_ShaderOption &= ~0x80;)
+            KH_DEBUG(} else) if (m_ColorScale.w >= 1.0f && m_Mode != 0x10) {
                 INT id = getLayerID() & 0xF;
                 if (id >= 2 && (id < 4 || id == 0xB)) {
                     CModelMan::add2DispList(*this, 0);

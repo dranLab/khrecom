@@ -507,3 +507,4 @@ void CNaviMap::initRoomName(const CHAR* inFile, UINT inIdxSeq) {
 }  // namespace Gauge
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata
