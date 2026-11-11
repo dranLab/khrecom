@@ -9,6 +9,7 @@ Form/Menu/MenuParts
 Form/Menu/MonstroGauge
 Form/Menu/MoogleShop
 Form/Menu/Pause
+Form/Menu/Roulette
 Form/Menu/SaveLoadCtrl
 Form/Menu/TechHelp
 Form/Menu/TitleReportDllStarter
@@ -18,7 +19,9 @@ Game/Atel/AtelBlur
 Game/Atel/AtelCamera
 Game/Atel/AtelCrossFade
 Game/Atel/AtelTutorial
+Game/AttachCard
 Game/Bullet/BulletManager
+Game/CardKind
 Game/CollParam
 Game/Collision/CollMap
 Game/Collision/CollMapCamera
@@ -34,6 +37,7 @@ Game/Enemy/EnemyBarrelspider
 Game/Enemy/EnemyBlackfungus
 Game/Enemy/EnemyBluerhapsody
 Game/Enemy/EnemyBouncywild
+Game/Enemy/EnemyCreapplant
 Game/Enemy/EnemyDarkball
 Game/Enemy/EnemyDefender
 Game/Enemy/EnemyFatbandit
@@ -44,6 +48,7 @@ Game/Enemy/EnemyNeoshadow
 Game/Enemy/EnemyPirate
 Game/Enemy/EnemyPowerwild
 Game/Enemy/EnemyRednocturne
+Game/Enemy/EnemyScrewdiver
 Game/Enemy/EnemySeaneon
 Game/Enemy/EnemySearchghost
 Game/Enemy/EnemyShadow
@@ -105,6 +110,7 @@ Game/ModelObj
 Game/NowLoading
 Game/Player/Friend
 Game/Player/FriendAladdin
+Game/Player/FriendAriel
 Game/Player/FriendBeast
 Game/Player/FriendDonald
 Game/Player/FriendGoofy
@@ -115,6 +121,7 @@ Game/Player/FriendPluto
 Game/Player/PlayerRiku
 Game/Player/PlayerSora
 Game/Player/PlayerWeapon
+Game/Player/Summon
 Game/Player/SummonBambi
 Game/Player/SummonCloud
 Game/Player/SummonDumbo
@@ -129,6 +136,7 @@ System/Component
 System/FileIO
 System/Fsm
 System/Graphic/2d/2DBase
+System/Graphic/2d/2DCard
 System/Graphic/2d/2DFnt
 System/Graphic/2d/2DFntObj
 System/Graphic/2d/2DLay
