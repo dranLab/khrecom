@@ -1,6 +1,6 @@
 #ifndef GAME_DEBUG_DEBUGPATHDATA_H
 #define GAME_DEBUG_DEBUGPATHDATA_H
-
+#ifndef KH_RETAIL /* retail has no path debugger */
 #include "khtypes.h"
 #include "System/Task.h"
 #include "System/MainApp.h"
@@ -193,5 +193,5 @@ private:
         return m_pInstance;
     }
 };
-
+#endif /* KH_RETAIL */
 #endif /* GAME_DEBUG_DEBUGPATHDATA_H */

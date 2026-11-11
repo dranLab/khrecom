@@ -4888,7 +4888,7 @@ BOOL CPlayer::chkDamage() {
             hp0 += dmg0;
         } else {
             hp0 += (KH_DW(DebugWork::g_dw.player.iDamage0) > 0) * dmg0;
-            setDamageNumber(m_vHeadPos, dmg0);
+            KH_DEBUG(setDamageNumber(m_vHeadPos, dmg0);)
         }
     }
     if (m_pCB) {
@@ -6555,7 +6555,7 @@ void CPlayer::setTrapDamage(INT inPower, const CHAR* lpszInName, UINT nNo) {
         hp0 += inPower;
     } else {
         hp0 += (KH_DW(DebugWork::g_dw.player.iDamage0) > 0) * inPower;
-        setDamageNumber(m_vHeadPos, inPower);
+        KH_DEBUG(setDamageNumber(m_vHeadPos, inPower);)
     }
     if (m_pCB) {
         if (hp0 <= 0 && m_iHP >= 2 && m_pCB->getEnchantKind() == 0x29) {

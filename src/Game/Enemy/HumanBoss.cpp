@@ -52,8 +52,8 @@ void AddVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 
 extern CEntity* g_pPlayer; /* a CPlayer (Game/Player/Player.h) */
 /* CPlayer's HP: m_iHp (0x320), m_iHpMax (0x324) */
-static inline INT _playerHp(CEntity* p) { return *(INT*)((UBYTE*)p + 0x320); }
-static inline INT _playerHpMax(CEntity* p) { return *(INT*)((UBYTE*)p + 0x324); }
+static inline INT _playerHp(CEntity* p) { return *(INT*)((UBYTE*)p + KH_VER(0x320, 0x300)); }
+static inline INT _playerHpMax(CEntity* p) { return *(INT*)((UBYTE*)p + KH_VER(0x324, 0x304)); }
 
 #line 286
 

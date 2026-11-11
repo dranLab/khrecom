@@ -22,7 +22,7 @@ private:
     CTask* m_pTarget;               /* 0x68 */
     INT m_iNum;                     /* 0x6c */
     INT m_iCNum;                    /* 0x70 */
-    CDbgArrow* m_DDPathCamArrow;    /* 0x74 */
+    KH_DEBUG(CDbgArrow* m_DDPathCamArrow;    /* 0x74 */)
 
 public:
     CPathDataCamera(CTask* p, const CHAR* pszInName, INT iKind, const CTask* pTarget, INT iNum, const CTask* pParent);

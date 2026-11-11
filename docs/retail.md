@@ -328,6 +328,21 @@ Eleventh batch (2026-11-11): **528 units from source in retail**, 275 functions 
   beta-only.
 - tools/helpers/retail_wrap_lines.py leaves preprocessor lines and block comments as they are.
 
+Twelfth batch (2026-11-11): **531 units from source in retail**, 235 functions differ.
+
+- The path editor: CDbgCube, CDbgArrow, CPathVector's and CPathData's debug lines and edit state (retail's
+  CPathVector is 12 bytes: m_pVec, m_iVecMax, m_pPathData; _init only stores the first two, its getters return
+  0.0f without path data: `KH_RELEASE(...)` variants on the same lines), the add/del/dispDebugLine functions,
+  the path cameras' debug arrows; DebugPathData.h's body is `#ifndef KH_RETAIL` (on two blank lines).
+- CDebugProcInfo's five functions are empty in retail.
+- Hard-coded member offsets in matching code follow the retail layout (`KH_VER(0x450, 0x430)`: CEntity is 0x20
+  smaller in retail): CBattleEnemy's state array, CHeartless's card kind, HumanBoss's player HP, the gimmick
+  parameter in BattleEnemyManager. CEntity::setDamageNumber's callers are beta-only.
+- TRACE stays `((void)(args))` (decision 19; CCard::tryAddBattleCardAppearance keeps its `card.getName()` calls),
+  but retail also has debug-only regions around traces: statements that only feed a trace (CHermitePathCamera::out's
+  camera dumps) and traces whose arguments retail doesn't evaluate (ProjectionToViewAngle in _init) are wrapped.
+- Note for the wrap helpers: line numbers from compiler errors are `#line` numbers, not file lines.
+
 ### Where it stands (end of the unattended run)
 
 - 517/638 units of retail from source; 10,392 functions match retail, 480 differ, 689 are beta-only ("extra").

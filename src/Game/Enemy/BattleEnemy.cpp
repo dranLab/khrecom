@@ -703,7 +703,7 @@ BOOL CBattleEnemy::isPlayingCardBattle() {
 }
 BOOL CBattleEnemy::isCurrentState(INT inState) {
     KH_DEBUG(if (!((UINT)inState < 31)) AssertApp(__FILE__, 0x4AF, "0 <= inState && inState < BTL_ENEMY_STATE_MAX", 0);)
-    CState& State = *(CState*)((inState * 0x20 + (INT)this) + 0x450);
+    CState& State = *(CState*)((inState * 0x20 + (INT)this) + KH_VER(0x450, 0x430));
     return isState(State);
 }
 BOOL CBattleEnemy::isValidSynchro() {
@@ -2475,7 +2475,7 @@ void CBattleEnemy::beginStateAttack1_() {
     commonBeginAttack();
 }
 void CBattleEnemy::stateAttack1_() {
-    if (!(m_ullBtlEnemyFlag & 0x800000000ULL) && !isPlayingCardBattle()) TRACE("warning:\x83J\x81[\x83h\x92\xf1\x8e\xa6\x82\xb5\x82\xc4\x82\xa2\x82\xc8\x82\xa2\x82\xcc\x82\xc9\x8dU\x8c\x82\x82\xb5\x82\xc4\x82\xa2\x82\xdc\x82\xb7\x81I\x81I... handle = %x, ID = %d\n", getHandle(), getID());
+    KH_DEBUG(if (!(m_ullBtlEnemyFlag & 0x800000000ULL) && !isPlayingCardBattle()) TRACE("warning:\x83J\x81[\x83h\x92\xf1\x8e\xa6\x82\xb5\x82\xc4\x82\xa2\x82\xc8\x82\xa2\x82\xcc\x82\xc9\x8dU\x8c\x82\x82\xb5\x82\xc4\x82\xa2\x82\xdc\x82\xb7\x81I\x81I... handle = %x, ID = %d\n", getHandle(), getID());)
     stateAttack1();
 }
 void CBattleEnemy::endStateAttack1_() {
@@ -2487,7 +2487,7 @@ void CBattleEnemy::beginStateAttack2_() {
     commonBeginAttack();
 }
 void CBattleEnemy::stateAttack2_() {
-    if (!(m_ullBtlEnemyFlag & 0x800000000ULL) && !isPlayingCardBattle()) TRACE("warning:\x83J\x81[\x83h\x92\xf1\x8e\xa6\x82\xb5\x82\xc4\x82\xa2\x82\xc8\x82\xa2\x82\xcc\x82\xc9\x8dU\x8c\x82\x82\xb5\x82\xc4\x82\xa2\x82\xdc\x82\xb7\x81I\x81I... handle = %x, ID = %d\n", getHandle(), getID());
+    KH_DEBUG(if (!(m_ullBtlEnemyFlag & 0x800000000ULL) && !isPlayingCardBattle()) TRACE("warning:\x83J\x81[\x83h\x92\xf1\x8e\xa6\x82\xb5\x82\xc4\x82\xa2\x82\xc8\x82\xa2\x82\xcc\x82\xc9\x8dU\x8c\x82\x82\xb5\x82\xc4\x82\xa2\x82\xdc\x82\xb7\x81I\x81I... handle = %x, ID = %d\n", getHandle(), getID());)
     stateAttack2();
 }
 void CBattleEnemy::endStateAttack2_() {
@@ -2499,7 +2499,7 @@ void CBattleEnemy::beginStateAttack3_() {
     commonBeginAttack();
 }
 void CBattleEnemy::stateAttack3_() {
-    if (!(m_ullBtlEnemyFlag & 0x800000000ULL) && !isPlayingCardBattle()) TRACE("warning:\x83J\x81[\x83h\x92\xf1\x8e\xa6\x82\xb5\x82\xc4\x82\xa2\x82\xc8\x82\xa2\x82\xcc\x82\xc9\x8dU\x8c\x82\x82\xb5\x82\xc4\x82\xa2\x82\xdc\x82\xb7\x81I\x81I... handle = %x, ID = %d\n", getHandle(), getID());
+    KH_DEBUG(if (!(m_ullBtlEnemyFlag & 0x800000000ULL) && !isPlayingCardBattle()) TRACE("warning:\x83J\x81[\x83h\x92\xf1\x8e\xa6\x82\xb5\x82\xc4\x82\xa2\x82\xc8\x82\xa2\x82\xcc\x82\xc9\x8dU\x8c\x82\x82\xb5\x82\xc4\x82\xa2\x82\xdc\x82\xb7\x81I\x81I... handle = %x, ID = %d\n", getHandle(), getID());)
     stateAttack3();
 }
 void CBattleEnemy::endStateAttack3_() {
@@ -2511,7 +2511,7 @@ void CBattleEnemy::beginStateAttack4_() {
     commonBeginAttack();
 }
 void CBattleEnemy::stateAttack4_() {
-    if (!(m_ullBtlEnemyFlag & 0x800000000ULL) && !isPlayingCardBattle()) TRACE("warning:\x83J\x81[\x83h\x92\xf1\x8e\xa6\x82\xb5\x82\xc4\x82\xa2\x82\xc8\x82\xa2\x82\xcc\x82\xc9\x8dU\x8c\x82\x82\xb5\x82\xc4\x82\xa2\x82\xdc\x82\xb7\x81I\x81I... handle = %x, ID = %d\n", getHandle(), getID());
+    KH_DEBUG(if (!(m_ullBtlEnemyFlag & 0x800000000ULL) && !isPlayingCardBattle()) TRACE("warning:\x83J\x81[\x83h\x92\xf1\x8e\xa6\x82\xb5\x82\xc4\x82\xa2\x82\xc8\x82\xa2\x82\xcc\x82\xc9\x8dU\x8c\x82\x82\xb5\x82\xc4\x82\xa2\x82\xdc\x82\xb7\x81I\x81I... handle = %x, ID = %d\n", getHandle(), getID());)
     stateAttack4();
 }
 void CBattleEnemy::endStateAttack4_() {
@@ -2523,7 +2523,7 @@ void CBattleEnemy::beginStateAttack5_() {
     commonBeginAttack();
 }
 void CBattleEnemy::stateAttack5_() {
-    if (!(m_ullBtlEnemyFlag & 0x800000000ULL) && !isPlayingCardBattle()) TRACE("warning:\x83J\x81[\x83h\x92\xf1\x8e\xa6\x82\xb5\x82\xc4\x82\xa2\x82\xc8\x82\xa2\x82\xcc\x82\xc9\x8dU\x8c\x82\x82\xb5\x82\xc4\x82\xa2\x82\xdc\x82\xb7\x81I\x81I... handle = %x, ID = %d\n", getHandle(), getID());
+    KH_DEBUG(if (!(m_ullBtlEnemyFlag & 0x800000000ULL) && !isPlayingCardBattle()) TRACE("warning:\x83J\x81[\x83h\x92\xf1\x8e\xa6\x82\xb5\x82\xc4\x82\xa2\x82\xc8\x82\xa2\x82\xcc\x82\xc9\x8dU\x8c\x82\x82\xb5\x82\xc4\x82\xa2\x82\xdc\x82\xb7\x81I\x81I... handle = %x, ID = %d\n", getHandle(), getID());)
     stateAttack5();
 }
 void CBattleEnemy::endStateAttack5_() {
@@ -2535,7 +2535,7 @@ void CBattleEnemy::beginStateAttack6_() {
     commonBeginAttack();
 }
 void CBattleEnemy::stateAttack6_() {
-    if (!(m_ullBtlEnemyFlag & 0x800000000ULL) && !isPlayingCardBattle()) TRACE("warning:\x83J\x81[\x83h\x92\xf1\x8e\xa6\x82\xb5\x82\xc4\x82\xa2\x82\xc8\x82\xa2\x82\xcc\x82\xc9\x8dU\x8c\x82\x82\xb5\x82\xc4\x82\xa2\x82\xdc\x82\xb7\x81I\x81I... handle = %x, ID = %d\n", getHandle(), getID());
+    KH_DEBUG(if (!(m_ullBtlEnemyFlag & 0x800000000ULL) && !isPlayingCardBattle()) TRACE("warning:\x83J\x81[\x83h\x92\xf1\x8e\xa6\x82\xb5\x82\xc4\x82\xa2\x82\xc8\x82\xa2\x82\xcc\x82\xc9\x8dU\x8c\x82\x82\xb5\x82\xc4\x82\xa2\x82\xdc\x82\xb7\x81I\x81I... handle = %x, ID = %d\n", getHandle(), getID());)
     stateAttack6();
 }
 void CBattleEnemy::endStateAttack6_() {
@@ -2547,7 +2547,7 @@ void CBattleEnemy::beginStateAttack7_() {
     commonBeginAttack();
 }
 void CBattleEnemy::stateAttack7_() {
-    if (!(m_ullBtlEnemyFlag & 0x800000000ULL) && !isPlayingCardBattle()) TRACE("warning:\x83J\x81[\x83h\x92\xf1\x8e\xa6\x82\xb5\x82\xc4\x82\xa2\x82\xc8\x82\xa2\x82\xcc\x82\xc9\x8dU\x8c\x82\x82\xb5\x82\xc4\x82\xa2\x82\xdc\x82\xb7\x81I\x81I... handle = %x, ID = %d\n", getHandle(), getID());
+    KH_DEBUG(if (!(m_ullBtlEnemyFlag & 0x800000000ULL) && !isPlayingCardBattle()) TRACE("warning:\x83J\x81[\x83h\x92\xf1\x8e\xa6\x82\xb5\x82\xc4\x82\xa2\x82\xc8\x82\xa2\x82\xcc\x82\xc9\x8dU\x8c\x82\x82\xb5\x82\xc4\x82\xa2\x82\xdc\x82\xb7\x81I\x81I... handle = %x, ID = %d\n", getHandle(), getID());)
     stateAttack7();
 }
 void CBattleEnemy::endStateAttack7_() {
@@ -2559,7 +2559,7 @@ void CBattleEnemy::beginStateAttack8_() {
     commonBeginAttack();
 }
 void CBattleEnemy::stateAttack8_() {
-    if (!(m_ullBtlEnemyFlag & 0x800000000ULL) && !isPlayingCardBattle()) TRACE("warning:\x83J\x81[\x83h\x92\xf1\x8e\xa6\x82\xb5\x82\xc4\x82\xa2\x82\xc8\x82\xa2\x82\xcc\x82\xc9\x8dU\x8c\x82\x82\xb5\x82\xc4\x82\xa2\x82\xdc\x82\xb7\x81I\x81I... handle = %x, ID = %d\n", getHandle(), getID());
+    KH_DEBUG(if (!(m_ullBtlEnemyFlag & 0x800000000ULL) && !isPlayingCardBattle()) TRACE("warning:\x83J\x81[\x83h\x92\xf1\x8e\xa6\x82\xb5\x82\xc4\x82\xa2\x82\xc8\x82\xa2\x82\xcc\x82\xc9\x8dU\x8c\x82\x82\xb5\x82\xc4\x82\xa2\x82\xdc\x82\xb7\x81I\x81I... handle = %x, ID = %d\n", getHandle(), getID());)
     stateAttack8();
 }
 void CBattleEnemy::endStateAttack8_() {
@@ -2845,7 +2845,7 @@ void CBattleEnemy::initRoom_() {
 }
 void CBattleEnemy::changeBattleEnemyState(INT inState) {
     KH_DEBUG(if (!((UINT)inState < 31)) AssertApp(__FILE__, 0x162B, "0 <= inState && inState < BTL_ENEMY_STATE_MAX", 0);)
-    CState& NewState = *(CState*)((inState * 0x20 + (INT)this) + 0x450);
+    CState& NewState = *(CState*)((inState * 0x20 + (INT)this) + KH_VER(0x450, 0x430));
     setBattleEnemyFlag(0, 0x10);
     m_pNewState = &NewState;
 }
@@ -3084,9 +3084,9 @@ INT CBattleEnemy::computeDamage_(FLOAT inDamage, FLOAT inAttr) {
             notifyHP();
         }
     }
-    CCollBody* hitBody = m_pBodyColl->getHitCollBody();
+    KH_DEBUG(CCollBody* hitBody = m_pBodyColl->getHitCollBody();)
     KH_DEBUG(if (!hitBody) AssertApp(__FILE__, 0x18BD, "hitBody", 0);)
-    setDamageNumber(*hitBody->getDetectPos(), result);
+    KH_DEBUG(setDamageNumber(*hitBody->getDetectPos(), result);)
     return result;
 }
 void CBattleEnemy::changeDamageState_(ATK_KIND inDmgKind) {

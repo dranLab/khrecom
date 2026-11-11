@@ -84,7 +84,7 @@ BOOL CHeartless::startCardBattle() {
         setBattleEnemyFlag(0, 0x200);
         return FALSE;
     }
-    if (!cb->setEnemyCard(getHandle(), *(INT*)((BYTE*)this + 0x240), num)) {
+    if (!cb->setEnemyCard(getHandle(), *(INT*)((BYTE*)this + KH_VER(0x240, 0x220)), num)) {
         setBattleEnemyFlag(2, 0);
         setBattleEnemyFlag(0, 0x200);
         onCardBattleFailed();

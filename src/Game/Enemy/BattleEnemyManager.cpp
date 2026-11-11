@@ -91,7 +91,7 @@ extern CPlayer* g_pPlayer;
 
 /* CBaseGimmick::setParam (Game/Gimmick/BaseGimmick.h): m_iParam at 0x1d4 */
 static inline void _setGimmickParam(CEntity* inEntity, INT inParam) {
-    *(INT*)((UBYTE*)inEntity + 0x1d4) = inParam;
+    *(INT*)((UBYTE*)inEntity + KH_VER(0x1d4, 0x1b4)) = inParam;
 }
 
 INT CBattleEnemyManager::m_iBeforeFormation = -1;

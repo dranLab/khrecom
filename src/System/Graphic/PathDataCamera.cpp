@@ -70,8 +70,8 @@ CPathDataCamera::~CPathDataCamera() {
     }
     if (m_pHPM) delete m_pHPM;
     m_pHPM = NULL;
-    if (m_DDPathCamArrow) delete m_DDPathCamArrow;
-    m_DDPathCamArrow = NULL;
+    KH_DEBUG(if (m_DDPathCamArrow) delete m_DDPathCamArrow;)
+    KH_DEBUG(m_DDPathCamArrow = NULL;)
 }
 
 #line 85
@@ -88,7 +88,7 @@ void CPathDataCamera::_init(INT iKind, CTask* pTarget, INT iNum, CTask* pParent)
     m_iNum = iNum;
     m_iCNum = iNum;
     CTask::ignorePlaySpeed(TRUE);
-    m_DDPathCamArrow = NULL;
+    KH_DEBUG(m_DDPathCamArrow = NULL;)
     switch (iKind) {
     case 2:
 #line 109
@@ -172,14 +172,14 @@ void CPathDataCamera::update(FLOAT fr, BOOL bUpdate) {
             m_pHPM->update(fr);
         }
     case 0:
-        if (m_DDPathCamArrow) {
-            FVECTOR vRot;
-            vRot.init0();
-            m_pHPM->getNowRot(vRot, 1.0f);
-            vRot.z = m_pHPM->getNowRoll();
-            vRot.w = 5.0f;
-            m_DDPathCamArrow->setCoord(NULL, &vRot);
-        }
+        KH_DEBUG(if (m_DDPathCamArrow) {)
+            KH_DEBUG(FVECTOR vRot;)
+            KH_DEBUG(vRot.init0();)
+            KH_DEBUG(m_pHPM->getNowRot(vRot, 1.0f);)
+            KH_DEBUG(vRot.z = m_pHPM->getNowRoll();)
+            KH_DEBUG(vRot.w = 5.0f;)
+            KH_DEBUG(m_DDPathCamArrow->setCoord(NULL, &vRot);)
+        KH_DEBUG(})
         if (m_iKind == 0 && bUpdate) {
             PATH_PARAM sParam;
             m_pPathData->getPathParam(m_iCNum, sParam);
@@ -196,10 +196,10 @@ void CPathDataCamera::update(FLOAT fr, BOOL bUpdate) {
 }
 
 void CPathDataCamera::disp() {
-    if (CDebugPathData::isDebugPathData() && (CDebugPathData::m_iCtrlFlg & 2)) {
-        if (m_pHPM && m_pHPM->getPathVector()) m_pHPM->getPathVector()->dispDebugLine(0);
-        if (m_DDPathCamArrow) m_DDPathCamArrow->disp();
-    }
+    KH_DEBUG(if (CDebugPathData::isDebugPathData() && (CDebugPathData::m_iCtrlFlg & 2)) {)
+        KH_DEBUG(if (m_pHPM && m_pHPM->getPathVector()) m_pHPM->getPathVector()->dispDebugLine(0);)
+        KH_DEBUG(if (m_DDPathCamArrow) m_DDPathCamArrow->disp();)
+    KH_DEBUG(})
 }
 
 BOOL CPathDataCamera::isEnd() {
@@ -207,17 +207,18 @@ BOOL CPathDataCamera::isEnd() {
 }
 
 #line 309
-void CPathDataCamera::entryDebugArrow() {
-    if (!m_DDPathCamArrow && getCoordNum() > 0) {
-        FVECTOR vRot;
+KH_DEBUG(void CPathDataCamera::entryDebugArrow() {)
+    KH_DEBUG(if (!m_DDPathCamArrow && getCoordNum() > 0) {)
+        KH_DEBUG(FVECTOR vRot;)
 #line 314
-        m_DDPathCamArrow = new KH_AT("(314)") CDbgArrow;
+        KH_DEBUG(m_DDPathCamArrow = new KH_AT("(314)") CDbgArrow;)
         KH_DEBUG(if (!m_DDPathCamArrow) AssertApp(__FILE__, __LINE__, "m_DDPathCamArrow", 0);)
-        m_DDPathCamArrow->getCoord().setParent(&Crd(0));
-        vRot.init0();
-        vRot.w = 5.0f;
-        m_DDPathCamArrow->setCoord(NULL, &vRot);
-    }
-}
+        KH_DEBUG(m_DDPathCamArrow->getCoord().setParent(&Crd(0));)
+        KH_DEBUG(vRot.init0();)
+        KH_DEBUG(vRot.w = 5.0f;)
+        KH_DEBUG(m_DDPathCamArrow->setCoord(NULL, &vRot);)
+    KH_DEBUG(})
+KH_DEBUG(})
 
 // SOURCE DATA: .rodata
+// SOURCE DATA SLUS_217.99_retail: .rodata

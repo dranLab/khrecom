@@ -46,7 +46,7 @@ private:
     FLOAT m_fLearpAimProj;     /* 0x130 */
     FLOAT m_fLearpOldProj;     /* 0x134 */
     CCollMapCamera* m_pCollMapCamera; /* 0x138 */
-    CDbgArrow m_DDPathCamArrow;       /* 0x140 */
+    KH_DEBUG(CDbgArrow m_DDPathCamArrow;       /* 0x140 */)
 
 public:
     CHermitePathCamera(CTask* p, const FVECTOR* pPath, INT iPathMax, const CTask* pTarget,

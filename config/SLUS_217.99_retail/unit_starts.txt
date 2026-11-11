@@ -220,8 +220,10 @@ System/Graphic/Effect/libppp/ryjProg/pppRyjMegaBirthModelFilter .bss 0x0057E160 
 System/Graphic/Fnt .data 0x00332AC0 0x10
 System/Graphic/Fnt .rodata 0x004010B0 0x28
 System/Graphic/Glare .data 0x00332990 0xc
+System/Graphic/HermitePathCamera .rodata 0x00400E30 0x50
 System/Graphic/MotData .rodata 0x00400EE0 0x20
 System/Graphic/PathCamera .rodata 0x00400F08 0x10
+System/Graphic/PathDataCamera .rodata 0x00400F70 0x50
 System/Graphic/TexAnm .rodata 0x00400FD8 0x8
 System/LinkedBuf .bss 0x0043BD38 0xc
 System/Movie/AudioDec .data 0x0033B118 0x4

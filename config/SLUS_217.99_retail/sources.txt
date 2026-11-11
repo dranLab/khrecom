@@ -145,6 +145,7 @@ System/Buf
 System/Component
 System/Coord
 System/CoordMan
+System/DebugProcInfo
 System/FileIO
 System/Fsm
 System/Graphic/2d/2DBase
@@ -373,8 +374,10 @@ System/Graphic/Effect/libppp/stdProg/pppGetRotMatrixZYX
 System/Graphic/Fnt
 System/Graphic/Glare
 System/Graphic/HermitePath
+System/Graphic/HermitePathCamera
 System/Graphic/MotData
 System/Graphic/PathCamera
+System/Graphic/PathDataCamera
 System/Graphic/ScreenMask
 System/Graphic/StrPrim
 System/Graphic/TexAnm
