@@ -534,7 +534,7 @@ Open, with what was tried:
 - Units without retail code: DebugMenu, DebugWindow, DebugWindowTBL, CollDisp, KisEnemy, System/Debug, DebugWork,
   DebugPathData, vprintf, vsprintf.
 
-### Unattended run 2026-11-11/12 (second night): 601 -> 615 units (user: "keep working on the what's-left units")
+### Unattended run 2026-11-11/12 (second night): 601 -> 618 units (user: "keep working on the what's-left units")
 
 The main lever this time: **the beta's line markers give the original statement order** where our beta-matching
 source happened to compile the same with another order (sched2 and cross-jumping hid it); retail's scheduling and
@@ -562,15 +562,19 @@ Decisions taken alone:
     `iDeckDbgDisp` tests match retail as KH_DW_ON (`if (!1) ...` keeps the block layout that removing the statement
     loses), setHandLocate's as KH_DW (off).
 20. (decision) Placeholders for retail-only zero blocks in .rodata: BattleCard (16 bytes before the "" its tables
-    use, so its jump tables stay 16-aligned at 0x407010), Game's beta placeholder `KH_DEBUG` (retail merges it into
-    Task.h's "").
+    use, so its jump tables stay 16-aligned at 0x407010), CollMap (the 16 unclaimed zero bytes after CollBody's end;
+    this replaces decision 14's `!` exclusion), Game's beta placeholder `KH_DEBUG` (retail merges it into Task.h's "").
+21. (decision) Hand pairs also for pppPart (pppRunPartDraw had been given callEndProg's address by the call graph).
+22. (tool) `retail_units.py scan`: data that runs past the next unit's start onto its bytes is `LONG`, not OK.
 
 Done: TriangleIK, SoundMan, FrecFont (Task.h; FrecFont's .data start by hand), Game, Entity (the debug camera check;
 EntityFactory's unreferenced .rodata start by hand), ShadowModel (drawAfter's shadow-count knob and its loop),
 GimmickManager, PlayerCamera (mode names; m_nBossCamID through `_ref`), PathData, PlayerControl (debug inputs),
 HeapMan (the debug allocation API, dumps and reports), MainApp (trace screen, halt, AssertApp, debug pause stepping,
 `_bSetupManagers`; retail's IOP module file is 0x8F sectors), SaveLoadUtil (a Riku-game rollback retail lacks),
-BattleCard. Partial: SceneInfo reqChangeRoom (retail refuses a given scene), Model getTexParam (VramDef.h's
+BattleCard, pppPart (paired by hand), SceneInfo (AREA_SCENE's inlines `operator=`, `operator==`, `clear`, `isEmpty`
+as the ref's locals and the beta's markers show; the floor-index early returns and openGoalDoor's message
+beta-only), CollMap. Partial: SceneInfo reqChangeRoom (retail refuses a given scene), Model getTexParam (VramDef.h's
 `_getTmpTexArea`, as Gprim) and CSemiZModel::makePkt (one pass), TreasureBox (WndCmnd.h's constructor sets nLine),
 VSME (`_TRACE` an empty inline, m_bTrace never set), pppDrawShapeX (no shape check).
 
@@ -578,3 +582,27 @@ Tried without a match (see the open list): TRACE as `do {} while (0)` or `((void
 CChatMan::instance() returning `*m_pInstance` (no effect where wanted, WorldSelect worse), loadFromMem's ref locals
 (breaks the beta), PlayerManager setReqLoad without the `next` local (breaks the beta), CardRevolver's debug-deck
 switch kept (no effect).
+
+Open after this run (32 complete units not from source in retail: 10 have no retail code (DebugMenu, DebugWindow,
+DebugWindowTBL, CollDisp, KisEnemy, System/Debug, DebugWork, DebugPathData, vprintf, vsprintf); the rest, with
+what was found):
+- Global/local register ties (priorities measured with -dl/-dg where noted): Avatar RotateAvatarMain (this vs the
+  rotation; the beta has this in s0 as ours), BattleEnemy makeCard (inPos 0.1176 vs bem 0.1165: one more insn of
+  inPos's range would flip it; `kind` at function level as the ref lists it changes nothing), CtdMan _sprintf
+  (s6/s7, 33 allocnos), MSStream threadStream (nErrCnt vs the hoisted divisor 6), HumanBoss normalActProc (s5/s6),
+  WorldCard (retail keeps one more callee-saved register), GimmickTreasureBox and VSME close_dest_se (the
+  `CChatMan::instance().reqCommand` call: retail computes the adjusted this before the vtable load, ours and the
+  beta after; call-site forms tried), LightUnit _calc and CardBattle exePlaying (two spill slots swapped).
+- Cross-jumping/layout: HumanBoss enemyCardProc (retail shares `changeMode(-1,0); return TRUE`), CardRevolver
+  _initialize (which copy of the shared deck tail survives) and setPlayCard, VSME execExt2Code/execExt3Code (the
+  CCameraMan/CChatMan reqCommand tails retail shares), JiminyMemo CMemo3DObj::main (loop-rotated effect block placed
+  elsewhere), PlayerManager mallocBattleRsrcBuffer, BattleEnemyManager notifyDead (retail's loop not rotated) and
+  main, PlayerManager setReqLoad (retail rotates the block loop: its moved exit region has fewer insns).
+- "TRACE leaves something": CardBattle testBreakingCard and HumanBoss stockActProc keep `if (x) { TRACE; return
+  TRUE; } return FALSE;` branchy in retail where ours if-converts; every TRACE macro as `do {} while (0)` or
+  `((void)0)` is worse overall.
+- Loop invariants: MapEnemy searchGround_ (retail hoists 45.0 too: its second loop pass has at most ~51 real insns,
+  ours 53; threshold 62-64, -3 per move), Model sendTexture.
+- Others: SaveLoad's constructor (spill slots), LockOnManager/MessageManager (CPoolList's list-head addresses
+  computed from the derived this before the init loop in retail), CardBattle calcEnchantParam (a copy of
+  `_PLAYER`), pppDrawShapeX (the seq tail stores), VSME loadFromMem.
