@@ -136,6 +136,8 @@ Game/Enemy/MonstroEventBattle .data 0x0033F870 0x1c
 Game/Enemy/MonstroEventBattle .rodata 0x00421240 0xb0
 Game/Enemy/SampleEnemy .rodata 0x004212F0 0x50
 Game/EntityFactory .data 0x0033BC30 0x4
+Game/Game .data 0x0033BC34 0x18
+Game/Game .rodata 0x0040E580 0x170
 Game/GameSubBattle .bss 0x005BDB48 0x8
 Game/GameSubBattle .data 0x0033BC48 0x38
 Game/GameSubBattle .rodata 0x0040E700 0x1a0

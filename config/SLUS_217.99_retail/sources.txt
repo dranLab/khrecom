@@ -93,6 +93,7 @@ Game/Enemy/MapEnemyShadow
 Game/Enemy/MonstroEventBattle
 Game/Enemy/SampleEnemy
 Game/EntityFactory
+Game/Game
 Game/GameSub
 Game/GameSubBattle
 Game/GameSubField

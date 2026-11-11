@@ -10,7 +10,7 @@
 #include "System/Graphic/Str.h"
 #include "Game/Collision/CollUtil.h"
 /* placeholder: 8 zero bytes follow CollUtil.h's strings in the original */
-__asm__(".rdata\n.align 3\n.word 0\n.word 0\n"); /* stays in .rdata: gcc has not left it here */
+KH_DEBUG(__asm__(".rdata\n.align 3\n.word 0\n.word 0\n");) /* stays in .rdata: gcc has not left it here. MATCH: beta only: if it is a "", retail merges it into Task.h's earlier "" */
 
 #include "System/TaskMan.h"
 
@@ -243,8 +243,8 @@ CGameMain* s_pMain = NULL;
 CGame::_FADE_PROC_PRIO s_nFadeProcPrio = CGame::FADE_PROC_PRIO_0;
 CFadeIOMask* s_pFadeMask = NULL;
 INT s_nGameStep = 0;
-INT s_nDbgGameMode = 0;
-BOOL s_bDbgStartFromBattle = 0;
+KH_DEBUG(INT s_nDbgGameMode = 0;)
+KH_DEBUG(BOOL s_bDbgStartFromBattle = 0;) // MATCH: retail's .data ends after s_nGameStep (0x33BC44 is padding before GameSubBattle's, as 0x39BA14 in the beta)
 }
 
 
@@ -603,8 +603,8 @@ void CGameMain::setupWorld() {
                 nState = 3;
                 CSound::clearForEventScene();
             } else {
+                nState = 2; // MATCH: before the call as in the other arm (beta: TRACE_COL 1008, clear 1010); retail's registers need it
                 CSound::clearForBattleScene();
-                nState = 2;
             }
             changeState(nState);
         }
@@ -1572,3 +1572,4 @@ KH_DEBUG(INT CGame::getDbgGameMode() { return s_nDbgGameMode; })
 KH_DEBUG(void CGame::dbgStartFromBattle(BOOL bBattle) { s_bDbgStartFromBattle = bBattle; })
 KH_DEBUG(BOOL CGame::isDbgStartFromBattle() { return s_bDbgStartFromBattle; })
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata
