@@ -35,3 +35,6 @@ System/Graphic/FrecFont .data 0x00332950
 # EntityFactory's .rodata (Task.h's "", then OsdDef.h's "@OSD" and "@EVB"; no code references it, so nothing votes)
 # follows Entity's 0x10 bytes: "" at 0x40E568, "@OSD" 0x40E570, "@EVB" 0x40E578, Game's from 0x40E580
 Game/EntityFactory .rodata 0x0040E568
+# CollMap's .rodata (the beta's 0x488670): it takes the 16 zero bytes after CollBody's end (0x410700) that no
+# object produces; its code votes 0x410710 for Task.h's "" and its jump tables at 0x410720 stay 16-aligned
+Game/Collision/CollMap .rodata 0x00410700

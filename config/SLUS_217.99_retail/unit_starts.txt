@@ -59,6 +59,8 @@ Game/Collision/CollAttack .data 0x0033C3B8 0x8
 Game/Collision/CollAttack .rodata 0x004105F0 0x8
 Game/Collision/CollBody .bss 0x005BE9C0 0x80
 Game/Collision/CollBody .rodata 0x00410600 0x100
+Game/Collision/CollMap .data 0x0033C3C0 0x8
+Game/Collision/CollMap .rodata 0x00410700 0x80
 Game/Collision/CollMapCamera .data 0x0033C3C8 0x8
 Game/Collision/CollObj .data 0x0033C3D0 0x18
 Game/Collision/CollObj .rodata 0x00410780 0x60

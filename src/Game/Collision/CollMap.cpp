@@ -8,7 +8,7 @@
 #include "Game/Collision/Ride.h"
 #include "System/Debug.h"
 #include "include_asm.h"
-
+KH_RELEASE(__asm__(".rdata\n.align 3\n.word 0\n.word 0\n.word 0\n.word 0\n");) /* MATCH: retail's .rodata has 16 more zero bytes before this unit's jump tables (not identified; given to it, as BattleCard's) */
 
 
 
@@ -363,3 +363,4 @@ INT CCollMap::checkWaterSurface(FVECTOR& inPos, FLOAT inHeight) {
 }
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

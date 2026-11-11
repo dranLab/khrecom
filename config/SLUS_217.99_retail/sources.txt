@@ -1,6 +1,5 @@
 # Units this version builds from src/ (configure.py: build.yaml `sources:` names this file); written by
 # tools/retail_units.py switch/verify. One fnmatch pattern per line, `!` excludes.
-!Game/Collision/CollMap
 Form/Menu/BtlReportCtrl
 Form/Menu/DecknameEdit
 Form/Menu/GameOver
@@ -43,6 +42,7 @@ Game/CardKind
 Game/CollParam
 Game/Collision/CollAttack
 Game/Collision/CollBody
+Game/Collision/CollMap
 Game/Collision/CollMapCamera
 Game/Collision/CollObj
 Game/Collision/CollUtil
