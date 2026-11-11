@@ -266,9 +266,9 @@ void CRoomCreation::removeRsrc() {
 }
 #line 507
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 /* g_pPlayer read through a reference: its load stays after the preceding member stores. */
-#define ASSERT_REF(e) if (!_ref(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT_REF(e) KH_DEBUG(if (!_ref(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 
 
@@ -1487,3 +1487,4 @@ LPCTSTR CRoomCreation::getNormaInfo() {
     return m_normaInfoBuf;
 }
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

@@ -146,7 +146,7 @@ void C2DSeqCtrl::destroyIndexToLast(UINT nIdx) {
     }
 }
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 #line 116
 C2DSeqObj* C2DSeqCtrl::addSeq(const CHAR* pLadName, UINT idxUnit, UINT idxSeq) {

@@ -62,7 +62,7 @@ void SubVector(FVECTOR& outV, const FVECTOR& inV0, const FVECTOR& inV1);
 FLOAT InnerProduct(const FVECTOR& inV0, const FVECTOR& inV1);
 
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 #define SEQ_VSB 0x10000000
 #define SEQ_ID(n) (((n) & 0x0FFFFFFF) % 1000)

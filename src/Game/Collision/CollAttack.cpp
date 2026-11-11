@@ -15,7 +15,7 @@ extern "C" float atan2f(float y, float x);
 void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void Normalize(FVECTOR& v0, const FVECTOR& v1);
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 /* iterates a CSJointListT, the current entry may be removed (original macro name unknown) */
 #define SJ_FOREACH(T, pEntry, list) \

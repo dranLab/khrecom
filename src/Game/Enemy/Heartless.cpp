@@ -47,7 +47,7 @@ void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
 
 template <class T> static inline T& _ref(T& v) { return v; }
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 #define DEG2RAD 0.017453292f
 
 namespace Heartless {

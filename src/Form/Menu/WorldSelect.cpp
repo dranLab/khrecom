@@ -219,7 +219,7 @@ void CWorldSelect::dispose() {
 
 using namespace D2;
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 /* CDrawable::setLayer on the fonts, written through a USHORT pointer as in GameOver. */
 static inline void _setFntLayer(C2DFnt* p, USHORT nID, USHORT nDepth) {
@@ -645,3 +645,4 @@ INT CWorldSelect::menuMain() {
     return ret;
 }
 // SOURCE DATA: .rodata
+// SOURCE DATA SLUS_217.99_retail: .rodata

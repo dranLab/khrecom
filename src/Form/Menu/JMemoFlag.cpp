@@ -1527,7 +1527,7 @@ void CJiminyMemoFlag::checkRikuEvent_GetCard(INT inKind) {
     }
     if (cardFlag >= 0) setContentNewFlag(cardFlag);
 }
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 #define CFW_FLAG_SIZE 400
 #define CFW_SCORE_SIZE 5
 #define CFW_NUM_SIZE 69

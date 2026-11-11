@@ -96,7 +96,7 @@ float powf(float, float);
 
 using namespace D2;
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 CRoulette::CRoulette(CTask* p, BOOL fgRoulette) : CMenu(p, -1) {
     declareSysTask(0x22);

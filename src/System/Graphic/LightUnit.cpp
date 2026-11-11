@@ -9,7 +9,7 @@
 #include "Game/Map.h"
 #include "System/Graphic/LightUnit.h"
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 #define POINT_LIGHT_MAX 4
 
 void Normalize(FVECTOR& v0, const FVECTOR& v1);

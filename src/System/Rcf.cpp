@@ -13,7 +13,7 @@ extern "C" const char _ctype_[];
 #define isdigit(c) ((_ctype_ + 1)[(int)(c)] & 4)
 
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 struct SemaParam {
     int currentCount;

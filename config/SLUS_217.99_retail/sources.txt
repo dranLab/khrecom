@@ -9,10 +9,12 @@ Form/Menu/MenuParts
 Form/Menu/MonstroGauge
 Form/Menu/MoogleShop
 Form/Menu/Pause
+Form/Menu/RoomCreation
 Form/Menu/Roulette
 Form/Menu/SaveLoadCtrl
 Form/Menu/TechHelp
 Form/Menu/TitleReportDllStarter
+Form/Menu/WorldSelect
 Form/SystemMessage
 Game/AtWater
 Game/Atel/AtelBlur
@@ -25,9 +27,11 @@ Game/CardKind
 Game/CollParam
 Game/Collision/CollMap
 Game/Collision/CollMapCamera
+Game/Collision/CollUtil
 Game/Collision/CollUtilA
 Game/Collision/CollUtilF
 Game/Collision/CollUtilO
+Game/Collision/Ride
 Game/EffectMotion
 Game/Enemy/EnemyAirpirate
 Game/Enemy/EnemyAirsoldier
@@ -107,6 +111,7 @@ Game/InterpolateMove
 Game/MapCardDef
 Game/MapUnitTable
 Game/ModelObj
+Game/Movement
 Game/NowLoading
 Game/Player/Friend
 Game/Player/FriendAladdin
@@ -357,6 +362,7 @@ System/Graphic/Effect/libppp/stdProg/pppGetRotMatrixZ
 System/Graphic/Effect/libppp/stdProg/pppGetRotMatrixZXY
 System/Graphic/Effect/libppp/stdProg/pppGetRotMatrixZYX
 System/Graphic/Fnt
+System/Graphic/HermitePath
 System/Graphic/MotData
 System/Graphic/PathCamera
 System/Graphic/ScreenMask

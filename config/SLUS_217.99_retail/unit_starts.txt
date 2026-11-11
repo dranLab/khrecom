@@ -10,6 +10,8 @@ Form/Menu/MonstroGauge .rodata 0x0042AE90 0x80
 Form/Menu/MoogleShop .data 0x003400E8 0x4
 Form/Menu/Pause .data 0x003400F0 0x78
 Form/Menu/Pause .rodata 0x0042AF20 0x1a0
+Form/Menu/RoomCreation .data 0x00340168 0x188
+Form/Menu/RoomCreation .rodata 0x0042B0C0 0x1500
 Form/Menu/Roulette .data 0x003402F0 0x48
 Form/Menu/Roulette .rodata 0x0042C5C0 0x1350
 Form/Menu/SaveLoadCtrl .rodata 0x0042F1F0 0x20
@@ -17,6 +19,7 @@ Form/Menu/TechHelp .data 0x00340374 0xc
 Form/Menu/TechHelp .rodata 0x0042F320 0x120
 Form/Menu/TitleReportDllStarter .data 0x00340380 0x4
 Form/Menu/TitleReportDllStarter .rodata 0x0042F440 0x50
+Form/Menu/WorldSelect .rodata 0x004307B0 0x13a0
 Form/SystemMessage .bss 0x005BF3C0 0x100
 Form/SystemMessage .data 0x0033F9E0 0x14
 Form/SystemMessage .rodata 0x00424050 0x30
@@ -125,6 +128,8 @@ Game/Gimmick/GimmickWindowLid .rodata 0x00424000 0x10
 Game/MapCardDef .data 0x0033BEB0 0x20
 Game/MapCardDef .rodata 0x0040EBA0 0x8
 Game/MapUnitTable .data 0x0033BED0 0x358
+Game/Movement .data 0x0033C2C0 0x30
+Game/Movement .rodata 0x0040ECB0 0xb0
 Game/NowLoading .data 0x0033C2F0 0xc
 Game/NowLoading .rodata 0x0040ED60 0x40
 Game/Player/Friend .data 0x0033C480 0x90

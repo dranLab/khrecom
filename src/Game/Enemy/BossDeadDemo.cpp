@@ -40,7 +40,7 @@ inline void _bossDeadDemoEmptyString() {
 
 
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 template <class T> static inline T& _ref(T& v) { return v; }
 
 

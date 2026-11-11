@@ -112,7 +112,7 @@ static inline BOOL _setupEnemyParam(ENEMY_PARAM* inParam) {
     return TRUE;
 }
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 namespace MapEnemy {
 static CHAR* g_pIdlingMotion[37] = {

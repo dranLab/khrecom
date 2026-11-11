@@ -29,7 +29,7 @@ extern "C" int strcmp(const char* a, const char* b);
 
 
 
-#define ASSERT_LINE(line, e) if (!(e)) AssertApp(__FILE__, line, #e, 0)
+#define ASSERT_LINE(line, e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, line, #e, 0))
 
 extern CHAR* __BUILD;
 

@@ -1278,9 +1278,9 @@ public:
 };
 /* DLL import initEveryInt__8CCollDbgi: 0 in config/SLUS_217.99/dll_imports.ld */
 void CCollUtil::_initDbg() {
-    if (m_pCollDbg) {
-        ((CCollDbg*)m_pCollDbg)->initEveryInt(m_PrimInfoMax);
-        m_PrimInfoMax = 0;
-    }
+    KH_DEBUG(if (m_pCollDbg) {)
+        KH_DEBUG(((CCollDbg*)m_pCollDbg)->initEveryInt(m_PrimInfoMax);)
+        KH_DEBUG(m_PrimInfoMax = 0;)
+    KH_DEBUG(})
 }
 // SOURCE DATA: .data .rodata

@@ -48,7 +48,7 @@ inline void _emptyStringPlaceholder() {
 
 
 
-#define ASSERT_AT(line, e) if (!(e)) AssertApp(__FILE__, line, #e, 0)
+#define ASSERT_AT(line, e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, line, #e, 0))
 
 
 

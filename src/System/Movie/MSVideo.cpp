@@ -20,7 +20,7 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 
 template <class T> static inline T& _ref(T& v) { return v; }
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 #define UNCACHED(p) ((((u_int)(p)) & 0x0fffffff) | 0x20000000)
 #define T0_COUNT (*(volatile u_int*)0x10000000)

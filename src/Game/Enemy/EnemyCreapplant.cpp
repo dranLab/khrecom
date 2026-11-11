@@ -18,7 +18,7 @@
 #include "System/Math3D.h"
 #include "Game/Collision/CollBody.h"
 #include "System/HeapMan.h"
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 
 

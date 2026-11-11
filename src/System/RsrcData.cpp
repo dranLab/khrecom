@@ -47,7 +47,7 @@ void* snDllGetFreeMemory(void* pDll);
 
 #define RSRC_ALLOC(line, n) KH_DEBUG(operator new(n, __FILE__ "(" #line ")")) KH_RELEASE(operator new(n))
 #define _RSRC_STR(e) #e
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, _RSRC_STR(e), 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, _RSRC_STR(e), 0))
 
 static CRsrcData* createRsrcTex(const RsrcInfo& info, CBuf& data);
 static CRsrcData* createRsrcFont(const RsrcInfo& info, CBuf& data);

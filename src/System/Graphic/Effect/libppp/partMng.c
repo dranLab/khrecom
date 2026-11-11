@@ -126,7 +126,7 @@ void pppLoopEnd(void *mng) {
 }
 #define TBP0_OF(l) ((u_short)(l) & 0x3FFF)
 #define CBP_OF(h) (((h) >> 5) & 0x3FFF)
-#define ASSERTS(e, s) if (!(e)) AssertApp(__FILE__, __LINE__, s, 0)
+#define ASSERTS(e, s) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, s, 0))
 
 static void setOmdTex0(OMD_H *omd, DPD_MODEL_HEADER *pMh, short shTexpStart, short shClutpStart) {
     OMD_PRIM_H *mph;

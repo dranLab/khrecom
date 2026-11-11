@@ -11,7 +11,7 @@
 
 
 #define _ASSERT_STR(e) #e
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, _ASSERT_STR(e), 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, _ASSERT_STR(e), 0))
 
 
 

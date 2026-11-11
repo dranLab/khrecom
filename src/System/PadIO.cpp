@@ -27,7 +27,7 @@ int sceVibSetActParam(int socket, int profilesize, unsigned char* profile, int d
 
 extern INT VSYNC_TIMEQ;
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 
 #define PAD_MAX 2

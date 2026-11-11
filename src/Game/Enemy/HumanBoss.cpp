@@ -46,7 +46,7 @@ inline void _humanBossEmptyString() {
 
 
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 void AddVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 

@@ -114,7 +114,7 @@ void MulMatrix(FMATRIX& m0, const FMATRIX& m1, const FMATRIX& m2);
 
 inline FLOAT DegToRad(FLOAT d) { return d * 0.017453292f; }
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 CEffectMotionCtrl::CEffectMotionCtrl(CEffectMotion* inParent) {
     m_iStep = 3;

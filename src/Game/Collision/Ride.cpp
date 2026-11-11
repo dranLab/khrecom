@@ -9,7 +9,7 @@
 #include "System/Debug.h"
 #include "Game/Collision/Ride.h"
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 /* iterates a CSJointListT, the current entry may be removed (original macro name unknown) */
 #define SJ_FOREACH(T, pEntry, list) \

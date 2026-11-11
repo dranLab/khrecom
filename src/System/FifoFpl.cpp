@@ -3,7 +3,7 @@
 #include "System/MainApp.h"
 #include "System/Debug.h"
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 CFifoFpl::CFifoFpl() {
     m_pPoolBuf = NULL;

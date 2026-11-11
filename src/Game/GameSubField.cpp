@@ -93,7 +93,7 @@ static inline void _collUtilDispose() {
     instance->dispose();
 }
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 static int s_preEventMovieFlags[2] = {0x20000, 0x40000};
 static int s_preEventMovieNums[2] = {132, 133};

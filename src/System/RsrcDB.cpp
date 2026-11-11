@@ -20,7 +20,7 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 
 
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 #define RCID_MAX 63
 #define GROUP_ID_BASE 10000
