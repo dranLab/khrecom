@@ -35,6 +35,11 @@ overrides:
     cflags: -O2 -G0 -g -fexceptions
     source_root: null
     assembler: ee-gcc2.9-990721
+  - match: lib/src/gcc/frame    # as below; KH_RETAIL drops the beta's build stamp before frame's .rodata (src/lib/src/gcc/frame.c)
+    compiler: ee-gcc2.9-991111
+    cflags: -O2 -G0 -g -DKH_RETAIL
+    source_root: null
+    assembler: ee-gcc2.9-990721
   - match: lib/src/gcc/*        # libgcc (GCC 2.9 libgcc2.c): __floatdisf's open jal delay slot needs the 2.9 assembler
     compiler: ee-gcc2.9-991111
     cflags: -O2 -G0 -g

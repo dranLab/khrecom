@@ -22,3 +22,9 @@ Game/Enemy/CreateEnemy .rodata 0x0041DAE0
 # VSME's .data follows ChatMan's (as in the beta) and begins with the header statics' name pointers; the split had no
 # VSME .data and gave the range to ChatMan (0x33C40C + 0xC)
 Game/Atel/VSME .data 0x0033C418
+# libpad2's and thread's .rodata: the split's starts match their bytes exactly; their votes split over references
+# into a string's tail
+lib/libpad2 .rodata 0x00433260
+lib/thread .rodata 0x00436800
+# CreateGimmick's .rodata: the split's start matches its bytes exactly (no references to vote with)
+Game/Gimmick/CreateGimmick .rodata 0x00421440

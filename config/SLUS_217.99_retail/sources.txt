@@ -97,6 +97,7 @@ Game/GameSubBattle
 Game/GameSubField
 Game/GameWork
 Game/Gimmick/BaseGimmick
+Game/Gimmick/CreateGimmick
 Game/Gimmick/GimmickAngelArrow
 Game/Gimmick/GimmickBell
 Game/Gimmick/GimmickBreakable
@@ -497,6 +498,7 @@ lib/libdma
 lib/libipu
 lib/libmc
 lib/libosd
+lib/libpad2
 lib/libvib
 lib/mpeg
 lib/nodebug/Tim2CheckFileHeader
@@ -546,6 +548,7 @@ lib/output
 lib/pack
 lib/sifcmd
 lib/sifrpc
+lib/src/gcc/frame
 lib/src/gcc/libgcc2___default_terminate
 lib/src/gcc/libgcc2___divdi3
 lib/src/gcc/libgcc2___do_global_dtors
@@ -589,6 +592,7 @@ lib/src/newlib/libm/math/wf_atan2
 lib/src/newlib/libm/math/wf_fmod
 lib/src/newlib/libm/math/wf_pow
 lib/src/newlib/libm/math/wf_sqrt
+lib/thread
 lib/timer
 lib/timeralarm
 lib/tlbfunc

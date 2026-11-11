@@ -599,3 +599,4 @@ CEntity* CEntityFactory::createGimmick(INT inRsrcID, CTask* inParent, void* inEx
     return gimmick;
 }
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .rodata

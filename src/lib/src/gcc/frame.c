@@ -34,7 +34,9 @@ Boston, MA 02111-1307, USA.  */
 /* GCC 2.95.3 frame.c, unmodified apart from the includes and one case (SCE_GCC_2_9): tconfig.h, the system headers,
    defaults.h and gthr.h are replaced by the definitions they contribute for the EE. */
 /* Not frame.c's: a version string linked in before it (also at the start of System/Component). */
+#ifndef KH_RETAIL /* retail: no build stamp */
 __asm__(".section .rodata\n.align 3\nD_004FB210:\n.asciz \"EEDO 2008/10/01 18:29:10.65 xxx\"\n.previous");
+#endif
 
 #define SCE_GCC_2_9
 #define DWARF2_UNWIND_INFO 1
@@ -878,3 +880,4 @@ __frame_state_for (void *pc_target, struct frame_state *state_in)
 #endif /* DWARF2_UNWIND_INFO */
 
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .rodata

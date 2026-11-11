@@ -1879,10 +1879,10 @@ UINT CSound::getBgmID_withName(const CHAR* pszName) {
     return 0;
 }
 
-KH_DEBUG(static CHAR* _getBgmName_withID(UINT nID) {)
-    KH_DEBUG(if (nID - 1 >= 44) {)
-        KH_DEBUG(return NULL;)
-    KH_DEBUG(})
-    KH_DEBUG(return s_BgmTbl[nID - 1];)
-KH_DEBUG(})
+static CHAR* _getBgmName_withID(UINT nID) {
+    if (nID - 1 >= 44) {
+        return NULL;
+    }
+    return s_BgmTbl[nID - 1];
+}
 // SOURCE DATA: .data .rodata .bss

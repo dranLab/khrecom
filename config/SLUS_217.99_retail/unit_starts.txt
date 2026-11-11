@@ -142,6 +142,7 @@ Game/GameSubField .rodata 0x0040E8A0 0x1e0
 Game/GameWork .bss 0x005BDB50 0x48
 Game/GameWork .data 0x0033BCC8 0x70
 Game/Gimmick/BaseGimmick .rodata 0x00421340 0x100
+Game/Gimmick/CreateGimmick .rodata 0x00421440 0xf0
 Game/Gimmick/GimmickAngelArrow .data 0x0033F8E0 0x40
 Game/Gimmick/GimmickAngelArrow .rodata 0x00421530 0x130
 Game/Gimmick/GimmickCarry .rodata 0x00421670 0x50
@@ -384,6 +385,9 @@ lib/libmc .bss 0x005C36C0 0x3f10
 lib/libmc .data 0x003458E0 0x120
 lib/libmc .rodata 0x00434510 0xe7
 lib/libosd .data 0x003479E0 0x7c0
+lib/libpad2 .bss 0x005BF5C0 0x3340
+lib/libpad2 .data 0x00343A68 0x30
+lib/libpad2 .rodata 0x00433260 0x59
 lib/mpeg .rodata 0x00433A10 0x183
 lib/nodebug/Tim2CheckFileHeader .rodata 0x00434600 0x470
 lib/nodebug/__assert .rodata 0x004361E8 0x30
@@ -404,6 +408,8 @@ lib/sifcmd .rodata 0x00436AC0 0x10
 lib/sifrpc .bss 0x005C8700 0x182c
 lib/sifrpc .data 0x00347914 0x4
 lib/sifrpc .rodata 0x00436AD0 0x2e
+lib/src/gcc/frame .bss 0x005BF588 0x4
+lib/src/gcc/frame .rodata 0x00432E70 0xcc
 lib/src/gcc/libgcc2___default_terminate .bss 0x005BF568 0x20
 lib/src/gcc/libgcc2___default_terminate .data 0x003403C4 0x5f8
 lib/src/gcc/libgcc2___divdi3 .rodata 0x00436E98 0x100
@@ -427,6 +433,9 @@ lib/src/newlib/libm/math/wf_atan2 .rodata 0x004333D8 0x7
 lib/src/newlib/libm/math/wf_fmod .rodata 0x004333E0 0x10
 lib/src/newlib/libm/math/wf_pow .rodata 0x004333F0 0x20
 lib/src/newlib/libm/math/wf_sqrt .rodata 0x00433410 0x10
+lib/thread .bss 0x005C7780 0x810
+lib/thread .data 0x00347908 0x4
+lib/thread .rodata 0x00436800 0x55
 lib/timer .bss 0x005CBC00 0x2000
 lib/timer .data 0x00348950 0x28
 lib/timeralarm .bss 0x005CDC00 0x404
