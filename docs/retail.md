@@ -409,3 +409,40 @@ Seventeenth batch (2026-11-11): **549 units from source in retail**, 151 functio
     FriendAriel, Glare, ...), CreateEnemy's unused "abnormal" (BattleEnemy.h's header static, absent in retail);
   - 45 bare `AssertApp(...)` statements (default branches) are left as written: in retail they are empty statements.
 
+
+### Session 2026-11-11 (afternoon): 549 -> 564 units
+
+- Done: Atel (CAtel's world/floor/step flag setters are absent in retail; two raw CAvatar offsets above 0x1b0 are
+  `KH_VER(beta, retail)`, CEntity being 0x20 smaller), EnemyLoudness (the `g_dw.enemy` act override block:
+  `KH_DW` folds the test but its `for` leaves loop notes, a `.p2align` before the epilogue), WorldWarp (`PIN_V1` is
+  beta-only: the plain pointer matches retail), SummonMushu (no `getBattleCamData` reload in retail), the debug
+  movie player (Movie/MSVideo: `bForDebug`, flag 0x80000000, `openDbg`, `s_nStreamUnderflowCnt` and its getter
+  are beta-only; retail's constructor is `__12CMoviePlayerP5CTask`, `_openMovie` takes only the file and never
+  makes the dummy player). Statement orders taken from the beta's line markers where retail needed another order
+  (AtelFog ctor, PadIO init, PlayerGauge _initialize: chained assignments on lines 126/127, MSVideo close); the
+  beta matches with each.
+- Tools: `retail_units.py try` pairs a function whose signature retail changed through retail's symbol, or (a
+  file-local one) through the unit's one unproduced beta function of the same base name; with it the static
+  initializer units (EnemyHeartsoldier, EnemySpadesoldier, GimmickDoor, SampleGimmick, MapUnit, main) switched.
+  `split_version.py`: at one address a unit that starts there wins over one pushed there by the gap rule (retail's
+  WorldWarp .data covers the beta's `__FRAME_BEGIN__0` bytes; that unit has no .data in retail).
+- `try` masks the offset of every load/store whose base register some `lui` of the function loads, anywhere in
+  it (`version_map.decode`), so a plain field offset can pass as OK (Atel createAvatar's 0x1e4/0x1c4); `verify`
+  catches it. Read the image diff when `verify` switches a unit back that `try` calls eligible.
+- Open, tried without a match:
+  - CPoolList::init (MessageManager, LockOnManager constructors): retail computes `erase()`'s `&m_Tail`/`&m_Top`
+    before the loop (base = the derived `this`, so cse folded them in the first block) and keeps them across it.
+    Not the scheduler (single-block regions), not loop.c (the code is after LOOP_END in ours). Tried: unwrapped
+    asserts (empty ifs), while/pointer/m_iSize loop forms, a guarding if, `do {} while (0)` at several places.
+  - PlayerDRiku constructor: retail stores `m_pParam` with the vtables, the three zero stores after; ours floats the
+    zero stores up. Every order of lines 163-167, with and without `_ref`.
+  - EffectMan initialize: at the join after `new CEffect` retail issues the `lui` of `s_pExceptEffect` before the
+    `s_pEffectList` reload (ours: reload first, reorg copies it into a `beql` slot). Release ASSERT forms at the
+    site (`(void)(e)`, empty ifs, `do {} while (0)`) change nothing.
+  - CardBattle testBreakingCard: retail keeps branches where ours makes `slt`/`sll 1` and a shared `return 2` tail;
+    no release TRACE form (`do {} while (0)`, `if (0) {}`, ...) changes it: probably a source change in retail.
+  - MainApp: `_mainLoop` (0x1D8 -> 0x50) and `_warmReset` are restructured in retail (real changes).
+  - WorldCard WorldWndFour/Five: retail's frame is 0x10 larger with one more saved register.
+- Triage helpers (scratch, build/): `rdiff.py <unit> <function>` (unified ours/retail diff, branch offsets masked),
+  `difflist.sh`, `dstat.sh` (lines only in ours/retail per DIFF function; run one unit per process: `try` writes
+  one object per unit), `rperm.py` (every order of n lines, retail score).
