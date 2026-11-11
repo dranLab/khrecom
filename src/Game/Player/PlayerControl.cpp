@@ -31,7 +31,7 @@ CPlayerPad::CPlayerPad() : m_uiPadFlag(1) {
     m_HoukouR = HOUKOU_NUTRAL;
     m_PreHoukouR = HOUKOU_NUTRAL;
     m_fViewDir = 0.0f;
-    m_uiPadFlag |= 2;
+    KH_DEBUG(m_uiPadFlag |= 2;) // MATCH: beta only (the debug input enable)
     if (CGameWork::getByte(0, 100) == 0) {
         m_padLA = 4;
         m_padRA = 8;
@@ -272,22 +272,22 @@ BOOL CPlayerPad::isChangeHoukouR() {
     return FALSE;
 }
 
-BOOL CPlayerPad::dbgIsTrgCommonInput(UINT b, UINT pad) {
-    return isButtonTrg(b, pad) * (m_uiPadFlag & 2);
-}
+KH_DEBUG(BOOL CPlayerPad::dbgIsTrgCommonInput(UINT b, UINT pad) {)
+    KH_DEBUG(return isButtonTrg(b, pad) * (m_uiPadFlag & 2);)
+KH_DEBUG(})
 
-BOOL CPlayerPad::dbgIsDownCommonInput(UINT b, UINT pad) {
-    return isButtonDown(b, pad) * (m_uiPadFlag & 2);
-}
+KH_DEBUG(BOOL CPlayerPad::dbgIsDownCommonInput(UINT b, UINT pad) {)
+    KH_DEBUG(return isButtonDown(b, pad) * (m_uiPadFlag & 2);)
+KH_DEBUG(})
 
-BOOL CPlayerPad::isTrgBattleChange() {
-    return dbgIsTrgCommonInput(0x800, 1);
-}
+KH_DEBUG(BOOL CPlayerPad::isTrgBattleChange() {)
+    KH_DEBUG(return dbgIsTrgCommonInput(0x800, 1);)
+KH_DEBUG(})
 
-BOOL CPlayerPad::isTrgWarpStartPos() {
-    return dbgIsTrgCommonInput(0x200, 1);
-}
+KH_DEBUG(BOOL CPlayerPad::isTrgWarpStartPos() {)
+    KH_DEBUG(return dbgIsTrgCommonInput(0x200, 1);)
+KH_DEBUG(})
 
-BOOL CPlayerPad::isDownDebugMode() {
-    return dbgIsDownCommonInput(1, 0) && dbgIsDownCommonInput(2, 0);
-}
+KH_DEBUG(BOOL CPlayerPad::isDownDebugMode() {)
+    KH_DEBUG(return dbgIsDownCommonInput(1, 0) && dbgIsDownCommonInput(2, 0);)
+KH_DEBUG(})

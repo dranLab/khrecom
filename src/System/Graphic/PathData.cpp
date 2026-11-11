@@ -318,10 +318,10 @@ void CPathVector::getNearPath(FVECTOR& outvN, float* outfDis, float* outfT, int*
     FVECTOR v1[4];
     FVECTOR vCloss;
     KH_DEBUG(m_DDPathPolys.m_vVERT.clear();)
-    iNearStep = 0;
-    fNearT = 0.0f;
-    fNearDis = 1.7014118e+38f;
+    fNearDis = 1.7014118e+38f; // MATCH: in the beta's marker order (515-518)
     fChkNearDis = 1.7014118e+38f;
+    fNearT = 0.0f;
+    iNearStep = 0;
     vNearNv.init0();
     /* MATCH: an asm with an operand and no clobber ends cse's equivalences (fNearT = 0.0f), so the hoisted 0.0f
        compare constant gets its own mtc1 zero instead of a copy of fNearT */
@@ -1108,3 +1108,4 @@ KH_DEBUG(void CDbgArrow::disp() {)
     KH_DEBUG(m_gpPolyStrip.CGPrim::disp();)
 KH_DEBUG(})
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .rodata

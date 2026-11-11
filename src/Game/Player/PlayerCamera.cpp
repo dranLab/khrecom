@@ -112,9 +112,9 @@ char g_strtmp[256] = "";
 
 extern PCAM_PARAM g_ParamTest;
 
-char* szTestCamMode[6] = {
-    "OFF", "1:FLD-Normal", "2:(FLD-Far)", "3:BTL-Normal", "4:BTL-Lockon", "5:BTL-Loading",
-};
+KH_DEBUG(char* szTestCamMode[6] = {)
+    KH_DEBUG("OFF", "1:FLD-Normal", "2:(FLD-Far)", "3:BTL-Normal", "4:BTL-Lockon", "5:BTL-Loading",)
+KH_DEBUG(};) // MATCH: beta only (retail's .rodata has no mode names)
 
 PCAM_DATA* pTestCamData[6] = {
     NULL,
@@ -1231,3 +1231,4 @@ void CPlayerCamera::enableRikuShiftY() {
 } // namespace PlayerCamera
 
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .data .rodata

@@ -160,6 +160,8 @@ Game/Player/FriendPan
 Game/Player/FriendPluto
 Game/Player/NaviMap
 Game/Player/Player
+Game/Player/PlayerCamera
+Game/Player/PlayerControl
 Game/Player/PlayerDRiku
 Game/Player/PlayerGauge
 Game/Player/PlayerRiku
@@ -431,6 +433,7 @@ System/Graphic/ModelMan
 System/Graphic/MotData
 System/Graphic/PackMan
 System/Graphic/PathCamera
+System/Graphic/PathData
 System/Graphic/PathDataCamera
 System/Graphic/ScreenMask
 System/Graphic/ShadowModel
@@ -439,7 +442,9 @@ System/Graphic/TexAnm
 System/Graphic/TexCtrl
 System/Graphic/TexUtil
 System/Graphic/TriangleIK
+System/HeapMan
 System/LinkedBuf
+System/MainApp
 System/MainTaskFactory
 System/Math3D
 System/Memoca

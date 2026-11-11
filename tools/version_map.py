@@ -238,6 +238,21 @@ class Mapper:
                 if k != n and len(keyed.get(k, ())) == 1:
                     self.pair[a], self.how[a] = keyed[k][0], "anon"
 
+    def manual(self, path: Path) -> int:
+        """Pairs measured by hand (config/<VERSION>/function_pairs.manual.txt: `<beta name> <other address>`, each
+        with its evidence in a comment): they take precedence over the call graph, which a removed call shifts."""
+        n = 0
+        if not path.exists():
+            return n
+        for line in path.read_text().splitlines():
+            line = line.split("#", 1)[0].strip()
+            if not line:
+                continue
+            name, addr = line.split()
+            self.pair[self.bynamebeta[name]], self.how[self.bynamebeta[name]] = int(addr, 16), "manual"
+            n += 1
+        return n
+
     # -- sizes in the other version: up to the next known start ----------------------------------------------
     def other_end(self, addr: int) -> int:
         starts = self._sorted_ostarts
@@ -511,8 +526,9 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     m = Mapper(beta, other)
     m.by_name()
+    nm = m.manual(ROOT / "config" / Path(args.other).name / "function_pairs.manual.txt")
     print(f"by name: {sum(1 for h in m.how.values() if h == 'name')}, by anonymous key: "
-          f"{sum(1 for h in m.how.values() if h == 'anon')} of {len(m.funcs)} beta functions")
+          f"{sum(1 for h in m.how.values() if h == 'anon')} of {len(m.funcs)} beta functions, by hand: {nm}")
     m.refresh()
     for rnd in range(6):
         n1 = m.propagate()

@@ -215,6 +215,9 @@ Game/Player/NaviMap .rodata 0x00413870 0x1320
 Game/Player/Player .bss 0x005BEA40 0x8
 Game/Player/Player .data 0x0033C720 0x3b0
 Game/Player/Player .rodata 0x00414B90 0x1df0
+Game/Player/PlayerCamera .bss 0x005BEA50 0x110
+Game/Player/PlayerCamera .data 0x0033DEB0 0x138
+Game/Player/PlayerCamera .rodata 0x00418910 0x48
 Game/Player/PlayerDRiku .data 0x0033DFF0 0x80
 Game/Player/PlayerDRiku .rodata 0x00418960 0x1c0
 Game/Player/PlayerGauge .data 0x0033E070 0xa0
@@ -313,6 +316,7 @@ System/Graphic/ModelMan .rodata 0x00400ED0 0x10
 System/Graphic/MotData .rodata 0x00400EE0 0x20
 System/Graphic/PackMan .bss 0x0043C4C0 0x131140
 System/Graphic/PathCamera .rodata 0x00400F08 0x10
+System/Graphic/PathData .rodata 0x00400F20 0x50
 System/Graphic/PathDataCamera .rodata 0x00400F70 0x50
 System/Graphic/ShadowModel .bss 0x0056D600 0x10
 System/Graphic/ShadowModel .rodata 0x00400FC8 0x10
@@ -321,7 +325,12 @@ System/Graphic/TexUtil .data 0x00332A68 0x20
 System/Graphic/TexUtil .rodata 0x00400FE0 0x50
 System/Graphic/TriangleIK .data 0x00332A88 0x38
 System/Graphic/TriangleIK .rodata 0x00401030 0x78
+System/HeapMan .bss 0x0043BD28 0x10
+System/HeapMan .data 0x00332928 0xc
 System/LinkedBuf .bss 0x0043BD38 0xc
+System/MainApp .bss 0x00437680 0x1088
+System/MainApp .data 0x003328A0 0x24
+System/MainApp .rodata 0x003FF910 0x38
 System/Math3D .rodata 0x003FF948 0xc
 System/Memoca .bss 0x0043B240 0x6c0
 System/Memoca .rodata 0x004008A0 0x440
