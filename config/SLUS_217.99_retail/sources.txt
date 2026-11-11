@@ -48,6 +48,7 @@ Game/Collision/CollUtilO
 Game/Collision/Ride
 Game/EffectMotion
 Game/Enemy/BossDeadDemo
+Game/Enemy/CreateEnemy
 Game/Enemy/EnemyAirpirate
 Game/Enemy/EnemyAirsoldier
 Game/Enemy/EnemyAquatank

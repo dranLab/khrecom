@@ -69,6 +69,13 @@ class Version:
         # the pairs by this version's address: a function whose signature this version changed (CMoviePlayer's
         # constructor without the debug flag) has this version's name, found through its symbol
         self.pairs_by_other = {int(r["other"], 16): r for r in self.pairs.values() if r["other"]}
+        self.manual_starts = {}
+        manual = self.cfg / "unit_starts.manual.txt"
+        if manual.exists():
+            for line in manual.read_text(encoding="utf-8").splitlines():
+                if line.strip() and not line.startswith("#"):
+                    unit_, section_, addr_, *_ = line.split()
+                    self.manual_starts[(unit_, section_)] = int(addr_, 16)
         # each unit's subsegment ranges in this version's split: (unit, kind) -> (start, end)
         self.ranges = {}
         rows = []
@@ -261,6 +268,9 @@ def try_unit(v: Version, unit: str, show=(), data=True) -> dict:
                 if not lo_d[0] <= addr < lo_d[1]:
                     continue  # another object's copy: removed in the build
                 entry["start"] = addr
+            elif (unit, name) in v.manual_starts:  # measured by hand (config/<VERSION>/unit_starts.manual.txt)
+                entry["start"] = v.manual_starts[(unit, name)]
+                entry["votes"] = "manual"
             elif votes.get(name):
                 start, n = votes[name].most_common(1)[0]
                 entry["votes"] = f"{n}/{sum(votes[name].values())}"

@@ -16,3 +16,6 @@ Game/Enemy/HumanBoss .data 0x0033F3B0
 Game/Enemy/HumanBoss .rodata 0x0041F870
 Game/LockOnManager .data 0x0033BD38
 Game/LockOnManager .rodata 0x0040EA88
+# CreateEnemy's .rodata: its .data points at "abnormal" (0x41DAE8) and "cure01" (0x41DAF8) at the start; the vote
+# (0x41DAF0) pairs its code's references with the next unit's copy of "abnormal"
+Game/Enemy/CreateEnemy .rodata 0x0041DAE0

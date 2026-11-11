@@ -12,8 +12,8 @@
 #include "System/Graphic/Anim.h"
 
 /* MATCH: Placeholder: .rodata has "e123_062" after Anim.h's strings (from an unidentified header). */
-inline void _createEnemyMotionName() {
-    TRACE("e123_062");
+inline const CHAR* _createEnemyMotionName() {
+    return "e123_062";
 }
 
 #include "Game/Enemy/EnemyShadow.h"
@@ -696,3 +696,4 @@ CEntity* CEntityFactory::createMapEnemy(const OBJ_INFO& inObjInfo, CTask* inPare
 }
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .rodata
