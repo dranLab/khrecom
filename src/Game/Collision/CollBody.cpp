@@ -90,10 +90,10 @@ INT CCollBody::collideBody(INT iTargetType) {
             INT type = pEntry->getType();
             INT ret0 = 0;
             switch (type | bodyType) {
-            case 0x22:
-            case 0x24:
-            case 0x42:
-            case 0x44:
+            case 0x22: case 0x42:
+                ret0 = CCollUtil::detectColumnColumnEz(*pTarget, (CColumnCollision&)m_collTmp);
+                break;
+            case 0x24: case 0x44:
                 ret0 = CCollUtil::detectColumnColumnEz(*pTarget, (CColumnCollision&)m_collTmp);
                 break;
             case 0x25:
@@ -232,3 +232,4 @@ HANDLE CCollBody::setHitEffect() {
 }
 
 // SOURCE DATA: .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .rodata

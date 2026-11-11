@@ -656,11 +656,11 @@ BOOL CHumanBoss::reloadCardProc() {
 }
 
 /* placeholder for enemyCardProc (INCLUDE_ASM): its strings */
-__attribute__((section(".sdata"))) void _enemyCardProc_placeholder(void* cb) {
-    TRACE("----------- change normal card mode.\n");
+KH_DEBUG(__attribute__((section(".sdata"))) void _enemyCardProc_placeholder(void* cb) {)
+    KH_DEBUG(TRACE("----------- change normal card mode.\n");)
     KH_DEBUG(if (!cb) AssertApp(__FILE__, 0, "cb", 0);)
-    TRACE("----------- change enemy card mode.\n");
-}
+    KH_DEBUG(TRACE("----------- change enemy card mode.\n");)
+KH_DEBUG(})
 BOOL CHumanBoss::enemyCardProc(const CARD* inActiveCard) {
     INT n;
     CardBattle::CCardBattle* cb;
@@ -714,58 +714,58 @@ BOOL CHumanBoss::itemCardProc(const CARD* inActiveCard) {
     INT haveCardNum;
     INT remainCard;
     INT rate;
-    INT kind[16];
+    KH_DEBUG(INT kind[16];)
     INT count;
     INT i;
     ENEMY_CARD* card;
     INT cardKind;
     BOOL find;
 
-    if ((KH_DW(DebugWork::g_dw.enemy.uiFlag) & 8) && KH_DW(DebugWork::g_dw.enemy.sActNo) + 2 == 10) {
-        count = 0;
-        for (i = 0; i < getEnemyParam()->iCardCount; i++) {
-            card = &getEnemyParam()->pCards[i];
-            cardKind = 0;
-            switch (card->iCardKind) {
-            case 8:
-                cardKind = 0x2a;
-                break;
-            case 9:
-                cardKind = 0x2b;
-                break;
-            case 10:
-                cardKind = 0x2c;
-                break;
-            case 11:
-                cardKind = 0x2d;
-                break;
-            case 12:
-                cardKind = 0x2e;
-                break;
-            case 13:
-                cardKind = 0x2f;
-                break;
-            }
-            find = FALSE;
-            {
-                INT i;
-                for (i = 0; i < count; i++) {
-                    if (kind[i] == cardKind) {
-                        find = TRUE;
-                        break;
-                    }
-                }
-            }
-            if (!find) {
-                kind[count++] = cardKind;
-            }
-        }
-        if (count > 0) {
-            m_iUseItem = kind[RND::genrand_int31() % count];
-            setPlayCard(10);
-            return TRUE;
-        }
-    }
+    KH_DEBUG(if ((KH_DW(DebugWork::g_dw.enemy.uiFlag) & 8) && KH_DW(DebugWork::g_dw.enemy.sActNo) + 2 == 10) {)
+        KH_DEBUG(count = 0;)
+        KH_DEBUG(for (i = 0; i < getEnemyParam()->iCardCount; i++) {)
+            KH_DEBUG(card = &getEnemyParam()->pCards[i];)
+            KH_DEBUG(cardKind = 0;)
+            KH_DEBUG(switch (card->iCardKind) {)
+            KH_DEBUG(case 8:)
+                KH_DEBUG(cardKind = 0x2a;)
+                KH_DEBUG(break;)
+            KH_DEBUG(case 9:)
+                KH_DEBUG(cardKind = 0x2b;)
+                KH_DEBUG(break;)
+            KH_DEBUG(case 10:)
+                KH_DEBUG(cardKind = 0x2c;)
+                KH_DEBUG(break;)
+            KH_DEBUG(case 11:)
+                KH_DEBUG(cardKind = 0x2d;)
+                KH_DEBUG(break;)
+            KH_DEBUG(case 12:)
+                KH_DEBUG(cardKind = 0x2e;)
+                KH_DEBUG(break;)
+            KH_DEBUG(case 13:)
+                KH_DEBUG(cardKind = 0x2f;)
+                KH_DEBUG(break;)
+            KH_DEBUG(})
+            KH_DEBUG(find = FALSE;)
+            KH_DEBUG({)
+                KH_DEBUG(INT i;)
+                KH_DEBUG(for (i = 0; i < count; i++) {)
+                    KH_DEBUG(if (kind[i] == cardKind) {)
+                        KH_DEBUG(find = TRUE;)
+                        KH_DEBUG(break;)
+                    KH_DEBUG(})
+                KH_DEBUG(})
+            KH_DEBUG(})
+            KH_DEBUG(if (!find) {)
+                KH_DEBUG(kind[count++] = cardKind;)
+            KH_DEBUG(})
+        KH_DEBUG(})
+        KH_DEBUG(if (count > 0) {)
+            KH_DEBUG(m_iUseItem = kind[RND::genrand_int31() % count];)
+            KH_DEBUG(setPlayCard(10);)
+            KH_DEBUG(return TRUE;)
+        KH_DEBUG(})
+    KH_DEBUG(})
     noReloadNum = -1;
     cardNum = 0;
     haveCardNum = 0;
@@ -829,10 +829,10 @@ BOOL CHumanBoss::itemCardProc(const CARD* inActiveCard) {
 }
 
 /* placeholder for stockActProc (INCLUDE_ASM): its strings */
-__attribute__((section(".sdata"))) void _stockActProc_placeholder(INT n) {
-    TRACE("CHumanBoss::\x83X\x83g\x83" "b\x83N\x82\xc5\x82\xab\x82\xc8\x82\xa2\n");
-    TRACE("----------- stock boss card = 0x%08x\n", n);
-}
+KH_DEBUG(__attribute__((section(".sdata"))) void _stockActProc_placeholder(INT n) {)
+    KH_DEBUG(TRACE("CHumanBoss::\x83X\x83g\x83" "b\x83N\x82\xc5\x82\xab\x82\xc8\x82\xa2\n");)
+    KH_DEBUG(TRACE("----------- stock boss card = 0x%08x\n", n);)
+KH_DEBUG(})
 BOOL CHumanBoss::stockActProc(const CARD* inActiveCard) {
     INT attackCardNum;
     INT magicCardNum;
@@ -886,26 +886,26 @@ BOOL CHumanBoss::stockActProc(const CARD* inActiveCard) {
         if (!canAttack_(m_pUseStock->pAct)) {
             return FALSE;
         }
-        if (KH_DW(DebugWork::g_dw.enemy.uiFlag) & 8) {
-            state = KH_DW(DebugWork::g_dw.enemy.sActNo) + 2;
-            {
-                INT i;
-                for (i = 0; i < m_iNormalActNum; i++) {
-                    if (m_pNormalActs[i].iState == state) {
-                        return setPlayStock(state) != 0;
-                    }
-                }
-            }
-            {
-                INT i;
-                for (i = 0; i < m_iStockNum; i++) {
-                    if (m_pStockData[i].iState == state) {
-                        return setPlayStock(state) != 0;
-                    }
-                }
-            }
-            return TRUE;
-        }
+        KH_DEBUG(if (KH_DW(DebugWork::g_dw.enemy.uiFlag) & 8) {)
+            KH_DEBUG(state = KH_DW(DebugWork::g_dw.enemy.sActNo) + 2;)
+            KH_DEBUG({)
+                KH_DEBUG(INT i;)
+                KH_DEBUG(for (i = 0; i < m_iNormalActNum; i++) {)
+                    KH_DEBUG(if (m_pNormalActs[i].iState == state) {)
+                        KH_DEBUG(return setPlayStock(state) != 0;)
+                    KH_DEBUG(})
+                KH_DEBUG(})
+            KH_DEBUG(})
+            KH_DEBUG({)
+                KH_DEBUG(INT i;)
+                KH_DEBUG(for (i = 0; i < m_iStockNum; i++) {)
+                    KH_DEBUG(if (m_pStockData[i].iState == state) {)
+                        KH_DEBUG(return setPlayStock(state) != 0;)
+                    KH_DEBUG(})
+                KH_DEBUG(})
+            KH_DEBUG(})
+            KH_DEBUG(return TRUE;)
+        KH_DEBUG(})
         if (setPlayStock(m_pUseStock->iState)) {
             return TRUE;
         }
@@ -1008,28 +1008,28 @@ void CHumanBoss::setDoBattleAct(const ACT_DATA* inAct) {
 void CHumanBoss::useCard(INT inState) {
     INT state;
 
-    if (KH_DW(DebugWork::g_dw.enemy.uiFlag) & 8) {
-        state = KH_DW(DebugWork::g_dw.enemy.sActNo) + 2;
-        {
-            INT i;
-            for (i = 0; i < m_iNormalActNum; i++) {
-                if (m_pNormalActs[i].iState == state) {
-                    setPlayCard(state);
-                    return;
-                }
-            }
-        }
-        {
-            INT i;
-            for (i = 0; i < m_iStockNum; i++) {
-                if (m_pStockData[i].iState == state) {
-                    setPlayCard(state);
-                    return;
-                }
-            }
-        }
-        return;
-    }
+    KH_DEBUG(if (KH_DW(DebugWork::g_dw.enemy.uiFlag) & 8) {)
+        KH_DEBUG(state = KH_DW(DebugWork::g_dw.enemy.sActNo) + 2;)
+        KH_DEBUG({)
+            KH_DEBUG(INT i;)
+            KH_DEBUG(for (i = 0; i < m_iNormalActNum; i++) {)
+                KH_DEBUG(if (m_pNormalActs[i].iState == state) {)
+                    KH_DEBUG(setPlayCard(state);)
+                    KH_DEBUG(return;)
+                KH_DEBUG(})
+            KH_DEBUG(})
+        KH_DEBUG(})
+        KH_DEBUG({)
+            KH_DEBUG(INT i;)
+            KH_DEBUG(for (i = 0; i < m_iStockNum; i++) {)
+                KH_DEBUG(if (m_pStockData[i].iState == state) {)
+                    KH_DEBUG(setPlayCard(state);)
+                    KH_DEBUG(return;)
+                KH_DEBUG(})
+            KH_DEBUG(})
+        KH_DEBUG(})
+        KH_DEBUG(return;)
+    KH_DEBUG(})
     setPlayCard(inState);
 }
 

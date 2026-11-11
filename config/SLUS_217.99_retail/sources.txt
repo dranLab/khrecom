@@ -34,8 +34,10 @@ Game/Bullet/BulletManager
 Game/Bullet/CreateBullet
 Game/CardKind
 Game/CollParam
-Game/Collision/CollMap
+Game/Collision/CollAttack
+Game/Collision/CollBody
 Game/Collision/CollMapCamera
+Game/Collision/CollObj
 Game/Collision/CollUtil
 Game/Collision/CollUtilA
 Game/Collision/CollUtilF

@@ -41,9 +41,13 @@ Game/BodyCollision .data 0x0033B3C0 0x10
 Game/Bullet/Bullet .rodata 0x00424020 0x20
 Game/CardKind .rodata 0x0040B160 0x1220
 Game/CollParam .rodata 0x0040E4E8 0x60
-Game/Collision/CollMap .data 0x0033C3C0 0x8
-Game/Collision/CollMap .rodata 0x00410710 0x70
+Game/Collision/CollAttack .data 0x0033C3B8 0x8
+Game/Collision/CollAttack .rodata 0x004105F0 0x8
+Game/Collision/CollBody .bss 0x005BE9C0 0x80
+Game/Collision/CollBody .rodata 0x00410600 0x100
 Game/Collision/CollMapCamera .data 0x0033C3C8 0x8
+Game/Collision/CollObj .data 0x0033C3D0 0x18
+Game/Collision/CollObj .rodata 0x00410780 0x60
 Game/EffectMotion .rodata 0x0040E548 0x10
 Game/Enemy/BossDeadDemo .data 0x0033ED44 0x24
 Game/Enemy/BossDeadDemo .rodata 0x0041D730 0x3b0

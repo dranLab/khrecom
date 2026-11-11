@@ -15,7 +15,7 @@ CCollisionList* CCollObj::m_pCollListI = NULL;
 CCollisionList* CCollObj::m_pCollListR = NULL;
 CCollisionList* CCollObj::m_pCollListR2 = NULL;
 CCollisionList* CCollObj::m_pCollListRC = NULL;
-CCollisionList* CCollObj::m_pCollListA = NULL;
+KH_DEBUG(CCollisionList* CCollObj::m_pCollListA = NULL;)
 
 CCollObj::CCollObj() {
     m_pCollision = NULL;
@@ -114,10 +114,10 @@ void CCollObj::link(HANDLE hTask) {
 void CCollObj::unlink() {
     if (!m_hTask) return;
     CCollisionList* pList = NULL;
-    if (getKind() & 1) {
-        if (!m_pCollListA) return;
-        pList = m_pCollListA;
-    } else {
+    KH_DEBUG(if (getKind() & 1) {)
+        KH_DEBUG(if (!m_pCollListA) return;)
+        KH_DEBUG(pList = m_pCollListA;)
+    KH_DEBUG(} else {)
         switch (getKind() & 0xE) {
         case COLL_KIND_PLAYER:
             pList = m_pCollListP;
@@ -136,7 +136,7 @@ void CCollObj::unlink() {
             pList = m_pCollListI;
             break;
         }
-    }
+    KH_DEBUG(})
     if (pList) {
         pList->remove(*this);
     } else {
@@ -178,7 +178,7 @@ void CCollObj::collisionInit() {
     m_pCollListR = new KH_AT("(219)") CCollisionList;
     m_pCollListR2 = new KH_AT("(220)") CCollisionList;
     m_pCollListRC = new KH_AT("(221)") CCollisionList;
-    m_pCollListA = new KH_AT("(223)") CCollisionList;
+    KH_DEBUG(m_pCollListA = new KH_AT("(223)") CCollisionList;)
 }
 
 void CCollObj::collisionDelete() {
@@ -194,8 +194,9 @@ void CCollObj::collisionDelete() {
     m_pCollListR2 = NULL;
     if (m_pCollListRC) delete m_pCollListRC;
     m_pCollListRC = NULL;
-    if (m_pCollListA) delete m_pCollListA;
-    m_pCollListA = NULL;
+    KH_DEBUG(if (m_pCollListA) delete m_pCollListA;)
+    KH_DEBUG(m_pCollListA = NULL;)
 }
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

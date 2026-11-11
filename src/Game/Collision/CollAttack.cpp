@@ -69,9 +69,9 @@ INT CCollAttack::collideAttack() {
     INT ret1;
     if (!m_Enable) return 0;
     m_fHitEffectWait = 0;
-    if (m_hTask) {
-        if (m_pCollListA && !m_pCollListA->hasMember(*this)) m_pCollListA->pushBack(*this);
-    }
+    KH_DEBUG(if (m_hTask) {)
+        KH_DEBUG(if (m_pCollListA && !m_pCollListA->hasMember(*this)) m_pCollListA->pushBack(*this);)
+    KH_DEBUG(})
     if ((getKind() & 0xE) == COLL_KIND_PLAYER) {
         ret1 = attackSub(m_pCollListE);
         CTaskMan::getSysTask(1);
@@ -279,3 +279,4 @@ void CCollAttack::setHitEffectParam(const CHAR* inName, INT inNo, ObjType::eObjT
 }
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata
