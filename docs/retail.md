@@ -245,3 +245,12 @@ SoundMan's `_getBgmName_withID`).
 - Seen on the way: the beta's PackMan beginScene failed one build and matched four rebuilds - the known
   anonymous-namespace suffix hash (memory "gcse PRE hash order"), not a change of this run.
 
+Fifth batch (2026-11-11): **478 units from source in retail.** CBattleEnemy::main/update are beta-only (debug-switch
+overrides; ~25 enemies' vtables). Split/layout fixes found on the way (decisions):
+
+13. A unit with a hand-written `.s` source keeps the large code alignment cap (128) also while a version builds it
+    from splat's assembly (retail klib after a compiled _mbtowc_r).
+14. A library unit's data without pairs of its own takes the offset of the nearest paired library unit (by beta
+    address), not the previous one (__FRAME_BEGIN__0 before default_terminate).
+15. A gap after a recorded unit is alignment padding only if it is all zeros (PathData's floats after PathCamera).
+

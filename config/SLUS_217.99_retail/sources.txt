@@ -27,6 +27,8 @@ Game/Collision/CollUtilF
 Game/Collision/CollUtilO
 Game/EffectMotion
 Game/Enemy/EnemyAquatank
+Game/Enemy/EnemyBarrelspider
+Game/Enemy/EnemyBlackfungus
 Game/Enemy/EnemyBouncywild
 Game/Enemy/EnemyDefender
 Game/Enemy/EnemyFatbandit
@@ -35,6 +37,7 @@ Game/Enemy/EnemyGreenrequiem
 Game/Enemy/EnemyPirate
 Game/Enemy/EnemyPowerwild
 Game/Enemy/EnemyRednocturne
+Game/Enemy/EnemySearchghost
 Game/Enemy/EnemySoldier
 Game/Enemy/EnemyWhitemushroom
 Game/Enemy/EnemyWightnight
@@ -44,6 +47,7 @@ Game/Enemy/MapEnemyAir
 Game/Enemy/MapEnemyGround
 Game/Enemy/MapEnemyMushroom
 Game/Enemy/MapEnemyShadow
+Game/Enemy/MonstroEventBattle
 Game/Enemy/SampleEnemy
 Game/EntityFactory
 Game/GameSub
@@ -87,6 +91,7 @@ Game/InterpolateMove
 Game/MapCardDef
 Game/MapUnitTable
 Game/ModelObj
+Game/NowLoading
 Game/Player/Friend
 Game/Player/FriendDonald
 Game/Player/FriendGoofy
@@ -97,6 +102,7 @@ Game/Player/PlayerRiku
 Game/Player/PlayerSora
 Game/Player/PlayerWeapon
 Game/Player/SummonDumbo
+Game/Player/SummonGenie
 Game/Player/SummonSinba
 Game/SceneEnv
 Game/StorageWork
@@ -327,6 +333,7 @@ System/Graphic/Effect/libppp/stdProg/pppGetRotMatrixZXY
 System/Graphic/Effect/libppp/stdProg/pppGetRotMatrixZYX
 System/Graphic/Fnt
 System/Graphic/MotData
+System/Graphic/PathCamera
 System/Graphic/ScreenMask
 System/Graphic/StrPrim
 System/Graphic/TexAnm
@@ -392,6 +399,7 @@ lib/nodebug/_free_r
 lib/nodebug/_fstat_r
 lib/nodebug/_fwalk
 lib/nodebug/_lseek_r
+lib/nodebug/_mbtowc_r
 lib/nodebug/_open_r
 lib/nodebug/_printf_r
 lib/nodebug/_read_r
@@ -425,6 +433,7 @@ lib/output
 lib/pack
 lib/sifcmd
 lib/sifrpc
+lib/src/gcc/libgcc2___default_terminate
 lib/src/gcc/libgcc2___divdi3
 lib/src/gcc/libgcc2___do_global_dtors
 lib/src/gcc/libgcc2___fixunsdfdi

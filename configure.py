@@ -709,10 +709,12 @@ def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg
                 continue
             unit = entries[0].segment.name
             text_cap = SECTION_ALIGN_CAP[".text"]
-            if suffix == ".s" and (ROOT / "src" / f"{unit}.s").exists() and source_selected(build_cfg, unit):
-                # hand-written assembly as source
-                src = f"src/{unit}.s"
-                text_cap = DEFAULT_ALIGN_CAP  # its code may be aligned further (tlbtrap.s: 128), unlike gcc's
+            if suffix == ".s" and (ROOT / "src" / f"{unit}.s").exists():
+                # hand-written assembly: its code may be aligned further (tlbtrap.s: 128), unlike gcc's - also while
+                # a version still builds it from splat's assembly (retail klib after a compiled _mbtowc_r)
+                text_cap = DEFAULT_ALIGN_CAP
+                if source_selected(build_cfg, unit):
+                    src = f"src/{unit}.s"  # hand-written assembly as source
             align = {"align_flags": object_fixups(entries, compiled=suffix in (".c", ".cpp", ".cc"), text_cap=text_cap)}
             if suffix in (".c", ".cpp", ".cc"):  # ee-gcc picks cc1 / cc1plus from the extension
                 tc = toolchain_variables(unit_toolchain(build_cfg, unit))

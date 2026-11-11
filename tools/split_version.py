@@ -182,9 +182,13 @@ def main() -> None:
                 offset = total.most_common(1)[0][0] if total else None
             if offset is not None:
                 first = {u: o for u, o in first.items() if not u.startswith("lib/")}
+                # a unit without pairs of its own takes the offset of the nearest library unit (by beta address)
+                # that has them (lib/nodebug/__FRAME_BEGIN__0 sits 0x1c before default_terminate, not after)
+                paired = [(a, offsets[u].most_common(1)[0][0]) for a, u in libs if offsets.get(u)]
                 for a, u in libs:
-                    if bsect != ".bss" and offsets.get(u):
-                        offset = offsets[u].most_common(1)[0][0]
+                    if bsect != ".bss" and paired:
+                        offset = offsets[u].most_common(1)[0][0] if offsets.get(u) else \
+                            min(paired, key=lambda p: abs(p[0] - a))[1]
                     first[u] = a + offset
                 report[f"{bsect}: library units placed by offset"] = len(libs)
         for unit, o in first.items():
@@ -218,8 +222,10 @@ def main() -> None:
             k = next(i for i, x in enumerate(rows) if x[2] == unit)
             nxt = rows[k + 1][0] if k + 1 < len(rows) else None
             align = min(128, nxt & -nxt) if nxt else 1  # configure.py gives an object its start's alignment
-            if nxt and nxt > addr + size and (addr + size + align - 1) & -align != nxt:
-                # the gap isn't the next object's alignment padding. A unit between the two in link order that has
+            gap_data = nxt and section != ".bss" and any(
+                other.data[other.off(addr + size):other.off(addr + size) + (nxt - addr - size)])
+            if nxt and nxt > addr + size and ((addr + size + align - 1) & -align != nxt or gap_data):
+                # the gap isn't the next object's alignment padding (or it holds data). A unit between the two in link order that has
                 # nothing of its own in this section here owns it (PackMan's .rodata between MotData and PathCamera);
                 # else it is the next object's leading data
                 order = [u for _, _, u in blocks[section]]

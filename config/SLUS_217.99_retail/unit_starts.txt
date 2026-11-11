@@ -29,6 +29,10 @@ Game/Collision/CollMapCamera .data 0x0033C3C8 0x8
 Game/EffectMotion .rodata 0x0040E548 0x10
 Game/Enemy/EnemyAquatank .data 0x0033EDE8 0x24
 Game/Enemy/EnemyAquatank .rodata 0x0041E008 0xe0
+Game/Enemy/EnemyBarrelspider .data 0x0033EE30 0xb8
+Game/Enemy/EnemyBarrelspider .rodata 0x0041E170 0xd0
+Game/Enemy/EnemyBlackfungus .data 0x0033EEE8 0x2c
+Game/Enemy/EnemyBlackfungus .rodata 0x0041E240 0xd0
 Game/Enemy/EnemyBouncywild .data 0x0033EF70 0xd0
 Game/Enemy/EnemyBouncywild .rodata 0x0041E380 0xa8
 Game/Enemy/EnemyDefender .data 0x0033F074 0x1c
@@ -45,6 +49,8 @@ Game/Enemy/EnemyPowerwild .data 0x0033F17C 0x30
 Game/Enemy/EnemyPowerwild .rodata 0x0041ECB0 0xe0
 Game/Enemy/EnemyRednocturne .data 0x0033F1AC 0x18
 Game/Enemy/EnemyRednocturne .rodata 0x0041ED90 0xf0
+Game/Enemy/EnemySearchghost .data 0x0033F1F4 0x14
+Game/Enemy/EnemySearchghost .rodata 0x0041EF40 0x58
 Game/Enemy/EnemySoldier .data 0x0033F234 0x30
 Game/Enemy/EnemySoldier .rodata 0x0041F080 0xe0
 Game/Enemy/EnemyWhitemushroom .data 0x0033F2A8 0x48
@@ -56,6 +62,8 @@ Game/Enemy/EnemyWizard .rodata 0x0041F490 0x180
 Game/Enemy/EnemyYellowopera .data 0x0033F378 0x28
 Game/Enemy/EnemyYellowopera .rodata 0x0041F6E0 0xf0
 Game/Enemy/MapEnemyShadow .rodata 0x00421210 0x28
+Game/Enemy/MonstroEventBattle .data 0x0033F870 0x1c
+Game/Enemy/MonstroEventBattle .rodata 0x00421240 0xb0
 Game/Enemy/SampleEnemy .rodata 0x004212F0 0x50
 Game/EntityFactory .data 0x0033BC30 0x4
 Game/Gimmick/BaseGimmick .rodata 0x00421340 0x100
@@ -87,6 +95,8 @@ Game/Gimmick/GimmickWindowLid .rodata 0x00424000 0x10
 Game/MapCardDef .data 0x0033BEB0 0x20
 Game/MapCardDef .rodata 0x0040EBA0 0x8
 Game/MapUnitTable .data 0x0033BED0 0x358
+Game/NowLoading .data 0x0033C2F0 0xc
+Game/NowLoading .rodata 0x0040ED60 0x40
 Game/Player/Friend .data 0x0033C480 0x90
 Game/Player/Friend .rodata 0x00413420 0x1f0
 Game/Player/FriendDonald .data 0x0033C538 0x28
@@ -106,6 +116,8 @@ Game/Player/PlayerWeapon .bss 0x005BEB60 0x48
 Game/Player/PlayerWeapon .data 0x0033E540 0x20
 Game/Player/PlayerWeapon .rodata 0x0041CBD0 0x50
 Game/Player/SummonDumbo .data 0x0033E628 0x8
+Game/Player/SummonGenie .data 0x0033E630 0x80
+Game/Player/SummonGenie .rodata 0x0041CD30 0x40
 Game/Player/SummonSinba .data 0x0033E730 0x10
 Game/Player/SummonSinba .rodata 0x0041CD80 0x40
 Game/SceneEnv .data 0x0033C300 0x28
@@ -143,6 +155,7 @@ System/Graphic/Effect/libppp/ryjProg/pppRyjMegaBirthModelFilter .bss 0x0057E160 
 System/Graphic/Fnt .data 0x00332AC0 0x10
 System/Graphic/Fnt .rodata 0x004010B0 0x28
 System/Graphic/MotData .rodata 0x00400EE0 0x20
+System/Graphic/PathCamera .rodata 0x00400F08 0x10
 System/Graphic/TexAnm .rodata 0x00400FD8 0x8
 System/LinkedBuf .bss 0x0043BD38 0xc
 System/Movie/AudioDec .data 0x0033B118 0x4
@@ -196,6 +209,7 @@ lib/libdma .data 0x00343A30 0x38
 lib/libdma .rodata 0x004331F0 0x6a
 lib/libosd .data 0x003479E0 0x7c0
 lib/nodebug/__assert .rodata 0x004361E8 0x30
+lib/nodebug/_mbtowc_r .rodata 0x004367C0 0x40
 lib/nodebug/_vfwrite .bss 0x005C76F8 0x80
 lib/nodebug/_vfwrite .rodata 0x004364E0 0x1d0
 lib/nodebug/check_dll .rodata 0x00432F40 0x60
@@ -212,6 +226,8 @@ lib/sifcmd .rodata 0x00436AC0 0x10
 lib/sifrpc .bss 0x005C8700 0x182c
 lib/sifrpc .data 0x00347914 0x4
 lib/sifrpc .rodata 0x00436AD0 0x2e
+lib/src/gcc/libgcc2___default_terminate .bss 0x005BF568 0x20
+lib/src/gcc/libgcc2___default_terminate .data 0x003403C4 0x5f8
 lib/src/gcc/libgcc2___divdi3 .rodata 0x00436E98 0x100
 lib/src/gcc/libgcc2___do_global_dtors .bss 0x005BF538 0x4
 lib/src/gcc/libgcc2___do_global_dtors .data 0x003403C0 0x4

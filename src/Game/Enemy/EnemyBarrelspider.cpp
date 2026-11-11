@@ -181,3 +181,4 @@ CEntity* CEnemyBarrelspider::createExplode_(INT inIndex) {
 }
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata
