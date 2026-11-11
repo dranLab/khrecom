@@ -33,6 +33,7 @@ Game/BodyCollision
 Game/Bullet/Bullet
 Game/Bullet/BulletManager
 Game/Bullet/CreateBullet
+Game/Card
 Game/CardKind
 Game/CollParam
 Game/Collision/CollAttack

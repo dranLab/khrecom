@@ -39,6 +39,9 @@ Game/Atel/CameraMan .rodata 0x004109C0 0x30
 Game/AttachCard .rodata 0x00405D38 0x1280
 Game/BodyCollision .data 0x0033B3C0 0x10
 Game/Bullet/Bullet .rodata 0x00424020 0x20
+Game/Card .bss 0x005BDB38 0x10
+Game/Card .data 0x0033B3D0 0x28
+Game/Card .rodata 0x00408550 0x1400
 Game/CardKind .rodata 0x0040B160 0x1220
 Game/CollParam .rodata 0x0040E4E8 0x60
 Game/Collision/CollAttack .data 0x0033C3B8 0x8

@@ -5,5 +5,5 @@ System/Graphic/Effect/libppp/pppfunctbl .rodata 0x00402600
 # CardBattle's .data begins with BattleEnemy.h's two file-local statics, as in the beta (0x39AF88), before its
 # first named symbol g_szBinBattleCardList (0x33B400)
 Game/CardBattle .data 0x0033B3F8
-# CardBattle's .rodata likewise begins with those statics' strings "abnormal" and "cure01", right after Card's
-Game/CardBattle .rodata 0x00409958
+# CardBattle's .rodata likewise holds those statics' strings "abnormal" and "cure01" (0x409958), after Card's (0x408550 + 0x1400)
+Game/CardBattle .rodata 0x00409950

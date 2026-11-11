@@ -1228,3 +1228,4 @@ void CCard::setCardAppearance(USHORT usKind2, INT nAppear) {
 }
 
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .data .rodata

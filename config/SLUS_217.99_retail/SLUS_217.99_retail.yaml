@@ -1383,8 +1383,8 @@ segments:
       - [0x305D38, rodata, Game/AttachCard]
       - [0x306FC0, rodata, Game/AttackMotion]
       - [0x307058, rodata, Game/BattleCard]
-      - [0x308558, rodata, Game/Card]
-      - [0x309958, rodata, Game/CardBattle]
+      - [0x308550, rodata, Game/Card]
+      - [0x309950, rodata, Game/CardBattle]
       - [0x30B160, rodata, Game/CardKind]
       - [0x30C380, rodata, Game/CardRevolver]
       - [0x30E4E8, rodata, Game/CollParam]
@@ -1666,6 +1666,7 @@ segments:
       - { type: bss, vram: 0x005BD640, name: System/RsrcDB }
       - { type: bss, vram: 0x005BD760, name: System/TaskMan }
       - { type: bss, vram: 0x005BD930, name: Game/BattleCard }
+      - { type: bss, vram: 0x005BDB38, name: Game/Card }
       - { type: bss, vram: 0x005BDB48, name: Game/GameSubBattle }
       - { type: bss, vram: 0x005BDB50, name: Game/GameWork }
       - { type: bss, vram: 0x005BDB98, name: Game/MinigameManager }
