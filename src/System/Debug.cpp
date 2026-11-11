@@ -18,7 +18,7 @@ int vsprintf(char* buf, const char* fmt, va_list ap);
 
 char _szTraceBuf[1536];
 
-extern "C" int dbgCheckUser(USER uid) {
+extern "C" int (dbgCheckUser)(USER uid) {
     USER mdb;
 
     if (uid == USR_SYSTEM) {
@@ -63,56 +63,56 @@ extern "C" int dbgCheckUser(USER uid) {
     return 0;
 }
 
-INT dbgButtonTrg(USER uid, UINT button, INT padId) {
+INT (dbgButtonTrg)(USER uid, UINT button, INT padId) {
     if (!dbgCheckUser(uid)) {
         return 0;
     }
     return CPadIO::isButtonTrg(button, padId);
 }
 
-INT dbgButtonDown(USER uid, UINT button, INT padId) {
+INT (dbgButtonDown)(USER uid, UINT button, INT padId) {
     if (!dbgCheckUser(uid)) {
         return 0;
     }
     return CPadIO::isButtonDown(button, padId);
 }
 
-INT dbgButtonRTrg(USER uid, UINT button, INT padId) {
+INT (dbgButtonRTrg)(USER uid, UINT button, INT padId) {
     if (!dbgCheckUser(uid)) {
         return 0;
     }
     return CPadIO::isButtonRTrg(button, padId);
 }
 
-INT dbgButtonRpt(USER uid, UINT button, INT padId) {
+INT (dbgButtonRpt)(USER uid, UINT button, INT padId) {
     if (!dbgCheckUser(uid)) {
         return 0;
     }
     return CPadIO::isButtonRpt(button, padId);
 }
 
-INT dbgAnalogRX(USER uid, INT padId) {
+INT (dbgAnalogRX)(USER uid, INT padId) {
     if (!dbgCheckUser(uid)) {
         return 0;
     }
     return CPadIO::getAnalogRX(padId);
 }
 
-INT dbgAnalogRY(USER uid, INT padId) {
+INT (dbgAnalogRY)(USER uid, INT padId) {
     if (!dbgCheckUser(uid)) {
         return 0;
     }
     return CPadIO::getAnalogRY(padId);
 }
 
-INT dbgAnalogLX(USER uid, INT padId) {
+INT (dbgAnalogLX)(USER uid, INT padId) {
     if (!dbgCheckUser(uid)) {
         return 0;
     }
     return CPadIO::getAnalogLX(padId);
 }
 
-INT dbgAnalogLY(USER uid, INT padId) {
+INT (dbgAnalogLY)(USER uid, INT padId) {
     if (!dbgCheckUser(uid)) {
         return 0;
     }

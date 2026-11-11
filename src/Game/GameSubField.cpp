@@ -322,7 +322,7 @@ void CGameSubField::setupTasks() {
     }
     CDeFocus::create(pSysTask);
     CDeFocus::offNear();
-    CCollDisp::initialize(pSysTask, dbgButtonDown(USR_SYSTEM, 0x100, 1) | CCollDisp::m_fgDisp, CCollDisp::m_fgMapZoneDisp);
+    KH_DEBUG(CCollDisp::initialize(pSysTask, dbgButtonDown(USR_SYSTEM, 0x100, 1) | CCollDisp::m_fgDisp, CCollDisp::m_fgMapZoneDisp);)
     changeState(5);
 }
 

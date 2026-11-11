@@ -111,15 +111,15 @@ static inline void _setRTP(RTP& r, USHORT lv, USHORT actor, SHORT tag, SHORT mac
 namespace DWTEvent {
 static BOOL DebugSetNpcIDWindow(CDebugWindow* pObj, INT inY, INT inParam) {
     if (inParam & 0x20) {
-        DebugWork::g_dw.event.iNpcID = inY;
+        KH_DEBUG(DebugWork::g_dw.event.iNpcID = inY;)
         CActorDebug* p;
-        if (DebugWork::g_dw.event.pClass) {
-            p = (CActorDebug*)DebugWork::g_dw.event.pClass;
+        if (KH_DW(DebugWork::g_dw.event.pClass)) {
+            p = (CActorDebug*)KH_DW(DebugWork::g_dw.event.pClass);
             delete p;
         }
         p = new CActorDebug(CTaskMan::getSysTask(1));
-        DebugWork::g_dw.event.pClass = (INT*)p;
-        DebugWork::g_dw.event.iNpcCoordDisp = 1;
+        KH_DEBUG(DebugWork::g_dw.event.pClass = (INT*)p;)
+        KH_DEBUG(DebugWork::g_dw.event.iNpcCoordDisp = 1;)
     }
     return 1;
 }
@@ -185,9 +185,9 @@ static BOOL DebugCreateNpcWindow(CDebugWindow* pObj, INT inY, INT inParam) {
     CTask* pA = CTaskMan::getSysTask(0x1A);
     if (pA && ((CAtel*)pA)->getVSM()) {
         if (inParam & 0x180) {
-            if (DebugWork::g_dw.event.iNpcCoordDisp == 1) {
+            if (KH_DW(DebugWork::g_dw.event.iNpcCoordDisp) == 1) {
                 CActorDebug* p = new CActorDebug(CTaskMan::getSysTask(1));
-                DebugWork::g_dw.event.pClass = (INT*)p;
+                KH_DEBUG(DebugWork::g_dw.event.pClass = (INT*)p;)
             }
         }
     }
@@ -199,14 +199,14 @@ static BOOL DebugCreateEventLineDisp(CDebugWindow* pObj, INT inY, INT inParam) {
     CTask* pA = CTaskMan::getSysTask(0x1A);
     if (pA && ((CAtel*)pA)->getVSM()) {
         if (inParam & 0x180) {
-            if (DebugWork::g_dw.event.iEventline == 1) {
+            if (KH_DW(DebugWork::g_dw.event.iEventline) == 1) {
                 CEventLineDisp* p = new CEventLineDisp(CTaskMan::getSysTask(1));
-                DebugWork::g_dw.event.pEventlineClass = (INT*)p;
+                KH_DEBUG(DebugWork::g_dw.event.pEventlineClass = (INT*)p;)
             } else {
-                if (DebugWork::g_dw.event.pEventlineClass) {
-                    ((CTask*)DebugWork::g_dw.event.pEventlineClass)->out();
+                if (KH_DW(DebugWork::g_dw.event.pEventlineClass)) {
+                    ((CTask*)KH_DW(DebugWork::g_dw.event.pEventlineClass))->out();
                 }
-                DebugWork::g_dw.event.pEventlineClass = NULL;
+                KH_DEBUG(DebugWork::g_dw.event.pEventlineClass = NULL;)
             }
         }
     }
@@ -215,72 +215,72 @@ static BOOL DebugCreateEventLineDisp(CDebugWindow* pObj, INT inY, INT inParam) {
 }
 namespace DWTEvent {
 static INT DebugAtelWorkDef(CDebugWindow* pObj, INT inParam) {
-    DebugWork::g_dw.atelwork.iWorldIntro = CGameWork::getInt(0, 0xC1);
-    DebugWork::g_dw.atelwork.iTutorialEnd = CGameWork::getInt(0, 0xC2);
-    DebugWork::g_dw.atelwork.iPossibleCard = CGameWork::getInt(0, 0x21);
-    DebugWork::g_dw.atelwork.iPossibleFriend = CGameWork::getInt(0, 0x22);
-    DebugWork::g_dw.atelwork.iPoohMiniGameIntro = CGameWork::getInt(0, 0x23);
-    DebugWork::g_dw.atelwork.iPcStanderdSkill = CGameWork::getInt(0, 0x24);
-    DebugWork::g_dw.atelwork.iEnSoraEventStep = CGameWork::getInt(0, 0x25);
-    DebugWork::g_dw.atelwork.iEnRikuEventStep = CGameWork::getInt(0, 0x26);
-    DebugWork::g_dw.atelwork.iSoraJiminyStep = CGameWork::getInt(0, 0x33);
-    DebugWork::g_dw.atelwork.iRikuJiminyStep = CGameWork::getInt(0, 0x34);
-    DebugWork::g_dw.atelwork.iKH2CardGet = CGameWork::getInt(0, 0x2D);
-    DebugWork::g_dw.atelwork.iPoohHiScoreOwl = CGameWork::getInt(0, 0x2E);
-    DebugWork::g_dw.atelwork.iPoohHiScoreRoo = CGameWork::getInt(0, 0x2F);
-    DebugWork::g_dw.atelwork.iPoohHiScoreEeyore = CGameWork::getInt(0, 0x30);
-    DebugWork::g_dw.atelwork.iPoohHiScoreTigger = CGameWork::getInt(0, 0x31);
-    DebugWork::g_dw.atelwork.iPoohHiScoreRabbit = CGameWork::getInt(0, 0x32);
-    DebugWork::g_dw.atelwork.iDistinctionClear = CGameWork::getFlag(0, 0x83);
-    DebugWork::g_dw.atelwork.iPlayMode = CGameWork::getByte(0, 0x60);
-    DebugWork::g_dw.atelwork.iPlayDifficultMode = CGameWork::getByte(0, 0x61);
-    DebugWork::g_dw.atelwork.iSoundMode = CGameWork::getByte(0, 0x62);
-    DebugWork::g_dw.atelwork.iVibrat = CGameWork::getByte(0, 0x63);
-    DebugWork::g_dw.atelwork.iPoohGamePiglet = CGameWork::getByte(0, 0x3);
-    DebugWork::g_dw.atelwork.iPoohGameOwl = CGameWork::getByte(0, 0x4);
-    DebugWork::g_dw.atelwork.iPoohGameRoo = CGameWork::getByte(0, 0x5);
-    DebugWork::g_dw.atelwork.iPoohGameEeyore = CGameWork::getByte(0, 0x6);
-    DebugWork::g_dw.atelwork.iPoohGameTigger = CGameWork::getByte(0, 0x7);
-    DebugWork::g_dw.atelwork.iPoohGameRabbit = CGameWork::getByte(0, 0x8);
-    DebugWork::g_dw.atelwork.iPoohClearIntoroPiglet = CGameWork::getFlag(0, 0xA);
-    DebugWork::g_dw.atelwork.iPoohClearIntoroOwl = CGameWork::getFlag(0, 0xB);
-    DebugWork::g_dw.atelwork.iPoohClearIntoroRoo = CGameWork::getFlag(0, 0xC);
-    DebugWork::g_dw.atelwork.iPoohClearIntoroEeyore = CGameWork::getFlag(0, 0xD);
-    DebugWork::g_dw.atelwork.iPoohClearIntoroTigger = CGameWork::getFlag(0, 0xE);
-    DebugWork::g_dw.atelwork.iPoohClearIntoroRabbit = CGameWork::getFlag(0, 0xF);
-    DebugWork::g_dw.atelwork.iPoohClearIntoroResetPiglet = CGameWork::getFlag(0, 0x13);
-    DebugWork::g_dw.atelwork.iPoohClearIntoroResetOwl = CGameWork::getFlag(0, 0x14);
-    DebugWork::g_dw.atelwork.iPoohClearIntoroResetRoo = CGameWork::getFlag(0, 0x15);
-    DebugWork::g_dw.atelwork.iPoohClearIntoroResetEeyore = CGameWork::getFlag(0, 0x16);
-    DebugWork::g_dw.atelwork.iPoohClearIntoroResetTigger = CGameWork::getFlag(0, 0x17);
-    DebugWork::g_dw.atelwork.iPoohClearIntoroRabbit = CGameWork::getFlag(0, 0x18);
-    DebugWork::g_dw.atelwork.iGameKH2clear = CGameWork::getFlag(0, 0x11);
-    DebugWork::g_dw.atelwork.iMahluciaKilled = CGameWork::getFlag(0, 0x82);
-    DebugWork::g_dw.atelwork.iRikuClear = CGameWork::getFlag(0, 0x12);
-    DebugWork::g_dw.atelwork.iSoraClear = CGameWork::getFlag(0, 0x9);
-    DebugWork::g_dw.atelwork.iSoraMovie0 = CGameWork::getInt(0, 0x27);
-    DebugWork::g_dw.atelwork.iSoraMovie1 = CGameWork::getInt(0, 0x28);
-    DebugWork::g_dw.atelwork.iSoraMovie2 = CGameWork::getInt(0, 0x29);
-    DebugWork::g_dw.atelwork.iRikuMovie0 = CGameWork::getInt(0, 0x2A);
-    DebugWork::g_dw.atelwork.iRikuMovie1 = CGameWork::getInt(0, 0x2B);
-    DebugWork::g_dw.atelwork.iRikuMovie2 = CGameWork::getInt(0, 0x2C);
-    DebugWork::g_dw.atelwork.iBossEventStep = CGameWork::getInt(1, 0xE1);
-    DebugWork::g_dw.atelwork.iCockpitDisp = CGameWork::getInt(1, 0xE2);
-    DebugWork::g_dw.atelwork.iKindMenu = CGameWork::getByte(1, 0x140);
-    DebugWork::g_dw.atelwork.iPoohMinigameState = CGameWork::getByte(1, 0x141);
-    DebugWork::g_dw.atelwork.iPoohMinigameKind = CGameWork::getByte(1, 0x142);
-    DebugWork::g_dw.atelwork.iPlayerDispOff = CGameWork::getFlag(1, 0x0);
-    DebugWork::g_dw.atelwork.iBossKilled = CGameWork::getFlag(1, 0x2);
-    DebugWork::g_dw.atelwork.iNotEventSkip = CGameWork::getFlag(1, 0x3);
-    DebugWork::g_dw.atelwork.iIsAtelEvent = CGameWork::getFlag(1, 0x4);
-    DebugWork::g_dw.atelwork.iNotPcControl = CGameWork::getFlag(1, 0x5);
-    DebugWork::g_dw.atelwork.iNotPause = CGameWork::getFlag(1, 0x6);
-    DebugWork::g_dw.atelwork.iIsTutorial = CGameWork::getFlag(1, 0x7);
-    DebugWork::g_dw.atelwork.iNotRoomJump = CGameWork::getFlag(1, 0x20);
-    DebugWork::g_dw.atelwork.iNotRoomCreation = CGameWork::getFlag(1, 0x24);
-    DebugWork::g_dw.atelwork.iNotHartBtl = CGameWork::getFlag(1, 0x25);
-    DebugWork::g_dw.atelwork.iIsBtlTutorial = CGameWork::getFlag(1, 0x2C);
-    DebugWork::g_dw.atelwork.iIsWorldIntro = CGameWork::getFlag(1, 0x37);
+    KH_DEBUG(DebugWork::g_dw.atelwork.iWorldIntro = CGameWork::getInt(0, 0xC1);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iTutorialEnd = CGameWork::getInt(0, 0xC2);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iPossibleCard = CGameWork::getInt(0, 0x21);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iPossibleFriend = CGameWork::getInt(0, 0x22);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iPoohMiniGameIntro = CGameWork::getInt(0, 0x23);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iPcStanderdSkill = CGameWork::getInt(0, 0x24);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iEnSoraEventStep = CGameWork::getInt(0, 0x25);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iEnRikuEventStep = CGameWork::getInt(0, 0x26);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iSoraJiminyStep = CGameWork::getInt(0, 0x33);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iRikuJiminyStep = CGameWork::getInt(0, 0x34);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iKH2CardGet = CGameWork::getInt(0, 0x2D);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iPoohHiScoreOwl = CGameWork::getInt(0, 0x2E);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iPoohHiScoreRoo = CGameWork::getInt(0, 0x2F);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iPoohHiScoreEeyore = CGameWork::getInt(0, 0x30);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iPoohHiScoreTigger = CGameWork::getInt(0, 0x31);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iPoohHiScoreRabbit = CGameWork::getInt(0, 0x32);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iDistinctionClear = CGameWork::getFlag(0, 0x83);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iPlayMode = CGameWork::getByte(0, 0x60);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iPlayDifficultMode = CGameWork::getByte(0, 0x61);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iSoundMode = CGameWork::getByte(0, 0x62);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iVibrat = CGameWork::getByte(0, 0x63);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iPoohGamePiglet = CGameWork::getByte(0, 0x3);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iPoohGameOwl = CGameWork::getByte(0, 0x4);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iPoohGameRoo = CGameWork::getByte(0, 0x5);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iPoohGameEeyore = CGameWork::getByte(0, 0x6);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iPoohGameTigger = CGameWork::getByte(0, 0x7);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iPoohGameRabbit = CGameWork::getByte(0, 0x8);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iPoohClearIntoroPiglet = CGameWork::getFlag(0, 0xA);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iPoohClearIntoroOwl = CGameWork::getFlag(0, 0xB);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iPoohClearIntoroRoo = CGameWork::getFlag(0, 0xC);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iPoohClearIntoroEeyore = CGameWork::getFlag(0, 0xD);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iPoohClearIntoroTigger = CGameWork::getFlag(0, 0xE);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iPoohClearIntoroRabbit = CGameWork::getFlag(0, 0xF);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iPoohClearIntoroResetPiglet = CGameWork::getFlag(0, 0x13);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iPoohClearIntoroResetOwl = CGameWork::getFlag(0, 0x14);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iPoohClearIntoroResetRoo = CGameWork::getFlag(0, 0x15);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iPoohClearIntoroResetEeyore = CGameWork::getFlag(0, 0x16);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iPoohClearIntoroResetTigger = CGameWork::getFlag(0, 0x17);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iPoohClearIntoroRabbit = CGameWork::getFlag(0, 0x18);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iGameKH2clear = CGameWork::getFlag(0, 0x11);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iMahluciaKilled = CGameWork::getFlag(0, 0x82);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iRikuClear = CGameWork::getFlag(0, 0x12);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iSoraClear = CGameWork::getFlag(0, 0x9);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iSoraMovie0 = CGameWork::getInt(0, 0x27);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iSoraMovie1 = CGameWork::getInt(0, 0x28);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iSoraMovie2 = CGameWork::getInt(0, 0x29);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iRikuMovie0 = CGameWork::getInt(0, 0x2A);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iRikuMovie1 = CGameWork::getInt(0, 0x2B);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iRikuMovie2 = CGameWork::getInt(0, 0x2C);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iBossEventStep = CGameWork::getInt(1, 0xE1);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iCockpitDisp = CGameWork::getInt(1, 0xE2);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iKindMenu = CGameWork::getByte(1, 0x140);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iPoohMinigameState = CGameWork::getByte(1, 0x141);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iPoohMinigameKind = CGameWork::getByte(1, 0x142);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iPlayerDispOff = CGameWork::getFlag(1, 0x0);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iBossKilled = CGameWork::getFlag(1, 0x2);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iNotEventSkip = CGameWork::getFlag(1, 0x3);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iIsAtelEvent = CGameWork::getFlag(1, 0x4);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iNotPcControl = CGameWork::getFlag(1, 0x5);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iNotPause = CGameWork::getFlag(1, 0x6);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iIsTutorial = CGameWork::getFlag(1, 0x7);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iNotRoomJump = CGameWork::getFlag(1, 0x20);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iNotRoomCreation = CGameWork::getFlag(1, 0x24);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iNotHartBtl = CGameWork::getFlag(1, 0x25);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iIsBtlTutorial = CGameWork::getFlag(1, 0x2C);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.iIsWorldIntro = CGameWork::getFlag(1, 0x37);)
     return 1;
 }
 }
@@ -291,13 +291,13 @@ namespace DWTEvent {
 static BOOL debugBtlReportCallBackParam(CDebugWindow* pObj, INT inY, INT inParam) {
     if (inParam & 0x180) {
         switch (inY) {
-        case 6: CGameWork::setInt(0, 0x3C, DebugWork::g_dw.atelwork.CardBreakCount); break;
-        case 7: CGameWork::setInt(0, 0x3D, DebugWork::g_dw.atelwork.StockKind); break;
-        case 8: CGameWork::setInt(0, 0x3E, DebugWork::g_dw.atelwork.StockCount); break;
-        case 15: CGameWork::setInt(0, 0x3F, DebugWork::g_dw.atelwork.SpeedCount); break;
+        case 6: CGameWork::setInt(0, 0x3C, KH_DW(DebugWork::g_dw.atelwork.CardBreakCount)); break;
+        case 7: CGameWork::setInt(0, 0x3D, KH_DW(DebugWork::g_dw.atelwork.StockKind)); break;
+        case 8: CGameWork::setInt(0, 0x3E, KH_DW(DebugWork::g_dw.atelwork.StockCount)); break;
+        case 15: CGameWork::setInt(0, 0x3F, KH_DW(DebugWork::g_dw.atelwork.SpeedCount)); break;
         case 4:
-        case 16: CGameWork::setInt(0, 0xB3, DebugWork::g_dw.atelwork.KillEnemyCount); break;
-        case 18: CGameWork::setInt(0, 0x41, DebugWork::g_dw.atelwork.DarkCount); break;
+        case 16: CGameWork::setInt(0, 0xB3, KH_DW(DebugWork::g_dw.atelwork.KillEnemyCount)); break;
+        case 18: CGameWork::setInt(0, 0x41, KH_DW(DebugWork::g_dw.atelwork.DarkCount)); break;
         }
     }
     return 1;
@@ -306,45 +306,45 @@ static BOOL debugBtlReportCallBackParam(CDebugWindow* pObj, INT inY, INT inParam
 namespace DWTEvent {
 static INT debugBtlReportCallBack(CDebugWindow* pObj, INT inParam) {
     INT i;
-    DebugWork::g_dw.atelwork.BtlMemo = CJiminyMemoFlag::getContentOpenPercentage(CGameWork::getByte(0, 0x60));
-    DebugWork::g_dw.atelwork.KillEnemyCount = CGameWork::getInt(0, 0xB3);
-    DebugWork::g_dw.atelwork.KeysTresur = 0;
+    KH_DEBUG(DebugWork::g_dw.atelwork.BtlMemo = CJiminyMemoFlag::getContentOpenPercentage(CGameWork::getByte(0, 0x60));)
+    KH_DEBUG(DebugWork::g_dw.atelwork.KillEnemyCount = CGameWork::getInt(0, 0xB3);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.KeysTresur = 0;)
     for (i = 0; i < 16; i++) {
-        DebugWork::g_dw.atelwork.KeysTresur += CGameWork::progMCW()._KeyRoomsTresureBoxCounter[i];
+        KH_DEBUG(DebugWork::g_dw.atelwork.KeysTresur += CGameWork::progMCW()._KeyRoomsTresureBoxCounter[i];)
     }
-    DebugWork::g_dw.atelwork.CardBreakCount = CGameWork::getInt(0, 0x3C);
-    DebugWork::g_dw.atelwork.StockKind = CGameWork::getInt(0, 0x3D);
-    DebugWork::g_dw.atelwork.StockCount = CGameWork::getInt(0, 0x3E);
+    KH_DEBUG(DebugWork::g_dw.atelwork.CardBreakCount = CGameWork::getInt(0, 0x3C);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.StockKind = CGameWork::getInt(0, 0x3D);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.StockCount = CGameWork::getInt(0, 0x3E);)
     UINT nTime = CMainApp::getPlayTime();
-    DebugWork::g_dw.atelwork.Hour = nTime / 3600;
-    DebugWork::g_dw.atelwork.minit = nTime % 3600 / 60;
-    if (DebugWork::g_dw.atelwork.Hour >= 1000) {
-        DebugWork::g_dw.atelwork.Hour = 999;
-        DebugWork::g_dw.atelwork.minit = 59;
+    KH_DEBUG(DebugWork::g_dw.atelwork.Hour = nTime / 3600;)
+    KH_DEBUG(DebugWork::g_dw.atelwork.minit = nTime % 3600 / 60;)
+    if (KH_DW(DebugWork::g_dw.atelwork.Hour) >= 1000) {
+        KH_DEBUG(DebugWork::g_dw.atelwork.Hour = 999;)
+        KH_DEBUG(DebugWork::g_dw.atelwork.minit = 59;)
     }
     F_UL win;
     win.ul = CGameWork::getInt(0, 0x40);
-    DebugWork::g_dw.atelwork.DuelWin = win.f * 100.0f;
-    DebugWork::g_dw.atelwork.DarkCount = CGameWork::getInt(0, 0x41);
-    DebugWork::g_dw.atelwork.SpeedCount = CGameWork::getInt(0, 0x3F);
+    KH_DEBUG(DebugWork::g_dw.atelwork.DuelWin = win.f * 100.0f;)
+    KH_DEBUG(DebugWork::g_dw.atelwork.DarkCount = CGameWork::getInt(0, 0x41);)
+    KH_DEBUG(DebugWork::g_dw.atelwork.SpeedCount = CGameWork::getInt(0, 0x3F);)
     return 1;
 }
 }
 namespace DWTEvent {
 static INT debugKeyTresurCallBack(CDebugWindow* pObj, INT inParam) {
-    DebugWork::g_dw.atelwork.TreTr = CGameWork::progMCW()._KeyRoomsTresureBoxCounter[1];
-    DebugWork::g_dw.atelwork.TreAg = CGameWork::progMCW()._KeyRoomsTresureBoxCounter[2];
-    DebugWork::g_dw.atelwork.TreOl = CGameWork::progMCW()._KeyRoomsTresureBoxCounter[3];
-    DebugWork::g_dw.atelwork.TreWo = CGameWork::progMCW()._KeyRoomsTresureBoxCounter[4];
-    DebugWork::g_dw.atelwork.TreMo = CGameWork::progMCW()._KeyRoomsTresureBoxCounter[5];
-    DebugWork::g_dw.atelwork.TreHa = CGameWork::progMCW()._KeyRoomsTresureBoxCounter[6];
-    DebugWork::g_dw.atelwork.TreAt = CGameWork::progMCW()._KeyRoomsTresureBoxCounter[7];
-    DebugWork::g_dw.atelwork.TreNe = CGameWork::progMCW()._KeyRoomsTresureBoxCounter[8];
-    DebugWork::g_dw.atelwork.TreHo = CGameWork::progMCW()._KeyRoomsTresureBoxCounter[9];
-    DebugWork::g_dw.atelwork.TrePo = CGameWork::progMCW()._KeyRoomsTresureBoxCounter[10];
-    DebugWork::g_dw.atelwork.TreTw = CGameWork::progMCW()._KeyRoomsTresureBoxCounter[11];
-    DebugWork::g_dw.atelwork.TreDe = CGameWork::progMCW()._KeyRoomsTresureBoxCounter[12];
-    DebugWork::g_dw.atelwork.TreCa = CGameWork::progMCW()._KeyRoomsTresureBoxCounter[13];
+    KH_DEBUG(DebugWork::g_dw.atelwork.TreTr = CGameWork::progMCW()._KeyRoomsTresureBoxCounter[1];)
+    KH_DEBUG(DebugWork::g_dw.atelwork.TreAg = CGameWork::progMCW()._KeyRoomsTresureBoxCounter[2];)
+    KH_DEBUG(DebugWork::g_dw.atelwork.TreOl = CGameWork::progMCW()._KeyRoomsTresureBoxCounter[3];)
+    KH_DEBUG(DebugWork::g_dw.atelwork.TreWo = CGameWork::progMCW()._KeyRoomsTresureBoxCounter[4];)
+    KH_DEBUG(DebugWork::g_dw.atelwork.TreMo = CGameWork::progMCW()._KeyRoomsTresureBoxCounter[5];)
+    KH_DEBUG(DebugWork::g_dw.atelwork.TreHa = CGameWork::progMCW()._KeyRoomsTresureBoxCounter[6];)
+    KH_DEBUG(DebugWork::g_dw.atelwork.TreAt = CGameWork::progMCW()._KeyRoomsTresureBoxCounter[7];)
+    KH_DEBUG(DebugWork::g_dw.atelwork.TreNe = CGameWork::progMCW()._KeyRoomsTresureBoxCounter[8];)
+    KH_DEBUG(DebugWork::g_dw.atelwork.TreHo = CGameWork::progMCW()._KeyRoomsTresureBoxCounter[9];)
+    KH_DEBUG(DebugWork::g_dw.atelwork.TrePo = CGameWork::progMCW()._KeyRoomsTresureBoxCounter[10];)
+    KH_DEBUG(DebugWork::g_dw.atelwork.TreTw = CGameWork::progMCW()._KeyRoomsTresureBoxCounter[11];)
+    KH_DEBUG(DebugWork::g_dw.atelwork.TreDe = CGameWork::progMCW()._KeyRoomsTresureBoxCounter[12];)
+    KH_DEBUG(DebugWork::g_dw.atelwork.TreCa = CGameWork::progMCW()._KeyRoomsTresureBoxCounter[13];)
     return 1;
 }
 }
@@ -410,7 +410,7 @@ static BOOL DebugSetWorldTitleFlag(CDebugWindow* pObj, INT inY, INT inParam) {
         case 26: world ^= 0x8000000; break;
         case 27: world ^= 0x10000000; break;
         }
-        DebugWork::g_dw.atelwork.iWorldIntro = world;
+        KH_DEBUG(DebugWork::g_dw.atelwork.iWorldIntro = world;)
         CGameWork::setInt(0, 0xC1, world);
     }
     return 1;
@@ -429,7 +429,7 @@ static BOOL DebugSetTutorialFlag(CDebugWindow* pObj, INT inY, INT inParam) {
         case 5: tuto ^= 0x20; break;
         case 6: tuto ^= 0x40; break;
         }
-        DebugWork::g_dw.atelwork.iTutorialEnd = tuto;
+        KH_DEBUG(DebugWork::g_dw.atelwork.iTutorialEnd = tuto;)
         CGameWork::setInt(0, 0xC2, tuto);
     }
     return 1;
@@ -467,7 +467,7 @@ static BOOL DebugSetCardPossibleFlag(CDebugWindow* pObj, INT inY, INT inParam) {
         case 24: card ^= 0x1000000; break;
         case 25: card ^= 0x2000000; break;
         }
-        DebugWork::g_dw.atelwork.iPossibleCard = card;
+        KH_DEBUG(DebugWork::g_dw.atelwork.iPossibleCard = card;)
         CGameWork::setInt(0, 0x21, card);
     }
     return 1;
@@ -488,7 +488,7 @@ static BOOL DebugSetFriendPossibleFlag(CDebugWindow* pObj, INT inY, INT inParam)
         case 7: fri ^= 0x80; break;
         case 8: fri ^= 0x100; break;
         }
-        DebugWork::g_dw.atelwork.iPossibleFriend = fri;
+        KH_DEBUG(DebugWork::g_dw.atelwork.iPossibleFriend = fri;)
         CGameWork::setInt(0, 0x22, fri);
     }
     return 1;
@@ -508,19 +508,19 @@ static BOOL DebugSetPoohFlag(CDebugWindow* pObj, INT inY, INT inParam) {
         case 10: intro ^= 0x40; break;
         case 11: intro ^= 0x80; break;
         }
-        DebugWork::g_dw.atelwork.iPoohMiniGameIntro = intro;
+        KH_DEBUG(DebugWork::g_dw.atelwork.iPoohMiniGameIntro = intro;)
         CGameWork::setInt(0, 0x23, intro);
-        CGameWork::setInt(0, 0x2E, DebugWork::g_dw.atelwork.iPoohHiScoreOwl);
-        CGameWork::setInt(0, 0x2F, DebugWork::g_dw.atelwork.iPoohHiScoreRoo);
-        CGameWork::setInt(0, 0x30, DebugWork::g_dw.atelwork.iPoohHiScoreEeyore);
-        CGameWork::setInt(0, 0x31, DebugWork::g_dw.atelwork.iPoohHiScoreTigger);
-        CGameWork::setInt(0, 0x32, DebugWork::g_dw.atelwork.iPoohHiScoreRabbit);
-        CGameWork::setByte(0, 3, DebugWork::g_dw.atelwork.iPoohGamePiglet);
-        CGameWork::setByte(0, 4, DebugWork::g_dw.atelwork.iPoohGameOwl);
-        CGameWork::setByte(0, 5, DebugWork::g_dw.atelwork.iPoohGameRoo);
-        CGameWork::setByte(0, 6, DebugWork::g_dw.atelwork.iPoohGameEeyore);
-        CGameWork::setByte(0, 7, DebugWork::g_dw.atelwork.iPoohGameTigger);
-        CGameWork::setByte(0, 8, DebugWork::g_dw.atelwork.iPoohGameRabbit);
+        CGameWork::setInt(0, 0x2E, KH_DW(DebugWork::g_dw.atelwork.iPoohHiScoreOwl));
+        CGameWork::setInt(0, 0x2F, KH_DW(DebugWork::g_dw.atelwork.iPoohHiScoreRoo));
+        CGameWork::setInt(0, 0x30, KH_DW(DebugWork::g_dw.atelwork.iPoohHiScoreEeyore));
+        CGameWork::setInt(0, 0x31, KH_DW(DebugWork::g_dw.atelwork.iPoohHiScoreTigger));
+        CGameWork::setInt(0, 0x32, KH_DW(DebugWork::g_dw.atelwork.iPoohHiScoreRabbit));
+        CGameWork::setByte(0, 3, KH_DW(DebugWork::g_dw.atelwork.iPoohGamePiglet));
+        CGameWork::setByte(0, 4, KH_DW(DebugWork::g_dw.atelwork.iPoohGameOwl));
+        CGameWork::setByte(0, 5, KH_DW(DebugWork::g_dw.atelwork.iPoohGameRoo));
+        CGameWork::setByte(0, 6, KH_DW(DebugWork::g_dw.atelwork.iPoohGameEeyore));
+        CGameWork::setByte(0, 7, KH_DW(DebugWork::g_dw.atelwork.iPoohGameTigger));
+        CGameWork::setByte(0, 8, KH_DW(DebugWork::g_dw.atelwork.iPoohGameRabbit));
     }
     return 1;
 }
@@ -537,7 +537,7 @@ static BOOL DebugSetPcSkillFlag(CDebugWindow* pObj, INT inY, INT inParam) {
         case 4: skill ^= 0x10; break;
         case 5: skill ^= 0x20; break;
         }
-        DebugWork::g_dw.atelwork.iPcStanderdSkill = skill;
+        KH_DEBUG(DebugWork::g_dw.atelwork.iPcStanderdSkill = skill;)
         CGameWork::setInt(0, 0x24, skill);
     }
     return 1;
@@ -610,11 +610,11 @@ static BOOL DebugSetSoraMovieFlag(CDebugWindow* pObj, INT inY, INT inParam) {
         case 57: movie1 ^= 0x2000000; break;
         case 58: movie1 ^= 0x4000000; break;
         }
-        DebugWork::g_dw.atelwork.iSoraMovie0 = movie0;
+        KH_DEBUG(DebugWork::g_dw.atelwork.iSoraMovie0 = movie0;)
         CGameWork::setInt(0, 0x27, movie0);
-        DebugWork::g_dw.atelwork.iSoraMovie1 = movie1;
+        KH_DEBUG(DebugWork::g_dw.atelwork.iSoraMovie1 = movie1;)
         CGameWork::setInt(0, 0x28, movie1);
-        DebugWork::g_dw.atelwork.iSoraMovie2 = movie2;
+        KH_DEBUG(DebugWork::g_dw.atelwork.iSoraMovie2 = movie2;)
         CGameWork::setInt(0, 0x29, movie2);
     }
     return 1;
@@ -669,11 +669,11 @@ static BOOL DebugSetRikuMovieFlag(CDebugWindow* pObj, INT inY, INT inParam) {
         case 39: movie1 ^= 0x80; break;
         case 40: movie1 ^= 0x100; break;
         }
-        DebugWork::g_dw.atelwork.iRikuMovie0 = movie0;
+        KH_DEBUG(DebugWork::g_dw.atelwork.iRikuMovie0 = movie0;)
         CGameWork::setInt(0, 0x2A, movie0);
-        DebugWork::g_dw.atelwork.iRikuMovie1 = movie1;
+        KH_DEBUG(DebugWork::g_dw.atelwork.iRikuMovie1 = movie1;)
         CGameWork::setInt(0, 0x2B, movie1);
-        DebugWork::g_dw.atelwork.iRikuMovie2 = movie2;
+        KH_DEBUG(DebugWork::g_dw.atelwork.iRikuMovie2 = movie2;)
         CGameWork::setInt(0, 0x2C, movie2);
     }
     return 1;
@@ -698,7 +698,7 @@ static BOOL DebugSetKH2CardGetFlag(CDebugWindow* pObj, INT inY, INT inParam) {
         case 11: card ^= 0x800; break;
         case 12: card ^= 0x1000; break;
         }
-        DebugWork::g_dw.atelwork.iKH2CardGet = card;
+        KH_DEBUG(DebugWork::g_dw.atelwork.iKH2CardGet = card;)
         CGameWork::setInt(0, 0x2D, card);
     }
     return 1;
@@ -711,11 +711,11 @@ extern USHORT SoraCardKindTbl[];
 extern USHORT RikuCardKindTbl[];
 static BOOL DebugSetJiminyMemoFlag(CDebugWindow* pObj, INT inY, INT inParam) {
     if (inParam & 0x180) {
-        INT SoraWorld = DebugWork::g_dw.jiminy.Sora_World;
-        INT SoraFloor = DebugWork::g_dw.jiminy.Sora_Floor;
-        INT RikuFloor = DebugWork::g_dw.jiminy.Riku_Floor;
-        INT RikuWorld = DebugWork::g_dw.jiminy.Riku_World;
-        INT SoraEtc = DebugWork::g_dw.jiminy.Sora_Etc;
+        INT SoraWorld = KH_DW(DebugWork::g_dw.jiminy.Sora_World);
+        INT SoraFloor = KH_DW(DebugWork::g_dw.jiminy.Sora_Floor);
+        INT RikuFloor = KH_DW(DebugWork::g_dw.jiminy.Riku_Floor);
+        INT RikuWorld = KH_DW(DebugWork::g_dw.jiminy.Riku_World);
+        INT SoraEtc = KH_DW(DebugWork::g_dw.jiminy.Sora_Etc);
         INT shiftY;
         switch (inY) {
         case 1: case 2: case 3: case 4: case 5: case 6: case 7: case 8: case 9: case 10: case 11: case 12: case 13:
@@ -753,21 +753,21 @@ static BOOL DebugSetJiminyMemoFlag(CDebugWindow* pObj, INT inY, INT inParam) {
         case 65: SoraEtc ^= 0x1000; CJiminyMemoFlag::debugEvent(SoraEtc & 0x1000, 0, 10, 16, 0); break;
         case 66: SoraEtc ^= 0x2000; CJiminyMemoFlag::debugEvent(SoraEtc & 0x2000, 0, 9, 0, 0); break;
         }
-        DebugWork::g_dw.jiminy.Sora_World = SoraWorld;
-        DebugWork::g_dw.jiminy.Sora_Floor = SoraFloor;
-        DebugWork::g_dw.jiminy.Riku_World = RikuWorld;
-        DebugWork::g_dw.jiminy.Riku_Floor = RikuFloor;
-        DebugWork::g_dw.jiminy.Sora_Etc = SoraEtc;
+        KH_DEBUG(DebugWork::g_dw.jiminy.Sora_World = SoraWorld;)
+        KH_DEBUG(DebugWork::g_dw.jiminy.Sora_Floor = SoraFloor;)
+        KH_DEBUG(DebugWork::g_dw.jiminy.Riku_World = RikuWorld;)
+        KH_DEBUG(DebugWork::g_dw.jiminy.Riku_Floor = RikuFloor;)
+        KH_DEBUG(DebugWork::g_dw.jiminy.Sora_Etc = SoraEtc;)
     } else if (inParam & 0x20) {
-        INT SoraFlag = DebugWork::g_dw.jiminy.Sora_Flag;
-        INT SoraEKind = SoraEnemyMemoIdTbl[DebugWork::g_dw.jiminy.Sora_Enemy];
-        INT SoraENum = DebugWork::g_dw.jiminy.Sora_ENum;
-        INT SoraCard = DebugWork::g_dw.jiminy.Sora_Card;
+        INT SoraFlag = KH_DW(DebugWork::g_dw.jiminy.Sora_Flag);
+        INT SoraEKind = SoraEnemyMemoIdTbl[KH_DW(DebugWork::g_dw.jiminy.Sora_Enemy)];
+        INT SoraENum = KH_DW(DebugWork::g_dw.jiminy.Sora_ENum);
+        INT SoraCard = KH_DW(DebugWork::g_dw.jiminy.Sora_Card);
         USHORT SoraCKind = SoraCardKindTbl[SoraCard];
-        INT RikuFlag = DebugWork::g_dw.jiminy.Riku_Flag;
-        INT RikuEKind = RikuEnemyMemoIdTbl[DebugWork::g_dw.jiminy.Riku_Enemy];
-        INT RikuENum = DebugWork::g_dw.jiminy.Riku_ENum;
-        INT RikuCard = DebugWork::g_dw.jiminy.Riku_Card;
+        INT RikuFlag = KH_DW(DebugWork::g_dw.jiminy.Riku_Flag);
+        INT RikuEKind = RikuEnemyMemoIdTbl[KH_DW(DebugWork::g_dw.jiminy.Riku_Enemy)];
+        INT RikuENum = KH_DW(DebugWork::g_dw.jiminy.Riku_ENum);
+        INT RikuCard = KH_DW(DebugWork::g_dw.jiminy.Riku_Card);
         USHORT RikuCKind = RikuCardKindTbl[RikuCard];
         switch (inY) {
         case 68: case 69: case 70:
@@ -787,11 +787,11 @@ static BOOL DebugSetJiminyMemoFlag(CDebugWindow* pObj, INT inY, INT inParam) {
             CJiminyMemoFlag::debugEvent(TRUE, 1, 4, RikuCKind, 0);
             break;
         }
-        DebugWork::g_dw.jiminy.Sora_Flag = SoraFlag;
-        DebugWork::g_dw.jiminy.Riku_Flag = RikuFlag;
+        KH_DEBUG(DebugWork::g_dw.jiminy.Sora_Flag = SoraFlag;)
+        KH_DEBUG(DebugWork::g_dw.jiminy.Riku_Flag = RikuFlag;)
     } else {
-        INT SoraFlag = DebugWork::g_dw.jiminy.Sora_Flag;
-        INT RikuFlag = DebugWork::g_dw.jiminy.Riku_Flag;
+        INT SoraFlag = KH_DW(DebugWork::g_dw.jiminy.Sora_Flag);
+        INT RikuFlag = KH_DW(DebugWork::g_dw.jiminy.Riku_Flag);
         INT n;
         for (INT i = 0; i < 2; i++) {
             if ((SoraFlag >> i) & 1) {
@@ -809,8 +809,8 @@ static BOOL DebugSetJiminyMemoFlag(CDebugWindow* pObj, INT inY, INT inParam) {
                 RikuFlag = (RikuFlag & ~(0xF << (i * 4 + 8))) | (n << (i * 4 + 8));
             }
         }
-        DebugWork::g_dw.jiminy.Sora_Flag = SoraFlag;
-        DebugWork::g_dw.jiminy.Riku_Flag = RikuFlag;
+        KH_DEBUG(DebugWork::g_dw.jiminy.Sora_Flag = SoraFlag;)
+        KH_DEBUG(DebugWork::g_dw.jiminy.Riku_Flag = RikuFlag;)
     }
     return 1;
 }
@@ -938,12 +938,12 @@ namespace DWTEvent {
 static BOOL debugGameInfomationParam(CDebugWindow* pObj, INT inY, INT inParam) {
     if (inParam & 0x180) {
         switch (inY) {
-        case 1: CGameWork::setFlag(0, 0x83, DebugWork::g_dw.atelwork.iDistinctionClear); break;
-        case 2: CGameWork::setFlag(0, 0x11, DebugWork::g_dw.atelwork.iGameKH2clear); break;
-        case 3: CGameWork::setFlag(0, 0x9, DebugWork::g_dw.atelwork.iSoraClear); break;
-        case 4: CGameWork::setFlag(0, 0x12, DebugWork::g_dw.atelwork.iRikuClear); break;
-        case 7: CGameWork::setFlag(0, 0x82, DebugWork::g_dw.atelwork.iMahluciaKilled); break;
-        case 8: CGameWork::setByte(0, 0x61, DebugWork::g_dw.atelwork.iPlayDifficultMode); break;
+        case 1: CGameWork::setFlag(0, 0x83, KH_DW(DebugWork::g_dw.atelwork.iDistinctionClear)); break;
+        case 2: CGameWork::setFlag(0, 0x11, KH_DW(DebugWork::g_dw.atelwork.iGameKH2clear)); break;
+        case 3: CGameWork::setFlag(0, 0x9, KH_DW(DebugWork::g_dw.atelwork.iSoraClear)); break;
+        case 4: CGameWork::setFlag(0, 0x12, KH_DW(DebugWork::g_dw.atelwork.iRikuClear)); break;
+        case 7: CGameWork::setFlag(0, 0x82, KH_DW(DebugWork::g_dw.atelwork.iMahluciaKilled)); break;
+        case 8: CGameWork::setByte(0, 0x61, KH_DW(DebugWork::g_dw.atelwork.iPlayDifficultMode)); break;
         }
     }
     return 1;
@@ -1164,13 +1164,13 @@ namespace DWTEvent {
 static BOOL DebugSetGameWorkParam(CDebugWindow* pObj, INT inY, INT inParam) {
     if (inParam & 0x180) {
         switch (inY) {
-        case 17: CGameWork::setFlag(1, 0x0, DebugWork::g_dw.atelwork.iPlayerDispOff); break;
-        case 18: CGameWork::setFlag(1, 0x2, DebugWork::g_dw.atelwork.iBossKilled); break;
-        case 21: CGameWork::setFlag(1, 0x5, DebugWork::g_dw.atelwork.iNotPcControl); break;
-        case 22: CGameWork::setFlag(1, 0x6, DebugWork::g_dw.atelwork.iNotPause); break;
-        case 26: CGameWork::setFlag(1, 0x25, DebugWork::g_dw.atelwork.iNotHartBtl); break;
-        case 27: CGameWork::setFlag(1, 0x2C, DebugWork::g_dw.atelwork.iIsBtlTutorial); break;
-        case 28: CGameWork::setFlag(1, 0x37, DebugWork::g_dw.atelwork.iIsWorldIntro); break;
+        case 17: CGameWork::setFlag(1, 0x0, KH_DW(DebugWork::g_dw.atelwork.iPlayerDispOff)); break;
+        case 18: CGameWork::setFlag(1, 0x2, KH_DW(DebugWork::g_dw.atelwork.iBossKilled)); break;
+        case 21: CGameWork::setFlag(1, 0x5, KH_DW(DebugWork::g_dw.atelwork.iNotPcControl)); break;
+        case 22: CGameWork::setFlag(1, 0x6, KH_DW(DebugWork::g_dw.atelwork.iNotPause)); break;
+        case 26: CGameWork::setFlag(1, 0x25, KH_DW(DebugWork::g_dw.atelwork.iNotHartBtl)); break;
+        case 27: CGameWork::setFlag(1, 0x2C, KH_DW(DebugWork::g_dw.atelwork.iIsBtlTutorial)); break;
+        case 28: CGameWork::setFlag(1, 0x37, KH_DW(DebugWork::g_dw.atelwork.iIsWorldIntro)); break;
         }
     }
     return 1;
@@ -1179,8 +1179,8 @@ static BOOL DebugSetGameWorkParam(CDebugWindow* pObj, INT inY, INT inParam) {
 namespace DWTEvent {
 static INT debugWinNPCMainlCall(CDebugWindow* pObj, INT inParam) {
     if (inParam & 1) {
-        DebugWork::g_dw.event.pClass = NULL;
-        DebugWork::g_dw.event.pEventlineClass = NULL;
+        KH_DEBUG(DebugWork::g_dw.event.pClass = NULL;)
+        KH_DEBUG(DebugWork::g_dw.event.pEventlineClass = NULL;)
     }
     return 1;
 }
@@ -5783,7 +5783,7 @@ extern INT SCREEN_HEIGHT;
 CActorDebug::CActorDebug(CTask* pParent) : CTask(pParent, 0x8000), m_pWindow(NULL) {
     CTask* pA = CTaskMan::getSysTask(0x1A);
     DEBUG_WINDOW_TBL debugActorInfo = {
-        ((CAtel*)pA)->getVSM()->getAvatarName(DebugWork::g_dw.event.iNpcID),
+        ((CAtel*)pA)->getVSM()->getAvatarName(KH_DW(DebugWork::g_dw.event.iNpcID)),
         0x90, -(SCREEN_HEIGHT >> 1) + 0x18, 7, 12, 14, 0, 6, DWTEvent::debugNpcInfoLine, NULL, NULL
     };
     m_pWindow = new KH_AT("(6871)") CDebugWindow(this, debugActorInfo);
@@ -5794,19 +5794,19 @@ CActorDebug::~CActorDebug() {
 }
 void CActorDebug::main() {
     CAtel* pA = (CAtel*)CTaskMan::getSysTask(0x1A);
-    if (DebugWork::g_dw.event.iNpcCoordDisp) {
+    if (KH_DW(DebugWork::g_dw.event.iNpcCoordDisp)) {
         if (!pA) return;
-        CAvatar* p = pA->getVSM()->getAvatar(DebugWork::g_dw.event.iNpcID);
+        CAvatar* p = pA->getVSM()->getAvatar(KH_DW(DebugWork::g_dw.event.iNpcID));
         if (!p) return;
         if (p->getMovement()) {
-            DebugWork::g_dw.event.vPos = p->getPos();
-            DebugWork::g_dw.event.vRot = p->getRot();
-            DebugWork::g_dw.event.vRot.x = RAD2DEG(DebugWork::g_dw.event.vRot.x);
-            DebugWork::g_dw.event.vRot.y = RAD2DEG(DebugWork::g_dw.event.vRot.y);
-            DebugWork::g_dw.event.vRot.z = RAD2DEG(DebugWork::g_dw.event.vRot.z);
+            KH_DEBUG(DebugWork::g_dw.event.vPos = p->getPos();)
+            KH_DEBUG(DebugWork::g_dw.event.vRot = p->getRot();)
+            KH_DEBUG(DebugWork::g_dw.event.vRot.x = RAD2DEG(DebugWork::g_dw.event.vRot.x);)
+            KH_DEBUG(DebugWork::g_dw.event.vRot.y = RAD2DEG(DebugWork::g_dw.event.vRot.y);)
+            KH_DEBUG(DebugWork::g_dw.event.vRot.z = RAD2DEG(DebugWork::g_dw.event.vRot.z);)
         }
     } else {
-        DebugWork::g_dw.event.pClass = NULL;
+        KH_DEBUG(DebugWork::g_dw.event.pClass = NULL;)
         delete this;
     }
 }

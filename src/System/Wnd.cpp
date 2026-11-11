@@ -26,7 +26,7 @@ void FTOI0Vector(IVECTOR& v0, const FVECTOR& v1);
 /* SCREEN_HEIGHT read through a reference (the original reloads it after the preceding member stores) */
 static inline INT& _screenHeight() { return SCREEN_HEIGHT; }
 
-inline void* operator new[](size_t size) throw() { return com_malloc(size); }
+KH_DEBUG(inline void* operator new[](size_t size) throw() { return com_malloc(size); }) /* retail: HeapMan.h's */
 
 
 #include "System/Graphic/TexInfo.h"
@@ -523,7 +523,7 @@ void CTextWnd::mainImpl() {
     }
 }
 void CTextWnd::dispImpl() {
-    if (m_pWnd && m_pWnd->isDispEnable() && DebugWork::g_dw.sys.m_iFukidasiDisp) {
+    if (m_pWnd && m_pWnd->isDispEnable() && KH_DW(DebugWork::g_dw.sys.m_iFukidasiDisp)) {
         INT fgDispText = FALSE;
         m_pWnd->_disp();
         if (m_pWnd->getSize() == m_targetSize && m_pText) {

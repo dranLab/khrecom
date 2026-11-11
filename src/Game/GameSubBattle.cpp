@@ -332,7 +332,7 @@ void CGameSubBattle::setupTasks() {
     CShadowModelMan::setDownLen(2.8f);
     CDeFocus::create(pGame);
     CDeFocus::offNear();
-    CCollDisp::initialize(pGame, dbgButtonDown(USR_SYSTEM, 0x100, 1) | CCollDisp::m_fgDisp, CCollDisp::m_fgMapZoneDisp);
+    KH_DEBUG(CCollDisp::initialize(pGame, dbgButtonDown(USR_SYSTEM, 0x100, 1) | CCollDisp::m_fgDisp, CCollDisp::m_fgMapZoneDisp);)
     changeState(4);
 }
 

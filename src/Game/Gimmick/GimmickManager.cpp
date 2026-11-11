@@ -522,7 +522,7 @@ DropPrize CGimmickManager::DecideGimmickCard_PossibleCheck(INT DropProbNum, Gimm
     INT Prob = getRand() % 100;
     DropPrize ret;
     TRACE("\x83J\x81[\x83h\x92\x8a\x91I\x90\x94\x92l(\x89\xf0) 0\x81`99 = %d\n", Prob);
-    DebugWork::g_dw.gimDropProb.ProbRandomCardPossible = Prob;
+    KH_DEBUG(DebugWork::g_dw.gimDropProb.ProbRandomCardPossible = Prob;)
     ret.StockKind = 0;
     ret.Kind = CARD_KIND_None;
     ret.Num = 0;
@@ -557,9 +557,9 @@ DropPrize CGimmickManager::DecideGimmickCard_PossibleCheck(INT DropProbNum, Gimm
     }
 found:
     if (ret.Kind == CARD_KIND_None) {
-        sprintf(DebugWork::g_dw.gimDropProb.PossibleCardName, "%s", cardDataTbl[CARD_KIND_None].pName);
+        sprintf(KH_DW(DebugWork::g_dw.gimDropProb.PossibleCardName), "%s", cardDataTbl[CARD_KIND_None].pName);
     } else {
-        sprintf(DebugWork::g_dw.gimDropProb.PossibleCardName, "\x82\xcd\x82\xb8\x82\xea");
+        sprintf(KH_DW(DebugWork::g_dw.gimDropProb.PossibleCardName), "\x82\xcd\x82\xb8\x82\xea");
     }
     return ret;
 }
@@ -569,7 +569,7 @@ DropPrize CGimmickManager::DecideGimmickCard_PossibleNoCheck(INT DropProbNum, Gi
     INT Prob = getRand() % 100;
     DropPrize ret;
     TRACE("\x83J\x81[\x83h\x92\x8a\x91I\x90\x94\x92l 0\x81`99 = %d\n", Prob);
-    DebugWork::g_dw.gimDropProb.ProbRandomCard = Prob;
+    KH_DEBUG(DebugWork::g_dw.gimDropProb.ProbRandomCard = Prob;)
     ret.StockKind = 0;
     ret.Kind = CARD_KIND_None;
     ret.Num = 0;
@@ -602,7 +602,7 @@ DropPrize CGimmickManager::DecideGimmickCard_PossibleNoCheck(INT DropProbNum, Gi
         }
         if (breakFlag) break;
     }
-    sprintf(DebugWork::g_dw.gimDropProb.CardName, "%s", cardDataTbl[ret.Kind].pName);
+    sprintf(KH_DW(DebugWork::g_dw.gimDropProb.CardName), "%s", cardDataTbl[ret.Kind].pName);
     return ret;
 }
 
@@ -1251,8 +1251,8 @@ INT CGimmickManager::DecidePrize(INT in_GimmickID, const FVECTOR* Pos, const FVE
         return 0;
     }
     ret = DecidePrizeKind(param);
-    DebugWork::g_dw.gimDropProb.ProbCategoryKind = ret;
-    if (DebugWork::g_dw.gimPrize.Kind) ret = DebugWork::g_dw.gimPrize.Kind;
+    KH_DEBUG(DebugWork::g_dw.gimDropProb.ProbCategoryKind = ret;)
+    if (KH_DW(DebugWork::g_dw.gimPrize.Kind)) ret = KH_DW(DebugWork::g_dw.gimPrize.Kind);
     switch (ret) {
     case 0:
         TRACE("\x92\x8a\x91I\x8c\x8b\x89\xca\x81""F\x82\xcd\x82\xb8\x82\xea\n");
@@ -1273,7 +1273,7 @@ INT CGimmickManager::DecidePrize(INT in_GimmickID, const FVECTOR* Pos, const FVE
         TRACE("\x92\x8a\x91I\x8c\x8b\x89\xca\x81""F\x83J\x81[\x83h\n");
         Prize = DecideGimmickCard_PossibleCheck(m_NomalCardDropProbNum, m_pNomalCardDropProbTable, m_CardProbNum);
         if (!checkPossibleCard(Prize.Kind)) {
-            DebugWork::g_dw.gimDropProb.PossibleCheck = 1;
+            KH_DEBUG(DebugWork::g_dw.gimDropProb.PossibleCheck = 1;)
             Prize = DecideGimmickCard_PossibleNoCheck(m_NomalCardDropProbNum, m_pNomalCardDropProbTable, m_CardProbNum);
         }
         Prize = checkAddCardGimmick(Prize);
@@ -1296,13 +1296,13 @@ INT CGimmickManager::DecidePrize(INT in_GimmickID, const FVECTOR* Pos, const FVE
 INT CGimmickManager::DecidePrizeKind(const GimParam* in_pParam) {
     INT Prob = getRand() % 100;
     _GimmickRoomInfo* gim;
-    DebugWork::g_dw.gimDropProb.ProbCard = in_pParam->C_Prob;
-    DebugWork::g_dw.gimDropProb.ProbSoraGBall = in_pParam->G_Prob;
-    DebugWork::g_dw.gimDropProb.ProbSoraRBall = in_pParam->R_Prob;
-    DebugWork::g_dw.gimDropProb.ProbSoraBarel = in_pParam->B_Prob;
-    DebugWork::g_dw.gimDropProb.ProbRikuGball = in_pParam->Riku_GProb;
-    DebugWork::g_dw.gimDropProb.ProbRikuBarel = in_pParam->B_Prob;
-    DebugWork::g_dw.gimDropProb.ProbRandomCategory = Prob;
+    KH_DEBUG(DebugWork::g_dw.gimDropProb.ProbCard = in_pParam->C_Prob;)
+    KH_DEBUG(DebugWork::g_dw.gimDropProb.ProbSoraGBall = in_pParam->G_Prob;)
+    KH_DEBUG(DebugWork::g_dw.gimDropProb.ProbSoraRBall = in_pParam->R_Prob;)
+    KH_DEBUG(DebugWork::g_dw.gimDropProb.ProbSoraBarel = in_pParam->B_Prob;)
+    KH_DEBUG(DebugWork::g_dw.gimDropProb.ProbRikuGball = in_pParam->Riku_GProb;)
+    KH_DEBUG(DebugWork::g_dw.gimDropProb.ProbRikuBarel = in_pParam->B_Prob;)
+    KH_DEBUG(DebugWork::g_dw.gimDropProb.ProbRandomCategory = Prob;)
     if (CGameWork::getByte(0, 0x60) == 0) {
         if (Prob < in_pParam->C_Prob) {
             gim = CSceneInfo::getCurrentRoomGimmickInfo();
@@ -1341,7 +1341,7 @@ DropPrize CGimmickManager::DecideGPrize(INT in_DataIndex) {
         return ret;
     }
     Prob = getRand() % 100;
-    DebugWork::g_dw.gimDropProb.ProbRandomGBall = Prob;
+    KH_DEBUG(DebugWork::g_dw.gimDropProb.ProbRandomGBall = Prob;)
     for (int i = 0; i < 6; i++) {
         if (Prob < m_pGBallDropTable[in_DataIndex].prob[i]) {
             if (m_pGBallDropTable[in_DataIndex].type[i]) {
@@ -1350,8 +1350,8 @@ DropPrize CGimmickManager::DecideGPrize(INT in_DataIndex) {
                 ret.Kind = (CARD_KIND)0xD3;
             }
             ret.Num = m_pGBallDropTable[in_DataIndex].num[i];
-            DebugWork::g_dw.gimDropProb.GBallType = ret.Kind - 0xD1;
-            DebugWork::g_dw.gimDropProb.GBallNum = ret.Num;
+            KH_DEBUG(DebugWork::g_dw.gimDropProb.GBallType = ret.Kind - 0xD1;)
+            KH_DEBUG(DebugWork::g_dw.gimDropProb.GBallNum = ret.Num;)
             return ret;
         }
         Prob -= m_pGBallDropTable[in_DataIndex].prob[i];
@@ -1374,7 +1374,7 @@ DropPrize CGimmickManager::DecideRPrize(INT in_DataIndex) {
         return ret;
     }
     Prob = getRand() % 100;
-    DebugWork::g_dw.gimDropProb.ProbRandomRBall = Prob;
+    KH_DEBUG(DebugWork::g_dw.gimDropProb.ProbRandomRBall = Prob;)
     for (int i = 0; i < 6; i++) {
         if (Prob < m_pRBallDropTable[in_DataIndex].prob[i]) {
             if (m_pRBallDropTable[in_DataIndex].type[i]) {
@@ -1383,8 +1383,8 @@ DropPrize CGimmickManager::DecideRPrize(INT in_DataIndex) {
                 ret.Kind = (CARD_KIND)0xD5;
             }
             ret.Num = m_pRBallDropTable[in_DataIndex].num[i];
-            DebugWork::g_dw.gimDropProb.RBallType = ret.Kind - 0xD3;
-            DebugWork::g_dw.gimDropProb.RBallNum = ret.Num;
+            KH_DEBUG(DebugWork::g_dw.gimDropProb.RBallType = ret.Kind - 0xD3;)
+            KH_DEBUG(DebugWork::g_dw.gimDropProb.RBallNum = ret.Num;)
             return ret;
         }
         Prob -= m_pRBallDropTable[in_DataIndex].prob[i];
@@ -1688,8 +1688,8 @@ CGimmickProbDebug::CGimmickProbDebug(CTask* pParent) : CTask(pParent, 0x8000) {
     DEBUG_WINDOW_TBL debugGimProbInfo = {"\x83M\x83~\x83""b\x83N\x82\xbf\x82\xe3\x82\xa4\x82\xb9\x82\xf1", 0x68, -(SCREEN_HEIGHT >> 1) + 0x28, 13, 24, 12, 0, 6, debugGimProbLine, NULL, NULL};
     m_pWindow = new KH_AT("(2870)") CDebugWindow(this, debugGimProbInfo);
     m_pWindow->dispOn(0);
-    szdebugGimPossibleCardName = DebugWork::g_dw.gimDropProb.PossibleCardName;
-    szdebugGimCardName = DebugWork::g_dw.gimDropProb.CardName;
+    szdebugGimPossibleCardName = KH_DW(DebugWork::g_dw.gimDropProb.PossibleCardName);
+    szdebugGimCardName = KH_DW(DebugWork::g_dw.gimDropProb.CardName);
 }
 
 CGimmickProbDebug::~CGimmickProbDebug() {
@@ -1697,8 +1697,8 @@ CGimmickProbDebug::~CGimmickProbDebug() {
 }
 
 void CGimmickProbDebug::main() {
-    if (!DebugWork::g_dw.gimPrize.iDisp) {
-        DebugWork::g_dw.gimPrize.pClass = NULL;
+    if (!KH_DW(DebugWork::g_dw.gimPrize.iDisp)) {
+        KH_DEBUG(DebugWork::g_dw.gimPrize.pClass = NULL;)
         delete this;
     }
 }

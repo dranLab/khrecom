@@ -379,7 +379,7 @@ void CPlayerManager::init() {
     initRsrcBlock();
     for (i = 0; i < 17; i++) {
         sprintf(m_strBlock[i], " ");
-        DebugWork::g_dw.player.m_szBlock[i] = m_strBlock[i];
+        KH_DEBUG(DebugWork::g_dw.player.m_szBlock[i] = m_strBlock[i];)
     }
     m_pWindow = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(701)")
         CDebugWindow(this, DWTPlayer::debugPlayerBlockInfo);
@@ -392,7 +392,7 @@ void CPlayerManager::main() {
     if (m_uiFlag & 4) procPlayerDead();
     exeWind();
     m_tqTimer -= getFrameRate();
-    if (DebugWork::g_dw.player.iBlockInfo) {
+    if (KH_DW(DebugWork::g_dw.player.iBlockInfo)) {
         sprintf(m_strBlock[0], "Current:%d/16 Remain:%06X Reserve:%d/6", m_uiCurrentBlock, m_uiRemain, m_uiReserve);
         char* col[4] = {"\xf9S", "\xf9U", "\xf9X", "\xf9T"};
         for (i = 0; i < 16; i++) {
@@ -1633,10 +1633,10 @@ void setVibration(INT inID) {
     default:
         return;
     }
-    if (dbgCheckUser(KKIKUCHI) && DebugWork::g_dw.player.iTemp == 8) {
-        FLOAT fl = DebugWork::g_dw.player.vTemp.x * 100.0f;
-        FLOAT fs = DebugWork::g_dw.player.vTemp.y * 100.0f;
-        FLOAT ft = DebugWork::g_dw.player.vTemp.z * 10000.0f;
+    if (dbgCheckUser(KKIKUCHI) && KH_DW(DebugWork::g_dw.player.iTemp) == 8) {
+        FLOAT fl = KH_DW(DebugWork::g_dw.player.vTemp.x) * 100.0f;
+        FLOAT fs = KH_DW(DebugWork::g_dw.player.vTemp.y) * 100.0f;
+        FLOAT ft = KH_DW(DebugWork::g_dw.player.vTemp.z) * 10000.0f;
         motorL = (INT)(fl + 0.5f);
         motorS = (INT)(fs + 0.5f);
         tq = (INT)(ft + 0.5f);

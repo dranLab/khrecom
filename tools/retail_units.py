@@ -108,7 +108,7 @@ def try_unit(v: Version, unit: str, show=(), data=True) -> dict:
     cmd = (f"{tc['cc']} -S {tc['cflags']} -I include -I src -o {out}.gcc.s {src} && "
            f"{sys.executable} tools/ee_asm_compat.py {out}.gcc.s {out}.s --source {src} "
            f"--symbols {v.cfg}/elf_symbol_addrs.txt --own-data 0x0-0xFFFFFFFF --unit-data none "
-           f"--asm-path asm/{v.name} {tc['compat_extra']} && {tc['assemble']} -o {out} {out}.s")
+           f"--asm-path asm/{v.name} --release {tc['compat_extra']} && {tc['assemble']} -o {out} {out}.s")
     r = subprocess.run(cmd, shell=True, capture_output=True, text=True, cwd=ROOT)
     if r.returncode:
         err = [l for l in (r.stdout + r.stderr).splitlines() if "rror" in l or ": parse" in l]

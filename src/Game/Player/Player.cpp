@@ -285,7 +285,7 @@ void CPlayer::enableDbgPadControl(INT inFlag) {
         m_pInstance->m_uiPadFlag = (m_pInstance->m_uiPadFlag | inFlag) & ~(inFlag ^ bit);
     }
 }
-__asm__(".rdata\n");
+KH_DEBUG(__asm__(".rdata\n");)
 CPlayer::CPlayer(CTask* inParent, UINT inChara, INT inEx) : CEntity(inParent, (ObjType::eObjType)1), m_uiCharaID(inChara), m_iState(0) {
     m_pDebug = NULL;
     declareSysTask(3);
@@ -536,7 +536,7 @@ void CPlayer::lastUpdate() {
     m_hGimmickJump = 0;
     updateFooting();
 }
-__asm__(".rdata\n");
+KH_DEBUG(__asm__(".rdata\n");)
 void CPlayer::changeState(INT inState) {
     KH_DEBUG(if (!((UINT)inState < 4)) AssertApp(__FILE__, 941, "0 <= inState && inState < STATE_MAX", 0);)
     gotoState(m_State[inState]);
@@ -642,7 +642,7 @@ void CPlayer::makeWeapon() {
     m_pWeapon = new KH_AT("(1094)") PlayerWeapon::CPlayerWeapon(this, m_uiCharaID, m_iBoneWeapon);
     offWeapon();
 }
-__asm__(".rdata\n");
+KH_DEBUG(__asm__(".rdata\n");)
 void CPlayer::makeCockpit() {
     m_pCam = new KH_AT("(1103)") PlayerCamera::CPlayerCamera(this);
     m_pMarker = new KH_AT("(1106)") Gauge::CLockonMarker(this, FALSE);
@@ -655,12 +655,12 @@ void CPlayer::makeCockpit() {
     m_pGauge->setDP(m_iDP, 30);
     m_pDebug = new KH_AT("(1124)") CPlayerDebug(this);
 }
-__asm__(".rdata\n");
+KH_DEBUG(__asm__(".rdata\n");)
 void CPlayer::makeRevolver() {
     if (!m_pRevolver) {
         CARD* pDeck = NULL;
         CARD* deck = CCard::getCurrentDeck();
-        if (!DebugWork::g_dw.player.iUseDbgDeck) pDeck = deck;
+        if (!KH_DW(DebugWork::g_dw.player.iUseDbgDeck)) pDeck = deck;
         if (CGameWork::getFlag(1, 0x2C)) pDeck = NULL;
         if (m_bIsMinigameScene) pDeck = NULL;
         if (!pDeck) {
@@ -668,7 +668,7 @@ void CPlayer::makeRevolver() {
         } else {
             INT max = CCard::getCurrentDeckMax();
             INT sc = CCard::getCurrentShortCut();
-            if (dbgCheckUser(KKIKUCHI) && sc == -1) sc = DebugWork::g_dw.player.iTemp;
+            if (dbgCheckUser(KKIKUCHI) && sc == -1) sc = KH_DW(DebugWork::g_dw.player.iTemp);
             deck = new KH_AT("(1172)") CARD[max + 1];
             for (INT i = 0; i < max; i++) {
                 deck[i] = pDeck[i];
@@ -685,14 +685,14 @@ void CPlayer::initActionSkill() {
     UINT uiActionSkill = CGameWork::getInt(0, 0x24);
     if (uiActionSkill & 1) setActionFlag(0x200000, 0);
     else setActionFlag(0, 0x200000);
-    DebugWork::g_dw.player.iHiJump = isActionFlag(0x200000) != 0;
+    KH_DEBUG(DebugWork::g_dw.player.iHiJump = isActionFlag(0x200000) != 0;)
     if (CGame::isSoraGame()) {
         if (uiActionSkill & 4) setActionFlag(0x800000, 0);
         else setActionFlag(0, 0x800000);
         if (uiActionSkill & 2) setActionFlag(0x400000, 0);
         else setActionFlag(0, 0x400000);
-        DebugWork::g_dw.player.iGlide = isActionFlag(0x400000) != 0;
-        DebugWork::g_dw.player.iGlideSP = isActionFlag(0x800000) != 0;
+        KH_DEBUG(DebugWork::g_dw.player.iGlide = isActionFlag(0x400000) != 0;)
+        KH_DEBUG(DebugWork::g_dw.player.iGlideSP = isActionFlag(0x800000) != 0;)
     }
     setActionFlag(0, 0x4000000);
     if (CGame::isRikuGame() && m_bIsBattleScene) {
@@ -744,7 +744,7 @@ void CPlayer::makeAnimIndex(INT inChara) {
         }
     }
 }
-__asm__(".rdata\n");
+KH_DEBUG(__asm__(".rdata\n");)
 INT CPlayer::getMotIndex(INT inChara, INT inIndex) {
     KH_DEBUG(if (!(0 <= inIndex && inIndex < ANIM_MAX)) AssertApp(__FILE__, 1361, "0<=inIndex && inIndex<ANIM_MAX", 0);)
     return PL_ANIM::g_MotNameTbl[inChara][inIndex].iIndex;
@@ -871,7 +871,7 @@ void CPlayer::getWeaponTopPos(FVECTOR& inVec) {
 void CPlayer::getCaskPos(FVECTOR& inVec) {
     if (m_pWeapon) {
         FVECTOR ofs = { { -0.06f, -0.27f, 0.03f, 1.0f } };
-        if (DebugWork::g_dw.player.iTemp == 1) ofs = DebugWork::g_dw.player.vTemp;
+        if (KH_DW(DebugWork::g_dw.player.iTemp) == 1) ofs = DebugWork::g_dw.player.vTemp;
         FMATRIX m = m_pWeapon->getMatrixWep0();
         ApplyMatrixXYZ(inVec, m, ofs);
     }
@@ -914,7 +914,7 @@ void CPlayer::exeMutekiTimer() {
     m_tqMutekiTimer -= m_tqFrameRate;
     if (m_tqMutekiTimer < 0) m_tqMutekiTimer = 0;
 }
-__asm__(".rdata\n");
+KH_DEBUG(__asm__(".rdata\n");)
 void CPlayer::setControl() {
     INT iRev;
     m_fDir = m_pMove->getRot().y;
@@ -1135,7 +1135,7 @@ void CPlayer::stateField() {
     m_tqStateTimer += m_tqFrameRate;
     getPadInfo();
     setControl();
-    if (m_iHP >= 2 && DebugWork::g_dw.player.iHP1) {
+    if (m_iHP >= 2 && KH_DW(DebugWork::g_dw.player.iHP1)) {
         m_iHP = 1;
         if (m_pGauge) m_pGauge->setDamage(1, 0);
     }
@@ -1152,7 +1152,7 @@ void CPlayer::stateField() {
         FLOAT y;
         FLOAT dir;
         FLOAT power;
-        DebugWork::g_dw.player.iPlayerInfo = 1;
+        KH_DEBUG(DebugWork::g_dw.player.iPlayerInfo = 1;)
         pos = m_pMove->getPos();
         pos.y -= (FLOAT)dbgAnalogRY(USR_SYSTEM, 1) * 0.00024414062f;
         x = (FLOAT)CPadHandler::getAnalogLX(1) * 0.00024414062f;
@@ -1317,7 +1317,7 @@ void CPlayer::stateBattle() {
     getPadInfo();
     chkPlayCard();
     setControl();
-    if (m_iHP >= 2 && DebugWork::g_dw.player.iHP1) {
+    if (m_iHP >= 2 && KH_DW(DebugWork::g_dw.player.iHP1)) {
         m_iHP = 1;
         if (m_pGauge) m_pGauge->setDamage(1, 0);
     }
@@ -1334,7 +1334,7 @@ void CPlayer::stateBattle() {
         FLOAT y;
         FLOAT dir;
         FLOAT power;
-        DebugWork::g_dw.player.iPlayerInfo = 1;
+        KH_DEBUG(DebugWork::g_dw.player.iPlayerInfo = 1;)
         pos = m_pMove->getPos();
         pos.y -= (FLOAT)dbgAnalogRY(USR_SYSTEM, 1) * 0.00024414062f;
         x = (FLOAT)CPadHandler::getAnalogLX(1) * 0.00024414062f;
@@ -1689,7 +1689,7 @@ void CPlayer::initStandUp(INT inFlag) {
     setFaceAnim(0, 0);
     m_pMove->setFlag(0x40, 0); // partial CMovement: (flag, on)
 }
-__asm__(".rdata\n");
+KH_DEBUG(__asm__(".rdata\n");)
 void CPlayer::exeStandUp() {
     WalkMode PreWalkMode;
     if (isTrgFlag(0x100000) || isConditionFlag(0x2000000)) {
@@ -2493,7 +2493,7 @@ INT CPlayer::getJumpState() const {
 }
 void CPlayer::initJump(INT inFlag) {
     setPlayerState(PL::JUMP);
-    if (DebugWork::g_dw.player.iHiJump) setActionFlag(0x200000, 0);
+    if (KH_DW(DebugWork::g_dw.player.iHiJump)) setActionFlag(0x200000, 0);
     else setActionFlag(0, 0x200000);
     if (CGame::isSoraGame()) {
         UINT uiActionSkill = CGameWork::getInt(0, 0x24);
@@ -2501,8 +2501,8 @@ void CPlayer::initJump(INT inFlag) {
         else setActionFlag(0, 0x800000);
         if (uiActionSkill & 2) setActionFlag(0x400000, 0);
         else setActionFlag(0, 0x400000);
-        if (DebugWork::g_dw.player.iGlide) setActionFlag(0x400000, 0);
-        if (DebugWork::g_dw.player.iGlideSP) setActionFlag(0x800000, 0);
+        if (KH_DW(DebugWork::g_dw.player.iGlide)) setActionFlag(0x400000, 0);
+        if (KH_DW(DebugWork::g_dw.player.iGlideSP)) setActionFlag(0x800000, 0);
     }
     if (m_fAnalogPower >= 0.3f) {
         m_fDir = m_fAnalogViewDir;
@@ -3102,7 +3102,7 @@ void CPlayer::notifyGimmickJump(HANDLE inHandle, INT inPow) {
         _instance()->m_fGimmickJumpPow = PL::g_fGimmickJumpPower[inPow];
     }
 }
-__asm__(".rdata\n");
+KH_DEBUG(__asm__(".rdata\n");)
 INT CPlayer::chkGimmick(UINT inID) {
     INT result;
     HANDLE handle = m_hGimmickJump;
@@ -3755,9 +3755,9 @@ void CPlayer::setPushon(INT inFlag) {
     }
 }
 void CPlayer::setTrgFlagRendaNG(const CHAR* inName) {
-    if (!DebugWork::g_dw.player.iRenda) m_uiTrgFlag |= 0x40000;
+    if (!KH_DW(DebugWork::g_dw.player.iRenda)) m_uiTrgFlag |= 0x40000;
 }
-__asm__(".rdata\n");
+KH_DEBUG(__asm__(".rdata\n");)
 void CPlayer::chkPlayCard() {
     if (m_bIsDead) return;
     if (!m_pRevolver) return;
@@ -3821,7 +3821,7 @@ INT CPlayer::isNowCardActionState() {
     }
     return 0;
 }
-__asm__(".rdata\n");
+KH_DEBUG(__asm__(".rdata\n");)
 INT CPlayer::chkPlayCardCombo() {
     if (!m_pRevolver) return FALSE;
     if (m_bIsDead) return FALSE;
@@ -3950,18 +3950,18 @@ void CPlayer::onMsg(INT inMsg, void* inExtraInfo) {
         }
     } else if (!m_iStockSkill) {
         m_iStepStockSkill = 0;
-        if (DebugWork::g_dw.player.iCardLock > 0) {
+        if (KH_DW(DebugWork::g_dw.player.iCardLock) > 0) {
             switch (CARD0.m_nCategory21) {
             case 1:
             case 2:
             case 3:
             case 4:
             case 5:
-                CARD0.init(DebugWork::g_dw.player.iCardLock, CARD0.m_nNumber);
+                CARD0.init(KH_DW(DebugWork::g_dw.player.iCardLock), CARD0.m_nNumber);
                 break;
             case 6:
             case 14:
-                CARD0.init(DebugWork::g_dw.player.iCardLock, 0);
+                CARD0.init(KH_DW(DebugWork::g_dw.player.iCardLock), 0);
                 break;
             case 7:
             case 8:
@@ -4197,7 +4197,7 @@ INT CPlayer::exeUseStock(INT inFlag) {
         return FALSE;
     }
 }
-__asm__(".rdata\n");
+KH_DEBUG(__asm__(".rdata\n");)
 INT CPlayer::startSingleAction() {
     offAttack();
     UBYTE* pc = (UBYTE*)this + m_iStepStockSkill * 4; /* m_recvCardInfo.m_cardData[step]: id byte, category in the top nibble (CARD is not in the tree yet) */
@@ -4361,9 +4361,9 @@ void CPlayer::setAttack() {
     else m_uiAttackID = PL::g_DRikuAttackList[m_uiAttackKind];
     if (m_iAttackNo == 0) {
         if (CGame::isSoraGame()) {
-            if ((UINT)((USHORT)DebugWork::g_dw.player.iAttackID - 1) < 7) m_uiAttackID = DebugWork::g_dw.player.iAttackID;
+            if ((UINT)((USHORT)KH_DW(DebugWork::g_dw.player.iAttackID) - 1) < 7) m_uiAttackID = KH_DW(DebugWork::g_dw.player.iAttackID);
         } else {
-            if ((UINT)((USHORT)DebugWork::g_dw.player.iAttackID - 0x97) < 7) m_uiAttackID = DebugWork::g_dw.player.iAttackID;
+            if ((UINT)((USHORT)KH_DW(DebugWork::g_dw.player.iAttackID) - 0x97) < 7) m_uiAttackID = KH_DW(DebugWork::g_dw.player.iAttackID);
         }
     }
     m_pAtkData = &PL::g_AttackDataList[m_uiAttackID];
@@ -4641,7 +4641,7 @@ void CPlayer::procGravity(TIMEQ inNowFrame, TIMEQ inEndFrame, INT inFlag) {
     vel.y = m_fJumpSpdY;
     m_pMove->setVel(vel);
 }
-__asm__(".rdata\n");
+KH_DEBUG(__asm__(".rdata\n");)
 void CPlayer::procSkillEnd(INT inAir) {
     INT bAir = inAir;
     if (bAir < 0) bAir = isAir();
@@ -4887,7 +4887,7 @@ BOOL CPlayer::chkDamage() {
         if (m_pCB && m_pCB->getEnchantKind() == 0x3B) {
             hp0 += dmg0;
         } else {
-            hp0 += (DebugWork::g_dw.player.iDamage0 > 0) * dmg0;
+            hp0 += (KH_DW(DebugWork::g_dw.player.iDamage0) > 0) * dmg0;
             setDamageNumber(m_vHeadPos, dmg0);
         }
     }
@@ -5159,7 +5159,7 @@ BOOL CPlayer::chkDamage() {
     }
     return TRUE;
 }
-__asm__(".rdata\n");
+KH_DEBUG(__asm__(".rdata\n");)
 void CPlayer::initFlip(INT inBreak) {
     FLOAT speed;
     INT animID;
@@ -6439,7 +6439,7 @@ void CPlayer::exePrizeHealing() {
         }
     }
 }
-__asm__(".rdata\n");
+KH_DEBUG(__asm__(".rdata\n");)
 void CPlayer::initGimmickCard(INT inNo) {
     TRACE("CPlayer:: initGimmickCard()\n");
     setPlayerState(PL::GIMMICKCARD);
@@ -6541,12 +6541,12 @@ void CPlayer::exeGimmickCard() {
         break;
     }
 }
-__asm__(".rdata\n");
+KH_DEBUG(__asm__(".rdata\n");)
 void CPlayer::setTrapDamage(INT inPower, const CHAR* lpszInName, UINT nNo) {
     INT face;
     INT hp0;
     TRACE("PL:: setTrapDamage\n");
-    if (DebugWork::g_dw.player.iMuteki) return;
+    if (KH_DW(DebugWork::g_dw.player.iMuteki)) return;
     if (lpszInName) setEffect(lpszInName, nNo, &m_vCenterPos, NULL, 0.0f);
     face = 1;
     hp0 = m_iHP;
@@ -6554,7 +6554,7 @@ void CPlayer::setTrapDamage(INT inPower, const CHAR* lpszInName, UINT nNo) {
     if (m_pCB && m_pCB->getEnchantKind() == 0x3B) {
         hp0 += inPower;
     } else {
-        hp0 += (DebugWork::g_dw.player.iDamage0 > 0) * inPower;
+        hp0 += (KH_DW(DebugWork::g_dw.player.iDamage0) > 0) * inPower;
         setDamageNumber(m_vHeadPos, inPower);
     }
     if (m_pCB) {
@@ -6628,7 +6628,7 @@ void CPlayer::updateSpotLight(HANDLE inHandle) {
         effect->getCoords()->Crd(0).touch();
     }
 }
-__asm__(".rdata\n");
+KH_DEBUG(__asm__(".rdata\n");)
 void CPlayer::setQuake(FLOAT inCycle, FLOAT inPower, UINT inTime) {
     CCamera* cam = CWorldEnv::getActiveCamera();
     CameraQuakeParam cqp;
@@ -6956,7 +6956,7 @@ void CPlayer::procDropMP() {
     m_iMP -= dropMP - mp;
     Gauge::CPrizeGauge::setDropMp(dropMP - mp);
 }
-__asm__(".rdata\n");
+KH_DEBUG(__asm__(".rdata\n");)
 void CPlayer::notifyExterminate() {
     if (!_instance()) return;
     if (_instance()->m_bIsDead) {
@@ -7327,7 +7327,7 @@ void CPlayer::addWind(FVECTOR* inVel) {
     if (m_pPLM) m_pPLM->addWindXYZ(inVel);
 }
 void CPlayer::exeWind() {
-    if (dbgCheckUser(KKIKUCHI) && DebugWork::g_dw.player.iTemp == 5) {
+    if (dbgCheckUser(KKIKUCHI) && KH_DW(DebugWork::g_dw.player.iTemp) == 5) {
         if (!m_pPLM) return;
         m_pPLM->addWindXYZ(&DebugWork::g_dw.player.vTemp);
     }
@@ -7355,7 +7355,7 @@ void CPlayer::cmdMove_WaterSurfaceCheck(INT inFlag) {
     if (inFlag) m_pMove->setFlag(0x80, 0);
     else m_pMove->setFlag(0, 0x80);
 }
-__asm__(".rdata\n");
+KH_DEBUG(__asm__(".rdata\n");)
 void CPlayer::cmdState_initWorldSelect(HANDLE inDoor) {
     m_hGimmick = inDoor;
     m_pMarker->holdTarget(8);
@@ -7406,7 +7406,7 @@ void CPlayer::endStateHide_() {
     endStateHide();
 }
 /* the debug window / state name tables (after the last function with strings, before CPlayerDebug) */
-__asm__(".rdata\n");
+KH_DEBUG(__asm__(".rdata\n");)
 char* szPlayerState[38] = {
     "INIT",
     "START WAIT",
@@ -7859,12 +7859,12 @@ CPlayerDebug::CPlayerDebug(CTask* pParent) : CTask(pParent, 0x4000) {
     sprintf(m_szBuf[3], " ");
     sprintf(m_szBuf[4], " ");
     sprintf(m_szBuf[5], " ");
-    DebugWork::g_dw.player.m_szState[0] = m_szBuf[0];
-    DebugWork::g_dw.player.m_szState[1] = m_szBuf[1];
-    DebugWork::g_dw.player.m_szState[2] = m_szBuf[2];
-    DebugWork::g_dw.player.m_szState[3] = m_szBuf[3];
-    DebugWork::g_dw.player.m_szAnim[0] = m_szBuf[4];
-    DebugWork::g_dw.player.m_szAnim[1] = m_szBuf[5];
+    KH_DEBUG(DebugWork::g_dw.player.m_szState[0] = m_szBuf[0];)
+    KH_DEBUG(DebugWork::g_dw.player.m_szState[1] = m_szBuf[1];)
+    KH_DEBUG(DebugWork::g_dw.player.m_szState[2] = m_szBuf[2];)
+    KH_DEBUG(DebugWork::g_dw.player.m_szState[3] = m_szBuf[3];)
+    KH_DEBUG(DebugWork::g_dw.player.m_szAnim[0] = m_szBuf[4];)
+    KH_DEBUG(DebugWork::g_dw.player.m_szAnim[1] = m_szBuf[5];)
     m_iPrevState = 0;
     m_iPrevMuteki = 0;
     m_iPrevHP = 0;
@@ -7877,12 +7877,12 @@ CPlayerDebug::CPlayerDebug(CTask* pParent) : CTask(pParent, 0x4000) {
 }
 CPlayerDebug::~CPlayerDebug() {}
 void CPlayerDebug::main() {
-    if (DebugWork::g_dw.player.iPlayerInfo) {
+    if (KH_DW(DebugWork::g_dw.player.iPlayerInfo)) {
         if (g_pPlayer) {
-            DebugWork::g_dw.player.vPos = g_pPlayer->getPos();
-            DebugWork::g_dw.player.vPos.w = g_pPlayer->m_fDir * 180.0f / 3.1415927f;
+            KH_DEBUG(DebugWork::g_dw.player.vPos = g_pPlayer->getPos();)
+            KH_DEBUG(DebugWork::g_dw.player.vPos.w = g_pPlayer->m_fDir * 180.0f / 3.1415927f;)
             INT st = g_pPlayer->m_PlayerState;
-            DebugWork::g_dw.player.iPlayerState = st;
+            KH_DEBUG(DebugWork::g_dw.player.iPlayerState = st;)
             switch (g_pPlayer->m_PlayerState) {
             case 2:
             case 0x20:
@@ -7971,68 +7971,68 @@ void CPlayerDebug::main() {
         m_pWin->dispOff(0);
     }
     if (g_pPlayer) {
-        if (DebugWork::g_dw.player.iMuteki) g_pPlayer->setPlayerFlag(1, 0);
+        if (KH_DW(DebugWork::g_dw.player.iMuteki)) g_pPlayer->setPlayerFlag(1, 0);
         else if (m_iPrevMuteki) g_pPlayer->setPlayerFlag(0, 1);
-        m_iPrevMuteki = DebugWork::g_dw.player.iMuteki;
-        if (DebugWork::g_dw.player.iDbgWindow) {
-            if (DebugWork::g_dw.player.iHP < 0) {
-                DebugWork::g_dw.player.iHP = 0;
+        m_iPrevMuteki = KH_DW(DebugWork::g_dw.player.iMuteki);
+        if (KH_DW(DebugWork::g_dw.player.iDbgWindow)) {
+            if (KH_DW(DebugWork::g_dw.player.iHP) < 0) {
+                KH_DEBUG(DebugWork::g_dw.player.iHP = 0;)
                 m_iPrevHP = 1;
             }
             INT maxHp = g_pPlayer->m_iMaxHP;
-            if (maxHp < DebugWork::g_dw.player.iHP) {
-                DebugWork::g_dw.player.iHP = maxHp;
+            if (maxHp < KH_DW(DebugWork::g_dw.player.iHP)) {
+                KH_DEBUG(DebugWork::g_dw.player.iHP = maxHp;)
                 m_iPrevHP = (SHORT)maxHp + 1;
             }
-            if (m_iPrevHP != DebugWork::g_dw.player.iHP) {
-                m_iPrevHP = DebugWork::g_dw.player.iHP;
+            if (m_iPrevHP != KH_DW(DebugWork::g_dw.player.iHP)) {
+                m_iPrevHP = KH_DW(DebugWork::g_dw.player.iHP);
                 (*(CPlayer* volatile*)&g_pPlayer)->m_iHP = m_iPrevHP;
                 (*(CPlayer* volatile*)&g_pPlayer)->m_pGauge->setHP(m_iPrevHP, 1);
             }
             if (m_iPrevHP != g_pPlayer->m_iHP) {
                 m_iPrevHP = g_pPlayer->m_iHP;
-                DebugWork::g_dw.player.iHP = m_iPrevHP;
+                KH_DEBUG(DebugWork::g_dw.player.iHP = m_iPrevHP;)
             }
         }
     }
-    m_pCamData = (PCAM_DATA*)DebugWork::g_dw.player.pCamData;
+    m_pCamData = (PCAM_DATA*)KH_DW(DebugWork::g_dw.player.pCamData);
     if (m_pCamData) {
-        if (m_pCamData->fViewAngle != DebugWork::g_dw.player.vCamEye.w) {
-            if (PlayerCamera::CPlayerCamera::getNowCamMode() == DebugWork::g_dw.player.iCamMode) ((CCamera*)g_pPlayer->m_pCam)->setGakaku(DebugWork::g_dw.player.vCamEye.w);
+        if (m_pCamData->fViewAngle != KH_DW(DebugWork::g_dw.player.vCamEye.w)) {
+            if (PlayerCamera::CPlayerCamera::getNowCamMode() == KH_DW(DebugWork::g_dw.player.iCamMode)) ((CCamera*)g_pPlayer->m_pCam)->setGakaku(KH_DW(DebugWork::g_dw.player.vCamEye.w));
         }
-        if (DebugWork::g_dw.player.iCamMode) {
-            if (DebugWork::g_dw.player.iCamMode == 2) {
+        if (KH_DW(DebugWork::g_dw.player.iCamMode)) {
+            if (KH_DW(DebugWork::g_dw.player.iCamMode) == 2) {
                 if (m_pCamData->vEye.x != DebugWork::g_dw.player.vCamEye.x) DebugWork::g_dw.player.vCamEye.z = DebugWork::g_dw.player.vCamEye.x;
                 if (m_pCamData->vEye.z != DebugWork::g_dw.player.vCamEye.z) DebugWork::g_dw.player.vCamEye.x = DebugWork::g_dw.player.vCamEye.z;
             }
         }
         m_pCamData->vEye = DebugWork::g_dw.player.vCamEye;
-        m_pCamData->fViewAngle = DebugWork::g_dw.player.vCamEye.w;
+        m_pCamData->fViewAngle = KH_DW(DebugWork::g_dw.player.vCamEye.w);
         m_pCamData->vAim = DebugWork::g_dw.player.vCamAim;
-        m_pCamData->fAdjust = DebugWork::g_dw.player.vCamAim.w;
-        m_pCamData->fDistance = DebugWork::g_dw.player.fCamDist;
-        m_pCamData->fSize = DebugWork::g_dw.player.fCamSize;
+        m_pCamData->fAdjust = KH_DW(DebugWork::g_dw.player.vCamAim.w);
+        m_pCamData->fDistance = KH_DW(DebugWork::g_dw.player.fCamDist);
+        m_pCamData->fSize = KH_DW(DebugWork::g_dw.player.fCamSize);
     }
-    m_pAtkData = (PATK_DATA*)DebugWork::g_dw.player.pAtkData;
+    m_pAtkData = (PATK_DATA*)KH_DW(DebugWork::g_dw.player.pAtkData);
     if (m_pAtkData) {
-        m_pAtkData->ANIM_ID = DebugWork::g_dw.player.iAtkPrm[0];
-        m_pAtkData->ANIM_ESQ = DebugWork::g_dw.player.iAtkPrm[1];
-        m_pAtkData->EFFECT = DebugWork::g_dw.player.iAtkPrm[2];
-        m_pAtkData->TRG_FRAME = DebugWork::g_dw.player.iAtkPrm[3];
-        m_pAtkData->COLL_START_FRAME = DebugWork::g_dw.player.iAtkPrm[4];
-        m_pAtkData->COLL_END_FRAME = DebugWork::g_dw.player.iAtkPrm[5];
-        m_pAtkData->MOVE_START_FRAME = DebugWork::g_dw.player.iAtkPrm[6];
-        m_pAtkData->MOVE_END_FRAME = DebugWork::g_dw.player.iAtkPrm[7];
-        m_pAtkData->RADIUS = DebugWork::g_dw.player.iAtkPrm[8];
-        m_pAtkData->MAX_SPEED = DebugWork::g_dw.player.iAtkPrm[9];
-        m_pAtkData->POWER = DebugWork::g_dw.player.iAtkPrm[10];
-        m_pAtkData->DAMAGE = DebugWork::g_dw.player.iAtkPrm[11];
-        m_pAtkData->WORK0 = DebugWork::g_dw.player.iAtkPrm[12];
-        m_pAtkData->WORK1 = DebugWork::g_dw.player.iAtkPrm[13];
-        m_pAtkData->WORK2 = DebugWork::g_dw.player.iAtkPrm[14];
-        m_pAtkData->FLAG = DebugWork::g_dw.player.iAtkFlag[0] | DebugWork::g_dw.player.iAtkFlag[1] << 1 | DebugWork::g_dw.player.iAtkFlag[2] << 2 | DebugWork::g_dw.player.iAtkFlag[3] << 3 | DebugWork::g_dw.player.iAtkFlag[4] << 4 | DebugWork::g_dw.player.iAtkFlag[5] << 5 | DebugWork::g_dw.player.iAtkFlag[6] << 6 | DebugWork::g_dw.player.iAtkFlag[7] << 7;
+        m_pAtkData->ANIM_ID = KH_DW(DebugWork::g_dw.player.iAtkPrm[0]);
+        m_pAtkData->ANIM_ESQ = KH_DW(DebugWork::g_dw.player.iAtkPrm[1]);
+        m_pAtkData->EFFECT = KH_DW(DebugWork::g_dw.player.iAtkPrm[2]);
+        m_pAtkData->TRG_FRAME = KH_DW(DebugWork::g_dw.player.iAtkPrm[3]);
+        m_pAtkData->COLL_START_FRAME = KH_DW(DebugWork::g_dw.player.iAtkPrm[4]);
+        m_pAtkData->COLL_END_FRAME = KH_DW(DebugWork::g_dw.player.iAtkPrm[5]);
+        m_pAtkData->MOVE_START_FRAME = KH_DW(DebugWork::g_dw.player.iAtkPrm[6]);
+        m_pAtkData->MOVE_END_FRAME = KH_DW(DebugWork::g_dw.player.iAtkPrm[7]);
+        m_pAtkData->RADIUS = KH_DW(DebugWork::g_dw.player.iAtkPrm[8]);
+        m_pAtkData->MAX_SPEED = KH_DW(DebugWork::g_dw.player.iAtkPrm[9]);
+        m_pAtkData->POWER = KH_DW(DebugWork::g_dw.player.iAtkPrm[10]);
+        m_pAtkData->DAMAGE = KH_DW(DebugWork::g_dw.player.iAtkPrm[11]);
+        m_pAtkData->WORK0 = KH_DW(DebugWork::g_dw.player.iAtkPrm[12]);
+        m_pAtkData->WORK1 = KH_DW(DebugWork::g_dw.player.iAtkPrm[13]);
+        m_pAtkData->WORK2 = KH_DW(DebugWork::g_dw.player.iAtkPrm[14]);
+        m_pAtkData->FLAG = KH_DW(DebugWork::g_dw.player.iAtkFlag[0]) | KH_DW(DebugWork::g_dw.player.iAtkFlag[1]) << 1 | KH_DW(DebugWork::g_dw.player.iAtkFlag[2]) << 2 | KH_DW(DebugWork::g_dw.player.iAtkFlag[3]) << 3 | KH_DW(DebugWork::g_dw.player.iAtkFlag[4]) << 4 | KH_DW(DebugWork::g_dw.player.iAtkFlag[5]) << 5 | KH_DW(DebugWork::g_dw.player.iAtkFlag[6]) << 6 | KH_DW(DebugWork::g_dw.player.iAtkFlag[7]) << 7;
     }
 }
 /* the static initializer (DWT table titles) is generated after the last INCLUDE_ASM: gcc assumes .rdata for its strings */
-__asm__(".rdata\n");
+KH_DEBUG(__asm__(".rdata\n");)
 // SOURCE DATA: .data .rodata .bss

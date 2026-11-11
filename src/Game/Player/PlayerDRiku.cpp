@@ -235,7 +235,7 @@ void CPlayerDRiku::beginStateBattle() {
 
 void CPlayerDRiku::stateBattle() {
     CPlayer::stateBattle();
-    if (DebugWork::g_dw.player.iDP1 && m_iDP >= 2) {
+    if (KH_DW(DebugWork::g_dw.player.iDP1) && m_iDP >= 2) {
         m_pGauge->setDP(1, m_iMaxDP);
         m_iDP = 1;
     }
@@ -654,7 +654,7 @@ void CPlayerDRiku::setAttack() {
     }
     m_uiAttackID = PL::g_DRikuAttackList[m_uiAttackKind];
     if (m_iAttackNo == 0) {
-        if ((UINT)((USHORT)DebugWork::g_dw.player.iAttackID - 0x9E) < 7) m_uiAttackID = DebugWork::g_dw.player.iAttackID;
+        if ((UINT)((USHORT)KH_DW(DebugWork::g_dw.player.iAttackID) - 0x9E) < 7) m_uiAttackID = KH_DW(DebugWork::g_dw.player.iAttackID);
     }
     m_pAtkData = &PL::g_AttackDataList[m_uiAttackID];
     switch (m_uiAttackID) {

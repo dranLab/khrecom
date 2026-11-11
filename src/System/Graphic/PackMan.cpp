@@ -844,7 +844,7 @@ void CPackMan::swapDBuf(INT nInFrame) {
         s_nReqPcrtcMode = -1;
     }
     tGS_DISPFB2 dispfb = env.dispfb;
-    if (DebugWork::g_dw.nakamich.iVramDisp) {
+    if (KH_DW(DebugWork::g_dw.nakamich.iVramDisp)) {
         if (!CDebugWindow::isTopDebugWindow()) {
             INT pls = dbgButtonDown(USR_SYSTEM, 8, 1) ? 8 : 2;
             if (dbgButtonDown(USR_SYSTEM, 0x1000, 1)) DebugWork::g_dw.nakamich.iVramDy -= pls;
@@ -852,12 +852,12 @@ void CPackMan::swapDBuf(INT nInFrame) {
             else if (dbgButtonDown(USR_SYSTEM, 0x8000, 1)) DebugWork::g_dw.nakamich.iVramDx -= pls;
             else if (dbgButtonDown(USR_SYSTEM, 0x2000, 1)) DebugWork::g_dw.nakamich.iVramDx += pls;
             dispfb.PSM = 0;
-            dispfb.DBX = DebugWork::g_dw.nakamich.iVramDx;
-            dispfb.DBY = DebugWork::g_dw.nakamich.iVramDy;
+            dispfb.DBX = KH_DW(DebugWork::g_dw.nakamich.iVramDx);
+            dispfb.DBY = KH_DW(DebugWork::g_dw.nakamich.iVramDy);
         }
     } else {
-        DebugWork::g_dw.nakamich.iVramDy = 0;
-        DebugWork::g_dw.nakamich.iVramDx = 0;
+        KH_DEBUG(DebugWork::g_dw.nakamich.iVramDy = 0;)
+        KH_DEBUG(DebugWork::g_dw.nakamich.iVramDx = 0;)
     }
     *(volatile u_long*)0x12000070 = *(u_long*)&dispfb;
     *(volatile u_long*)0x12000090 = *(u_long*)&dispfb;

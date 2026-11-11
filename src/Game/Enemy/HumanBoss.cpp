@@ -351,8 +351,8 @@ void CHumanBoss::setupCardRevolver() {
         for (j = 0; j < 10; j++) {
             INT k;
             for (k = 0; k < card->bNumber[j]; k++) {
-                if (DebugWork::g_dw.enemy.uiFlag & 0x4000) {
-                    cards->init(cardKind, DebugWork::g_dw.enemy.iCardNumber);
+                if (KH_DW(DebugWork::g_dw.enemy.uiFlag) & 0x4000) {
+                    cards->init(cardKind, KH_DW(DebugWork::g_dw.enemy.iCardNumber));
                 } else {
                     cards->init(cardKind, j);
                 }
@@ -721,7 +721,7 @@ BOOL CHumanBoss::itemCardProc(const CARD* inActiveCard) {
     INT cardKind;
     BOOL find;
 
-    if ((DebugWork::g_dw.enemy.uiFlag & 8) && DebugWork::g_dw.enemy.sActNo + 2 == 10) {
+    if ((KH_DW(DebugWork::g_dw.enemy.uiFlag) & 8) && KH_DW(DebugWork::g_dw.enemy.sActNo) + 2 == 10) {
         count = 0;
         for (i = 0; i < getEnemyParam()->iCardCount; i++) {
             card = &getEnemyParam()->pCards[i];
@@ -886,8 +886,8 @@ BOOL CHumanBoss::stockActProc(const CARD* inActiveCard) {
         if (!canAttack_(m_pUseStock->pAct)) {
             return FALSE;
         }
-        if (DebugWork::g_dw.enemy.uiFlag & 8) {
-            state = DebugWork::g_dw.enemy.sActNo + 2;
+        if (KH_DW(DebugWork::g_dw.enemy.uiFlag) & 8) {
+            state = KH_DW(DebugWork::g_dw.enemy.sActNo) + 2;
             {
                 INT i;
                 for (i = 0; i < m_iNormalActNum; i++) {
@@ -966,7 +966,7 @@ BOOL CHumanBoss::normalActProc(const CARD* inActiveCard) {
                     continue;
                 }
             }
-            if (((DebugWork::g_dw.enemy.uiFlag & 8) && canAttack_(m_pNormalActs[i].pAct)) ||
+            if (((KH_DW(DebugWork::g_dw.enemy.uiFlag) & 8) && canAttack_(m_pNormalActs[i].pAct)) ||
                 (m_pCardData->iCardKind[card] == inActiveCard->m_nKind && canAttack_(m_pNormalActs[i].pAct))) {
                 tmp[count++] = &m_pNormalActs[i];
                 break;
@@ -1008,8 +1008,8 @@ void CHumanBoss::setDoBattleAct(const ACT_DATA* inAct) {
 void CHumanBoss::useCard(INT inState) {
     INT state;
 
-    if (DebugWork::g_dw.enemy.uiFlag & 8) {
-        state = DebugWork::g_dw.enemy.sActNo + 2;
+    if (KH_DW(DebugWork::g_dw.enemy.uiFlag) & 8) {
+        state = KH_DW(DebugWork::g_dw.enemy.sActNo) + 2;
         {
             INT i;
             for (i = 0; i < m_iNormalActNum; i++) {

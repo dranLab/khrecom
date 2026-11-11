@@ -633,7 +633,8 @@ def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg
         # the EE's hazard and erratum nops, guided by -g's line labels), otherwise with modern binutils.
         # Windows-only tools (SN Systems' ee-gcc 2.95.x) run under wibo.
         compat_args = f" --source $in --symbols {symbols} --own-data $own_data --unit-data $unit_data" if (ROOT / symbols).exists() else ""
-        compat_args += f" --asm-path {opts['asm_path']} $compat_extra"
+        compat_args += f" --asm-path {opts['asm_path']}" + ("" if version == versions()[0] else " --release")
+        compat_args += " $compat_extra"
         assemble = "$assemble -o $out $out.s"
         # The preprocessor writes the included headers to $out.d (gcc 2.95 has no -MT: its target is the bare
         # object name, so it is replaced by $out), which ninja reads to rebuild the object when a header changes.

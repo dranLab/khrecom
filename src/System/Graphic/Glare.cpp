@@ -128,7 +128,7 @@ void CGlare::main() {
 
 void CGlare::disp() {
     FLOAT fAlphaPer = m_fAlpha;
-    if (DebugWork::g_dw.sys.m_iGlare == 1) fAlphaPer = DebugWork::g_dw.sys.m_fGlareMaxPer;
+    if (KH_DW(DebugWork::g_dw.sys.m_iGlare) == 1) fAlphaPer = KH_DW(DebugWork::g_dw.sys.m_fGlareMaxPer);
     m_pGlare->setAlpha((INT)(fAlphaPer * 128.0f));
     if (!(m_iFlags & 4)) {
         if (m_iFlags & 8) m_pGlare->setFlag(1);
@@ -175,7 +175,7 @@ void CGlarePrim::makePkt() {
     iAlpha = m_iAlpha;
     if (iAlpha >= 256) iAlpha = 255;
 
-    if (DebugWork::g_dw.sys.m_iGlare == 2) iAlpha = 0;
+    if (KH_DW(DebugWork::g_dw.sys.m_iGlare) == 2) iAlpha = 0;
 
     if (iAlpha <= 0) return;
 #line 312

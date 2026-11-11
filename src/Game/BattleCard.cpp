@@ -430,7 +430,7 @@ void CBattleCard::destroy(INT inFlag) {
         m_uiFlag = (INT)m_uiFlag & ~0x2008;
         changeState(2);
         resetEnchantEffect(0);
-        if (DebugWork::g_dw.player.iCardSpend) return;
+        if (KH_DW(DebugWork::g_dw.player.iCardSpend)) return;
         if (!inFlag) return;
         switch (getCardCategory()) {
         case 0xe:
@@ -500,7 +500,7 @@ void CBattleCard::setPlayStock(INT inCount) {
         struct _bits { u_long b0 : 28; u_long cat1 : 4; };
         if (!m_iStock) {
             CCardBattle* pCB = (CCardBattle*)CTaskMan::getSysTask(0x16);
-            if (DebugWork::g_dw.player.iCardSpend) return;
+            if (KH_DW(DebugWork::g_dw.player.iCardSpend)) return;
             INT enchant = pCB->getEnchantKind(m_uiUser);
             if (enchant == 0x2b) {
                 if (getCardCategory() < 4 && getCardCategory()) return;
@@ -508,7 +508,7 @@ void CBattleCard::setPlayStock(INT inCount) {
                 if (m_pRevolver->getHave(1, 1, 1, 0, 0) == 1) return;
             }
         } else {
-            if (DebugWork::g_dw.player.iCardSpend) return;
+            if (KH_DW(DebugWork::g_dw.player.iCardSpend)) return;
             if (getCardCategory() >= 6) return;
             if (getCardCategory() < 4) return;
         }
@@ -653,7 +653,7 @@ void CBattleCard::stateHand() {
             if (m_iHand != m_iHandMax - 1) {
                 m_tqTimer = 0;
                 m_uiMode = 10;
-                if (!DebugWork::g_dw.player.iDeckDbgDisp) m_uiFlag = (INT)m_uiFlag & ~0x1;
+                if (!KH_DW(DebugWork::g_dw.player.iDeckDbgDisp)) m_uiFlag = (INT)m_uiFlag & ~0x1;
             }
         hand_ok1:
             m_Pos = m_EndPos;
@@ -689,7 +689,7 @@ void CBattleCard::stateHand() {
             m_uiFlag |= 0x100000;
             m_uiMode = 10;
             m_tqTimer = 0;
-            if (!DebugWork::g_dw.player.iDeckDbgDisp) {
+            if (!KH_DW(DebugWork::g_dw.player.iDeckDbgDisp)) {
                 m_uiFlag = (INT)m_uiFlag & ~0x1;
                 m_uiFlag = (INT)m_uiFlag & ~0x2008;
             }
@@ -707,7 +707,7 @@ void CBattleCard::stateHand() {
                 if (m_iHand != m_iHandMax - 1) {
                     m_tqTimer = 0;
                     m_uiMode = 10;
-                    if (!DebugWork::g_dw.player.iDeckDbgDisp) m_uiFlag = (INT)m_uiFlag & ~0x1;
+                    if (!KH_DW(DebugWork::g_dw.player.iDeckDbgDisp)) m_uiFlag = (INT)m_uiFlag & ~0x1;
                 }
         hand_ok2:
                 m_Pos = m_EndPos;
@@ -934,7 +934,7 @@ void CBattleCard::setHandLocate(INT inNum, INT inMax) {
             }
             m_tqTimer = 0;
             m_uiMode = 10;
-            if (DebugWork::g_dw.player.iDeckDbgDisp) {
+            if (KH_DW(DebugWork::g_dw.player.iDeckDbgDisp)) {
                 n = inNum * 25;
                 pLayout = &g_LayoutData[15];
             } else {
@@ -972,7 +972,7 @@ void CBattleCard::setHandLocate(INT inNum, INT inMax) {
         } else {
             m_tqTimer = 0;
             m_uiMode = 10;
-            if (DebugWork::g_dw.player.iDeckDbgDisp) {
+            if (KH_DW(DebugWork::g_dw.player.iDeckDbgDisp)) {
                 n = inNum * 35;
                 pLayout = &g_LayoutData[23];
             } else {

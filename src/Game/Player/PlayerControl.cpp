@@ -176,7 +176,7 @@ BOOL CPlayerPad::isTrgDefense() {
 }
 
 BOOL CPlayerPad::isTrgAttack() {
-    if (DebugWork::g_dw.player.iTrgAuto > 0) {
+    if (KH_DW(DebugWork::g_dw.player.iTrgAuto) > 0) {
         return isButtonDown(0x40) * (m_uiPadFlag & 1);
     } else {
         return isButtonTrg(0x40) * (m_uiPadFlag & 1);

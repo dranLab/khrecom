@@ -14,6 +14,8 @@
 #define KH_AT(line)
 /* KH_VER(beta, retail): an expression or text the retail version changed (e.g. "MAX HP" -> "Max HP") */
 #define KH_VER(beta, retail) retail
+/* KH_DW(DebugWork::g_dw.x): a read of a debug switch (retail has no DebugWork: every switch is off, 0) */
+#define KH_DW(x) 0
 /* operator new(size KH_ATARG("(123)")): the debug operator new's message argument */
 #define KH_ATARG(line)
 /* The debug calls vanish with their arguments (no strings); an assert's condition stays an expression statement
@@ -27,11 +29,22 @@
 #define TRACE_COL(args...) ((void)0)
 #define TRACE_USER(args...) ((void)0)
 #define TRACE_USER_COL(args...) ((void)0)
+/* System/Debug's debug-user and debug-button queries: no debug user, no button in retail */
+#define dbgCheckUser(uid) 0
+#define dbgButtonTrg(args...) 0
+#define dbgButtonDown(args...) 0
+#define dbgButtonRTrg(args...) 0
+#define dbgButtonRpt(args...) 0
+#define dbgAnalogRX(args...) 0
+#define dbgAnalogRY(args...) 0
+#define dbgAnalogLX(args...) 0
+#define dbgAnalogLY(args...) 0
 #else
 #define KH_DEBUG(x...) x
 #define KH_RELEASE(x...)
 #define KH_AT(line) (__FILE__ line)
 #define KH_VER(beta, retail) beta
+#define KH_DW(x) (x)
 #define KH_ATARG(line) , __FILE__ line
 #endif
 

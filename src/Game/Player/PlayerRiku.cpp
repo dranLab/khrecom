@@ -171,7 +171,7 @@ void CPlayerRiku::beginStateBattle() {
 
 void CPlayerRiku::stateBattle() {
     CPlayer::stateBattle();
-    if (DebugWork::g_dw.player.iDP) {
+    if (KH_DW(DebugWork::g_dw.player.iDP)) {
         if (m_iDP != 30) {
             m_pGauge->setDP(30, 0);
         }
@@ -1624,3 +1624,4 @@ void CPlayer::exeDuel() {
 }
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

@@ -284,7 +284,7 @@ void C2DMan::main() {
 }
 
 void C2DMan::disp() {
-    if (m_pInstance && DebugWork::g_dw.sys.m_iFukidasiDisp) C2DSpr::_disp(m_nLevel);
+    if (m_pInstance && KH_DW(DebugWork::g_dw.sys.m_iFukidasiDisp)) C2DSpr::_disp(m_nLevel);
 }
 
 BOOL C2DMan::isEnd(HANDLE handle) {

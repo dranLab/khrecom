@@ -227,15 +227,15 @@ CPlayerCamera::CPlayerCamera(CTask* pParent) : CCamera(pParent, -1), m_uiFlag(0)
     sprintf(m_strCamera2, " ");
     sprintf(m_strCamera3, " ");
     sprintf(m_strCamera4, " ");
-    DebugWork::g_dw.player.m_szCamera[0] = m_strCamera0;
-    DebugWork::g_dw.player.m_szCamera[1] = m_strCamera1;
-    DebugWork::g_dw.player.m_szCamera[2] = m_strCamera2;
-    DebugWork::g_dw.player.m_szCamera[3] = m_strCamera3;
-    DebugWork::g_dw.player.m_szCamera[4] = m_strCamera4;
+    KH_DEBUG(DebugWork::g_dw.player.m_szCamera[0] = m_strCamera0;)
+    KH_DEBUG(DebugWork::g_dw.player.m_szCamera[1] = m_strCamera1;)
+    KH_DEBUG(DebugWork::g_dw.player.m_szCamera[2] = m_strCamera2;)
+    KH_DEBUG(DebugWork::g_dw.player.m_szCamera[3] = m_strCamera3;)
+    KH_DEBUG(DebugWork::g_dw.player.m_szCamera[4] = m_strCamera4;)
 #line 269
     m_pWindow = new KH_AT("(269)") CDebugWindow(this, DWTPlayer::debugPlayerCameraInfo);
     m_pWindow->dispOff(0);
-    DebugWork::g_dw.player.iCamMode = 1;
+    KH_DEBUG(DebugWork::g_dw.player.iCamMode = 1;)
     g_pCamData[0] = NULL;
     g_pCamData[1] = &m_pParam->FieldNormal;
     g_pCamData[2] = &m_pParam->FieldFar;
@@ -256,14 +256,14 @@ CPlayerCamera::CPlayerCamera(CTask* pParent) : CCamera(pParent, -1), m_uiFlag(0)
     m_iModeFieldNear = 1;
     m_iModeFieldFar = 2;
     m_fRikuShiftY = 0.0f;
-    m_fRikuShiftY = (DebugWork::g_dw.player.iCamRikuShiftY && CGame::isRikuGame()) ? 0.4f : 0.0f;
+    m_fRikuShiftY = (KH_DW(DebugWork::g_dw.player.iCamRikuShiftY) && CGame::isRikuGame()) ? 0.4f : 0.0f;
     _initialize();
 }
 
 CPlayerCamera::~CPlayerCamera() {
     if (m_pLines) delete m_pLines;
     m_pLines = NULL;
-    DebugWork::g_dw.player.iCamMode = 0;
+    KH_DEBUG(DebugWork::g_dw.player.iCamMode = 0;)
     m_pInstance = NULL;
     m_nBossCamID = 0;
     m_tqEffect = 0;
@@ -294,10 +294,10 @@ void CPlayerCamera::_initialize() {
     BOOL bIsBattleScene = CSceneInfo::isBattleScene() | CSceneInfo::isMinigameScene();
     m_fYLimitHi = 3.1415927f;
     if (CGame::isRikuGame() && !(bIsBattleScene && (USHORT)(CSceneInfo::getCurrentSceneNum() - 1050) < 149)) {
-        DebugWork::g_dw.player.iCamRikuShiftY = 1;
+        KH_DEBUG(DebugWork::g_dw.player.iCamRikuShiftY = 1;)
         m_fRikuShiftY = 0.4f;
     } else {
-        DebugWork::g_dw.player.iCamRikuShiftY = 0;
+        KH_DEBUG(DebugWork::g_dw.player.iCamRikuShiftY = 0;)
         m_fRikuShiftY = 0.0f;
     }
     if (!bIsBattleScene) {
@@ -344,7 +344,7 @@ void CPlayerCamera::initCamera(INT inMode, INT inReset, FVECTOR* inDir) {
         m_pPlayer->updateCoord();
         m_pPlayer->coordFix();
     }
-    m_fRikuShiftY = (DebugWork::g_dw.player.iCamRikuShiftY && CGame::isRikuGame()) ? 0.4f : 0.0f;
+    m_fRikuShiftY = (KH_DW(DebugWork::g_dw.player.iCamRikuShiftY) && CGame::isRikuGame()) ? 0.4f : 0.0f;
     pos = getNowPlayerPos();
     eye = m_pData->vEye;
     eye.y += m_fRikuShiftY;
@@ -445,7 +445,7 @@ void CPlayerCamera::initCamera(INT inMode, INT inReset, FVECTOR* inDir) {
     lookAt(m_vAim, (const FVECTOR*)NULL);
     m_vPreEye = m_vEye;
     m_vPreAim = m_vAim;
-    if (DebugWork::g_dw.player.iCameraInfo) {
+    if (KH_DW(DebugWork::g_dw.player.iCameraInfo)) {
         FLOAT deltaRingAngle;
         G_LINE line;
         FVECTOR ofs;
@@ -560,7 +560,7 @@ void CPlayerCamera::main() {
     update();
     exeFrameEffect();
     m_tqTimer += getFrameRate();
-    if (DebugWork::g_dw.player.iCameraInfo) {
+    if (KH_DW(DebugWork::g_dw.player.iCameraInfo)) {
         sprintf(m_strCamera0, "Mode %s", szTestCamMode[m_iMode]);
         sprintf(m_strCamera1, "Aim:  % 10.6f,% 10.6f,% 10.6f", m_vAim.x, m_vAim.y, m_vAim.z);
         sprintf(m_strCamera2, "Eye:  % 10.6f,% 10.6f,% 10.6f", m_vEye.x, m_vEye.y, m_vEye.z);
@@ -861,7 +861,7 @@ void CPlayerCamera::changeModeBattle(INT inMode) {
 
     setGakaku(m_pData->fViewAngle);
     m_vOffset.init();
-    m_fRikuShiftY = (DebugWork::g_dw.player.iCamRikuShiftY && CGame::isRikuGame()) ? 0.4f : 0.0f;
+    m_fRikuShiftY = (KH_DW(DebugWork::g_dw.player.iCamRikuShiftY) && CGame::isRikuGame()) ? 0.4f : 0.0f;
     FVECTOR eye = m_pData->vEye;
     eye.y += m_fRikuShiftY;
     FVECTOR aim = m_pData->vAim;
@@ -1223,7 +1223,7 @@ FVECTOR& CPlayerCamera::getNowPlayerCamPos() {
 
 void CPlayerCamera::enableRikuShiftY() {
     if (CGame::isRikuGame()) {
-        DebugWork::g_dw.player.iCamRikuShiftY = 1;
+        KH_DEBUG(DebugWork::g_dw.player.iCamRikuShiftY = 1;)
         m_fRikuShiftY = 0.4f;
     }
 }

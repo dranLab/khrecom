@@ -455,7 +455,7 @@ CEntity* CBattleEnemyManager::createPremiumPrize(const FVECTOR& inPos, INT inEne
     if ((USHORT)(CSceneInfo::getCurrentSceneNum() - 1050) < 149) return NULL;
     if (isAppearPremiumPrize()) return NULL;
     if (CCard::isCurrentDeckPremiumFull()) return NULL;
-    if (!(DebugWork::g_dw.enemy.uiFlag & 0x80)) {
+    if (!(KH_DW(DebugWork::g_dw.enemy.uiFlag) & 0x80)) {
         RoomInfo* room = CSceneInfo::getRoomInfo(-1);
         if (!room) return NULL;
         switch (room->getCardID()) {
@@ -488,7 +488,7 @@ CEntity* CBattleEnemyManager::createRoulettePrize(const FVECTOR& inPos) {
     if (isAppearRoulettePrize()) return NULL;
     if (CCard::isMapCardFull()) return NULL;
     if (!CCard::getMapTotal()) return NULL;
-    if (!(DebugWork::g_dw.enemy.uiFlag & 0x100)) {
+    if (!(KH_DW(DebugWork::g_dw.enemy.uiFlag) & 0x100)) {
         RoomInfo* room = CSceneInfo::getRoomInfo(-1);
         if (!room) return NULL;
         if (room->getCardID() != 0xab) return NULL;
@@ -637,8 +637,8 @@ OBJ_FORMATION* CBattleEnemyManager::getFormation_() {
     int select[16];
     INT index;
     INT n;
-    if (DebugWork::g_dw.enemy.uiFlag & 4) {
-        start = end = DebugWork::g_dw.enemy.sFormation;
+    if (KH_DW(DebugWork::g_dw.enemy.uiFlag) & 4) {
+        start = end = KH_DW(DebugWork::g_dw.enemy.sFormation);
     } else {
         _MapEnemyRoomInfo* info = CSceneInfo::getCurrentRoomMapEnemyInfo();
         if (CSceneInfo::getCurrentWorldID(TRUE) == 9) {

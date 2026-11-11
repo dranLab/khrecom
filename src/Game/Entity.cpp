@@ -1265,7 +1265,7 @@ BOOL CEntity::initRideModel_(INT inGroup) {
     if (!m_pRideModel) return FALSE;
     m_pRideModel->init(ocd, this);
     m_pRideModel->on();
-    if (DebugWork::g_dw.collision.uiFlag & 1) new KH_AT("(2632)") CCollRideModelDisp(this, m_pRideModel, TRUE);
+    if (KH_DW(DebugWork::g_dw.collision.uiFlag) & 1) new KH_AT("(2632)") CCollRideModelDisp(this, m_pRideModel, TRUE);
     return TRUE;
 }
 void CEntity::updateTimer_() {

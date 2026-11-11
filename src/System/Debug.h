@@ -93,15 +93,15 @@ void (TRACE)(char* fmt, ...);
 #else
 extern char _szTraceBuf[1536];
 
-extern "C" int dbgCheckUser(USER uid);
-INT dbgButtonTrg(USER uid, UINT button, INT padId);
-INT dbgButtonDown(USER uid, UINT button, INT padId);
-INT dbgButtonRTrg(USER uid, UINT button, INT padId);
-INT dbgButtonRpt(USER uid, UINT button, INT padId);
-INT dbgAnalogRX(USER uid, INT padId);
-INT dbgAnalogRY(USER uid, INT padId);
-INT dbgAnalogLX(USER uid, INT padId);
-INT dbgAnalogLY(USER uid, INT padId);
+extern "C" int (dbgCheckUser)(USER uid);
+INT (dbgButtonTrg)(USER uid, UINT button, INT padId);
+INT (dbgButtonDown)(USER uid, UINT button, INT padId);
+INT (dbgButtonRTrg)(USER uid, UINT button, INT padId);
+INT (dbgButtonRpt)(USER uid, UINT button, INT padId);
+INT (dbgAnalogRX)(USER uid, INT padId);
+INT (dbgAnalogRY)(USER uid, INT padId);
+INT (dbgAnalogLX)(USER uid, INT padId);
+INT (dbgAnalogLY)(USER uid, INT padId);
 extern "C" void (TRACE)(char* fmt, ...);
 extern "C" void (TRACE_COL)(TtyColor nCol, char* fmt, ...);
 extern "C" void (TRACE_USER)(USER uid, char* fmt, ...);

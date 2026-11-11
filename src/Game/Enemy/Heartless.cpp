@@ -111,11 +111,11 @@ void CHeartless::aiCardBattle() {
     }
     if (count == 0) return;
     if (!canCardBattle()) return;
-    if (DebugWork::g_dw.enemy.uiFlag & 8) {
+    if (KH_DW(DebugWork::g_dw.enemy.uiFlag) & 8) {
         for (INT i = 0; i < getEnemyParam()->iActCount; i++) {
-            if (getEnemyParam()->pActs[i].iActNo == DebugWork::g_dw.enemy.sActNo) {
+            if (getEnemyParam()->pActs[i].iActNo == KH_DW(DebugWork::g_dw.enemy.sActNo)) {
                 setBattleEnemyFlag(0x200, 0);
-                m_iAttackState = DebugWork::g_dw.enemy.sActNo + 2;
+                m_iAttackState = KH_DW(DebugWork::g_dw.enemy.sActNo) + 2;
                 return;
             }
         }
@@ -520,7 +520,7 @@ static inline ENEMY_ACT* _findAct(ENEMY_PARAM* param, INT inActNo) {
 
 #define PARAM (((CHeartless*)this)->getEnemyParam())
 INT CHeartless::getCardNumber_(INT inState) const {
-    if (DebugWork::g_dw.enemy.uiFlag & 0x4000) return DebugWork::g_dw.enemy.iCardNumber;
+    if (KH_DW(DebugWork::g_dw.enemy.uiFlag) & 0x4000) return KH_DW(DebugWork::g_dw.enemy.iCardNumber);
     ENEMY_ACT* act = _findAct(PARAM, inState - 2);
 #line 826
     ASSERT(act);

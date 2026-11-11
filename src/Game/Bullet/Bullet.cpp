@@ -718,11 +718,11 @@ BOOL CHomingBullet::setup(const BULLET_PARAM& inParam) {
     m_vTwist.y = 0.008726646f;
     m_vTwist.z = -0.08726646f;
     m_vTwist.w = 1.0f;
-    if (DebugWork::g_dw.player.iTemp == 3) {
-        m_vTwist.w = DebugWork::g_dw.player.vTemp.w;
-        m_vTwist.x = DebugWork::g_dw.player.vTemp.x * 10.0f * 0.017453292f;
-        m_vTwist.y = DebugWork::g_dw.player.vTemp.y * 10.0f * 0.017453292f;
-        m_vTwist.z = DebugWork::g_dw.player.vTemp.z * 10.0f * 0.017453292f;
+    if (KH_DW(DebugWork::g_dw.player.iTemp) == 3) {
+        m_vTwist.w = KH_DW(DebugWork::g_dw.player.vTemp.w);
+        m_vTwist.x = KH_DW(DebugWork::g_dw.player.vTemp.x) * 10.0f * 0.017453292f;
+        m_vTwist.y = KH_DW(DebugWork::g_dw.player.vTemp.y) * 10.0f * 0.017453292f;
+        m_vTwist.z = KH_DW(DebugWork::g_dw.player.vTemp.z) * 10.0f * 0.017453292f;
     }
     m_iStep = 0;
     if (isHitExplodeOnly()) {

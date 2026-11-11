@@ -142,7 +142,7 @@ CBlurPrim::CBlurPrim() {
     m_iDebugID = 0;
 }
 FIX4 CBlurPrim::calcZ() {
-    if (!(DebugWork::g_dw.sys.m_iBlurKind && DebugWork::g_dw.sys.m_iBlurCh == m_iDebugID)) {
+    if (!(KH_DW(DebugWork::g_dw.sys.m_iBlurKind) && KH_DW(DebugWork::g_dw.sys.m_iBlurCh) == m_iDebugID)) {
         if (!m_iKind || m_iRate <= 0) return 0xf0000000;
     }
     return m_nCalcZOfs + 0xffffc08;
@@ -309,7 +309,7 @@ void CDeFocusPrim::_makePktDeFocus() {
     FLOAT BAK_Far;
     QWdata* qp;
 
-    if (DebugWork::g_dw.sys.m_iDeFocus) return;
+    if (KH_DW(DebugWork::g_dw.sys.m_iDeFocus)) return;
     if (m_iStatus & 0x10000) return;
     if ((m_iStatus & 3) == 3) return;
     pCam = CWorldEnv::getActiveCamera();
@@ -322,15 +322,15 @@ void CDeFocusPrim::_makePktDeFocus() {
     BAK_Status = m_iStatus;
     BAK_Near = m_fNear;
     BAK_Far = m_fFar;
-    if (0.0f < DebugWork::g_dw.sys.m_fDeFocusNear) {
+    if (0.0f < KH_DW(DebugWork::g_dw.sys.m_fDeFocusNear)) {
         m_iStatus |= 4;
         m_iStatus &= ~2;
-        m_fNear = DebugWork::g_dw.sys.m_fDeFocusNear;
+        m_fNear = KH_DW(DebugWork::g_dw.sys.m_fDeFocusNear);
     }
-    if (0.0f < DebugWork::g_dw.sys.m_fDeFocusFar) {
+    if (0.0f < KH_DW(DebugWork::g_dw.sys.m_fDeFocusFar)) {
         m_iStatus |= 4;
         m_iStatus &= ~1;
-        m_fFar = DebugWork::g_dw.sys.m_fDeFocusFar;
+        m_fFar = KH_DW(DebugWork::g_dw.sys.m_fDeFocusFar);
     }
     if (m_iStatus & 4) {
         ScaleVectorXYZ(vNear, vN, m_fNear);
@@ -369,7 +369,7 @@ void CDeFocusPrim::_makePktDeFocus() {
             ((u_long*)qp)[0] = 0x356;
             ((u_long*)qp)[1] = 0; qp++;
             ((u_long*)qp)[0] = 0x50808080;
-            if (DebugWork::g_dw.sys.m_iDeFocusCol) ((u_long*)qp)[0] = 0x504040FF;
+            if (KH_DW(DebugWork::g_dw.sys.m_iDeFocusCol)) ((u_long*)qp)[0] = 0x504040FF;
             ((u_long*)qp)[1] = 1;
             CPackMan::pkCloseGifTag(qp + 1);
             qp = __null;
@@ -387,7 +387,7 @@ void CDeFocusPrim::_makePktDeFocus() {
             ((u_long*)qp)[0] = 0x356;
             ((u_long*)qp)[1] = 0; qp++;
             ((u_long*)qp)[0] = 0x50808080;
-            if (DebugWork::g_dw.sys.m_iDeFocusCol) ((u_long*)qp)[0] = 0x5040FF40;
+            if (KH_DW(DebugWork::g_dw.sys.m_iDeFocusCol)) ((u_long*)qp)[0] = 0x5040FF40;
             ((u_long*)qp)[1] = 1;
             CPackMan::pkCloseGifTag(qp + 1);
             qp = __null;
@@ -428,7 +428,7 @@ void CDeFocusPrim::_makePktDeFocus() {
             ((u_long*)qp)[0] = 0x356;
             ((u_long*)qp)[1] = 0; qp++;
             ((u_long*)qp)[0] = 0x80808080;
-            if (DebugWork::g_dw.sys.m_iDeFocusCol) ((u_long*)qp)[0] = 0x80FF4040;
+            if (KH_DW(DebugWork::g_dw.sys.m_iDeFocusCol)) ((u_long*)qp)[0] = 0x80FF4040;
             ((u_long*)qp)[1] = 1;
             CPackMan::pkCloseGifTag(qp + 1);
             set_tsprite32(__null, 32, 0, 0xFFFF28, 0x200, SCREEN_HEIGHT, 0x200, SCREEN_HEIGHT);
@@ -460,15 +460,15 @@ void CBlurPrim::_makePktBlur() {
     Bak_fBlurLen = m_fLen;
     Bak_iBlurCol = m_iColor.col;
     Bak_iBlurAlpha = m_iAlpha;
-    if (DebugWork::g_dw.sys.m_iBlurKind && DebugWork::g_dw.sys.m_iBlurCh == m_iDebugID) {
-        m_iKind = DebugWork::g_dw.sys.m_iBlurKind;
-        m_iRate = DebugWork::g_dw.sys.m_iBlurRate;
-        m_fLen = DebugWork::g_dw.sys.m_fBlurLen;
-        m_iColor.col = (u_char)DebugWork::g_dw.sys.m_iBlurCR |
-                       ((u_char)DebugWork::g_dw.sys.m_iBlurCG << 8) |
-                       ((u_char)DebugWork::g_dw.sys.m_iBlurCB << 16) |
-                       ((u_char)DebugWork::g_dw.sys.m_iBlurCA << 24);
-        m_iAlpha = DebugWork::g_dw.sys.m_iBlurAlpha;
+    if (KH_DW(DebugWork::g_dw.sys.m_iBlurKind) && KH_DW(DebugWork::g_dw.sys.m_iBlurCh) == m_iDebugID) {
+        m_iKind = KH_DW(DebugWork::g_dw.sys.m_iBlurKind);
+        m_iRate = KH_DW(DebugWork::g_dw.sys.m_iBlurRate);
+        m_fLen = KH_DW(DebugWork::g_dw.sys.m_fBlurLen);
+        m_iColor.col = (u_char)KH_DW(DebugWork::g_dw.sys.m_iBlurCR) |
+                       ((u_char)KH_DW(DebugWork::g_dw.sys.m_iBlurCG) << 8) |
+                       ((u_char)KH_DW(DebugWork::g_dw.sys.m_iBlurCB) << 16) |
+                       ((u_char)KH_DW(DebugWork::g_dw.sys.m_iBlurCA) << 24);
+        m_iAlpha = KH_DW(DebugWork::g_dw.sys.m_iBlurAlpha);
     }
     if (!m_iKind || m_iRate <= 0) {
         m_iKind = Bak_iBlurKind;

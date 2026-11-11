@@ -209,7 +209,7 @@ void CShadowModelMan::drawBefore() {
     qp++;
     *(u_long128*)&qp[0] = _makeQW(6, 0);
     *(u_long128*)&qp[1] = _makeQW(0, 1);
-    if (DebugWork::g_dw.shadow.iDispArea) {
+    if (KH_DW(DebugWork::g_dw.shadow.iDispArea)) {
         *(u_long128*)&qp[1] = _makeQW(0x60000080, 1);
     }
     qp += 2;

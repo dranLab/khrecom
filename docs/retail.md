@@ -213,9 +213,9 @@ SoundMan's `_getBgmName_withID`).
 
 ### Open (for the next session)
 
-- `DebugWork::g_dw` (1,776 uses): retail compiles every use away (e.g. aiCardBattle of three enemies:
-  `if (g_dw... & 8)` branch gone). Needs a decision on the release value of each switch (most likely: as if 0/off,
-  reads only; writes and debug-only branches vanish) and then a mechanical `KH_DEBUG`/`KH_VER` pass per use.
+- `DebugWork::g_dw`: done as decided by the user (2026-11-11, below); left: VSME's debug menu tables (data with
+  `&g_dw...` pointers) and the debug-only overrides it implies (e.g. CBattleEnemy::update exists only for a switch:
+  retail has no override, so the CFSM vtable slot differs).
 - Retail changes proper (`calls`/`shape` and many `inline`/`header` DIFFs are real code changes, e.g.
   ATEL::CAvatar::InitAvatar's new `% 10000 == 1007` case): `KH_RELEASE`/`KH_VER` variants written from the retail
   assembly, unit by unit (`tools/retail_units.py try <unit> --show <function>`).
@@ -224,4 +224,24 @@ SoundMan's `_getBgmName_withID`).
 - Size mismatches with all functions matching: PlaySpeedCtrl (retail names getProgressTime and getSysProgressTime
   at one address), SoundMan (retail has a function the source lacks).
 - Units still with INCLUDE_ASM (the beta's parked functions) are not scanned.
+
+## DebugWork switches off (user decision 2026-11-11: "treat g_dw switches as off in retail")
+
+- Reads of `DebugWork::g_dw.x` are `KH_DW(DebugWork::g_dw.x)`: the read in the beta, `0` in retail (gcc folds the
+  dead branches without a trace: EnemyAirpirate::aiCardBattle matched). Whole-line writes are `KH_DEBUG(...)`
+  (`KH_RELEASE(;)` after them where they are the body of an unbraced if/else). Vector members (vCamEye, vTemp, ...)
+  stay plain reads: they only occur in code that folds away. 287 reads and 183 write lines
+  (tools/helpers/retail_dw_wrap.py, debug-only files left out); VSME's debug tables and a few conditional writes are
+  left for per-unit work.
+- System/Debug's queries are off too: `dbgCheckUser`, `dbgButton*`, `dbgAnalog*` are `0` in retail (khversion.h;
+  declarations `(name)`); CComponentObj's dbgButtonTrg/RTrg members and the CCollDisp::initialize calls are
+  beta-only.
+- Two ee_asm_compat.py fixes for code built without -g (`--release`, passed for the non-reference versions only):
+  no short-loop padding over an alignment (a jump table's target, not a loop), and an explicit nop after a jump
+  through a register before the jump table's section switch (Ps2EeAs crashed). And the sources' `__asm__(".rdata\n")`
+  resyncs (JiminyMemo, Player: beta placeholders) are beta-only: without -g gcc's section bookkeeping differs, and the
+  resync left functions in .rdata.
+- Result: 10,353 functions match (was 9,320), **454 units from source in retail**.
+- Seen on the way: the beta's PackMan beginScene failed one build and matched four rebuilds - the known
+  anonymous-namespace suffix hash (memory "gcse PRE hash order"), not a change of this run.
 

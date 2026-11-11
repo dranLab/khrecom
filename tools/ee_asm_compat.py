@@ -108,6 +108,26 @@ def branch_word(mnemonic: str, operands: str | None) -> int:
     return (opcode << 26) | (regs[0] << 21) | ((regs[1] if nregs == 2 else rt) << 16)
 
 
+RELEASE = False  # --release
+
+
+def fix_table_jumps(lines: list[str]) -> list[str]:
+    """--release (built without -g): a jump through a register in reorder code followed by an alignment and the
+    jump table's section switch gets its delay slot nop explicitly. With -g a line marker follows the table's
+    targets and Ps2EeAs leaves the slot alone; without it Ps2EeAs crashes trying to fill it (the retail ELF has the
+    nop: 414 of its 418 jr's through a register)."""
+    out, noreorder = [], False
+    for i, line in enumerate(lines):
+        if m := SET_REORDER.match(line):
+            noreorder = m.group(1) == "no"
+        nxt = next((l for l in lines[i + 1:i + 4] if l.strip()), "")
+        if not noreorder and re.match(r"^\tj\t\$\d+\s*$", line) and re.match(r"^\t\.(?:p2)?align\b", nxt):
+            out += ["\t.set\tnoreorder", line, "\tnop", "\t.set\treorder"]
+            continue
+        out.append(line)
+    return out
+
+
 def fix_short_loops(lines: list[str]) -> list[str]:
     """Pad short loops the way the original assembler did.
 
@@ -121,6 +141,7 @@ def fix_short_loops(lines: list[str]) -> list[str]:
     out: list[str] = []
     labels: dict[str, int] = {}  # label -> index in out
     noreorder = False
+    no_g = RELEASE
     n = 0
     for i, line in enumerate(lines):
         if m := SET_REORDER.match(line):
@@ -129,7 +150,10 @@ def fix_short_loops(lines: list[str]) -> list[str]:
             labels.clear()
         elif m := LABEL.match(line):
             labels[m.group(1)] = len(out)
-        elif (m := BRANCH.match(line)) and m.group(3) in labels:
+        elif (m := BRANCH.match(line)) and m.group(3) in labels and not (no_g and any(
+                re.match(r"^\t\.(?:p2)?align\b", l) for l in out[labels[m.group(3)] + 1:])):
+            # (built without -g, the retail build: an alignment between label and branch is no loop - a jump
+            # table's target block - and the distance isn't a constant for the assembler)
             body = [l for l in out[labels[m.group(3)] + 1:] if INSN.match(l)]
             # gcc leaves the nop between an FP compare and its bc1t/bc1f to the assembler ("#nop"), even when it
             # puts the branch in a noreorder block; it is part of the loop, and the .word branch would hide the
@@ -408,8 +432,11 @@ def main() -> None:
                                            "are removed")
     parser.add_argument("--asm-path", help="the building version's splat tree (asm/<VERSION>): INCLUDE_ASM paths "
                                            "asm/<any version>/nonmatchings/... are read from it")
+    parser.add_argument("--release", action="store_true",
+                        help="a version built without -g (retail): see fix_short_loops")
     args = parser.parse_args()
-    global ASM_PATH
+    global ASM_PATH, RELEASE
+    RELEASE = args.release
     ASM_PATH = args.asm_path
 
     with open(args.input, encoding="latin-1") as f:
@@ -435,6 +462,8 @@ def main() -> None:
         source_lines = rename_local_statics(source_lines, args.symbols, args.unit_data, args.own_data)
     if args.assembler == "snas":
         source_lines = fix_short_loops(source_lines)  # compiled code only: INCLUDE_ASM'd code is inlined below
+        if RELEASE:
+            source_lines = fix_table_jumps(source_lines)
     for line in source_lines:
         if args.assembler == "gas":
             if (m := INCLUDE.match(line)) and m.group(1).endswith(".s"):

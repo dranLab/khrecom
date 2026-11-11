@@ -352,7 +352,7 @@ void CNaviMap::main() {
         FVECTOR rot;
         rot.x = _roundRot(_deg2rad(55.0f));
         rot.y = 0.0f;
-        if (2 == DebugWork::g_dw.player.iTemp) {
+        if (2 == KH_DW(DebugWork::g_dw.player.iTemp)) {
             rot = DebugWork::g_dw.player.vTemp;
             rot.x = _roundRot(_deg2rad(rot.x * 100.0f));
         }
@@ -381,7 +381,7 @@ void CNaviMap::disp() {
     if (m_uiDispFlag & 0x800000) {
         return;
     }
-    if (!DebugWork::g_dw.sys.m_iFukidasiDisp) {
+    if (!KH_DW(DebugWork::g_dw.sys.m_iFukidasiDisp)) {
         return;
     }
     if (!m_pModels) {

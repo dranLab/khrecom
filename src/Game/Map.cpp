@@ -710,7 +710,7 @@ void CMap::resetFog() {
     CWorldEnv::setFogColor(m_pFog->color.x, m_pFog->color.y, m_pFog->color.z);
     CWorldEnv::setScreenZ(m_pFog->screenz);
     CWorldEnv::setDefScreenZ(m_pFog->screenz);
-    DebugWork::g_dw.nakamich.fCamVAngle = ProjectionToViewAngle(m_pFog->screenz);
+    KH_DEBUG(DebugWork::g_dw.nakamich.fCamVAngle = ProjectionToViewAngle(m_pFog->screenz);)
     INT max = m_pFog->skynum;
     if (max > 4) {
         TRACE("FOG\203f\201[\203^\202\252\211\363\202\352\202\304\202\351\202\251\202\340\202\346\n");
@@ -783,18 +783,18 @@ void CMap::disp() {
 
     INT group_no; FLOAT fR; CMapModel* pModel; INT nModel; FVECTOR vColor; FVECTOR* pSceneColor; INT i;
 
-    if (DebugWork::g_dw.sys.m_iMapDisp < -1)
-        DebugWork::g_dw.sys.m_iMapDisp = m_nModelMax;
+    if (KH_DW(DebugWork::g_dw.sys.m_iMapDisp) < -1)
+        KH_DEBUG(DebugWork::g_dw.sys.m_iMapDisp = m_nModelMax;) KH_RELEASE(;)
 
-    else if (m_nModelMax < DebugWork::g_dw.sys.m_iMapDisp)
-        DebugWork::g_dw.sys.m_iMapDisp = -1;
-
-
-    if (DebugWork::g_dw.sys.m_iMapDisp < 0) return;
+    else if (m_nModelMax < KH_DW(DebugWork::g_dw.sys.m_iMapDisp))
+        KH_DEBUG(DebugWork::g_dw.sys.m_iMapDisp = -1;) KH_RELEASE(;)
 
 
-    if (DebugWork::g_dw.sys.m_iMapDisp > 0) {
-        m_gpPosDir.setCoord(&Crd(DebugWork::g_dw.sys.m_iMapDisp));
+    if (KH_DW(DebugWork::g_dw.sys.m_iMapDisp) < 0) return;
+
+
+    if (KH_DW(DebugWork::g_dw.sys.m_iMapDisp) > 0) {
+        m_gpPosDir.setCoord(&Crd(KH_DW(DebugWork::g_dw.sys.m_iMapDisp)));
         m_gpPosDir.disp();
     }
 
@@ -802,17 +802,17 @@ void CMap::disp() {
     {
         CMapModel* pModel = m_pModelTbl;
         INT nModel = m_nModelMax;
-        if (DebugWork::g_dw.sys.m_iMapBack == 0) {
+        if (KH_DW(DebugWork::g_dw.sys.m_iMapBack) == 0) {
             for (INT i = 0; i < nModel; i++, pModel++) {
                 pModel->defaultShaderOption();
             }
 
-        } else if (DebugWork::g_dw.sys.m_iMapBack == 1) {
+        } else if (KH_DW(DebugWork::g_dw.sys.m_iMapBack) == 1) {
             for (INT i = 0; i < nModel; i++, pModel++) {
                 pModel->setShaderOption(2);
             }
 
-        } else if (DebugWork::g_dw.sys.m_iMapBack == 2) {
+        } else if (KH_DW(DebugWork::g_dw.sys.m_iMapBack) == 2) {
             for (INT i = 0; i < nModel; i++, pModel++) {
                 pModel->resetShaderOption(2);
             }
@@ -898,7 +898,7 @@ void CMap::disp() {
                     if (m_LightUnit) m_LightUnit[ii].calc();
                     m_pModelTbl[ii].setBBoxFlag(f);
 
-                    if (!DebugWork::g_dw.sys.m_iMapDisp || DebugWork::g_dw.sys.m_iMapDisp - 1 == ii)
+                    if (!KH_DW(DebugWork::g_dw.sys.m_iMapDisp) || KH_DW(DebugWork::g_dw.sys.m_iMapDisp) - 1 == ii)
 
                         m_pModelTbl[ii].dispImpl();
                 }
@@ -918,7 +918,7 @@ void CMap::disp() {
                 if (m_LightUnit) m_LightUnit[ii].calc();
                 m_pModelTbl[ii].setBBoxFlag(f);
 
-                if (!DebugWork::g_dw.sys.m_iMapDisp || DebugWork::g_dw.sys.m_iMapDisp - 1 == ii)
+                if (!KH_DW(DebugWork::g_dw.sys.m_iMapDisp) || KH_DW(DebugWork::g_dw.sys.m_iMapDisp) - 1 == ii)
 
                     m_pModelTbl[ii].dispImpl();
             }
@@ -966,7 +966,7 @@ void CMap::disp() {
                     if (m_LightUnit) m_LightUnit[ii].calc();
                     m_pModelTbl[ii].setBBoxFlag(f);
 
-                    if (!DebugWork::g_dw.sys.m_iMapDisp || DebugWork::g_dw.sys.m_iMapDisp - 1 == ii)
+                    if (!KH_DW(DebugWork::g_dw.sys.m_iMapDisp) || KH_DW(DebugWork::g_dw.sys.m_iMapDisp) - 1 == ii)
 
                         m_pModelTbl[ii].dispImpl();
                 }
@@ -986,7 +986,7 @@ void CMap::disp() {
                 if (m_LightUnit) m_LightUnit[ii].calc();
                 m_pModelTbl[ii].setBBoxFlag(f);
 
-                if (!DebugWork::g_dw.sys.m_iMapDisp || DebugWork::g_dw.sys.m_iMapDisp - 1 == ii)
+                if (!KH_DW(DebugWork::g_dw.sys.m_iMapDisp) || KH_DW(DebugWork::g_dw.sys.m_iMapDisp) - 1 == ii)
 
                     m_pModelTbl[ii].dispImpl();
             }
@@ -1151,7 +1151,7 @@ HANDLE CMap::createMapEffect_(const ZONEPARTS& inParts) {
     Math3D::LimitPIVector(rot);
     HANDLE handle = 0;
     TRACE("    \203}\203b\203v\203G\203t\203F\203N\203g %s %d\n", rsrc->getName(), no);
-    if (!DebugWork::g_dw.sys.m_iEffectNoEntry) {
+    if (!KH_DW(DebugWork::g_dw.sys.m_iEffectNoEntry)) {
         handle = CEffectMan::setEffect(rsrc->getName(), no, (ObjType::eObjType)0xB, (const FVECTOR*)inParts.trans, &rot, 0.0f);
         CEffect* effect = CEffectMan::getEffect(handle);
         if (effect) effect->setScale(*(const FVECTOR*)inParts.scale);
@@ -1257,7 +1257,7 @@ void MulVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void CSky::disp() {
     if (DebugWork::g_dw.sys.m_iSkyDisp < -1) DebugWork::g_dw.sys.m_iSkyDisp = m_modelSuu;
     else if (m_modelSuu < DebugWork::g_dw.sys.m_iSkyDisp) DebugWork::g_dw.sys.m_iSkyDisp = -1;
-    if (DebugWork::g_dw.sys.m_iSkyDisp < 0) return;
+    if (KH_DW(DebugWork::g_dw.sys.m_iSkyDisp) < 0) return;
     CCamera* pCamera = CWorldEnv::getActiveCamera();
     if (!pCamera) return;
     Crd(0).m_Local.setTrans(pCamera->Crd(0).m_World.v[3]);
@@ -1271,7 +1271,7 @@ void CSky::disp() {
     for (INT i = 0; i < m_modelSuu; i++) {
         m_pModel[i].setColorScale(vColor);
         m_pModel[i].dispUpdate(fR);
-        if (!DebugWork::g_dw.sys.m_iSkyDisp || DebugWork::g_dw.sys.m_iSkyDisp - 1 == i) m_pModel[i].disp();
+        if (!KH_DW(DebugWork::g_dw.sys.m_iSkyDisp) || KH_DW(DebugWork::g_dw.sys.m_iSkyDisp) - 1 == i) m_pModel[i].disp();
     }
 }
 void CSky::setColorScale(FVECTOR& inColorScale) { m_vColor = inColorScale; }

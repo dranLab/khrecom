@@ -80,10 +80,10 @@ void CSummonMushu::adjustPlayer() {
     FVECTOR rot;
 
     m = m_pPlayer->Crd(1).getWorldMatrix();
-    if (dbgCheckUser(KKIKUCHI) && DebugWork::g_dw.player.iTemp == 7) {
-        g_MushuOffset.x = DebugWork::g_dw.player.vTemp.x;
-        g_MushuOffset.y = DebugWork::g_dw.player.vTemp.y;
-        g_MushuOffset.z = DebugWork::g_dw.player.vTemp.z;
+    if (dbgCheckUser(KKIKUCHI) && KH_DW(DebugWork::g_dw.player.iTemp) == 7) {
+        g_MushuOffset.x = KH_DW(DebugWork::g_dw.player.vTemp.x);
+        g_MushuOffset.y = KH_DW(DebugWork::g_dw.player.vTemp.y);
+        g_MushuOffset.z = KH_DW(DebugWork::g_dw.player.vTemp.z);
     }
     ApplyMatrixXYZ(pos, m, g_MushuOffset);
     warp(pos);

@@ -1096,7 +1096,7 @@ BOOL CMapEnemy::hitTest_() {
     case 0x29:
         break;
     default:
-        if (DebugWork::g_dw.enemy.uiFlag & 0x40) return TRUE;
+        if (KH_DW(DebugWork::g_dw.enemy.uiFlag) & 0x40) return TRUE;
         changeMapEnemyState(4);
         break;
     }
@@ -1135,7 +1135,7 @@ BOOL CMapEnemy::initEnemyParam_(INT inGroupID, INT inRsrcID) {
 }
 
 BOOL CMapEnemy::checkEncont_() {
-    if (DebugWork::g_dw.enemy.uiFlag & 0x40) return FALSE;
+    if (KH_DW(DebugWork::g_dw.enemy.uiFlag) & 0x40) return FALSE;
     if (isFaint()) {
         if (isHpHalf()) return encount_(3);
         return encount_(2);

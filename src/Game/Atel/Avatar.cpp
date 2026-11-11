@@ -1049,7 +1049,7 @@ FVECTOR* CAvatar::getPathStartPos(const CHAR* pszName) const {
 }
 void CAvatar::disp() {
     CEntity::disp();
-    if (DebugWork::g_dw.event.iAtelCoord) {
+    if (KH_DW(DebugWork::g_dw.event.iAtelCoord)) {
         lineX.CGPrim::disp();
         lineY.CGPrim::disp();
         lineZ.CGPrim::disp();

@@ -873,7 +873,7 @@ void CEffectMan::_calc(FLOAT fFrameRate, const FMATRIX& mWV, const FMATRIX& mVS,
             effect->_setSpecialData();
             pppSetUp(effect->m_pPartMng);
             viewclip = effect->_viewclip(mWC, frustumClip);
-            if (!viewclip && ((s_iStatus & 0x80000000) || DebugWork::g_dw.sys.m_iEffectBBOX)) {
+            if (!viewclip && ((s_iStatus & 0x80000000) || KH_DW(DebugWork::g_dw.sys.m_iEffectBBOX))) {
                 _setDebugBBOXLine(pppGetBbox(effect->m_pPartMng));
             }
             effect->m_iFlag |= 2;
@@ -896,7 +896,7 @@ void CEffectMan::update() {
     FMATRIX* pMVS;
     CCamera* pCam;
 
-    if (DebugWork::g_dw.sys.m_iStopEffect) return;
+    if (KH_DW(DebugWork::g_dw.sys.m_iStopEffect)) return;
     bPlay = !_isPause();
     if (!(s_iStatus & 1)) bPlay = FALSE;
     if (bPlay) {
@@ -938,7 +938,7 @@ INT CEffectMan::setup() {
     INT iDrawFlags;
 
     s_nDrawNum = 0;
-    if (DebugWork::g_dw.sys.m_iStopEffect) return 0;
+    if (KH_DW(DebugWork::g_dw.sys.m_iStopEffect)) return 0;
     nSemiNum = CModelMan::getSemiPktListNum();
     s_nEffNum = getNum();
     if (s_iStatus & 2) s_nEffNum = 0;
@@ -977,7 +977,7 @@ void CEffectMan::draw() {
     INT nDrawNum = s_nDrawNum;
 
     if (nDrawNum <= 0) return;
-    if (DebugWork::g_dw.sys.m_iStopEffect) return;
+    if (KH_DW(DebugWork::g_dw.sys.m_iStopEffect)) return;
     nEffNum = s_nEffNum;
     pEffList = s_pEffList;
     bDrawALL = s_bDrawALL;
@@ -1020,7 +1020,7 @@ void CEffectMan::draw() {
                 bDraw = effect->isDrawing();
                 if (!((1 << effect->getType()) & eDrawBit)) bDraw = FALSE;
                 bDraw &= bDrawALL;
-                if (DebugWork::g_dw.sys.m_iEffect) bDraw = FALSE;
+                if (KH_DW(DebugWork::g_dw.sys.m_iEffect)) bDraw = FALSE;
                 if (!pppPartDraw(effect->m_pPartMng, bDraw)) effect->kill();
             }
         }

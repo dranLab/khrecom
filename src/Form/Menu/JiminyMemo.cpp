@@ -1661,7 +1661,7 @@ CMemo3DObj::~CMemo3DObj() {
         }
     }
 }
-__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
+KH_DEBUG(__asm__(".rdata\n");) /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
 void CMemo3DObj::main() {
     INT nID;
     MODELDATA** pModelTbl;
@@ -1983,7 +1983,7 @@ void CMemo2DLayout::setState(INT inState) {
 INT CMemo2DLayout::getState() {
     return m_iState;
 }
-__asm__(".rdata\n"); /* resync: gcc believes it is in .rdata after the previous placeholder */
+KH_DEBUG(__asm__(".rdata\n");) /* resync: gcc believes it is in .rdata after the previous placeholder */
 void CMemo2DLayout::createLayer(INT inKind) {
     D2::C2DMan::setLayer(m_iLayerLevel);
     m_hLayer = D2::C2DMan::create(m_pLayoutFileName, m_pLayoutNoTbl[inKind]);
@@ -2204,7 +2204,7 @@ CMemo2DCursor::CMemo2DCursor(HANDLE inHandle) {
 CMemo2DCursor::~CMemo2DCursor() {
     finalise();
 }
-__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
+KH_DEBUG(__asm__(".rdata\n");) /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
 void CMemo2DCursor::setup(CursorDataParam& inParam) {
     if (inParam.posiNum > 0) {
         if (inParam.posiTbl) {
@@ -2360,7 +2360,7 @@ CMemo2DCard::CMemo2DCard(const CHAR* inEmptySeqName) {
     setScl(m_fScale);
 }
 CMemo2DCard::~CMemo2DCard() {}
-__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
+KH_DEBUG(__asm__(".rdata\n");) /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
 #line 3432
 void CMemo2DCard::create(CARD inCard, INT inMode) {
     if (inCard.m_nCategory0 == 0xC) return;
@@ -2447,7 +2447,7 @@ CJiminyMemo::CJiminyMemo(CTask* inParent, INT inPlayerMode) : CMenu(inParent, -1
 CJiminyMemo::~CJiminyMemo() {
     finalize();
 }
-__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
+KH_DEBUG(__asm__(".rdata\n");) /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
 void CJiminyMemo::initialize(INT inPlayerMode) {
     INT resourceId;
     TRACE_USER((USER)10, "%s\n", "########## Jiminy memo is MainApp boot. ##########");
@@ -2746,7 +2746,7 @@ void CJiminyMemo::setContentMode(INT inContentMode) {
     m_ContentCommon.iPrevContent = prev;
 }
 /* placeholder: rodata of the items before createSequence__11CJiminyMemoPCiiiiP15CMemo2DSequence */
-__asm__(".rdata\n");
+KH_DEBUG(__asm__(".rdata\n");)
 inline void _roPh13() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
     TRACE(__FILE__ "(3948)");
     TRACE(__FILE__ "(4012)");
@@ -2897,7 +2897,7 @@ void CJiminyMemo::replaceNoteListMark(D2::C2DSeqCtrl** inMark, BYTE* inFlagTbl, 
         }
     }
 }
-__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
+KH_DEBUG(__asm__(".rdata\n");) /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
 void CJiminyMemo::replaceNoteListMark(D2::C2DSeqCtrl** inMark, INT inFlagId, INT inListNum, INT inListAllNum,
                                       INT inStartNo, INT inLayoutNo, INT inLayoutSeqNo) {
     INT flagIndex = inFlagId;
@@ -3677,7 +3677,7 @@ void CJiminyMemo::contentMenu() {
         }
     }
 }
-__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
+KH_DEBUG(__asm__(".rdata\n");) /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
 namespace JiminyMemo {
 namespace Story {
 }
@@ -6612,7 +6612,7 @@ INT CJiminyMemo::contentCharaView_ModelView() {
     if (work(0x3C4)) ((CMemo2DSequence*)work(0x3C4))->main(getFrameRateF());
     return rval;
 }
-__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
+KH_DEBUG(__asm__(".rdata\n");) /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
 namespace JiminyMemo {
 namespace Minigame {
 }

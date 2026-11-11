@@ -413,10 +413,10 @@ INT CBattleEnemy::getTypeID() const {
     return 0x1004;
 }
 void CBattleEnemy::main() {
-    if (!(DebugWork::g_dw.enemy.uiFlag & 0x20)) CEntity::main();
+    if (!(KH_DW(DebugWork::g_dw.enemy.uiFlag) & 0x20)) CEntity::main();
 }
 void CBattleEnemy::update() {
-    if (DebugWork::g_dw.enemy.uiFlag & 0x400) clearSpeed();
+    if (KH_DW(DebugWork::g_dw.enemy.uiFlag) & 0x400) clearSpeed();
     else CFSM::update();
 }
 BOOL CBattleEnemy::initalize(INT inGroupID, INT inRsrcID, UINT iFlag) {
@@ -1377,7 +1377,7 @@ void CBattleEnemy::stateStop() {
         }
         STOP_DAMAGE* stopDmg = &m_StopDamage[m_sStopDamagePtr];
         if (!isHitPoints()) {
-            if (!(DebugWork::g_dw.enemy.uiFlag & 1)) m_iHp -= stopDmg->iDamage;
+            if (!(KH_DW(DebugWork::g_dw.enemy.uiFlag) & 1)) m_iHp -= stopDmg->iDamage;
             if (getHp() >= getHpMax()) m_iHp = getHpMax();
             notifyHP();
             if (m_iHp <= 0 && !isReraise_()) {
@@ -2331,7 +2331,7 @@ BOOL CBattleEnemy::initEnemyParam(INT inGroupID, INT inRsrcID, INT inIndex) {
         m_pBasicParam = _getBasicParam(param, floor);
         m_iHp = BattleEnemy::GameModeHp(m_pBasicParam->iHP);
         m_iExp = m_pBasicParam->iExp;
-        if (DebugWork::g_dw.enemy.uiFlag & 0x800) m_iHp = m_iHp * DebugWork::g_dw.enemy.iHpPercent / 100;
+        if (KH_DW(DebugWork::g_dw.enemy.uiFlag) & 0x800) m_iHp = m_iHp * KH_DW(DebugWork::g_dw.enemy.iHpPercent) / 100;
         return TRUE;
     }
     return FALSE;
@@ -2456,7 +2456,7 @@ void CBattleEnemy::endStateAppear_() {
     setEntityFlag(0x10000, 0);
     endStateAppear();
     m_ullBtlEnemyFlag &= ~0x20000000008ULL;
-    if ((UINT)getID() % 10000 < 100 && (DebugWork::g_dw.enemy.uiFlag & 0x1000)) {
+    if ((UINT)getID() % 10000 < 100 && (KH_DW(DebugWork::g_dw.enemy.uiFlag) & 0x1000)) {
         m_iHp = 0;
         changeBattleEnemyState(30);
     }
@@ -2918,7 +2918,7 @@ BOOL CBattleEnemy::hitTest_() {
         return FALSE;
     }
     if (!isCurrentState(0x12)) checkResist_(hit->getDamageKind());
-    if (DebugWork::g_dw.enemy.uiFlag & 2) m_iHp = 0;
+    if (KH_DW(DebugWork::g_dw.enemy.uiFlag) & 2) m_iHp = 0;
     setHitEffect_();
     if (m_iHp <= 0) {
         if (!isReraise_()) changeBattleEnemyState(0x1E);
@@ -3034,7 +3034,7 @@ INT CBattleEnemy::computeDamage_(FLOAT inDamage, FLOAT inAttr) {
             CCollBody* hitBody = m_pBodyColl->getHitCollBody();
             KH_DEBUG(if (!hitBody) AssertApp(__FILE__, 0x1846, "hitBody", 0);)
             INT bodyHp = hitBody->getHp();
-            if (!(DebugWork::g_dw.enemy.uiFlag & 1)) {
+            if (!(KH_DW(DebugWork::g_dw.enemy.uiFlag) & 1)) {
                 if (!isLastLeave_(bodyHp - result)) {
                     bodyHp -= result;
                 } else {
@@ -3060,7 +3060,7 @@ INT CBattleEnemy::computeDamage_(FLOAT inDamage, FLOAT inAttr) {
                 if (getHpMax() < m_iHp) m_iHp = getHpMax();
             }
         } else {
-            if (!(DebugWork::g_dw.enemy.uiFlag & 1)) {
+            if (!(KH_DW(DebugWork::g_dw.enemy.uiFlag) & 1)) {
                 if (!isLastLeave_(m_iHp - result)) {
                     m_iHp -= result;
                 } else {
@@ -3491,12 +3491,12 @@ void CBattleEnemy::setHitEffect_() {
 }
 void CBattleEnemy::cardBattleProc_() {
     if (!isNoCardBattle() && isPermissionCardBattle() && m_iHp > 0 && m_tqCancelTimer <= 0 &&
-        !(DebugWork::g_dw.enemy.uiFlag & 0x400)) {
+        !(KH_DW(DebugWork::g_dw.enemy.uiFlag) & 0x400)) {
         if (isStartCardBattle()) {
             startCardBattle();
             return;
         }
-        if (DebugWork::g_dw.enemy.uiFlag & 0x10) return;
+        if (KH_DW(DebugWork::g_dw.enemy.uiFlag) & 0x10) return;
         if (isCardBattle()) return;
         aiCardBattle();
         return;
@@ -3614,7 +3614,7 @@ BOOL CBattleEnemy::canCreateEnemyCard_() {
     if (kind == 0x59) return FALSE;
     if (!CCard::canAddCard((USHORT)kind, 0)) return FALSE;
     if (CCard::getMapTotal() < 5) return FALSE;
-    if (DebugWork::g_dw.enemy.uiFlag & 0x2000) return TRUE;
+    if (KH_DW(DebugWork::g_dw.enemy.uiFlag) & 0x2000) return TRUE;
     INT rate = m_pEnemyParam->uiEnemyCardDrop;
     RoomInfo* room = CSceneInfo::getRoomInfo(-1);
     if (room) {
@@ -3660,5 +3660,5 @@ BOOL CBattleEnemy::checkResist_(ATK_KIND inDmgKind) {
     if (resist) Gauge::CCommonGauge::setDispSeq(getHandle(), 6);
     return resist;
 }
-typedef char _chk_be[sizeof(CBattleEnemy) == 0x830 ? 1 : -1];
+typedef char _chk_be[sizeof(CBattleEnemy) == KH_VER(0x830, 0x810) ? 1 : -1]; /* retail: CEntity is 0x20 smaller */
 // SOURCE DATA: .data .rodata

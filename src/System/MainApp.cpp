@@ -446,9 +446,9 @@ static INT _mainProc(INT nTcount, TIMEQ nTQ) {
     CPackMan::endScene();
     CModelMan::drawDispListFG();
     CEffectMan::setup();
-    if (DebugWork::g_dw.sys.m_HeapDispDetail) {
+    if (KH_DW(DebugWork::g_dw.sys.m_HeapDispDetail)) {
         dbgReportHeapPerFile();
-        DebugWork::g_dw.sys.m_HeapDispDetail = 0;
+        KH_DEBUG(DebugWork::g_dw.sys.m_HeapDispDetail = 0;)
     }
     if (CPadIO::isButtonDown(0x80, 1)) {
         _nProcCountMax = 0;
@@ -848,14 +848,14 @@ void CMainApp::setFpsFull() {
     _nVWaitCount = 0;
     _bForceHalfFps = 0;
     TRACE_COL(_TTY_RED, " --- 60fps ---\n");
-    DebugWork::g_dw.sys.m_iFps = 0;
+    KH_DEBUG(DebugWork::g_dw.sys.m_iFps = 0;)
 }
 
 void CMainApp::setFpsHalf() {
     _nVWaitCount = 1;
     _bForceHalfFps = 1;
     TRACE_COL(_TTY_RED, " --- 30fps ---\n");
-    DebugWork::g_dw.sys.m_iFps = 1;
+    KH_DEBUG(DebugWork::g_dw.sys.m_iFps = 1;)
 }
 
 BOOL CMainApp::isFpsHalf() {

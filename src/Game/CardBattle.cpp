@@ -1887,7 +1887,7 @@ void CardBattle::getDropFriendCard(CARD& outData, INT inRate) {
     if (roomID == 0 || roomID == 99) worldID = 13;
     BOOL bCheck = TRUE;
     if (CGame::isRikuGame()) worldID += 13;
-    if (DebugWork::g_dw.player.iFriend > 0) {
+    if (KH_DW(DebugWork::g_dw.player.iFriend) > 0) {
         r = 0;
         bCheck = FALSE;
     }
@@ -1957,11 +1957,11 @@ INT CardBattle::getDropPlutoCard(CARD& outData) {
     BOOL bCheck2 = TRUE;
     INT r = RND::genrand_int31() % 1000;
     BOOL bCheck = TRUE;
-    if (DebugWork::g_dw.player.iFriend > 0) {
+    if (KH_DW(DebugWork::g_dw.player.iFriend) > 0) {
         r = 0;
         bCheck = FALSE;
     }
-    if (DebugWork::g_dw.player.iPluto > 0) {
+    if (KH_DW(DebugWork::g_dw.player.iPluto) > 0) {
         r = 0;
         bCheck = FALSE;
         bCheck2 = FALSE;
@@ -2095,7 +2095,7 @@ void CCardBattle::setDuelStart(INT inFlag) {
     CGameWork::setFlag(1, 11, TRUE);
     CGameWork::setInt(1, 0xE2, CGameWork::getInt(1, 0xE2) | 0x14);
     TIMEQ time = m_nDuelBreakCountMax * 3000 + 3000;
-    if (DebugWork::g_dw.player.iDuelTime > 0) time = DebugWork::g_dw.player.iDuelTime * 3000;
+    if (KH_DW(DebugWork::g_dw.player.iDuelTime) > 0) time = KH_DW(DebugWork::g_dw.player.iDuelTime) * 3000;
     m_pDuelGauge->setStart(time, m_nDuelBreakCountMax);
     PLM::CPlayerManager* pPLM = (PLM::CPlayerManager*)CTaskMan::getSysTask(0x1F);
     INT shiftID = (g_pPlayer->m_uiConditionFlag & 0x400000) ? 3 : 0;

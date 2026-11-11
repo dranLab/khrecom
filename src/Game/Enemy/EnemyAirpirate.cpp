@@ -116,11 +116,11 @@ void CEnemyAirpirate::aiCardBattle() {
     }
     if (count == 0) return;
     if (!canCardBattle()) return;
-    if (DebugWork::g_dw.enemy.uiFlag & 8) {
+    if (KH_DW(DebugWork::g_dw.enemy.uiFlag) & 8) {
         for (INT i = 0; i < param->iActCount; i++) {
-            if (param->pActs[i].iActNo == DebugWork::g_dw.enemy.sActNo) {
+            if (param->pActs[i].iActNo == KH_DW(DebugWork::g_dw.enemy.sActNo)) {
                 setBattleEnemyFlag(0x200, 0);
-                setAttackState(DebugWork::g_dw.enemy.sActNo + 2);
+                setAttackState(KH_DW(DebugWork::g_dw.enemy.sActNo) + 2);
                 return;
             }
         }
