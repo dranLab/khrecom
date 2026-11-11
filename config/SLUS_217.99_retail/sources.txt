@@ -29,6 +29,7 @@ Game/Atel/AtelTutorial
 Game/Atel/CameraMan
 Game/Atel/EventTrap
 Game/AttachCard
+Game/AttackMotion
 Game/BodyCollision
 Game/Bullet/Bullet
 Game/Bullet/BulletManager
@@ -80,6 +81,7 @@ Game/Enemy/EnemyWightnight
 Game/Enemy/EnemyWizard
 Game/Enemy/EnemyWyvern
 Game/Enemy/EnemyYellowopera
+Game/Enemy/Heartless
 Game/Enemy/MapEnemyAir
 Game/Enemy/MapEnemyGround
 Game/Enemy/MapEnemyMushroom
@@ -90,6 +92,7 @@ Game/EntityFactory
 Game/GameSub
 Game/GameSubBattle
 Game/GameSubField
+Game/GameWork
 Game/Gimmick/BaseGimmick
 Game/Gimmick/GimmickAngelArrow
 Game/Gimmick/GimmickBell

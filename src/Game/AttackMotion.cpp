@@ -585,3 +585,4 @@ BOOL CAttackMotion::checkOnCollisionAtkKind(ATK_KIND inAtkKind) {
 }
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

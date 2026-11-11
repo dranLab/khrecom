@@ -476,3 +476,4 @@ void CByteWork::setByte(UINT nIndex, BYTE nData) {
 }
 
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .data
