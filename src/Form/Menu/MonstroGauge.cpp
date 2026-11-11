@@ -287,3 +287,4 @@ BOOL CMostroGauge::exec(EXEC_CMD nCmd, INT nParam) {
     return ret;
 }
 // SOURCE DATA: .rodata
+// SOURCE DATA SLUS_217.99_retail: .rodata

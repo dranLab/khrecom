@@ -200,3 +200,28 @@ Third batch (2026-11-11): `scan` covers the libraries too (each unit with its bu
 with INCLUDE_ASM are left out). **446 units build from source in retail** (the libraries largely complete);
 switched back by `verify`: Pause, SummonGenie, MonstroGauge, MoogleShop, lib/nodebug/Tim2CheckFileHeader.
 
+Fourth batch (2026-11-11): **451 units from source in retail** (of 648 complete units; 456 eligible, `verify`
+switched back _mbtowc_r, tlbfunc, libgcc2___default_terminate, SummonGenie, Tim2CheckFileHeader). Debug-only
+functions retail lacks wrapped line by line (`CGameWork::getPoohSysFlag`, `CPlaySpeedCtrl::setDebugPlaySpeed`,
+SoundMan's `_getBgmName_withID`).
+
+11. (decision) The gap after a recorded unit: owned by a unit between the two in link order that has nothing of its
+    own in that section (PackMan's 8 bytes of .rodata between MotData and PathCamera); else the next unit's leading
+    data, unless the next object's own alignment produces it anyway (PathData after PathCamera).
+12. (decision) `scan` rejects a unit when the retail image has nonzero data after our section's end inside the
+    unit's range (retail has more data there: GameWork's .data).
+
+### Open (for the next session)
+
+- `DebugWork::g_dw` (1,776 uses): retail compiles every use away (e.g. aiCardBattle of three enemies:
+  `if (g_dw... & 8)` branch gone). Needs a decision on the release value of each switch (most likely: as if 0/off,
+  reads only; writes and debug-only branches vanish) and then a mechanical `KH_DEBUG`/`KH_VER` pass per use.
+- Retail changes proper (`calls`/`shape` and many `inline`/`header` DIFFs are real code changes, e.g.
+  ATEL::CAvatar::InitAvatar's new `% 10000 == 1007` case): `KH_RELEASE`/`KH_VER` variants written from the retail
+  assembly, unit by unit (`tools/retail_units.py try <unit> --show <function>`).
+- Static initializers retail lacks (EnemyHeartsoldier, EnemySpadesoldier, GimmickDoor, SampleGimmick, MapUnit,
+  main): the dynamically initialized statics are initialized differently there (e.g. `g_vDeadDemoPlayerPos`).
+- Size mismatches with all functions matching: PlaySpeedCtrl (retail names getProgressTime and getSysProgressTime
+  at one address), SoundMan (retail has a function the source lacks).
+- Units still with INCLUDE_ASM (the beta's parked functions) are not scanned.
+

@@ -6,6 +6,10 @@ Form/Menu/LevelUp .bss 0x005BF4C8 0x50
 Form/Menu/LevelUp .data 0x00340010 0xd8
 Form/Menu/LevelUp .rodata 0x0042AAE0 0x370
 Form/Menu/Menu .rodata 0x0042AE50 0x28
+Form/Menu/MonstroGauge .rodata 0x0042AE90 0x80
+Form/Menu/MoogleShop .data 0x003400E8 0x4
+Form/Menu/Pause .data 0x003400F0 0x78
+Form/Menu/Pause .rodata 0x0042AF20 0x1a0
 Form/Menu/SaveLoadCtrl .rodata 0x0042F1F0 0x20
 Form/Menu/TechHelp .data 0x00340374 0xc
 Form/Menu/TechHelp .rodata 0x0042F320 0x120
@@ -26,12 +30,14 @@ Game/EffectMotion .rodata 0x0040E548 0x10
 Game/Enemy/BossDeadDemo .data 0x0033ED44 0x24
 Game/Enemy/BossDeadDemo .rodata 0x0041D730 0x3b0
 Game/Enemy/MapEnemyShadow .rodata 0x00421210 0x28
+Game/Gimmick/BaseGimmick .rodata 0x00421340 0x100
 Game/Gimmick/GimmickAngelArrow .data 0x0033F8E0 0x40
 Game/Gimmick/GimmickAngelArrow .rodata 0x00421530 0x130
 Game/Gimmick/GimmickDeceiveEnemy .rodata 0x004216D0 0x40
 Game/Gimmick/GimmickDominoPillar .rodata 0x00421710 0x10
 Game/Gimmick/GimmickFallTomb .rodata 0x00421C80 0xe0
 Game/Gimmick/GimmickFlowerLump .rodata 0x00421D60 0x110
+Game/Gimmick/GimmickGuillotine .rodata 0x00421F70 0x70
 Game/Gimmick/GimmickHitReturn .rodata 0x00421FF8 0x30
 Game/Gimmick/GimmickJumpStand .rodata 0x00422030 0x140
 Game/Gimmick/GimmickLotusLeaf .rodata 0x00422170 0x18
@@ -51,8 +57,6 @@ Game/Gimmick/GimmickWindowLid .rodata 0x00424000 0x10
 Game/MapCardDef .data 0x0033BEB0 0x20
 Game/MapCardDef .rodata 0x0040EBA0 0x8
 Game/MapUnitTable .data 0x0033BED0 0x358
-Game/NowLoading .data 0x0033C2F0 0xc
-Game/NowLoading .rodata 0x0040ED60 0x40
 Game/Player/FriendDonald .data 0x0033C538 0x28
 Game/Player/FriendDonald .rodata 0x00413670 0xb0
 Game/Player/FriendGoofy .data 0x0033C560 0x18
@@ -77,6 +81,8 @@ System/FileIO .rodata 0x00400850 0x38
 System/Fsm .rodata 0x003FF8F8 0x18
 System/Graphic/2d/2DLay .rodata 0x00402360 0x18
 System/Graphic/2d/2DLayObj .data 0x00332C50 0x4
+System/Graphic/2d/2DSeqCtrl .data 0x00332C68 0x8
+System/Graphic/2d/2DSeqCtrl .rodata 0x00402390 0x18
 System/Graphic/Billboard .rodata 0x00400D10 0x60
 System/Graphic/Effect/libppp/draw/draw .data 0x00336D68 0x8
 System/Graphic/Effect/libppp/draw/md .data 0x00336DC0 0xe0

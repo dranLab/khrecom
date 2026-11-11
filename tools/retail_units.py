@@ -233,6 +233,12 @@ def try_unit(v: Version, unit: str, show=(), data=True) -> dict:
                     theirs = b""
                 diff = [i for i in range(0, size, 4) if i not in relocated[name] and blob[i:i + 4] != theirs[i:i + 4]]
                 entry["bytes"] = "OK" if not diff and len(theirs) == size else f"DIFF@{diff[0]:#x}" if diff else "DIFF"
+                rng = v.ranges.get((unit, name))
+                if entry["bytes"] == "OK" and rng and rng[0] <= entry["start"] < rng[1]:
+                    end = entry["start"] + size
+                    rest = v.image.data[v.image.off(end):v.image.off(end) + max(0, rng[1] - end)] if rng[1] > end else b""
+                    if any(rest):  # retail has more data in this unit's range than the source gives
+                        entry["bytes"] = f"SHORT (retail data up to {rng[1]:#x})"
             res["data"][name] = entry
     return res
 

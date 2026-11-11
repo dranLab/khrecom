@@ -216,8 +216,22 @@ def main() -> None:
             # is recorded too (then the gap is its alignment)
             rows = sorted(data_lines[section])
             k = next(i for i, x in enumerate(rows) if x[2] == unit)
-            if k + 1 < len(rows) and rows[k + 1][0] > addr + size and (rows[k + 1][2], section) not in fixed:
-                rows[k + 1] = (addr + size,) + rows[k + 1][1:]
+            nxt = rows[k + 1][0] if k + 1 < len(rows) else None
+            align = min(128, nxt & -nxt) if nxt else 1  # configure.py gives an object its start's alignment
+            if nxt and nxt > addr + size and (addr + size + align - 1) & -align != nxt:
+                # the gap isn't the next object's alignment padding. A unit between the two in link order that has
+                # nothing of its own in this section here owns it (PackMan's .rodata between MotData and PathCamera);
+                # else it is the next object's leading data
+                order = [u for _, _, u in blocks[section]]
+                present = {x[2] for x in rows}
+                between = []
+                if unit in order and rows[k + 1][2] in order:
+                    between = [u for u in order[order.index(unit) + 1:order.index(rows[k + 1][2])]
+                               if u not in present and u not in left_out]
+                if between:
+                    rows.insert(k + 1, (addr + size, section.lstrip("."), between[0]))
+                elif (rows[k + 1][2], section) not in fixed:
+                    rows[k + 1] = (addr + size,) + rows[k + 1][1:]
             data_lines[section] = rows
     for s in (".data", ".rodata", ".bss"):
         rows = sorted(data_lines[s])

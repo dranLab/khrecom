@@ -351,14 +351,14 @@ void CGameWork::setSysDataCOM(const SysDataCOM* pSrc, const ULONGLONG* pTime) {
     }
 }
 
-void CGameWork::getPoohSysFlag(SysDataCOM& s) {
-    for (INT i = 0; i < 6; i++) {
-        s.Data.PoohClearIntro[i] = getFlag(0, s_PoohClearIntroTbl[i]);
-        s.Data.PoohClear[i] = getByte(0, s_PoohClearTbl[i]);
-    }
-    s.Data.PoohIntro = getInt(0, 35);
-    s.Data.LastPoohEvent = getByte(0, 12);
-}
+KH_DEBUG(void CGameWork::getPoohSysFlag(SysDataCOM& s) {)
+    KH_DEBUG(for (INT i = 0; i < 6; i++) {)
+        KH_DEBUG(s.Data.PoohClearIntro[i] = getFlag(0, s_PoohClearIntroTbl[i]);)
+        KH_DEBUG(s.Data.PoohClear[i] = getByte(0, s_PoohClearTbl[i]);)
+    KH_DEBUG(})
+    KH_DEBUG(s.Data.PoohIntro = getInt(0, 35);)
+    KH_DEBUG(s.Data.LastPoohEvent = getByte(0, 12);)
+KH_DEBUG(})
 
 CWorkUnit::CWorkUnit() : m_pWork(NULL), m_nWorkSize(0), m_bWorkManaged(FALSE), m_nRange(0) {}
 

@@ -6,6 +6,9 @@ Form/Menu/LevelUp
 Form/Menu/Menu
 Form/Menu/MenuModel
 Form/Menu/MenuParts
+Form/Menu/MonstroGauge
+Form/Menu/MoogleShop
+Form/Menu/Pause
 Form/Menu/SaveLoadCtrl
 Form/Menu/TechHelp
 Form/Menu/TitleReportDllStarter
@@ -29,6 +32,7 @@ Game/Enemy/MapEnemyGround
 Game/Enemy/MapEnemyMushroom
 Game/Enemy/MapEnemyShadow
 Game/GameSub
+Game/Gimmick/BaseGimmick
 Game/Gimmick/GimmickAngelArrow
 Game/Gimmick/GimmickBell
 Game/Gimmick/GimmickBreakable
@@ -37,6 +41,7 @@ Game/Gimmick/GimmickDeceiveEnemy
 Game/Gimmick/GimmickDominoPillar
 Game/Gimmick/GimmickFallTomb
 Game/Gimmick/GimmickFlowerLump
+Game/Gimmick/GimmickGuillotine
 Game/Gimmick/GimmickHitFlying
 Game/Gimmick/GimmickHitMore
 Game/Gimmick/GimmickHitRepetition
@@ -66,7 +71,6 @@ Game/InterpolateMove
 Game/MapCardDef
 Game/MapUnitTable
 Game/ModelObj
-Game/NowLoading
 Game/Player/FriendDonald
 Game/Player/FriendGoofy
 Game/Player/FriendJack
@@ -86,6 +90,7 @@ System/Graphic/2d/2DFnt
 System/Graphic/2d/2DFntObj
 System/Graphic/2d/2DLay
 System/Graphic/2d/2DLayObj
+System/Graphic/2d/2DSeqCtrl
 System/Graphic/Billboard
 System/Graphic/Camera
 System/Graphic/ColorFader

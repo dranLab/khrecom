@@ -894,7 +894,7 @@ segments:
       - [0x232CC8, data, System/Graphic/Effect/libppp/partMng]
       - [0x234738, data, System/Graphic/Effect/libppp/pppfunctbl]
       - [0x236D68, data, System/Graphic/Effect/libppp/draw/draw]
-      - [0x236D70, data, System/Graphic/Effect/libppp/draw/draw_w]
+      - [0x236D80, data, System/Graphic/Effect/libppp/draw/draw_w]
       - [0x236DC0, data, System/Graphic/Effect/libppp/draw/md]
       - [0x236EA0, data, System/Graphic/Effect/libppp/draw/md1]
       - [0x236F50, data, System/Graphic/Effect/libppp/draw/sin_t]
@@ -914,7 +914,7 @@ segments:
       - [0x23B368, data, System/Ctd/CtdMan]
       - [0x23B378, data, Game/AttackMotion]
       - [0x23B390, data, Game/AtWater]
-      - [0x23B394, data, Game/BattleCard]
+      - [0x23B398, data, Game/BattleCard]
       - [0x23B3C0, data, Game/BodyCollision]
       - [0x23B3D0, data, Game/Card]
       - [0x23B400, data, Game/CardBattle]
@@ -980,7 +980,8 @@ segments:
       - [0x23E7C0, data, Game/Enemy/BattleEnemy]
       - [0x23ED40, data, Game/Enemy/BattleEnemyManager]
       - [0x23ED44, data, Game/Enemy/BossDeadDemo]
-      - [0x23ED68, data, Game/Enemy/EnemyAirpirate]
+      - [0x23ED68, data, Game/Enemy/CreateEnemy]
+      - [0x23EDBC, data, Game/Enemy/EnemyAirpirate]
       - [0x23EDD4, data, Game/Enemy/EnemyAirsoldier]
       - [0x23EDF0, data, Game/Enemy/EnemyAquatank]
       - [0x23EE14, data, Game/Enemy/EnemyBandit]
@@ -1022,7 +1023,7 @@ segments:
       - [0x23F960, data, Game/Gimmick/GimmickPlantBullet]
       - [0x23F9A0, data, Game/Gimmick/GimmickThunderTrap]
       - [0x23F9E0, data, Form/SystemMessage]
-      - [0x23F9F4, data, Form/Menu/Camp]
+      - [0x23F9F8, data, Form/Menu/Camp]
       - [0x23FD60, data, Form/Menu/DecknameEdit]
       - [0x23FDB0, data, Form/Menu/GameOver]
       - [0x23FDB8, data, Form/Menu/JiminyMemo]
@@ -1321,12 +1322,13 @@ segments:
       - [0x2FF910, rodata, System/MainApp]
       - [0x2FF948, rodata, System/Math3D]
       - [0x2FF958, rodata, System/Tsin]
-      - [0x300770, rodata, System/Wnd]
+      - [0x300780, rodata, System/Wnd]
       - [0x300850, rodata, System/FileIO]
       - [0x300888, rodata, System/mcd]
       - [0x3008A0, rodata, System/Memoca]
       - [0x300D10, rodata, System/Graphic/Billboard]
-      - [0x300D70, rodata, System/Graphic/DeFocus]
+      - [0x300D70, rodata, System/Graphic/Camera]
+      - [0x300D90, rodata, System/Graphic/DeFocus]
       - [0x300DB0, rodata, System/Graphic/DispList]
       - [0x300DC0, rodata, System/Graphic/FrecFont]
       - [0x300E40, rodata, System/Graphic/HermitePathCamera]
@@ -1335,16 +1337,21 @@ segments:
       - [0x300EB4, rodata, System/Graphic/Model]
       - [0x300ED0, rodata, System/Graphic/ModelMan]
       - [0x300EE0, rodata, System/Graphic/MotData]
-      - [0x300F00, rodata, System/Graphic/PathCamera]
+      - [0x300F00, rodata, System/Graphic/PackMan]
+      - [0x300F10, rodata, System/Graphic/PathCamera]
       - [0x300F80, rodata, System/Graphic/PathDataCamera]
       - [0x300FCC, rodata, System/Graphic/ShadowModel]
       - [0x300FD8, rodata, System/Graphic/TexAnm]
-      - [0x300FE0, rodata, System/Graphic/TexUtil]
+      - [0x300FE0, rodata, System/Graphic/TexCtrl]
+      - [0x300FF0, rodata, System/Graphic/TexUtil]
       - [0x3010A4, rodata, System/Graphic/TriangleIK]
       - [0x3010B0, rodata, System/Graphic/Fnt]
-      - [0x3010D8, rodata, System/Graphic/2d/2DCard]
+      - [0x3010D8, rodata, System/Graphic/Gprim]
+      - [0x301C58, rodata, System/Graphic/2d/2DCard]
       - [0x302360, rodata, System/Graphic/2d/2DLay]
-      - [0x302378, rodata, System/Graphic/2d/2DSeqCtrl]
+      - [0x302378, rodata, System/Graphic/2d/2DLayObj]
+      - [0x302390, rodata, System/Graphic/2d/2DSeqCtrl]
+      - [0x3023A8, rodata, System/Graphic/2d/2DSeqObj]
       - [0x3023F0, rodata, System/Graphic/Effect/EffectMan]
       - [0x302400, rodata, System/Graphic/Effect/libppp/partMng]
       - [0x3036D0, rodata, System/Graphic/Effect/libppp/draw/md0]
@@ -1360,7 +1367,8 @@ segments:
       - [0x303A20, rodata, System/Sound/driver/sddrv_ee]
       - [0x305210, rodata, System/Sound/SoundMan]
       - [0x305568, rodata, System/Movie/MovieScript]
-      - [0x305580, rodata, System/Movie/MSVideo]
+      - [0x305580, rodata, System/Movie/MSStream]
+      - [0x305590, rodata, System/Movie/MSVideo]
       - [0x305640, rodata, System/Rcf]
       - [0x3058C0, rodata, System/RcfCD]
       - [0x3058F0, rodata, System/RsrcData]
@@ -1382,10 +1390,11 @@ segments:
       - [0x30E8A8, rodata, Game/GameSubField]
       - [0x30EAB8, rodata, Game/Map]
       - [0x30EBA0, rodata, Game/MapCardDef]
-      - [0x30EBA8, rodata, Game/MinigameManager]
+      - [0x30EBA8, rodata, Game/MessageManager]
+      - [0x30EBF8, rodata, Game/MinigameManager]
       - [0x30ED20, rodata, Game/Movement]
-      - [0x30ED60, rodata, Game/NowLoading]
-      - [0x30EDA0, rodata, Game/Prize]
+      - [0x30ED70, rodata, Game/NowLoading]
+      - [0x30EDC0, rodata, Game/Prize]
       - [0x3101A8, rodata, Game/SceneInfo]
       - [0x310478, rodata, Game/SEMotion]
       - [0x3105C0, rodata, Game/Status]
@@ -1404,7 +1413,8 @@ segments:
       - [0x313720, rodata, Game/Player/FriendGoofy]
       - [0x3137A0, rodata, Game/Player/FriendJack]
       - [0x3137D0, rodata, Game/Player/FriendKing]
-      - [0x313850, rodata, Game/Player/NaviMap]
+      - [0x313850, rodata, Game/Player/FriendPan]
+      - [0x313940, rodata, Game/Player/NaviMap]
       - [0x314CF0, rodata, Game/Player/Player]
       - [0x3174D8, rodata, Game/Player/PlayerAttack]
       - [0x318938, rodata, Game/Player/PlayerCamera]
@@ -1417,7 +1427,8 @@ segments:
       - [0x31CC20, rodata, Game/Player/Summon]
       - [0x31CD50, rodata, Game/Player/SummonGenie]
       - [0x31CD80, rodata, Game/Player/SummonSinba]
-      - [0x31CDC0, rodata, Game/Enemy/BattleEnemy]
+      - [0x31CDC0, rodata, Game/Player/SummonTink]
+      - [0x31CDE0, rodata, Game/Enemy/BattleEnemy]
       - [0x31D6E0, rodata, Game/Enemy/BattleEnemyManager]
       - [0x31D730, rodata, Game/Enemy/BossDeadDemo]
       - [0x31DAE0, rodata, Game/Enemy/CreateEnemy]
@@ -1449,16 +1460,18 @@ segments:
       - [0x321210, rodata, Game/Enemy/MapEnemyShadow]
       - [0x321238, rodata, Game/Enemy/MonstroEventBattle]
       - [0x321310, rodata, Game/Enemy/SampleEnemy]
-      - [0x321348, rodata, Game/Gimmick/BaseGimmick]
+      - [0x321340, rodata, Game/Gimmick/BaseGimmick]
+      - [0x321440, rodata, Game/Gimmick/CreateGimmick]
       - [0x321530, rodata, Game/Gimmick/GimmickAngelArrow]
-      - [0x321660, rodata, Game/Gimmick/GimmickCarry]
+      - [0x321680, rodata, Game/Gimmick/GimmickCarry]
       - [0x3216D0, rodata, Game/Gimmick/GimmickDeceiveEnemy]
       - [0x321710, rodata, Game/Gimmick/GimmickDominoPillar]
       - [0x321720, rodata, Game/Gimmick/GimmickDoor]
       - [0x321C80, rodata, Game/Gimmick/GimmickFallTomb]
       - [0x321D60, rodata, Game/Gimmick/GimmickFlowerLump]
       - [0x321E70, rodata, Game/Gimmick/GimmickFountain]
-      - [0x321F78, rodata, Game/Gimmick/GimmickGuillotine]
+      - [0x321F70, rodata, Game/Gimmick/GimmickGuillotine]
+      - [0x321FE0, rodata, Game/Gimmick/GimmickHitFlying]
       - [0x321FF8, rodata, Game/Gimmick/GimmickHitReturn]
       - [0x322030, rodata, Game/Gimmick/GimmickJumpStand]
       - [0x322170, rodata, Game/Gimmick/GimmickLotusLeaf]
@@ -1471,22 +1484,25 @@ segments:
       - [0x323AE0, rodata, Game/Gimmick/GimmickSearchLaser]
       - [0x323B80, rodata, Game/Gimmick/GimmickStatue]
       - [0x323BA0, rodata, Game/Gimmick/GimmickThunderTrap]
-      - [0x323D40, rodata, Game/Gimmick/GimmickTreasureBox]
+      - [0x323D40, rodata, Game/Gimmick/GimmickTimeBomb]
+      - [0x323D58, rodata, Game/Gimmick/GimmickTreasureBox]
       - [0x323E60, rodata, Game/Gimmick/GimmickTutorial]
       - [0x323FA0, rodata, Game/Gimmick/GimmickUpFloor]
       - [0x324000, rodata, Game/Gimmick/GimmickWindowLid]
       - [0x324010, rodata, Game/Gimmick/SampleGimmick]
       - [0x324020, rodata, Game/Bullet/Bullet]
       - [0x324050, rodata, Form/SystemMessage]
-      - [0x324080, rodata, Form/Menu/Camp]
+      - [0x324080, rodata, Form/Menu/BtlReportCtrl]
+      - [0x324178, rodata, Form/Menu/Camp]
       - [0x325E00, rodata, Form/Menu/DecknameEdit]
       - [0x3264F0, rodata, Form/Menu/GameOver]
       - [0x326590, rodata, Form/Menu/JiminyMemo]
       - [0x329F60, rodata, Form/Menu/JMemoFlag]
       - [0x32AAE0, rodata, Form/Menu/LevelUp]
       - [0x32AE50, rodata, Form/Menu/Menu]
-      - [0x32AE78, rodata, Form/Menu/MonstroGauge]
-      - [0x32AF28, rodata, Form/Menu/Pause]
+      - [0x32AE78, rodata, Form/Menu/MenuModel]
+      - [0x32AE90, rodata, Form/Menu/MonstroGauge]
+      - [0x32AF20, rodata, Form/Menu/Pause]
       - [0x32B0C0, rodata, Form/Menu/RoomCreation]
       - [0x32C5C8, rodata, Form/Menu/Roulette]
       - [0x32D910, rodata, Form/Menu/SaveLoad]
@@ -1503,7 +1519,7 @@ segments:
       - [0x332FE8, rodata, lib/graphdev_sceGsExecLoadImage]
       - [0x333020, rodata, lib/graphdev_sceGsExecStoreImage]
       - [0x3331F0, rodata, lib/libdma]
-      - [0x33325A, rodata, lib/libpad2]
+      - [0x333260, rodata, lib/libpad2]
       - [0x3332C0, rodata, lib/src/newlib/libm/math/s_atan]
       - [0x333370, rodata, lib/src/newlib/libm/math/sf_atan]
       - [0x3333C4, rodata, lib/src/newlib/libm/math/sf_cos]
@@ -1523,7 +1539,7 @@ segments:
       - [0x333928, rodata, lib/src/newlib/libm/math/kf_rem_pio2]
       - [0x333974, rodata, lib/src/newlib/libm/math/kf_sin]
       - [0x333990, rodata, lib/src/newlib/libm/math/kf_tan]
-      - [0x3339D4, rodata, lib/src/newlib/libm/math/s_infconst]
+      - [0x3339D8, rodata, lib/src/newlib/libm/math/s_infconst]
       - [0x3339E0, rodata, lib/src/newlib/libm/common/s_lib_ver]
       - [0x3339E8, rodata, lib/src/newlib/libm/common/s_rint]
       - [0x3339F8, rodata, lib/src/newlib/libm/math/sf_floor]
@@ -1540,10 +1556,10 @@ segments:
       - [0x334218, rodata, lib/eecdvd_sceCdRead]
       - [0x334240, rodata, lib/eecdvd_sceCdMmode]
       - [0x334268, rodata, lib/libdbc]
-      - [0x33450E, rodata, lib/libmc]
+      - [0x334510, rodata, lib/libmc]
       - [0x334600, rodata, lib/nodebug/Tim2CheckFileHeader]
       - [0x334A70, rodata, lib/libat3dec]
-      - [0x334C91, rodata, lib/table]
+      - [0x334C98, rodata, lib/table]
       - [0x336060, rodata, lib/init]
       - [0x3360D8, rodata, lib/nodebug/_ctype_]
       - [0x3361E0, rodata, lib/nodebug/impure_data]
@@ -1559,15 +1575,15 @@ segments:
       - [0x3367C0, rodata, lib/nodebug/_mbtowc_r]
       - [0x336800, rodata, lib/thread]
       - [0x336858, rodata, lib/tty]
-      - [0x3368C8, rodata, lib/kprintf2]
+      - [0x3368D0, rodata, lib/kprintf2]
       - [0x336AC0, rodata, lib/sifcmd]
       - [0x336AD0, rodata, lib/sifrpc]
-      - [0x336AFE, rodata, lib/filestub]
+      - [0x336B00, rodata, lib/filestub]
       - [0x336DB0, rodata, lib/eeloadfile]
       - [0x336DC0, rodata, lib/iopreset]
       - [0x336DF0, rodata, lib/initsys]
       - [0x336E10, rodata, lib/exit]
-      - [0x336E11, rodata, lib/tlbfunc]
+      - [0x336E18, rodata, lib/tlbfunc]
       - [0x336E98, rodata, lib/src/gcc/libgcc2___divdi3]
       - [0x336F98, rodata, lib/src/gcc/libgcc2___moddi3]
       - [0x337098, rodata, lib/src/gcc/libgcc2___udivdi3]
@@ -1581,7 +1597,7 @@ segments:
       - { type: bss, vram: 0x00438710, name: System/Rnd }
       - { type: bss, vram: 0x00439100, name: System/FileIO }
       - { type: bss, vram: 0x0043A140, name: System/mcd }
-      - { type: bss, vram: 0x0043B220, name: System/Memoca }
+      - { type: bss, vram: 0x0043B240, name: System/Memoca }
       - { type: bss, vram: 0x0043B900, name: System/PadIO }
       - { type: bss, vram: 0x0043BB40, name: System/dlmalloc }
       - { type: bss, vram: 0x0043BD28, name: System/HeapMan }
@@ -1613,7 +1629,7 @@ segments:
       - { type: bss, vram: 0x005AE300, name: System/Movie/Movie }
       - { type: bss, vram: 0x005AE324, name: System/Movie/MovieFiles }
       - { type: bss, vram: 0x005AE32C, name: System/Movie/MovieScript }
-      - { type: bss, vram: 0x005AE330, name: System/Movie/MSStream }
+      - { type: bss, vram: 0x005AE340, name: System/Movie/MSStream }
       - { type: bss, vram: 0x005AF3C0, name: System/Rcf }
       - { type: bss, vram: 0x005B1440, name: System/RcfCD }
       - { type: bss, vram: 0x005BD640, name: System/RsrcDB }
@@ -1627,7 +1643,7 @@ segments:
       - { type: bss, vram: 0x005BEA40, name: Game/Player/Player }
       - { type: bss, vram: 0x005BEA50, name: Game/Player/PlayerCamera }
       - { type: bss, vram: 0x005BEB60, name: Game/Player/PlayerWeapon }
-      - { type: bss, vram: 0x005BEBA8, name: Game/Enemy/EnemyHeartsoldier }
+      - { type: bss, vram: 0x005BEBB0, name: Game/Enemy/EnemyHeartsoldier }
       - { type: bss, vram: 0x005BEBC0, name: Game/Enemy/EnemySpadesoldier }
       - { type: bss, vram: 0x005BEBD0, name: Game/Gimmick/GimmickDoor }
       - { type: bss, vram: 0x005BF3B0, name: Game/Gimmick/SampleGimmick }
@@ -1645,11 +1661,11 @@ segments:
       - { type: bss, vram: 0x005BF590, name: lib/nodebug/__SN_Libsn_version_v26 }
       - { type: bss, vram: 0x005BF598, name: lib/nodebug/snDebugInit }
       - { type: bss, vram: 0x005BF5A8, name: lib/libdma }
-      - { type: bss, vram: 0x005BF5BC, name: lib/libpad2 }
+      - { type: bss, vram: 0x005BF5C0, name: lib/libpad2 }
       - { type: bss, vram: 0x005C2900, name: lib/mpc }
       - { type: bss, vram: 0x005C2B00, name: lib/eecdvd_sceCdCallback }
       - { type: bss, vram: 0x005C2DC0, name: lib/libdbc }
-      - { type: bss, vram: 0x005C3684, name: lib/libmc }
+      - { type: bss, vram: 0x005C36C0, name: lib/libmc }
       - { type: bss, vram: 0x005C75D0, name: lib/nodebug/strround }
       - { type: bss, vram: 0x005C76F8, name: lib/nodebug/_vfwrite }
       - { type: bss, vram: 0x005C7778, name: lib/nodebug/errno }
@@ -1658,13 +1674,13 @@ segments:
       - { type: bss, vram: 0x005C8380, name: lib/kprintf2 }
       - { type: bss, vram: 0x005C8400, name: lib/sifcmd }
       - { type: bss, vram: 0x005C8700, name: lib/sifrpc }
-      - { type: bss, vram: 0x005C9F2C, name: lib/filestub }
+      - { type: bss, vram: 0x005C9F40, name: lib/filestub }
       - { type: bss, vram: 0x005CB780, name: lib/iopheap }
       - { type: bss, vram: 0x005CB940, name: lib/eeloadfile }
       - { type: bss, vram: 0x005CBB80, name: lib/iopreset }
-      - { type: bss, vram: 0x005CBBE8, name: lib/timer }
+      - { type: bss, vram: 0x005CBC00, name: lib/timer }
       - { type: bss, vram: 0x005CDC00, name: lib/timeralarm }
-      - { type: bss, vram: 0x005CE004, name: lib/iopnotify }
+      - { type: bss, vram: 0x005CE008, name: lib/iopnotify }
       - { type: bss, vram: 0x005CE208, name: lib/deci2 }
       - { type: bss, vram: 0x005CF240, name: lib/tlbtrap }
       - { type: bss, vram: 0x005CF470, name: lib/nodebug/memcmp }

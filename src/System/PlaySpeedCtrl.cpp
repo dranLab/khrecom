@@ -17,13 +17,13 @@ TIMEQ CPlaySpeedCtrl::getProgressTime(TIMEQ nInTQ) {
     return nInTQ * s_fPlaySpeed;
 }
 
-void CPlaySpeedCtrl::setDebugPlaySpeed(FLOAT fInSpeed) {
-    if (fInSpeed > 0.f) {
-        s_fDebugPlaySpeed = fInSpeed;
-    } else {
-        s_fDebugPlaySpeed = 0.f;
-    }
-}
+KH_DEBUG(void CPlaySpeedCtrl::setDebugPlaySpeed(FLOAT fInSpeed) {)
+    KH_DEBUG(if (fInSpeed > 0.f) {)
+        KH_DEBUG(s_fDebugPlaySpeed = fInSpeed;)
+    KH_DEBUG(} else {)
+        KH_DEBUG(s_fDebugPlaySpeed = 0.f;)
+    KH_DEBUG(})
+KH_DEBUG(})
 
 TIMEQ CPlaySpeedCtrl::getSysProgressTime(TIMEQ nInTQ) {
     return nInTQ * s_fDebugPlaySpeed;
