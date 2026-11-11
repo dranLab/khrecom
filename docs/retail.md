@@ -254,3 +254,10 @@ overrides; ~25 enemies' vtables). Split/layout fixes found on the way (decisions
     address), not the previous one (__FRAME_BEGIN__0 before default_terminate).
 15. A gap after a recorded unit is alignment padding only if it is all zeros (PathData's floats after PathCamera).
 
+Sixth batch (2026-11-11): **480 units from source in retail - every eligible unit**, `verify` switches nothing back.
+
+16. Address-named labels in the sources (`extern char D_004FF688[]`) name beta addresses: for another version
+    configure.py translates them through the version map (functions.tsv, data.tsv); unmapped ones are not
+    provided (Tim2CheckFileHeader's "TIM2"/"CLT2" in .sdata).
+17. A row that starts inside a recorded unit moves to its end (lib/nodebug/__CTOR_LIST__ inside tlbfunc's .data).
+

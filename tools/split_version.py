@@ -221,6 +221,9 @@ def main() -> None:
             rows = sorted(data_lines[section])
             k = next(i for i, x in enumerate(rows) if x[2] == unit)
             nxt = rows[k + 1][0] if k + 1 < len(rows) else None
+            if nxt is not None and nxt < addr + size and (rows[k + 1][2], section) not in fixed:
+                rows[k + 1] = (addr + size,) + rows[k + 1][1:]  # it started inside this unit: it follows it
+                nxt = addr + size
             align = min(128, nxt & -nxt) if nxt else 1  # configure.py gives an object its start's alignment
             gap_data = nxt and section != ".bss" and any(
                 other.data[other.off(addr + size):other.off(addr + size) + (nxt - addr - size)])

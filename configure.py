@@ -463,10 +463,37 @@ def linkonce_from_source(opts: dict, by_object: dict) -> tuple[set[str], dict[st
     return set(replace), {u: ",".join(r) for u, r in ranges.items()} | {u: "none" for u in compiled if u not in ranges}
 
 
-def address_labels(opts: dict) -> dict[str, int]:
+def version_address_map(build_cfg: dict) -> dict[int, int]:
+    """Beta address -> this version's address (tools/version_map.py: functions.tsv, data.tsv)."""
+    out = {}
+    vmap = ROOT / "build" / Path(build_cfg["elf"]).name / "version_map"
+    for name, beta, other in (("functions.tsv", "beta", "other"), ("data.tsv", "beta", "other")):
+        path = vmap / name
+        if path.exists():
+            import csv
+            for row in csv.DictReader(path.open(encoding="utf-8"), delimiter="\t"):
+                if row[other]:
+                    out[int(row[beta], 16)] = int(row[other], 16)
+    return out
+
+
+def address_labels(opts: dict, address_map: dict[int, int] | None = None) -> dict[str, int]:
     """Every address-named label (D_004E26D8, jtbl_..., cardDataTbl_004E5840) that the original's assembly, its
-    data or the sources mention, with its address."""
+    data or the sources mention, with its address. The sources name the reference version's (the beta's) addresses:
+    for another version (address_map given) they are translated through the version map, and labels without a
+    mapping are left out (a use then fails to link instead of pointing at the wrong data)."""
     labels: dict[str, int] = {}
+    if address_map is not None:
+        for path in sorted([*(ROOT / opts["asm_path"] / "nonmatchings").rglob("*.s"),
+                            *(ROOT / opts["asm_path"] / "data").rglob("*.s")]):
+            for m in ADDRESS_LABEL.finditer(path.read_text(encoding="latin-1")):
+                labels[m.group(1)] = int(m.group(2), 16)
+        for path in sorted(p for p in (ROOT / "src").rglob("*") if p.suffix in (".c", ".cpp", ".h", ".s")):
+            for m in ADDRESS_LABEL.finditer(path.read_text(encoding="latin-1")):
+                addr = address_map.get(int(m.group(2), 16))
+                if addr is not None and m.group(1) not in labels:
+                    labels[m.group(1)] = addr
+        return labels
     # The data's assembly too: where splat read string bytes as label + addend (.word D_0063696C + 0x2), that label
     # may be defined nowhere once the data around its address comes from source.
     # And the C/C++ sources: compiled code names the original's strings and tables `extern D_xxxxxxxx` while the
@@ -607,7 +634,7 @@ def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg
 
     # linker_script_matching.ld: checks that only hold for the original layout (e.g. where _end lands); the shifted
     # links (write_shift_links) leave it out.
-    labels = address_labels(opts)
+    labels = address_labels(opts, None if version == versions()[0] else version_address_map(build_cfg))
     labels_by_addr = sorted((addr, name) for name, addr in labels.items())
     extra_scripts = [f"{cfg_dir}/linker_script_extra.ld", f"{cfg_dir}/dll_imports.ld",
                      f"{cfg_dir}/linker_script_matching.ld"] + [

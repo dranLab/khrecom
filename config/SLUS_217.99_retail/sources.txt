@@ -388,6 +388,7 @@ lib/libdma
 lib/libipu
 lib/libosd
 lib/libvib
+lib/nodebug/Tim2CheckFileHeader
 lib/nodebug/__assert
 lib/nodebug/__malloc_lock
 lib/nodebug/__sflags
@@ -477,4 +478,5 @@ lib/src/newlib/libm/math/wf_fmod
 lib/src/newlib/libm/math/wf_pow
 lib/src/newlib/libm/math/wf_sqrt
 lib/timeralarm
+lib/tlbfunc
 lib/tty

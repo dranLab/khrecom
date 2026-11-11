@@ -1077,7 +1077,7 @@ segments:
       - [0x248950, data, lib/timer]
       - [0x248978, data, lib/iopnotify]
       - [0x248980, data, lib/tlbfunc]
-      - [0x248FAC, data, lib/nodebug/__CTOR_LIST__]
+      - [0x248FCC, data, lib/nodebug/__CTOR_LIST__]
       - [0x250380, data, System/Component.linkonce]
       - [0x250440, data, System/Coord.linkonce]
       - [0x2504A0, data, System/CoordMan.linkonce]

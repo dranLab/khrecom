@@ -208,6 +208,7 @@ lib/libdma .bss 0x005BF5A8 0x14
 lib/libdma .data 0x00343A30 0x38
 lib/libdma .rodata 0x004331F0 0x6a
 lib/libosd .data 0x003479E0 0x7c0
+lib/nodebug/Tim2CheckFileHeader .rodata 0x00434600 0x470
 lib/nodebug/__assert .rodata 0x004361E8 0x30
 lib/nodebug/_mbtowc_r .rodata 0x004367C0 0x40
 lib/nodebug/_vfwrite .bss 0x005C76F8 0x80
@@ -250,5 +251,7 @@ lib/src/newlib/libm/math/wf_fmod .rodata 0x004333E0 0x10
 lib/src/newlib/libm/math/wf_pow .rodata 0x004333F0 0x20
 lib/src/newlib/libm/math/wf_sqrt .rodata 0x00433410 0x10
 lib/timeralarm .bss 0x005CDC00 0x404
+lib/tlbfunc .data 0x00348980 0x64c
+lib/tlbfunc .rodata 0x00436E18 0x7c
 lib/tty .bss 0x005C7FC0 0x3c0
 lib/tty .rodata 0x00436858 0x70
