@@ -429,3 +429,4 @@ void sceSifWriteBackDCache(void *ptr, int size)
         "\tnop\n");
 }
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .data .rodata

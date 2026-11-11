@@ -66,3 +66,4 @@ int sceGsExecLoadImage(sceGsLoadImage *lp, u_long128 *srcaddr)
     return 0;
 }
 // SOURCE DATA: .rodata
+// SOURCE DATA SLUS_217.99_retail: .rodata

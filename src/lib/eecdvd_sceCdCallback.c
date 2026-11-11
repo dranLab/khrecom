@@ -728,3 +728,4 @@ unsigned int _sceCd_rcmdrdata[64] __attribute__((aligned(64))) = { 0 };
 sceSifClientData _sceCd_cd_scmd __attribute__((aligned(64))) = { { 0 } };
 
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .data .rodata

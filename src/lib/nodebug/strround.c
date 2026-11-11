@@ -288,3 +288,4 @@ char *add_separators(char *buf, char *cp, char *end, int *size)
     return buf;
 }
 // SOURCE DATA: .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .rodata

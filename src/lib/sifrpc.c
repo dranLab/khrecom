@@ -717,3 +717,4 @@ void sceSifRpcLoop(sceSifQueueData *qd)
     }
 }
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .data .rodata

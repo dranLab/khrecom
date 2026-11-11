@@ -49,6 +49,9 @@ class Version:
         self.cfg = ROOT / "config" / name
         self.build_cfg = yaml.safe_load((self.cfg / "build.yaml").read_text(encoding="utf-8"))
         self.cflags = self.build_cfg["cflags"]
+        sys.path.insert(0, str(ROOT))
+        import configure  # its toolchain selection (unit_toolchain, toolchain_variables)
+        self.toolchain = lambda unit: configure.toolchain_variables(configure.unit_toolchain(self.build_cfg, unit))
         self.image = Image(ROOT / self.build_cfg["elf"])
         self.out = ROOT / "build" / name / "retail_units"
         vmap = ROOT / "build" / Path(self.build_cfg["elf"]).name / "version_map" / "functions.tsv"
@@ -101,10 +104,11 @@ def try_unit(v: Version, unit: str, show=(), data=True) -> dict:
     out = v.out / "obj" / (unit.replace("/", "_") + ".o")
     out.parent.mkdir(parents=True, exist_ok=True)
     src = src.relative_to(ROOT)  # as the build passes it: gcc's _GLOBAL_$I$<path> names come from it
-    cmd = (f"{CC} -S {v.cflags} -I include -I src -o {out}.gcc.s {src} && "
+    tc = v.toolchain(unit)  # the unit's compiler, flags and assembler (build.yaml overrides: the libraries)
+    cmd = (f"{tc['cc']} -S {tc['cflags']} -I include -I src -o {out}.gcc.s {src} && "
            f"{sys.executable} tools/ee_asm_compat.py {out}.gcc.s {out}.s --source {src} "
            f"--symbols {v.cfg}/elf_symbol_addrs.txt --own-data 0x0-0xFFFFFFFF --unit-data none "
-           f"--source-root c:/KHCOM/MainApp/ --assembler snas --asm-path asm/{v.name} && {AS} -o {out} {out}.s")
+           f"--asm-path asm/{v.name} {tc['compat_extra']} && {tc['assemble']} -o {out} {out}.s")
     r = subprocess.run(cmd, shell=True, capture_output=True, text=True, cwd=ROOT)
     if r.returncode:
         err = [l for l in (r.stdout + r.stderr).splitlines() if "rror" in l or ": parse" in l]
@@ -323,7 +327,7 @@ def layout_culprits(v: Version) -> set[str]:
 def complete_units() -> list[str]:
     units = []
     for p in sorted((ROOT / "src").rglob("*")):
-        if p.suffix in (".c", ".cpp") and not p.relative_to(ROOT / "src").as_posix().startswith("lib/"):
+        if p.suffix in (".c", ".cpp"):
             if "INCLUDE_ASM(" not in p.read_text(encoding="latin-1"):
                 units.append(p.relative_to(ROOT / "src").with_suffix("").as_posix())
     return units

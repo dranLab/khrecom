@@ -196,3 +196,7 @@ MonstroGauge, MoogleShop switched back: to look at).
 10. (decision) `verify` blames from the linker map: the first input section, by address, not at its split start
     (also when the link's own checks fail), and the compiled object placed last before it.
 
+Third batch (2026-11-11): `scan` covers the libraries too (each unit with its build.yaml toolchain; units still
+with INCLUDE_ASM are left out). **446 units build from source in retail** (the libraries largely complete);
+switched back by `verify`: Pause, SummonGenie, MonstroGauge, MoogleShop, lib/nodebug/Tim2CheckFileHeader.
+
