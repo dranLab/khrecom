@@ -446,3 +446,38 @@ Seventeenth batch (2026-11-11): **549 units from source in retail**, 151 functio
 - Triage helpers (scratch, build/): `rdiff.py <unit> <function>` (unified ours/retail diff, branch offsets masked),
   `difflist.sh`, `dstat.sh` (lines only in ours/retail per DIFF function; run one unit per process: `try` writes
   one object per unit), `rperm.py` (every order of n lines, retail score).
+
+### Session 2026-11-11 (evening): 564 -> 576 units
+
+- Done (beta-only in retail, line-neutral `KH_DEBUG`): TexInfo's `_nTexSize`/`_nClutSize` (retail TexInfo is 0x68),
+  RsrcData's DLL load report and `dumpTag`/`getGroupTagList`, JiminyMemo's `ScaleStr[64]` (CJiminyMemo 0x530) and
+  JMemoFlag's 21 debug event setters, RsrcDB's NULL-name fallback, GimmickManager's world-23 and early prize paths,
+  Player's debug controls (battle toggle `isTrgBattleChange`, free move, KKIKUCHI keys, hi-jump, debug deck/attack/
+  game mode, hang-hand display, `szAtkAnimID`, `m_pDebug` clear), the minigame validation and trace switch,
+  LightUnit's map viewer hooks, Model's wireframe display, Math3D's `checkFloat`, CCollDisp::finalize, the attack
+  collision list `m_pCollListA` (debug display only), the revolver's debug deck/dump/display blocks, HumanBoss's
+  debug act blocks and its `.sdata` string placeholders.
+- Retail forms (`KH_RELEASE`/`KH_VER`): JiminyMemo's assert-returns (`createSequence`: `if (!(n < 32)) return NULL`;
+  `main`'s default ends the menu like -1), TiggerJump/WildDive object sizes, Player's `startSingleAction` offset
+  (CEntity 0x20 smaller), `makeRevolver`'s deck taken at the declaration (movn form), LightUnit's `ll[5]`.
+- Source shapes that fit both builds (the beta matches with either; retail needs this one): RsrcDB
+  getFirstRsrc_Scene's `pRsrc = pContainer ? ... : NULL` without the NULL init, CollBody's two `detectColumnColumnEz`
+  case groups ({0x22, 0x42} and {0x24, 0x44}: retail's jump table).
+- Lessons: a debug block folded by `dbgCheckUser`/`dbgButton*`/`KH_DW` still changes code: its locals keep stack
+  space (stateField/stateBattle frames), its calls in conditions stay (`isSoraGame()`, `isStandingCard()`), its
+  loops leave notes/alignment, its tests get CSE'd into the code after it (MinigameManager sendEvent's trace
+  switch), it shifts scheduling (CardRevolver main). Wrap the whole block. `scan` doesn't check `.bss` contents:
+  a beta-only global there (`szAtkAnimID`) breaks the link (`verify` shows it).
+- Open, tried without a match: HumanBoss enemyCardProc/stockActProc/normalActProc (retail keeps branches or
+  cross-jumps where ours makes store-flags; no release TRACE form or empty asm explains all three), CardBattle
+  testBreakingCard (same family), BattleEnemyManager main (the 15000/6000 arms: the inverted `if` matches retail and
+  the beta, but the beta's markers put 15000 first), GimmickManager DecideGimmickCard_PossibleNoCheck (one saved
+  register more in ours), FifoFpl getValidActiveBlock (early `return NULL` placed inline in retail), JiminyMemo
+  setPlateText/contentMinigame/CMemo3DObj::main (register allocation), CardRevolver `_initialize` (ours cross-jumps
+  the tutorial arm's convBtlDeckToCard/setDeck tail), TreasureBox CardMaxWarningMain, LightUnit _calc (two spill
+  slots swapped), Card (retail's .data/.rodata carry BattleEnemy.h's `abnormal`/`cure01` statics: Card includes
+  BattleEnemy.h in retail, not in the beta), CollBody/CollMap (retail has 16 zero bytes between their .rodata that
+  neither object produces; `verify` keeps CollMap in assembly).
+- Helpers (build/, scratch): `wrap_lines.py FILE A-B ...` (line-neutral KH_DEBUG wrapping, multi-line statements as
+  one call), `khcheck.py FILES` (KH_DEBUG/KH_RELEASE calls whose parentheses don't close on their line),
+  `calls.sh <unit> <function>` (call targets ours vs retail by name).
