@@ -108,113 +108,113 @@ static inline void _setRTP(RTP& r, USHORT lv, USHORT actor, SHORT tag, SHORT mac
 }
 #include "Game/Player/PlayerGauge.h"
 
-namespace DWTEvent {
-static BOOL DebugSetNpcIDWindow(CDebugWindow* pObj, INT inY, INT inParam) {
-    if (inParam & 0x20) {
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(static BOOL DebugSetNpcIDWindow(CDebugWindow* pObj, INT inY, INT inParam) {)
+    KH_DEBUG(if (inParam & 0x20) {)
         KH_DEBUG(DebugWork::g_dw.event.iNpcID = inY;)
-        CActorDebug* p;
-        if (KH_DW(DebugWork::g_dw.event.pClass)) {
-            p = (CActorDebug*)KH_DW(DebugWork::g_dw.event.pClass);
-            delete p;
-        }
-        p = new CActorDebug(CTaskMan::getSysTask(1));
+        KH_DEBUG(CActorDebug* p;)
+        KH_DEBUG(if (KH_DW(DebugWork::g_dw.event.pClass)) {)
+            KH_DEBUG(p = (CActorDebug*)KH_DW(DebugWork::g_dw.event.pClass);)
+            KH_DEBUG(delete p;)
+        KH_DEBUG(})
+        KH_DEBUG(p = new CActorDebug(CTaskMan::getSysTask(1));)
         KH_DEBUG(DebugWork::g_dw.event.pClass = (INT*)p;)
         KH_DEBUG(DebugWork::g_dw.event.iNpcCoordDisp = 1;)
-    }
-    return 1;
-}
-}
-namespace DWTEvent {
-static INT debugWinNPCListAllCall(CDebugWindow* pObj, INT inParam) {
-    CTask* pA;
-    INT ret;
-    if (inParam & 1) {
-        pA = CTaskMan::getSysTask(0x1A);
-        ret = 0;
-        if (pA && ((CAtel*)pA)->getVSM()) ret = ((CAtel*)pA)->getVSM()->getActorNum();
-        return ret;
-    }
-    return 1;
-}
-}
+    KH_DEBUG(})
+    KH_DEBUG(return 1;)
+KH_DEBUG(})
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(static INT debugWinNPCListAllCall(CDebugWindow* pObj, INT inParam) {)
+    KH_DEBUG(CTask* pA;)
+    KH_DEBUG(INT ret;)
+    KH_DEBUG(if (inParam & 1) {)
+        KH_DEBUG(pA = CTaskMan::getSysTask(0x1A);)
+        KH_DEBUG(ret = 0;)
+        KH_DEBUG(if (pA && ((CAtel*)pA)->getVSM()) ret = ((CAtel*)pA)->getVSM()->getActorNum();)
+        KH_DEBUG(return ret;)
+    KH_DEBUG(})
+    KH_DEBUG(return 1;)
+KH_DEBUG(})
+KH_DEBUG(})
 /* placeholder: "" comes right before szPlayMode's strings in the original (0x48C630; the tables and cardDataTbl
    share it), though the first table using it (debugWinNPCListLine) follows szStockKindName: its source is unknown */
-__asm__(".rdata\n");
-inline void _roPh0a() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
-    TRACE("");
-}
-namespace DWTEvent {
-LPCSTR szPlayMode[2] = { "\x83\\\x83\x89", "\x83\x8a\x83N" };
-}
-namespace DWTEvent {
-LPCSTR szDifficultMode[4] = { "\x83r\x83M\x83i\x81[", "\x83X\x83^\x83\x93\x83_\x81[\x83h", "\x83v\x83\x89\x83" "E\x83h", "\x83G\x83N\x83X\x83g\x83\x8a\x81[\x83\x80" };
-}
-namespace DWTEvent {
-LPCSTR szSoundMode[3] = { "\x83X\x83" "e\x83\x8c\x83I", "\x83v\x83\x8d\x83\x8d\x83W\x83" "b\x83N\x87U", "\x83\x82\x83m\x83\x89\x83\x8b" };
-}
-namespace DWTEvent {
-LPCSTR szMenuKind[8] = { "NotOpen", "Camp", "RoomCreation_1", "RoomCreation_2", "RoomCreation_EV", "WorldSelect", "MogShop", "SaveMenu" };
-}
-namespace DWTEvent {
-LPCSTR szMiniGameState[6] = { "\x82\xb5\x82\xe5\x82\xab\x82\xb6\x82\xe5\x82\xa4\x82\xbd\x82\xa2", "\x82P\x89\xf1\x96\xda\x82\xbf\x82\xe5\x82\xa4\x82\xb9\x82\xf1", "\x82P\x89\xf1\x96\xda\x83N\x83\x8a\x83" "A\x82\xb5\x82\xbd", "\x82Q\x89\xf1\x96\xda\x82\xbf\x82\xe5\x82\xa4\x82\xb9\x82\xf1", "\x82Q\x89\xf1\x96\xda\x83N\x83\x8a\x83" "A\x82\xb5\x82\xbd", "\x8d" "D\x82\xab\x82\xc9\x97V\x82\xd7" };
-}
-namespace DWTEvent {
-LPCSTR szMiniGamePlayState[4] = { "\x82\xb5\x82\xe5\x82\xab\x82\xb6\x82\xe5\x82\xa4\x82\xbd\x82\xa2", "\x83Q\x81[\x83\x80\x8aJ\x8en", "\x83Q\x81[\x83\x80\x92\x86", "\x83Q\x81[\x83\x80\x8fI\x97\xb9" };
-}
-namespace DWTEvent {
-LPCSTR szMiniGameKind[5] = { "\x96\xec\x8d\xd8\x83p\x83j\x83" "b\x83N", "\x83o\x83\x8b\x81[\x83\x93\x83O\x83\x89\x83" "C\x83_\x81[", "\x83" "e\x83" "B\x83K\x81[\x83W\x83\x83\x83\x93\x83v", "\x83\x8f\x83" "C\x83\x8b\x83h\x83_\x83" "C\x83u", "\x82\xcd\x82\xbf\x91\xde\x8e\xa1" };
-}
-namespace DWTEvent {
-LPCSTR szStockKindName[77] = { "-----\x82O", "-----\x82P", "-----\x82Q", "-----\x82R", "\x83X\x83\x89\x83" "C\x83h\x83_\x83" "b\x83V\x83\x85", "\x83t\x83@\x83" "C\x83i\x83\x8b\x83u\x83\x8c\x83" "C\x83N", "\x83X\x83^\x83\x93\x83" "C\x83\x93\x83p\x83N\x83g", "\x83U\x83\x93\x83" "e\x83" "c\x83P\x83\x93", "\x83X\x83g\x83\x89\x83" "C\x83N\x83\x8c\x83" "C\x83h", "\x83\\\x83j\x83" "b\x83N\x83\x8c\x83" "C\x83\x94", "\x83\x89\x83X\x83g\x83" "A\x83\x8b\x83J\x83i\x83\x80", "\x83\x89\x83O\x83i\x83\x8d\x83N", "\x83\x8a\x83j\x83" "e\x83" "B\x83\x8a\x83~\x83" "b\x83g", "\x83t\x83@\x83" "C\x83\x89", "\x83u\x83\x8a\x83U\x83\x89", "\x83T\x83\x93\x83_\x83\x89", "\x83P\x83" "A\x83\x8b\x83\x89", "\x83O\x83\x89\x83r\x83\x89", "\x83X\x83g\x83v\x83\x89", "\x83G\x83" "A\x83\x8d\x83\x89", "\x83t\x83@\x83" "C\x83K", "\x83u\x83\x8a\x83U\x83K", "\x83T\x83\x93\x83_\x83K", "\x83P\x83" "A\x83\x8b\x83K", "\x83O\x83\x89\x83r\x83K", "\x83X\x83g\x83v\x83K", "\x83G\x83" "A\x83\x8d\x83K", "\x83t\x83@\x83" "C\x83" "A\x83\x8c\x83" "C\x83h", "\x83u\x83\x8a\x83U\x83h\x83\x8c\x83" "C\x83h", "\x83T\x83\x93\x83_\x81[\x83\x8c\x83" "C\x83h", "\x83\x8a\x83t\x83\x8c\x83N\x83g\x83\x8c\x83" "C\x83h", "\x83W\x83\x83\x83" "b\x83W\x83\x81\x83\x93\x83g", "\x83t\x83@\x83" "C\x83K\x83o\x81[\x83X\x83g", "\x83\x8c\x83" "C\x83W\x83\x93\x83O\x83X\x83g\x81[\x83\x80", "\x83\x81\x83K\x83t\x83\x8c\x83" "A", "\x83t\x83\x8a\x81[\x83Y", "\x83z\x81[\x83~\x83\x93\x83O\x83u\x83\x8a\x83U\x83\x89\t", "\x83" "A\x83N\x83" "A\x83X\x83v\x83\x89\x83" "b\x83V\x83\x85", "\x83}\x83O\x83l\x83X\x83p\x83" "C\x83\x89\x83\x8b", "\x83\x8a\x81[\x83T\x83\x8b\x83t\x83\x8c\x81[\x83\x80", "\x83V\x83\x87\x83" "b\x83N\x83" "C\x83\x93\x83p\x83N\x83g", "\x83g\x83\x8b\x83l\x83h", "\x83N\x83G\x83" "C\x83N", "\x83" "f\x83W\x83\x87\x83l\x81[\x83^\x81[", "\x83" "f\x83W\x83\x87\x83\x93", "\x83o\x83" "C\x83\x93\x83h", "\x83R\x83\x93\x83t\x83\x85", "\x83" "e\x83\x89\x81[", "\x83V\x83\x93\x83N\x83\x8d", "\x83~\x83\x89\x83N\x83\x8b\x83M\x83t\x83g", "\x83" "e\x83\x8c\x83|", "\x83z\x81[\x83\x8a\x81[", "\x83v\x83\x89\x83" "E\x83h\x83\x8d\x83" "A", "\x83X\x83v\x83\x89\x83" "b\x83V\x83\x85", "\x83p\x83\x89\x83_\x83" "C\x83X", "\x83p\x83\x89\x83_\x83" "C\x83X\x83X\x83^\x83\x93\x83v", "\x83t\x83\x8c\x83" "A\x83u\x83\x8c\x83X", "\x83V\x83\x87\x81[\x83^\x83" "C\x83\x80", "\x83V\x83\x87\x81[\x83^\x83" "C\x83\x80", "\x83" "c\x83" "C\x83\x93\x83N\x83\x8b", "\x8b\xa5\x8e" "a\x82\xe8", "\x92\xb4\x8b\x86\x95\x90\x90_\x94" "e\x8e" "a", "\x8b\xa5\x8e" "a\x82\xe8\x81" "E\x89\xfc", "\x83}\x83W\x83" "b\x83N", "\x83X\x83^\x81[\x83_\x83X\x83g\x83u\x83\x8a\x83" "b\x83" "c", "\x83O\x81[\x83t\x83" "B\x81[\x83g\x83\x8b\x83l\x83h", "\x83O\x81[\x83t\x83" "B\x81[\x83X\x83}\x83" "b\x83V\x83\x85", "\x83\x8f\x83" "C\x83\x8b\x83h\x83N\x83\x89\x83" "b\x83V\x83\x83\x81[", "\x83X\x83g\x81[\x83\x80\x83\x8a\x81[\x83p\x81[", "\x83T\x83v\x83\x89\x83" "C\x83Y", "\x83X\x83p\x83" "C\x83\x89\x83\x8b\x83" "E\x83" "F\x83" "C\x83u", "\x83X\x83p\x83" "C\x83\x89\x83\x8b\x83" "E\x83" "F\x83" "C\x83u", "\x83X\x83\x89\x83X\x83g\x83\x89\x83" "b\x83V\x83\x85", "\x83t\x83\x85\x83\x8a\x83" "A\x83X\x83{\x83\x8c\x81[", "\x83t\x83\x85\x83\x8a\x83" "A\x83X\x83{\x83\x8c\x81[", "\x83\x89\x83" "b\x83L\x81[\x83o\x83" "E\x83\x93\x83" "e\x83" "B", "\x83\x89\x83" "b\x83L\x81[\x83o\x83" "E\x83\x93\x83" "e\x83" "B" };
-}
-namespace DWTEvent {
-DEBUG_WINDOW_LINE debugWinNPCListLine[2] = {
-    { "", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, DebugSetNpcIDWindow, NULL },
-    { NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-};
-}
-namespace DWTEvent {
-static INT debugWinNPCListDispCall(LPSTR pStr, INT iLineY, const void* pValue) {
-    CTask* pA = CTaskMan::getSysTask(0x1A);
-    if (pA && ((CAtel*)pA)->getVSM()) sprintf(pStr, " %s", ((CAtel*)pA)->getVSM()->getAvatarName(iLineY));
-    return 1;
-}
-}
-namespace DWTEvent {
-static BOOL DebugCreateNpcWindow(CDebugWindow* pObj, INT inY, INT inParam) {
-    CTask* pA = CTaskMan::getSysTask(0x1A);
-    if (pA && ((CAtel*)pA)->getVSM()) {
-        if (inParam & 0x180) {
-            if (KH_DW(DebugWork::g_dw.event.iNpcCoordDisp) == 1) {
-                CActorDebug* p = new CActorDebug(CTaskMan::getSysTask(1));
+KH_DEBUG(__asm__(".rdata\n");)
+KH_DEBUG(inline void _roPh0a() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */)
+    KH_DEBUG(TRACE("");)
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(LPCSTR szPlayMode[2] = { "\x83\\\x83\x89", "\x83\x8a\x83N" };)
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(LPCSTR szDifficultMode[4] = { "\x83r\x83M\x83i\x81[", "\x83X\x83^\x83\x93\x83_\x81[\x83h", "\x83v\x83\x89\x83" "E\x83h", "\x83G\x83N\x83X\x83g\x83\x8a\x81[\x83\x80" };)
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(LPCSTR szSoundMode[3] = { "\x83X\x83" "e\x83\x8c\x83I", "\x83v\x83\x8d\x83\x8d\x83W\x83" "b\x83N\x87U", "\x83\x82\x83m\x83\x89\x83\x8b" };)
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(LPCSTR szMenuKind[8] = { "NotOpen", "Camp", "RoomCreation_1", "RoomCreation_2", "RoomCreation_EV", "WorldSelect", "MogShop", "SaveMenu" };)
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(LPCSTR szMiniGameState[6] = { "\x82\xb5\x82\xe5\x82\xab\x82\xb6\x82\xe5\x82\xa4\x82\xbd\x82\xa2", "\x82P\x89\xf1\x96\xda\x82\xbf\x82\xe5\x82\xa4\x82\xb9\x82\xf1", "\x82P\x89\xf1\x96\xda\x83N\x83\x8a\x83" "A\x82\xb5\x82\xbd", "\x82Q\x89\xf1\x96\xda\x82\xbf\x82\xe5\x82\xa4\x82\xb9\x82\xf1", "\x82Q\x89\xf1\x96\xda\x83N\x83\x8a\x83" "A\x82\xb5\x82\xbd", "\x8d" "D\x82\xab\x82\xc9\x97V\x82\xd7" };)
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(LPCSTR szMiniGamePlayState[4] = { "\x82\xb5\x82\xe5\x82\xab\x82\xb6\x82\xe5\x82\xa4\x82\xbd\x82\xa2", "\x83Q\x81[\x83\x80\x8aJ\x8en", "\x83Q\x81[\x83\x80\x92\x86", "\x83Q\x81[\x83\x80\x8fI\x97\xb9" };)
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(LPCSTR szMiniGameKind[5] = { "\x96\xec\x8d\xd8\x83p\x83j\x83" "b\x83N", "\x83o\x83\x8b\x81[\x83\x93\x83O\x83\x89\x83" "C\x83_\x81[", "\x83" "e\x83" "B\x83K\x81[\x83W\x83\x83\x83\x93\x83v", "\x83\x8f\x83" "C\x83\x8b\x83h\x83_\x83" "C\x83u", "\x82\xcd\x82\xbf\x91\xde\x8e\xa1" };)
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(LPCSTR szStockKindName[77] = { "-----\x82O", "-----\x82P", "-----\x82Q", "-----\x82R", "\x83X\x83\x89\x83" "C\x83h\x83_\x83" "b\x83V\x83\x85", "\x83t\x83@\x83" "C\x83i\x83\x8b\x83u\x83\x8c\x83" "C\x83N", "\x83X\x83^\x83\x93\x83" "C\x83\x93\x83p\x83N\x83g", "\x83U\x83\x93\x83" "e\x83" "c\x83P\x83\x93", "\x83X\x83g\x83\x89\x83" "C\x83N\x83\x8c\x83" "C\x83h", "\x83\\\x83j\x83" "b\x83N\x83\x8c\x83" "C\x83\x94", "\x83\x89\x83X\x83g\x83" "A\x83\x8b\x83J\x83i\x83\x80", "\x83\x89\x83O\x83i\x83\x8d\x83N", "\x83\x8a\x83j\x83" "e\x83" "B\x83\x8a\x83~\x83" "b\x83g", "\x83t\x83@\x83" "C\x83\x89", "\x83u\x83\x8a\x83U\x83\x89", "\x83T\x83\x93\x83_\x83\x89", "\x83P\x83" "A\x83\x8b\x83\x89", "\x83O\x83\x89\x83r\x83\x89", "\x83X\x83g\x83v\x83\x89", "\x83G\x83" "A\x83\x8d\x83\x89", "\x83t\x83@\x83" "C\x83K", "\x83u\x83\x8a\x83U\x83K", "\x83T\x83\x93\x83_\x83K", "\x83P\x83" "A\x83\x8b\x83K", "\x83O\x83\x89\x83r\x83K", "\x83X\x83g\x83v\x83K", "\x83G\x83" "A\x83\x8d\x83K", "\x83t\x83@\x83" "C\x83" "A\x83\x8c\x83" "C\x83h", "\x83u\x83\x8a\x83U\x83h\x83\x8c\x83" "C\x83h", "\x83T\x83\x93\x83_\x81[\x83\x8c\x83" "C\x83h", "\x83\x8a\x83t\x83\x8c\x83N\x83g\x83\x8c\x83" "C\x83h", "\x83W\x83\x83\x83" "b\x83W\x83\x81\x83\x93\x83g", "\x83t\x83@\x83" "C\x83K\x83o\x81[\x83X\x83g", "\x83\x8c\x83" "C\x83W\x83\x93\x83O\x83X\x83g\x81[\x83\x80", "\x83\x81\x83K\x83t\x83\x8c\x83" "A", "\x83t\x83\x8a\x81[\x83Y", "\x83z\x81[\x83~\x83\x93\x83O\x83u\x83\x8a\x83U\x83\x89\t", "\x83" "A\x83N\x83" "A\x83X\x83v\x83\x89\x83" "b\x83V\x83\x85", "\x83}\x83O\x83l\x83X\x83p\x83" "C\x83\x89\x83\x8b", "\x83\x8a\x81[\x83T\x83\x8b\x83t\x83\x8c\x81[\x83\x80", "\x83V\x83\x87\x83" "b\x83N\x83" "C\x83\x93\x83p\x83N\x83g", "\x83g\x83\x8b\x83l\x83h", "\x83N\x83G\x83" "C\x83N", "\x83" "f\x83W\x83\x87\x83l\x81[\x83^\x81[", "\x83" "f\x83W\x83\x87\x83\x93", "\x83o\x83" "C\x83\x93\x83h", "\x83R\x83\x93\x83t\x83\x85", "\x83" "e\x83\x89\x81[", "\x83V\x83\x93\x83N\x83\x8d", "\x83~\x83\x89\x83N\x83\x8b\x83M\x83t\x83g", "\x83" "e\x83\x8c\x83|", "\x83z\x81[\x83\x8a\x81[", "\x83v\x83\x89\x83" "E\x83h\x83\x8d\x83" "A", "\x83X\x83v\x83\x89\x83" "b\x83V\x83\x85", "\x83p\x83\x89\x83_\x83" "C\x83X", "\x83p\x83\x89\x83_\x83" "C\x83X\x83X\x83^\x83\x93\x83v", "\x83t\x83\x8c\x83" "A\x83u\x83\x8c\x83X", "\x83V\x83\x87\x81[\x83^\x83" "C\x83\x80", "\x83V\x83\x87\x81[\x83^\x83" "C\x83\x80", "\x83" "c\x83" "C\x83\x93\x83N\x83\x8b", "\x8b\xa5\x8e" "a\x82\xe8", "\x92\xb4\x8b\x86\x95\x90\x90_\x94" "e\x8e" "a", "\x8b\xa5\x8e" "a\x82\xe8\x81" "E\x89\xfc", "\x83}\x83W\x83" "b\x83N", "\x83X\x83^\x81[\x83_\x83X\x83g\x83u\x83\x8a\x83" "b\x83" "c", "\x83O\x81[\x83t\x83" "B\x81[\x83g\x83\x8b\x83l\x83h", "\x83O\x81[\x83t\x83" "B\x81[\x83X\x83}\x83" "b\x83V\x83\x85", "\x83\x8f\x83" "C\x83\x8b\x83h\x83N\x83\x89\x83" "b\x83V\x83\x83\x81[", "\x83X\x83g\x81[\x83\x80\x83\x8a\x81[\x83p\x81[", "\x83T\x83v\x83\x89\x83" "C\x83Y", "\x83X\x83p\x83" "C\x83\x89\x83\x8b\x83" "E\x83" "F\x83" "C\x83u", "\x83X\x83p\x83" "C\x83\x89\x83\x8b\x83" "E\x83" "F\x83" "C\x83u", "\x83X\x83\x89\x83X\x83g\x83\x89\x83" "b\x83V\x83\x85", "\x83t\x83\x85\x83\x8a\x83" "A\x83X\x83{\x83\x8c\x81[", "\x83t\x83\x85\x83\x8a\x83" "A\x83X\x83{\x83\x8c\x81[", "\x83\x89\x83" "b\x83L\x81[\x83o\x83" "E\x83\x93\x83" "e\x83" "B", "\x83\x89\x83" "b\x83L\x81[\x83o\x83" "E\x83\x93\x83" "e\x83" "B" };)
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(DEBUG_WINDOW_LINE debugWinNPCListLine[2] = {)
+    KH_DEBUG({ "", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, DebugSetNpcIDWindow, NULL },)
+    KH_DEBUG({ NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+KH_DEBUG(};)
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(static INT debugWinNPCListDispCall(LPSTR pStr, INT iLineY, const void* pValue) {)
+    KH_DEBUG(CTask* pA = CTaskMan::getSysTask(0x1A);)
+    KH_DEBUG(if (pA && ((CAtel*)pA)->getVSM()) sprintf(pStr, " %s", ((CAtel*)pA)->getVSM()->getAvatarName(iLineY));)
+    KH_DEBUG(return 1;)
+KH_DEBUG(})
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(static BOOL DebugCreateNpcWindow(CDebugWindow* pObj, INT inY, INT inParam) {)
+    KH_DEBUG(CTask* pA = CTaskMan::getSysTask(0x1A);)
+    KH_DEBUG(if (pA && ((CAtel*)pA)->getVSM()) {)
+        KH_DEBUG(if (inParam & 0x180) {)
+            KH_DEBUG(if (KH_DW(DebugWork::g_dw.event.iNpcCoordDisp) == 1) {)
+                KH_DEBUG(CActorDebug* p = new CActorDebug(CTaskMan::getSysTask(1));)
                 KH_DEBUG(DebugWork::g_dw.event.pClass = (INT*)p;)
-            }
-        }
-    }
-    return 1;
-}
-}
-namespace DWTEvent {
-static BOOL DebugCreateEventLineDisp(CDebugWindow* pObj, INT inY, INT inParam) {
-    CTask* pA = CTaskMan::getSysTask(0x1A);
-    if (pA && ((CAtel*)pA)->getVSM()) {
-        if (inParam & 0x180) {
-            if (KH_DW(DebugWork::g_dw.event.iEventline) == 1) {
-                CEventLineDisp* p = new CEventLineDisp(CTaskMan::getSysTask(1));
+            KH_DEBUG(})
+        KH_DEBUG(})
+    KH_DEBUG(})
+    KH_DEBUG(return 1;)
+KH_DEBUG(})
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(static BOOL DebugCreateEventLineDisp(CDebugWindow* pObj, INT inY, INT inParam) {)
+    KH_DEBUG(CTask* pA = CTaskMan::getSysTask(0x1A);)
+    KH_DEBUG(if (pA && ((CAtel*)pA)->getVSM()) {)
+        KH_DEBUG(if (inParam & 0x180) {)
+            KH_DEBUG(if (KH_DW(DebugWork::g_dw.event.iEventline) == 1) {)
+                KH_DEBUG(CEventLineDisp* p = new CEventLineDisp(CTaskMan::getSysTask(1));)
                 KH_DEBUG(DebugWork::g_dw.event.pEventlineClass = (INT*)p;)
-            } else {
-                if (KH_DW(DebugWork::g_dw.event.pEventlineClass)) {
-                    ((CTask*)KH_DW(DebugWork::g_dw.event.pEventlineClass))->out();
-                }
+            KH_DEBUG(} else {)
+                KH_DEBUG(if (KH_DW(DebugWork::g_dw.event.pEventlineClass)) {)
+                    KH_DEBUG(((CTask*)KH_DW(DebugWork::g_dw.event.pEventlineClass))->out();)
+                KH_DEBUG(})
                 KH_DEBUG(DebugWork::g_dw.event.pEventlineClass = NULL;)
-            }
-        }
-    }
-    return 1;
-}
-}
-namespace DWTEvent {
-static INT DebugAtelWorkDef(CDebugWindow* pObj, INT inParam) {
+            KH_DEBUG(})
+        KH_DEBUG(})
+    KH_DEBUG(})
+    KH_DEBUG(return 1;)
+KH_DEBUG(})
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(static INT DebugAtelWorkDef(CDebugWindow* pObj, INT inParam) {)
     KH_DEBUG(DebugWork::g_dw.atelwork.iWorldIntro = CGameWork::getInt(0, 0xC1);)
     KH_DEBUG(DebugWork::g_dw.atelwork.iTutorialEnd = CGameWork::getInt(0, 0xC2);)
     KH_DEBUG(DebugWork::g_dw.atelwork.iPossibleCard = CGameWork::getInt(0, 0x21);)
@@ -281,57 +281,57 @@ static INT DebugAtelWorkDef(CDebugWindow* pObj, INT inParam) {
     KH_DEBUG(DebugWork::g_dw.atelwork.iNotHartBtl = CGameWork::getFlag(1, 0x25);)
     KH_DEBUG(DebugWork::g_dw.atelwork.iIsBtlTutorial = CGameWork::getFlag(1, 0x2C);)
     KH_DEBUG(DebugWork::g_dw.atelwork.iIsWorldIntro = CGameWork::getFlag(1, 0x37);)
-    return 1;
-}
-}
-namespace DWTEvent {
-DEBUG_WINDOW_TBL debugWinNpcList = { "ACTOR\x83\x8a\x83X\x83g", -208, -136, 10, 20, 14, 0, 8, debugWinNPCListLine, debugWinNPCListDispCall, debugWinNPCListAllCall };
-}
-namespace DWTEvent {
-static BOOL debugBtlReportCallBackParam(CDebugWindow* pObj, INT inY, INT inParam) {
-    if (inParam & 0x180) {
-        switch (inY) {
-        case 6: CGameWork::setInt(0, 0x3C, KH_DW(DebugWork::g_dw.atelwork.CardBreakCount)); break;
-        case 7: CGameWork::setInt(0, 0x3D, KH_DW(DebugWork::g_dw.atelwork.StockKind)); break;
-        case 8: CGameWork::setInt(0, 0x3E, KH_DW(DebugWork::g_dw.atelwork.StockCount)); break;
-        case 15: CGameWork::setInt(0, 0x3F, KH_DW(DebugWork::g_dw.atelwork.SpeedCount)); break;
-        case 4:
-        case 16: CGameWork::setInt(0, 0xB3, KH_DW(DebugWork::g_dw.atelwork.KillEnemyCount)); break;
-        case 18: CGameWork::setInt(0, 0x41, KH_DW(DebugWork::g_dw.atelwork.DarkCount)); break;
-        }
-    }
-    return 1;
-}
-}
-namespace DWTEvent {
-static INT debugBtlReportCallBack(CDebugWindow* pObj, INT inParam) {
-    INT i;
+    KH_DEBUG(return 1;)
+KH_DEBUG(})
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(DEBUG_WINDOW_TBL debugWinNpcList = { "ACTOR\x83\x8a\x83X\x83g", -208, -136, 10, 20, 14, 0, 8, debugWinNPCListLine, debugWinNPCListDispCall, debugWinNPCListAllCall };)
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(static BOOL debugBtlReportCallBackParam(CDebugWindow* pObj, INT inY, INT inParam) {)
+    KH_DEBUG(if (inParam & 0x180) {)
+        KH_DEBUG(switch (inY) {)
+        KH_DEBUG(case 6: CGameWork::setInt(0, 0x3C, KH_DW(DebugWork::g_dw.atelwork.CardBreakCount)); break;)
+        KH_DEBUG(case 7: CGameWork::setInt(0, 0x3D, KH_DW(DebugWork::g_dw.atelwork.StockKind)); break;)
+        KH_DEBUG(case 8: CGameWork::setInt(0, 0x3E, KH_DW(DebugWork::g_dw.atelwork.StockCount)); break;)
+        KH_DEBUG(case 15: CGameWork::setInt(0, 0x3F, KH_DW(DebugWork::g_dw.atelwork.SpeedCount)); break;)
+        KH_DEBUG(case 4:)
+        KH_DEBUG(case 16: CGameWork::setInt(0, 0xB3, KH_DW(DebugWork::g_dw.atelwork.KillEnemyCount)); break;)
+        KH_DEBUG(case 18: CGameWork::setInt(0, 0x41, KH_DW(DebugWork::g_dw.atelwork.DarkCount)); break;)
+        KH_DEBUG(})
+    KH_DEBUG(})
+    KH_DEBUG(return 1;)
+KH_DEBUG(})
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(static INT debugBtlReportCallBack(CDebugWindow* pObj, INT inParam) {)
+    KH_DEBUG(INT i;)
     KH_DEBUG(DebugWork::g_dw.atelwork.BtlMemo = CJiminyMemoFlag::getContentOpenPercentage(CGameWork::getByte(0, 0x60));)
     KH_DEBUG(DebugWork::g_dw.atelwork.KillEnemyCount = CGameWork::getInt(0, 0xB3);)
     KH_DEBUG(DebugWork::g_dw.atelwork.KeysTresur = 0;)
-    for (i = 0; i < 16; i++) {
+    KH_DEBUG(for (i = 0; i < 16; i++) {)
         KH_DEBUG(DebugWork::g_dw.atelwork.KeysTresur += CGameWork::progMCW()._KeyRoomsTresureBoxCounter[i];)
-    }
+    KH_DEBUG(})
     KH_DEBUG(DebugWork::g_dw.atelwork.CardBreakCount = CGameWork::getInt(0, 0x3C);)
     KH_DEBUG(DebugWork::g_dw.atelwork.StockKind = CGameWork::getInt(0, 0x3D);)
     KH_DEBUG(DebugWork::g_dw.atelwork.StockCount = CGameWork::getInt(0, 0x3E);)
-    UINT nTime = CMainApp::getPlayTime();
+    KH_DEBUG(UINT nTime = CMainApp::getPlayTime();)
     KH_DEBUG(DebugWork::g_dw.atelwork.Hour = nTime / 3600;)
     KH_DEBUG(DebugWork::g_dw.atelwork.minit = nTime % 3600 / 60;)
-    if (KH_DW(DebugWork::g_dw.atelwork.Hour) >= 1000) {
+    KH_DEBUG(if (KH_DW(DebugWork::g_dw.atelwork.Hour) >= 1000) {)
         KH_DEBUG(DebugWork::g_dw.atelwork.Hour = 999;)
         KH_DEBUG(DebugWork::g_dw.atelwork.minit = 59;)
-    }
-    F_UL win;
-    win.ul = CGameWork::getInt(0, 0x40);
+    KH_DEBUG(})
+    KH_DEBUG(F_UL win;)
+    KH_DEBUG(win.ul = CGameWork::getInt(0, 0x40);)
     KH_DEBUG(DebugWork::g_dw.atelwork.DuelWin = win.f * 100.0f;)
     KH_DEBUG(DebugWork::g_dw.atelwork.DarkCount = CGameWork::getInt(0, 0x41);)
     KH_DEBUG(DebugWork::g_dw.atelwork.SpeedCount = CGameWork::getInt(0, 0x3F);)
-    return 1;
-}
-}
-namespace DWTEvent {
-static INT debugKeyTresurCallBack(CDebugWindow* pObj, INT inParam) {
+    KH_DEBUG(return 1;)
+KH_DEBUG(})
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(static INT debugKeyTresurCallBack(CDebugWindow* pObj, INT inParam) {)
     KH_DEBUG(DebugWork::g_dw.atelwork.TreTr = CGameWork::progMCW()._KeyRoomsTresureBoxCounter[1];)
     KH_DEBUG(DebugWork::g_dw.atelwork.TreAg = CGameWork::progMCW()._KeyRoomsTresureBoxCounter[2];)
     KH_DEBUG(DebugWork::g_dw.atelwork.TreOl = CGameWork::progMCW()._KeyRoomsTresureBoxCounter[3];)
@@ -345,1037 +345,1037 @@ static INT debugKeyTresurCallBack(CDebugWindow* pObj, INT inParam) {
     KH_DEBUG(DebugWork::g_dw.atelwork.TreTw = CGameWork::progMCW()._KeyRoomsTresureBoxCounter[11];)
     KH_DEBUG(DebugWork::g_dw.atelwork.TreDe = CGameWork::progMCW()._KeyRoomsTresureBoxCounter[12];)
     KH_DEBUG(DebugWork::g_dw.atelwork.TreCa = CGameWork::progMCW()._KeyRoomsTresureBoxCounter[13];)
-    return 1;
-}
-}
-namespace DWTEvent {
-DEBUG_WINDOW_LINE debugKeyTresurLine[14] = {
-    { "\x83g\x83\x89\x83\x94\x83@\x81[\x83X       :%d", &DebugWork::g_dw.atelwork.TreTr, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83" "A\x83O\x83\x89\x83o           :%d", &DebugWork::g_dw.atelwork.TreAg, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83I\x83\x8a\x83\x93\x83|\x83X         :%d", &DebugWork::g_dw.atelwork.TreOl, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83\x8f\x83\x93\x83_\x81[\x83\x89\x83\x93\x83h     :%d", &DebugWork::g_dw.atelwork.TreWo, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83\x82\x83\x93\x83X\x83g\x83\x8d         :%d", &DebugWork::g_dw.atelwork.TreMo, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83n\x83\x8d\x83" "E\x83" "B\x83\x93         :%d", &DebugWork::g_dw.atelwork.TreHa, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83" "A\x83g\x83\x89\x83\x93\x83" "e\x83" "B\x83J     :%d", &DebugWork::g_dw.atelwork.TreAt, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83l\x83o\x81[\x83\x89\x83\x93\x83h       :%d", &DebugWork::g_dw.atelwork.TreNe, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83z\x83\x8d\x83" "E\x83o\x83X\x83" "e\x83" "B\x83I\x83\x93 :%d", &DebugWork::g_dw.atelwork.TreHo, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "100\x83G\x81[\x83J\x81[        :%d", &DebugWork::g_dw.atelwork.TrePo, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83g\x83\x8f\x83" "C\x83\x89\x83" "C\x83g       :%d", &DebugWork::g_dw.atelwork.TreTw, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83" "f\x83X\x83" "e\x83j\x81[         :%d", &DebugWork::g_dw.atelwork.TreDe, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x96Y\x8bp\x82\xcc\x8f\xe9           :%d", &DebugWork::g_dw.atelwork.TreCa, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
-    { NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-};
-}
-namespace DWTEvent {
-UBYTE SoraEnemyMemoIdTbl[35] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 100, 108, 103, 113 };
-}
-namespace DWTEvent {
-UBYTE RikuEnemyMemoIdTbl[34] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 100, 108, 103, 113 };
-}
-namespace DWTEvent {
-USHORT SoraCardKindTbl[159] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 19, 20, 21, 22, 23, 24, 26, 27, 28, 29, 30, 31, 32, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 57, 68, 69, 75, 76, 70, 79, 82, 78, 87, 71, 72, 73, 74, 92, 77, 80, 85, 88, 86, 81, 84, 83, 91, 90, 94, 95, 96, 97, 98, 93, 99, 104, 101, 105, 107, 106, 100, 108, 109, 102, 110, 103, 116, 118, 119, 120, 113, 115, 117, 121, 111, 122, 123, 114, 112, 124, 125, 126, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 189, 186, 187, 188, 185, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 58, 59, 60, 61, 62, 63, 64, 65 };
-}
-namespace DWTEvent {
-USHORT RikuCardKindTbl[66] = { 18, 42, 43, 56, 68, 75, 70, 79, 82, 87, 85, 81, 90, 89, 99, 104, 101, 105, 107, 106, 100, 108, 109, 102, 115, 117, 161, 162, 163, 164, 165, 166, 169, 170, 171, 172, 175, 176, 177, 178, 182, 183, 186, 187, 188, 185, 190, 191, 192, 193, 194, 195, 196, 197, 198, 200, 201, 202, 58, 59, 60, 61, 62, 63, 64, 65 };
-}
-namespace DWTEvent {
-static BOOL DebugSetWorldTitleFlag(CDebugWindow* pObj, INT inY, INT inParam) {
-    if (inParam & 0x180) {
-        INT world = CGameWork::getInt(0, 0xC1);
-        switch (inY) {
-        case 1: world ^= 0x1; break;
-        case 2: world ^= 0x2; break;
-        case 3: world ^= 0x4; break;
-        case 4: world ^= 0x8; break;
-        case 5: world ^= 0x10; break;
-        case 6: world ^= 0x20; break;
-        case 7: world ^= 0x40; break;
-        case 8: world ^= 0x80; break;
-        case 9: world ^= 0x100; break;
-        case 10: world ^= 0x200; break;
-        case 11: world ^= 0x400; break;
-        case 12: world ^= 0x800; break;
-        case 13: world ^= 0x1000; break;
-        case 15: world ^= 0x10000; break;
-        case 16: world ^= 0x20000; break;
-        case 17: world ^= 0x40000; break;
-        case 18: world ^= 0x80000; break;
-        case 19: world ^= 0x100000; break;
-        case 20: world ^= 0x200000; break;
-        case 21: world ^= 0x400000; break;
-        case 22: world ^= 0x800000; break;
-        case 23: world ^= 0x1000000; break;
-        case 24: world ^= 0x2000000; break;
-        case 25: world ^= 0x4000000; break;
-        case 26: world ^= 0x8000000; break;
-        case 27: world ^= 0x10000000; break;
-        }
+    KH_DEBUG(return 1;)
+KH_DEBUG(})
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(DEBUG_WINDOW_LINE debugKeyTresurLine[14] = {)
+    KH_DEBUG({ "\x83g\x83\x89\x83\x94\x83@\x81[\x83X       :%d", &DebugWork::g_dw.atelwork.TreTr, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83" "A\x83O\x83\x89\x83o           :%d", &DebugWork::g_dw.atelwork.TreAg, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83I\x83\x8a\x83\x93\x83|\x83X         :%d", &DebugWork::g_dw.atelwork.TreOl, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83\x8f\x83\x93\x83_\x81[\x83\x89\x83\x93\x83h     :%d", &DebugWork::g_dw.atelwork.TreWo, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83\x82\x83\x93\x83X\x83g\x83\x8d         :%d", &DebugWork::g_dw.atelwork.TreMo, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83n\x83\x8d\x83" "E\x83" "B\x83\x93         :%d", &DebugWork::g_dw.atelwork.TreHa, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83" "A\x83g\x83\x89\x83\x93\x83" "e\x83" "B\x83J     :%d", &DebugWork::g_dw.atelwork.TreAt, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83l\x83o\x81[\x83\x89\x83\x93\x83h       :%d", &DebugWork::g_dw.atelwork.TreNe, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83z\x83\x8d\x83" "E\x83o\x83X\x83" "e\x83" "B\x83I\x83\x93 :%d", &DebugWork::g_dw.atelwork.TreHo, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "100\x83G\x81[\x83J\x81[        :%d", &DebugWork::g_dw.atelwork.TrePo, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83g\x83\x8f\x83" "C\x83\x89\x83" "C\x83g       :%d", &DebugWork::g_dw.atelwork.TreTw, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83" "f\x83X\x83" "e\x83j\x81[         :%d", &DebugWork::g_dw.atelwork.TreDe, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x96Y\x8bp\x82\xcc\x8f\xe9           :%d", &DebugWork::g_dw.atelwork.TreCa, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+KH_DEBUG(};)
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(UBYTE SoraEnemyMemoIdTbl[35] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 100, 108, 103, 113 };)
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(UBYTE RikuEnemyMemoIdTbl[34] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 100, 108, 103, 113 };)
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(USHORT SoraCardKindTbl[159] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 19, 20, 21, 22, 23, 24, 26, 27, 28, 29, 30, 31, 32, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 57, 68, 69, 75, 76, 70, 79, 82, 78, 87, 71, 72, 73, 74, 92, 77, 80, 85, 88, 86, 81, 84, 83, 91, 90, 94, 95, 96, 97, 98, 93, 99, 104, 101, 105, 107, 106, 100, 108, 109, 102, 110, 103, 116, 118, 119, 120, 113, 115, 117, 121, 111, 122, 123, 114, 112, 124, 125, 126, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 189, 186, 187, 188, 185, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 58, 59, 60, 61, 62, 63, 64, 65 };)
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(USHORT RikuCardKindTbl[66] = { 18, 42, 43, 56, 68, 75, 70, 79, 82, 87, 85, 81, 90, 89, 99, 104, 101, 105, 107, 106, 100, 108, 109, 102, 115, 117, 161, 162, 163, 164, 165, 166, 169, 170, 171, 172, 175, 176, 177, 178, 182, 183, 186, 187, 188, 185, 190, 191, 192, 193, 194, 195, 196, 197, 198, 200, 201, 202, 58, 59, 60, 61, 62, 63, 64, 65 };)
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(static BOOL DebugSetWorldTitleFlag(CDebugWindow* pObj, INT inY, INT inParam) {)
+    KH_DEBUG(if (inParam & 0x180) {)
+        KH_DEBUG(INT world = CGameWork::getInt(0, 0xC1);)
+        KH_DEBUG(switch (inY) {)
+        KH_DEBUG(case 1: world ^= 0x1; break;)
+        KH_DEBUG(case 2: world ^= 0x2; break;)
+        KH_DEBUG(case 3: world ^= 0x4; break;)
+        KH_DEBUG(case 4: world ^= 0x8; break;)
+        KH_DEBUG(case 5: world ^= 0x10; break;)
+        KH_DEBUG(case 6: world ^= 0x20; break;)
+        KH_DEBUG(case 7: world ^= 0x40; break;)
+        KH_DEBUG(case 8: world ^= 0x80; break;)
+        KH_DEBUG(case 9: world ^= 0x100; break;)
+        KH_DEBUG(case 10: world ^= 0x200; break;)
+        KH_DEBUG(case 11: world ^= 0x400; break;)
+        KH_DEBUG(case 12: world ^= 0x800; break;)
+        KH_DEBUG(case 13: world ^= 0x1000; break;)
+        KH_DEBUG(case 15: world ^= 0x10000; break;)
+        KH_DEBUG(case 16: world ^= 0x20000; break;)
+        KH_DEBUG(case 17: world ^= 0x40000; break;)
+        KH_DEBUG(case 18: world ^= 0x80000; break;)
+        KH_DEBUG(case 19: world ^= 0x100000; break;)
+        KH_DEBUG(case 20: world ^= 0x200000; break;)
+        KH_DEBUG(case 21: world ^= 0x400000; break;)
+        KH_DEBUG(case 22: world ^= 0x800000; break;)
+        KH_DEBUG(case 23: world ^= 0x1000000; break;)
+        KH_DEBUG(case 24: world ^= 0x2000000; break;)
+        KH_DEBUG(case 25: world ^= 0x4000000; break;)
+        KH_DEBUG(case 26: world ^= 0x8000000; break;)
+        KH_DEBUG(case 27: world ^= 0x10000000; break;)
+        KH_DEBUG(})
         KH_DEBUG(DebugWork::g_dw.atelwork.iWorldIntro = world;)
-        CGameWork::setInt(0, 0xC1, world);
-    }
-    return 1;
-}
-}
-namespace DWTEvent {
-static BOOL DebugSetTutorialFlag(CDebugWindow* pObj, INT inY, INT inParam) {
-    if (inParam & 0x180) {
-        INT tuto = CGameWork::getInt(0, 0xC2);
-        switch (inY) {
-        case 0: tuto ^= 0x1; break;
-        case 1: tuto ^= 0x2; break;
-        case 2: tuto ^= 0x4; break;
-        case 3: tuto ^= 0x8; break;
-        case 4: tuto ^= 0x10; break;
-        case 5: tuto ^= 0x20; break;
-        case 6: tuto ^= 0x40; break;
-        }
+        KH_DEBUG(CGameWork::setInt(0, 0xC1, world);)
+    KH_DEBUG(})
+    KH_DEBUG(return 1;)
+KH_DEBUG(})
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(static BOOL DebugSetTutorialFlag(CDebugWindow* pObj, INT inY, INT inParam) {)
+    KH_DEBUG(if (inParam & 0x180) {)
+        KH_DEBUG(INT tuto = CGameWork::getInt(0, 0xC2);)
+        KH_DEBUG(switch (inY) {)
+        KH_DEBUG(case 0: tuto ^= 0x1; break;)
+        KH_DEBUG(case 1: tuto ^= 0x2; break;)
+        KH_DEBUG(case 2: tuto ^= 0x4; break;)
+        KH_DEBUG(case 3: tuto ^= 0x8; break;)
+        KH_DEBUG(case 4: tuto ^= 0x10; break;)
+        KH_DEBUG(case 5: tuto ^= 0x20; break;)
+        KH_DEBUG(case 6: tuto ^= 0x40; break;)
+        KH_DEBUG(})
         KH_DEBUG(DebugWork::g_dw.atelwork.iTutorialEnd = tuto;)
-        CGameWork::setInt(0, 0xC2, tuto);
-    }
-    return 1;
-}
-}
-namespace DWTEvent {
-static BOOL DebugSetCardPossibleFlag(CDebugWindow* pObj, INT inY, INT inParam) {
-    if (inParam & 0x180) {
-        INT card = CGameWork::getInt(0, 0x21);
-        switch (inY) {
-        case 0: card ^= 0x1; break;
-        case 1: card ^= 0x2; break;
-        case 2: card ^= 0x4; break;
-        case 3: card ^= 0x8; break;
-        case 4: card ^= 0x10; break;
-        case 5: card ^= 0x20; break;
-        case 6: card ^= 0x40; break;
-        case 7: card ^= 0x80; break;
-        case 8: card ^= 0x100; break;
-        case 9: card ^= 0x200; break;
-        case 10: card ^= 0x400; break;
-        case 11: card ^= 0x800; break;
-        case 12: card ^= 0x1000; break;
-        case 13: card ^= 0x2000; break;
-        case 14: card ^= 0x4000; break;
-        case 15: card ^= 0x8000; break;
-        case 16: card ^= 0x10000; break;
-        case 17: card ^= 0x20000; break;
-        case 18: card ^= 0x40000; break;
-        case 19: card ^= 0x80000; break;
-        case 20: card ^= 0x100000; break;
-        case 21: card ^= 0x200000; break;
-        case 22: card ^= 0x400000; break;
-        case 23: card ^= 0x800000; break;
-        case 24: card ^= 0x1000000; break;
-        case 25: card ^= 0x2000000; break;
-        }
+        KH_DEBUG(CGameWork::setInt(0, 0xC2, tuto);)
+    KH_DEBUG(})
+    KH_DEBUG(return 1;)
+KH_DEBUG(})
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(static BOOL DebugSetCardPossibleFlag(CDebugWindow* pObj, INT inY, INT inParam) {)
+    KH_DEBUG(if (inParam & 0x180) {)
+        KH_DEBUG(INT card = CGameWork::getInt(0, 0x21);)
+        KH_DEBUG(switch (inY) {)
+        KH_DEBUG(case 0: card ^= 0x1; break;)
+        KH_DEBUG(case 1: card ^= 0x2; break;)
+        KH_DEBUG(case 2: card ^= 0x4; break;)
+        KH_DEBUG(case 3: card ^= 0x8; break;)
+        KH_DEBUG(case 4: card ^= 0x10; break;)
+        KH_DEBUG(case 5: card ^= 0x20; break;)
+        KH_DEBUG(case 6: card ^= 0x40; break;)
+        KH_DEBUG(case 7: card ^= 0x80; break;)
+        KH_DEBUG(case 8: card ^= 0x100; break;)
+        KH_DEBUG(case 9: card ^= 0x200; break;)
+        KH_DEBUG(case 10: card ^= 0x400; break;)
+        KH_DEBUG(case 11: card ^= 0x800; break;)
+        KH_DEBUG(case 12: card ^= 0x1000; break;)
+        KH_DEBUG(case 13: card ^= 0x2000; break;)
+        KH_DEBUG(case 14: card ^= 0x4000; break;)
+        KH_DEBUG(case 15: card ^= 0x8000; break;)
+        KH_DEBUG(case 16: card ^= 0x10000; break;)
+        KH_DEBUG(case 17: card ^= 0x20000; break;)
+        KH_DEBUG(case 18: card ^= 0x40000; break;)
+        KH_DEBUG(case 19: card ^= 0x80000; break;)
+        KH_DEBUG(case 20: card ^= 0x100000; break;)
+        KH_DEBUG(case 21: card ^= 0x200000; break;)
+        KH_DEBUG(case 22: card ^= 0x400000; break;)
+        KH_DEBUG(case 23: card ^= 0x800000; break;)
+        KH_DEBUG(case 24: card ^= 0x1000000; break;)
+        KH_DEBUG(case 25: card ^= 0x2000000; break;)
+        KH_DEBUG(})
         KH_DEBUG(DebugWork::g_dw.atelwork.iPossibleCard = card;)
-        CGameWork::setInt(0, 0x21, card);
-    }
-    return 1;
-}
-}
-namespace DWTEvent {
-static BOOL DebugSetFriendPossibleFlag(CDebugWindow* pObj, INT inY, INT inParam) {
-    if (inParam & 0x180) {
-        INT fri = CGameWork::getInt(0, 0x22);
-        switch (inY) {
-        case 0: fri ^= 0x1; break;
-        case 1: fri ^= 0x2; break;
-        case 2: fri ^= 0x4; break;
-        case 3: fri ^= 0x8; break;
-        case 4: fri ^= 0x10; break;
-        case 5: fri ^= 0x20; break;
-        case 6: fri ^= 0x40; break;
-        case 7: fri ^= 0x80; break;
-        case 8: fri ^= 0x100; break;
-        }
+        KH_DEBUG(CGameWork::setInt(0, 0x21, card);)
+    KH_DEBUG(})
+    KH_DEBUG(return 1;)
+KH_DEBUG(})
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(static BOOL DebugSetFriendPossibleFlag(CDebugWindow* pObj, INT inY, INT inParam) {)
+    KH_DEBUG(if (inParam & 0x180) {)
+        KH_DEBUG(INT fri = CGameWork::getInt(0, 0x22);)
+        KH_DEBUG(switch (inY) {)
+        KH_DEBUG(case 0: fri ^= 0x1; break;)
+        KH_DEBUG(case 1: fri ^= 0x2; break;)
+        KH_DEBUG(case 2: fri ^= 0x4; break;)
+        KH_DEBUG(case 3: fri ^= 0x8; break;)
+        KH_DEBUG(case 4: fri ^= 0x10; break;)
+        KH_DEBUG(case 5: fri ^= 0x20; break;)
+        KH_DEBUG(case 6: fri ^= 0x40; break;)
+        KH_DEBUG(case 7: fri ^= 0x80; break;)
+        KH_DEBUG(case 8: fri ^= 0x100; break;)
+        KH_DEBUG(})
         KH_DEBUG(DebugWork::g_dw.atelwork.iPossibleFriend = fri;)
-        CGameWork::setInt(0, 0x22, fri);
-    }
-    return 1;
-}
-}
-namespace DWTEvent {
-static BOOL DebugSetPoohFlag(CDebugWindow* pObj, INT inY, INT inParam) {
-    if (inParam & 0x180) {
-        INT intro = CGameWork::getInt(0, 0x23);
-        switch (inY) {
-        case 4: intro ^= 0x1; break;
-        case 5: intro ^= 0x2; break;
-        case 6: intro ^= 0x4; break;
-        case 7: intro ^= 0x8; break;
-        case 8: intro ^= 0x10; break;
-        case 9: intro ^= 0x20; break;
-        case 10: intro ^= 0x40; break;
-        case 11: intro ^= 0x80; break;
-        }
+        KH_DEBUG(CGameWork::setInt(0, 0x22, fri);)
+    KH_DEBUG(})
+    KH_DEBUG(return 1;)
+KH_DEBUG(})
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(static BOOL DebugSetPoohFlag(CDebugWindow* pObj, INT inY, INT inParam) {)
+    KH_DEBUG(if (inParam & 0x180) {)
+        KH_DEBUG(INT intro = CGameWork::getInt(0, 0x23);)
+        KH_DEBUG(switch (inY) {)
+        KH_DEBUG(case 4: intro ^= 0x1; break;)
+        KH_DEBUG(case 5: intro ^= 0x2; break;)
+        KH_DEBUG(case 6: intro ^= 0x4; break;)
+        KH_DEBUG(case 7: intro ^= 0x8; break;)
+        KH_DEBUG(case 8: intro ^= 0x10; break;)
+        KH_DEBUG(case 9: intro ^= 0x20; break;)
+        KH_DEBUG(case 10: intro ^= 0x40; break;)
+        KH_DEBUG(case 11: intro ^= 0x80; break;)
+        KH_DEBUG(})
         KH_DEBUG(DebugWork::g_dw.atelwork.iPoohMiniGameIntro = intro;)
-        CGameWork::setInt(0, 0x23, intro);
-        CGameWork::setInt(0, 0x2E, KH_DW(DebugWork::g_dw.atelwork.iPoohHiScoreOwl));
-        CGameWork::setInt(0, 0x2F, KH_DW(DebugWork::g_dw.atelwork.iPoohHiScoreRoo));
-        CGameWork::setInt(0, 0x30, KH_DW(DebugWork::g_dw.atelwork.iPoohHiScoreEeyore));
-        CGameWork::setInt(0, 0x31, KH_DW(DebugWork::g_dw.atelwork.iPoohHiScoreTigger));
-        CGameWork::setInt(0, 0x32, KH_DW(DebugWork::g_dw.atelwork.iPoohHiScoreRabbit));
-        CGameWork::setByte(0, 3, KH_DW(DebugWork::g_dw.atelwork.iPoohGamePiglet));
-        CGameWork::setByte(0, 4, KH_DW(DebugWork::g_dw.atelwork.iPoohGameOwl));
-        CGameWork::setByte(0, 5, KH_DW(DebugWork::g_dw.atelwork.iPoohGameRoo));
-        CGameWork::setByte(0, 6, KH_DW(DebugWork::g_dw.atelwork.iPoohGameEeyore));
-        CGameWork::setByte(0, 7, KH_DW(DebugWork::g_dw.atelwork.iPoohGameTigger));
-        CGameWork::setByte(0, 8, KH_DW(DebugWork::g_dw.atelwork.iPoohGameRabbit));
-    }
-    return 1;
-}
-}
-namespace DWTEvent {
-static BOOL DebugSetPcSkillFlag(CDebugWindow* pObj, INT inY, INT inParam) {
-    if (inParam & 0x180) {
-        INT skill = CGameWork::getInt(0, 0x24);
-        switch (inY) {
-        case 0: skill ^= 0x1; break;
-        case 1: skill ^= 0x2; break;
-        case 2: skill ^= 0x4; break;
-        case 3: skill ^= 0x8; break;
-        case 4: skill ^= 0x10; break;
-        case 5: skill ^= 0x20; break;
-        }
+        KH_DEBUG(CGameWork::setInt(0, 0x23, intro);)
+        KH_DEBUG(CGameWork::setInt(0, 0x2E, KH_DW(DebugWork::g_dw.atelwork.iPoohHiScoreOwl));)
+        KH_DEBUG(CGameWork::setInt(0, 0x2F, KH_DW(DebugWork::g_dw.atelwork.iPoohHiScoreRoo));)
+        KH_DEBUG(CGameWork::setInt(0, 0x30, KH_DW(DebugWork::g_dw.atelwork.iPoohHiScoreEeyore));)
+        KH_DEBUG(CGameWork::setInt(0, 0x31, KH_DW(DebugWork::g_dw.atelwork.iPoohHiScoreTigger));)
+        KH_DEBUG(CGameWork::setInt(0, 0x32, KH_DW(DebugWork::g_dw.atelwork.iPoohHiScoreRabbit));)
+        KH_DEBUG(CGameWork::setByte(0, 3, KH_DW(DebugWork::g_dw.atelwork.iPoohGamePiglet));)
+        KH_DEBUG(CGameWork::setByte(0, 4, KH_DW(DebugWork::g_dw.atelwork.iPoohGameOwl));)
+        KH_DEBUG(CGameWork::setByte(0, 5, KH_DW(DebugWork::g_dw.atelwork.iPoohGameRoo));)
+        KH_DEBUG(CGameWork::setByte(0, 6, KH_DW(DebugWork::g_dw.atelwork.iPoohGameEeyore));)
+        KH_DEBUG(CGameWork::setByte(0, 7, KH_DW(DebugWork::g_dw.atelwork.iPoohGameTigger));)
+        KH_DEBUG(CGameWork::setByte(0, 8, KH_DW(DebugWork::g_dw.atelwork.iPoohGameRabbit));)
+    KH_DEBUG(})
+    KH_DEBUG(return 1;)
+KH_DEBUG(})
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(static BOOL DebugSetPcSkillFlag(CDebugWindow* pObj, INT inY, INT inParam) {)
+    KH_DEBUG(if (inParam & 0x180) {)
+        KH_DEBUG(INT skill = CGameWork::getInt(0, 0x24);)
+        KH_DEBUG(switch (inY) {)
+        KH_DEBUG(case 0: skill ^= 0x1; break;)
+        KH_DEBUG(case 1: skill ^= 0x2; break;)
+        KH_DEBUG(case 2: skill ^= 0x4; break;)
+        KH_DEBUG(case 3: skill ^= 0x8; break;)
+        KH_DEBUG(case 4: skill ^= 0x10; break;)
+        KH_DEBUG(case 5: skill ^= 0x20; break;)
+        KH_DEBUG(})
         KH_DEBUG(DebugWork::g_dw.atelwork.iPcStanderdSkill = skill;)
-        CGameWork::setInt(0, 0x24, skill);
-    }
-    return 1;
-}
-}
-namespace DWTEvent {
-static BOOL DebugSetSoraMovieFlag(CDebugWindow* pObj, INT inY, INT inParam) {
-    if (inParam & 0x180) {
-        INT movie0 = CGameWork::getInt(0, 0x27);
-        INT movie1 = CGameWork::getInt(0, 0x28);
-        INT movie2 = CGameWork::getInt(0, 0x29);
-        switch (inY) {
-        case 0: movie0 ^= 0x1; break;
-        case 1: movie0 ^= 0x2; break;
-        case 2: movie0 ^= 0x4; break;
-        case 3: movie0 ^= 0x8; break;
-        case 4: movie0 ^= 0x10; break;
-        case 5: movie0 ^= 0x20; break;
-        case 6: movie0 ^= 0x40; break;
-        case 7: movie0 ^= 0x80; break;
-        case 8: movie0 ^= 0x100; break;
-        case 9: movie0 ^= 0x200; break;
-        case 10: movie0 ^= 0x400; break;
-        case 11: movie0 ^= 0x800; break;
-        case 12: movie0 ^= 0x1000; break;
-        case 13: movie0 ^= 0x2000; break;
-        case 14: movie0 ^= 0x4000; break;
-        case 15: movie0 ^= 0x8000; break;
-        case 16: movie0 ^= 0x10000; break;
-        case 17: movie0 ^= 0x20000; break;
-        case 18: movie0 ^= 0x40000; break;
-        case 19: movie0 ^= 0x80000; break;
-        case 20: movie0 ^= 0x100000; break;
-        case 21: movie0 ^= 0x200000; break;
-        case 22: movie0 ^= 0x400000; break;
-        case 23: movie0 ^= 0x800000; break;
-        case 24: movie0 ^= 0x1000000; break;
-        case 25: movie0 ^= 0x2000000; break;
-        case 26: movie0 ^= 0x4000000; break;
-        case 27: movie0 ^= 0x8000000; break;
-        case 28: movie0 ^= 0x10000000; break;
-        case 29: movie0 ^= 0x20000000; break;
-        case 30: movie0 ^= 0x40000000; break;
-        case 31: movie0 ^= 0x80000000; break;
-        case 32: movie1 ^= 0x1; break;
-        case 33: movie1 ^= 0x2; break;
-        case 34: movie1 ^= 0x4; break;
-        case 35: movie1 ^= 0x8; break;
-        case 36: movie1 ^= 0x10; break;
-        case 37: movie1 ^= 0x20; break;
-        case 38: movie1 ^= 0x40; break;
-        case 39: movie1 ^= 0x80; break;
-        case 40: movie1 ^= 0x100; break;
-        case 41: movie1 ^= 0x200; break;
-        case 42: movie1 ^= 0x400; break;
-        case 43: movie1 ^= 0x800; break;
-        case 44: movie1 ^= 0x1000; break;
-        case 45: movie1 ^= 0x2000; break;
-        case 46: movie1 ^= 0x4000; break;
-        case 47: movie1 ^= 0x8000; break;
-        case 48: movie1 ^= 0x10000; break;
-        case 49: movie1 ^= 0x20000; break;
-        case 50: movie1 ^= 0x40000; break;
-        case 51: movie1 ^= 0x80000; break;
-        case 52: movie1 ^= 0x100000; break;
-        case 53: movie1 ^= 0x200000; break;
-        case 54: movie1 ^= 0x400000; break;
-        case 55: movie1 ^= 0x800000; break;
-        case 56: movie1 ^= 0x1000000; break;
-        case 57: movie1 ^= 0x2000000; break;
-        case 58: movie1 ^= 0x4000000; break;
-        }
+        KH_DEBUG(CGameWork::setInt(0, 0x24, skill);)
+    KH_DEBUG(})
+    KH_DEBUG(return 1;)
+KH_DEBUG(})
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(static BOOL DebugSetSoraMovieFlag(CDebugWindow* pObj, INT inY, INT inParam) {)
+    KH_DEBUG(if (inParam & 0x180) {)
+        KH_DEBUG(INT movie0 = CGameWork::getInt(0, 0x27);)
+        KH_DEBUG(INT movie1 = CGameWork::getInt(0, 0x28);)
+        KH_DEBUG(INT movie2 = CGameWork::getInt(0, 0x29);)
+        KH_DEBUG(switch (inY) {)
+        KH_DEBUG(case 0: movie0 ^= 0x1; break;)
+        KH_DEBUG(case 1: movie0 ^= 0x2; break;)
+        KH_DEBUG(case 2: movie0 ^= 0x4; break;)
+        KH_DEBUG(case 3: movie0 ^= 0x8; break;)
+        KH_DEBUG(case 4: movie0 ^= 0x10; break;)
+        KH_DEBUG(case 5: movie0 ^= 0x20; break;)
+        KH_DEBUG(case 6: movie0 ^= 0x40; break;)
+        KH_DEBUG(case 7: movie0 ^= 0x80; break;)
+        KH_DEBUG(case 8: movie0 ^= 0x100; break;)
+        KH_DEBUG(case 9: movie0 ^= 0x200; break;)
+        KH_DEBUG(case 10: movie0 ^= 0x400; break;)
+        KH_DEBUG(case 11: movie0 ^= 0x800; break;)
+        KH_DEBUG(case 12: movie0 ^= 0x1000; break;)
+        KH_DEBUG(case 13: movie0 ^= 0x2000; break;)
+        KH_DEBUG(case 14: movie0 ^= 0x4000; break;)
+        KH_DEBUG(case 15: movie0 ^= 0x8000; break;)
+        KH_DEBUG(case 16: movie0 ^= 0x10000; break;)
+        KH_DEBUG(case 17: movie0 ^= 0x20000; break;)
+        KH_DEBUG(case 18: movie0 ^= 0x40000; break;)
+        KH_DEBUG(case 19: movie0 ^= 0x80000; break;)
+        KH_DEBUG(case 20: movie0 ^= 0x100000; break;)
+        KH_DEBUG(case 21: movie0 ^= 0x200000; break;)
+        KH_DEBUG(case 22: movie0 ^= 0x400000; break;)
+        KH_DEBUG(case 23: movie0 ^= 0x800000; break;)
+        KH_DEBUG(case 24: movie0 ^= 0x1000000; break;)
+        KH_DEBUG(case 25: movie0 ^= 0x2000000; break;)
+        KH_DEBUG(case 26: movie0 ^= 0x4000000; break;)
+        KH_DEBUG(case 27: movie0 ^= 0x8000000; break;)
+        KH_DEBUG(case 28: movie0 ^= 0x10000000; break;)
+        KH_DEBUG(case 29: movie0 ^= 0x20000000; break;)
+        KH_DEBUG(case 30: movie0 ^= 0x40000000; break;)
+        KH_DEBUG(case 31: movie0 ^= 0x80000000; break;)
+        KH_DEBUG(case 32: movie1 ^= 0x1; break;)
+        KH_DEBUG(case 33: movie1 ^= 0x2; break;)
+        KH_DEBUG(case 34: movie1 ^= 0x4; break;)
+        KH_DEBUG(case 35: movie1 ^= 0x8; break;)
+        KH_DEBUG(case 36: movie1 ^= 0x10; break;)
+        KH_DEBUG(case 37: movie1 ^= 0x20; break;)
+        KH_DEBUG(case 38: movie1 ^= 0x40; break;)
+        KH_DEBUG(case 39: movie1 ^= 0x80; break;)
+        KH_DEBUG(case 40: movie1 ^= 0x100; break;)
+        KH_DEBUG(case 41: movie1 ^= 0x200; break;)
+        KH_DEBUG(case 42: movie1 ^= 0x400; break;)
+        KH_DEBUG(case 43: movie1 ^= 0x800; break;)
+        KH_DEBUG(case 44: movie1 ^= 0x1000; break;)
+        KH_DEBUG(case 45: movie1 ^= 0x2000; break;)
+        KH_DEBUG(case 46: movie1 ^= 0x4000; break;)
+        KH_DEBUG(case 47: movie1 ^= 0x8000; break;)
+        KH_DEBUG(case 48: movie1 ^= 0x10000; break;)
+        KH_DEBUG(case 49: movie1 ^= 0x20000; break;)
+        KH_DEBUG(case 50: movie1 ^= 0x40000; break;)
+        KH_DEBUG(case 51: movie1 ^= 0x80000; break;)
+        KH_DEBUG(case 52: movie1 ^= 0x100000; break;)
+        KH_DEBUG(case 53: movie1 ^= 0x200000; break;)
+        KH_DEBUG(case 54: movie1 ^= 0x400000; break;)
+        KH_DEBUG(case 55: movie1 ^= 0x800000; break;)
+        KH_DEBUG(case 56: movie1 ^= 0x1000000; break;)
+        KH_DEBUG(case 57: movie1 ^= 0x2000000; break;)
+        KH_DEBUG(case 58: movie1 ^= 0x4000000; break;)
+        KH_DEBUG(})
         KH_DEBUG(DebugWork::g_dw.atelwork.iSoraMovie0 = movie0;)
-        CGameWork::setInt(0, 0x27, movie0);
+        KH_DEBUG(CGameWork::setInt(0, 0x27, movie0);)
         KH_DEBUG(DebugWork::g_dw.atelwork.iSoraMovie1 = movie1;)
-        CGameWork::setInt(0, 0x28, movie1);
+        KH_DEBUG(CGameWork::setInt(0, 0x28, movie1);)
         KH_DEBUG(DebugWork::g_dw.atelwork.iSoraMovie2 = movie2;)
-        CGameWork::setInt(0, 0x29, movie2);
-    }
-    return 1;
-}
-}
-namespace DWTEvent {
-static BOOL DebugSetRikuMovieFlag(CDebugWindow* pObj, INT inY, INT inParam) {
-    if (inParam & 0x180) {
-        INT movie0 = CGameWork::getInt(0, 0x2A);
-        INT movie1 = CGameWork::getInt(0, 0x2B);
-        INT movie2 = CGameWork::getInt(0, 0x2C);
-        switch (inY) {
-        case 0: movie0 ^= 0x1; break;
-        case 1: movie0 ^= 0x2; break;
-        case 2: movie0 ^= 0x4; break;
-        case 3: movie0 ^= 0x8; break;
-        case 4: movie0 ^= 0x10; break;
-        case 5: movie0 ^= 0x20; break;
-        case 6: movie0 ^= 0x40; break;
-        case 7: movie0 ^= 0x80; break;
-        case 8: movie0 ^= 0x100; break;
-        case 9: movie0 ^= 0x200; break;
-        case 10: movie0 ^= 0x400; break;
-        case 11: movie0 ^= 0x800; break;
-        case 12: movie0 ^= 0x1000; break;
-        case 13: movie0 ^= 0x2000; break;
-        case 14: movie0 ^= 0x4000; break;
-        case 15: movie0 ^= 0x8000; break;
-        case 16: movie0 ^= 0x10000; break;
-        case 17: movie0 ^= 0x20000; break;
-        case 18: movie0 ^= 0x40000; break;
-        case 19: movie0 ^= 0x80000; break;
-        case 20: movie0 ^= 0x100000; break;
-        case 21: movie0 ^= 0x200000; break;
-        case 22: movie0 ^= 0x400000; break;
-        case 23: movie0 ^= 0x800000; break;
-        case 24: movie0 ^= 0x1000000; break;
-        case 25: movie0 ^= 0x2000000; break;
-        case 26: movie0 ^= 0x4000000; break;
-        case 27: movie0 ^= 0x8000000; break;
-        case 28: movie0 ^= 0x10000000; break;
-        case 29: movie0 ^= 0x20000000; break;
-        case 30: movie0 ^= 0x40000000; break;
-        case 31: movie0 ^= 0x80000000; break;
-        case 32: movie1 ^= 0x1; break;
-        case 33: movie1 ^= 0x2; break;
-        case 34: movie1 ^= 0x4; break;
-        case 35: movie1 ^= 0x8; break;
-        case 36: movie1 ^= 0x10; break;
-        case 37: movie1 ^= 0x20; break;
-        case 38: movie1 ^= 0x40; break;
-        case 39: movie1 ^= 0x80; break;
-        case 40: movie1 ^= 0x100; break;
-        }
+        KH_DEBUG(CGameWork::setInt(0, 0x29, movie2);)
+    KH_DEBUG(})
+    KH_DEBUG(return 1;)
+KH_DEBUG(})
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(static BOOL DebugSetRikuMovieFlag(CDebugWindow* pObj, INT inY, INT inParam) {)
+    KH_DEBUG(if (inParam & 0x180) {)
+        KH_DEBUG(INT movie0 = CGameWork::getInt(0, 0x2A);)
+        KH_DEBUG(INT movie1 = CGameWork::getInt(0, 0x2B);)
+        KH_DEBUG(INT movie2 = CGameWork::getInt(0, 0x2C);)
+        KH_DEBUG(switch (inY) {)
+        KH_DEBUG(case 0: movie0 ^= 0x1; break;)
+        KH_DEBUG(case 1: movie0 ^= 0x2; break;)
+        KH_DEBUG(case 2: movie0 ^= 0x4; break;)
+        KH_DEBUG(case 3: movie0 ^= 0x8; break;)
+        KH_DEBUG(case 4: movie0 ^= 0x10; break;)
+        KH_DEBUG(case 5: movie0 ^= 0x20; break;)
+        KH_DEBUG(case 6: movie0 ^= 0x40; break;)
+        KH_DEBUG(case 7: movie0 ^= 0x80; break;)
+        KH_DEBUG(case 8: movie0 ^= 0x100; break;)
+        KH_DEBUG(case 9: movie0 ^= 0x200; break;)
+        KH_DEBUG(case 10: movie0 ^= 0x400; break;)
+        KH_DEBUG(case 11: movie0 ^= 0x800; break;)
+        KH_DEBUG(case 12: movie0 ^= 0x1000; break;)
+        KH_DEBUG(case 13: movie0 ^= 0x2000; break;)
+        KH_DEBUG(case 14: movie0 ^= 0x4000; break;)
+        KH_DEBUG(case 15: movie0 ^= 0x8000; break;)
+        KH_DEBUG(case 16: movie0 ^= 0x10000; break;)
+        KH_DEBUG(case 17: movie0 ^= 0x20000; break;)
+        KH_DEBUG(case 18: movie0 ^= 0x40000; break;)
+        KH_DEBUG(case 19: movie0 ^= 0x80000; break;)
+        KH_DEBUG(case 20: movie0 ^= 0x100000; break;)
+        KH_DEBUG(case 21: movie0 ^= 0x200000; break;)
+        KH_DEBUG(case 22: movie0 ^= 0x400000; break;)
+        KH_DEBUG(case 23: movie0 ^= 0x800000; break;)
+        KH_DEBUG(case 24: movie0 ^= 0x1000000; break;)
+        KH_DEBUG(case 25: movie0 ^= 0x2000000; break;)
+        KH_DEBUG(case 26: movie0 ^= 0x4000000; break;)
+        KH_DEBUG(case 27: movie0 ^= 0x8000000; break;)
+        KH_DEBUG(case 28: movie0 ^= 0x10000000; break;)
+        KH_DEBUG(case 29: movie0 ^= 0x20000000; break;)
+        KH_DEBUG(case 30: movie0 ^= 0x40000000; break;)
+        KH_DEBUG(case 31: movie0 ^= 0x80000000; break;)
+        KH_DEBUG(case 32: movie1 ^= 0x1; break;)
+        KH_DEBUG(case 33: movie1 ^= 0x2; break;)
+        KH_DEBUG(case 34: movie1 ^= 0x4; break;)
+        KH_DEBUG(case 35: movie1 ^= 0x8; break;)
+        KH_DEBUG(case 36: movie1 ^= 0x10; break;)
+        KH_DEBUG(case 37: movie1 ^= 0x20; break;)
+        KH_DEBUG(case 38: movie1 ^= 0x40; break;)
+        KH_DEBUG(case 39: movie1 ^= 0x80; break;)
+        KH_DEBUG(case 40: movie1 ^= 0x100; break;)
+        KH_DEBUG(})
         KH_DEBUG(DebugWork::g_dw.atelwork.iRikuMovie0 = movie0;)
-        CGameWork::setInt(0, 0x2A, movie0);
+        KH_DEBUG(CGameWork::setInt(0, 0x2A, movie0);)
         KH_DEBUG(DebugWork::g_dw.atelwork.iRikuMovie1 = movie1;)
-        CGameWork::setInt(0, 0x2B, movie1);
+        KH_DEBUG(CGameWork::setInt(0, 0x2B, movie1);)
         KH_DEBUG(DebugWork::g_dw.atelwork.iRikuMovie2 = movie2;)
-        CGameWork::setInt(0, 0x2C, movie2);
-    }
-    return 1;
-}
-}
-namespace DWTEvent {
-static BOOL DebugSetKH2CardGetFlag(CDebugWindow* pObj, INT inY, INT inParam) {
-    if (inParam & 0x180) {
-        INT card = CGameWork::getInt(0, 0x2D);
-        switch (inY) {
-        case 0: card ^= 0x1; break;
-        case 1: card ^= 0x2; break;
-        case 2: card ^= 0x4; break;
-        case 3: card ^= 0x8; break;
-        case 4: card ^= 0x10; break;
-        case 5: card ^= 0x20; break;
-        case 6: card ^= 0x40; break;
-        case 7: card ^= 0x80; break;
-        case 8: card ^= 0x100; break;
-        case 9: card ^= 0x200; break;
-        case 10: card ^= 0x400; break;
-        case 11: card ^= 0x800; break;
-        case 12: card ^= 0x1000; break;
-        }
+        KH_DEBUG(CGameWork::setInt(0, 0x2C, movie2);)
+    KH_DEBUG(})
+    KH_DEBUG(return 1;)
+KH_DEBUG(})
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(static BOOL DebugSetKH2CardGetFlag(CDebugWindow* pObj, INT inY, INT inParam) {)
+    KH_DEBUG(if (inParam & 0x180) {)
+        KH_DEBUG(INT card = CGameWork::getInt(0, 0x2D);)
+        KH_DEBUG(switch (inY) {)
+        KH_DEBUG(case 0: card ^= 0x1; break;)
+        KH_DEBUG(case 1: card ^= 0x2; break;)
+        KH_DEBUG(case 2: card ^= 0x4; break;)
+        KH_DEBUG(case 3: card ^= 0x8; break;)
+        KH_DEBUG(case 4: card ^= 0x10; break;)
+        KH_DEBUG(case 5: card ^= 0x20; break;)
+        KH_DEBUG(case 6: card ^= 0x40; break;)
+        KH_DEBUG(case 7: card ^= 0x80; break;)
+        KH_DEBUG(case 8: card ^= 0x100; break;)
+        KH_DEBUG(case 9: card ^= 0x200; break;)
+        KH_DEBUG(case 10: card ^= 0x400; break;)
+        KH_DEBUG(case 11: card ^= 0x800; break;)
+        KH_DEBUG(case 12: card ^= 0x1000; break;)
+        KH_DEBUG(})
         KH_DEBUG(DebugWork::g_dw.atelwork.iKH2CardGet = card;)
-        CGameWork::setInt(0, 0x2D, card);
-    }
-    return 1;
-}
-}
-namespace DWTEvent {
-extern BYTE SoraEnemyMemoIdTbl[];
-extern BYTE RikuEnemyMemoIdTbl[];
-extern USHORT SoraCardKindTbl[];
-extern USHORT RikuCardKindTbl[];
-static BOOL DebugSetJiminyMemoFlag(CDebugWindow* pObj, INT inY, INT inParam) {
-    if (inParam & 0x180) {
-        INT SoraWorld = KH_DW(DebugWork::g_dw.jiminy.Sora_World);
-        INT SoraFloor = KH_DW(DebugWork::g_dw.jiminy.Sora_Floor);
-        INT RikuFloor = KH_DW(DebugWork::g_dw.jiminy.Riku_Floor);
-        INT RikuWorld = KH_DW(DebugWork::g_dw.jiminy.Riku_World);
-        INT SoraEtc = KH_DW(DebugWork::g_dw.jiminy.Sora_Etc);
-        INT shiftY;
-        switch (inY) {
-        case 1: case 2: case 3: case 4: case 5: case 6: case 7: case 8: case 9: case 10: case 11: case 12: case 13:
-            shiftY = 1 << (inY - 1);
-            SoraWorld ^= shiftY;
-            CJiminyMemoFlag::debugEvent(SoraWorld & shiftY, 0, 1, inY, 0);
-            break;
-        case 14: case 15: case 16: case 17: case 18: case 19: case 20: case 21: case 22: case 23: case 24: case 25: case 26:
-            shiftY = 1 << (inY - 14);
-            SoraFloor ^= shiftY;
-            CJiminyMemoFlag::debugEvent(SoraFloor & shiftY, 0, 2, inY - 13, 0);
-            break;
-        case 28: case 29: case 30: case 31: case 32: case 33: case 34: case 35: case 36: case 37: case 38: case 39:
-            shiftY = 1 << (inY - 28);
-            RikuWorld ^= shiftY;
-            CJiminyMemoFlag::debugEvent(RikuWorld & shiftY, 1, 1, inY - 27, 0);
-            break;
-        case 40: case 41: case 42: case 43: case 44: case 45: case 46: case 47: case 48: case 49: case 50: case 51:
-            shiftY = 1 << (inY - 40);
-            RikuFloor ^= shiftY;
-            CJiminyMemoFlag::debugEvent(RikuFloor & shiftY, 1, 2, inY - 52, 0);
-            break;
-        case 53: SoraEtc ^= 0x1; CJiminyMemoFlag::debugEvent(SoraEtc & 0x1, 0, 8, 0, 0); break;
-        case 54: SoraEtc ^= 0x2; CJiminyMemoFlag::debugEvent(SoraEtc & 0x2, 0, 8, 1, 0); break;
-        case 55: SoraEtc ^= 0x4; CJiminyMemoFlag::debugEvent(SoraEtc & 0x4, 0, 8, 2, 0); break;
-        case 56: SoraEtc ^= 0x8; CJiminyMemoFlag::debugEvent(SoraEtc & 0x8, 0, 8, 3, 0); break;
-        case 57: SoraEtc ^= 0x10; CJiminyMemoFlag::debugEvent(SoraEtc & 0x10, 0, 8, 4, 0); break;
-        case 58: SoraEtc ^= 0x20; CJiminyMemoFlag::debugEvent(SoraEtc & 0x20, 0, 6, 0, 0); break;
-        case 59: SoraEtc ^= 0x40; CJiminyMemoFlag::debugEvent(SoraEtc & 0x40, 0, 5, 0, 0); break;
-        case 60: SoraEtc ^= 0x80; CJiminyMemoFlag::debugEvent(SoraEtc & 0x80, 0, 10, 11, 0); break;
-        case 61: SoraEtc ^= 0x100; CJiminyMemoFlag::debugEvent(SoraEtc & 0x100, 0, 10, 12, 0); break;
-        case 62: SoraEtc ^= 0x200; CJiminyMemoFlag::debugEvent(SoraEtc & 0x200, 0, 10, 13, 0); break;
-        case 63: SoraEtc ^= 0x400; CJiminyMemoFlag::debugEvent(SoraEtc & 0x400, 0, 10, 14, 0); break;
-        case 64: SoraEtc ^= 0x800; CJiminyMemoFlag::debugEvent(SoraEtc & 0x800, 0, 10, 15, 0); break;
-        case 65: SoraEtc ^= 0x1000; CJiminyMemoFlag::debugEvent(SoraEtc & 0x1000, 0, 10, 16, 0); break;
-        case 66: SoraEtc ^= 0x2000; CJiminyMemoFlag::debugEvent(SoraEtc & 0x2000, 0, 9, 0, 0); break;
-        }
+        KH_DEBUG(CGameWork::setInt(0, 0x2D, card);)
+    KH_DEBUG(})
+    KH_DEBUG(return 1;)
+KH_DEBUG(})
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(extern BYTE SoraEnemyMemoIdTbl[];)
+KH_DEBUG(extern BYTE RikuEnemyMemoIdTbl[];)
+KH_DEBUG(extern USHORT SoraCardKindTbl[];)
+KH_DEBUG(extern USHORT RikuCardKindTbl[];)
+KH_DEBUG(static BOOL DebugSetJiminyMemoFlag(CDebugWindow* pObj, INT inY, INT inParam) {)
+    KH_DEBUG(if (inParam & 0x180) {)
+        KH_DEBUG(INT SoraWorld = KH_DW(DebugWork::g_dw.jiminy.Sora_World);)
+        KH_DEBUG(INT SoraFloor = KH_DW(DebugWork::g_dw.jiminy.Sora_Floor);)
+        KH_DEBUG(INT RikuFloor = KH_DW(DebugWork::g_dw.jiminy.Riku_Floor);)
+        KH_DEBUG(INT RikuWorld = KH_DW(DebugWork::g_dw.jiminy.Riku_World);)
+        KH_DEBUG(INT SoraEtc = KH_DW(DebugWork::g_dw.jiminy.Sora_Etc);)
+        KH_DEBUG(INT shiftY;)
+        KH_DEBUG(switch (inY) {)
+        KH_DEBUG(case 1: case 2: case 3: case 4: case 5: case 6: case 7: case 8: case 9: case 10: case 11: case 12: case 13:)
+            KH_DEBUG(shiftY = 1 << (inY - 1);)
+            KH_DEBUG(SoraWorld ^= shiftY;)
+            KH_DEBUG(CJiminyMemoFlag::debugEvent(SoraWorld & shiftY, 0, 1, inY, 0);)
+            KH_DEBUG(break;)
+        KH_DEBUG(case 14: case 15: case 16: case 17: case 18: case 19: case 20: case 21: case 22: case 23: case 24: case 25: case 26:)
+            KH_DEBUG(shiftY = 1 << (inY - 14);)
+            KH_DEBUG(SoraFloor ^= shiftY;)
+            KH_DEBUG(CJiminyMemoFlag::debugEvent(SoraFloor & shiftY, 0, 2, inY - 13, 0);)
+            KH_DEBUG(break;)
+        KH_DEBUG(case 28: case 29: case 30: case 31: case 32: case 33: case 34: case 35: case 36: case 37: case 38: case 39:)
+            KH_DEBUG(shiftY = 1 << (inY - 28);)
+            KH_DEBUG(RikuWorld ^= shiftY;)
+            KH_DEBUG(CJiminyMemoFlag::debugEvent(RikuWorld & shiftY, 1, 1, inY - 27, 0);)
+            KH_DEBUG(break;)
+        KH_DEBUG(case 40: case 41: case 42: case 43: case 44: case 45: case 46: case 47: case 48: case 49: case 50: case 51:)
+            KH_DEBUG(shiftY = 1 << (inY - 40);)
+            KH_DEBUG(RikuFloor ^= shiftY;)
+            KH_DEBUG(CJiminyMemoFlag::debugEvent(RikuFloor & shiftY, 1, 2, inY - 52, 0);)
+            KH_DEBUG(break;)
+        KH_DEBUG(case 53: SoraEtc ^= 0x1; CJiminyMemoFlag::debugEvent(SoraEtc & 0x1, 0, 8, 0, 0); break;)
+        KH_DEBUG(case 54: SoraEtc ^= 0x2; CJiminyMemoFlag::debugEvent(SoraEtc & 0x2, 0, 8, 1, 0); break;)
+        KH_DEBUG(case 55: SoraEtc ^= 0x4; CJiminyMemoFlag::debugEvent(SoraEtc & 0x4, 0, 8, 2, 0); break;)
+        KH_DEBUG(case 56: SoraEtc ^= 0x8; CJiminyMemoFlag::debugEvent(SoraEtc & 0x8, 0, 8, 3, 0); break;)
+        KH_DEBUG(case 57: SoraEtc ^= 0x10; CJiminyMemoFlag::debugEvent(SoraEtc & 0x10, 0, 8, 4, 0); break;)
+        KH_DEBUG(case 58: SoraEtc ^= 0x20; CJiminyMemoFlag::debugEvent(SoraEtc & 0x20, 0, 6, 0, 0); break;)
+        KH_DEBUG(case 59: SoraEtc ^= 0x40; CJiminyMemoFlag::debugEvent(SoraEtc & 0x40, 0, 5, 0, 0); break;)
+        KH_DEBUG(case 60: SoraEtc ^= 0x80; CJiminyMemoFlag::debugEvent(SoraEtc & 0x80, 0, 10, 11, 0); break;)
+        KH_DEBUG(case 61: SoraEtc ^= 0x100; CJiminyMemoFlag::debugEvent(SoraEtc & 0x100, 0, 10, 12, 0); break;)
+        KH_DEBUG(case 62: SoraEtc ^= 0x200; CJiminyMemoFlag::debugEvent(SoraEtc & 0x200, 0, 10, 13, 0); break;)
+        KH_DEBUG(case 63: SoraEtc ^= 0x400; CJiminyMemoFlag::debugEvent(SoraEtc & 0x400, 0, 10, 14, 0); break;)
+        KH_DEBUG(case 64: SoraEtc ^= 0x800; CJiminyMemoFlag::debugEvent(SoraEtc & 0x800, 0, 10, 15, 0); break;)
+        KH_DEBUG(case 65: SoraEtc ^= 0x1000; CJiminyMemoFlag::debugEvent(SoraEtc & 0x1000, 0, 10, 16, 0); break;)
+        KH_DEBUG(case 66: SoraEtc ^= 0x2000; CJiminyMemoFlag::debugEvent(SoraEtc & 0x2000, 0, 9, 0, 0); break;)
+        KH_DEBUG(})
         KH_DEBUG(DebugWork::g_dw.jiminy.Sora_World = SoraWorld;)
         KH_DEBUG(DebugWork::g_dw.jiminy.Sora_Floor = SoraFloor;)
         KH_DEBUG(DebugWork::g_dw.jiminy.Riku_World = RikuWorld;)
         KH_DEBUG(DebugWork::g_dw.jiminy.Riku_Floor = RikuFloor;)
         KH_DEBUG(DebugWork::g_dw.jiminy.Sora_Etc = SoraEtc;)
-    } else if (inParam & 0x20) {
-        INT SoraFlag = KH_DW(DebugWork::g_dw.jiminy.Sora_Flag);
-        INT SoraEKind = SoraEnemyMemoIdTbl[KH_DW(DebugWork::g_dw.jiminy.Sora_Enemy)];
-        INT SoraENum = KH_DW(DebugWork::g_dw.jiminy.Sora_ENum);
-        INT SoraCard = KH_DW(DebugWork::g_dw.jiminy.Sora_Card);
-        USHORT SoraCKind = SoraCardKindTbl[SoraCard];
-        INT RikuFlag = KH_DW(DebugWork::g_dw.jiminy.Riku_Flag);
-        INT RikuEKind = RikuEnemyMemoIdTbl[KH_DW(DebugWork::g_dw.jiminy.Riku_Enemy)];
-        INT RikuENum = KH_DW(DebugWork::g_dw.jiminy.Riku_ENum);
-        INT RikuCard = KH_DW(DebugWork::g_dw.jiminy.Riku_Card);
-        USHORT RikuCKind = RikuCardKindTbl[RikuCard];
-        switch (inY) {
-        case 68: case 69: case 70:
-            SoraFlag |= 0x701;
-            CJiminyMemoFlag::debugEvent(TRUE, 0, 3, SoraEKind, SoraENum);
-            break;
-        case 72: case 73: case 74:
-            RikuFlag |= 0x701;
-            CJiminyMemoFlag::debugEvent(TRUE, 1, 3, RikuEKind, RikuENum);
-            break;
-        case 76: case 77:
-            SoraFlag |= 0x7002;
-            CJiminyMemoFlag::debugEvent(TRUE, 0, 4, SoraCKind, 0);
-            break;
-        case 79: case 80:
-            RikuFlag |= 0x7002;
-            CJiminyMemoFlag::debugEvent(TRUE, 1, 4, RikuCKind, 0);
-            break;
-        }
+    KH_DEBUG(} else if (inParam & 0x20) {)
+        KH_DEBUG(INT SoraFlag = KH_DW(DebugWork::g_dw.jiminy.Sora_Flag);)
+        KH_DEBUG(INT SoraEKind = SoraEnemyMemoIdTbl[KH_DW(DebugWork::g_dw.jiminy.Sora_Enemy)];)
+        KH_DEBUG(INT SoraENum = KH_DW(DebugWork::g_dw.jiminy.Sora_ENum);)
+        KH_DEBUG(INT SoraCard = KH_DW(DebugWork::g_dw.jiminy.Sora_Card);)
+        KH_DEBUG(USHORT SoraCKind = SoraCardKindTbl[SoraCard];)
+        KH_DEBUG(INT RikuFlag = KH_DW(DebugWork::g_dw.jiminy.Riku_Flag);)
+        KH_DEBUG(INT RikuEKind = RikuEnemyMemoIdTbl[KH_DW(DebugWork::g_dw.jiminy.Riku_Enemy)];)
+        KH_DEBUG(INT RikuENum = KH_DW(DebugWork::g_dw.jiminy.Riku_ENum);)
+        KH_DEBUG(INT RikuCard = KH_DW(DebugWork::g_dw.jiminy.Riku_Card);)
+        KH_DEBUG(USHORT RikuCKind = RikuCardKindTbl[RikuCard];)
+        KH_DEBUG(switch (inY) {)
+        KH_DEBUG(case 68: case 69: case 70:)
+            KH_DEBUG(SoraFlag |= 0x701;)
+            KH_DEBUG(CJiminyMemoFlag::debugEvent(TRUE, 0, 3, SoraEKind, SoraENum);)
+            KH_DEBUG(break;)
+        KH_DEBUG(case 72: case 73: case 74:)
+            KH_DEBUG(RikuFlag |= 0x701;)
+            KH_DEBUG(CJiminyMemoFlag::debugEvent(TRUE, 1, 3, RikuEKind, RikuENum);)
+            KH_DEBUG(break;)
+        KH_DEBUG(case 76: case 77:)
+            KH_DEBUG(SoraFlag |= 0x7002;)
+            KH_DEBUG(CJiminyMemoFlag::debugEvent(TRUE, 0, 4, SoraCKind, 0);)
+            KH_DEBUG(break;)
+        KH_DEBUG(case 79: case 80:)
+            KH_DEBUG(RikuFlag |= 0x7002;)
+            KH_DEBUG(CJiminyMemoFlag::debugEvent(TRUE, 1, 4, RikuCKind, 0);)
+            KH_DEBUG(break;)
+        KH_DEBUG(})
         KH_DEBUG(DebugWork::g_dw.jiminy.Sora_Flag = SoraFlag;)
         KH_DEBUG(DebugWork::g_dw.jiminy.Riku_Flag = RikuFlag;)
-    } else {
-        INT SoraFlag = KH_DW(DebugWork::g_dw.jiminy.Sora_Flag);
-        INT RikuFlag = KH_DW(DebugWork::g_dw.jiminy.Riku_Flag);
-        INT n;
-        for (INT i = 0; i < 2; i++) {
-            if ((SoraFlag >> i) & 1) {
-                n = (SoraFlag >> (i * 4 + 8)) & 0xF;
-                n--;
-                if (n == 0) SoraFlag &= ~(1 << i);
-                SoraFlag = (SoraFlag & ~(0xF << (i * 4 + 8))) | (n << (i * 4 + 8));
-            }
-        }
-        for (INT i = 0; i < 2; i++) {
-            if ((RikuFlag >> i) & 1) {
-                n = (RikuFlag >> (i * 4 + 8)) & 0xF;
-                n--;
-                if (n == 0) RikuFlag &= ~(1 << i);
-                RikuFlag = (RikuFlag & ~(0xF << (i * 4 + 8))) | (n << (i * 4 + 8));
-            }
-        }
+    KH_DEBUG(} else {)
+        KH_DEBUG(INT SoraFlag = KH_DW(DebugWork::g_dw.jiminy.Sora_Flag);)
+        KH_DEBUG(INT RikuFlag = KH_DW(DebugWork::g_dw.jiminy.Riku_Flag);)
+        KH_DEBUG(INT n;)
+        KH_DEBUG(for (INT i = 0; i < 2; i++) {)
+            KH_DEBUG(if ((SoraFlag >> i) & 1) {)
+                KH_DEBUG(n = (SoraFlag >> (i * 4 + 8)) & 0xF;)
+                KH_DEBUG(n--;)
+                KH_DEBUG(if (n == 0) SoraFlag &= ~(1 << i);)
+                KH_DEBUG(SoraFlag = (SoraFlag & ~(0xF << (i * 4 + 8))) | (n << (i * 4 + 8));)
+            KH_DEBUG(})
+        KH_DEBUG(})
+        KH_DEBUG(for (INT i = 0; i < 2; i++) {)
+            KH_DEBUG(if ((RikuFlag >> i) & 1) {)
+                KH_DEBUG(n = (RikuFlag >> (i * 4 + 8)) & 0xF;)
+                KH_DEBUG(n--;)
+                KH_DEBUG(if (n == 0) RikuFlag &= ~(1 << i);)
+                KH_DEBUG(RikuFlag = (RikuFlag & ~(0xF << (i * 4 + 8))) | (n << (i * 4 + 8));)
+            KH_DEBUG(})
+        KH_DEBUG(})
         KH_DEBUG(DebugWork::g_dw.jiminy.Sora_Flag = SoraFlag;)
         KH_DEBUG(DebugWork::g_dw.jiminy.Riku_Flag = RikuFlag;)
-    }
-    return 1;
-}
-}
-namespace DWTEvent {
-LPCSTR szJMSoraEnemyKind[35] = { "\x83V\x83\x83\x83h\x83" "E", "\x83\\\x83\x8b\x83W\x83\x83\x81[", "\x83\x8c\x83" "b\x83h\x83m\x83N\x83^\x81[\x83\x93", "\x83u\x83\x8b\x81[\x83\x89\x83v\x83\\\x83" "f\x83" "B", "\x83" "C\x83G\x83\x8d\x81[\x83I\x83y\x83\x89", "\x83O\x83\x8a\x81[\x83\x93\x83\x8c\x83N\x83" "C\x83G\x83\x80", "\x83p\x83\x8f\x81[\x83\x8f\x83" "C\x83\x8b\x83h", "\x83o\x83" "E\x83\x93\x83V\x81[\x83\x8f\x83" "C\x83\x8b\x83h", "\x83\x89\x81[\x83W\x83{\x83" "f\x83" "B", "\x83t\x83@\x83" "b\x83g\x83o\x83\x93\x83" "f\x83" "B\x83" "b\x83g", "\x83o\x83\x93\x83" "f\x83" "B\x83" "b\x83g", "\x83\x8f\x83" "C\x83g\x83i\x83" "C\x83g", "\x83K\x81[\x83S\x83" "C\x83\x8b", "\x83T\x81[\x83`\x83S\x81[\x83X\x83g", "\x83G\x83" "A\x83\\\x83\x8b\x83W\x83\x83\x81[", "\x83z\x83\x8f\x83" "C\x83g\x83}\x83" "b\x83V\x83\x85\x83\x8b\x81[\x83\x80", "\x83u\x83\x89\x83" "b\x83N\x83t\x83@\x83\x93\x83K\x83X", "\x83V\x81[\x83l\x83I\x83\x93", "\x83X\x83N\x83\x8a\x83\x85\x81[\x83_\x83" "C\x83o\x81[", "\x83" "A\x83N\x83" "A\x83^\x83\x93\x83N", "\x83p\x83" "C\x83\x8c\x81[\x83" "c", "\x83G\x83" "A\x83p\x83" "C\x83\x8c\x81[\x83" "c", "\x83_\x81[\x83N\x83{\x81[\x83\x8b", "\x83\x8f\x83" "C\x83o\x81[\x83\x93", "\x83" "E\x83" "B\x83U\x81[\x83h", "\x83" "f\x83" "B\x83t\x83" "F\x83\x93\x83_\x81[", "\x83l\x83I\x83V\x83\x83\x83h\x83" "E", "\x83o\x83\x8c\x83\x8b\x83X\x83p\x83" "C\x83_\x81[", "\x83g\x83\x8b\x83l\x81[\x83h\x83X\x83" "e\x83" "b\x83v", "\x83\x89\x83" "E\x83h\x83l\x83X", "\x83N\x83\x8a\x81[\x83v\x83v\x83\x89\x83\x93\x83g", "\x83K\x81[\x83h\x83" "A\x81[\x83}\x81[", "\x83p\x83\x89\x83T\x83" "C\x83g\x83P\x83" "C\x83W", "\x83g\x83\x8a\x83" "b\x83N\x83}\x83X\x83^\x81[", "\x83_\x81[\x83N\x83T\x83" "C\x83h" };
-}
-namespace DWTEvent {
-LPCSTR szJMRikuEnemyKind[34] = { "\x83V\x83\x83\x83h\x83" "E", "\x83\\\x83\x8b\x83W\x83\x83\x81[", "\x83\x8c\x83" "b\x83h\x83m\x83N\x83^\x81[\x83\x93", "\x83u\x83\x8b\x81[\x83\x89\x83v\x83\\\x83" "f\x83" "B", "\x83" "C\x83G\x83\x8d\x81[\x83I\x83y\x83\x89", "\x83O\x83\x8a\x81[\x83\x93\x83\x8c\x83N\x83" "C\x83G\x83\x80", "\x83p\x83\x8f\x81[\x83\x8f\x83" "C\x83\x8b\x83h", "\x83o\x83" "E\x83\x93\x83V\x81[\x83\x8f\x83" "C\x83\x8b\x83h", "\x83\x89\x81[\x83W\x83{\x83" "f\x83" "B", "\x83t\x83@\x83" "b\x83g\x83o\x83\x93\x83" "f\x83" "B\x83" "b\x83g", "\x83o\x83\x93\x83" "f\x83" "B\x83" "b\x83g", "\x83\x8f\x83" "C\x83g\x83i\x83" "C\x83g", "\x83K\x81[\x83S\x83" "C\x83\x8b", "\x83T\x81[\x83`\x83S\x81[\x83X\x83g", "\x83G\x83" "A\x83\\\x83\x8b\x83W\x83\x83\x81[", "\x83u\x83\x89\x83" "b\x83N\x83t\x83@\x83\x93\x83K\x83X", "\x83V\x81[\x83l\x83I\x83\x93", "\x83X\x83N\x83\x8a\x83\x85\x81[\x83_\x83" "C\x83o\x81[", "\x83" "A\x83N\x83" "A\x83^\x83\x93\x83N", "\x83p\x83" "C\x83\x8c\x81[\x83" "c", "\x83G\x83" "A\x83p\x83" "C\x83\x8c\x81[\x83" "c", "\x83_\x81[\x83N\x83{\x81[\x83\x8b", "\x83\x8f\x83" "C\x83o\x81[\x83\x93", "\x83" "E\x83" "B\x83U\x81[\x83h", "\x83" "f\x83" "B\x83t\x83" "F\x83\x93\x83_\x81[", "\x83l\x83I\x83V\x83\x83\x83h\x83" "E", "\x83o\x83\x8c\x83\x8b\x83X\x83p\x83" "C\x83_\x81[", "\x83g\x83\x8b\x83l\x81[\x83h\x83X\x83" "e\x83" "b\x83v", "\x83\x89\x83" "E\x83h\x83l\x83X", "\x83N\x83\x8a\x81[\x83v\x83v\x83\x89\x83\x93\x83g", "\x83K\x81[\x83h\x83" "A\x81[\x83}\x81[", "\x83p\x83\x89\x83T\x83" "C\x83g\x83P\x83" "C\x83W", "\x83g\x83\x8a\x83" "b\x83N\x83}\x83X\x83^\x81[", "\x83_\x81[\x83N\x83T\x83" "C\x83h" };
-}
-namespace DWTEvent {
-LPCSTR szJMSoraCardKindTbl[159] = { "\x83L\x83\x93\x83O\x83_\x83\x80\x83`\x83" "F\x81[\x83\x93", "\x83" "f\x83U\x83" "C\x83" "A\x81[\x83\x89\x83\x93\x83v", "\x83g\x83\x8c\x83W\x83\x83\x81[\x83I\x83u\x83V\x81[", "\x83p\x83\x93\x83v\x83L\x83\x93\x83w\x83" "b\x83h", "\x83t\x83" "F\x83" "A\x83\x8a\x81[\x83n\x81[\x83v", "\x83" "E\x83" "B\x83" "b\x83V\x83\x85\x83X\x83^\x81[", "\x83G\x83O\x83U\x83~\x83l\x81[\x83V\x83\x87\x83\x93", "\x83\x81\x83^\x83\x8b\x83`\x83\x87\x83R\x83{", "\x83p\x83\x8f\x81[\x83I\x83u\x83q\x81[\x83\x8d\x81[", "\x83\x89\x83" "C\x83I\x83\x93\x83n\x81[\x83g", "\x83\x89\x83X\x83g\x83\x8a\x83]\x81[\x83g", "\x83\x89\x83\x94\x83" "B\x83" "A\x83\x93\x83\x8d\x81[\x83Y", "\x96\xf1\x91\xa9\x82\xcc\x82\xa8\x8e\xe7\x82\xe8", "\x89\xdf\x82\xac\x8b\x8e\x82\xe8\x82\xb5\x8ev\x82\xa2\x8fo", "\x83" "A\x83\x8b\x83" "e\x83}\x83" "E\x83" "F\x83|\x83\x93", "\x83_\x83" "C\x83\x84\x83\x82\x83\x93\x83h\x83_\x83X\x83g", "\x95\xd0\x97\x83\x82\xcc\x93V\x8eg", "\x83X\x83^\x81[\x83V\x81[\x83J\x81[", "\x83\x82\x83m\x83N\x83\x8d\x81[\x83\x80", "\x83t\x83H\x83\x8d\x81[\x83U\x83" "E\x83" "B\x83\x93\x83h", "\x83q\x83h\x83" "D\x83\x93\x83h\x83\x89\x83S\x83\x93", "\x83t\x83H\x83g\x83\x93\x83" "f\x83o\x83" "b\x83K\x81[", "\x83{\x83\x93\x83h\x83I\x83u\x83t\x83\x8c\x83" "C\x83\x80", "\x83t\x83@\x83" "C\x83" "A", "\x83u\x83\x8a\x83U\x83h", "\x83T\x83\x93\x83_\x81[", "\x83P\x83" "A\x83\x8b", "\x83O\x83\x89\x83r\x83" "f", "\x83X\x83g\x83" "b\x83v", "\x83G\x83" "A\x83\x8d", "\x83V\x83\x93\x83o", "\x83W\x81[\x83j\x81[", "\x83o\x83\x93\x83r", "\x83_\x83\x93\x83{", "\x83" "e\x83" "B\x83\x93\x83N", "\x83\x80\x81[\x83V\x83\x85\x81[", "\x83N\x83\x89\x83" "E\x83h", "\x83|\x81[\x83V\x83\x87\x83\x93", "\x83n\x83" "C\x83|\x81[\x83V\x83\x87\x83\x93", "\x83\x81\x83K\x83|\x81[\x83V\x83\x87\x83\x93", "\x83G\x81[\x83" "e\x83\x8b", "\x83\x81\x83K\x83G\x81[\x83" "e\x83\x8b", "\x83G\x83\x8a\x83N\x83T\x81[", "\x83\x89\x83X\x83g\x83G\x83\x8a\x83N\x83T\x81[", "\x83h\x83i\x83\x8b\x83h", "\x83O\x81[\x83t\x83" "B\x81[", "\x83" "A\x83\x89\x83W\x83\x93", "\x83" "A\x83\x8a\x83G\x83\x8b", "\x83W\x83\x83\x83" "b\x83N", "\x83s\x81[\x83^\x81[\x83p\x83\x93", "\x83r\x81[\x83X\x83g", "\x83v\x83\x8b\x81[\x83g", "\x83V\x83\x83\x83h\x83" "E", "\x83\\\x83\x8b\x83W\x83\x83\x81[", "\x83p\x83\x8f\x81[\x83\x8f\x83" "C\x83\x8b\x83h", "\x83o\x83" "E\x83\x93\x83V\x81[\x83\x8f\x83" "C\x83\x8b\x83h", "\x83\x89\x81[\x83W\x83{\x83" "f\x83" "B", "\x83t\x83@\x83" "b\x83g\x83o\x83\x93\x83" "f\x83" "B\x83" "b\x83g", "\x83V\x81[\x83l\x83I\x83\x93", "\x83o\x83\x93\x83" "f\x83" "B\x83" "b\x83g", "\x83p\x83" "C\x83\x8c\x81[\x83" "c", "\x83\x8c\x83" "b\x83h\x83m\x83N\x83^\x81[\x83\x93", "\x83u\x83\x8b\x81[\x83\x89\x83v\x83\\\x83" "f\x83" "B", "\x83" "C\x83G\x83\x8d\x81[\x83I\x83y\x83\x89", "\x83O\x83\x8a\x81[\x83\x93\x83\x8c\x83N\x83" "C\x83G\x83\x80", "\x83" "E\x83" "B\x83U\x81[\x83h", "\x83G\x83" "A\x83\\\x83\x8b\x83W\x83\x83\x81[", "\x83o\x83\x8c\x83\x8b\x83X\x83p\x83" "C\x83_\x81[", "\x83\x8f\x83" "C\x83g\x83i\x83" "C\x83g", "\x83G\x83" "A\x83p\x83" "C\x83\x8c\x81[\x83" "c", "\x83K\x81[\x83S\x83" "C\x83\x8b", "\x83T\x81[\x83`\x83S\x81[\x83X\x83g", "\x83" "A\x83N\x83" "A\x83^\x83\x93\x83N", "\x83X\x83N\x83\x8a\x83\x85\x81[\x83_\x83" "C\x83o\x81[", "\x83\x8f\x83" "C\x83o\x81[\x83\x93", "\x83" "f\x83" "B\x83t\x83" "F\x83\x93\x83_\x81[", "\x83z\x83\x8f\x83" "C\x83g\x83}\x83" "b\x83V\x83\x85\x83\x8b\x81[\x83\x80", "\x83u\x83\x89\x83" "b\x83N\x83t\x83@\x83\x93\x83K\x83X", "\x83N\x83\x8a\x81[\x83v\x83v\x83\x89\x83\x93\x83g", "\x83g\x83\x8b\x83l\x81[\x83h\x83X\x83" "e\x83" "b\x83v", "\x83\x89\x83" "E\x83h\x83l\x83X", "\x83l\x83I\x83V\x83\x83\x83h\x83" "E", "\x83K\x81[\x83h\x83" "A\x81[\x83}\x81[", "\x83n\x83" "f\x83X", "\x83g\x83\x8a\x83" "b\x83N\x83}\x83X\x83^\x81[", "\x83W\x83\x83\x83t\x83@\x81[", "\x83" "A\x81[\x83X\x83\x89", "\x83u\x83M\x81[", "\x83p\x83\x89\x83T\x83" "C\x83g\x83P\x83" "C\x83W", "\x83t\x83" "b\x83N", "\x83}\x83\x8c\x83t\x83" "B\x83Z\x83\x93\x83g\x83h\x83\x89\x83S\x83\x93", "\x83_\x81[\x83N\x83T\x83" "C\x83h", "\x83\x8a\x83N", "\x83g\x83\x89\x83\x93\x83v\x95\xba", "\x83" "A\x83\x93\x83Z\x83\x80", "\x83[\x83\x80\x83i\x83X", "\x83V\x83O\x83o\x81[\x83\x8b", "\x83U\x83\x8b\x83" "f\x83" "B\x83\x93", "\x83\x94\x83" "B\x83N\x83Z\x83\x93", "\x83\x8c\x83N\x83Z\x83" "E\x83X", "\x83[\x83N\x83V\x83I\x83\x93", "\x83T\x83" "C\x83N\x83X", "\x83" "A\x83N\x83Z\x83\x8b", "\x83" "f\x83~\x83" "b\x83N\x83X", "\x83\x8b\x83N\x83\\\x81[\x83h", "\x83}\x81[\x83\x8b\x81[\x83V\x83\x83", "\x83\x89\x83N\x83V\x81[\x83k", "\x83\x8d\x83N\x83T\x83X", "\x83S\x81[\x83\x8b\x83h", "\x83v\x83\x89\x83`\x83i", "\x90\xc3\x82\xb6\x82\xe1\x82\xad\x82\xc8\x82\xe9\x88\xc5", "\x82\xd0\x82\xb5\x82\xdf\x82\xad\x88\xc5", "\x82\xbf\x82\xa9\x82\xe7\x82\xc8\x82\xab\x88\xc5", "\x82\xa8\x82\xa8\x82\xa2\x82\xc8\x82\xe9\x88\xc5", "\x96\xb0\x82\xe8\x82\xcc\x88\xc5", "\x82\xb9\x82\xdc\x82\xe8\x82\xad\x82\xe9\x88\xc5", "\x83v\x83\x8c\x83~\x83" "A\x83\x8b\x81[\x83\x80", "\x83z\x83\x8f\x83" "C\x83g\x83\x8b\x81[\x83\x80", "\x83u\x83\x89\x83" "b\x83N\x83\x8b\x81[\x83\x80", "\x92\xea\x92m\x82\xea\x82\xca\x88\xc5", "\x83\x8b\x81[\x83\x8c\x83" "b\x83g\x83\x8b\x81[\x83\x80", "\x95\x90\x97\xcd\x82\xd6\x82\xcc\x82\xdf\x82\xb4\x82\xdf", "\x96\x82\x97\xcd\x82\xd6\x82\xcc\x82\xdf\x82\xb4\x82\xdf", "\x98" "B\x8b\xe0\x82\xd6\x82\xcc\x82\xdf\x82\xb4\x82\xdf", "\x82\xdf\x82\xae\x82\xe8\x82\xa0\x82\xa2\x82\xcc\x92n", "\x82\xc4\x82\xa2\x82\xbd\x82\xa2\x82\xcc\x8a\xd4", "\x83_\x83\x81\x81[\x83W\x83" "A\x83" "b\x83v\x83\x8b\x81[\x83\x80", "\x83X\x83^\x83\x93\x83v\x83\x89\x83X\x83\x8b\x81[\x83\x80", "\x82\xe2\x82\xb7\x82\xe7\x82\xac\x82\xcc\x95\xf3", "\x8e\xe7\x82\xe7\x82\xea\x82\xb5\x95\xf3", "\x82\xa2\x82\xc2\x82\xed\x82\xe8\x82\xcc\x95\xf3", "\x88\xea\x8e\x9e\x82\xcc\x8bx\x91\xa7", "\x8c\xf0\x82\xb6\x82\xe8\x8d\x87\x82\xa4\x90\xa2\x8a" "E", "\x83\x82\x81[\x83O\x83\x8a\x83\x8b\x81[\x83\x80", "\x96\xa2\x92m\x82\xc8\x82\xe9\x95\xf3\x82\xcc\x83L\x81[\x83J\x81[\x83h", "\x82\xcd\x82\xb6\x82\xdc\x82\xe8\x82\xcc\x83L\x81[\x83J\x81[\x83h", "\x82\xdd\x82\xbf\x82\xd1\x82\xab\x82\xcc\x83L\x81[\x83J\x81[\x83h", "\x90^\x8e\xc0\x82\xd6\x82\xcc\x83L\x81[\x83J\x81[\x83h", "\x83W\x83\x87\x81[\x83J\x81[", "\x83g\x83\x89\x83o\x81[\x83X\x83^\x83" "E\x83\x93", "\x83" "A\x83O\x83\x89\x83o\x81[", "\x83I\x83\x8a\x83\x93\x83|\x83X\x81" "E\x83R\x83\x8d\x83V\x83" "A\x83\x80", "\x83\x8f\x83\x93\x83_\x81[\x83\x89\x83\x93\x83h", "\x83\x82\x83\x93\x83X\x83g\x83\x8d", "\x83n\x83\x8d\x83" "E\x83" "B\x83\x93\x83^\x83" "E\x83\x93", "\x83" "A\x83g\x83\x89\x83\x93\x83" "e\x83" "B\x83J", "\x83l\x83o\x81[\x83\x89\x83\x93\x83h", "\x83z\x83\x8d\x83" "E\x83o\x83X\x83" "e\x83" "B\x83I\x83\x93", "100\x83G\x81[\x83J\x81[\x82\xcc\x90X", "\x83g\x83\x8f\x83" "C\x83\x89\x83" "C\x83g\x83^\x83" "E\x83\x93", "\x83" "f\x83X\x83" "e\x83" "B\x83j\x81[\x83" "A\x83" "C\x83\x89\x83\x93\x83h", "\x83M\x83~\x83" "b\x83N-\x83K\x81[\x83h\x83" "A\x81[\x83}\x81[", "\x83M\x83~\x83" "b\x83N-\x83g\x83\x8a\x83" "b\x83N\x83X\x83^\x81[", "\x83M\x83~\x83" "b\x83N-\x83W\x83\x83\x83t\x83@\x81[", "\x83M\x83~\x83" "b\x83N-\x83u\x83M\x81[", "\x83M\x83~\x83" "b\x83N-\x83p\x83\x89\x83T\x83" "C\x83g\x83P\x83" "C\x83W", "\x83M\x83~\x83" "b\x83N-\x83" "A\x81[\x83X\x83\x89", "\x83M\x83~\x83" "b\x83N-\x83}\x83\x8c\x83t\x83" "B\x83Z\x83\x93\x83g\x83h\x83\x89\x83S\x83\x93", "\x83M\x83~\x83" "b\x83N-\x83_\x81[\x83N\x83T\x83" "C\x83h" };
-}
-namespace DWTEvent {
-LPCSTR szJMRikuCardKindTbl[66] = { "\x83\\\x83" "E\x83\x8b\x83" "C\x81[\x83^\x81[", "\x83|\x81[\x83V\x83\x87\x83\x93", "\x83n\x83" "C\x83|\x81[\x83V\x83\x87\x83\x93", "\x89\xa4\x97l", "\x83V\x83\x83\x83h\x83" "E", "\x83p\x83\x8f\x81[\x83\x8f\x83" "C\x83\x8b\x83h", "\x83\x89\x81[\x83W\x83{\x83" "f\x83" "B", "\x83t\x83@\x83" "b\x83g\x83o\x83\x93\x83" "f\x83" "B\x83" "b\x83g", "\x83V\x81[\x83l\x83I\x83\x93", "\x83p\x83" "C\x83\x8c\x81[\x83" "c", "\x83\x8f\x83" "C\x83g\x83i\x83" "C\x83g", "\x83T\x81[\x83`\x83S\x81[\x83X\x83g", "\x83" "f\x83" "B\x83t\x83" "F\x83\x93\x83_\x81[", "\x83_\x81[\x83N\x83{\x81[\x83\x8b", "\x83K\x81[\x83h\x83" "A\x81[\x83}\x81[", "\x83n\x83" "f\x83X", "\x83g\x83\x8a\x83" "b\x83N\x83}\x83X\x83^\x81[", "\x83W\x83\x83\x83t\x83@\x81[", "\x83" "A\x81[\x83X\x83\x89", "\x83u\x83M\x81[", "\x83p\x83\x89\x83T\x83" "C\x83g\x83P\x83" "C\x83W", "\x83t\x83" "b\x83N", "\x83}\x83\x8c\x83t\x83" "B\x83Z\x83\x93\x83g\x83h\x83\x89\x83S\x83\x93", "\x83_\x81[\x83N\x83T\x83" "C\x83h", "\x83\x8c\x83N\x83Z\x83" "E\x83X", "\x83[\x83N\x83V\x83I\x83\x93", "\x90\xc3\x82\xb6\x82\xe1\x82\xad\x82\xc8\x82\xe9\x88\xc5", "\x82\xd0\x82\xb5\x82\xdf\x82\xad\x88\xc5", "\x82\xbf\x82\xa9\x82\xe7\x82\xc8\x82\xab\x88\xc5", "\x82\xa8\x82\xa8\x82\xa2\x82\xc8\x82\xe9\x88\xc5", "\x96\xb0\x82\xe8\x82\xcc\x88\xc5", "\x82\xb9\x82\xdc\x82\xe8\x82\xad\x82\xe9\x88\xc5", "\x83u\x83\x89\x83" "b\x83N\x83\x8b\x81[\x83\x80", "\x92\xea\x92m\x82\xea\x82\xca\x88\xc5", "\x83\x8b\x81[\x83\x8c\x83" "b\x83g\x83\x8b\x81[\x83\x80", "\x95\x90\x97\xcd\x82\xd6\x82\xcc\x82\xdf\x82\xb4\x82\xdf", "\x82\xdf\x82\xae\x82\xe8\x82\xa0\x82\xa2\x82\xcc\x92n", "\x82\xc4\x82\xa2\x82\xbd\x82\xa2\x82\xcc\x8a\xd4", "\x83_\x83\x81\x81[\x83W\x83" "A\x83" "b\x83v\x83\x8b\x81[\x83\x80", "\x83X\x83^\x83\x93\x83v\x83\x89\x83X\x83\x8b\x81[\x83\x80", "\x88\xea\x8e\x9e\x82\xcc\x8bx\x91\xa7", "\x8c\xf0\x82\xb6\x82\xe8\x8d\x87\x82\xa4\x90\xa2\x8a" "E", "\x82\xcd\x82\xb6\x82\xdc\x82\xe8\x82\xcc\x83L\x81[\x83J\x81[\x83h", "\x82\xdd\x82\xbf\x82\xd1\x82\xab\x82\xcc\x83L\x81[\x83J\x81[\x83h", "\x90^\x8e\xc0\x82\xd6\x82\xcc\x83L\x81[\x83J\x81[\x83h", "\x83W\x83\x87\x81[\x83J\x81[", "\x83g\x83\x89\x83o\x81[\x83X\x83^\x83" "E\x83\x93", "\x83" "A\x83O\x83\x89\x83o\x81[", "\x83I\x83\x8a\x83\x93\x83|\x83X\x81" "E\x83R\x83\x8d\x83V\x83" "A\x83\x80", "\x83\x8f\x83\x93\x83_\x81[\x83\x89\x83\x93\x83h", "\x83\x82\x83\x93\x83X\x83g\x83\x8d", "\x83n\x83\x8d\x83" "E\x83" "B\x83\x93\x83^\x83" "E\x83\x93", "\x83" "A\x83g\x83\x89\x83\x93\x83" "e\x83" "B\x83J", "\x83l\x83o\x81[\x83\x89\x83\x93\x83h", "\x83z\x83\x8d\x83" "E\x83o\x83X\x83" "e\x83" "B\x83I\x83\x93", "\x83g\x83\x8f\x83" "C\x83\x89\x83" "C\x83g\x83^\x83" "E\x83\x93", "\x83" "f\x83X\x83" "e\x83" "B\x83j\x81[\x83" "A\x83" "C\x83\x89\x83\x93\x83h", "\x96Y\x8bp\x82\xcc\x8f\xe9", "\x83M\x83~\x83" "b\x83N-\x83K\x81[\x83h\x83" "A\x81[\x83}\x81[", "\x83M\x83~\x83" "b\x83N-\x83g\x83\x8a\x83" "b\x83N\x83X\x83^\x81[", "\x83M\x83~\x83" "b\x83N-\x83W\x83\x83\x83t\x83@\x81[", "\x83M\x83~\x83" "b\x83N-\x83u\x83M\x81[", "\x83M\x83~\x83" "b\x83N-\x83p\x83\x89\x83T\x83" "C\x83g\x83P\x83" "C\x83W", "\x83M\x83~\x83" "b\x83N-\x83" "A\x81[\x83X\x83\x89", "\x83M\x83~\x83" "b\x83N-\x83}\x83\x8c\x83t\x83" "B\x83Z\x83\x93\x83g\x83h\x83\x89\x83S\x83\x93", "\x83M\x83~\x83" "b\x83N-\x83_\x81[\x83N\x83T\x83" "C\x83h" };
-}
-namespace DWTEvent {
-LPCSTR szJMSwitchTbl[2] = { "", "\x8dX\x90V" };
-}
-namespace DWTEvent {
-DEBUG_WINDOW_LINE debugWinJiminyLine[82] = {
-    { "\xf9S----------\xf9V\x83\\\x83\x89\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83g\x83\x89\x83\x94\x83@\x81[\x83X       :%s", &DebugWork::g_dw.jiminy.Sora_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetJiminyMemoFlag, NULL },
-    { "\x83" "A\x83O\x83\x89\x83o\x81[         :%s", &DebugWork::g_dw.jiminy.Sora_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetJiminyMemoFlag, NULL },
-    { "\x83I\x83\x8a\x83\x93\x83|\x83X         :%s", &DebugWork::g_dw.jiminy.Sora_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetJiminyMemoFlag, NULL },
-    { "\x83\x8f\x83\x93\x83_\x81[\x83\x89\x83\x93\x83h     :%s", &DebugWork::g_dw.jiminy.Sora_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetJiminyMemoFlag, NULL },
-    { "\x83\x82\x83\x93\x83X\x83g\x83\x8d         :%s", &DebugWork::g_dw.jiminy.Sora_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetJiminyMemoFlag, NULL },
-    { "\x83n\x83\x8d\x83" "E\x83" "B\x83\x93\x83^\x83" "E\x83\x93   :%s", &DebugWork::g_dw.jiminy.Sora_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetJiminyMemoFlag, NULL },
-    { "\x83" "A\x83g\x83\x89\x83\x93\x83" "e\x83" "B\x83J     :%s", &DebugWork::g_dw.jiminy.Sora_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40, DebugSetJiminyMemoFlag, NULL },
-    { "\x83l\x83o\x81[\x83\x89\x83\x93\x83h       :%s", &DebugWork::g_dw.jiminy.Sora_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80, DebugSetJiminyMemoFlag, NULL },
-    { "\x83z\x83\x8d\x83" "E\x83o\x83X\x83" "e\x83" "B\x83I\x83\x93 :%s", &DebugWork::g_dw.jiminy.Sora_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100, DebugSetJiminyMemoFlag, NULL },
-    { "\x82P\x82O\x82O\x83G\x81[\x83J\x81[     :%s", &DebugWork::g_dw.jiminy.Sora_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200, DebugSetJiminyMemoFlag, NULL },
-    { "\x83g\x83\x8f\x83" "C\x83\x89\x83" "C\x83g       :%s", &DebugWork::g_dw.jiminy.Sora_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400, DebugSetJiminyMemoFlag, NULL },
-    { "\x83" "f\x83X\x83" "e\x83j\x81[         :%s", &DebugWork::g_dw.jiminy.Sora_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800, DebugSetJiminyMemoFlag, NULL },
-    { "\x82\xda\x82\xa4\x82\xab\x82\xe1\x82\xad\x82\xcc\x82\xb5\x82\xeb   :%s", &DebugWork::g_dw.jiminy.Sora_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x1000, DebugSetJiminyMemoFlag, NULL },
-    { "\x81@\x82P\x82" "e             :%s", &DebugWork::g_dw.jiminy.Sora_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetJiminyMemoFlag, NULL },
-    { "\x81@\x82Q\x82" "e             :%s", &DebugWork::g_dw.jiminy.Sora_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetJiminyMemoFlag, NULL },
-    { "\x81@\x82R\x82" "e             :%s", &DebugWork::g_dw.jiminy.Sora_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetJiminyMemoFlag, NULL },
-    { "\x81@\x82S\x82" "e             :%s", &DebugWork::g_dw.jiminy.Sora_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetJiminyMemoFlag, NULL },
-    { "\x81@\x82T\x82" "e             :%s", &DebugWork::g_dw.jiminy.Sora_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetJiminyMemoFlag, NULL },
-    { "\x81@\x82U\x82" "e             :%s", &DebugWork::g_dw.jiminy.Sora_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetJiminyMemoFlag, NULL },
-    { "\x81@\x82V\x82" "e             :%s", &DebugWork::g_dw.jiminy.Sora_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40, DebugSetJiminyMemoFlag, NULL },
-    { "\x81@\x82W\x82" "e             :%s", &DebugWork::g_dw.jiminy.Sora_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80, DebugSetJiminyMemoFlag, NULL },
-    { "\x81@\x82X\x82" "e             :%s", &DebugWork::g_dw.jiminy.Sora_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100, DebugSetJiminyMemoFlag, NULL },
-    { "\x82P\x82O\x82" "e             :%s", &DebugWork::g_dw.jiminy.Sora_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200, DebugSetJiminyMemoFlag, NULL },
-    { "\x82P\x82P\x82" "e             :%s", &DebugWork::g_dw.jiminy.Sora_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400, DebugSetJiminyMemoFlag, NULL },
-    { "\x82P\x82Q\x82" "e             :%s", &DebugWork::g_dw.jiminy.Sora_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800, DebugSetJiminyMemoFlag, NULL },
-    { "\x82P\x82R\x82" "e             :%s", &DebugWork::g_dw.jiminy.Sora_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x1000, DebugSetJiminyMemoFlag, NULL },
-    { "\xf9S----------\xf9V\x83\x8a\x83N\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83g\x83\x89\x83\x94\x83@\x81[\x83X       :%s", &DebugWork::g_dw.jiminy.Riku_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetJiminyMemoFlag, NULL },
-    { "\x83" "A\x83O\x83\x89\x83o\x81[         :%s", &DebugWork::g_dw.jiminy.Riku_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetJiminyMemoFlag, NULL },
-    { "\x83I\x83\x8a\x83\x93\x83|\x83X         :%s", &DebugWork::g_dw.jiminy.Riku_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetJiminyMemoFlag, NULL },
-    { "\x83\x8f\x83\x93\x83_\x81[\x83\x89\x83\x93\x83h     :%s", &DebugWork::g_dw.jiminy.Riku_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetJiminyMemoFlag, NULL },
-    { "\x83\x82\x83\x93\x83X\x83g\x83\x8d         :%s", &DebugWork::g_dw.jiminy.Riku_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetJiminyMemoFlag, NULL },
-    { "\x83n\x83\x8d\x83" "E\x83" "B\x83\x93\x83^\x83" "E\x83\x93   :%s", &DebugWork::g_dw.jiminy.Riku_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetJiminyMemoFlag, NULL },
-    { "\x83" "A\x83g\x83\x89\x83\x93\x83" "e\x83" "B\x83J     :%s", &DebugWork::g_dw.jiminy.Riku_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40, DebugSetJiminyMemoFlag, NULL },
-    { "\x83l\x83o\x81[\x83\x89\x83\x93\x83h       :%s", &DebugWork::g_dw.jiminy.Riku_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80, DebugSetJiminyMemoFlag, NULL },
-    { "\x83z\x83\x8d\x83" "E\x83o\x83X\x83" "e\x83" "B\x83I\x83\x93 :%s", &DebugWork::g_dw.jiminy.Riku_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100, DebugSetJiminyMemoFlag, NULL },
-    { "\x83g\x83\x8f\x83" "C\x83\x89\x83" "C\x83g       :%s", &DebugWork::g_dw.jiminy.Riku_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200, DebugSetJiminyMemoFlag, NULL },
-    { "\x83" "f\x83X\x83" "e\x83j\x81[         :%s", &DebugWork::g_dw.jiminy.Riku_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400, DebugSetJiminyMemoFlag, NULL },
-    { "\x82\xda\x82\xa4\x82\xab\x82\xe1\x82\xad\x82\xcc\x82\xb5\x82\xeb   :%s", &DebugWork::g_dw.jiminy.Riku_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800, DebugSetJiminyMemoFlag, NULL },
-    { "\x82" "a\x82P\x82Q\x82" "e           :%s", &DebugWork::g_dw.jiminy.Riku_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetJiminyMemoFlag, NULL },
-    { "\x82" "a\x82P\x82P\x82" "e           :%s", &DebugWork::g_dw.jiminy.Riku_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetJiminyMemoFlag, NULL },
-    { "\x82" "a\x82P\x82O\x82" "e           :%s", &DebugWork::g_dw.jiminy.Riku_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetJiminyMemoFlag, NULL },
-    { "\x82" "a\x81@\x82X\x82" "e           :%s", &DebugWork::g_dw.jiminy.Riku_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetJiminyMemoFlag, NULL },
-    { "\x82" "a\x81@\x82W\x82" "e           :%s", &DebugWork::g_dw.jiminy.Riku_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetJiminyMemoFlag, NULL },
-    { "\x82" "a\x81@\x82V\x82" "e           :%s", &DebugWork::g_dw.jiminy.Riku_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetJiminyMemoFlag, NULL },
-    { "\x82" "a\x81@\x82U\x82" "e           :%s", &DebugWork::g_dw.jiminy.Riku_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40, DebugSetJiminyMemoFlag, NULL },
-    { "\x82" "a\x81@\x82T\x82" "e           :%s", &DebugWork::g_dw.jiminy.Riku_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80, DebugSetJiminyMemoFlag, NULL },
-    { "\x82" "a\x81@\x82S\x82" "e           :%s", &DebugWork::g_dw.jiminy.Riku_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100, DebugSetJiminyMemoFlag, NULL },
-    { "\x82" "a\x81@\x82R\x82" "e           :%s", &DebugWork::g_dw.jiminy.Riku_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200, DebugSetJiminyMemoFlag, NULL },
-    { "\x82" "a\x81@\x82Q\x82" "e           :%s", &DebugWork::g_dw.jiminy.Riku_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400, DebugSetJiminyMemoFlag, NULL },
-    { "\x82" "a\x81@\x82P\x82" "e           :%s", &DebugWork::g_dw.jiminy.Riku_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800, DebugSetJiminyMemoFlag, NULL },
-    { "\xf9S------\xf9V\x83\\\x83\x89 \x82\xbb\x82\xcc\x91\xbc\xf9S------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83~\x83j\x83Q\x81[\x83\x80\x81" "E\x96\xec\x8d\xd8   :%s", &DebugWork::g_dw.jiminy.Sora_Etc, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetJiminyMemoFlag, NULL },
-    { "\x83~\x83j\x83Q\x81[\x83\x80\x81" "E\x83o\x83\x8b   :%s", &DebugWork::g_dw.jiminy.Sora_Etc, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetJiminyMemoFlag, NULL },
-    { "\x83~\x83j\x83Q\x81[\x83\x80\x81" "E\x83W\x83\x83   :%s", &DebugWork::g_dw.jiminy.Sora_Etc, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetJiminyMemoFlag, NULL },
-    { "\x83~\x83j\x83Q\x81[\x83\x80\x81" "E\x83\x8f\x83" "C   :%s", &DebugWork::g_dw.jiminy.Sora_Etc, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetJiminyMemoFlag, NULL },
-    { "\x83~\x83j\x83Q\x81[\x83\x80\x81" "E\x83n\x83`   :%s", &DebugWork::g_dw.jiminy.Sora_Etc, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetJiminyMemoFlag, NULL },
-    { "\x83\x82\x83\x93\x83X\x83g\x83\x8d\x82\xc5\x91\xe5\x96\\\x82\xea :%s", &DebugWork::g_dw.jiminy.Sora_Etc, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetJiminyMemoFlag, NULL },
-    { "\x83\x82\x81[\x83O\x83\x8a\x83V\x83\x87\x83" "b\x83v   :%s", &DebugWork::g_dw.jiminy.Sora_Etc, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40, DebugSetJiminyMemoFlag, NULL },
-    { "\x83s\x83O\x83\x8c\x83" "b\x83g\x82\xc6\x98" "b\x82\xb5\x82\xbd :%s", &DebugWork::g_dw.jiminy.Sora_Etc, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80, DebugSetJiminyMemoFlag, NULL },
-    { "\x83I\x83" "E\x83\x8b\x82\xc6\x98" "b\x82\xb5\x82\xbd     :%s", &DebugWork::g_dw.jiminy.Sora_Etc, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100, DebugSetJiminyMemoFlag, NULL },
-    { "\x83\x8b\x81[\x82\xc6\x98" "b\x82\xb5\x82\xbd       :%s", &DebugWork::g_dw.jiminy.Sora_Etc, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200, DebugSetJiminyMemoFlag, NULL },
-    { "\x83" "C\x81[\x83\x88\x81[\x82\xc6\x98" "b\x82\xb5\x82\xbd   :%s", &DebugWork::g_dw.jiminy.Sora_Etc, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400, DebugSetJiminyMemoFlag, NULL },
-    { "\x83" "e\x83" "B\x83K\x81[\x82\xc6\x98" "b\x82\xb5\x82\xbd   :%s", &DebugWork::g_dw.jiminy.Sora_Etc, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800, DebugSetJiminyMemoFlag, NULL },
-    { "\x83\x89\x83r\x83" "b\x83g\x82\xc6\x98" "b\x82\xb5\x82\xbd   :%s", &DebugWork::g_dw.jiminy.Sora_Etc, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x1000, DebugSetJiminyMemoFlag, NULL },
-    { "100\x83G\x81[\x83J\x81[\x82\xcc\x90X\x8fo\x82\xbd:%s", &DebugWork::g_dw.jiminy.Sora_Etc, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x2000, DebugSetJiminyMemoFlag, NULL },
-    { "\xf9S------\xf9V\x83\\\x83\x89 \x93G\x82\xcc\x90\x94\xf9S------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x93G\x82\xcc\x8e\xed\x97\xde           :%s", &DebugWork::g_dw.jiminy.Sora_Enemy, 4, { 0 }, 0, 0.0f, 34.0f, 1.0f, szJMSoraEnemyKind, 0, DebugSetJiminyMemoFlag, NULL },
-    { "\x93G\x82\xcc\x90\x94             :%5d", &DebugWork::g_dw.jiminy.Sora_ENum, 4, { 0 }, 0, 0.0f, 10000.0f, 100.0f, NULL, 0, DebugSetJiminyMemoFlag, NULL },
-    { "\x81\x9b\x83{\x83^\x83\x93\x82\xc5\x90\xdd\x92\xe8     :%s", &DebugWork::g_dw.jiminy.Sora_Flag, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, szJMSwitchTbl, 1, DebugSetJiminyMemoFlag, NULL },
-    { "\xf9S------\xf9V\x83\x8a\x83N \x93G\x82\xcc\x90\x94\xf9S------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x93G\x82\xcc\x8e\xed\x97\xde           :%s", &DebugWork::g_dw.jiminy.Riku_Enemy, 4, { 0 }, 0, 0.0f, 33.0f, 1.0f, szJMRikuEnemyKind, 0, DebugSetJiminyMemoFlag, NULL },
-    { "\x93G\x82\xcc\x90\x94             :%5d", &DebugWork::g_dw.jiminy.Riku_ENum, 4, { 0 }, 0, 0.0f, 10000.0f, 100.0f, NULL, 0, DebugSetJiminyMemoFlag, NULL },
-    { "\x81\x9b\x83{\x83^\x83\x93\x82\xc5\x90\xdd\x92\xe8     :%s", &DebugWork::g_dw.jiminy.Riku_Flag, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, szJMSwitchTbl, 1, DebugSetJiminyMemoFlag, NULL },
-    { "\xf9S------\xf9V\x83\\\x83\x89 \x83J\x81[\x83h\xf9S------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83J\x81[\x83h\x82\xcc\x8e\xed\x97\xde       :%s", &DebugWork::g_dw.jiminy.Sora_Card, 4, { 0 }, 0, 0.0f, 158.0f, 1.0f, szJMSoraCardKindTbl, 0, DebugSetJiminyMemoFlag, NULL },
-    { "\x81\x9b\x83{\x83^\x83\x93\x82\xc5\x8e\xe6\x93\xbe     :%s", &DebugWork::g_dw.jiminy.Sora_Flag, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, szJMSwitchTbl, 2, DebugSetJiminyMemoFlag, NULL },
-    { "\xf9S------\xf9V\x83\x8a\x83N \x83J\x81[\x83h\xf9S------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83J\x81[\x83h\x82\xcc\x8e\xed\x97\xde       :%s", &DebugWork::g_dw.jiminy.Riku_Card, 4, { 0 }, 0, 0.0f, 65.0f, 1.0f, szJMRikuCardKindTbl, 0, DebugSetJiminyMemoFlag, NULL },
-    { "\x81\x9b\x83{\x83^\x83\x93\x82\xc5\x8e\xe6\x93\xbe     :%s", &DebugWork::g_dw.jiminy.Riku_Flag, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, szJMSwitchTbl, 2, DebugSetJiminyMemoFlag, NULL },
-    { NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-};
-}
-namespace DWTEvent {
-DEBUG_WINDOW_LINE debugWinKH2CardGetLine[14] = {
-    { "\x83[\x83\x80\x83i\x83X           :%s", &DebugWork::g_dw.atelwork.iKH2CardGet, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetKH2CardGetFlag, NULL },
-    { "\x83V\x83\x8b\x83o\x81[\x83\x8b         :%s", &DebugWork::g_dw.atelwork.iKH2CardGet, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetKH2CardGetFlag, NULL },
-    { "\x83U\x83\x8b\x83" "f\x83" "B\x83\x93         :%s", &DebugWork::g_dw.atelwork.iKH2CardGet, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetKH2CardGetFlag, NULL },
-    { "\x83T\x83" "C\x83N\x83X           :%s", &DebugWork::g_dw.atelwork.iKH2CardGet, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetKH2CardGetFlag, NULL },
-    { "\x83" "f\x83~\x83" "b\x83N\x83X         :%s", &DebugWork::g_dw.atelwork.iKH2CardGet, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetKH2CardGetFlag, NULL },
-    { "\x83\x8b\x83N\x83\\\x81[\x83h         :%s", &DebugWork::g_dw.atelwork.iKH2CardGet, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetKH2CardGetFlag, NULL },
-    { "\x83\x8d\x83N\x83T\x83X           :%s", &DebugWork::g_dw.atelwork.iKH2CardGet, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40, DebugSetKH2CardGetFlag, NULL },
-    { "\x83X\x83^\x81[\x83V\x81[\x83J\x81[     :%s", &DebugWork::g_dw.atelwork.iKH2CardGet, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80, DebugSetKH2CardGetFlag, NULL },
-    { "\x83\x82\x83m\x83N\x83\x8d\x81[\x83\x80\t    :%s", &DebugWork::g_dw.atelwork.iKH2CardGet, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100, DebugSetKH2CardGetFlag, NULL },
-    { "\x83t\x83H\x83\x8d\x81[\x83U\x83" "E\x83" "B\x83\x93\x83h :%s", &DebugWork::g_dw.atelwork.iKH2CardGet, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200, DebugSetKH2CardGetFlag, NULL },
-    { "\x83q\x83h\x83" "D\x83\x93\x83h\x83\x89\x83S\x83\x93   :%s", &DebugWork::g_dw.atelwork.iKH2CardGet, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400, DebugSetKH2CardGetFlag, NULL },
-    { "\x83t\x83H\x83g\x83\x93\x83" "f\x83o\x83" "b\x83K\x81[ :%s", &DebugWork::g_dw.atelwork.iKH2CardGet, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800, DebugSetKH2CardGetFlag, NULL },
-    { "\x83{\x83\x93\x83h\x83I\x83u\x83t\x83\x8c\x83" "C\x83\x80 :%s", &DebugWork::g_dw.atelwork.iKH2CardGet, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x1000, DebugSetKH2CardGetFlag, NULL },
-    { NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-};
-}
-namespace DWTEvent {
-static BOOL debugGameInfomationParam(CDebugWindow* pObj, INT inY, INT inParam) {
-    if (inParam & 0x180) {
-        switch (inY) {
-        case 1: CGameWork::setFlag(0, 0x83, KH_DW(DebugWork::g_dw.atelwork.iDistinctionClear)); break;
-        case 2: CGameWork::setFlag(0, 0x11, KH_DW(DebugWork::g_dw.atelwork.iGameKH2clear)); break;
-        case 3: CGameWork::setFlag(0, 0x9, KH_DW(DebugWork::g_dw.atelwork.iSoraClear)); break;
-        case 4: CGameWork::setFlag(0, 0x12, KH_DW(DebugWork::g_dw.atelwork.iRikuClear)); break;
-        case 7: CGameWork::setFlag(0, 0x82, KH_DW(DebugWork::g_dw.atelwork.iMahluciaKilled)); break;
-        case 8: CGameWork::setByte(0, 0x61, KH_DW(DebugWork::g_dw.atelwork.iPlayDifficultMode)); break;
-        }
-    }
-    return 1;
-}
-}
-namespace DWTEvent {
-DEBUG_WINDOW_LINE debugWinTuEndLine[8] = {
-    { "\x83L\x81[\x83\x8b\x81[\x83\x80        :%s", &DebugWork::g_dw.atelwork.iTutorialEnd, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetTutorialFlag, NULL },
-    { "\x83\x82\x81[\x83O\x83\x8a\x83V\x83\x87\x83" "b\x83v  :%s", &DebugWork::g_dw.atelwork.iTutorialEnd, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetTutorialFlag, NULL },
-    { "\x83t\x83\x8d\x83" "A\x88\xda\x93\xae        :%s", &DebugWork::g_dw.atelwork.iTutorialEnd, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetTutorialFlag, NULL },
-    { "\x83\x8f\x81[\x83v\x83|\x83" "C\x83\x93\x83g    :%s", &DebugWork::g_dw.atelwork.iTutorialEnd, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetTutorialFlag, NULL },
-    { "\x83Z\x81[\x83u\x83|\x83" "C\x83\x93\x83g    :%s", &DebugWork::g_dw.atelwork.iTutorialEnd, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetTutorialFlag, NULL },
-    { "\x83t\x83" "B\x81[\x83\x8b\x83h        :%s", &DebugWork::g_dw.atelwork.iTutorialEnd, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetTutorialFlag, NULL },
-    { "\x83\x8f\x81[\x83\x8b\x83h\x83Z\x83\x8c\x83N\x83g  :%s", &DebugWork::g_dw.atelwork.iTutorialEnd, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40, DebugSetTutorialFlag, NULL },
-    { NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-};
-}
-namespace DWTEvent {
-DEBUG_WINDOW_LINE debugWinMovieLineRiku[42] = {
-    { "501   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetRikuMovieFlag, NULL },
-    { "502   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetRikuMovieFlag, NULL },
-    { "503   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetRikuMovieFlag, NULL },
-    { "504   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetRikuMovieFlag, NULL },
-    { "511   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetRikuMovieFlag, NULL },
-    { "512   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetRikuMovieFlag, NULL },
-    { "521   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40, DebugSetRikuMovieFlag, NULL },
-    { "522   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80, DebugSetRikuMovieFlag, NULL },
-    { "531   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100, DebugSetRikuMovieFlag, NULL },
-    { "541   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200, DebugSetRikuMovieFlag, NULL },
-    { "542   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400, DebugSetRikuMovieFlag, NULL },
-    { "543   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800, DebugSetRikuMovieFlag, NULL },
-    { "551   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x1000, DebugSetRikuMovieFlag, NULL },
-    { "552   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x2000, DebugSetRikuMovieFlag, NULL },
-    { "561   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x4000, DebugSetRikuMovieFlag, NULL },
-    { "571   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x8000, DebugSetRikuMovieFlag, NULL },
-    { "581   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10000, DebugSetRikuMovieFlag, NULL },
-    { "582   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20000, DebugSetRikuMovieFlag, NULL },
-    { "583   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40000, DebugSetRikuMovieFlag, NULL },
-    { "584   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80000, DebugSetRikuMovieFlag, NULL },
-    { "585   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100000, DebugSetRikuMovieFlag, NULL },
-    { "586   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200000, DebugSetRikuMovieFlag, NULL },
-    { "591   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400000, DebugSetRikuMovieFlag, NULL },
-    { "592   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800000, DebugSetRikuMovieFlag, NULL },
-    { "593   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x1000000, DebugSetRikuMovieFlag, NULL },
-    { "594   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x2000000, DebugSetRikuMovieFlag, NULL },
-    { "595   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x4000000, DebugSetRikuMovieFlag, NULL },
-    { "596   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x8000000, DebugSetRikuMovieFlag, NULL },
-    { "601   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10000000, DebugSetRikuMovieFlag, NULL },
-    { "602   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20000000, DebugSetRikuMovieFlag, NULL },
-    { "603   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40000000, DebugSetRikuMovieFlag, NULL },
-    { "604   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80000000, DebugSetRikuMovieFlag, NULL },
-    { "605   :%s", &DebugWork::g_dw.atelwork.iRikuMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetRikuMovieFlag, NULL },
-    { "606   :%s", &DebugWork::g_dw.atelwork.iRikuMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetRikuMovieFlag, NULL },
-    { "611   :%s", &DebugWork::g_dw.atelwork.iRikuMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetRikuMovieFlag, NULL },
-    { "612   :%s", &DebugWork::g_dw.atelwork.iRikuMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetRikuMovieFlag, NULL },
-    { "613   :%s", &DebugWork::g_dw.atelwork.iRikuMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetRikuMovieFlag, NULL },
-    { "614   :%s", &DebugWork::g_dw.atelwork.iRikuMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetRikuMovieFlag, NULL },
-    { "615   :%s", &DebugWork::g_dw.atelwork.iRikuMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40, DebugSetRikuMovieFlag, NULL },
-    { "621   :%s", &DebugWork::g_dw.atelwork.iRikuMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80, DebugSetRikuMovieFlag, NULL },
-    { "631   :%s", &DebugWork::g_dw.atelwork.iRikuMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100, DebugSetRikuMovieFlag, NULL },
-    { NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-};
-}
-namespace DWTEvent {
-DEBUG_WINDOW_LINE debugWinMovieLine[60] = {
-    { "001   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetSoraMovieFlag, NULL },
-    { "011   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetSoraMovieFlag, NULL },
-    { "012   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetSoraMovieFlag, NULL },
-    { "013   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetSoraMovieFlag, NULL },
-    { "021   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetSoraMovieFlag, NULL },
-    { "022   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetSoraMovieFlag, NULL },
-    { "023   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40, DebugSetSoraMovieFlag, NULL },
-    { "031   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80, DebugSetSoraMovieFlag, NULL },
-    { "032   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100, DebugSetSoraMovieFlag, NULL },
-    { "033   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200, DebugSetSoraMovieFlag, NULL },
-    { "041   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400, DebugSetSoraMovieFlag, NULL },
-    { "042   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800, DebugSetSoraMovieFlag, NULL },
-    { "043   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x1000, DebugSetSoraMovieFlag, NULL },
-    { "051   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x2000, DebugSetSoraMovieFlag, NULL },
-    { "052   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x4000, DebugSetSoraMovieFlag, NULL },
-    { "053   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x8000, DebugSetSoraMovieFlag, NULL },
-    { "061   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10000, DebugSetSoraMovieFlag, NULL },
-    { "062   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20000, DebugSetSoraMovieFlag, NULL },
-    { "063   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40000, DebugSetSoraMovieFlag, NULL },
-    { "064   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80000, DebugSetSoraMovieFlag, NULL },
-    { "071   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100000, DebugSetSoraMovieFlag, NULL },
-    { "072   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200000, DebugSetSoraMovieFlag, NULL },
-    { "073   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400000, DebugSetSoraMovieFlag, NULL },
-    { "081   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800000, DebugSetSoraMovieFlag, NULL },
-    { "082   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x1000000, DebugSetSoraMovieFlag, NULL },
-    { "083   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x2000000, DebugSetSoraMovieFlag, NULL },
-    { "084   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x4000000, DebugSetSoraMovieFlag, NULL },
-    { "091   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x8000000, DebugSetSoraMovieFlag, NULL },
-    { "092   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10000000, DebugSetSoraMovieFlag, NULL },
-    { "093   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20000000, DebugSetSoraMovieFlag, NULL },
-    { "101   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40000000, DebugSetSoraMovieFlag, NULL },
-    { "102   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80000000, DebugSetSoraMovieFlag, NULL },
-    { "103   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetSoraMovieFlag, NULL },
-    { "104   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetSoraMovieFlag, NULL },
-    { "111   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetSoraMovieFlag, NULL },
-    { "112   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetSoraMovieFlag, NULL },
-    { "113   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetSoraMovieFlag, NULL },
-    { "114   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetSoraMovieFlag, NULL },
-    { "115   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40, DebugSetSoraMovieFlag, NULL },
-    { "116   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80, DebugSetSoraMovieFlag, NULL },
-    { "117   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100, DebugSetSoraMovieFlag, NULL },
-    { "118   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200, DebugSetSoraMovieFlag, NULL },
-    { "121   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400, DebugSetSoraMovieFlag, NULL },
-    { "122   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800, DebugSetSoraMovieFlag, NULL },
-    { "123   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x1000, DebugSetSoraMovieFlag, NULL },
-    { "124   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x2000, DebugSetSoraMovieFlag, NULL },
-    { "125   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x4000, DebugSetSoraMovieFlag, NULL },
-    { "126   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x8000, DebugSetSoraMovieFlag, NULL },
-    { "131   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10000, DebugSetSoraMovieFlag, NULL },
-    { "132   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20000, DebugSetSoraMovieFlag, NULL },
-    { "133   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40000, DebugSetSoraMovieFlag, NULL },
-    { "134   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80000, DebugSetSoraMovieFlag, NULL },
-    { "135   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100000, DebugSetSoraMovieFlag, NULL },
-    { "136   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200000, DebugSetSoraMovieFlag, NULL },
-    { "137   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400000, DebugSetSoraMovieFlag, NULL },
-    { "138   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800000, DebugSetSoraMovieFlag, NULL },
-    { "139   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x1000000, DebugSetSoraMovieFlag, NULL },
-    { "140   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x2000000, DebugSetSoraMovieFlag, NULL },
-    { "151   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x4000000, DebugSetSoraMovieFlag, NULL },
-    { NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-};
-}
-namespace DWTEvent {
-DEBUG_WINDOW_LINE debugWinPcSkillLine[7] = {
-    { "\x83n\x83" "C\x83W\x83\x83\x83\x93\x83v     :%s", &DebugWork::g_dw.atelwork.iPcStanderdSkill, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetPcSkillFlag, NULL },
-    { "\x83O\x83\x89\x83" "C\x83h         :%s", &DebugWork::g_dw.atelwork.iPcStanderdSkill, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetPcSkillFlag, NULL },
-    { "\x83X\x81[\x83p\x81[\x83O\x83\x89\x83" "C\x83h :%s", &DebugWork::g_dw.atelwork.iPcStanderdSkill, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetPcSkillFlag, NULL },
-    { "\x83_\x81[\x83N\x83\x8a\x83N\x89\xbb     :%s", &DebugWork::g_dw.atelwork.iPcStanderdSkill, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetPcSkillFlag, NULL },
-    { "\x83X\x83s\x81[\x83h\x83u\x83\x8c\x83" "C\x83N :%s", &DebugWork::g_dw.atelwork.iPcStanderdSkill, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetPcSkillFlag, NULL },
-    { "\x83" "f\x83\x85\x83G\x83\x8b         :%s", &DebugWork::g_dw.atelwork.iPcStanderdSkill, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetPcSkillFlag, NULL },
-    { NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-};
-}
-namespace DWTEvent {
-DEBUG_WINDOW_LINE debugWinFriendPossibleLine[10] = {
-    { "\x83h\x83i\x83\x8b\x83h     :%s", &DebugWork::g_dw.atelwork.iPossibleFriend, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetFriendPossibleFlag, NULL },
-    { "\x83O\x81[\x83t\x83" "B\x81[   :%s", &DebugWork::g_dw.atelwork.iPossibleFriend, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetFriendPossibleFlag, NULL },
-    { "\x83" "A\x83\x89\x83W\x83\x93     :%s", &DebugWork::g_dw.atelwork.iPossibleFriend, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetFriendPossibleFlag, NULL },
-    { "\x83" "A\x83\x8a\x83G\x83\x8b     :%s", &DebugWork::g_dw.atelwork.iPossibleFriend, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetFriendPossibleFlag, NULL },
-    { "\x83W\x83\x83\x83" "b\x83N     :%s", &DebugWork::g_dw.atelwork.iPossibleFriend, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetFriendPossibleFlag, NULL },
-    { "\x83s\x81[\x83^\x81[\x83p\x83\x93 :%s", &DebugWork::g_dw.atelwork.iPossibleFriend, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetFriendPossibleFlag, NULL },
-    { "\x83r\x81[\x83X\x83g     :%s", &DebugWork::g_dw.atelwork.iPossibleFriend, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40, DebugSetFriendPossibleFlag, NULL },
-    { "\x89\xa4\x97l         :%s", &DebugWork::g_dw.atelwork.iPossibleFriend, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80, DebugSetFriendPossibleFlag, NULL },
-    { "\x83v\x83\x8b\x81[\x83g     :%s", &DebugWork::g_dw.atelwork.iPossibleFriend, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100, DebugSetFriendPossibleFlag, NULL },
-    { NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-};
-}
-namespace DWTEvent {
-DEBUG_WINDOW_LINE debugWinCardPossibleLine[27] = {
-    { "\x83G\x83O\x83U\x83~\x83l\x81[\x83V\x83\x87\x83\x93 :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetCardPossibleFlag, NULL },
-    { "\x83\x81\x83^\x83\x8b\x83`\x83\x87\x83R\x83{     :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetCardPossibleFlag, NULL },
-    { "\x83\x89\x83" "C\x83I\x83\x93\x83n\x81[\x83g     :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetCardPossibleFlag, NULL },
-    { "\x96\xf1\x91\xa9\x82\xcc\x82\xa8\x8e\xe7\x82\xe8       :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetCardPossibleFlag, NULL },
-    { "\x89\xdf\x82\xac\x8b\x8e\x82\xe8\x82\xb5\x8ev\x82\xa2\x8fo   :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetCardPossibleFlag, NULL },
-    { "\x83" "A\x83\x8b\x83" "e\x83}\x83" "E\x83G\x83|\x83\x93   :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetCardPossibleFlag, NULL },
-    { "\x83_\x83" "C\x83" "A\x83\x82\x83\x93\x83h\x83_\x83X\x83g :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40, DebugSetCardPossibleFlag, NULL },
-    { "\x95\xfb\x97\x83\x82\xcc\x93V\x8eg         :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80, DebugSetCardPossibleFlag, NULL },
-    { "\x83t\x83@\x83" "C\x83" "A           :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100, DebugSetCardPossibleFlag, NULL },
-    { "\x83T\x83\x93\x83_\x81[           :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200, DebugSetCardPossibleFlag, NULL },
-    { "\x83O\x83\x89\x83r\x83" "f           :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400, DebugSetCardPossibleFlag, NULL },
-    { "\x83X\x83g\x83" "b\x83v           :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800, DebugSetCardPossibleFlag, NULL },
-    { "\x83G\x83" "A\x83\x8d             :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x1000, DebugSetCardPossibleFlag, NULL },
-    { "\x83V\x83\x93\x83o             :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x2000, DebugSetCardPossibleFlag, NULL },
-    { "\x83W\x81[\x83j\x81[           :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x4000, DebugSetCardPossibleFlag, NULL },
-    { "\x83o\x83\x93\x83r             :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x8000, DebugSetCardPossibleFlag, NULL },
-    { "\x83_\x83\x93\x83{             :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10000, DebugSetCardPossibleFlag, NULL },
-    { "\x83" "e\x83" "B\x83\x93\x83N           :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20000, DebugSetCardPossibleFlag, NULL },
-    { "\x83\x80\x81[\x83V\x83\x85\x81[         :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40000, DebugSetCardPossibleFlag, NULL },
-    { "\x83N\x83\x89\x83" "E\x83h           :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80000, DebugSetCardPossibleFlag, NULL },
-    { "\x83n\x83" "C\x83|\x81[\x83V\x83\x87\x83\x93     :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100000, DebugSetCardPossibleFlag, NULL },
-    { "\x83\x81\x83K\x83|\x81[\x83V\x83\x87\x83\x93     :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200000, DebugSetCardPossibleFlag, NULL },
-    { "\x83G\x81[\x83" "e\x83\x8b           :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400000, DebugSetCardPossibleFlag, NULL },
-    { "\x83\x81\x83K\x83G\x81[\x83" "e\x83\x8b       :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800000, DebugSetCardPossibleFlag, NULL },
-    { "\x83G\x83\x8a\x83N\x83T\x81[         :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x1000000, DebugSetCardPossibleFlag, NULL },
-    { "\x83\x89\x83X\x83g\x83G\x83\x8a\x83N\x83T\x81[   :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x2000000, DebugSetCardPossibleFlag, NULL },
-    { NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-};
-}
-namespace DWTEvent {
-DEBUG_WINDOW_LINE debugWinWorldIntroLine[29] = {
-    { "\xf9S----------\xf9V\x83\\\x83\x89\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83g\x83\x89\x83\x94\x83@\x81[\x83X       :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetWorldTitleFlag, NULL },
-    { "\x83" "A\x83O\x83\x89\x83o           :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetWorldTitleFlag, NULL },
-    { "\x83I\x83\x8a\x83\x93\x83|\x83X         :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetWorldTitleFlag, NULL },
-    { "\x83\x8f\x83\x93\x83_\x81[\x83\x89\x83\x93\x83h     :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetWorldTitleFlag, NULL },
-    { "\x83\x82\x83\x93\x83X\x83g\x83\x8d         :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetWorldTitleFlag, NULL },
-    { "\x83n\x83\x8d\x83" "E\x83" "B\x83\x93         :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetWorldTitleFlag, NULL },
-    { "\x83" "A\x83g\x83\x89\x83\x93\x83" "e\x83" "B\x83J     :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40, DebugSetWorldTitleFlag, NULL },
-    { "\x83l\x83o\x81[\x83\x89\x83\x93\x83h       :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80, DebugSetWorldTitleFlag, NULL },
-    { "\x83z\x83\x8d\x83" "E\x83o\x83X\x83" "e\x83" "B\x83I\x83\x93 :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100, DebugSetWorldTitleFlag, NULL },
-    { "100\x83G\x81[\x83J\x81[        :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200, DebugSetWorldTitleFlag, NULL },
-    { "\x83g\x83\x8f\x83" "C\x83\x89\x83" "C\x83g       :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400, DebugSetWorldTitleFlag, NULL },
-    { "\x83" "f\x83X\x83" "e\x83j\x81[         :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800, DebugSetWorldTitleFlag, NULL },
-    { "\x96Y\x8bp\x82\xcc\x8f\xe9           :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x1000, DebugSetWorldTitleFlag, NULL },
-    { "\xf9S----------\xf9V\x83\x8a\x83N\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83g\x83\x89\x83\x94\x83@\x81[\x83X       :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10000, DebugSetWorldTitleFlag, NULL },
-    { "\x83" "A\x83O\x83\x89\x83o           :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20000, DebugSetWorldTitleFlag, NULL },
-    { "\x83I\x83\x8a\x83\x93\x83|\x83X         :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40000, DebugSetWorldTitleFlag, NULL },
-    { "\x83\x8f\x83\x93\x83_\x81[\x83\x89\x83\x93\x83h     :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80000, DebugSetWorldTitleFlag, NULL },
-    { "\x83\x82\x83\x93\x83X\x83g\x83\x8d         :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100000, DebugSetWorldTitleFlag, NULL },
-    { "\x83n\x83\x8d\x83" "E\x83" "B\x83\x93         :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200000, DebugSetWorldTitleFlag, NULL },
-    { "\x83" "A\x83g\x83\x89\x83\x93\x83" "e\x83" "B\x83J     :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400000, DebugSetWorldTitleFlag, NULL },
-    { "\x83l\x83o\x81[\x83\x89\x83\x93\x83h       :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800000, DebugSetWorldTitleFlag, NULL },
-    { "\x83z\x83\x8d\x83" "E\x83o\x83X\x83" "e\x83" "B\x83I\x83\x93 :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x1000000, DebugSetWorldTitleFlag, NULL },
-    { "100\x83G\x81[\x83J\x81[        :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x2000000, DebugSetWorldTitleFlag, NULL },
-    { "\x83g\x83\x8f\x83" "C\x83\x89\x83" "C\x83g       :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x4000000, DebugSetWorldTitleFlag, NULL },
-    { "\x83" "f\x83X\x83" "e\x83j\x81[         :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x8000000, DebugSetWorldTitleFlag, NULL },
-    { "\x96Y\x8bp\x82\xcc\x8f\xe9           :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10000000, DebugSetWorldTitleFlag, NULL },
-    { NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-};
-}
-namespace DWTEvent {
-static BOOL DebugSetGameWorkParam(CDebugWindow* pObj, INT inY, INT inParam) {
-    if (inParam & 0x180) {
-        switch (inY) {
-        case 17: CGameWork::setFlag(1, 0x0, KH_DW(DebugWork::g_dw.atelwork.iPlayerDispOff)); break;
-        case 18: CGameWork::setFlag(1, 0x2, KH_DW(DebugWork::g_dw.atelwork.iBossKilled)); break;
-        case 21: CGameWork::setFlag(1, 0x5, KH_DW(DebugWork::g_dw.atelwork.iNotPcControl)); break;
-        case 22: CGameWork::setFlag(1, 0x6, KH_DW(DebugWork::g_dw.atelwork.iNotPause)); break;
-        case 26: CGameWork::setFlag(1, 0x25, KH_DW(DebugWork::g_dw.atelwork.iNotHartBtl)); break;
-        case 27: CGameWork::setFlag(1, 0x2C, KH_DW(DebugWork::g_dw.atelwork.iIsBtlTutorial)); break;
-        case 28: CGameWork::setFlag(1, 0x37, KH_DW(DebugWork::g_dw.atelwork.iIsWorldIntro)); break;
-        }
-    }
-    return 1;
-}
-}
-namespace DWTEvent {
-static INT debugWinNPCMainlCall(CDebugWindow* pObj, INT inParam) {
-    if (inParam & 1) {
+    KH_DEBUG(})
+    KH_DEBUG(return 1;)
+KH_DEBUG(})
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(LPCSTR szJMSoraEnemyKind[35] = { "\x83V\x83\x83\x83h\x83" "E", "\x83\\\x83\x8b\x83W\x83\x83\x81[", "\x83\x8c\x83" "b\x83h\x83m\x83N\x83^\x81[\x83\x93", "\x83u\x83\x8b\x81[\x83\x89\x83v\x83\\\x83" "f\x83" "B", "\x83" "C\x83G\x83\x8d\x81[\x83I\x83y\x83\x89", "\x83O\x83\x8a\x81[\x83\x93\x83\x8c\x83N\x83" "C\x83G\x83\x80", "\x83p\x83\x8f\x81[\x83\x8f\x83" "C\x83\x8b\x83h", "\x83o\x83" "E\x83\x93\x83V\x81[\x83\x8f\x83" "C\x83\x8b\x83h", "\x83\x89\x81[\x83W\x83{\x83" "f\x83" "B", "\x83t\x83@\x83" "b\x83g\x83o\x83\x93\x83" "f\x83" "B\x83" "b\x83g", "\x83o\x83\x93\x83" "f\x83" "B\x83" "b\x83g", "\x83\x8f\x83" "C\x83g\x83i\x83" "C\x83g", "\x83K\x81[\x83S\x83" "C\x83\x8b", "\x83T\x81[\x83`\x83S\x81[\x83X\x83g", "\x83G\x83" "A\x83\\\x83\x8b\x83W\x83\x83\x81[", "\x83z\x83\x8f\x83" "C\x83g\x83}\x83" "b\x83V\x83\x85\x83\x8b\x81[\x83\x80", "\x83u\x83\x89\x83" "b\x83N\x83t\x83@\x83\x93\x83K\x83X", "\x83V\x81[\x83l\x83I\x83\x93", "\x83X\x83N\x83\x8a\x83\x85\x81[\x83_\x83" "C\x83o\x81[", "\x83" "A\x83N\x83" "A\x83^\x83\x93\x83N", "\x83p\x83" "C\x83\x8c\x81[\x83" "c", "\x83G\x83" "A\x83p\x83" "C\x83\x8c\x81[\x83" "c", "\x83_\x81[\x83N\x83{\x81[\x83\x8b", "\x83\x8f\x83" "C\x83o\x81[\x83\x93", "\x83" "E\x83" "B\x83U\x81[\x83h", "\x83" "f\x83" "B\x83t\x83" "F\x83\x93\x83_\x81[", "\x83l\x83I\x83V\x83\x83\x83h\x83" "E", "\x83o\x83\x8c\x83\x8b\x83X\x83p\x83" "C\x83_\x81[", "\x83g\x83\x8b\x83l\x81[\x83h\x83X\x83" "e\x83" "b\x83v", "\x83\x89\x83" "E\x83h\x83l\x83X", "\x83N\x83\x8a\x81[\x83v\x83v\x83\x89\x83\x93\x83g", "\x83K\x81[\x83h\x83" "A\x81[\x83}\x81[", "\x83p\x83\x89\x83T\x83" "C\x83g\x83P\x83" "C\x83W", "\x83g\x83\x8a\x83" "b\x83N\x83}\x83X\x83^\x81[", "\x83_\x81[\x83N\x83T\x83" "C\x83h" };)
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(LPCSTR szJMRikuEnemyKind[34] = { "\x83V\x83\x83\x83h\x83" "E", "\x83\\\x83\x8b\x83W\x83\x83\x81[", "\x83\x8c\x83" "b\x83h\x83m\x83N\x83^\x81[\x83\x93", "\x83u\x83\x8b\x81[\x83\x89\x83v\x83\\\x83" "f\x83" "B", "\x83" "C\x83G\x83\x8d\x81[\x83I\x83y\x83\x89", "\x83O\x83\x8a\x81[\x83\x93\x83\x8c\x83N\x83" "C\x83G\x83\x80", "\x83p\x83\x8f\x81[\x83\x8f\x83" "C\x83\x8b\x83h", "\x83o\x83" "E\x83\x93\x83V\x81[\x83\x8f\x83" "C\x83\x8b\x83h", "\x83\x89\x81[\x83W\x83{\x83" "f\x83" "B", "\x83t\x83@\x83" "b\x83g\x83o\x83\x93\x83" "f\x83" "B\x83" "b\x83g", "\x83o\x83\x93\x83" "f\x83" "B\x83" "b\x83g", "\x83\x8f\x83" "C\x83g\x83i\x83" "C\x83g", "\x83K\x81[\x83S\x83" "C\x83\x8b", "\x83T\x81[\x83`\x83S\x81[\x83X\x83g", "\x83G\x83" "A\x83\\\x83\x8b\x83W\x83\x83\x81[", "\x83u\x83\x89\x83" "b\x83N\x83t\x83@\x83\x93\x83K\x83X", "\x83V\x81[\x83l\x83I\x83\x93", "\x83X\x83N\x83\x8a\x83\x85\x81[\x83_\x83" "C\x83o\x81[", "\x83" "A\x83N\x83" "A\x83^\x83\x93\x83N", "\x83p\x83" "C\x83\x8c\x81[\x83" "c", "\x83G\x83" "A\x83p\x83" "C\x83\x8c\x81[\x83" "c", "\x83_\x81[\x83N\x83{\x81[\x83\x8b", "\x83\x8f\x83" "C\x83o\x81[\x83\x93", "\x83" "E\x83" "B\x83U\x81[\x83h", "\x83" "f\x83" "B\x83t\x83" "F\x83\x93\x83_\x81[", "\x83l\x83I\x83V\x83\x83\x83h\x83" "E", "\x83o\x83\x8c\x83\x8b\x83X\x83p\x83" "C\x83_\x81[", "\x83g\x83\x8b\x83l\x81[\x83h\x83X\x83" "e\x83" "b\x83v", "\x83\x89\x83" "E\x83h\x83l\x83X", "\x83N\x83\x8a\x81[\x83v\x83v\x83\x89\x83\x93\x83g", "\x83K\x81[\x83h\x83" "A\x81[\x83}\x81[", "\x83p\x83\x89\x83T\x83" "C\x83g\x83P\x83" "C\x83W", "\x83g\x83\x8a\x83" "b\x83N\x83}\x83X\x83^\x81[", "\x83_\x81[\x83N\x83T\x83" "C\x83h" };)
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(LPCSTR szJMSoraCardKindTbl[159] = { "\x83L\x83\x93\x83O\x83_\x83\x80\x83`\x83" "F\x81[\x83\x93", "\x83" "f\x83U\x83" "C\x83" "A\x81[\x83\x89\x83\x93\x83v", "\x83g\x83\x8c\x83W\x83\x83\x81[\x83I\x83u\x83V\x81[", "\x83p\x83\x93\x83v\x83L\x83\x93\x83w\x83" "b\x83h", "\x83t\x83" "F\x83" "A\x83\x8a\x81[\x83n\x81[\x83v", "\x83" "E\x83" "B\x83" "b\x83V\x83\x85\x83X\x83^\x81[", "\x83G\x83O\x83U\x83~\x83l\x81[\x83V\x83\x87\x83\x93", "\x83\x81\x83^\x83\x8b\x83`\x83\x87\x83R\x83{", "\x83p\x83\x8f\x81[\x83I\x83u\x83q\x81[\x83\x8d\x81[", "\x83\x89\x83" "C\x83I\x83\x93\x83n\x81[\x83g", "\x83\x89\x83X\x83g\x83\x8a\x83]\x81[\x83g", "\x83\x89\x83\x94\x83" "B\x83" "A\x83\x93\x83\x8d\x81[\x83Y", "\x96\xf1\x91\xa9\x82\xcc\x82\xa8\x8e\xe7\x82\xe8", "\x89\xdf\x82\xac\x8b\x8e\x82\xe8\x82\xb5\x8ev\x82\xa2\x8fo", "\x83" "A\x83\x8b\x83" "e\x83}\x83" "E\x83" "F\x83|\x83\x93", "\x83_\x83" "C\x83\x84\x83\x82\x83\x93\x83h\x83_\x83X\x83g", "\x95\xd0\x97\x83\x82\xcc\x93V\x8eg", "\x83X\x83^\x81[\x83V\x81[\x83J\x81[", "\x83\x82\x83m\x83N\x83\x8d\x81[\x83\x80", "\x83t\x83H\x83\x8d\x81[\x83U\x83" "E\x83" "B\x83\x93\x83h", "\x83q\x83h\x83" "D\x83\x93\x83h\x83\x89\x83S\x83\x93", "\x83t\x83H\x83g\x83\x93\x83" "f\x83o\x83" "b\x83K\x81[", "\x83{\x83\x93\x83h\x83I\x83u\x83t\x83\x8c\x83" "C\x83\x80", "\x83t\x83@\x83" "C\x83" "A", "\x83u\x83\x8a\x83U\x83h", "\x83T\x83\x93\x83_\x81[", "\x83P\x83" "A\x83\x8b", "\x83O\x83\x89\x83r\x83" "f", "\x83X\x83g\x83" "b\x83v", "\x83G\x83" "A\x83\x8d", "\x83V\x83\x93\x83o", "\x83W\x81[\x83j\x81[", "\x83o\x83\x93\x83r", "\x83_\x83\x93\x83{", "\x83" "e\x83" "B\x83\x93\x83N", "\x83\x80\x81[\x83V\x83\x85\x81[", "\x83N\x83\x89\x83" "E\x83h", "\x83|\x81[\x83V\x83\x87\x83\x93", "\x83n\x83" "C\x83|\x81[\x83V\x83\x87\x83\x93", "\x83\x81\x83K\x83|\x81[\x83V\x83\x87\x83\x93", "\x83G\x81[\x83" "e\x83\x8b", "\x83\x81\x83K\x83G\x81[\x83" "e\x83\x8b", "\x83G\x83\x8a\x83N\x83T\x81[", "\x83\x89\x83X\x83g\x83G\x83\x8a\x83N\x83T\x81[", "\x83h\x83i\x83\x8b\x83h", "\x83O\x81[\x83t\x83" "B\x81[", "\x83" "A\x83\x89\x83W\x83\x93", "\x83" "A\x83\x8a\x83G\x83\x8b", "\x83W\x83\x83\x83" "b\x83N", "\x83s\x81[\x83^\x81[\x83p\x83\x93", "\x83r\x81[\x83X\x83g", "\x83v\x83\x8b\x81[\x83g", "\x83V\x83\x83\x83h\x83" "E", "\x83\\\x83\x8b\x83W\x83\x83\x81[", "\x83p\x83\x8f\x81[\x83\x8f\x83" "C\x83\x8b\x83h", "\x83o\x83" "E\x83\x93\x83V\x81[\x83\x8f\x83" "C\x83\x8b\x83h", "\x83\x89\x81[\x83W\x83{\x83" "f\x83" "B", "\x83t\x83@\x83" "b\x83g\x83o\x83\x93\x83" "f\x83" "B\x83" "b\x83g", "\x83V\x81[\x83l\x83I\x83\x93", "\x83o\x83\x93\x83" "f\x83" "B\x83" "b\x83g", "\x83p\x83" "C\x83\x8c\x81[\x83" "c", "\x83\x8c\x83" "b\x83h\x83m\x83N\x83^\x81[\x83\x93", "\x83u\x83\x8b\x81[\x83\x89\x83v\x83\\\x83" "f\x83" "B", "\x83" "C\x83G\x83\x8d\x81[\x83I\x83y\x83\x89", "\x83O\x83\x8a\x81[\x83\x93\x83\x8c\x83N\x83" "C\x83G\x83\x80", "\x83" "E\x83" "B\x83U\x81[\x83h", "\x83G\x83" "A\x83\\\x83\x8b\x83W\x83\x83\x81[", "\x83o\x83\x8c\x83\x8b\x83X\x83p\x83" "C\x83_\x81[", "\x83\x8f\x83" "C\x83g\x83i\x83" "C\x83g", "\x83G\x83" "A\x83p\x83" "C\x83\x8c\x81[\x83" "c", "\x83K\x81[\x83S\x83" "C\x83\x8b", "\x83T\x81[\x83`\x83S\x81[\x83X\x83g", "\x83" "A\x83N\x83" "A\x83^\x83\x93\x83N", "\x83X\x83N\x83\x8a\x83\x85\x81[\x83_\x83" "C\x83o\x81[", "\x83\x8f\x83" "C\x83o\x81[\x83\x93", "\x83" "f\x83" "B\x83t\x83" "F\x83\x93\x83_\x81[", "\x83z\x83\x8f\x83" "C\x83g\x83}\x83" "b\x83V\x83\x85\x83\x8b\x81[\x83\x80", "\x83u\x83\x89\x83" "b\x83N\x83t\x83@\x83\x93\x83K\x83X", "\x83N\x83\x8a\x81[\x83v\x83v\x83\x89\x83\x93\x83g", "\x83g\x83\x8b\x83l\x81[\x83h\x83X\x83" "e\x83" "b\x83v", "\x83\x89\x83" "E\x83h\x83l\x83X", "\x83l\x83I\x83V\x83\x83\x83h\x83" "E", "\x83K\x81[\x83h\x83" "A\x81[\x83}\x81[", "\x83n\x83" "f\x83X", "\x83g\x83\x8a\x83" "b\x83N\x83}\x83X\x83^\x81[", "\x83W\x83\x83\x83t\x83@\x81[", "\x83" "A\x81[\x83X\x83\x89", "\x83u\x83M\x81[", "\x83p\x83\x89\x83T\x83" "C\x83g\x83P\x83" "C\x83W", "\x83t\x83" "b\x83N", "\x83}\x83\x8c\x83t\x83" "B\x83Z\x83\x93\x83g\x83h\x83\x89\x83S\x83\x93", "\x83_\x81[\x83N\x83T\x83" "C\x83h", "\x83\x8a\x83N", "\x83g\x83\x89\x83\x93\x83v\x95\xba", "\x83" "A\x83\x93\x83Z\x83\x80", "\x83[\x83\x80\x83i\x83X", "\x83V\x83O\x83o\x81[\x83\x8b", "\x83U\x83\x8b\x83" "f\x83" "B\x83\x93", "\x83\x94\x83" "B\x83N\x83Z\x83\x93", "\x83\x8c\x83N\x83Z\x83" "E\x83X", "\x83[\x83N\x83V\x83I\x83\x93", "\x83T\x83" "C\x83N\x83X", "\x83" "A\x83N\x83Z\x83\x8b", "\x83" "f\x83~\x83" "b\x83N\x83X", "\x83\x8b\x83N\x83\\\x81[\x83h", "\x83}\x81[\x83\x8b\x81[\x83V\x83\x83", "\x83\x89\x83N\x83V\x81[\x83k", "\x83\x8d\x83N\x83T\x83X", "\x83S\x81[\x83\x8b\x83h", "\x83v\x83\x89\x83`\x83i", "\x90\xc3\x82\xb6\x82\xe1\x82\xad\x82\xc8\x82\xe9\x88\xc5", "\x82\xd0\x82\xb5\x82\xdf\x82\xad\x88\xc5", "\x82\xbf\x82\xa9\x82\xe7\x82\xc8\x82\xab\x88\xc5", "\x82\xa8\x82\xa8\x82\xa2\x82\xc8\x82\xe9\x88\xc5", "\x96\xb0\x82\xe8\x82\xcc\x88\xc5", "\x82\xb9\x82\xdc\x82\xe8\x82\xad\x82\xe9\x88\xc5", "\x83v\x83\x8c\x83~\x83" "A\x83\x8b\x81[\x83\x80", "\x83z\x83\x8f\x83" "C\x83g\x83\x8b\x81[\x83\x80", "\x83u\x83\x89\x83" "b\x83N\x83\x8b\x81[\x83\x80", "\x92\xea\x92m\x82\xea\x82\xca\x88\xc5", "\x83\x8b\x81[\x83\x8c\x83" "b\x83g\x83\x8b\x81[\x83\x80", "\x95\x90\x97\xcd\x82\xd6\x82\xcc\x82\xdf\x82\xb4\x82\xdf", "\x96\x82\x97\xcd\x82\xd6\x82\xcc\x82\xdf\x82\xb4\x82\xdf", "\x98" "B\x8b\xe0\x82\xd6\x82\xcc\x82\xdf\x82\xb4\x82\xdf", "\x82\xdf\x82\xae\x82\xe8\x82\xa0\x82\xa2\x82\xcc\x92n", "\x82\xc4\x82\xa2\x82\xbd\x82\xa2\x82\xcc\x8a\xd4", "\x83_\x83\x81\x81[\x83W\x83" "A\x83" "b\x83v\x83\x8b\x81[\x83\x80", "\x83X\x83^\x83\x93\x83v\x83\x89\x83X\x83\x8b\x81[\x83\x80", "\x82\xe2\x82\xb7\x82\xe7\x82\xac\x82\xcc\x95\xf3", "\x8e\xe7\x82\xe7\x82\xea\x82\xb5\x95\xf3", "\x82\xa2\x82\xc2\x82\xed\x82\xe8\x82\xcc\x95\xf3", "\x88\xea\x8e\x9e\x82\xcc\x8bx\x91\xa7", "\x8c\xf0\x82\xb6\x82\xe8\x8d\x87\x82\xa4\x90\xa2\x8a" "E", "\x83\x82\x81[\x83O\x83\x8a\x83\x8b\x81[\x83\x80", "\x96\xa2\x92m\x82\xc8\x82\xe9\x95\xf3\x82\xcc\x83L\x81[\x83J\x81[\x83h", "\x82\xcd\x82\xb6\x82\xdc\x82\xe8\x82\xcc\x83L\x81[\x83J\x81[\x83h", "\x82\xdd\x82\xbf\x82\xd1\x82\xab\x82\xcc\x83L\x81[\x83J\x81[\x83h", "\x90^\x8e\xc0\x82\xd6\x82\xcc\x83L\x81[\x83J\x81[\x83h", "\x83W\x83\x87\x81[\x83J\x81[", "\x83g\x83\x89\x83o\x81[\x83X\x83^\x83" "E\x83\x93", "\x83" "A\x83O\x83\x89\x83o\x81[", "\x83I\x83\x8a\x83\x93\x83|\x83X\x81" "E\x83R\x83\x8d\x83V\x83" "A\x83\x80", "\x83\x8f\x83\x93\x83_\x81[\x83\x89\x83\x93\x83h", "\x83\x82\x83\x93\x83X\x83g\x83\x8d", "\x83n\x83\x8d\x83" "E\x83" "B\x83\x93\x83^\x83" "E\x83\x93", "\x83" "A\x83g\x83\x89\x83\x93\x83" "e\x83" "B\x83J", "\x83l\x83o\x81[\x83\x89\x83\x93\x83h", "\x83z\x83\x8d\x83" "E\x83o\x83X\x83" "e\x83" "B\x83I\x83\x93", "100\x83G\x81[\x83J\x81[\x82\xcc\x90X", "\x83g\x83\x8f\x83" "C\x83\x89\x83" "C\x83g\x83^\x83" "E\x83\x93", "\x83" "f\x83X\x83" "e\x83" "B\x83j\x81[\x83" "A\x83" "C\x83\x89\x83\x93\x83h", "\x83M\x83~\x83" "b\x83N-\x83K\x81[\x83h\x83" "A\x81[\x83}\x81[", "\x83M\x83~\x83" "b\x83N-\x83g\x83\x8a\x83" "b\x83N\x83X\x83^\x81[", "\x83M\x83~\x83" "b\x83N-\x83W\x83\x83\x83t\x83@\x81[", "\x83M\x83~\x83" "b\x83N-\x83u\x83M\x81[", "\x83M\x83~\x83" "b\x83N-\x83p\x83\x89\x83T\x83" "C\x83g\x83P\x83" "C\x83W", "\x83M\x83~\x83" "b\x83N-\x83" "A\x81[\x83X\x83\x89", "\x83M\x83~\x83" "b\x83N-\x83}\x83\x8c\x83t\x83" "B\x83Z\x83\x93\x83g\x83h\x83\x89\x83S\x83\x93", "\x83M\x83~\x83" "b\x83N-\x83_\x81[\x83N\x83T\x83" "C\x83h" };)
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(LPCSTR szJMRikuCardKindTbl[66] = { "\x83\\\x83" "E\x83\x8b\x83" "C\x81[\x83^\x81[", "\x83|\x81[\x83V\x83\x87\x83\x93", "\x83n\x83" "C\x83|\x81[\x83V\x83\x87\x83\x93", "\x89\xa4\x97l", "\x83V\x83\x83\x83h\x83" "E", "\x83p\x83\x8f\x81[\x83\x8f\x83" "C\x83\x8b\x83h", "\x83\x89\x81[\x83W\x83{\x83" "f\x83" "B", "\x83t\x83@\x83" "b\x83g\x83o\x83\x93\x83" "f\x83" "B\x83" "b\x83g", "\x83V\x81[\x83l\x83I\x83\x93", "\x83p\x83" "C\x83\x8c\x81[\x83" "c", "\x83\x8f\x83" "C\x83g\x83i\x83" "C\x83g", "\x83T\x81[\x83`\x83S\x81[\x83X\x83g", "\x83" "f\x83" "B\x83t\x83" "F\x83\x93\x83_\x81[", "\x83_\x81[\x83N\x83{\x81[\x83\x8b", "\x83K\x81[\x83h\x83" "A\x81[\x83}\x81[", "\x83n\x83" "f\x83X", "\x83g\x83\x8a\x83" "b\x83N\x83}\x83X\x83^\x81[", "\x83W\x83\x83\x83t\x83@\x81[", "\x83" "A\x81[\x83X\x83\x89", "\x83u\x83M\x81[", "\x83p\x83\x89\x83T\x83" "C\x83g\x83P\x83" "C\x83W", "\x83t\x83" "b\x83N", "\x83}\x83\x8c\x83t\x83" "B\x83Z\x83\x93\x83g\x83h\x83\x89\x83S\x83\x93", "\x83_\x81[\x83N\x83T\x83" "C\x83h", "\x83\x8c\x83N\x83Z\x83" "E\x83X", "\x83[\x83N\x83V\x83I\x83\x93", "\x90\xc3\x82\xb6\x82\xe1\x82\xad\x82\xc8\x82\xe9\x88\xc5", "\x82\xd0\x82\xb5\x82\xdf\x82\xad\x88\xc5", "\x82\xbf\x82\xa9\x82\xe7\x82\xc8\x82\xab\x88\xc5", "\x82\xa8\x82\xa8\x82\xa2\x82\xc8\x82\xe9\x88\xc5", "\x96\xb0\x82\xe8\x82\xcc\x88\xc5", "\x82\xb9\x82\xdc\x82\xe8\x82\xad\x82\xe9\x88\xc5", "\x83u\x83\x89\x83" "b\x83N\x83\x8b\x81[\x83\x80", "\x92\xea\x92m\x82\xea\x82\xca\x88\xc5", "\x83\x8b\x81[\x83\x8c\x83" "b\x83g\x83\x8b\x81[\x83\x80", "\x95\x90\x97\xcd\x82\xd6\x82\xcc\x82\xdf\x82\xb4\x82\xdf", "\x82\xdf\x82\xae\x82\xe8\x82\xa0\x82\xa2\x82\xcc\x92n", "\x82\xc4\x82\xa2\x82\xbd\x82\xa2\x82\xcc\x8a\xd4", "\x83_\x83\x81\x81[\x83W\x83" "A\x83" "b\x83v\x83\x8b\x81[\x83\x80", "\x83X\x83^\x83\x93\x83v\x83\x89\x83X\x83\x8b\x81[\x83\x80", "\x88\xea\x8e\x9e\x82\xcc\x8bx\x91\xa7", "\x8c\xf0\x82\xb6\x82\xe8\x8d\x87\x82\xa4\x90\xa2\x8a" "E", "\x82\xcd\x82\xb6\x82\xdc\x82\xe8\x82\xcc\x83L\x81[\x83J\x81[\x83h", "\x82\xdd\x82\xbf\x82\xd1\x82\xab\x82\xcc\x83L\x81[\x83J\x81[\x83h", "\x90^\x8e\xc0\x82\xd6\x82\xcc\x83L\x81[\x83J\x81[\x83h", "\x83W\x83\x87\x81[\x83J\x81[", "\x83g\x83\x89\x83o\x81[\x83X\x83^\x83" "E\x83\x93", "\x83" "A\x83O\x83\x89\x83o\x81[", "\x83I\x83\x8a\x83\x93\x83|\x83X\x81" "E\x83R\x83\x8d\x83V\x83" "A\x83\x80", "\x83\x8f\x83\x93\x83_\x81[\x83\x89\x83\x93\x83h", "\x83\x82\x83\x93\x83X\x83g\x83\x8d", "\x83n\x83\x8d\x83" "E\x83" "B\x83\x93\x83^\x83" "E\x83\x93", "\x83" "A\x83g\x83\x89\x83\x93\x83" "e\x83" "B\x83J", "\x83l\x83o\x81[\x83\x89\x83\x93\x83h", "\x83z\x83\x8d\x83" "E\x83o\x83X\x83" "e\x83" "B\x83I\x83\x93", "\x83g\x83\x8f\x83" "C\x83\x89\x83" "C\x83g\x83^\x83" "E\x83\x93", "\x83" "f\x83X\x83" "e\x83" "B\x83j\x81[\x83" "A\x83" "C\x83\x89\x83\x93\x83h", "\x96Y\x8bp\x82\xcc\x8f\xe9", "\x83M\x83~\x83" "b\x83N-\x83K\x81[\x83h\x83" "A\x81[\x83}\x81[", "\x83M\x83~\x83" "b\x83N-\x83g\x83\x8a\x83" "b\x83N\x83X\x83^\x81[", "\x83M\x83~\x83" "b\x83N-\x83W\x83\x83\x83t\x83@\x81[", "\x83M\x83~\x83" "b\x83N-\x83u\x83M\x81[", "\x83M\x83~\x83" "b\x83N-\x83p\x83\x89\x83T\x83" "C\x83g\x83P\x83" "C\x83W", "\x83M\x83~\x83" "b\x83N-\x83" "A\x81[\x83X\x83\x89", "\x83M\x83~\x83" "b\x83N-\x83}\x83\x8c\x83t\x83" "B\x83Z\x83\x93\x83g\x83h\x83\x89\x83S\x83\x93", "\x83M\x83~\x83" "b\x83N-\x83_\x81[\x83N\x83T\x83" "C\x83h" };)
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(LPCSTR szJMSwitchTbl[2] = { "", "\x8dX\x90V" };)
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(DEBUG_WINDOW_LINE debugWinJiminyLine[82] = {)
+    KH_DEBUG({ "\xf9S----------\xf9V\x83\\\x83\x89\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83g\x83\x89\x83\x94\x83@\x81[\x83X       :%s", &DebugWork::g_dw.jiminy.Sora_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x83" "A\x83O\x83\x89\x83o\x81[         :%s", &DebugWork::g_dw.jiminy.Sora_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x83I\x83\x8a\x83\x93\x83|\x83X         :%s", &DebugWork::g_dw.jiminy.Sora_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x83\x8f\x83\x93\x83_\x81[\x83\x89\x83\x93\x83h     :%s", &DebugWork::g_dw.jiminy.Sora_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x83\x82\x83\x93\x83X\x83g\x83\x8d         :%s", &DebugWork::g_dw.jiminy.Sora_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x83n\x83\x8d\x83" "E\x83" "B\x83\x93\x83^\x83" "E\x83\x93   :%s", &DebugWork::g_dw.jiminy.Sora_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x83" "A\x83g\x83\x89\x83\x93\x83" "e\x83" "B\x83J     :%s", &DebugWork::g_dw.jiminy.Sora_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x83l\x83o\x81[\x83\x89\x83\x93\x83h       :%s", &DebugWork::g_dw.jiminy.Sora_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x83z\x83\x8d\x83" "E\x83o\x83X\x83" "e\x83" "B\x83I\x83\x93 :%s", &DebugWork::g_dw.jiminy.Sora_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x82P\x82O\x82O\x83G\x81[\x83J\x81[     :%s", &DebugWork::g_dw.jiminy.Sora_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x83g\x83\x8f\x83" "C\x83\x89\x83" "C\x83g       :%s", &DebugWork::g_dw.jiminy.Sora_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x83" "f\x83X\x83" "e\x83j\x81[         :%s", &DebugWork::g_dw.jiminy.Sora_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x82\xda\x82\xa4\x82\xab\x82\xe1\x82\xad\x82\xcc\x82\xb5\x82\xeb   :%s", &DebugWork::g_dw.jiminy.Sora_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x1000, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x81@\x82P\x82" "e             :%s", &DebugWork::g_dw.jiminy.Sora_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x81@\x82Q\x82" "e             :%s", &DebugWork::g_dw.jiminy.Sora_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x81@\x82R\x82" "e             :%s", &DebugWork::g_dw.jiminy.Sora_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x81@\x82S\x82" "e             :%s", &DebugWork::g_dw.jiminy.Sora_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x81@\x82T\x82" "e             :%s", &DebugWork::g_dw.jiminy.Sora_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x81@\x82U\x82" "e             :%s", &DebugWork::g_dw.jiminy.Sora_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x81@\x82V\x82" "e             :%s", &DebugWork::g_dw.jiminy.Sora_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x81@\x82W\x82" "e             :%s", &DebugWork::g_dw.jiminy.Sora_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x81@\x82X\x82" "e             :%s", &DebugWork::g_dw.jiminy.Sora_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x82P\x82O\x82" "e             :%s", &DebugWork::g_dw.jiminy.Sora_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x82P\x82P\x82" "e             :%s", &DebugWork::g_dw.jiminy.Sora_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x82P\x82Q\x82" "e             :%s", &DebugWork::g_dw.jiminy.Sora_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x82P\x82R\x82" "e             :%s", &DebugWork::g_dw.jiminy.Sora_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x1000, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\xf9S----------\xf9V\x83\x8a\x83N\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83g\x83\x89\x83\x94\x83@\x81[\x83X       :%s", &DebugWork::g_dw.jiminy.Riku_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x83" "A\x83O\x83\x89\x83o\x81[         :%s", &DebugWork::g_dw.jiminy.Riku_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x83I\x83\x8a\x83\x93\x83|\x83X         :%s", &DebugWork::g_dw.jiminy.Riku_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x83\x8f\x83\x93\x83_\x81[\x83\x89\x83\x93\x83h     :%s", &DebugWork::g_dw.jiminy.Riku_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x83\x82\x83\x93\x83X\x83g\x83\x8d         :%s", &DebugWork::g_dw.jiminy.Riku_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x83n\x83\x8d\x83" "E\x83" "B\x83\x93\x83^\x83" "E\x83\x93   :%s", &DebugWork::g_dw.jiminy.Riku_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x83" "A\x83g\x83\x89\x83\x93\x83" "e\x83" "B\x83J     :%s", &DebugWork::g_dw.jiminy.Riku_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x83l\x83o\x81[\x83\x89\x83\x93\x83h       :%s", &DebugWork::g_dw.jiminy.Riku_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x83z\x83\x8d\x83" "E\x83o\x83X\x83" "e\x83" "B\x83I\x83\x93 :%s", &DebugWork::g_dw.jiminy.Riku_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x83g\x83\x8f\x83" "C\x83\x89\x83" "C\x83g       :%s", &DebugWork::g_dw.jiminy.Riku_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x83" "f\x83X\x83" "e\x83j\x81[         :%s", &DebugWork::g_dw.jiminy.Riku_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x82\xda\x82\xa4\x82\xab\x82\xe1\x82\xad\x82\xcc\x82\xb5\x82\xeb   :%s", &DebugWork::g_dw.jiminy.Riku_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x82" "a\x82P\x82Q\x82" "e           :%s", &DebugWork::g_dw.jiminy.Riku_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x82" "a\x82P\x82P\x82" "e           :%s", &DebugWork::g_dw.jiminy.Riku_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x82" "a\x82P\x82O\x82" "e           :%s", &DebugWork::g_dw.jiminy.Riku_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x82" "a\x81@\x82X\x82" "e           :%s", &DebugWork::g_dw.jiminy.Riku_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x82" "a\x81@\x82W\x82" "e           :%s", &DebugWork::g_dw.jiminy.Riku_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x82" "a\x81@\x82V\x82" "e           :%s", &DebugWork::g_dw.jiminy.Riku_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x82" "a\x81@\x82U\x82" "e           :%s", &DebugWork::g_dw.jiminy.Riku_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x82" "a\x81@\x82T\x82" "e           :%s", &DebugWork::g_dw.jiminy.Riku_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x82" "a\x81@\x82S\x82" "e           :%s", &DebugWork::g_dw.jiminy.Riku_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x82" "a\x81@\x82R\x82" "e           :%s", &DebugWork::g_dw.jiminy.Riku_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x82" "a\x81@\x82Q\x82" "e           :%s", &DebugWork::g_dw.jiminy.Riku_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x82" "a\x81@\x82P\x82" "e           :%s", &DebugWork::g_dw.jiminy.Riku_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\xf9S------\xf9V\x83\\\x83\x89 \x82\xbb\x82\xcc\x91\xbc\xf9S------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83~\x83j\x83Q\x81[\x83\x80\x81" "E\x96\xec\x8d\xd8   :%s", &DebugWork::g_dw.jiminy.Sora_Etc, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x83~\x83j\x83Q\x81[\x83\x80\x81" "E\x83o\x83\x8b   :%s", &DebugWork::g_dw.jiminy.Sora_Etc, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x83~\x83j\x83Q\x81[\x83\x80\x81" "E\x83W\x83\x83   :%s", &DebugWork::g_dw.jiminy.Sora_Etc, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x83~\x83j\x83Q\x81[\x83\x80\x81" "E\x83\x8f\x83" "C   :%s", &DebugWork::g_dw.jiminy.Sora_Etc, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x83~\x83j\x83Q\x81[\x83\x80\x81" "E\x83n\x83`   :%s", &DebugWork::g_dw.jiminy.Sora_Etc, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x83\x82\x83\x93\x83X\x83g\x83\x8d\x82\xc5\x91\xe5\x96\\\x82\xea :%s", &DebugWork::g_dw.jiminy.Sora_Etc, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x83\x82\x81[\x83O\x83\x8a\x83V\x83\x87\x83" "b\x83v   :%s", &DebugWork::g_dw.jiminy.Sora_Etc, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x83s\x83O\x83\x8c\x83" "b\x83g\x82\xc6\x98" "b\x82\xb5\x82\xbd :%s", &DebugWork::g_dw.jiminy.Sora_Etc, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x83I\x83" "E\x83\x8b\x82\xc6\x98" "b\x82\xb5\x82\xbd     :%s", &DebugWork::g_dw.jiminy.Sora_Etc, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x83\x8b\x81[\x82\xc6\x98" "b\x82\xb5\x82\xbd       :%s", &DebugWork::g_dw.jiminy.Sora_Etc, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x83" "C\x81[\x83\x88\x81[\x82\xc6\x98" "b\x82\xb5\x82\xbd   :%s", &DebugWork::g_dw.jiminy.Sora_Etc, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x83" "e\x83" "B\x83K\x81[\x82\xc6\x98" "b\x82\xb5\x82\xbd   :%s", &DebugWork::g_dw.jiminy.Sora_Etc, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x83\x89\x83r\x83" "b\x83g\x82\xc6\x98" "b\x82\xb5\x82\xbd   :%s", &DebugWork::g_dw.jiminy.Sora_Etc, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x1000, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "100\x83G\x81[\x83J\x81[\x82\xcc\x90X\x8fo\x82\xbd:%s", &DebugWork::g_dw.jiminy.Sora_Etc, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x2000, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\xf9S------\xf9V\x83\\\x83\x89 \x93G\x82\xcc\x90\x94\xf9S------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x93G\x82\xcc\x8e\xed\x97\xde           :%s", &DebugWork::g_dw.jiminy.Sora_Enemy, 4, { 0 }, 0, 0.0f, 34.0f, 1.0f, szJMSoraEnemyKind, 0, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x93G\x82\xcc\x90\x94             :%5d", &DebugWork::g_dw.jiminy.Sora_ENum, 4, { 0 }, 0, 0.0f, 10000.0f, 100.0f, NULL, 0, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x81\x9b\x83{\x83^\x83\x93\x82\xc5\x90\xdd\x92\xe8     :%s", &DebugWork::g_dw.jiminy.Sora_Flag, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, szJMSwitchTbl, 1, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\xf9S------\xf9V\x83\x8a\x83N \x93G\x82\xcc\x90\x94\xf9S------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x93G\x82\xcc\x8e\xed\x97\xde           :%s", &DebugWork::g_dw.jiminy.Riku_Enemy, 4, { 0 }, 0, 0.0f, 33.0f, 1.0f, szJMRikuEnemyKind, 0, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x93G\x82\xcc\x90\x94             :%5d", &DebugWork::g_dw.jiminy.Riku_ENum, 4, { 0 }, 0, 0.0f, 10000.0f, 100.0f, NULL, 0, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x81\x9b\x83{\x83^\x83\x93\x82\xc5\x90\xdd\x92\xe8     :%s", &DebugWork::g_dw.jiminy.Riku_Flag, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, szJMSwitchTbl, 1, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\xf9S------\xf9V\x83\\\x83\x89 \x83J\x81[\x83h\xf9S------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83J\x81[\x83h\x82\xcc\x8e\xed\x97\xde       :%s", &DebugWork::g_dw.jiminy.Sora_Card, 4, { 0 }, 0, 0.0f, 158.0f, 1.0f, szJMSoraCardKindTbl, 0, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x81\x9b\x83{\x83^\x83\x93\x82\xc5\x8e\xe6\x93\xbe     :%s", &DebugWork::g_dw.jiminy.Sora_Flag, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, szJMSwitchTbl, 2, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\xf9S------\xf9V\x83\x8a\x83N \x83J\x81[\x83h\xf9S------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83J\x81[\x83h\x82\xcc\x8e\xed\x97\xde       :%s", &DebugWork::g_dw.jiminy.Riku_Card, 4, { 0 }, 0, 0.0f, 65.0f, 1.0f, szJMRikuCardKindTbl, 0, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ "\x81\x9b\x83{\x83^\x83\x93\x82\xc5\x8e\xe6\x93\xbe     :%s", &DebugWork::g_dw.jiminy.Riku_Flag, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, szJMSwitchTbl, 2, DebugSetJiminyMemoFlag, NULL },)
+    KH_DEBUG({ NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+KH_DEBUG(};)
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(DEBUG_WINDOW_LINE debugWinKH2CardGetLine[14] = {)
+    KH_DEBUG({ "\x83[\x83\x80\x83i\x83X           :%s", &DebugWork::g_dw.atelwork.iKH2CardGet, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetKH2CardGetFlag, NULL },)
+    KH_DEBUG({ "\x83V\x83\x8b\x83o\x81[\x83\x8b         :%s", &DebugWork::g_dw.atelwork.iKH2CardGet, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetKH2CardGetFlag, NULL },)
+    KH_DEBUG({ "\x83U\x83\x8b\x83" "f\x83" "B\x83\x93         :%s", &DebugWork::g_dw.atelwork.iKH2CardGet, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetKH2CardGetFlag, NULL },)
+    KH_DEBUG({ "\x83T\x83" "C\x83N\x83X           :%s", &DebugWork::g_dw.atelwork.iKH2CardGet, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetKH2CardGetFlag, NULL },)
+    KH_DEBUG({ "\x83" "f\x83~\x83" "b\x83N\x83X         :%s", &DebugWork::g_dw.atelwork.iKH2CardGet, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetKH2CardGetFlag, NULL },)
+    KH_DEBUG({ "\x83\x8b\x83N\x83\\\x81[\x83h         :%s", &DebugWork::g_dw.atelwork.iKH2CardGet, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetKH2CardGetFlag, NULL },)
+    KH_DEBUG({ "\x83\x8d\x83N\x83T\x83X           :%s", &DebugWork::g_dw.atelwork.iKH2CardGet, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40, DebugSetKH2CardGetFlag, NULL },)
+    KH_DEBUG({ "\x83X\x83^\x81[\x83V\x81[\x83J\x81[     :%s", &DebugWork::g_dw.atelwork.iKH2CardGet, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80, DebugSetKH2CardGetFlag, NULL },)
+    KH_DEBUG({ "\x83\x82\x83m\x83N\x83\x8d\x81[\x83\x80\t    :%s", &DebugWork::g_dw.atelwork.iKH2CardGet, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100, DebugSetKH2CardGetFlag, NULL },)
+    KH_DEBUG({ "\x83t\x83H\x83\x8d\x81[\x83U\x83" "E\x83" "B\x83\x93\x83h :%s", &DebugWork::g_dw.atelwork.iKH2CardGet, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200, DebugSetKH2CardGetFlag, NULL },)
+    KH_DEBUG({ "\x83q\x83h\x83" "D\x83\x93\x83h\x83\x89\x83S\x83\x93   :%s", &DebugWork::g_dw.atelwork.iKH2CardGet, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400, DebugSetKH2CardGetFlag, NULL },)
+    KH_DEBUG({ "\x83t\x83H\x83g\x83\x93\x83" "f\x83o\x83" "b\x83K\x81[ :%s", &DebugWork::g_dw.atelwork.iKH2CardGet, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800, DebugSetKH2CardGetFlag, NULL },)
+    KH_DEBUG({ "\x83{\x83\x93\x83h\x83I\x83u\x83t\x83\x8c\x83" "C\x83\x80 :%s", &DebugWork::g_dw.atelwork.iKH2CardGet, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x1000, DebugSetKH2CardGetFlag, NULL },)
+    KH_DEBUG({ NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+KH_DEBUG(};)
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(static BOOL debugGameInfomationParam(CDebugWindow* pObj, INT inY, INT inParam) {)
+    KH_DEBUG(if (inParam & 0x180) {)
+        KH_DEBUG(switch (inY) {)
+        KH_DEBUG(case 1: CGameWork::setFlag(0, 0x83, KH_DW(DebugWork::g_dw.atelwork.iDistinctionClear)); break;)
+        KH_DEBUG(case 2: CGameWork::setFlag(0, 0x11, KH_DW(DebugWork::g_dw.atelwork.iGameKH2clear)); break;)
+        KH_DEBUG(case 3: CGameWork::setFlag(0, 0x9, KH_DW(DebugWork::g_dw.atelwork.iSoraClear)); break;)
+        KH_DEBUG(case 4: CGameWork::setFlag(0, 0x12, KH_DW(DebugWork::g_dw.atelwork.iRikuClear)); break;)
+        KH_DEBUG(case 7: CGameWork::setFlag(0, 0x82, KH_DW(DebugWork::g_dw.atelwork.iMahluciaKilled)); break;)
+        KH_DEBUG(case 8: CGameWork::setByte(0, 0x61, KH_DW(DebugWork::g_dw.atelwork.iPlayDifficultMode)); break;)
+        KH_DEBUG(})
+    KH_DEBUG(})
+    KH_DEBUG(return 1;)
+KH_DEBUG(})
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(DEBUG_WINDOW_LINE debugWinTuEndLine[8] = {)
+    KH_DEBUG({ "\x83L\x81[\x83\x8b\x81[\x83\x80        :%s", &DebugWork::g_dw.atelwork.iTutorialEnd, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetTutorialFlag, NULL },)
+    KH_DEBUG({ "\x83\x82\x81[\x83O\x83\x8a\x83V\x83\x87\x83" "b\x83v  :%s", &DebugWork::g_dw.atelwork.iTutorialEnd, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetTutorialFlag, NULL },)
+    KH_DEBUG({ "\x83t\x83\x8d\x83" "A\x88\xda\x93\xae        :%s", &DebugWork::g_dw.atelwork.iTutorialEnd, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetTutorialFlag, NULL },)
+    KH_DEBUG({ "\x83\x8f\x81[\x83v\x83|\x83" "C\x83\x93\x83g    :%s", &DebugWork::g_dw.atelwork.iTutorialEnd, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetTutorialFlag, NULL },)
+    KH_DEBUG({ "\x83Z\x81[\x83u\x83|\x83" "C\x83\x93\x83g    :%s", &DebugWork::g_dw.atelwork.iTutorialEnd, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetTutorialFlag, NULL },)
+    KH_DEBUG({ "\x83t\x83" "B\x81[\x83\x8b\x83h        :%s", &DebugWork::g_dw.atelwork.iTutorialEnd, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetTutorialFlag, NULL },)
+    KH_DEBUG({ "\x83\x8f\x81[\x83\x8b\x83h\x83Z\x83\x8c\x83N\x83g  :%s", &DebugWork::g_dw.atelwork.iTutorialEnd, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40, DebugSetTutorialFlag, NULL },)
+    KH_DEBUG({ NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+KH_DEBUG(};)
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(DEBUG_WINDOW_LINE debugWinMovieLineRiku[42] = {)
+    KH_DEBUG({ "501   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetRikuMovieFlag, NULL },)
+    KH_DEBUG({ "502   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetRikuMovieFlag, NULL },)
+    KH_DEBUG({ "503   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetRikuMovieFlag, NULL },)
+    KH_DEBUG({ "504   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetRikuMovieFlag, NULL },)
+    KH_DEBUG({ "511   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetRikuMovieFlag, NULL },)
+    KH_DEBUG({ "512   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetRikuMovieFlag, NULL },)
+    KH_DEBUG({ "521   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40, DebugSetRikuMovieFlag, NULL },)
+    KH_DEBUG({ "522   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80, DebugSetRikuMovieFlag, NULL },)
+    KH_DEBUG({ "531   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100, DebugSetRikuMovieFlag, NULL },)
+    KH_DEBUG({ "541   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200, DebugSetRikuMovieFlag, NULL },)
+    KH_DEBUG({ "542   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400, DebugSetRikuMovieFlag, NULL },)
+    KH_DEBUG({ "543   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800, DebugSetRikuMovieFlag, NULL },)
+    KH_DEBUG({ "551   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x1000, DebugSetRikuMovieFlag, NULL },)
+    KH_DEBUG({ "552   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x2000, DebugSetRikuMovieFlag, NULL },)
+    KH_DEBUG({ "561   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x4000, DebugSetRikuMovieFlag, NULL },)
+    KH_DEBUG({ "571   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x8000, DebugSetRikuMovieFlag, NULL },)
+    KH_DEBUG({ "581   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10000, DebugSetRikuMovieFlag, NULL },)
+    KH_DEBUG({ "582   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20000, DebugSetRikuMovieFlag, NULL },)
+    KH_DEBUG({ "583   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40000, DebugSetRikuMovieFlag, NULL },)
+    KH_DEBUG({ "584   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80000, DebugSetRikuMovieFlag, NULL },)
+    KH_DEBUG({ "585   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100000, DebugSetRikuMovieFlag, NULL },)
+    KH_DEBUG({ "586   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200000, DebugSetRikuMovieFlag, NULL },)
+    KH_DEBUG({ "591   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400000, DebugSetRikuMovieFlag, NULL },)
+    KH_DEBUG({ "592   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800000, DebugSetRikuMovieFlag, NULL },)
+    KH_DEBUG({ "593   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x1000000, DebugSetRikuMovieFlag, NULL },)
+    KH_DEBUG({ "594   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x2000000, DebugSetRikuMovieFlag, NULL },)
+    KH_DEBUG({ "595   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x4000000, DebugSetRikuMovieFlag, NULL },)
+    KH_DEBUG({ "596   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x8000000, DebugSetRikuMovieFlag, NULL },)
+    KH_DEBUG({ "601   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10000000, DebugSetRikuMovieFlag, NULL },)
+    KH_DEBUG({ "602   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20000000, DebugSetRikuMovieFlag, NULL },)
+    KH_DEBUG({ "603   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40000000, DebugSetRikuMovieFlag, NULL },)
+    KH_DEBUG({ "604   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80000000, DebugSetRikuMovieFlag, NULL },)
+    KH_DEBUG({ "605   :%s", &DebugWork::g_dw.atelwork.iRikuMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetRikuMovieFlag, NULL },)
+    KH_DEBUG({ "606   :%s", &DebugWork::g_dw.atelwork.iRikuMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetRikuMovieFlag, NULL },)
+    KH_DEBUG({ "611   :%s", &DebugWork::g_dw.atelwork.iRikuMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetRikuMovieFlag, NULL },)
+    KH_DEBUG({ "612   :%s", &DebugWork::g_dw.atelwork.iRikuMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetRikuMovieFlag, NULL },)
+    KH_DEBUG({ "613   :%s", &DebugWork::g_dw.atelwork.iRikuMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetRikuMovieFlag, NULL },)
+    KH_DEBUG({ "614   :%s", &DebugWork::g_dw.atelwork.iRikuMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetRikuMovieFlag, NULL },)
+    KH_DEBUG({ "615   :%s", &DebugWork::g_dw.atelwork.iRikuMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40, DebugSetRikuMovieFlag, NULL },)
+    KH_DEBUG({ "621   :%s", &DebugWork::g_dw.atelwork.iRikuMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80, DebugSetRikuMovieFlag, NULL },)
+    KH_DEBUG({ "631   :%s", &DebugWork::g_dw.atelwork.iRikuMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100, DebugSetRikuMovieFlag, NULL },)
+    KH_DEBUG({ NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+KH_DEBUG(};)
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(DEBUG_WINDOW_LINE debugWinMovieLine[60] = {)
+    KH_DEBUG({ "001   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "011   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "012   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "013   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "021   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "022   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "023   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "031   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "032   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "033   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "041   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "042   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "043   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x1000, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "051   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x2000, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "052   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x4000, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "053   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x8000, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "061   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10000, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "062   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20000, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "063   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40000, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "064   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80000, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "071   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100000, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "072   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200000, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "073   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400000, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "081   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800000, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "082   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x1000000, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "083   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x2000000, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "084   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x4000000, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "091   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x8000000, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "092   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10000000, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "093   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20000000, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "101   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40000000, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "102   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80000000, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "103   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "104   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "111   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "112   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "113   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "114   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "115   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "116   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "117   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "118   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "121   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "122   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "123   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x1000, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "124   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x2000, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "125   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x4000, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "126   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x8000, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "131   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10000, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "132   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20000, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "133   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40000, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "134   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80000, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "135   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100000, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "136   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200000, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "137   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400000, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "138   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800000, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "139   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x1000000, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "140   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x2000000, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ "151   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x4000000, DebugSetSoraMovieFlag, NULL },)
+    KH_DEBUG({ NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+KH_DEBUG(};)
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(DEBUG_WINDOW_LINE debugWinPcSkillLine[7] = {)
+    KH_DEBUG({ "\x83n\x83" "C\x83W\x83\x83\x83\x93\x83v     :%s", &DebugWork::g_dw.atelwork.iPcStanderdSkill, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetPcSkillFlag, NULL },)
+    KH_DEBUG({ "\x83O\x83\x89\x83" "C\x83h         :%s", &DebugWork::g_dw.atelwork.iPcStanderdSkill, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetPcSkillFlag, NULL },)
+    KH_DEBUG({ "\x83X\x81[\x83p\x81[\x83O\x83\x89\x83" "C\x83h :%s", &DebugWork::g_dw.atelwork.iPcStanderdSkill, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetPcSkillFlag, NULL },)
+    KH_DEBUG({ "\x83_\x81[\x83N\x83\x8a\x83N\x89\xbb     :%s", &DebugWork::g_dw.atelwork.iPcStanderdSkill, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetPcSkillFlag, NULL },)
+    KH_DEBUG({ "\x83X\x83s\x81[\x83h\x83u\x83\x8c\x83" "C\x83N :%s", &DebugWork::g_dw.atelwork.iPcStanderdSkill, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetPcSkillFlag, NULL },)
+    KH_DEBUG({ "\x83" "f\x83\x85\x83G\x83\x8b         :%s", &DebugWork::g_dw.atelwork.iPcStanderdSkill, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetPcSkillFlag, NULL },)
+    KH_DEBUG({ NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+KH_DEBUG(};)
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(DEBUG_WINDOW_LINE debugWinFriendPossibleLine[10] = {)
+    KH_DEBUG({ "\x83h\x83i\x83\x8b\x83h     :%s", &DebugWork::g_dw.atelwork.iPossibleFriend, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetFriendPossibleFlag, NULL },)
+    KH_DEBUG({ "\x83O\x81[\x83t\x83" "B\x81[   :%s", &DebugWork::g_dw.atelwork.iPossibleFriend, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetFriendPossibleFlag, NULL },)
+    KH_DEBUG({ "\x83" "A\x83\x89\x83W\x83\x93     :%s", &DebugWork::g_dw.atelwork.iPossibleFriend, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetFriendPossibleFlag, NULL },)
+    KH_DEBUG({ "\x83" "A\x83\x8a\x83G\x83\x8b     :%s", &DebugWork::g_dw.atelwork.iPossibleFriend, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetFriendPossibleFlag, NULL },)
+    KH_DEBUG({ "\x83W\x83\x83\x83" "b\x83N     :%s", &DebugWork::g_dw.atelwork.iPossibleFriend, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetFriendPossibleFlag, NULL },)
+    KH_DEBUG({ "\x83s\x81[\x83^\x81[\x83p\x83\x93 :%s", &DebugWork::g_dw.atelwork.iPossibleFriend, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetFriendPossibleFlag, NULL },)
+    KH_DEBUG({ "\x83r\x81[\x83X\x83g     :%s", &DebugWork::g_dw.atelwork.iPossibleFriend, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40, DebugSetFriendPossibleFlag, NULL },)
+    KH_DEBUG({ "\x89\xa4\x97l         :%s", &DebugWork::g_dw.atelwork.iPossibleFriend, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80, DebugSetFriendPossibleFlag, NULL },)
+    KH_DEBUG({ "\x83v\x83\x8b\x81[\x83g     :%s", &DebugWork::g_dw.atelwork.iPossibleFriend, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100, DebugSetFriendPossibleFlag, NULL },)
+    KH_DEBUG({ NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+KH_DEBUG(};)
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(DEBUG_WINDOW_LINE debugWinCardPossibleLine[27] = {)
+    KH_DEBUG({ "\x83G\x83O\x83U\x83~\x83l\x81[\x83V\x83\x87\x83\x93 :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetCardPossibleFlag, NULL },)
+    KH_DEBUG({ "\x83\x81\x83^\x83\x8b\x83`\x83\x87\x83R\x83{     :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetCardPossibleFlag, NULL },)
+    KH_DEBUG({ "\x83\x89\x83" "C\x83I\x83\x93\x83n\x81[\x83g     :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetCardPossibleFlag, NULL },)
+    KH_DEBUG({ "\x96\xf1\x91\xa9\x82\xcc\x82\xa8\x8e\xe7\x82\xe8       :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetCardPossibleFlag, NULL },)
+    KH_DEBUG({ "\x89\xdf\x82\xac\x8b\x8e\x82\xe8\x82\xb5\x8ev\x82\xa2\x8fo   :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetCardPossibleFlag, NULL },)
+    KH_DEBUG({ "\x83" "A\x83\x8b\x83" "e\x83}\x83" "E\x83G\x83|\x83\x93   :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetCardPossibleFlag, NULL },)
+    KH_DEBUG({ "\x83_\x83" "C\x83" "A\x83\x82\x83\x93\x83h\x83_\x83X\x83g :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40, DebugSetCardPossibleFlag, NULL },)
+    KH_DEBUG({ "\x95\xfb\x97\x83\x82\xcc\x93V\x8eg         :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80, DebugSetCardPossibleFlag, NULL },)
+    KH_DEBUG({ "\x83t\x83@\x83" "C\x83" "A           :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100, DebugSetCardPossibleFlag, NULL },)
+    KH_DEBUG({ "\x83T\x83\x93\x83_\x81[           :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200, DebugSetCardPossibleFlag, NULL },)
+    KH_DEBUG({ "\x83O\x83\x89\x83r\x83" "f           :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400, DebugSetCardPossibleFlag, NULL },)
+    KH_DEBUG({ "\x83X\x83g\x83" "b\x83v           :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800, DebugSetCardPossibleFlag, NULL },)
+    KH_DEBUG({ "\x83G\x83" "A\x83\x8d             :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x1000, DebugSetCardPossibleFlag, NULL },)
+    KH_DEBUG({ "\x83V\x83\x93\x83o             :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x2000, DebugSetCardPossibleFlag, NULL },)
+    KH_DEBUG({ "\x83W\x81[\x83j\x81[           :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x4000, DebugSetCardPossibleFlag, NULL },)
+    KH_DEBUG({ "\x83o\x83\x93\x83r             :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x8000, DebugSetCardPossibleFlag, NULL },)
+    KH_DEBUG({ "\x83_\x83\x93\x83{             :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10000, DebugSetCardPossibleFlag, NULL },)
+    KH_DEBUG({ "\x83" "e\x83" "B\x83\x93\x83N           :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20000, DebugSetCardPossibleFlag, NULL },)
+    KH_DEBUG({ "\x83\x80\x81[\x83V\x83\x85\x81[         :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40000, DebugSetCardPossibleFlag, NULL },)
+    KH_DEBUG({ "\x83N\x83\x89\x83" "E\x83h           :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80000, DebugSetCardPossibleFlag, NULL },)
+    KH_DEBUG({ "\x83n\x83" "C\x83|\x81[\x83V\x83\x87\x83\x93     :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100000, DebugSetCardPossibleFlag, NULL },)
+    KH_DEBUG({ "\x83\x81\x83K\x83|\x81[\x83V\x83\x87\x83\x93     :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200000, DebugSetCardPossibleFlag, NULL },)
+    KH_DEBUG({ "\x83G\x81[\x83" "e\x83\x8b           :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400000, DebugSetCardPossibleFlag, NULL },)
+    KH_DEBUG({ "\x83\x81\x83K\x83G\x81[\x83" "e\x83\x8b       :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800000, DebugSetCardPossibleFlag, NULL },)
+    KH_DEBUG({ "\x83G\x83\x8a\x83N\x83T\x81[         :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x1000000, DebugSetCardPossibleFlag, NULL },)
+    KH_DEBUG({ "\x83\x89\x83X\x83g\x83G\x83\x8a\x83N\x83T\x81[   :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x2000000, DebugSetCardPossibleFlag, NULL },)
+    KH_DEBUG({ NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+KH_DEBUG(};)
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(DEBUG_WINDOW_LINE debugWinWorldIntroLine[29] = {)
+    KH_DEBUG({ "\xf9S----------\xf9V\x83\\\x83\x89\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83g\x83\x89\x83\x94\x83@\x81[\x83X       :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetWorldTitleFlag, NULL },)
+    KH_DEBUG({ "\x83" "A\x83O\x83\x89\x83o           :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetWorldTitleFlag, NULL },)
+    KH_DEBUG({ "\x83I\x83\x8a\x83\x93\x83|\x83X         :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetWorldTitleFlag, NULL },)
+    KH_DEBUG({ "\x83\x8f\x83\x93\x83_\x81[\x83\x89\x83\x93\x83h     :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetWorldTitleFlag, NULL },)
+    KH_DEBUG({ "\x83\x82\x83\x93\x83X\x83g\x83\x8d         :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetWorldTitleFlag, NULL },)
+    KH_DEBUG({ "\x83n\x83\x8d\x83" "E\x83" "B\x83\x93         :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetWorldTitleFlag, NULL },)
+    KH_DEBUG({ "\x83" "A\x83g\x83\x89\x83\x93\x83" "e\x83" "B\x83J     :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40, DebugSetWorldTitleFlag, NULL },)
+    KH_DEBUG({ "\x83l\x83o\x81[\x83\x89\x83\x93\x83h       :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80, DebugSetWorldTitleFlag, NULL },)
+    KH_DEBUG({ "\x83z\x83\x8d\x83" "E\x83o\x83X\x83" "e\x83" "B\x83I\x83\x93 :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100, DebugSetWorldTitleFlag, NULL },)
+    KH_DEBUG({ "100\x83G\x81[\x83J\x81[        :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200, DebugSetWorldTitleFlag, NULL },)
+    KH_DEBUG({ "\x83g\x83\x8f\x83" "C\x83\x89\x83" "C\x83g       :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400, DebugSetWorldTitleFlag, NULL },)
+    KH_DEBUG({ "\x83" "f\x83X\x83" "e\x83j\x81[         :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800, DebugSetWorldTitleFlag, NULL },)
+    KH_DEBUG({ "\x96Y\x8bp\x82\xcc\x8f\xe9           :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x1000, DebugSetWorldTitleFlag, NULL },)
+    KH_DEBUG({ "\xf9S----------\xf9V\x83\x8a\x83N\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83g\x83\x89\x83\x94\x83@\x81[\x83X       :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10000, DebugSetWorldTitleFlag, NULL },)
+    KH_DEBUG({ "\x83" "A\x83O\x83\x89\x83o           :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20000, DebugSetWorldTitleFlag, NULL },)
+    KH_DEBUG({ "\x83I\x83\x8a\x83\x93\x83|\x83X         :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40000, DebugSetWorldTitleFlag, NULL },)
+    KH_DEBUG({ "\x83\x8f\x83\x93\x83_\x81[\x83\x89\x83\x93\x83h     :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80000, DebugSetWorldTitleFlag, NULL },)
+    KH_DEBUG({ "\x83\x82\x83\x93\x83X\x83g\x83\x8d         :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100000, DebugSetWorldTitleFlag, NULL },)
+    KH_DEBUG({ "\x83n\x83\x8d\x83" "E\x83" "B\x83\x93         :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200000, DebugSetWorldTitleFlag, NULL },)
+    KH_DEBUG({ "\x83" "A\x83g\x83\x89\x83\x93\x83" "e\x83" "B\x83J     :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400000, DebugSetWorldTitleFlag, NULL },)
+    KH_DEBUG({ "\x83l\x83o\x81[\x83\x89\x83\x93\x83h       :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800000, DebugSetWorldTitleFlag, NULL },)
+    KH_DEBUG({ "\x83z\x83\x8d\x83" "E\x83o\x83X\x83" "e\x83" "B\x83I\x83\x93 :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x1000000, DebugSetWorldTitleFlag, NULL },)
+    KH_DEBUG({ "100\x83G\x81[\x83J\x81[        :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x2000000, DebugSetWorldTitleFlag, NULL },)
+    KH_DEBUG({ "\x83g\x83\x8f\x83" "C\x83\x89\x83" "C\x83g       :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x4000000, DebugSetWorldTitleFlag, NULL },)
+    KH_DEBUG({ "\x83" "f\x83X\x83" "e\x83j\x81[         :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x8000000, DebugSetWorldTitleFlag, NULL },)
+    KH_DEBUG({ "\x96Y\x8bp\x82\xcc\x8f\xe9           :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10000000, DebugSetWorldTitleFlag, NULL },)
+    KH_DEBUG({ NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+KH_DEBUG(};)
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(static BOOL DebugSetGameWorkParam(CDebugWindow* pObj, INT inY, INT inParam) {)
+    KH_DEBUG(if (inParam & 0x180) {)
+        KH_DEBUG(switch (inY) {)
+        KH_DEBUG(case 17: CGameWork::setFlag(1, 0x0, KH_DW(DebugWork::g_dw.atelwork.iPlayerDispOff)); break;)
+        KH_DEBUG(case 18: CGameWork::setFlag(1, 0x2, KH_DW(DebugWork::g_dw.atelwork.iBossKilled)); break;)
+        KH_DEBUG(case 21: CGameWork::setFlag(1, 0x5, KH_DW(DebugWork::g_dw.atelwork.iNotPcControl)); break;)
+        KH_DEBUG(case 22: CGameWork::setFlag(1, 0x6, KH_DW(DebugWork::g_dw.atelwork.iNotPause)); break;)
+        KH_DEBUG(case 26: CGameWork::setFlag(1, 0x25, KH_DW(DebugWork::g_dw.atelwork.iNotHartBtl)); break;)
+        KH_DEBUG(case 27: CGameWork::setFlag(1, 0x2C, KH_DW(DebugWork::g_dw.atelwork.iIsBtlTutorial)); break;)
+        KH_DEBUG(case 28: CGameWork::setFlag(1, 0x37, KH_DW(DebugWork::g_dw.atelwork.iIsWorldIntro)); break;)
+        KH_DEBUG(})
+    KH_DEBUG(})
+    KH_DEBUG(return 1;)
+KH_DEBUG(})
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(static INT debugWinNPCMainlCall(CDebugWindow* pObj, INT inParam) {)
+    KH_DEBUG(if (inParam & 1) {)
         KH_DEBUG(DebugWork::g_dw.event.pClass = NULL;)
         KH_DEBUG(DebugWork::g_dw.event.pEventlineClass = NULL;)
-    }
-    return 1;
-}
-}
-extern INT SCREEN_HEIGHT;
+    KH_DEBUG(})
+    KH_DEBUG(return 1;)
+KH_DEBUG(})
+KH_DEBUG(})
+KH_DEBUG(extern INT SCREEN_HEIGHT;)
 /* Initialized at run time (SCREEN_HEIGHT, value-name lookups by the current g_dw values): these make up the
    static initializer. */
-namespace DWTEvent {
-extern DEBUG_WINDOW_LINE debugKeyTresurLine[];
-extern DEBUG_WINDOW_LINE debugWinCardPossibleLine[];
-extern DEBUG_WINDOW_LINE debugWinEventSelectPlayerLine[];
-extern DEBUG_WINDOW_LINE debugWinFriendPossibleLine[];
-extern DEBUG_WINDOW_LINE debugWinJiminyLine[];
-extern DEBUG_WINDOW_LINE debugWinKH2CardGetLine[];
-extern DEBUG_WINDOW_LINE debugWinMovieLine[];
-extern DEBUG_WINDOW_LINE debugWinMovieLineRiku[];
-extern DEBUG_WINDOW_LINE debugWinPcSkillLine[];
-extern DEBUG_WINDOW_LINE debugWinTuEndLine[];
-extern DEBUG_WINDOW_LINE debugWinWorldIntroLine[];
-extern LPCSTR szDifficultMode[];
-extern LPCSTR szMenuKind[];
-extern LPCSTR szMiniGameKind[];
-extern LPCSTR szMiniGamePlayState[];
-extern LPCSTR szMiniGameState[];
-extern LPCSTR szPlayMode[];
-extern LPCSTR szSoundMode[];
-extern LPCSTR szStockKindName[];
-static DEBUG_WINDOW_LINE debugBtlReportLine[22] = {
-    { "\xf9S----------\xf9V\x83\\\x83\x89\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83Q\x81[\x83\x80\x83\x8c\x83x\x83\x8b       \x81@:%s", &DebugWork::g_dw.atelwork.iPlayDifficultMode, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, &szDifficultMode[DebugWork::g_dw.atelwork.iPlayDifficultMode], 0, NULL, NULL },
-    { "\x83W\x83~\x83j\x81[\x92" "B\x90\xac\x97\xa6     \x81@:%d", &DebugWork::g_dw.atelwork.BtlMemo, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83R\x83\x8c\x83N\x83^\x81[\x83Y\x83\x89\x83\x93\x83N \x81@:--", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x93|\x82\xb5\x82\xbd\x93G\x82\xcc\x90\x94\x81@\x81@\x81@ \x81@:%d", &DebugWork::g_dw.atelwork.KillEnemyCount, 4, { 0 }, 0, 0.0f, 999999.0f, 1000.0f, NULL, 0, debugBtlReportCallBackParam, NULL },
-    { "\x96\xa2\x92m\x82\xc8\x82\xe9\x95\xf3\x82\xcc\x90\x94     \x81@:%d/24", &DebugWork::g_dw.atelwork.KeysTresur, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83J\x81[\x83h\x83u\x83\x8c\x83" "C\x83N\x89\xf1\x90\x94 \x81@:%d", &DebugWork::g_dw.atelwork.CardBreakCount, 4, { 0 }, 0, 0.0f, 99999.0f, 100.0f, NULL, 0, debugBtlReportCallBackParam, NULL },
-    { "\x8d\xc5\x82\xe0\x8eg\x82\xc1\x82\xbd\x83X\x83g\x83" "b\x83N\x8bZ :%s", &DebugWork::g_dw.atelwork.StockKind, 4, { 0 }, 0, 0.0f, 78.0f, 1.0f, &szStockKindName[DebugWork::g_dw.atelwork.StockKind], 0, debugBtlReportCallBackParam, NULL },
-    { "        \x81@\x81@\x81@\x81@\x89\xf1\x90\x94 :%d", &DebugWork::g_dw.atelwork.StockCount, 4, { 0 }, 0, 0.0f, 99999.0f, 100.0f, NULL, 0, debugBtlReportCallBackParam, NULL },
-    { "\x83N\x83\x8a\x83" "A\x8e\x9e\x8a\xd4\x81@\x81@\x81@     :%d", &DebugWork::g_dw.atelwork.Hour, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x81@\x81@  \x81@\x95\xaa\x81@\x81@\x81@\x81@   :%d", &DebugWork::g_dw.atelwork.minit, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\xf9S----------\xf9V\x83\x8a\x83N\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83Q\x81[\x83\x80\x83\x8c\x83x\x83\x8b\x81@\x81@\x81@\x81@ :%s", &DebugWork::g_dw.atelwork.iPlayDifficultMode, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, &szDifficultMode[DebugWork::g_dw.atelwork.iPlayDifficultMode], 0, NULL, NULL },
-    { "\x82" "c\x83\x8c\x83|\x81[\x83g\x92" "B\x90\xac\x97\xa6     :%d", &DebugWork::g_dw.atelwork.BtlMemo, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83R\x83\x8c\x83N\x83^\x81[\x83Y\x83\x89\x83\x93\x83N   :--", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83X\x83s\x81[\x83h\x83u\x83\x8c\x83" "C\x83N     :%d", &DebugWork::g_dw.atelwork.SpeedCount, 4, { 0 }, 0, 0.0f, 99999.0f, 100.0f, NULL, 0, debugBtlReportCallBackParam, NULL },
-    { "\x93|\x82\xb5\x82\xbd\x93G\x82\xcc\x90\x94\x81@\x81@     :%d", &DebugWork::g_dw.atelwork.KillEnemyCount, 4, { 0 }, 0, 0.0f, 99999.0f, 100.0f, NULL, 0, debugBtlReportCallBackParam, NULL },
-    { "\x83" "f\x83\x85\x83G\x83\x8b\x82\xcc\x8f\x9f\x97\xa6       :%5.2f", &DebugWork::g_dw.atelwork.DuelWin, 4, { 0 }, 1, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x82" "c\x83\x82\x81[\x83h\x94\xad\x93\xae\x89\xf1\x90\x94     :%d", &DebugWork::g_dw.atelwork.DarkCount, 4, { 0 }, 0, 0.0f, 99999.0f, 100.0f, NULL, 0, debugBtlReportCallBackParam, NULL },
-    { "\x83N\x83\x8a\x83" "A\x8e\x9e\x8a\xd4\x81@\x81@\x81@     :%d", &DebugWork::g_dw.atelwork.Hour, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x81@\x81@  \x81@\x95\xaa\x81@\x81@\x81@\x81@   :%d", &DebugWork::g_dw.atelwork.minit, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
-    { NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-};
-static DEBUG_WINDOW_TBL debugBtlReport = { "\x83o\x83g\x83\x8b\x83\x8c\x83|\x81[\x83g", -106, -(SCREEN_HEIGHT >> 1) + 150, 20, 29, 12, 0, 0, debugBtlReportLine, NULL, debugBtlReportCallBack };
-static DEBUG_WINDOW_TBL debugKeyTresur = { "\x96\xa2\x92m\x82\xc8\x82\xe9\x95\xf3\x82\xa0\x82\xaf\x82\xbd\x90\x94", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 29, 12, 0, 0, debugKeyTresurLine, NULL, debugKeyTresurCallBack };
-static DEBUG_WINDOW_TBL debugWinJiminy = { "\x83W\x83~\x83j\x81[\x83\x81\x83\x82", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 25, 12, 0, 0, debugWinJiminyLine, NULL, NULL };
-static DEBUG_WINDOW_TBL debugWinKH2CardGet = { "\x82j\x82g\x82Q\x83J\x81[\x83h\x93\xfc\x8e\xe8", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 13, 12, 0, 0, debugWinKH2CardGetLine, NULL, DebugAtelWorkDef };
-static DEBUG_WINDOW_LINE debugGameInfomationLine[12] = {
-    { "\x83v\x83\x8c\x83" "C\x83\x82\x81[\x83h         : %s", &DebugWork::g_dw.atelwork.iPlayMode, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, &szPlayMode[DebugWork::g_dw.atelwork.iPlayMode], 0, NULL, NULL },
-    { "\x83R\x83x\x83" "c\x83Q\x81[\x83\x80\x83N\x83\x8a\x83" "A   : %s", &DebugWork::g_dw.atelwork.iDistinctionClear, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, debugGameInfomationParam, NULL },
-    { "\x82j\x82g\x82Q\x83N\x83\x8a\x83" "A         : %s", &DebugWork::g_dw.atelwork.iGameKH2clear, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, debugGameInfomationParam, NULL },
-    { "\x83\\\x83\x89\x83N\x83\x8a\x83" "A           : %s", &DebugWork::g_dw.atelwork.iSoraClear, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, debugGameInfomationParam, NULL },
-    { "\x83\x8a\x83N\x83N\x83\x8a\x83" "A           : %s", &DebugWork::g_dw.atelwork.iRikuClear, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, debugGameInfomationParam, NULL },
-    { "\x83\\\x83\x89" "EN\x83t\x83\x89\x83O         : %d", &DebugWork::g_dw.atelwork.iEnSoraEventStep, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83\x8a\x83NEN\x83t\x83\x89\x83O         : %d", &DebugWork::g_dw.atelwork.iEnRikuEventStep, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83}\x81[\x83\x8b\x81[\x83V\x83\x83KILL     : %s", &DebugWork::g_dw.atelwork.iMahluciaKilled, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, debugGameInfomationParam, NULL },
-    { "\x83v\x83\x8c\x83" "C\x82\xc8\x82\xf1\x82\xa2\x82\xc7       : %s", &DebugWork::g_dw.atelwork.iPlayDifficultMode, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, &szDifficultMode[DebugWork::g_dw.atelwork.iPlayDifficultMode], 0, debugGameInfomationParam, NULL },
-    { "\x83T\x83" "E\x83\x93\x83h\x83\x82\x81[\x83h       : %s", &DebugWork::g_dw.atelwork.iSoundMode, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, &szSoundMode[DebugWork::g_dw.atelwork.iSoundMode], 0, NULL, NULL },
-    { "\x83o\x83" "C\x83u\x83\x8c\x81[\x83V\x83\x87\x83\x93     : %s", &DebugWork::g_dw.atelwork.iVibrat, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, (LPCSTR*)DWT::szOnOff, 0, NULL, NULL },
-    { NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-};
-static DEBUG_WINDOW_TBL debugGameInfomation = { "\x83Q\x81[\x83\x80\x8f\xee\x95\xf1", -106, -(SCREEN_HEIGHT >> 1) + 150, 20, 13, 12, 0, 0, debugGameInfomationLine, NULL, DebugAtelWorkDef };
-static DEBUG_WINDOW_TBL debugWinTuEnd = { "\x83`\x83\x85\x81[\x83g\x83\x8a\x83" "A\x83\x8b\x8fI\x97\xb9", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 7, 12, 0, 0, debugWinTuEndLine, NULL, DebugAtelWorkDef };
-static DEBUG_WINDOW_TBL debugWinMovieRiku = { "\x83\x80\x81[\x83r\x81[", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 20, 12, 0, 0, debugWinMovieLineRiku, NULL, DebugAtelWorkDef };
-static DEBUG_WINDOW_TBL debugWinMovie = { "\x83\x80\x81[\x83r\x81[", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 20, 12, 0, 0, debugWinMovieLine, NULL, DebugAtelWorkDef };
-static DEBUG_WINDOW_TBL debugWinPcSkill = { "\x83v\x83\x8c\x83" "C\x83\x84\x81[\x83X\x83L\x83\x8b", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 6, 12, 0, 0, debugWinPcSkillLine, NULL, DebugAtelWorkDef };
-static DEBUG_WINDOW_LINE debugWinPoohLine[40] = {
-    { "\xf9S----------\xf9V\x83Q\x81[\x83\x80\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x82\xb6\x82\xe5\x82\xa4\x82\xbd\x82\xa2  :%s", &DebugWork::g_dw.atelwork.iPoohMinigameState, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, &szMiniGamePlayState[DebugWork::g_dw.atelwork.iPoohMinigameState], 0, NULL, NULL },
-    { "\x82\xb5\x82\xe3\x82\xe9\x82\xa2    :%s", &DebugWork::g_dw.atelwork.iPoohMinigameKind, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, &szMiniGameKind[DebugWork::g_dw.atelwork.iPoohMinigameKind], 0, NULL, NULL },
-    { "\xf9S----------\xf9V\x82\xc7\x82\xa4\x82\xc9\x82\xe3\x82\xa4\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83s\x83O\x83\x8c\x83" "b\x83g  :%s", &DebugWork::g_dw.atelwork.iPoohMiniGameIntro, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetPoohFlag, NULL },
-    { "\x83I\x83" "E\x83\x8b      :%s", &DebugWork::g_dw.atelwork.iPoohMiniGameIntro, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetPoohFlag, NULL },
-    { "\x83\x8b\x81[        :%s", &DebugWork::g_dw.atelwork.iPoohMiniGameIntro, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetPoohFlag, NULL },
-    { "\x83" "C\x81[\x83\x88\x81[    :%s", &DebugWork::g_dw.atelwork.iPoohMiniGameIntro, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetPoohFlag, NULL },
-    { "\x83" "e\x83" "B\x83K\x81[    :%s", &DebugWork::g_dw.atelwork.iPoohMiniGameIntro, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 16, DebugSetPoohFlag, NULL },
-    { "\x83\x89\x83r\x83" "b\x83g    :%s", &DebugWork::g_dw.atelwork.iPoohMiniGameIntro, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 32, DebugSetPoohFlag, NULL },
-    { "\x83S\x81[\x83\x8b\x82P    :%s", &DebugWork::g_dw.atelwork.iPoohMiniGameIntro, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 64, DebugSetPoohFlag, NULL },
-    { "\x83S\x81[\x83\x8b\x82Q    :%s", &DebugWork::g_dw.atelwork.iPoohMiniGameIntro, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 128, DebugSetPoohFlag, NULL },
-    { "\xf9S----------\xf9V\x82\xb6\x82\xe5\x82\xa4\x82\xbd\x82\xa2\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83s\x83O\x83\x8c\x83" "b\x83g  :%s", &DebugWork::g_dw.atelwork.iPoohGamePiglet, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, &szMiniGameState[DebugWork::g_dw.atelwork.iPoohGamePiglet], 0, DebugSetPoohFlag, NULL },
-    { "\x83I\x83" "E\x83\x8b      :%s", &DebugWork::g_dw.atelwork.iPoohGameOwl, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, &szMiniGameState[DebugWork::g_dw.atelwork.iPoohGameOwl], 0, DebugSetPoohFlag, NULL },
-    { "\x83\x8b\x81[        :%s", &DebugWork::g_dw.atelwork.iPoohGameRoo, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, &szMiniGameState[DebugWork::g_dw.atelwork.iPoohGameRoo], 0, DebugSetPoohFlag, NULL },
-    { "\x83" "C\x81[\x83\x88\x81[    :%s", &DebugWork::g_dw.atelwork.iPoohGameEeyore, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, &szMiniGameState[DebugWork::g_dw.atelwork.iPoohGameEeyore], 0, DebugSetPoohFlag, NULL },
-    { "\x83" "e\x83" "B\x83K\x81[    :%s", &DebugWork::g_dw.atelwork.iPoohGameTigger, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, &szMiniGameState[DebugWork::g_dw.atelwork.iPoohGameTigger], 0, DebugSetPoohFlag, NULL },
-    { "\x83\x89\x83r\x83" "b\x83g    :%s", &DebugWork::g_dw.atelwork.iPoohGameRabbit, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, &szMiniGameState[DebugWork::g_dw.atelwork.iPoohGameRabbit], 0, DebugSetPoohFlag, NULL },
-    { "\xf9S----------\xf9V\x83N\x83\x8a\x83" "A\x97p\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83s\x83O\x83\x8c\x83" "b\x83g  :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroPiglet, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83I\x83" "E\x83\x8b      :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroOwl, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83\x8b\x81[        :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroRoo, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83" "C\x81[\x83\x88\x81[    :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroEeyore, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83" "e\x83" "B\x83K\x81[    :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroTigger, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83\x89\x83r\x83" "b\x83g    :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroRabbit, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\xf9S----------\xf9V\x8eg\x82\xa2\x8e\xcc\x82\xc4\x83N\x83\x8a\x83" "A\x97p\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83s\x83O\x83\x8c\x83" "b\x83g  :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroResetPiglet, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83I\x83" "E\x83\x8b      :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroResetOwl, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83\x8b\x81[        :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroResetRoo, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83" "C\x81[\x83\x88\x81[    :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroResetEeyore, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83" "e\x83" "B\x83K\x81[    :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroResetTigger, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83\x89\x83r\x83" "b\x83g    :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroResetRabbit, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\xf9S----------\xf9V\x83n\x83" "C\x83X\x83R\x83" "A\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83I\x83" "E\x83\x8b      :%d", &DebugWork::g_dw.atelwork.iPoohHiScoreOwl, 4, { 0 }, 0, 0.0f, 10000.0f, 100.0f, NULL, 0, DebugSetPoohFlag, NULL },
-    { "\x83\x8b\x81[        :%d", &DebugWork::g_dw.atelwork.iPoohHiScoreRoo, 4, { 0 }, 0, 0.0f, 10000.0f, 100.0f, NULL, 0, DebugSetPoohFlag, NULL },
-    { "\x83" "C\x81[\x83\x88\x81[    :%d", &DebugWork::g_dw.atelwork.iPoohHiScoreEeyore, 4, { 0 }, 0, 0.0f, 10000.0f, 100.0f, NULL, 0, DebugSetPoohFlag, NULL },
-    { "\x83" "e\x83" "B\x83K\x81[    :%d", &DebugWork::g_dw.atelwork.iPoohHiScoreTigger, 4, { 0 }, 0, 0.0f, 10000.0f, 100.0f, NULL, 0, DebugSetPoohFlag, NULL },
-    { "\x83\x89\x83r\x83" "b\x83g    :%d", &DebugWork::g_dw.atelwork.iPoohHiScoreRabbit, 4, { 0 }, 0, 0.0f, 10000.0f, 100.0f, NULL, 0, DebugSetPoohFlag, NULL },
-    { NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-};
-static DEBUG_WINDOW_TBL debugWinPooh = { "\x83v\x81[", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 25, 12, 0, 0, debugWinPoohLine, NULL, DebugAtelWorkDef };
-static DEBUG_WINDOW_TBL debugWinFriendPossible = { "\x83t\x83\x8c\x83\x93\x83h\x82\xa9\x82\xa2\x82\xab\x82\xf1", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 29, 12, 0, 0, debugWinFriendPossibleLine, NULL, DebugAtelWorkDef };
-static DEBUG_WINDOW_TBL debugWinCardPossible = { "\x83J\x81[\x83h\x82\xa9\x82\xa2\x82\xab\x82\xf1", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 27, 12, 0, 0, debugWinCardPossibleLine, NULL, DebugAtelWorkDef };
-static DEBUG_WINDOW_TBL debugWinWorldIntro = { "\x83\x8f\x81[\x83\x8b\x83h\x83^\x83" "C\x83g\x83\x8b", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 29, 12, 0, 0, debugWinWorldIntroLine, NULL, DebugAtelWorkDef };
-static DEBUG_WINDOW_LINE debugWinAtelWorkDefLine[30] = {
-    { "\xf9S----------\xf9VWLV_STORAGE\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83\x8f\x81[\x83\x8b\x83h\x83^\x83" "C\x83g\x83\x8b...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinWorldIntro },
-    { "\x83`\x83\x85\x81[\x83g\x83\x8a\x83" "A\x83\x8b...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinTuEnd },
-    { "\x83J\x81[\x83h\x89\xf0\x8b\xd6...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinCardPossible },
-    { "\x83t\x83\x8c\x83\x93\x83h\x89\xf0\x8b\xd6...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinFriendPossible },
-    { "\x82P\x82O\x82O\x83G\x81[\x83J\x81[...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinPooh },
-    { "\x95W\x8f\x80\x83X\x83L\x83\x8b...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinPcSkill },
-    { "\x83\x80\x81[\x83r\x81[\x83\\\x83\x89...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinMovie },
-    { "\x83\x80\x81[\x83r\x81[\x83\x8a\x83N...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinMovieRiku },
-    { "\x82j\x82g\x82Q\x83J\x81[\x83h\x93\xfc\x8e\xe8...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinKH2CardGet },
-    { "\x83W\x83~\x83j\x81[\x83\x81\x83\x82...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinJiminy },
-    { "\x83Q\x81[\x83\x80\x8f\xee\x95\xf1...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugGameInfomation },
-    { "\x95\xf3\x94\xa0...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugKeyTresur },
-    { "\x83o\x83g\x83\x8b\x83\x8c\x83|\x81[\x83g...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugBtlReport },
-    { "\xf9S----------\xf9VWLV_GLOBAL\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "BOSS\x83" "C\x83x\x83\x93\x83g\x83X\x83" "e\x83" "b\x83v : %d", &DebugWork::g_dw.atelwork.iBossEventStep, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83\x81\x83j\x83\x85\x81[\x82\xcc\x8e\xed\x97\xde       : %s", &DebugWork::g_dw.atelwork.iKindMenu, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, &szMenuKind[DebugWork::g_dw.atelwork.iKindMenu], 0, NULL, NULL },
-    { "\x83v\x83\x8c\x83" "C\x83\x84\x81[\x94\xf1\x95\\\x8e\xa6     : %s", &DebugWork::g_dw.atelwork.iPlayerDispOff, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, DebugSetGameWorkParam, NULL },
-    { "\x82" "a\x82n\x82r\x82r\x8e\x80\x96S         : %s", &DebugWork::g_dw.atelwork.iBossKilled, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, DebugSetGameWorkParam, NULL },
-    { "\x83" "C\x83x\x83\x93\x83g\x83X\x83L\x83" "b\x83v\x95s\x89\xc2 : %s", &DebugWork::g_dw.atelwork.iNotEventSkip, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0, NULL, NULL },
-    { "ATEL\x83" "C\x83x\x83\x93\x83g\x92\x86       : %s", &DebugWork::g_dw.atelwork.iIsAtelEvent, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0, NULL, NULL },
-    { "PC\x91\x80\x8d\xec\x95s\x89\xc2           : %s", &DebugWork::g_dw.atelwork.iNotPcControl, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, DebugSetGameWorkParam, NULL },
-    { "PAUSE\x8b\xd6\x8e~            : %s", &DebugWork::g_dw.atelwork.iNotPause, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, DebugSetGameWorkParam, NULL },
-    { "\x83`\x83\x85\x81[\x83g\x83\x8a\x83" "A\x83\x8b\x92\x86     : %s", &DebugWork::g_dw.atelwork.iIsTutorial, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0, NULL, NULL },
-    { "\x83\x8b\x81[\x83\x80\x88\xda\x93\xae\x8b\xd6\x8e~       : %s", &DebugWork::g_dw.atelwork.iNotRoomJump, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0, NULL, NULL },
-    { "\x83\x8b\x81[\x83\x80" "Creation\x8b\xd6\x8e~   : %s", &DebugWork::g_dw.atelwork.iNotRoomCreation, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0, NULL, NULL },
-    { "\x83n\x81[\x83g\x8fo\x82\xb3\x82\xc8\x82\xa2       : %s", &DebugWork::g_dw.atelwork.iNotHartBtl, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, DebugSetGameWorkParam, NULL },
-    { "BTL\x83`\x83\x85\x81[\x83g\x83\x8a\x83" "A\x83\x8b\x92\x86  : %s", &DebugWork::g_dw.atelwork.iIsBtlTutorial, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, DebugSetGameWorkParam, NULL },
-    { "\x83\x8f\x81[\x83\x8b\x83h\x83^\x83" "C\x83g\x83\x8b\x92\x86   : %s", &DebugWork::g_dw.atelwork.iIsWorldIntro, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, DebugSetGameWorkParam, NULL },
-    { NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-};
-static DEBUG_WINDOW_TBL debugWinAtelWorkDef = { "ATEL WORK", -106, -(SCREEN_HEIGHT >> 1) + 150, 20, 30, 12, 0, 0, debugWinAtelWorkDefLine, NULL, DebugAtelWorkDef };
-}
-namespace DWTEvent {
-DEBUG_WINDOW_LINE debugWinEventSelectPlayerLine[6] = {
-    { "coord axis\x81" "F%s", &DebugWork::g_dw.event.iAtelCoord, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, NULL, NULL },
-    { "actor pos \x81" "F%s", &DebugWork::g_dw.event.iNpcCoordDisp, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, DebugCreateNpcWindow, NULL },
-    { "actor list...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, DebugCreateNpcWindow, &debugWinNpcList },
-    { "\x83" "C\x83x\x83\x93\x83g\x83\x89\x83" "C\x83\x93\x81" "F%s", &DebugWork::g_dw.event.iEventline, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, DebugCreateEventLineDisp, NULL },
-    { "\x83t\x83\x89\x83O\x83`\x83" "F\x83" "b\x83N...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, NULL, &debugWinAtelWorkDef },
-    { NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-};
-}
-namespace DWTEvent {
-static DEBUG_WINDOW_TBL debugWinEventPlayer = { "ATEL\x81@CONFIG", -206, -(SCREEN_HEIGHT >> 1) + 50, 12, 16, 14, 0, 0, debugWinEventSelectPlayerLine, NULL, debugWinNPCMainlCall };
-}
-namespace DWTEvent {
-DEBUG_WINDOW_LINE debugNpcInfoLine[7] = {
-    { "PosX:  %.2f", &DebugWork::g_dw.event.vPos, 4, { 0 }, 3, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "PosY:  %.2f", &DebugWork::g_dw.event.vPos.y, 4, { 0 }, 3, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "PosZ:  %.2f", &DebugWork::g_dw.event.vPos.z, 4, { 0 }, 3, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "RotX:  %.2f", &DebugWork::g_dw.event.vRot, 4, { 0 }, 3, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "RotY:  %.2f", &DebugWork::g_dw.event.vRot.y, 4, { 0 }, 3, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "RotZ:  %.2f", &DebugWork::g_dw.event.vRot.z, 4, { 0 }, 3, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-};
-}
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(extern DEBUG_WINDOW_LINE debugKeyTresurLine[];)
+KH_DEBUG(extern DEBUG_WINDOW_LINE debugWinCardPossibleLine[];)
+KH_DEBUG(extern DEBUG_WINDOW_LINE debugWinEventSelectPlayerLine[];)
+KH_DEBUG(extern DEBUG_WINDOW_LINE debugWinFriendPossibleLine[];)
+KH_DEBUG(extern DEBUG_WINDOW_LINE debugWinJiminyLine[];)
+KH_DEBUG(extern DEBUG_WINDOW_LINE debugWinKH2CardGetLine[];)
+KH_DEBUG(extern DEBUG_WINDOW_LINE debugWinMovieLine[];)
+KH_DEBUG(extern DEBUG_WINDOW_LINE debugWinMovieLineRiku[];)
+KH_DEBUG(extern DEBUG_WINDOW_LINE debugWinPcSkillLine[];)
+KH_DEBUG(extern DEBUG_WINDOW_LINE debugWinTuEndLine[];)
+KH_DEBUG(extern DEBUG_WINDOW_LINE debugWinWorldIntroLine[];)
+KH_DEBUG(extern LPCSTR szDifficultMode[];)
+KH_DEBUG(extern LPCSTR szMenuKind[];)
+KH_DEBUG(extern LPCSTR szMiniGameKind[];)
+KH_DEBUG(extern LPCSTR szMiniGamePlayState[];)
+KH_DEBUG(extern LPCSTR szMiniGameState[];)
+KH_DEBUG(extern LPCSTR szPlayMode[];)
+KH_DEBUG(extern LPCSTR szSoundMode[];)
+KH_DEBUG(extern LPCSTR szStockKindName[];)
+KH_DEBUG(static DEBUG_WINDOW_LINE debugBtlReportLine[22] = {)
+    KH_DEBUG({ "\xf9S----------\xf9V\x83\\\x83\x89\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83Q\x81[\x83\x80\x83\x8c\x83x\x83\x8b       \x81@:%s", &DebugWork::g_dw.atelwork.iPlayDifficultMode, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, &szDifficultMode[DebugWork::g_dw.atelwork.iPlayDifficultMode], 0, NULL, NULL },)
+    KH_DEBUG({ "\x83W\x83~\x83j\x81[\x92" "B\x90\xac\x97\xa6     \x81@:%d", &DebugWork::g_dw.atelwork.BtlMemo, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83R\x83\x8c\x83N\x83^\x81[\x83Y\x83\x89\x83\x93\x83N \x81@:--", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x93|\x82\xb5\x82\xbd\x93G\x82\xcc\x90\x94\x81@\x81@\x81@ \x81@:%d", &DebugWork::g_dw.atelwork.KillEnemyCount, 4, { 0 }, 0, 0.0f, 999999.0f, 1000.0f, NULL, 0, debugBtlReportCallBackParam, NULL },)
+    KH_DEBUG({ "\x96\xa2\x92m\x82\xc8\x82\xe9\x95\xf3\x82\xcc\x90\x94     \x81@:%d/24", &DebugWork::g_dw.atelwork.KeysTresur, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83J\x81[\x83h\x83u\x83\x8c\x83" "C\x83N\x89\xf1\x90\x94 \x81@:%d", &DebugWork::g_dw.atelwork.CardBreakCount, 4, { 0 }, 0, 0.0f, 99999.0f, 100.0f, NULL, 0, debugBtlReportCallBackParam, NULL },)
+    KH_DEBUG({ "\x8d\xc5\x82\xe0\x8eg\x82\xc1\x82\xbd\x83X\x83g\x83" "b\x83N\x8bZ :%s", &DebugWork::g_dw.atelwork.StockKind, 4, { 0 }, 0, 0.0f, 78.0f, 1.0f, &szStockKindName[DebugWork::g_dw.atelwork.StockKind], 0, debugBtlReportCallBackParam, NULL },)
+    KH_DEBUG({ "        \x81@\x81@\x81@\x81@\x89\xf1\x90\x94 :%d", &DebugWork::g_dw.atelwork.StockCount, 4, { 0 }, 0, 0.0f, 99999.0f, 100.0f, NULL, 0, debugBtlReportCallBackParam, NULL },)
+    KH_DEBUG({ "\x83N\x83\x8a\x83" "A\x8e\x9e\x8a\xd4\x81@\x81@\x81@     :%d", &DebugWork::g_dw.atelwork.Hour, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x81@\x81@  \x81@\x95\xaa\x81@\x81@\x81@\x81@   :%d", &DebugWork::g_dw.atelwork.minit, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\xf9S----------\xf9V\x83\x8a\x83N\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83Q\x81[\x83\x80\x83\x8c\x83x\x83\x8b\x81@\x81@\x81@\x81@ :%s", &DebugWork::g_dw.atelwork.iPlayDifficultMode, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, &szDifficultMode[DebugWork::g_dw.atelwork.iPlayDifficultMode], 0, NULL, NULL },)
+    KH_DEBUG({ "\x82" "c\x83\x8c\x83|\x81[\x83g\x92" "B\x90\xac\x97\xa6     :%d", &DebugWork::g_dw.atelwork.BtlMemo, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83R\x83\x8c\x83N\x83^\x81[\x83Y\x83\x89\x83\x93\x83N   :--", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83X\x83s\x81[\x83h\x83u\x83\x8c\x83" "C\x83N     :%d", &DebugWork::g_dw.atelwork.SpeedCount, 4, { 0 }, 0, 0.0f, 99999.0f, 100.0f, NULL, 0, debugBtlReportCallBackParam, NULL },)
+    KH_DEBUG({ "\x93|\x82\xb5\x82\xbd\x93G\x82\xcc\x90\x94\x81@\x81@     :%d", &DebugWork::g_dw.atelwork.KillEnemyCount, 4, { 0 }, 0, 0.0f, 99999.0f, 100.0f, NULL, 0, debugBtlReportCallBackParam, NULL },)
+    KH_DEBUG({ "\x83" "f\x83\x85\x83G\x83\x8b\x82\xcc\x8f\x9f\x97\xa6       :%5.2f", &DebugWork::g_dw.atelwork.DuelWin, 4, { 0 }, 1, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x82" "c\x83\x82\x81[\x83h\x94\xad\x93\xae\x89\xf1\x90\x94     :%d", &DebugWork::g_dw.atelwork.DarkCount, 4, { 0 }, 0, 0.0f, 99999.0f, 100.0f, NULL, 0, debugBtlReportCallBackParam, NULL },)
+    KH_DEBUG({ "\x83N\x83\x8a\x83" "A\x8e\x9e\x8a\xd4\x81@\x81@\x81@     :%d", &DebugWork::g_dw.atelwork.Hour, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x81@\x81@  \x81@\x95\xaa\x81@\x81@\x81@\x81@   :%d", &DebugWork::g_dw.atelwork.minit, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+KH_DEBUG(};)
+KH_DEBUG(static DEBUG_WINDOW_TBL debugBtlReport = { "\x83o\x83g\x83\x8b\x83\x8c\x83|\x81[\x83g", -106, -(SCREEN_HEIGHT >> 1) + 150, 20, 29, 12, 0, 0, debugBtlReportLine, NULL, debugBtlReportCallBack };)
+KH_DEBUG(static DEBUG_WINDOW_TBL debugKeyTresur = { "\x96\xa2\x92m\x82\xc8\x82\xe9\x95\xf3\x82\xa0\x82\xaf\x82\xbd\x90\x94", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 29, 12, 0, 0, debugKeyTresurLine, NULL, debugKeyTresurCallBack };)
+KH_DEBUG(static DEBUG_WINDOW_TBL debugWinJiminy = { "\x83W\x83~\x83j\x81[\x83\x81\x83\x82", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 25, 12, 0, 0, debugWinJiminyLine, NULL, NULL };)
+KH_DEBUG(static DEBUG_WINDOW_TBL debugWinKH2CardGet = { "\x82j\x82g\x82Q\x83J\x81[\x83h\x93\xfc\x8e\xe8", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 13, 12, 0, 0, debugWinKH2CardGetLine, NULL, DebugAtelWorkDef };)
+KH_DEBUG(static DEBUG_WINDOW_LINE debugGameInfomationLine[12] = {)
+    KH_DEBUG({ "\x83v\x83\x8c\x83" "C\x83\x82\x81[\x83h         : %s", &DebugWork::g_dw.atelwork.iPlayMode, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, &szPlayMode[DebugWork::g_dw.atelwork.iPlayMode], 0, NULL, NULL },)
+    KH_DEBUG({ "\x83R\x83x\x83" "c\x83Q\x81[\x83\x80\x83N\x83\x8a\x83" "A   : %s", &DebugWork::g_dw.atelwork.iDistinctionClear, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, debugGameInfomationParam, NULL },)
+    KH_DEBUG({ "\x82j\x82g\x82Q\x83N\x83\x8a\x83" "A         : %s", &DebugWork::g_dw.atelwork.iGameKH2clear, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, debugGameInfomationParam, NULL },)
+    KH_DEBUG({ "\x83\\\x83\x89\x83N\x83\x8a\x83" "A           : %s", &DebugWork::g_dw.atelwork.iSoraClear, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, debugGameInfomationParam, NULL },)
+    KH_DEBUG({ "\x83\x8a\x83N\x83N\x83\x8a\x83" "A           : %s", &DebugWork::g_dw.atelwork.iRikuClear, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, debugGameInfomationParam, NULL },)
+    KH_DEBUG({ "\x83\\\x83\x89" "EN\x83t\x83\x89\x83O         : %d", &DebugWork::g_dw.atelwork.iEnSoraEventStep, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83\x8a\x83NEN\x83t\x83\x89\x83O         : %d", &DebugWork::g_dw.atelwork.iEnRikuEventStep, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83}\x81[\x83\x8b\x81[\x83V\x83\x83KILL     : %s", &DebugWork::g_dw.atelwork.iMahluciaKilled, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, debugGameInfomationParam, NULL },)
+    KH_DEBUG({ "\x83v\x83\x8c\x83" "C\x82\xc8\x82\xf1\x82\xa2\x82\xc7       : %s", &DebugWork::g_dw.atelwork.iPlayDifficultMode, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, &szDifficultMode[DebugWork::g_dw.atelwork.iPlayDifficultMode], 0, debugGameInfomationParam, NULL },)
+    KH_DEBUG({ "\x83T\x83" "E\x83\x93\x83h\x83\x82\x81[\x83h       : %s", &DebugWork::g_dw.atelwork.iSoundMode, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, &szSoundMode[DebugWork::g_dw.atelwork.iSoundMode], 0, NULL, NULL },)
+    KH_DEBUG({ "\x83o\x83" "C\x83u\x83\x8c\x81[\x83V\x83\x87\x83\x93     : %s", &DebugWork::g_dw.atelwork.iVibrat, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, (LPCSTR*)DWT::szOnOff, 0, NULL, NULL },)
+    KH_DEBUG({ NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+KH_DEBUG(};)
+KH_DEBUG(static DEBUG_WINDOW_TBL debugGameInfomation = { "\x83Q\x81[\x83\x80\x8f\xee\x95\xf1", -106, -(SCREEN_HEIGHT >> 1) + 150, 20, 13, 12, 0, 0, debugGameInfomationLine, NULL, DebugAtelWorkDef };)
+KH_DEBUG(static DEBUG_WINDOW_TBL debugWinTuEnd = { "\x83`\x83\x85\x81[\x83g\x83\x8a\x83" "A\x83\x8b\x8fI\x97\xb9", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 7, 12, 0, 0, debugWinTuEndLine, NULL, DebugAtelWorkDef };)
+KH_DEBUG(static DEBUG_WINDOW_TBL debugWinMovieRiku = { "\x83\x80\x81[\x83r\x81[", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 20, 12, 0, 0, debugWinMovieLineRiku, NULL, DebugAtelWorkDef };)
+KH_DEBUG(static DEBUG_WINDOW_TBL debugWinMovie = { "\x83\x80\x81[\x83r\x81[", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 20, 12, 0, 0, debugWinMovieLine, NULL, DebugAtelWorkDef };)
+KH_DEBUG(static DEBUG_WINDOW_TBL debugWinPcSkill = { "\x83v\x83\x8c\x83" "C\x83\x84\x81[\x83X\x83L\x83\x8b", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 6, 12, 0, 0, debugWinPcSkillLine, NULL, DebugAtelWorkDef };)
+KH_DEBUG(static DEBUG_WINDOW_LINE debugWinPoohLine[40] = {)
+    KH_DEBUG({ "\xf9S----------\xf9V\x83Q\x81[\x83\x80\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x82\xb6\x82\xe5\x82\xa4\x82\xbd\x82\xa2  :%s", &DebugWork::g_dw.atelwork.iPoohMinigameState, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, &szMiniGamePlayState[DebugWork::g_dw.atelwork.iPoohMinigameState], 0, NULL, NULL },)
+    KH_DEBUG({ "\x82\xb5\x82\xe3\x82\xe9\x82\xa2    :%s", &DebugWork::g_dw.atelwork.iPoohMinigameKind, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, &szMiniGameKind[DebugWork::g_dw.atelwork.iPoohMinigameKind], 0, NULL, NULL },)
+    KH_DEBUG({ "\xf9S----------\xf9V\x82\xc7\x82\xa4\x82\xc9\x82\xe3\x82\xa4\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83s\x83O\x83\x8c\x83" "b\x83g  :%s", &DebugWork::g_dw.atelwork.iPoohMiniGameIntro, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetPoohFlag, NULL },)
+    KH_DEBUG({ "\x83I\x83" "E\x83\x8b      :%s", &DebugWork::g_dw.atelwork.iPoohMiniGameIntro, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetPoohFlag, NULL },)
+    KH_DEBUG({ "\x83\x8b\x81[        :%s", &DebugWork::g_dw.atelwork.iPoohMiniGameIntro, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetPoohFlag, NULL },)
+    KH_DEBUG({ "\x83" "C\x81[\x83\x88\x81[    :%s", &DebugWork::g_dw.atelwork.iPoohMiniGameIntro, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetPoohFlag, NULL },)
+    KH_DEBUG({ "\x83" "e\x83" "B\x83K\x81[    :%s", &DebugWork::g_dw.atelwork.iPoohMiniGameIntro, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 16, DebugSetPoohFlag, NULL },)
+    KH_DEBUG({ "\x83\x89\x83r\x83" "b\x83g    :%s", &DebugWork::g_dw.atelwork.iPoohMiniGameIntro, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 32, DebugSetPoohFlag, NULL },)
+    KH_DEBUG({ "\x83S\x81[\x83\x8b\x82P    :%s", &DebugWork::g_dw.atelwork.iPoohMiniGameIntro, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 64, DebugSetPoohFlag, NULL },)
+    KH_DEBUG({ "\x83S\x81[\x83\x8b\x82Q    :%s", &DebugWork::g_dw.atelwork.iPoohMiniGameIntro, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 128, DebugSetPoohFlag, NULL },)
+    KH_DEBUG({ "\xf9S----------\xf9V\x82\xb6\x82\xe5\x82\xa4\x82\xbd\x82\xa2\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83s\x83O\x83\x8c\x83" "b\x83g  :%s", &DebugWork::g_dw.atelwork.iPoohGamePiglet, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, &szMiniGameState[DebugWork::g_dw.atelwork.iPoohGamePiglet], 0, DebugSetPoohFlag, NULL },)
+    KH_DEBUG({ "\x83I\x83" "E\x83\x8b      :%s", &DebugWork::g_dw.atelwork.iPoohGameOwl, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, &szMiniGameState[DebugWork::g_dw.atelwork.iPoohGameOwl], 0, DebugSetPoohFlag, NULL },)
+    KH_DEBUG({ "\x83\x8b\x81[        :%s", &DebugWork::g_dw.atelwork.iPoohGameRoo, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, &szMiniGameState[DebugWork::g_dw.atelwork.iPoohGameRoo], 0, DebugSetPoohFlag, NULL },)
+    KH_DEBUG({ "\x83" "C\x81[\x83\x88\x81[    :%s", &DebugWork::g_dw.atelwork.iPoohGameEeyore, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, &szMiniGameState[DebugWork::g_dw.atelwork.iPoohGameEeyore], 0, DebugSetPoohFlag, NULL },)
+    KH_DEBUG({ "\x83" "e\x83" "B\x83K\x81[    :%s", &DebugWork::g_dw.atelwork.iPoohGameTigger, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, &szMiniGameState[DebugWork::g_dw.atelwork.iPoohGameTigger], 0, DebugSetPoohFlag, NULL },)
+    KH_DEBUG({ "\x83\x89\x83r\x83" "b\x83g    :%s", &DebugWork::g_dw.atelwork.iPoohGameRabbit, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, &szMiniGameState[DebugWork::g_dw.atelwork.iPoohGameRabbit], 0, DebugSetPoohFlag, NULL },)
+    KH_DEBUG({ "\xf9S----------\xf9V\x83N\x83\x8a\x83" "A\x97p\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83s\x83O\x83\x8c\x83" "b\x83g  :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroPiglet, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83I\x83" "E\x83\x8b      :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroOwl, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83\x8b\x81[        :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroRoo, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83" "C\x81[\x83\x88\x81[    :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroEeyore, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83" "e\x83" "B\x83K\x81[    :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroTigger, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83\x89\x83r\x83" "b\x83g    :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroRabbit, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\xf9S----------\xf9V\x8eg\x82\xa2\x8e\xcc\x82\xc4\x83N\x83\x8a\x83" "A\x97p\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83s\x83O\x83\x8c\x83" "b\x83g  :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroResetPiglet, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83I\x83" "E\x83\x8b      :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroResetOwl, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83\x8b\x81[        :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroResetRoo, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83" "C\x81[\x83\x88\x81[    :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroResetEeyore, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83" "e\x83" "B\x83K\x81[    :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroResetTigger, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83\x89\x83r\x83" "b\x83g    :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroResetRabbit, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\xf9S----------\xf9V\x83n\x83" "C\x83X\x83R\x83" "A\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83I\x83" "E\x83\x8b      :%d", &DebugWork::g_dw.atelwork.iPoohHiScoreOwl, 4, { 0 }, 0, 0.0f, 10000.0f, 100.0f, NULL, 0, DebugSetPoohFlag, NULL },)
+    KH_DEBUG({ "\x83\x8b\x81[        :%d", &DebugWork::g_dw.atelwork.iPoohHiScoreRoo, 4, { 0 }, 0, 0.0f, 10000.0f, 100.0f, NULL, 0, DebugSetPoohFlag, NULL },)
+    KH_DEBUG({ "\x83" "C\x81[\x83\x88\x81[    :%d", &DebugWork::g_dw.atelwork.iPoohHiScoreEeyore, 4, { 0 }, 0, 0.0f, 10000.0f, 100.0f, NULL, 0, DebugSetPoohFlag, NULL },)
+    KH_DEBUG({ "\x83" "e\x83" "B\x83K\x81[    :%d", &DebugWork::g_dw.atelwork.iPoohHiScoreTigger, 4, { 0 }, 0, 0.0f, 10000.0f, 100.0f, NULL, 0, DebugSetPoohFlag, NULL },)
+    KH_DEBUG({ "\x83\x89\x83r\x83" "b\x83g    :%d", &DebugWork::g_dw.atelwork.iPoohHiScoreRabbit, 4, { 0 }, 0, 0.0f, 10000.0f, 100.0f, NULL, 0, DebugSetPoohFlag, NULL },)
+    KH_DEBUG({ NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+KH_DEBUG(};)
+KH_DEBUG(static DEBUG_WINDOW_TBL debugWinPooh = { "\x83v\x81[", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 25, 12, 0, 0, debugWinPoohLine, NULL, DebugAtelWorkDef };)
+KH_DEBUG(static DEBUG_WINDOW_TBL debugWinFriendPossible = { "\x83t\x83\x8c\x83\x93\x83h\x82\xa9\x82\xa2\x82\xab\x82\xf1", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 29, 12, 0, 0, debugWinFriendPossibleLine, NULL, DebugAtelWorkDef };)
+KH_DEBUG(static DEBUG_WINDOW_TBL debugWinCardPossible = { "\x83J\x81[\x83h\x82\xa9\x82\xa2\x82\xab\x82\xf1", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 27, 12, 0, 0, debugWinCardPossibleLine, NULL, DebugAtelWorkDef };)
+KH_DEBUG(static DEBUG_WINDOW_TBL debugWinWorldIntro = { "\x83\x8f\x81[\x83\x8b\x83h\x83^\x83" "C\x83g\x83\x8b", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 29, 12, 0, 0, debugWinWorldIntroLine, NULL, DebugAtelWorkDef };)
+KH_DEBUG(static DEBUG_WINDOW_LINE debugWinAtelWorkDefLine[30] = {)
+    KH_DEBUG({ "\xf9S----------\xf9VWLV_STORAGE\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83\x8f\x81[\x83\x8b\x83h\x83^\x83" "C\x83g\x83\x8b...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinWorldIntro },)
+    KH_DEBUG({ "\x83`\x83\x85\x81[\x83g\x83\x8a\x83" "A\x83\x8b...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinTuEnd },)
+    KH_DEBUG({ "\x83J\x81[\x83h\x89\xf0\x8b\xd6...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinCardPossible },)
+    KH_DEBUG({ "\x83t\x83\x8c\x83\x93\x83h\x89\xf0\x8b\xd6...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinFriendPossible },)
+    KH_DEBUG({ "\x82P\x82O\x82O\x83G\x81[\x83J\x81[...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinPooh },)
+    KH_DEBUG({ "\x95W\x8f\x80\x83X\x83L\x83\x8b...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinPcSkill },)
+    KH_DEBUG({ "\x83\x80\x81[\x83r\x81[\x83\\\x83\x89...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinMovie },)
+    KH_DEBUG({ "\x83\x80\x81[\x83r\x81[\x83\x8a\x83N...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinMovieRiku },)
+    KH_DEBUG({ "\x82j\x82g\x82Q\x83J\x81[\x83h\x93\xfc\x8e\xe8...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinKH2CardGet },)
+    KH_DEBUG({ "\x83W\x83~\x83j\x81[\x83\x81\x83\x82...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinJiminy },)
+    KH_DEBUG({ "\x83Q\x81[\x83\x80\x8f\xee\x95\xf1...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugGameInfomation },)
+    KH_DEBUG({ "\x95\xf3\x94\xa0...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugKeyTresur },)
+    KH_DEBUG({ "\x83o\x83g\x83\x8b\x83\x8c\x83|\x81[\x83g...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugBtlReport },)
+    KH_DEBUG({ "\xf9S----------\xf9VWLV_GLOBAL\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "BOSS\x83" "C\x83x\x83\x93\x83g\x83X\x83" "e\x83" "b\x83v : %d", &DebugWork::g_dw.atelwork.iBossEventStep, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83\x81\x83j\x83\x85\x81[\x82\xcc\x8e\xed\x97\xde       : %s", &DebugWork::g_dw.atelwork.iKindMenu, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, &szMenuKind[DebugWork::g_dw.atelwork.iKindMenu], 0, NULL, NULL },)
+    KH_DEBUG({ "\x83v\x83\x8c\x83" "C\x83\x84\x81[\x94\xf1\x95\\\x8e\xa6     : %s", &DebugWork::g_dw.atelwork.iPlayerDispOff, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, DebugSetGameWorkParam, NULL },)
+    KH_DEBUG({ "\x82" "a\x82n\x82r\x82r\x8e\x80\x96S         : %s", &DebugWork::g_dw.atelwork.iBossKilled, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, DebugSetGameWorkParam, NULL },)
+    KH_DEBUG({ "\x83" "C\x83x\x83\x93\x83g\x83X\x83L\x83" "b\x83v\x95s\x89\xc2 : %s", &DebugWork::g_dw.atelwork.iNotEventSkip, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0, NULL, NULL },)
+    KH_DEBUG({ "ATEL\x83" "C\x83x\x83\x93\x83g\x92\x86       : %s", &DebugWork::g_dw.atelwork.iIsAtelEvent, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0, NULL, NULL },)
+    KH_DEBUG({ "PC\x91\x80\x8d\xec\x95s\x89\xc2           : %s", &DebugWork::g_dw.atelwork.iNotPcControl, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, DebugSetGameWorkParam, NULL },)
+    KH_DEBUG({ "PAUSE\x8b\xd6\x8e~            : %s", &DebugWork::g_dw.atelwork.iNotPause, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, DebugSetGameWorkParam, NULL },)
+    KH_DEBUG({ "\x83`\x83\x85\x81[\x83g\x83\x8a\x83" "A\x83\x8b\x92\x86     : %s", &DebugWork::g_dw.atelwork.iIsTutorial, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83\x8b\x81[\x83\x80\x88\xda\x93\xae\x8b\xd6\x8e~       : %s", &DebugWork::g_dw.atelwork.iNotRoomJump, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83\x8b\x81[\x83\x80" "Creation\x8b\xd6\x8e~   : %s", &DebugWork::g_dw.atelwork.iNotRoomCreation, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0, NULL, NULL },)
+    KH_DEBUG({ "\x83n\x81[\x83g\x8fo\x82\xb3\x82\xc8\x82\xa2       : %s", &DebugWork::g_dw.atelwork.iNotHartBtl, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, DebugSetGameWorkParam, NULL },)
+    KH_DEBUG({ "BTL\x83`\x83\x85\x81[\x83g\x83\x8a\x83" "A\x83\x8b\x92\x86  : %s", &DebugWork::g_dw.atelwork.iIsBtlTutorial, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, DebugSetGameWorkParam, NULL },)
+    KH_DEBUG({ "\x83\x8f\x81[\x83\x8b\x83h\x83^\x83" "C\x83g\x83\x8b\x92\x86   : %s", &DebugWork::g_dw.atelwork.iIsWorldIntro, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, DebugSetGameWorkParam, NULL },)
+    KH_DEBUG({ NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+KH_DEBUG(};)
+KH_DEBUG(static DEBUG_WINDOW_TBL debugWinAtelWorkDef = { "ATEL WORK", -106, -(SCREEN_HEIGHT >> 1) + 150, 20, 30, 12, 0, 0, debugWinAtelWorkDefLine, NULL, DebugAtelWorkDef };)
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(DEBUG_WINDOW_LINE debugWinEventSelectPlayerLine[6] = {)
+    KH_DEBUG({ "coord axis\x81" "F%s", &DebugWork::g_dw.event.iAtelCoord, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, NULL, NULL },)
+    KH_DEBUG({ "actor pos \x81" "F%s", &DebugWork::g_dw.event.iNpcCoordDisp, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, DebugCreateNpcWindow, NULL },)
+    KH_DEBUG({ "actor list...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, DebugCreateNpcWindow, &debugWinNpcList },)
+    KH_DEBUG({ "\x83" "C\x83x\x83\x93\x83g\x83\x89\x83" "C\x83\x93\x81" "F%s", &DebugWork::g_dw.event.iEventline, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, DebugCreateEventLineDisp, NULL },)
+    KH_DEBUG({ "\x83t\x83\x89\x83O\x83`\x83" "F\x83" "b\x83N...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, NULL, &debugWinAtelWorkDef },)
+    KH_DEBUG({ NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+KH_DEBUG(};)
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(static DEBUG_WINDOW_TBL debugWinEventPlayer = { "ATEL\x81@CONFIG", -206, -(SCREEN_HEIGHT >> 1) + 50, 12, 16, 14, 0, 0, debugWinEventSelectPlayerLine, NULL, debugWinNPCMainlCall };)
+KH_DEBUG(})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(DEBUG_WINDOW_LINE debugNpcInfoLine[7] = {)
+    KH_DEBUG({ "PosX:  %.2f", &DebugWork::g_dw.event.vPos, 4, { 0 }, 3, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "PosY:  %.2f", &DebugWork::g_dw.event.vPos.y, 4, { 0 }, 3, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "PosZ:  %.2f", &DebugWork::g_dw.event.vPos.z, 4, { 0 }, 3, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "RotX:  %.2f", &DebugWork::g_dw.event.vRot, 4, { 0 }, 3, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "RotY:  %.2f", &DebugWork::g_dw.event.vRot.y, 4, { 0 }, 3, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ "RotZ:  %.2f", &DebugWork::g_dw.event.vRot.z, 4, { 0 }, 3, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+    KH_DEBUG({ NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },)
+KH_DEBUG(};)
+KH_DEBUG(})
 #include "Form/Menu/TitleReportDllStarter.h"
 __asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
 void ATEL::_TRACE(BOOL bDisp, const CHAR* fmt, ...) {
-    va_list args;
+    KH_DEBUG(va_list args;)
 
-    if (bDisp) {
-        printf("\x1b[%dm[ATEL]: ", 31);
-        va_start(args, fmt);
-        if (g_bTraceOnScreen) {
-            vsprintf(_szTraceBuf, fmt, args);
-            addTraceString(_szTraceBuf);
-        } else {
-            vprintf(fmt, args);
-        }
-        printf("\x1b[0m");
-        va_end(args);
-    }
+    KH_DEBUG(if (bDisp) {)
+        KH_DEBUG(printf("\x1b[%dm[ATEL]: ", 31);)
+        KH_DEBUG(va_start(args, fmt);)
+        KH_DEBUG(if (g_bTraceOnScreen) {)
+            KH_DEBUG(vsprintf(_szTraceBuf, fmt, args);)
+            KH_DEBUG(addTraceString(_szTraceBuf);)
+        KH_DEBUG(} else {)
+            KH_DEBUG(vprintf(fmt, args);)
+        KH_DEBUG(})
+        KH_DEBUG(printf("\x1b[0m");)
+        KH_DEBUG(va_end(args);)
+    KH_DEBUG(})
 }
 CVSM::CVSM(CAtel& atel, BOOL bTrace)
     : m_Atel(atel), m_GAptr(0), m_FAptr(0), m_Pctr(0), m_SP(0), m_Freg(0), m_InsCount(0), m_MaxSD(0), m_MinFP(0x4000),
@@ -1505,7 +1505,7 @@ void CVSM::loadFromMem(const BYTE* pAddr) {
         }
     }
     setFlag(3);
-    if (m_bTrace) dispActorTag(m_ActorCount, m_ActorTbl);
+    KH_DEBUG(if (m_bTrace) dispActorTag(m_ActorCount, m_ActorTbl);)
 }
 void CVSM::deleteActorAll() {}
 void CVSM::checkEvents() {
@@ -5775,54 +5775,54 @@ void close_dest_se(INT win_num) {
 }
 void WinOpenSE(INT ctd) {}
 void WinCloseSE() {}
-static void dispActorTag(INT nMax, const Actor* pTbl) {}
-namespace DWTEvent {
-extern DEBUG_WINDOW_LINE debugNpcInfoLine[];
-}
-extern INT SCREEN_HEIGHT;
-CActorDebug::CActorDebug(CTask* pParent) : CTask(pParent, 0x8000), m_pWindow(NULL) {
-    CTask* pA = CTaskMan::getSysTask(0x1A);
-    DEBUG_WINDOW_TBL debugActorInfo = {
-        ((CAtel*)pA)->getVSM()->getAvatarName(KH_DW(DebugWork::g_dw.event.iNpcID)),
-        0x90, -(SCREEN_HEIGHT >> 1) + 0x18, 7, 12, 14, 0, 6, DWTEvent::debugNpcInfoLine, NULL, NULL
-    };
-    m_pWindow = new KH_AT("(6871)") CDebugWindow(this, debugActorInfo);
-    m_pWindow->dispOn(0);
-}
-CActorDebug::~CActorDebug() {
-    if (m_pWindow) m_pWindow->out();
-}
-void CActorDebug::main() {
-    CAtel* pA = (CAtel*)CTaskMan::getSysTask(0x1A);
-    if (KH_DW(DebugWork::g_dw.event.iNpcCoordDisp)) {
-        if (!pA) return;
-        CAvatar* p = pA->getVSM()->getAvatar(KH_DW(DebugWork::g_dw.event.iNpcID));
-        if (!p) return;
-        if (p->getMovement()) {
+KH_DEBUG(static void dispActorTag(INT nMax, const Actor* pTbl) {})
+KH_DEBUG(namespace DWTEvent {)
+KH_DEBUG(extern DEBUG_WINDOW_LINE debugNpcInfoLine[];)
+KH_DEBUG(})
+KH_DEBUG(extern INT SCREEN_HEIGHT;)
+KH_DEBUG(CActorDebug::CActorDebug(CTask* pParent) : CTask(pParent, 0x8000), m_pWindow(NULL) {)
+    KH_DEBUG(CTask* pA = CTaskMan::getSysTask(0x1A);)
+    KH_DEBUG(DEBUG_WINDOW_TBL debugActorInfo = {)
+        KH_DEBUG(((CAtel*)pA)->getVSM()->getAvatarName(KH_DW(DebugWork::g_dw.event.iNpcID)),)
+        KH_DEBUG(0x90, -(SCREEN_HEIGHT >> 1) + 0x18, 7, 12, 14, 0, 6, DWTEvent::debugNpcInfoLine, NULL, NULL)
+    KH_DEBUG(};)
+    KH_DEBUG(m_pWindow = new KH_AT("(6871)") CDebugWindow(this, debugActorInfo);)
+    KH_DEBUG(m_pWindow->dispOn(0);)
+KH_DEBUG(})
+KH_DEBUG(CActorDebug::~CActorDebug() {)
+    KH_DEBUG(if (m_pWindow) m_pWindow->out();)
+KH_DEBUG(})
+KH_DEBUG(void CActorDebug::main() {)
+    KH_DEBUG(CAtel* pA = (CAtel*)CTaskMan::getSysTask(0x1A);)
+    KH_DEBUG(if (KH_DW(DebugWork::g_dw.event.iNpcCoordDisp)) {)
+        KH_DEBUG(if (!pA) return;)
+        KH_DEBUG(CAvatar* p = pA->getVSM()->getAvatar(KH_DW(DebugWork::g_dw.event.iNpcID));)
+        KH_DEBUG(if (!p) return;)
+        KH_DEBUG(if (p->getMovement()) {)
             KH_DEBUG(DebugWork::g_dw.event.vPos = p->getPos();)
             KH_DEBUG(DebugWork::g_dw.event.vRot = p->getRot();)
             KH_DEBUG(DebugWork::g_dw.event.vRot.x = RAD2DEG(DebugWork::g_dw.event.vRot.x);)
             KH_DEBUG(DebugWork::g_dw.event.vRot.y = RAD2DEG(DebugWork::g_dw.event.vRot.y);)
             KH_DEBUG(DebugWork::g_dw.event.vRot.z = RAD2DEG(DebugWork::g_dw.event.vRot.z);)
-        }
-    } else {
+        KH_DEBUG(})
+    KH_DEBUG(} else {)
         KH_DEBUG(DebugWork::g_dw.event.pClass = NULL;)
-        delete this;
-    }
-}
-CEventLineDisp::CEventLineDisp(CTask* pParent) : CTask(pParent, 0x8000) {
-    CTaskMan::getSysTask(0x1A);
-}
-CEventLineDisp::~CEventLineDisp() {}
-void CEventLineDisp::main() {}
-void CEventLineDisp::disp() {
-    CAtel* at = (CAtel*)CTaskMan::getSysTask(0x1A);
-    if (at && at->getVSM()) {
-        for (int i = 0; i < at->getVSM()->getActorNum(); i++) {
-            CEventTrap* p = at->getVSM()->getEventTrap(i);
-            if (p) p->dispShape();
-        }
-    }
-}
+        KH_DEBUG(delete this;)
+    KH_DEBUG(})
+KH_DEBUG(})
+KH_DEBUG(CEventLineDisp::CEventLineDisp(CTask* pParent) : CTask(pParent, 0x8000) {)
+    KH_DEBUG(CTaskMan::getSysTask(0x1A);)
+KH_DEBUG(})
+KH_DEBUG(CEventLineDisp::~CEventLineDisp() {})
+KH_DEBUG(void CEventLineDisp::main() {})
+KH_DEBUG(void CEventLineDisp::disp() {)
+    KH_DEBUG(CAtel* at = (CAtel*)CTaskMan::getSysTask(0x1A);)
+    KH_DEBUG(if (at && at->getVSM()) {)
+        KH_DEBUG(for (int i = 0; i < at->getVSM()->getActorNum(); i++) {)
+            KH_DEBUG(CEventTrap* p = at->getVSM()->getEventTrap(i);)
+            KH_DEBUG(if (p) p->dispShape();)
+        KH_DEBUG(})
+    KH_DEBUG(})
+KH_DEBUG(})
 
 // SOURCE DATA: .data .rodata .bss

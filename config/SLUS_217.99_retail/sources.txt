@@ -22,6 +22,7 @@ Game/Atel/AtelCamera
 Game/Atel/AtelCrossFade
 Game/Atel/AtelTutorial
 Game/Atel/CameraMan
+Game/Atel/EventTrap
 Game/AttachCard
 Game/BodyCollision
 Game/Bullet/Bullet

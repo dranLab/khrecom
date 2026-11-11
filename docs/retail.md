@@ -391,6 +391,12 @@ Sixteenth batch (2026-11-11): 548 units from source in retail, **160 functions d
   the gimDropProb name sprintfs and memset, the throw-parameter setters, initRoomCreate's trace counter and its
   overflow checks.
 
+Seventeenth batch (2026-11-11): **549 units from source in retail**, 151 functions differ.
+
+- ATEL::CEventTrap's shape display (the dispShape virtuals: retail's vtables are shorter, and the C3DLines,
+  C3DPolyG4 and CCoord members), VSME's DWTEvent debug windows, CActorDebug, CEventLineDisp, dispActorTag;
+  ATEL::_TRACE has an empty body in retail.
+
 ### Where it stands (end of the unattended run)
 
 - 517/638 units of retail from source; 10,392 functions match retail, 480 differ, 689 are beta-only ("extra").

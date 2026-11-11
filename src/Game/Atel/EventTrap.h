@@ -54,7 +54,7 @@ public:
     }
     BOOL isActive() { return m_nFlag & 1; }
     USHORT getType() { return m_nType; }
-    virtual void dispShape() {}
+    KH_DEBUG(virtual void dispShape() {})
 
 protected:
     virtual void onSetActive(BOOL b) {}
@@ -69,23 +69,23 @@ protected:
 class CEventLine : public CEventTrap {
 private:
     LineTrapSrc m_srcData;
-    C3DLines m_Shape;
-    CCoord m_Crd;
+    KH_DEBUG(C3DLines m_Shape;)
+    KH_DEBUG(CCoord m_Crd;)
 
 public:
     CEventLine() { setType(1); }
     void setData(const LineTrapSrc& inData);
     virtual INT checkTrap(const ETMoveData& inData);
-    virtual void dispShape();
+    KH_DEBUG(virtual void dispShape();)
 };
 
 class CEventBox : public CEventTrap {
 private:
     FMATRIX m_matVert;
     BoxTrapSrc m_srcData;
-    C3DPolyG4 m_Shape[2];
-    C3DLines m_Lines;
-    CCoord m_Crd;
+    KH_DEBUG(C3DPolyG4 m_Shape[2];)
+    KH_DEBUG(C3DLines m_Lines;)
+    KH_DEBUG(CCoord m_Crd;)
 
 public:
     CEventBox() { setType(2); }
@@ -95,7 +95,7 @@ public:
 protected:
     void setupVertexes();
     const BoxTrapSrc& getTrapSrc() const { return m_srcData; }
-    virtual void dispShape();
+    KH_DEBUG(virtual void dispShape();)
 };
 
 } // namespace ATEL
