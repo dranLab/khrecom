@@ -178,6 +178,9 @@ Game/Player/FriendKing .rodata 0x004137D0 0x80
 Game/Player/FriendPan .data 0x0033C600 0x8
 Game/Player/FriendPluto .data 0x0033C608 0x18
 Game/Player/FriendPluto .rodata 0x00413858 0x10
+Game/Player/Player .bss 0x005BEA40 0x8
+Game/Player/Player .data 0x0033C720 0x3b0
+Game/Player/Player .rodata 0x00414B90 0x1df0
 Game/Player/PlayerGauge .data 0x0033E070 0xa0
 Game/Player/PlayerGauge .rodata 0x00418B20 0x14f0
 Game/Player/PlayerRiku .data 0x0033E310 0xb0
@@ -279,6 +282,8 @@ System/PadIO .bss 0x0043B900 0x240
 System/Rnd .bss 0x00438710 0x9c0
 System/Rnd .data 0x003328C8 0x10
 System/RootTask .data 0x0033B360 0x4
+System/RsrcDB .bss 0x005BD640 0x120
+System/RsrcDB .rodata 0x004059F0 0x2c0
 System/RsrcData .rodata 0x004058E0 0x110
 System/Spad .bss 0x0043BD44 0x4
 System/Task .rodata 0x00405CC0 0x8

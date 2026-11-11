@@ -139,6 +139,7 @@ Game/Player/FriendJack
 Game/Player/FriendKing
 Game/Player/FriendPan
 Game/Player/FriendPluto
+Game/Player/Player
 Game/Player/PlayerGauge
 Game/Player/PlayerRiku
 Game/Player/PlayerSora
@@ -420,6 +421,7 @@ System/PadHandler
 System/PadIO
 System/Rnd
 System/RootTask
+System/RsrcDB
 System/RsrcData
 System/Spad
 System/Task

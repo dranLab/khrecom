@@ -774,11 +774,11 @@ void* CRsrcDB::getFirstData_Scene(INT nRsrcType) {
 }
 
 CRsrcData* CRsrcDB::getFirstRsrc_Scene(INT nRsrcType, INT nGroupID) {
-    CRsrcData* pRsrc = NULL;
+    CRsrcData* pRsrc;
     SLContainerT<CRsrcData>* pTopContainer = _getRsrcList(nRsrcType).getHead();
     SLContainerT<CRsrcData>* pSeekContainer = pTopContainer;
     SLContainerT<CRsrcData>* pContainer = _seekNext(pSeekContainer, nGroupID | s_nSceneFlag, FALSE);
-    if (pContainer) pRsrc = pContainer->getValue();
+    pRsrc = pContainer ? pContainer->getValue() : NULL;
     if (!pRsrc) {
         switch (nRsrcType) {
         case 4:
@@ -911,16 +911,16 @@ CRsrcList& CRsrcDB::getScrollTexList() {
 
 TexInfo* CRsrcDB::getRsrcTex(const CHAR* pszName, NAME_CASE nc) {
     CRsrcTex* pRsrc;
-    if (!pszName) {
-        TRACE_COL(_TTY_PURPLE, "!!!!!!!!!!! ERROR \x83" "e\x83N\x83X\x83`\x83\x83\x96\xbc\x82\xc9NULL\x82\xaa\x94\xad\x90\xb6\x82\xb5\x82\xc4\x82\xa2\x82\xdc\x82\xb7\x81" "B !!!!!!!!!!!\n");
-        pszName = "error";
-        pRsrc = (CRsrcTex*)getRsrc(2, pszName, nc);
-        if (!pRsrc) pRsrc = (CRsrcTex*)getRsrc(0x800, pszName, nc);
-    } else {
+    KH_DEBUG(if (!pszName) {)
+        KH_DEBUG(TRACE_COL(_TTY_PURPLE, "!!!!!!!!!!! ERROR \x83" "e\x83N\x83X\x83`\x83\x83\x96\xbc\x82\xc9NULL\x82\xaa\x94\xad\x90\xb6\x82\xb5\x82\xc4\x82\xa2\x82\xdc\x82\xb7\x81" "B !!!!!!!!!!!\n");)
+        KH_DEBUG(pszName = "error";)
+        KH_DEBUG(pRsrc = (CRsrcTex*)getRsrc(2, pszName, nc);)
+        KH_DEBUG(if (!pRsrc) pRsrc = (CRsrcTex*)getRsrc(0x800, pszName, nc);)
+    KH_DEBUG(} else {)
         pRsrc = (CRsrcTex*)getRsrc(2, pszName, nc);
         if (!pRsrc) pRsrc = (CRsrcTex*)getRsrc(0x10, pszName, nc);
         if (!pRsrc) pRsrc = (CRsrcTex*)getRsrc(0x800, pszName, nc);
-    }
+    KH_DEBUG(})
     return pRsrc ? pRsrc->getTexInfo() : NULL;
 }
 
@@ -1154,3 +1154,4 @@ INT CRsrcDB::getMotionIdxFromMotName(const CHAR* pszName, const CHAR* pszMotName
     return -1;
 }
 // SOURCE DATA: .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .rodata

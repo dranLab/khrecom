@@ -328,20 +328,20 @@ BOOL CGimmickManager::AfterInit_() {
     case 13:
         CGameWork::setFlag(1, 0x27, TRUE);
         break;
-    case 23:
-        switch (CSceneInfo::getCurrentSceneNum()) {
-        case 1:
-        case 8:
-        case 9:
-        case 11:
-        case 13:
-            CGameWork::setFlag(1, 0x27, TRUE);
-            break;
-        default:
-            CGameWork::setFlag(1, 0x27, FALSE);
-            break;
-        }
-        break;
+    KH_DEBUG(case 23:)
+        KH_DEBUG(switch (CSceneInfo::getCurrentSceneNum()) {)
+        KH_DEBUG(case 1:)
+        KH_DEBUG(case 8:)
+        KH_DEBUG(case 9:)
+        KH_DEBUG(case 11:)
+        KH_DEBUG(case 13:)
+            KH_DEBUG(CGameWork::setFlag(1, 0x27, TRUE);)
+            KH_DEBUG(break;)
+        KH_DEBUG(default:)
+            KH_DEBUG(CGameWork::setFlag(1, 0x27, FALSE);)
+            KH_DEBUG(break;)
+        KH_DEBUG(})
+        KH_DEBUG(break;)
     default:
         CGameWork::setFlag(1, 0x27, FALSE);
         break;
@@ -1244,12 +1244,12 @@ INT CGimmickManager::DecidePrize(INT in_GimmickID, const FVECTOR* Pos, const FVE
     Prize.No = 0;
     param = getGimParam(in_GimmickID);
     KH_DEBUG(memset(&DebugWork::g_dw.gimDropProb, 0, sizeof(DebugWork::g_dw.gimDropProb));)
-    if ((CSceneInfo::getCurrentWorldID(0) >= 14 && CSceneInfo::getCurrentWorldID(0) != 23) || param == NULL) {
-        Prize.Kind = (CARD_KIND)0xD2;
-        Prize.Num = 5;
-        createPrize(Prize, 0, Pos, Rot);
-        return 0;
-    }
+    KH_DEBUG(if ((CSceneInfo::getCurrentWorldID(0) >= 14 && CSceneInfo::getCurrentWorldID(0) != 23) || param == NULL) {)
+        KH_DEBUG(Prize.Kind = (CARD_KIND)0xD2;)
+        KH_DEBUG(Prize.Num = 5;)
+        KH_DEBUG(createPrize(Prize, 0, Pos, Rot);)
+        KH_DEBUG(return 0;)
+    KH_DEBUG(})
     ret = DecidePrizeKind(param);
     KH_DEBUG(DebugWork::g_dw.gimDropProb.ProbCategoryKind = ret;)
     if (KH_DW(DebugWork::g_dw.gimPrize.Kind)) ret = KH_DW(DebugWork::g_dw.gimPrize.Kind);

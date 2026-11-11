@@ -238,7 +238,7 @@ static const FVECTOR HANG_HAND_LOCAL_OFS = {{ 0.0f, 1.2f, 0.11f, 1.0f }};
 FLOAT g_fGravity = g_fWeight * -0.008166667f;
 FLOAT g_fAntiGravity = g_fWeight * 0.008166667f;
 }
-char* szAtkAnimID[71];
+KH_DEBUG(char* szAtkAnimID[71];)
 /* instantiates CStateTemplate<CPlayer> (the original's CPlayer constructor does): vtable and weak functions at the end */
 inline void _stateTemplateInstance() {
     CStateTemplate<CPlayer> t;
@@ -278,16 +278,16 @@ void CPlayer::enablePadControl(INT inFlag) {
         m_pInstance->m_uiPadFlag = (m_pInstance->m_uiPadFlag | inFlag) & ~(inFlag ^ bit);
     }
 }
-void CPlayer::enableDbgPadControl(INT inFlag) {
-    if (m_pInstance) {
-        UINT bit = 2;
-        inFlag <<= 1;
-        m_pInstance->m_uiPadFlag = (m_pInstance->m_uiPadFlag | inFlag) & ~(inFlag ^ bit);
-    }
-}
+KH_DEBUG(void CPlayer::enableDbgPadControl(INT inFlag) {)
+    KH_DEBUG(if (m_pInstance) {)
+        KH_DEBUG(UINT bit = 2;)
+        KH_DEBUG(inFlag <<= 1;)
+        KH_DEBUG(m_pInstance->m_uiPadFlag = (m_pInstance->m_uiPadFlag | inFlag) & ~(inFlag ^ bit);)
+    KH_DEBUG(})
+KH_DEBUG(})
 KH_DEBUG(__asm__(".rdata\n");)
 CPlayer::CPlayer(CTask* inParent, UINT inChara, INT inEx) : CEntity(inParent, (ObjType::eObjType)1), m_uiCharaID(inChara), m_iState(0) {
-    m_pDebug = NULL;
+    KH_DEBUG(m_pDebug = NULL;)
     declareSysTask(3);
     _init();
     m_uiRCID = PLM::g_uiPlayerRcid[m_uiCharaID];
@@ -658,9 +658,9 @@ void CPlayer::makeCockpit() {
 KH_DEBUG(__asm__(".rdata\n");)
 void CPlayer::makeRevolver() {
     if (!m_pRevolver) {
-        CARD* pDeck = NULL;
-        CARD* deck = CCard::getCurrentDeck();
-        if (!KH_DW(DebugWork::g_dw.player.iUseDbgDeck)) pDeck = deck;
+        KH_DEBUG(CARD* pDeck = NULL;) KH_RELEASE(CARD* pDeck = CCard::getCurrentDeck();) /* retail: no debug deck */
+        KH_DEBUG(CARD* deck = CCard::getCurrentDeck();) KH_RELEASE(CARD* deck;)
+        KH_DEBUG(if (!KH_DW(DebugWork::g_dw.player.iUseDbgDeck)) pDeck = deck;)
         if (CGameWork::getFlag(1, 0x2C)) pDeck = NULL;
         if (m_bIsMinigameScene) pDeck = NULL;
         if (!pDeck) {
@@ -1135,82 +1135,82 @@ void CPlayer::stateField() {
     m_tqStateTimer += m_tqFrameRate;
     getPadInfo();
     setControl();
-    if (m_iHP >= 2 && KH_DW(DebugWork::g_dw.player.iHP1)) {
-        m_iHP = 1;
-        if (m_pGauge) m_pGauge->setDamage(1, 0);
-    }
-    if (dbgButtonTrg(USR_SYSTEM, 0x200, 1)) {
-        m_pMove->setPos(m_vStartPos);
-        m_pMove->setOldPos(m_vStartPos);
-        return;
-    }
-    if (dbgButtonDown(USR_SYSTEM, 1, 1) && dbgButtonDown(USR_SYSTEM, 2, 1)) {
-        FVECTOR pos;
-        FVECTOR vec;
-        FMATRIX mat;
-        FLOAT x;
-        FLOAT y;
-        FLOAT dir;
-        FLOAT power;
+    KH_DEBUG(if (m_iHP >= 2 && KH_DW(DebugWork::g_dw.player.iHP1)) {)
+        KH_DEBUG(m_iHP = 1;)
+        KH_DEBUG(if (m_pGauge) m_pGauge->setDamage(1, 0);)
+    KH_DEBUG(})
+    KH_DEBUG(if (dbgButtonTrg(USR_SYSTEM, 0x200, 1)) {)
+        KH_DEBUG(m_pMove->setPos(m_vStartPos);)
+        KH_DEBUG(m_pMove->setOldPos(m_vStartPos);)
+        KH_DEBUG(return;)
+    KH_DEBUG(})
+    KH_DEBUG(if (dbgButtonDown(USR_SYSTEM, 1, 1) && dbgButtonDown(USR_SYSTEM, 2, 1)) {)
+        KH_DEBUG(FVECTOR pos;)
+        KH_DEBUG(FVECTOR vec;)
+        KH_DEBUG(FMATRIX mat;)
+        KH_DEBUG(FLOAT x;)
+        KH_DEBUG(FLOAT y;)
+        KH_DEBUG(FLOAT dir;)
+        KH_DEBUG(FLOAT power;)
         KH_DEBUG(DebugWork::g_dw.player.iPlayerInfo = 1;)
-        pos = m_pMove->getPos();
-        pos.y -= (FLOAT)dbgAnalogRY(USR_SYSTEM, 1) * 0.00024414062f;
-        x = (FLOAT)CPadHandler::getAnalogLX(1) * 0.00024414062f;
-        y = (FLOAT)CPadHandler::getAnalogLY(1) * 0.00024414062f;
-        dir = atan2f(x, y);
-        power = _sqrtf(x * x + y * y);
-        if (power > 1.0f) power = 1.0f;
-        vec.x = 0.0f;
-        vec.y = 0.0f;
-        vec.z = power * 0.5f;
-        vec.w = 1.0f;
-        UnitMatrix(mat);
-        RotMatrixY(mat, mat, dir);
-        ApplyMatrix(vec, mat, vec);
-        pos += vec;
+        KH_DEBUG(pos = m_pMove->getPos();)
+        KH_DEBUG(pos.y -= (FLOAT)dbgAnalogRY(USR_SYSTEM, 1) * 0.00024414062f;)
+        KH_DEBUG(x = (FLOAT)CPadHandler::getAnalogLX(1) * 0.00024414062f;)
+        KH_DEBUG(y = (FLOAT)CPadHandler::getAnalogLY(1) * 0.00024414062f;)
+        KH_DEBUG(dir = atan2f(x, y);)
+        KH_DEBUG(power = _sqrtf(x * x + y * y);)
+        KH_DEBUG(if (power > 1.0f) power = 1.0f;)
+        KH_DEBUG(vec.x = 0.0f;)
+        KH_DEBUG(vec.y = 0.0f;)
+        KH_DEBUG(vec.z = power * 0.5f;)
+        KH_DEBUG(vec.w = 1.0f;)
+        KH_DEBUG(UnitMatrix(mat);)
+        KH_DEBUG(RotMatrixY(mat, mat, dir);)
+        KH_DEBUG(ApplyMatrix(vec, mat, vec);)
+        KH_DEBUG(pos += vec;)
 
 
 
-        m_pMove->setPos(pos);
-        m_pMove->setOldPos(pos);
-        vec.init();
-        m_pMove->setVel(vec);
-        m_fJumpSpdY = 0.0f;
-        m_pMove->setAcc(vec);
-        return;
-    }
-    if (isTrgBattleChange()) {
-        BOOL result;
-        if (CSceneInfo::isMinigameScene()) result = CSceneInfo::reqExitMinigame(0);
-        else result = CSceneInfo::reqEnterBattle();
-        if (result) {
-            changeState(2);
-            setPlayerState(DBGWAIT);
-            return;
-        }
-    }
-    if (dbgCheckUser(KKIKUCHI)) {
-        if (dbgButtonTrg(USR_SYSTEM, 0x10, 1)) {
-            if (CGameWork::getInt(1, 0xE2)) CGameWork::setInt(1, 0xE2, 0);
-            else CGameWork::setInt(1, 0xE2, -1);
-        }
-        if (dbgButtonTrg(USR_SYSTEM, 0x80, 1)) {
-            m_iHP = 1;
-            if (m_pGauge) m_pGauge->setDamage(1, 0);
-        }
-        if (dbgButtonTrg(USR_SYSTEM, 8, 1)) {
-            PRIZE_PARAM param;
-            param.vPos = m_vCenterPos;
-            param.PrizeKind = 1;
-            param.fSpeed = 0.25f;
-            param.uiFlag = 0;
-            param.uiPrizeFlag = 0;
-            param.iNumber = rand() % 10;
-            param.vRot.set((-70.0f - RND::genrand_real1() * 10.0f) * 0.017453292f, RND::genrand_real1() * 360.0f * 0.017453292f, 0.0f);
-            Math3D::LimitPIVector(param.vRot);
-            CEntityFactory::getInstance()->createPrize(param, NULL);
-        }
-    }
+        KH_DEBUG(m_pMove->setPos(pos);)
+        KH_DEBUG(m_pMove->setOldPos(pos);)
+        KH_DEBUG(vec.init();)
+        KH_DEBUG(m_pMove->setVel(vec);)
+        KH_DEBUG(m_fJumpSpdY = 0.0f;)
+        KH_DEBUG(m_pMove->setAcc(vec);)
+        KH_DEBUG(return;)
+    KH_DEBUG(})
+    KH_DEBUG(if (isTrgBattleChange()) {)
+        KH_DEBUG(BOOL result;)
+        KH_DEBUG(if (CSceneInfo::isMinigameScene()) result = CSceneInfo::reqExitMinigame(0);)
+        KH_DEBUG(else result = CSceneInfo::reqEnterBattle();)
+        KH_DEBUG(if (result) {)
+            KH_DEBUG(changeState(2);)
+            KH_DEBUG(setPlayerState(DBGWAIT);)
+            KH_DEBUG(return;)
+        KH_DEBUG(})
+    KH_DEBUG(})
+    KH_DEBUG(if (dbgCheckUser(KKIKUCHI)) {)
+        KH_DEBUG(if (dbgButtonTrg(USR_SYSTEM, 0x10, 1)) {)
+            KH_DEBUG(if (CGameWork::getInt(1, 0xE2)) CGameWork::setInt(1, 0xE2, 0);)
+            KH_DEBUG(else CGameWork::setInt(1, 0xE2, -1);)
+        KH_DEBUG(})
+        KH_DEBUG(if (dbgButtonTrg(USR_SYSTEM, 0x80, 1)) {)
+            KH_DEBUG(m_iHP = 1;)
+            KH_DEBUG(if (m_pGauge) m_pGauge->setDamage(1, 0);)
+        KH_DEBUG(})
+        KH_DEBUG(if (dbgButtonTrg(USR_SYSTEM, 8, 1)) {)
+            KH_DEBUG(PRIZE_PARAM param;)
+            KH_DEBUG(param.vPos = m_vCenterPos;)
+            KH_DEBUG(param.PrizeKind = 1;)
+            KH_DEBUG(param.fSpeed = 0.25f;)
+            KH_DEBUG(param.uiFlag = 0;)
+            KH_DEBUG(param.uiPrizeFlag = 0;)
+            KH_DEBUG(param.iNumber = rand() % 10;)
+            KH_DEBUG(param.vRot.set((-70.0f - RND::genrand_real1() * 10.0f) * 0.017453292f, RND::genrand_real1() * 360.0f * 0.017453292f, 0.0f);)
+            KH_DEBUG(Math3D::LimitPIVector(param.vRot);)
+            KH_DEBUG(CEntityFactory::getInstance()->createPrize(param, NULL);)
+        KH_DEBUG(})
+    KH_DEBUG(})
     if (m_PlayerState != DEAD) {
         if (chkDamage()) return;
     }
@@ -1317,77 +1317,77 @@ void CPlayer::stateBattle() {
     getPadInfo();
     chkPlayCard();
     setControl();
-    if (m_iHP >= 2 && KH_DW(DebugWork::g_dw.player.iHP1)) {
-        m_iHP = 1;
-        if (m_pGauge) m_pGauge->setDamage(1, 0);
-    }
-    if (dbgButtonTrg(USR_SYSTEM, 0x200, 1)) {
-        m_pMove->setPos(m_vStartPos);
-        m_pMove->setOldPos(m_vStartPos);
-        return;
-    }
-    if (dbgButtonDown(USR_SYSTEM, 1, 1) && dbgButtonDown(USR_SYSTEM, 2, 1)) {
-        FVECTOR pos;
-        FVECTOR vec;
-        FMATRIX mat;
-        FLOAT x;
-        FLOAT y;
-        FLOAT dir;
-        FLOAT power;
+    KH_DEBUG(if (m_iHP >= 2 && KH_DW(DebugWork::g_dw.player.iHP1)) {)
+        KH_DEBUG(m_iHP = 1;)
+        KH_DEBUG(if (m_pGauge) m_pGauge->setDamage(1, 0);)
+    KH_DEBUG(})
+    KH_DEBUG(if (dbgButtonTrg(USR_SYSTEM, 0x200, 1)) {)
+        KH_DEBUG(m_pMove->setPos(m_vStartPos);)
+        KH_DEBUG(m_pMove->setOldPos(m_vStartPos);)
+        KH_DEBUG(return;)
+    KH_DEBUG(})
+    KH_DEBUG(if (dbgButtonDown(USR_SYSTEM, 1, 1) && dbgButtonDown(USR_SYSTEM, 2, 1)) {)
+        KH_DEBUG(FVECTOR pos;)
+        KH_DEBUG(FVECTOR vec;)
+        KH_DEBUG(FMATRIX mat;)
+        KH_DEBUG(FLOAT x;)
+        KH_DEBUG(FLOAT y;)
+        KH_DEBUG(FLOAT dir;)
+        KH_DEBUG(FLOAT power;)
         KH_DEBUG(DebugWork::g_dw.player.iPlayerInfo = 1;)
-        pos = m_pMove->getPos();
-        pos.y -= (FLOAT)dbgAnalogRY(USR_SYSTEM, 1) * 0.00024414062f;
-        x = (FLOAT)CPadHandler::getAnalogLX(1) * 0.00024414062f;
-        y = (FLOAT)CPadHandler::getAnalogLY(1) * 0.00024414062f;
-        dir = atan2f(x, y);
-        power = _sqrtf(x * x + y * y);
-        if (power > 1.0f) power = 1.0f;
-        vec.x = 0.0f;
-        vec.y = 0.0f;
-        vec.z = power * 0.5f;
-        vec.w = 1.0f;
-        UnitMatrix(mat);
-        RotMatrixY(mat, mat, dir);
-        ApplyMatrix(vec, mat, vec);
-        pos += vec;
+        KH_DEBUG(pos = m_pMove->getPos();)
+        KH_DEBUG(pos.y -= (FLOAT)dbgAnalogRY(USR_SYSTEM, 1) * 0.00024414062f;)
+        KH_DEBUG(x = (FLOAT)CPadHandler::getAnalogLX(1) * 0.00024414062f;)
+        KH_DEBUG(y = (FLOAT)CPadHandler::getAnalogLY(1) * 0.00024414062f;)
+        KH_DEBUG(dir = atan2f(x, y);)
+        KH_DEBUG(power = _sqrtf(x * x + y * y);)
+        KH_DEBUG(if (power > 1.0f) power = 1.0f;)
+        KH_DEBUG(vec.x = 0.0f;)
+        KH_DEBUG(vec.y = 0.0f;)
+        KH_DEBUG(vec.z = power * 0.5f;)
+        KH_DEBUG(vec.w = 1.0f;)
+        KH_DEBUG(UnitMatrix(mat);)
+        KH_DEBUG(RotMatrixY(mat, mat, dir);)
+        KH_DEBUG(ApplyMatrix(vec, mat, vec);)
+        KH_DEBUG(pos += vec;)
 
 
 
-        m_pMove->setPos(pos);
-        m_pMove->setOldPos(pos);
-        vec.init();
-        m_pMove->setVel(vec);
-        m_fJumpSpdY = 0.0f;
-        m_pMove->setAcc(vec);
-        return;
-    }
-    if (isTrgBattleChange()) {
-        if (CSceneInfo::reqExitBattle()) {
-            resetAction(3);
-            CardBattle::CCardBattle::setBattleEnd();
-            m_pRevolver = NULL;
-            changeState(2);
-            setPlayerState(DBGWAIT);
-            return;
-        }
-    }
-    if (dbgCheckUser(KKIKUCHI)) {
-        if (dbgButtonTrg(USR_SYSTEM, 0x10, 1)) {
-            if (CGameWork::getInt(1, 0xE2)) CGameWork::setInt(1, 0xE2, 0);
-            else CGameWork::setInt(1, 0xE2, -1);
-        }
-        if (dbgButtonTrg(USR_SYSTEM, 0x80, 1)) {
-            m_iHP = 1;
-            if (m_pGauge) m_pGauge->setDamage(1, 0);
-        }
-        if (dbgButtonDown(USR_SYSTEM, 2, 1)) {
-            if (dbgButtonTrg(USR_SYSTEM, 0x8000, 1)) addMP(10);
-            if (dbgButtonTrg(USR_SYSTEM, 0x2000, 1)) addMP(4);
-            if (dbgButtonTrg(USR_SYSTEM, 0x1000, 1)) addMP(1000);
-            if (dbgButtonTrg(USR_SYSTEM, 0x4000, 1)) addMP(100);
-        }
-        if (dbgButtonDown(USR_SYSTEM, 0x400, 1)) setFlipForce(NULL);
-    }
+        KH_DEBUG(m_pMove->setPos(pos);)
+        KH_DEBUG(m_pMove->setOldPos(pos);)
+        KH_DEBUG(vec.init();)
+        KH_DEBUG(m_pMove->setVel(vec);)
+        KH_DEBUG(m_fJumpSpdY = 0.0f;)
+        KH_DEBUG(m_pMove->setAcc(vec);)
+        KH_DEBUG(return;)
+    KH_DEBUG(})
+    KH_DEBUG(if (isTrgBattleChange()) {)
+        KH_DEBUG(if (CSceneInfo::reqExitBattle()) {)
+            KH_DEBUG(resetAction(3);)
+            KH_DEBUG(CardBattle::CCardBattle::setBattleEnd();)
+            KH_DEBUG(m_pRevolver = NULL;)
+            KH_DEBUG(changeState(2);)
+            KH_DEBUG(setPlayerState(DBGWAIT);)
+            KH_DEBUG(return;)
+        KH_DEBUG(})
+    KH_DEBUG(})
+    KH_DEBUG(if (dbgCheckUser(KKIKUCHI)) {)
+        KH_DEBUG(if (dbgButtonTrg(USR_SYSTEM, 0x10, 1)) {)
+            KH_DEBUG(if (CGameWork::getInt(1, 0xE2)) CGameWork::setInt(1, 0xE2, 0);)
+            KH_DEBUG(else CGameWork::setInt(1, 0xE2, -1);)
+        KH_DEBUG(})
+        KH_DEBUG(if (dbgButtonTrg(USR_SYSTEM, 0x80, 1)) {)
+            KH_DEBUG(m_iHP = 1;)
+            KH_DEBUG(if (m_pGauge) m_pGauge->setDamage(1, 0);)
+        KH_DEBUG(})
+        KH_DEBUG(if (dbgButtonDown(USR_SYSTEM, 2, 1)) {)
+            KH_DEBUG(if (dbgButtonTrg(USR_SYSTEM, 0x8000, 1)) addMP(10);)
+            KH_DEBUG(if (dbgButtonTrg(USR_SYSTEM, 0x2000, 1)) addMP(4);)
+            KH_DEBUG(if (dbgButtonTrg(USR_SYSTEM, 0x1000, 1)) addMP(1000);)
+            KH_DEBUG(if (dbgButtonTrg(USR_SYSTEM, 0x4000, 1)) addMP(100);)
+        KH_DEBUG(})
+        KH_DEBUG(if (dbgButtonDown(USR_SYSTEM, 0x400, 1)) setFlipForce(NULL);)
+    KH_DEBUG(})
     switch (m_PlayerState) {
     case ESCAPE:
     case END_BTL:
@@ -2347,16 +2347,16 @@ void CPlayer::exeLadder() {
             }
         }
         break;
-    case 4: {
-        FVECTOR pos;
-        FMATRIX m;
-        pos = m_vCenterPos;
-        SubVectorXYZ(m_vHangHandPos, pos, getPos());
-        UnitMatrix(m);
-        RotMatrixY(m, m, m_fDir);
-        InversMatrix(m, m);
-        ApplyMatrixXYZ(m_vHangHandPos, m, m_vHangHandPos);
-    }
+    case 4: KH_DEBUG({)
+        KH_DEBUG(FVECTOR pos;)
+        KH_DEBUG(FMATRIX m;)
+        KH_DEBUG(pos = m_vCenterPos;)
+        KH_DEBUG(SubVectorXYZ(m_vHangHandPos, pos, getPos());)
+        KH_DEBUG(UnitMatrix(m);)
+        KH_DEBUG(RotMatrixY(m, m, m_fDir);)
+        KH_DEBUG(InversMatrix(m, m);)
+        KH_DEBUG(ApplyMatrixXYZ(m_vHangHandPos, m, m_vHangHandPos);)
+    KH_DEBUG(})
         if (isMotionEnd()) {
             FLOAT dir;
             FVECTOR pos;
@@ -2493,8 +2493,8 @@ INT CPlayer::getJumpState() const {
 }
 void CPlayer::initJump(INT inFlag) {
     setPlayerState(PL::JUMP);
-    if (KH_DW(DebugWork::g_dw.player.iHiJump)) setActionFlag(0x200000, 0);
-    else setActionFlag(0, 0x200000);
+    KH_DEBUG(if (KH_DW(DebugWork::g_dw.player.iHiJump)) setActionFlag(0x200000, 0);)
+    KH_DEBUG(else setActionFlag(0, 0x200000);)
     if (CGame::isSoraGame()) {
         UINT uiActionSkill = CGameWork::getInt(0, 0x24);
         if (uiActionSkill & 4) setActionFlag(0x800000, 0);
@@ -2960,12 +2960,12 @@ void CPlayer::exeHang() {
         if (m_iNowAnimID == 0xF) {
             if (m_tqStateTimer < 1500) break;
             if (isMotionEnd()) {
-                pos = Crd(m_pModels->getBoneIndex(PL::g_szBoneLHand)).getWorldMatrix().v[3];
-                SubVectorXYZ(m_vHangHandPos, pos, getPos());
-                UnitMatrix(m);
-                RotMatrixY(m, m, m_fDir);
-                InversMatrix(m, m);
-                ApplyMatrixXYZ(m_vHangHandPos, m, m_vHangHandPos);
+                KH_DEBUG(pos = Crd(m_pModels->getBoneIndex(PL::g_szBoneLHand)).getWorldMatrix().v[3];)
+                KH_DEBUG(SubVectorXYZ(m_vHangHandPos, pos, getPos());)
+                KH_DEBUG(UnitMatrix(m);)
+                KH_DEBUG(RotMatrixY(m, m, m_fDir);)
+                KH_DEBUG(InversMatrix(m, m);)
+                KH_DEBUG(ApplyMatrixXYZ(m_vHangHandPos, m, m_vHangHandPos);)
                 m_iSubState = 1;
                 setAnimForce(0xE, 400, 0, 0, 0, 0);
             }
@@ -4201,8 +4201,8 @@ KH_DEBUG(__asm__(".rdata\n");)
 INT CPlayer::startSingleAction() {
     offAttack();
     UBYTE* pc = (UBYTE*)this + m_iStepStockSkill * 4; /* m_recvCardInfo.m_cardData[step]: id byte, category in the top nibble (CARD is not in the tree yet) */
-    m_uiCardID = pc[0x6D8];
-    switch (*(UINT*)(pc + 0x6D8) >> 28) {
+    m_uiCardID = pc[KH_VER(0x6D8, 0x6B8)];
+    switch (*(UINT*)(pc + KH_VER(0x6D8, 0x6B8)) >> 28) {
     case 1:
         initAttack(m_iAttackNo);
         break;
@@ -4359,13 +4359,13 @@ void CPlayer::setAttack() {
     if (CGame::isSoraGame()) m_uiAttackID = PL::g_AttackList[m_uiAttackKind];
     else if (!isConditionFlag(0x400000)) m_uiAttackID = PL::g_RikuAttackList[m_uiAttackKind];
     else m_uiAttackID = PL::g_DRikuAttackList[m_uiAttackKind];
-    if (m_iAttackNo == 0) {
-        if (CGame::isSoraGame()) {
-            if ((UINT)((USHORT)KH_DW(DebugWork::g_dw.player.iAttackID) - 1) < 7) m_uiAttackID = KH_DW(DebugWork::g_dw.player.iAttackID);
-        } else {
-            if ((UINT)((USHORT)KH_DW(DebugWork::g_dw.player.iAttackID) - 0x97) < 7) m_uiAttackID = KH_DW(DebugWork::g_dw.player.iAttackID);
-        }
-    }
+    KH_DEBUG(if (m_iAttackNo == 0) {)
+        KH_DEBUG(if (CGame::isSoraGame()) {)
+            KH_DEBUG(if ((UINT)((USHORT)KH_DW(DebugWork::g_dw.player.iAttackID) - 1) < 7) m_uiAttackID = KH_DW(DebugWork::g_dw.player.iAttackID);)
+        KH_DEBUG(} else {)
+            KH_DEBUG(if ((UINT)((USHORT)KH_DW(DebugWork::g_dw.player.iAttackID) - 0x97) < 7) m_uiAttackID = KH_DW(DebugWork::g_dw.player.iAttackID);)
+        KH_DEBUG(})
+    KH_DEBUG(})
     m_pAtkData = &PL::g_AttackDataList[m_uiAttackID];
     switch (m_uiAttackID) {
     case 5:
@@ -4956,10 +4956,10 @@ BOOL CPlayer::chkDamage() {
                 return FALSE;
             }
         }
-        if (isBattleFlag(0x20)) {
-            if (isBattleFlag(0x10000000)) TRACE("CPlayer::chkDamage(); [REFRECT]  x(Now Card Play TRG)\n");
-            if (CardBattle::CCardBattle::isStandingCard(1)) TRACE("CPlayer::chkDamage(); [REFRECT]  x(Now Card Play)\n");
-        }
+        KH_DEBUG(if (isBattleFlag(0x20)) {)
+            KH_DEBUG(if (isBattleFlag(0x10000000)) TRACE("CPlayer::chkDamage(); [REFRECT]  x(Now Card Play TRG)\n");)
+            KH_DEBUG(if (CardBattle::CCardBattle::isStandingCard(1)) TRACE("CPlayer::chkDamage(); [REFRECT]  x(Now Card Play)\n");)
+        KH_DEBUG(})
     }
     if (!m_bIsDead && isBattleFlag(4)) {
         initEnd();
@@ -6684,11 +6684,11 @@ void CPlayer::notifyGetPrize(INT inKind, INT inNumber, INT inState) {
                 } else if (inState > 0) {
                     Gauge::CPrizeGauge::setPrizeCard(card, inState, 0);
                 }
-                INT mode = CGame::getDbgGameMode();
-                if (mode > 3) {
-                    if (mode < 7) CCard::addDeck(card, 0);
-                    else if (mode < 9) CCard::addDeck(card, 0);
-                }
+                KH_DEBUG(INT mode = CGame::getDbgGameMode();)
+                KH_DEBUG(if (mode > 3) {)
+                    KH_DEBUG(if (mode < 7) CCard::addDeck(card, 0);)
+                    KH_DEBUG(else if (mode < 9) CCard::addDeck(card, 0);)
+                KH_DEBUG(})
             }
             break;
         case 5:
@@ -8036,3 +8036,4 @@ void CPlayerDebug::main() {
 #endif /* the static initializer (DWT table titles) is generated after the last INCLUDE_ASM: gcc assumes .rdata for its strings */
 KH_DEBUG(__asm__(".rdata\n");)
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .data .rodata
