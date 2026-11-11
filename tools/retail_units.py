@@ -22,6 +22,7 @@ The version is SLUS_217.99_retail (--version for another non-reference version).
 """
 
 import argparse
+import fnmatch
 import csv
 import re
 import struct
@@ -451,6 +452,9 @@ def main() -> None:
     if args.command == "switch":
         units = [u for u, r in rows.items() if r["eligible"] == "1"] if args.eligible else args.units
         current = sources_list(v)
+        # `!pattern` lines in sources.txt keep units in assembly (decided by hand, with a reason in docs/retail.md)
+        excluded = [p[1:] for p in current if p.startswith("!")]
+        units = [u for u in units if not any(fnmatch.fnmatchcase(u, p) for p in excluded)]
         if args.eligible:  # a fresh list: exactly the eligible units (the others lose marker and starts)
             marker = f"// SOURCE DATA {v.name}:"
             for unit in set(current) - set(units):
@@ -465,7 +469,7 @@ def main() -> None:
                 lines = starts.read_text(encoding="utf-8").splitlines()
                 starts.write_text("\n".join(l for l in lines if not l or l.startswith("#") or l.split()[0] in keep)
                                   + "\n", encoding="utf-8")
-            current = []
+            current = ["!" + p for p in excluded]
         starts = v.cfg / "unit_starts.txt"
         lines = starts.read_text(encoding="utf-8").splitlines() if starts.exists() else []
         head = [l for l in lines if l.startswith("#")] or [

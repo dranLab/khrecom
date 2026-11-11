@@ -1329,6 +1329,7 @@ segments:
       - [0x300850, rodata, System/FileIO]
       - [0x300888, rodata, System/mcd]
       - [0x3008A0, rodata, System/Memoca]
+      - [0x300CE0, rodata, System/PadIO]
       - [0x300CE8, rodata, System/Graphic/Anim]
       - [0x300D10, rodata, System/Graphic/Billboard]
       - [0x300D80, rodata, System/Graphic/DeFocus]

@@ -83,7 +83,7 @@ void C2DMan::resetTexInfo() {}
 
 HANDLE C2DMan::init(void* inFile, const CHAR* pBaseName) {
     C2DBase* p2DBase;
-    char chrTmp[8];
+    KH_DEBUG(char chrTmp[8];)
 
     if (!m_pInstance) {
         TRACE("C2DMan: C2DMan\x96\xa2\x8b\x4e\x93\xae\n");
@@ -114,10 +114,10 @@ HANDLE C2DMan::init(void* inFile, const CHAR* pBaseName) {
         return 0;
     }
     m_p2DBaseList->pushBack(*p2DBase);
-    *(UINT*)chrTmp = *(UINT*)inFile;
-    chrTmp[4] = 0;
-    TRACE_COL((TtyColor)0x21, "C2DMan: %s,%s\x82\xf0\x93\x6f\x98\x5e %d\n", pBaseName, chrTmp,
-              m_p2DBaseList->getListSize());
+    KH_DEBUG(*(UINT*)chrTmp = *(UINT*)inFile;)
+    KH_DEBUG(chrTmp[4] = 0;)
+    KH_DEBUG(TRACE_COL((TtyColor)0x21, "C2DMan: %s,%s\x82\xf0\x93\x6f\x98\x5e %d\n", pBaseName, chrTmp,
+              m_p2DBaseList->getListSize());)
     return p2DBase->getBaseHandle();
 }
 
@@ -396,3 +396,4 @@ void C2DMan::report() {}
 
 }  // namespace D2
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data

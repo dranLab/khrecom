@@ -1,5 +1,6 @@
 # Units this version builds from src/ (configure.py: build.yaml `sources:` names this file); written by
 # tools/retail_units.py switch/verify. One fnmatch pattern per line, `!` excludes.
+!Game/Collision/CollMap
 Form/Menu/BtlReportCtrl
 Form/Menu/GameOver
 Form/Menu/JMemoFlag
@@ -169,6 +170,7 @@ System/Component
 System/Coord
 System/CoordMan
 System/DebugProcInfo
+System/FifoFpl
 System/FileIO
 System/Fsm
 System/Graphic/2d/2DBase
@@ -177,6 +179,7 @@ System/Graphic/2d/2DFnt
 System/Graphic/2d/2DFntObj
 System/Graphic/2d/2DLay
 System/Graphic/2d/2DLayObj
+System/Graphic/2d/2DMan
 System/Graphic/2d/2DSeq
 System/Graphic/2d/2DSeqCtrl
 System/Graphic/2d/2DSeqObj
@@ -420,6 +423,7 @@ System/Graphic/TexUtil
 System/LinkedBuf
 System/MainTaskFactory
 System/Math3D
+System/Memoca
 System/Movie/AudioDec
 System/Movie/MSVideo
 System/Movie/Movie

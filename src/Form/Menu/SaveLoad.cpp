@@ -152,17 +152,17 @@ public:
     virtual ~CSaveLoadUI();
     virtual void main() {
         if ((m_nFlag & 4) && exeMessageDlg()) return;
-        INT nCount = 10;
+        KH_DEBUG(INT nCount = 10;)
         BOOL bContinue;
         do {
             update();
             bContinue = m_nFlag & 1;
             if (bContinue) {
                 m_nFlag &= ~1;
-                if (--nCount == 0) {
-                    TRACE("CSaveLoadUI \x82\xcc update() \x82\xaa\x89\xf1\x82\xe8\x82\xb7\x82\xac\x81" "c\n");
-                    bContinue = FALSE;
-                }
+                KH_DEBUG(if (--nCount == 0) {)
+                    KH_DEBUG(TRACE("CSaveLoadUI \x82\xcc update() \x82\xaa\x89\xf1\x82\xe8\x82\xb7\x82\xac\x81" "c\n");)
+                    KH_DEBUG(bContinue = FALSE;)
+                KH_DEBUG(})
             }
         } while (bContinue);
         if (m_pTimeCtrl) m_pTimeCtrl->update();

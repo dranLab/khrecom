@@ -248,7 +248,7 @@ BOOL CMemoca::reqSave(INT nPort, const CHAR* pszName, const BYTE* pBuf, INT nSiz
     case MC_DATATYPE_SYS:
         break;
     case MC_DATATYPE_GAME:
-    case MC_DATATYPE_DEBUG:
+    KH_DEBUG(case MC_DATATYPE_DEBUG:)
         nHeaderSize = 0x10;
         break;
     default:
@@ -399,7 +399,7 @@ void _setupIconSys(const CHAR* pszName) {
 
     switch (s_nDataType) {
     case MC_DATATYPE_SYS:
-        pszTitle = "\x82j\x82g\x81@\x82q\x82" "d\x81" "F\x81@\x82" "b\x82\x8f\x82l\x82r\x82\x99\x82\x93\x82\x94\x82\x85\x82\x8d\x81@\x82" "c\x82\x81\x82\x94\x82\x81";
+        pszTitle = KH_VER("\x82j\x82g\x81@\x82q\x82" "d\x81" "F\x81@\x82" "b\x82\x8f\x82l\x82r\x82\x99\x82\x93\x82\x94\x82\x85\x82\x8d\x81@\x82" "c\x82\x81\x82\x94\x82\x81", "\x82j\x82g\x81@\x82q\x82\x85\x81" "F\x82" "b\x82\x8f\x82l\x81@\x82r\x82\x99\x82\x93\x82\x94\x82\x85\x82\x8d\x81@\x82" "c\x82\x81\x82\x94\x82\x81"); /* retail: "Re" */
         pszIcon = "frec_sys.ico";
         nLF = 20;
         break;
@@ -411,18 +411,18 @@ void _setupIconSys(const CHAR* pszName) {
         if (nLen >= 2) {
             nID = atoi(pszName + nLen - 2);
         }
-        sprintf(szTmp, "\x82j\x82g\x81@\x82q\x82" "d\x81" "F\x81@\x82" "b\x82\x8f\x82l\x81@[%02d]%s", nID, pszTitle);
+        sprintf(szTmp, KH_VER("\x82j\x82g\x81@\x82q\x82" "d\x81" "F\x81@\x82" "b\x82\x8f\x82l\x81@[%02d]%s", "\x82j\x82g\x81@\x82q\x82\x85\x81" "F\x82" "b\x82\x8f\x82l\x81@\x81@[%02d]%s"), nID, pszTitle);
         nLF = 30;
         pszTitle = szTmp;
         pszIcon = "frec_dat.ico";
         break;
-    case MC_DATATYPE_DEBUG:
-        if (!pszTitle) {
-            nLF = 32;
-            pszTitle = "\x81uKHCOM\x81v\x83" "f\x83o\x83" "b\x83O\x8a\xc2\x8b\xab";
-        }
-        pszIcon = "slime1.ico";
-        break;
+    KH_DEBUG(case MC_DATATYPE_DEBUG:)
+        KH_DEBUG(if (!pszTitle) {)
+            KH_DEBUG(nLF = 32;)
+            KH_DEBUG(pszTitle = "\x81uKHCOM\x81v\x83" "f\x83o\x83" "b\x83O\x8a\xc2\x8b\xab";)
+        KH_DEBUG(})
+        KH_DEBUG(pszIcon = "slime1.ico";)
+        KH_DEBUG(break;)
     default:
         return;
     }
@@ -1390,7 +1390,7 @@ static INT _McDataWrite() {
         }
         if (s_nDataType != MC_DATATYPE_SYS) {
             _MakeMcHeader(s_pSaveData->getBufPtr(), s_nMcFileSize,
-                          s_nDataType == MC_DATATYPE_DEBUG ? _CHECKTYPE_CHECKSUM : _CHECKTYPE_CRC32);
+                          KH_VER(s_nDataType == MC_DATATYPE_DEBUG ? _CHECKTYPE_CHECKSUM : _CHECKTYPE_CRC32, _CHECKTYPE_CRC32));
         }
         s_nPhase = 9;
         break;
@@ -1655,136 +1655,137 @@ CHAR* CMemoca::getGameDataFileName() {
     return s_szGameFileName;
 }
 
-BOOL CMemoca::reqSave(const DebugParam& param) {
-    return reqSave(0, "BISLPS-99999-BF2", (const BYTE*)&param, 0x40, MC_DATATYPE_DEBUG, __null, 0);
-}
+KH_DEBUG(BOOL CMemoca::reqSave(const DebugParam& param) {)
+    KH_DEBUG(return reqSave(0, "BISLPS-99999-BF2", (const BYTE*)&param, 0x40, MC_DATATYPE_DEBUG, __null, 0);)
+KH_DEBUG(})
 
-BOOL CMemoca::reqLoad(DebugParam& param) {
-    return reqLoad(0, "BISLPS-99999-BF2", (BYTE*)&param, 0x40, MC_DATATYPE_DEBUG);
-}
+KH_DEBUG(BOOL CMemoca::reqLoad(DebugParam& param) {)
+    KH_DEBUG(return reqLoad(0, "BISLPS-99999-BF2", (BYTE*)&param, 0x40, MC_DATATYPE_DEBUG);)
+KH_DEBUG(})
 
-BOOL CMemoca::reqSaveSysTest(BOOL bSora, BOOL bRiku, BOOL bFlag) {
-    SysDataCOM s;
-    INT i;
+KH_DEBUG(BOOL CMemoca::reqSaveSysTest(BOOL bSora, BOOL bRiku, BOOL bFlag) {)
+    KH_DEBUG(SysDataCOM s;)
+    KH_DEBUG(INT i;)
 
-    TRACE("sizeof(SysDataCOM) = %d\n", sizeof(SysDataCOM));
-    memset(&s, 0, sizeof(s));
-    s.Data.SoraClear = (bSora | bRiku) != 0;
-    s.Data.RikuClear = (bRiku != 0);
-    s.Header.Id = 0x4d4f43;
-    s.Header.Area = 0x504a;
-    s.Header.Version = 1;
-    if (s.Data.SoraClear) {
-        if (bFlag) {
-            for (i = 0; i < 6; i++) {
-                s.Data.PoohClearIntro[i] = 1;
-                s.Data.PoohClear[i] = 3;
-            }
-            s.Data.LastPoohEvent = 0;
-            s.Data.PoohIntro = 0xff;
-        } else {
-            CGameWork::getPoohSysFlag(s);
-        }
-        s.Data.LatestGameType = 2;
-        s.Data.JiminyMemoComplete = 1;
-        for (i = 0; i < 13;) {
-            WorldSelTable* pTbl = CSceneInfo::getSelectableWorldTable(i, TRUE);
-            UINT j;
-            for (j = 0; j < pTbl->_nCount; j++) {
-                s.Data.WorldTblSora[i++] = pTbl->_pTbl[j];
-            }
-        }
-    }
-    if (s.Data.RikuClear) {
-        s.Data.LatestGameType = 1;
-        s.Data.DReportComplete = 1;
-        for (i = 0; i < 12;) {
-            WorldSelTable* pTbl = CSceneInfo::getSelectableWorldTable(i, FALSE);
-            UINT j;
-            for (j = 0; j < pTbl->_nCount; j++) {
-                s.Data.WorldTblRiku[i++] = pTbl->_pTbl[j];
-            }
-        }
-    }
-    return reqSave(0, s_szSysFileName, (const BYTE*)&s, sizeof(s), MC_DATATYPE_SYS, __null, 0);
-}
+    KH_DEBUG(TRACE("sizeof(SysDataCOM) = %d\n", sizeof(SysDataCOM));)
+    KH_DEBUG(memset(&s, 0, sizeof(s));)
+    KH_DEBUG(s.Data.SoraClear = (bSora | bRiku) != 0;)
+    KH_DEBUG(s.Data.RikuClear = (bRiku != 0);)
+    KH_DEBUG(s.Header.Id = 0x4d4f43;)
+    KH_DEBUG(s.Header.Area = 0x504a;)
+    KH_DEBUG(s.Header.Version = 1;)
+    KH_DEBUG(if (s.Data.SoraClear) {)
+        KH_DEBUG(if (bFlag) {)
+            KH_DEBUG(for (i = 0; i < 6; i++) {)
+                KH_DEBUG(s.Data.PoohClearIntro[i] = 1;)
+                KH_DEBUG(s.Data.PoohClear[i] = 3;)
+            KH_DEBUG(})
+            KH_DEBUG(s.Data.LastPoohEvent = 0;)
+            KH_DEBUG(s.Data.PoohIntro = 0xff;)
+        KH_DEBUG(} else {)
+            KH_DEBUG(CGameWork::getPoohSysFlag(s);)
+        KH_DEBUG(})
+        KH_DEBUG(s.Data.LatestGameType = 2;)
+        KH_DEBUG(s.Data.JiminyMemoComplete = 1;)
+        KH_DEBUG(for (i = 0; i < 13;) {)
+            KH_DEBUG(WorldSelTable* pTbl = CSceneInfo::getSelectableWorldTable(i, TRUE);)
+            KH_DEBUG(UINT j;)
+            KH_DEBUG(for (j = 0; j < pTbl->_nCount; j++) {)
+                KH_DEBUG(s.Data.WorldTblSora[i++] = pTbl->_pTbl[j];)
+            KH_DEBUG(})
+        KH_DEBUG(})
+    KH_DEBUG(})
+    KH_DEBUG(if (s.Data.RikuClear) {)
+        KH_DEBUG(s.Data.LatestGameType = 1;)
+        KH_DEBUG(s.Data.DReportComplete = 1;)
+        KH_DEBUG(for (i = 0; i < 12;) {)
+            KH_DEBUG(WorldSelTable* pTbl = CSceneInfo::getSelectableWorldTable(i, FALSE);)
+            KH_DEBUG(UINT j;)
+            KH_DEBUG(for (j = 0; j < pTbl->_nCount; j++) {)
+                KH_DEBUG(s.Data.WorldTblRiku[i++] = pTbl->_pTbl[j];)
+            KH_DEBUG(})
+        KH_DEBUG(})
+    KH_DEBUG(})
+    KH_DEBUG(return reqSave(0, s_szSysFileName, (const BYTE*)&s, sizeof(s), MC_DATATYPE_SYS, __null, 0);)
+KH_DEBUG(})
 
-BOOL CMemoca::reqLoadSysTest(CBuf& buf) {
-    if (buf.getBufSize() < 0x400) {
-        buf.releaseBuf(0);
-        buf.allocBuf(0x400);
-    }
-    return reqLoad(0, s_szSysFileName, buf.getBufPtr(), 0x400, MC_DATATYPE_SYS);
-}
+KH_DEBUG(BOOL CMemoca::reqLoadSysTest(CBuf& buf) {)
+    KH_DEBUG(if (buf.getBufSize() < 0x400) {)
+        KH_DEBUG(buf.releaseBuf(0);)
+        KH_DEBUG(buf.allocBuf(0x400);)
+    KH_DEBUG(})
+    KH_DEBUG(return reqLoad(0, s_szSysFileName, buf.getBufPtr(), 0x400, MC_DATATYPE_SYS);)
+KH_DEBUG(})
 
-BOOL CMemoca::reqUnformat(INT nPort) {
-    if (s_nPhase != 0) {
-        return FALSE;
-    }
-    s_nMcPort = nPort;
-    s_nPhase = 0x14;
-    s_nStep = 0;
-    return TRUE;
-}
+KH_DEBUG(BOOL CMemoca::reqUnformat(INT nPort) {)
+    KH_DEBUG(if (s_nPhase != 0) {)
+        KH_DEBUG(return FALSE;)
+    KH_DEBUG(})
+    KH_DEBUG(s_nMcPort = nPort;)
+    KH_DEBUG(s_nPhase = 0x14;)
+    KH_DEBUG(s_nStep = 0;)
+    KH_DEBUG(return TRUE;)
+KH_DEBUG(})
 
-static INT _McUnformat(INT nPort) {
-    INT r = -9999;
-    INT nRes;
+KH_DEBUG(static INT _McUnformat(INT nPort) {)
+    KH_DEBUG(INT r = -9999;)
+    KH_DEBUG(INT nRes;)
 
-    switch (s_nStep) {
-    case 0:
-        nRes = _checkCard(nPort);
-        if (nRes == -9999) {
-            break;
-        }
-        if (nRes != 1) {
-            r = nRes;
-            s_nStep = 0;
-        } else {
-            s_nStep = 1;
-        }
-        break;
-    case 1:
-        if (sceMcUnformat(nPort, 0) < 0) {
-            s_nStep = 0;
-        } else {
-            s_nMcLatestCmnd = 0xf;
-            s_nStep = 2;
-        }
-        break;
-    case 2:
-        nRes = _McSync(0x11);
-        if (nRes == -9999) {
-            break;
-        }
-        s_nMcLatestCmnd = 0;
-        if (nRes == 0) {
-            r = 0;
-            s_nStep = 0;
-        } else {
-            s_nStep = 0;
-            r = -1;
-        }
-        if (nRes == -13) {
-            s_nStep = 0;
-            r = -9999;
-        }
-        break;
-    }
-    return r;
-}
+    KH_DEBUG(switch (s_nStep) {)
+    KH_DEBUG(case 0:)
+        KH_DEBUG(nRes = _checkCard(nPort);)
+        KH_DEBUG(if (nRes == -9999) {)
+            KH_DEBUG(break;)
+        KH_DEBUG(})
+        KH_DEBUG(if (nRes != 1) {)
+            KH_DEBUG(r = nRes;)
+            KH_DEBUG(s_nStep = 0;)
+        KH_DEBUG(} else {)
+            KH_DEBUG(s_nStep = 1;)
+        KH_DEBUG(})
+        KH_DEBUG(break;)
+    KH_DEBUG(case 1:)
+        KH_DEBUG(if (sceMcUnformat(nPort, 0) < 0) {)
+            KH_DEBUG(s_nStep = 0;)
+        KH_DEBUG(} else {)
+            KH_DEBUG(s_nMcLatestCmnd = 0xf;)
+            KH_DEBUG(s_nStep = 2;)
+        KH_DEBUG(})
+        KH_DEBUG(break;)
+    KH_DEBUG(case 2:)
+        KH_DEBUG(nRes = _McSync(0x11);)
+        KH_DEBUG(if (nRes == -9999) {)
+            KH_DEBUG(break;)
+        KH_DEBUG(})
+        KH_DEBUG(s_nMcLatestCmnd = 0;)
+        KH_DEBUG(if (nRes == 0) {)
+            KH_DEBUG(r = 0;)
+            KH_DEBUG(s_nStep = 0;)
+        KH_DEBUG(} else {)
+            KH_DEBUG(s_nStep = 0;)
+            KH_DEBUG(r = -1;)
+        KH_DEBUG(})
+        KH_DEBUG(if (nRes == -13) {)
+            KH_DEBUG(s_nStep = 0;)
+            KH_DEBUG(r = -9999;)
+        KH_DEBUG(})
+        KH_DEBUG(break;)
+    KH_DEBUG(})
+    KH_DEBUG(return r;)
+KH_DEBUG(})
 
-INT CMemoca::unformatProc() {
-    INT r = -9999;
-    INT nRes;
+KH_DEBUG(INT CMemoca::unformatProc() {)
+    KH_DEBUG(INT r = -9999;)
+    KH_DEBUG(INT nRes;)
 
-    if (s_nPhase == 0x14) {
-        nRes = _McUnformat(s_nMcPort);
-        if (nRes != -9999) {
-            s_nPhase = 0;
-            r = nRes;
-        }
-    }
-    return r;
-}
+    KH_DEBUG(if (s_nPhase == 0x14) {)
+        KH_DEBUG(nRes = _McUnformat(s_nMcPort);)
+        KH_DEBUG(if (nRes != -9999) {)
+            KH_DEBUG(s_nPhase = 0;)
+            KH_DEBUG(r = nRes;)
+        KH_DEBUG(})
+    KH_DEBUG(})
+    KH_DEBUG(return r;)
+KH_DEBUG(})
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .rodata
