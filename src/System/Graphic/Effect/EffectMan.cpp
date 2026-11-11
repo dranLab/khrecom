@@ -83,14 +83,14 @@ typedef CSLCListT<CEffect> CEffectList;
 
 class CEffectTask : public CTask {
 private:
-    C3DLineStrip* m_pDebugLine;
+    KH_DEBUG(C3DLineStrip* m_pDebugLine;)
 
 public:
     CEffectTask(CTask* p);
     virtual ~CEffectTask();
     virtual void main();
     virtual void disp();
-    C3DLineStrip* getDebugPrim() { return m_pDebugLine; }
+    KH_DEBUG(C3DLineStrip* getDebugPrim() { return m_pDebugLine; })
 };
 
 
@@ -206,17 +206,17 @@ CEffectTask::CEffectTask(CTask* p) : CTask(p, 0x4000) {
     declareSysTask(0x14);
     s_pTask = this;
 #line 371
-    m_pDebugLine = new KH_AT("(371)") C3DLineStrip;
-    ASSERT(m_pDebugLine);
-    m_pDebugLine->setLayerFG(0);
+    KH_DEBUG(m_pDebugLine = new KH_AT("(371)") C3DLineStrip;)
+    KH_DEBUG(ASSERT(m_pDebugLine);)
+    KH_DEBUG(m_pDebugLine->setLayerFG(0);)
 }
 CEffectTask::~CEffectTask() {
     CEffectTask*& rTask = s_pTask;
     if (rTask == this) {
         rTask = __null;
     }
-    if (m_pDebugLine) delete m_pDebugLine;
-    m_pDebugLine = __null;
+    KH_DEBUG(if (m_pDebugLine) delete m_pDebugLine;)
+    KH_DEBUG(m_pDebugLine = __null;)
 }
 void CEffectTask::main() {
     if (CSceneEnv::getStopTypeBit() != ObjType::OBJ_BIT_ALL || CEffectMan::isLastDraw()) {
@@ -224,7 +224,7 @@ void CEffectTask::main() {
     }
 }
 void CEffectTask::disp() {
-    m_pDebugLine->disp();
+    KH_DEBUG(m_pDebugLine->disp();)
 }
 void CEffectMan::_effInitialize(int work_memory_size, int packet_memory_size) {
     SBYTE* pAddr;
@@ -726,8 +726,8 @@ BOOL CEffectMan::_updateCoord(CEffect* effect) {
         if (i >= nNum) {
             char* pszEffName = (char*)"\x83G\x83t\x83" "F\x83N\x83g\x96\xbc\x95s\x96\xbe";
             if (effect->m_pEffName) pszEffName = effect->m_pEffName;
-            TRACE("CEffectMan::_updateCoord \x83" "A\x83^\x83" "b\x83`\x90\xe6\x82\xaa\x82\xa2\x82\xc8\x82\xad\x82\xc8\x82\xc1\x82\xc4\x82\xa2\x82\xdc\x82\xb7\x81" "B\x8e\xa9\x8e" "E\x82\xb5\x82\xdc\x82\xb7 eff:%08x crd:%08x (%s:%d)\n",
-                  effect, &effect->Crd(0), pszEffName, effect->m_nEffNo);
+            KH_DEBUG(TRACE("CEffectMan::_updateCoord \x83" "A\x83^\x83" "b\x83`\x90\xe6\x82\xaa\x82\xa2\x82\xc8\x82\xad\x82\xc8\x82\xc1\x82\xc4\x82\xa2\x82\xdc\x82\xb7\x81" "B\x8e\xa9\x8e" "E\x82\xb5\x82\xdc\x82\xb7 eff:%08x crd:%08x (%s:%d)\n", effect, &effect->Crd(0), pszEffName, effect->m_nEffNo);)
+
             return FALSE;
         }
     }
@@ -839,7 +839,7 @@ void CEffectMan::_calc(FLOAT fFrameRate, const FMATRIX& mWV, const FMATRIX& mVS,
         setFogColor(col.x, col.y, col.z);
     }
     eStopBit = CSceneEnv::getStopTypeBit();
-    s_pTask->getDebugPrim()->m_vVERT.clear();
+    KH_DEBUG(s_pTask->getDebugPrim()->m_vVERT.clear();)
     pppSetFrameTime(fFrameRate);
     SPAD::allocSpad(0x4000);
     pppPartCalcReady();
@@ -852,17 +852,17 @@ void CEffectMan::_calc(FLOAT fFrameRate, const FMATRIX& mWV, const FMATRIX& mVS,
         if (!effect->isAlive()) continue;
         if (!effect->isDrawing()) continue;
         if (!effect->m_pPartMng) continue;
-        if (!effect->_checkData()) {
-            char str[128];
-            if (effect->m_pEffName) {
-                sprintf(str, "Data Err!! calcEffect %s %d\n", effect->m_pEffName, effect->m_nEffNo);
-            } else {
-                sprintf(str, "Data Err!! calcEffect %08x %d\n", effect, effect->m_nEffNo);
-            }
-            TRACE(str);
+        KH_DEBUG(if (!effect->_checkData()) {)
+            KH_DEBUG(char str[128];)
+            KH_DEBUG(if (effect->m_pEffName) {)
+                KH_DEBUG(sprintf(str, "Data Err!! calcEffect %s %d\n", effect->m_pEffName, effect->m_nEffNo);)
+            KH_DEBUG(} else {)
+                KH_DEBUG(sprintf(str, "Data Err!! calcEffect %08x %d\n", effect, effect->m_nEffNo);)
+            KH_DEBUG(})
+            KH_DEBUG(TRACE(str);)
 #line 1479
-            AssertApp(__FILE__, __LINE__, "(0)", str);
-        }
+            KH_DEBUG(AssertApp(__FILE__, __LINE__, "(0)", str);)
+        KH_DEBUG(})
         if (_updateCoord(effect)) {
             _updateColor(effect);
             if (!(s_iStatus & 4) || ((1 << effect->getType()) & eStopBit)) {
@@ -873,9 +873,9 @@ void CEffectMan::_calc(FLOAT fFrameRate, const FMATRIX& mWV, const FMATRIX& mVS,
             effect->_setSpecialData();
             pppSetUp(effect->m_pPartMng);
             viewclip = effect->_viewclip(mWC, frustumClip);
-            if (!viewclip && ((s_iStatus & 0x80000000) || KH_DW(DebugWork::g_dw.sys.m_iEffectBBOX))) {
-                _setDebugBBOXLine(pppGetBbox(effect->m_pPartMng));
-            }
+            KH_DEBUG(if (!viewclip && ((s_iStatus & 0x80000000) || KH_DW(DebugWork::g_dw.sys.m_iEffectBBOX))) {)
+                KH_DEBUG(_setDebugBBOXLine(pppGetBbox(effect->m_pPartMng));)
+            KH_DEBUG(})
             effect->m_iFlag |= 2;
             if (effect->_fade(fFrameRate) && pppPartCalc(effect->m_pPartMng, viewclip)) continue;
         }
@@ -999,17 +999,17 @@ void CEffectMan::draw() {
             effect->m_iFlag &= ~2;
             if (effect->isAlive() && effect->m_pPartMng) {
                 BOOL bDraw;
-                if (!effect->_checkData()) {
-                    char str[128];
-                    if (effect->m_pEffName) {
-                        sprintf(str, "Data Err!! drawEffect %s %d\n", effect->m_pEffName, effect->m_nEffNo);
-                    } else {
-                        sprintf(str, "Data Err!! drawEffect %08x %d\n", effect, effect->m_nEffNo);
-                    }
-                    TRACE(str);
+                KH_DEBUG(if (!effect->_checkData()) {)
+                    KH_DEBUG(char str[128];)
+                    KH_DEBUG(if (effect->m_pEffName) {)
+                        KH_DEBUG(sprintf(str, "Data Err!! drawEffect %s %d\n", effect->m_pEffName, effect->m_nEffNo);)
+                    KH_DEBUG(} else {)
+                        KH_DEBUG(sprintf(str, "Data Err!! drawEffect %08x %d\n", effect, effect->m_nEffNo);)
+                    KH_DEBUG(})
+                    KH_DEBUG(TRACE(str);)
 #line 1760
-                    AssertApp(__FILE__, __LINE__, "(0)", str);
-                }
+                    KH_DEBUG(AssertApp(__FILE__, __LINE__, "(0)", str);)
+                KH_DEBUG(})
                 if (bReInit) {
                     sceGsSyncPath(0, 0);
                     bReInit = FALSE;
@@ -1155,34 +1155,34 @@ void CEffectMan::setLastDraw(BOOL bLast) {
     }
 }
 BOOL CEffectMan::isLastDraw() { return s_iStatus & 8; }
-void CEffectMan::dispDebugBBOXLine(BOOL bDisp) {
-    if (bDisp) {
-        s_iStatus |= 0x80000000;
-    } else {
-        s_iStatus &= ~0x80000000;
-    }
-}
-void CEffectMan::_setDebugBBOXLine(const FVECTOR* pV) {
-    int idx[2][8] = {{0, 2, 4, 1, 0, 3, 6, 1}, {5, 3, 6, 7, 5, 2, 4, 7}};
-    G_STRIP Line;
-    INT j;
-    INT i;
+KH_DEBUG(void CEffectMan::dispDebugBBOXLine(BOOL bDisp) {)
+    KH_DEBUG(if (bDisp) {)
+        KH_DEBUG(s_iStatus |= 0x80000000;)
+    KH_DEBUG(} else {)
+        KH_DEBUG(s_iStatus &= ~0x80000000;)
+    KH_DEBUG(})
+KH_DEBUG(})
+KH_DEBUG(void CEffectMan::_setDebugBBOXLine(const FVECTOR* pV) {)
+    KH_DEBUG(int idx[2][8] = {{0, 2, 4, 1, 0, 3, 6, 1}, {5, 3, 6, 7, 5, 2, 4, 7}};)
+    KH_DEBUG(G_STRIP Line;)
+    KH_DEBUG(INT j;)
+    KH_DEBUG(INT i;)
 
-    Line.C.set(0xFF, 0, 0, 0x80);
+    KH_DEBUG(Line.C.set(0xFF, 0, 0, 0x80);)
 
 
 
-    for (i = 0; i < 2; i++) {
-        for (j = 0; j < 8; j++) {
-            Line.P = pV[idx[i][j]];
-            if (j >= 7) {
-                Line.Term = 1;
-            } else {
-                Line.Term = 0;
-            }
-            s_pTask->getDebugPrim()->m_vVERT.push_back(Line);
-        }
-    }
-}
+    KH_DEBUG(for (i = 0; i < 2; i++) {)
+        KH_DEBUG(for (j = 0; j < 8; j++) {)
+            KH_DEBUG(Line.P = pV[idx[i][j]];)
+            KH_DEBUG(if (j >= 7) {)
+                KH_DEBUG(Line.Term = 1;)
+            KH_DEBUG(} else {)
+                KH_DEBUG(Line.Term = 0;)
+            KH_DEBUG(})
+            KH_DEBUG(s_pTask->getDebugPrim()->m_vVERT.push_back(Line);)
+        KH_DEBUG(})
+    KH_DEBUG(})
+KH_DEBUG(})
 
 // SOURCE DATA: .data .rodata .bss

@@ -25,10 +25,10 @@
 #define com_memalign_d(alignment, bytes, msg, ra) com_memalign(alignment, bytes)
 #define com_calloc_d(n, size, msg, ra) com_calloc(n, size)
 #define com_realloc_d(mem, size, msg, ra) com_realloc(mem, size)
-#define TRACE(args...) ((void)0)
-#define TRACE_COL(args...) ((void)0)
-#define TRACE_USER(args...) ((void)0)
-#define TRACE_USER_COL(args...) ((void)0)
+#define TRACE(args...) ((void)(args))
+#define TRACE_COL(args...) ((void)(args))
+#define TRACE_USER(args...) ((void)(args))
+#define TRACE_USER_COL(args...) ((void)(args))
 /* System/Debug's debug-user and debug-button queries: no debug user, no button in retail */
 #define dbgCheckUser(uid) 0
 #define dbgButtonTrg(args...) 0

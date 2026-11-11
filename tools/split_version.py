@@ -244,6 +244,12 @@ def main() -> None:
             data_lines[section] = rows
     for s in (".data", ".rodata", ".bss"):
         rows = sorted(data_lines[s])
+        if any(a == sec[s][0] for a, _, _ in rows) and rows[0][0] < sec[s][0]:
+            # a library unit placed by offset before the section start is not in this version when another unit
+            # starts the section (retail: lib/nodebug/_GLOBAL__F_0build.cpp's frame data; System/Coord's .data
+            # starts .data)
+            report[f"{s}: units dropped (before the section start)"] += sum(a < sec[s][0] for a, _, _ in rows)
+            rows = [x for x in rows if x[0] >= sec[s][0]]
         if rows[0][0] != sec[s][0]:
             # the leading part without a pair: the beta's first unit of the section, if this version has it (crt0's
             # .bss: _args), else the first unit found

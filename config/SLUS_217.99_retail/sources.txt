@@ -22,7 +22,9 @@ Game/Atel/AtelCamera
 Game/Atel/AtelCrossFade
 Game/Atel/AtelTutorial
 Game/AttachCard
+Game/Bullet/Bullet
 Game/Bullet/BulletManager
+Game/Bullet/CreateBullet
 Game/CardKind
 Game/CollParam
 Game/Collision/CollMap
@@ -133,11 +135,14 @@ Game/Player/SummonDumbo
 Game/Player/SummonGenie
 Game/Player/SummonSinba
 Game/Player/SummonTink
+Game/Prize
 Game/SceneEnv
 Game/StorageWork
 Game/Technic
 System/Buf
 System/Component
+System/Coord
+System/CoordMan
 System/FileIO
 System/Fsm
 System/Graphic/2d/2DBase
@@ -147,6 +152,7 @@ System/Graphic/2d/2DFntObj
 System/Graphic/2d/2DLay
 System/Graphic/2d/2DLayObj
 System/Graphic/2d/2DSeqCtrl
+System/Graphic/Anim
 System/Graphic/Billboard
 System/Graphic/Camera
 System/Graphic/ColorFader
@@ -376,6 +382,7 @@ System/Movie/MovieScript
 System/PadHandler
 System/Rnd
 System/Spad
+System/Task
 System/Thread
 System/Tsin
 System/Util

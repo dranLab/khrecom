@@ -621,7 +621,7 @@ public:
         if (m_nCrdNum && m_pCrdArray && nIndex < m_nCrdNum) {
             return m_pCrdArray[nIndex];
         }
-        _coord_alart(nIndex);
+        KH_DEBUG(_coord_alart(nIndex);)
         return getExceptCoord();
     }
 
@@ -630,7 +630,7 @@ public:
         if (m_nCrdNum && m_pCrdArray && nIndex < m_nCrdNum) {
             return m_pCrdArray[nIndex];
         }
-        _coord_alart(nIndex);
+        KH_DEBUG(_coord_alart(nIndex);)
         return getExceptCoord();
     }
 
@@ -638,7 +638,7 @@ public:
     CCoord* Crd() {
         if (m_nCrdNum && m_pCrdArray)
             return m_pCrdArray;
-        _coord_nullalart();
+        KH_DEBUG(_coord_nullalart();)
         return __null;
     }
 
@@ -646,7 +646,7 @@ public:
     CCoord* Crd() const {
         if (m_nCrdNum && m_pCrdArray)
             return m_pCrdArray;
-        _coord_nullalart();
+        KH_DEBUG(_coord_nullalart();)
         return __null;
     }
 

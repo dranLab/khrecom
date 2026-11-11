@@ -97,7 +97,7 @@ private:
     BULLET_EFFECT_INFO* m_pExtraEffectTbl; /* 0x228 */
     CCollAttack* m_pAttack;              /* 0x22c */
     CStateTemplate<CBullet> m_State;     /* 0x230 */
-    C3DLines* m_pCollLines;              /* 0x250 */
+    KH_DEBUG(C3DLines* m_pCollLines;)    /* 0x250 */
 
 public:
     CBullet(CTask* inParent);

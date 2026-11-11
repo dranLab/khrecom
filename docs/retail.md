@@ -272,6 +272,27 @@ Eighth batch (2026-11-11): **517 units from source in retail** (of 648 complete 
 lacks). "100 Acre Woods" -> "100 Acre Wood" (CardKind.h's table, 8 units), the 71 unit-local `ASSERT` macros vanish
 in retail (`KH_DEBUG` body), CCollUtil::_initDbg is empty in retail.
 
+Ninth batch (2026-11-11, the differing functions): **524 units from source in retail**, 388 functions still differ
+(from 480). Debug-only code found from the retail assembly:
+
+- CCoords::Crd's `_coord_alart` / `_coord_nullalart` calls and the two functions (Coord.h, Coord.cpp): retail has
+  neither (76 functions in all units that inline Crd).
+- CBullet::m_pCollLines (the collision display's C3DLines) and every block that builds it: retail has no CCollDisp;
+  whole `if (CCollDisp::m_fgDisp) {...}` blocks are wrapped line by line (their locals must go too: the frame).
+- CEffectTask::m_pDebugLine, CEffectMan::dispDebugBBOXLine/_setDebugBBOXLine (absent in retail) and the
+  `_checkData()` error blocks of _calc/draw (retail doesn't even call _checkData there).
+- `tools/helpers/retail_wrap_lines.py FILE START END ...` wraps line ranges (each line's parentheses must balance;
+  a multi-line statement is first joined onto its first line, the continuation left empty: line-neutral, and the
+  beta's line note stays on the statement's first line).
+
+19. (decision) `TRACE(...)` and its variants are `((void)(args))` in retail: the arguments are evaluated (calls stay,
+    strings go). Evidence: CCoord::fix keeps both `CCoordMan::getExceptCoord(FALSE)` calls of its TRACE, and the
+    change fixed 10 functions (Coord, Prize, Card, RsrcData, MSVideo, JiminyMemo, Game, HumanBoss). One TRACE whose
+    arguments retail does not evaluate (CEffectMan::_updateCoord's `&effect->Crd(0)`) is wrapped `KH_DEBUG`.
+20. (decision) `tools/split_version.py`: a library unit placed by offset before a data section's start is dropped
+    when another unit starts the section (lib/nodebug/_GLOBAL__F_0build.cpp's frame data, absent from retail's
+    .data, had displaced System/Coord's .data).
+
 ### Where it stands (end of the unattended run)
 
 - 517/638 units of retail from source; 10,392 functions match retail, 480 differ, 689 are beta-only ("extra").

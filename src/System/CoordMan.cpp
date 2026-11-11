@@ -170,3 +170,4 @@ CCoord& CCoordMan::getExceptCoord(BOOL bVerbose) {
     return s_pExceptCoords->Crd(0);
 }
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data
