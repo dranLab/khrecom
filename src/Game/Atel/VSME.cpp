@@ -3617,7 +3617,7 @@ INT CVSM::execExt3Code(INT op, eATEL_REQ_RET& ret) {
                 }
                 break;
             case 64:
-                CTitleReportDllStarter::create(CTaskMan::getSysTask(1), 2, 0);
+                KH_DEBUG(CTitleReportDllStarter::create(CTaskMan::getSysTask(1), 2, 0);) // MATCH: not in retail
                 break;
             case 65:
                 TRACE("\x83G\x83N\x83X\x83g\x83\x8a\x81[\x83\x80\x81" "F\x83X\x83g\x83" "b\x83N\x91S\x95\x94\x8ao\x82\xa6\x82\xe9\x81" "A\x83J\x81[\x83h\x91S\x95\x94\x89\xf0\x8b\xd6\x81" "A\x95W\x8f\x80\x83X\x83L\x83\x8b\x91S\x8eg\x97p\x89\xc2\n");
@@ -4513,7 +4513,7 @@ INT CVSM::execExt3Code(INT op, eATEL_REQ_RET& ret) {
             }
             if (room < 0 || door < 0) {
                 if (room == -2) {
-                    INT mode = CGame::getDbgGameMode();
+                    INT mode = KH_DEBUG(CGame::getDbgGameMode()) KH_RELEASE(0); // MATCH: retail has no debug game mode
                     if (mode < 9) {
                         if (mode >= 7) {
                             CGame::reqCompleteGame();

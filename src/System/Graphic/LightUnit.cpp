@@ -139,12 +139,12 @@ void CLightUnit::_calc(const FVECTOR& ctr) {
         return;
     }
     m_iFlags |= 1;
-    lbsuu = 5;
-    ld = &ALF_default;
+    ld = &ALF_default; /* MATCH: the beta's marker order: ld (176-178) before lbsuu (184) */
     CMap* pMap = (CMap*)CTaskMan::getSysTask(2);
     if (pMap) {
         ld = pMap->getLightData();
     }
+    lbsuu = 5;
     KH_DEBUG(if (m_Kind == 1) {)
         KH_DEBUG(if (CTaskMan::getSysTask(0x31)) {)
             KH_DEBUG(lbsuu = 16;)
