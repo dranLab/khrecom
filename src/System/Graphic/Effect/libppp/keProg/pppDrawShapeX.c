@@ -40,10 +40,10 @@ void pppDrawShapeX(pppPObject *pobj, PDrawShapeX *p, pppCtrlTable *ctbl) {
         if (vds->seq >= ah->seqc) {
             if (seq->flag & 0x80) {
                 vds->seq = 0;
+                vds->wait = 0; /* MATCH: in each arm, as pppDrawShape (eiProg) */
             } else {
                 vds->seq = vds->seq_now;
-            }
-            vds->wait = 0;
+                vds->wait = 0; }
 #line 48
             KH_DEBUG(if (!(vds->seq < ah->seqc)) AssertApp(__FILE__, __LINE__, "vds->seq<ah->seqc", 0);)
         }

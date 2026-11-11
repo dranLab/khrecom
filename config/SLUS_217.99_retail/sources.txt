@@ -337,6 +337,7 @@ System/Graphic/Effect/libppp/keProg/pppDrawMdlSemi2
 System/Graphic/Effect/libppp/keProg/pppDrawMdlSemi3
 System/Graphic/Effect/libppp/keProg/pppDrawMdlTs2
 System/Graphic/Effect/libppp/keProg/pppDrawMdlTs3
+System/Graphic/Effect/libppp/keProg/pppDrawShapeX
 System/Graphic/Effect/libppp/keProg/pppKeAcmSolid
 System/Graphic/Effect/libppp/keProg/pppKeBornPtCmpl
 System/Graphic/Effect/libppp/keProg/pppKeBornRnd
