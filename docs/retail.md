@@ -381,6 +381,14 @@ Fifteenth batch (2026-11-11): **548 units from source in retail**, 176 functions
 24. (decision) Debug switches that are on by default read as their default in retail (KH_DW_ON, KH_DWV); the plain
     KH_DW stays 0 (the default of every other switch).
 
+Sixteenth batch (2026-11-11): 548 units from source in retail, **164 functions differ**.
+
+- CAvatar: the coordinate-axis lines lineX/Y/Z with disp(), the create*Struct functions in retail form (`if (!m)
+  m = new ...; return m != NULL;`), FadeAvatarMain returns a result variable (set FALSE only while fading).
+- CGimmickManager: GimDebugTrace with its calls, the probability debug window (CGimmickProbDebug and its tables),
+  the gimDropProb name sprintfs and memset, the throw-parameter setters, initRoomCreate's trace counter and its
+  overflow checks.
+
 ### Where it stands (end of the unattended run)
 
 - 517/638 units of retail from source; 10,392 functions match retail, 480 differ, 689 are beta-only ("extra").

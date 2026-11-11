@@ -108,9 +108,9 @@ class CAvatar : public ICommandAccepter, public CEntity {
     AvatarScaleStruct* m_pScaleStruct;     /* 0x200 */
     AvatarFadeStruct* m_pFadeStruct[5];    /* 0x204 */
     CStateTemplate<CAvatar> m_MainState[2]; /* 0x218 */
-    C3DLine lineX;                         /* 0x260 */
-    C3DLine lineY;                         /* 0x2d0 */
-    C3DLine lineZ;                         /* 0x340 */
+    KH_DEBUG(C3DLine lineX;                         /* 0x260 */)
+    KH_DEBUG(C3DLine lineY;                         /* 0x2d0 */)
+    KH_DEBUG(C3DLine lineZ;                         /* 0x340 */)
 
 private:
     void setParentActorIdx(UINT nIdx) { m_nParentActorIdx = nIdx; }
@@ -121,7 +121,7 @@ private:
     AvatarFadeStruct* createFadeStruct();
     void InitAvatar(INT flag);
     void TexAnimTalk(INT nMotion);
-    virtual void disp();
+    KH_DEBUG(virtual void disp();)
 
 public:
     CAvatar(CTask* pParent);

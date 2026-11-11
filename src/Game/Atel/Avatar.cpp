@@ -158,21 +158,21 @@ void CAvatar::InitAvatar(INT in_flag) {
     enableFade2Path(1, -1);
     setTexAnmSeq(0, "EYE_BLINK");
     if (in_flag == 1) setEntityFlag(1, 0);
-    lineX.m_pCrd = &Crd(0);
-    lineY.m_pCrd = &Crd(0);
-    lineZ.m_pCrd = &Crd(0);
-    lineX.m_C0.set(255, 0, 0, 255);
-    lineX.m_C1.set(255, 0, 0, 255);
-    lineY.m_C0.set(0, 255, 0, 255);
-    lineY.m_C1.set(0, 255, 0, 255);
-    lineZ.m_C0.set(0, 0, 255, 255);
-    lineZ.m_C1.set(0, 0, 255, 255);
-    lineX.m_P0.set(0.0f, 0.0f, 0.0f, 1.0f);
-    lineX.m_P1.set(1.0f, 0.0f, 0.0f, 1.0f);
-    lineY.m_P0.set(0.0f, 0.0f, 0.0f, 1.0f);
-    lineY.m_P1.set(0.0f, 1.0f, 0.0f, 1.0f);
-    lineZ.m_P0.set(0.0f, 0.0f, 0.0f, 1.0f);
-    lineZ.m_P1.set(0.0f, 0.0f, 1.0f, 1.0f);
+    KH_DEBUG(lineX.m_pCrd = &Crd(0);)
+    KH_DEBUG(lineY.m_pCrd = &Crd(0);)
+    KH_DEBUG(lineZ.m_pCrd = &Crd(0);)
+    KH_DEBUG(lineX.m_C0.set(255, 0, 0, 255);)
+    KH_DEBUG(lineX.m_C1.set(255, 0, 0, 255);)
+    KH_DEBUG(lineY.m_C0.set(0, 255, 0, 255);)
+    KH_DEBUG(lineY.m_C1.set(0, 255, 0, 255);)
+    KH_DEBUG(lineZ.m_C0.set(0, 0, 255, 255);)
+    KH_DEBUG(lineZ.m_C1.set(0, 0, 255, 255);)
+    KH_DEBUG(lineX.m_P0.set(0.0f, 0.0f, 0.0f, 1.0f);)
+    KH_DEBUG(lineX.m_P1.set(1.0f, 0.0f, 0.0f, 1.0f);)
+    KH_DEBUG(lineY.m_P0.set(0.0f, 0.0f, 0.0f, 1.0f);)
+    KH_DEBUG(lineY.m_P1.set(0.0f, 1.0f, 0.0f, 1.0f);)
+    KH_DEBUG(lineZ.m_P0.set(0.0f, 0.0f, 0.0f, 1.0f);)
+    KH_DEBUG(lineZ.m_P1.set(0.0f, 0.0f, 1.0f, 1.0f);)
     if ((UINT)getID() % 10000 == 1007 && m_pMove) {
         m_pMove->setRadius(0.15f);
         m_pMove->setShiftY(0.18f);
@@ -265,31 +265,31 @@ void CAvatar::getFade(INT nModel, FLOAT& fFade) const {
 FLOAT CAvatar::getDirection() const { return 0.0f; }
 INT CAvatar::getTypeID() const { return 0x4000; }
 BOOL CAvatar::createMoveStruct() {
-    if (m_pMoveStruct) return TRUE;
+    KH_DEBUG(if (m_pMoveStruct) return TRUE;) KH_RELEASE(if (!m_pMoveStruct))
     m_pMoveStruct = new KH_AT("(458)") AvatarMoveStruct;
-    if (!m_pMoveStruct) {
-        TRACE(" ... Fail to create MoveStructure\n");
-        return FALSE;
-    }
-    return TRUE;
+    KH_DEBUG(if (!m_pMoveStruct) {)
+        KH_DEBUG(TRACE(" ... Fail to create MoveStructure\n");)
+        KH_DEBUG(return FALSE;)
+    KH_DEBUG(})
+    return KH_VER(TRUE, m_pMoveStruct != NULL);
 }
 BOOL CAvatar::createRotateStruct() {
-    if (m_pRotateStruct) return TRUE;
+    KH_DEBUG(if (m_pRotateStruct) return TRUE;) KH_RELEASE(if (!m_pRotateStruct))
     m_pRotateStruct = new KH_AT("(477)") AvatarRotateStruct;
-    if (!m_pRotateStruct) {
-        TRACE(" ... Fail to create RotateStructure\n");
-        return FALSE;
-    }
-    return TRUE;
+    KH_DEBUG(if (!m_pRotateStruct) {)
+        KH_DEBUG(TRACE(" ... Fail to create RotateStructure\n");)
+        KH_DEBUG(return FALSE;)
+    KH_DEBUG(})
+    return KH_VER(TRUE, m_pRotateStruct != NULL);
 }
 BOOL CAvatar::createScaleStruct() {
-    if (m_pScaleStruct) return TRUE;
+    KH_DEBUG(if (m_pScaleStruct) return TRUE;) KH_RELEASE(if (!m_pScaleStruct))
     m_pScaleStruct = new KH_AT("(494)") AvatarScaleStruct;
-    if (!m_pScaleStruct) {
-        TRACE(" ... Fail to create ScalingStructure\n");
-        return FALSE;
-    }
-    return TRUE;
+    KH_DEBUG(if (!m_pScaleStruct) {)
+        KH_DEBUG(TRACE(" ... Fail to create ScalingStructure\n");)
+        KH_DEBUG(return FALSE;)
+    KH_DEBUG(})
+    return KH_VER(TRUE, m_pScaleStruct != NULL);
 }
 AvatarFadeStruct* CAvatar::createFadeStruct() {
     for (INT i = 0; i < 5; i++) {
@@ -734,13 +734,13 @@ INT CAvatar::onFadeing(INT nCmd, void* pParam, INT nID) {
     return -1;
 }
 BOOL CAvatar::FadeAvatarMain() {
-    TIMEQ nTQ = getFrameRate();
+    TIMEQ nTQ = getFrameRate(); KH_RELEASE(BOOL bResult;)
     for (INT i = 0; i < 5; i++) {
         if (m_pFadeStruct[i]) {
             countAvatarFadeTime(m_pFadeStruct[i], nTQ);
             if (!isOverAvatarFadeTimeLimit(m_pFadeStruct[i])) {
                 if (isOverAvatarFadeTimeLimit(m_pFadeStruct[i], nTQ)) setAvatarState(0x8000, FALSE);
-                FLOAT fFadeSpeed = getAvatarFadeSpeed(m_pFadeStruct[i]) * nTQ;
+                KH_RELEASE(bResult = FALSE;) FLOAT fFadeSpeed = getAvatarFadeSpeed(m_pFadeStruct[i]) * nTQ;
                 FLOAT fFade;
                 if (m_pFadeStruct[i]->_ModelNo == -1) {
                     getFade(-1, fFade);
@@ -758,7 +758,7 @@ BOOL CAvatar::FadeAvatarMain() {
             }
         }
     }
-    return FALSE;
+    return KH_VER(FALSE, bResult);
 }
 void CAvatar::FadeAvatarEnd() {}
 void CAvatar::cancelFadeAvatar() {}
@@ -1047,14 +1047,14 @@ FVECTOR* CAvatar::getPathStartPos(const CHAR* pszName) const {
     }
     return pPos;
 }
-void CAvatar::disp() {
-    CEntity::disp();
-    if (KH_DW(DebugWork::g_dw.event.iAtelCoord)) {
-        lineX.CGPrim::disp();
-        lineY.CGPrim::disp();
-        lineZ.CGPrim::disp();
-    }
-}
+KH_DEBUG(void CAvatar::disp() {)
+    KH_DEBUG(CEntity::disp();)
+    KH_DEBUG(if (KH_DW(DebugWork::g_dw.event.iAtelCoord)) {)
+        KH_DEBUG(lineX.CGPrim::disp();)
+        KH_DEBUG(lineY.CGPrim::disp();)
+        KH_DEBUG(lineZ.CGPrim::disp();)
+    KH_DEBUG(})
+KH_DEBUG(})
 AvatarMoveStruct::~AvatarMoveStruct() {
     delete _pPathData;
     delete _pHermiteHelper;
