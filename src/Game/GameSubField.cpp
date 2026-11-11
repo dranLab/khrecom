@@ -350,7 +350,7 @@ void CGameSubField::disposeTasks() {
     if (!CGameWork::getFlag(1, 0x33)) {
         D2::C2DSpr::destroyAllForSceneChange();
     }
-    CCollDisp::finalize();
+    KH_DEBUG(CCollDisp::finalize();)
     _collUtilDispose();
 }
 
@@ -500,3 +500,4 @@ void CGameSubField::preSleep() {}
 
 void CGameSubField::sleeping() {}
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

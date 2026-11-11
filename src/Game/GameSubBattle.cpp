@@ -453,7 +453,7 @@ void CGameSubBattle::disposeTasks() {
     CDeFocus::remove();
     CEffectMan::killAll((ObjType::eObjBit)0xFFFFFFFF, 0.0f);
     D2::C2DSpr::destroyAllForSceneChange();
-    CCollDisp::finalize();
+    KH_DEBUG(CCollDisp::finalize();)
     _collUtilDispose();
 }
 
@@ -646,3 +646,4 @@ BOOL CEncountEffect::isEnd() {
     return s_nEnEffSeq == _EESEQ_END;
 }
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .data .rodata

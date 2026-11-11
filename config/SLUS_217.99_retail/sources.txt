@@ -84,6 +84,8 @@ Game/Enemy/MonstroEventBattle
 Game/Enemy/SampleEnemy
 Game/EntityFactory
 Game/GameSub
+Game/GameSubBattle
+Game/GameSubField
 Game/Gimmick/BaseGimmick
 Game/Gimmick/GimmickAngelArrow
 Game/Gimmick/GimmickBell

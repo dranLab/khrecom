@@ -247,17 +247,17 @@ void CCardRevolver::_initialize(CARD* inDeck, INT inShortCut) {
                 convBtlDeckToCard(g_deckSoraTutorial);
                 setDeck((CARD*)g_deckSoraTutorial, -1);
             } else {
-                switch (KH_DW(DebugWork::g_dw.player.iUseDbgDeck)) {
-                case 3:
-                    convBtlDeckToCard(g_deckSoraDebug99);
-                    setDeck((CARD*)g_deckSoraDebug99, -1);
-                    break;
-                case 2:
-                    convBtlDeckToCard(g_deckSoraDebug);
-                    setDeck((CARD*)g_deckSoraDebug, -1);
-                    break;
-                case 0:
-                default:
+                KH_DEBUG(switch (KH_DW(DebugWork::g_dw.player.iUseDbgDeck)) {)
+                KH_DEBUG(case 3:)
+                    KH_DEBUG(convBtlDeckToCard(g_deckSoraDebug99);)
+                    KH_DEBUG(setDeck((CARD*)g_deckSoraDebug99, -1);)
+                    KH_DEBUG(break;)
+                KH_DEBUG(case 2:)
+                    KH_DEBUG(convBtlDeckToCard(g_deckSoraDebug);)
+                    KH_DEBUG(setDeck((CARD*)g_deckSoraDebug, -1);)
+                    KH_DEBUG(break;)
+                KH_DEBUG(case 0:)
+                KH_DEBUG(default:)
                     if (CSceneInfo::isMinigameScene()) {
                         convBtlDeckToCard(g_deckSoraPoo);
                         setDeck((CARD*)g_deckSoraPoo, -1);
@@ -266,8 +266,8 @@ void CCardRevolver::_initialize(CARD* inDeck, INT inShortCut) {
                         convBtlDeckToCard(g_deckSoraStarter);
                         setDeck((CARD*)g_deckSoraStarter, -1);
                     }
-                    break;
-                }
+                    KH_DEBUG(break;)
+                KH_DEBUG(})
             }
         } else {
             m_uiFlag |= 0x80;
@@ -357,25 +357,25 @@ void CCardRevolver::main() {
     INT i;
     CBattleCard* pBC;
     m_uiFlag = (INT)m_uiFlag & ~6;
-    if (dbgCheckUser(USR_PROG) && m_uiUser == 1 && dbgButtonDown(USR_SYSTEM, 8, 1)) {
-        TRACE("PLCR: ========================================\n");
-        TRACE("Rev: Mode = MODE_NORMAL\n");
-        TRACE("Rev: nTotal = %d, nRemain = %d, nActive = %d,\n", m_nTotal[0], m_nRemain[0], m_nActive[0]);
-        TRACE("Rev: nLimit = %d, nExtra = %d, iMax = %d\n", m_nLimit, m_nExtra, m_iMax);
-        TRACE("Rev: bActive = %d, tqTimer = %d, uiFlag = %08x,\n", m_bActive, m_tqTimer, m_uiFlag);
-        TRACE("PLCR: Cards--------------------------------\n");
-        for (i = 0; i < m_nLimit; i++) {
-            pBC = &m_pCards[i];
-            if (pBC) {
-                TRACE("%3d: [Card%03d:%d(%d)] iStock=%d, iHand=%d/%d, uiFlag=%08x, uiOwner=%d,\n", i, pBC->m_cardData.m_nKind,
+    KH_DEBUG(if (dbgCheckUser(USR_PROG) && m_uiUser == 1 && dbgButtonDown(USR_SYSTEM, 8, 1)) {)
+        KH_DEBUG(TRACE("PLCR: ========================================\n");)
+        KH_DEBUG(TRACE("Rev: Mode = MODE_NORMAL\n");)
+        KH_DEBUG(TRACE("Rev: nTotal = %d, nRemain = %d, nActive = %d,\n", m_nTotal[0], m_nRemain[0], m_nActive[0]);)
+        KH_DEBUG(TRACE("Rev: nLimit = %d, nExtra = %d, iMax = %d\n", m_nLimit, m_nExtra, m_iMax);)
+        KH_DEBUG(TRACE("Rev: bActive = %d, tqTimer = %d, uiFlag = %08x,\n", m_bActive, m_tqTimer, m_uiFlag);)
+        KH_DEBUG(TRACE("PLCR: Cards--------------------------------\n");)
+        KH_DEBUG(for (i = 0; i < m_nLimit; i++) {)
+            KH_DEBUG(pBC = &m_pCards[i];)
+            KH_DEBUG(if (pBC) {)
+                KH_DEBUG(TRACE("%3d: [Card%03d:%d(%d)] iStock=%d, iHand=%d/%d, uiFlag=%08x, uiOwner=%d,\n", i, pBC->m_cardData.m_nKind,
                       pBC->m_cardData.m_nNumber, pBC->getBaseCardNumber(), pBC->getStock(), pBC->getHand(),
-                      pBC->getHandMax(), pBC->getFlag(), pBC->getCardOwner());
-            } else {
-                TRACE("%3d: NULL,\n", i);
-            }
-        }
-        TRACE("PLCR: ========================================\n");
-    }
+                      pBC->getHandMax(), pBC->getFlag(), pBC->getCardOwner());)
+            KH_DEBUG(} else {)
+                KH_DEBUG(TRACE("%3d: NULL,\n", i);)
+            KH_DEBUG(})
+        KH_DEBUG(})
+        KH_DEBUG(TRACE("PLCR: ========================================\n");)
+    KH_DEBUG(})
     switch (m_iState) {
     case 0:
         exeWait();
@@ -456,13 +456,13 @@ void CCardRevolver::main() {
     }
 }
 void CCardRevolver::exeMain() {
-    if (KH_DW(DebugWork::g_dw.player.iDeckDbgDisp)) {
-        if (!(m_uiFlag & 0x10)) rollDeck(0, 0, 300);
-        m_uiFlag |= 0x10;
-    } else {
-        if (m_uiFlag & 0x10) rollDeck(0, 0, 300);
-        m_uiFlag = (INT)m_uiFlag & ~0x10;
-    }
+    KH_DEBUG(if (KH_DW(DebugWork::g_dw.player.iDeckDbgDisp)) {)
+        KH_DEBUG(if (!(m_uiFlag & 0x10)) rollDeck(0, 0, 300);)
+        KH_DEBUG(m_uiFlag |= 0x10;)
+    KH_DEBUG(} else {)
+        KH_DEBUG(if (m_uiFlag & 0x10) rollDeck(0, 0, 300);)
+        KH_DEBUG(m_uiFlag = (INT)m_uiFlag & ~0x10;)
+    KH_DEBUG(})
     INT mode = m_iMode;
     INT nActive = m_nActive[mode];
     INT nRemain = m_nRemain[mode];

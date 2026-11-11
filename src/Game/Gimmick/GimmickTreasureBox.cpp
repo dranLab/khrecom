@@ -110,7 +110,7 @@ INT CGimmickTreasureBox::getTypeID() const {
 void CGimmickTreasureBox::AfterInit() {
     m_Stat = ((CGimmickManager*)getSysTask(17))->getStorageGimmickState(getUniqueID());
     if (m_Stat == -1) m_Stat = 0;
-    if (getParam() != 0 && getParam() != 10) m_Stat |= 4;
+    KH_DEBUG(if (getParam() != 0 && getParam() != 10) m_Stat |= 4;)
     if (CSceneInfo::getCurrentSceneNum() == 24) {
         if (CGameWork::progMCW()._KeyRoomsCreateState) {
             if (getParam() == 0) out();
@@ -274,7 +274,7 @@ void CGimmickTreasureBox::NormalMain() {
             prize.Num = 0;
             prize.No = 0;
             prize = mgr->DecideTreasurePrize();
-            mgr->GimDebugTrace(&prize);
+            KH_DEBUG(mgr->GimDebugTrace(&prize);)
             CSceneEnv::setStop((ObjType::eObjBit)(ObjType::OBJ_BIT_TRUE_ALL & ~(ObjType::OBJ_BIT_2D | ObjType::OBJ_BIT_FUKIDASI | ObjType::OBJ_BIT_GIMMICK)));
             if (prize.StockKind) {
                 CTechnic::addTechnic(prize.StockKind);
@@ -400,7 +400,7 @@ void CGimmickTreasureBox::EnemyPop() {
     entity = NULL;
     v.y += 1.0f;
     world = CSceneInfo::getCurrentWorldID();
-    if (world == 23) world = CSceneInfo::getCurrentSceneNum();
+    KH_DEBUG(if (world == 23) world = CSceneInfo::getCurrentSceneNum();)
     switch (world) {
     case 0:
     case 10:
