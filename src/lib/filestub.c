@@ -2130,3 +2130,4 @@ int sceReadlink(const char* path, char* buf, unsigned int bufsize) {
     return ret_link;
 }
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .data .rodata

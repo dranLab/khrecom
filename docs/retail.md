@@ -261,3 +261,10 @@ Sixth batch (2026-11-11): **480 units from source in retail - every eligible uni
     provided (Tim2CheckFileHeader's "TIM2"/"CLT2" in .sdata).
 17. A row that starts inside a recorded unit moves to its end (lib/nodebug/__CTOR_LIST__ inside tlbfunc's .data).
 
+Seventh batch (2026-11-11): **503 units from source in retail.** `scan` counts references only from what the build
+keeps (not from linkonce copies removed as foreign), lets pointers in data whose start is known vote for the
+sections they point into (string tables in .data), and accepts a clear majority of votes:
+
+18. (decision) A data start is accepted with >= 80 % of its votes (one outlier is typically a pointer just past an
+    array); `verify` would catch a wrong one.
+

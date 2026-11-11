@@ -208,7 +208,31 @@ def try_unit(v: Version, unit: str, show=(), data=True) -> dict:
     if lo_d[1] > lo_d[0] and not (lo_d[1] - lo_d[0] - 8 < own_ld <= lo_d[1] - lo_d[0]):
         res["problems"].append(f"linkonce data {own_ld:#x}, retail range {lo_d[1] - lo_d[0]:#x}")
     if data:
-        referenced = {t[0] for t in target_of.values()}
+        # references from what the build keeps: .text, data, and this unit's own linkonce copies (others are removed)
+        def kept(sec):
+            if sec.startswith(".gnu.linkonce."):
+                addr = v.symbols.get(sec.split(".", 4)[-1])
+                rng = lo_t if sec.startswith(".gnu.linkonce.t.") else lo_d
+                return addr is not None and rng[0] <= addr < rng[1]
+            return True
+        referenced = {t[0] for (src_sec, _), t in target_of.items() if kept(src_sec)}
+        # pointers in data whose start is known vote for the sections they point into (a .data table of strings in
+        # .rodata that no code addresses directly); twice, for chains
+        for _ in range(2):
+            known = {n: c.most_common(1)[0][0] for n, c in votes.items()
+                     if c.most_common(1)[0][1] >= 0.8 * sum(c.values())}
+            extra = defaultdict(Counter)
+            for (src_sec, off), (dst, symval) in target_of.items():
+                if src_sec in known and src_sec in DATA and secdata.get(src_sec, (None,))[0] is not None and dst != src_sec:
+                    ours = struct.unpack_from("<I", secdata[src_sec][0], off)[0]
+                    try:
+                        theirs = v.image.word(known[src_sec] + off)
+                    except KeyError:
+                        continue
+                    extra[dst][(theirs - ours - symval) & 0xFFFFFFFF] += 1
+            for dst, c in extra.items():
+                if dst not in votes:
+                    votes[dst] = c
         for name, (blob, size, align) in sorted(secdata.items()):
             if not size or not (name in DATA or name.startswith(".gnu.linkonce.d.")):
                 continue
@@ -224,7 +248,7 @@ def try_unit(v: Version, unit: str, show=(), data=True) -> dict:
             elif votes.get(name):
                 start, n = votes[name].most_common(1)[0]
                 entry["votes"] = f"{n}/{sum(votes[name].values())}"
-                if n == sum(votes[name].values()):
+                if n >= 0.8 * sum(votes[name].values()):  # a clear majority (an outlier: a reference past an array)
                     entry["start"] = start
             if entry["start"] is not None and blob is not None:
                 try:

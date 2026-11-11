@@ -98,3 +98,4 @@ void CEnemyLargebody::stateAttack2() {
 }
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata
