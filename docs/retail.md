@@ -533,3 +533,48 @@ Open, with what was tried:
   BattleCard, Entity, MapEnemy, ShadowModel, PlayerControl, pppDrawShapeX, pppPart, SaveLoadUtil.
 - Units without retail code: DebugMenu, DebugWindow, DebugWindowTBL, CollDisp, KisEnemy, System/Debug, DebugWork,
   DebugPathData, vprintf, vsprintf.
+
+### Unattended run 2026-11-11/12 (second night): 601 -> 615 units (user: "keep working on the what's-left units")
+
+The main lever this time: **the beta's line markers give the original statement order** where our beta-matching
+source happened to compile the same with another order (sched2 and cross-jumping hid it); retail's scheduling and
+register allocation show the difference. `tools/helpers/asmlines.py` on the beta, then the retail try:
+Game setupWorld (both arms assign before their call), GimmickManager DecideGimmickCard_PossibleNoCheck (Num, Kind, No,
+StockKind; `breakFlag` declared after `ret` as the ref lists it), PlayerCamera initCamera (timer and near stores
+before the second init), PathData getNearPath (515-518), BattleEnemyManager's constructor (setAppearRoulettePrize in
+each arm), MainApp _loadIopModules (heap before pInfo), BattleCard's constructor (a mem-initializer list: all its
+member stores carry the constructor's line; m_nNumber first). Each edit keeps the beta matching.
+
+`build/rpermuter.py` (scratch): tools/permuter.py scored against the retail function (KH_VERSION, a retail compile
+command for units not switched yet). It found setupWorld, DecideGimmickCard and getNearPath in seconds; the markers
+then chose among its changes. It can't resolve constructors by mangled name, and fails while check.sh rebuilds.
+
+Decisions taken alone:
+
+17. (decision) Task.h's `getDebugInfo` "" only where retail has it: RsrcData.h includes Task.h's own includes
+    (Debug.h, SLContainer.h) instead of Task.h, AttachMotion.h includes Task.h (EffectMotion and SEMotion have the ""
+    before their own strings; of their headers only this one is theirs alone), TriangleIK drops the unused Camera.h.
+18. (decision) `config/<VERSION>/function_pairs.manual.txt`: function pairs by hand, read by tools/version_map.py
+    before the call graph. Retail's CMainApp::run no longer calls DebugWork::initialize, which had shifted the
+    call-graph names of its other callees by one (`_warmReset` was named "initialize__9DebugWorkv"); MainApp's static
+    functions are paired by link order.
+19. (decision) A debug switch may behave as on in one place and off in another: BattleCard stateHand's
+    `iDeckDbgDisp` tests match retail as KH_DW_ON (`if (!1) ...` keeps the block layout that removing the statement
+    loses), setHandLocate's as KH_DW (off).
+20. (decision) Placeholders for retail-only zero blocks in .rodata: BattleCard (16 bytes before the "" its tables
+    use, so its jump tables stay 16-aligned at 0x407010), Game's beta placeholder `KH_DEBUG` (retail merges it into
+    Task.h's "").
+
+Done: TriangleIK, SoundMan, FrecFont (Task.h; FrecFont's .data start by hand), Game, Entity (the debug camera check;
+EntityFactory's unreferenced .rodata start by hand), ShadowModel (drawAfter's shadow-count knob and its loop),
+GimmickManager, PlayerCamera (mode names; m_nBossCamID through `_ref`), PathData, PlayerControl (debug inputs),
+HeapMan (the debug allocation API, dumps and reports), MainApp (trace screen, halt, AssertApp, debug pause stepping,
+`_bSetupManagers`; retail's IOP module file is 0x8F sectors), SaveLoadUtil (a Riku-game rollback retail lacks),
+BattleCard. Partial: SceneInfo reqChangeRoom (retail refuses a given scene), Model getTexParam (VramDef.h's
+`_getTmpTexArea`, as Gprim) and CSemiZModel::makePkt (one pass), TreasureBox (WndCmnd.h's constructor sets nLine),
+VSME (`_TRACE` an empty inline, m_bTrace never set), pppDrawShapeX (no shape check).
+
+Tried without a match (see the open list): TRACE as `do {} while (0)` or `((void)0)` (both worse across ~80 units),
+CChatMan::instance() returning `*m_pInstance` (no effect where wanted, WorldSelect worse), loadFromMem's ref locals
+(breaks the beta), PlayerManager setReqLoad without the `next` local (breaks the beta), CardRevolver's debug-deck
+switch kept (no effect).
