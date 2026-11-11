@@ -412,13 +412,13 @@ CBattleEnemy::~CBattleEnemy() {
 INT CBattleEnemy::getTypeID() const {
     return 0x1004;
 }
-void CBattleEnemy::main() {
-    if (!(KH_DW(DebugWork::g_dw.enemy.uiFlag) & 0x20)) CEntity::main();
-}
-void CBattleEnemy::update() {
-    if (KH_DW(DebugWork::g_dw.enemy.uiFlag) & 0x400) clearSpeed();
-    else CFSM::update();
-}
+KH_DEBUG(void CBattleEnemy::main() {)
+    KH_DEBUG(if (!(KH_DW(DebugWork::g_dw.enemy.uiFlag) & 0x20)) CEntity::main();)
+KH_DEBUG(})
+KH_DEBUG(void CBattleEnemy::update() {)
+    KH_DEBUG(if (KH_DW(DebugWork::g_dw.enemy.uiFlag) & 0x400) clearSpeed();)
+    KH_DEBUG(else CFSM::update();)
+KH_DEBUG(})
 BOOL CBattleEnemy::initalize(INT inGroupID, INT inRsrcID, UINT iFlag) {
     if (!CEntity::initalize(inGroupID, inRsrcID, iFlag)) return FALSE;
     if (!initEnemyParam(inGroupID, inRsrcID, m_iParam)) initEnemyParam(inGroupID, inRsrcID, 0);

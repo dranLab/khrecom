@@ -104,8 +104,8 @@ public:
     CBattleEnemy(CTask* inParent, CState* inDefaultState, CState* inMainState);
     virtual ~CBattleEnemy();
     virtual INT getTypeID() const;
-    virtual void main();
-    virtual void update();
+    KH_DEBUG(virtual void main();) /* retail: only CEntity::main (the override serves a debug switch) */
+    KH_DEBUG(virtual void update();) /* retail: CFSM::update */
     virtual BOOL initalize(INT inGroupID, INT inRsrcID, UINT iFlag);
     virtual BOOL initalize(INT inGroupID, INT inRsrcID) { return initalize(inGroupID, inRsrcID, 0); }
     virtual void onMsg(INT inMsg, void* inExtraInfo);

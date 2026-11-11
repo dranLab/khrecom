@@ -134,3 +134,4 @@ void CEnemyDefender::stateAttack2() {
 void CEnemyDefender::endStateAttack2() {}
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata
