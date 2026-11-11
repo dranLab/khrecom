@@ -139,11 +139,11 @@ namespace PL {
 extern BULLET_EFFECT_INFO g_EffTbl_Skill[67][4]; // PlayerAttack.h in the original
 extern INT g_CardBreakTime[8]; // PlayerAttack.h in the original
 }
-class CPlayerDebug : public CTask { /* main() is still INCLUDE_ASM; the members are those the constructor touches */
-    CDebugWindow* m_pWin; PCAM_DATA* m_pCamData; PATK_DATA* m_pAtkData; INT m_iPrevState; INT m_iPrevMuteki; INT m_iPrevHP; CHAR m_szBuf[6][0x20];
-public: CPlayerDebug(CTask* inParent); virtual ~CPlayerDebug();
-    virtual void main();
-};
+KH_DEBUG(class CPlayerDebug : public CTask { /* main() is still INCLUDE_ASM; the members are those the constructor touches */)
+    KH_DEBUG(CDebugWindow* m_pWin; PCAM_DATA* m_pCamData; PATK_DATA* m_pAtkData; INT m_iPrevState; INT m_iPrevMuteki; INT m_iPrevHP; CHAR m_szBuf[6][0x20];)
+KH_DEBUG(public: CPlayerDebug(CTask* inParent); virtual ~CPlayerDebug();)
+    KH_DEBUG(virtual void main();)
+KH_DEBUG(};)
 #include "Form/Menu/JMemoFlag.h"
 #include "Game/Player/Friend.h"
 #include "Game/Player/Summon.h"
@@ -653,7 +653,7 @@ void CPlayer::makeCockpit() {
     m_pGauge->setMaxHP(m_iMaxHP);
     m_pGauge->setHP(m_iHP, 1);
     m_pGauge->setDP(m_iDP, 30);
-    m_pDebug = new KH_AT("(1124)") CPlayerDebug(this);
+    KH_DEBUG(m_pDebug = new KH_AT("(1124)") CPlayerDebug(this);)
 }
 KH_DEBUG(__asm__(".rdata\n");)
 void CPlayer::makeRevolver() {
@@ -7405,7 +7405,7 @@ void CPlayer::stateHide_() {
 void CPlayer::endStateHide_() {
     endStateHide();
 }
-/* the debug window / state name tables (after the last function with strings, before CPlayerDebug) */
+#ifndef KH_RETAIL /* retail: no CPlayerDebug */ /* the debug window / state name tables (after the last function with strings, before CPlayerDebug) */
 KH_DEBUG(__asm__(".rdata\n");)
 char* szPlayerState[38] = {
     "INIT",
@@ -8033,6 +8033,6 @@ void CPlayerDebug::main() {
         m_pAtkData->FLAG = KH_DW(DebugWork::g_dw.player.iAtkFlag[0]) | KH_DW(DebugWork::g_dw.player.iAtkFlag[1]) << 1 | KH_DW(DebugWork::g_dw.player.iAtkFlag[2]) << 2 | KH_DW(DebugWork::g_dw.player.iAtkFlag[3]) << 3 | KH_DW(DebugWork::g_dw.player.iAtkFlag[4]) << 4 | KH_DW(DebugWork::g_dw.player.iAtkFlag[5]) << 5 | KH_DW(DebugWork::g_dw.player.iAtkFlag[6]) << 6 | KH_DW(DebugWork::g_dw.player.iAtkFlag[7]) << 7;
     }
 }
-/* the static initializer (DWT table titles) is generated after the last INCLUDE_ASM: gcc assumes .rdata for its strings */
+#endif /* the static initializer (DWT table titles) is generated after the last INCLUDE_ASM: gcc assumes .rdata for its strings */
 KH_DEBUG(__asm__(".rdata\n");)
 // SOURCE DATA: .data .rodata .bss

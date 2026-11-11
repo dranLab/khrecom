@@ -361,11 +361,11 @@ void CPlayerManager::init() {
     case 13:
         if (CGame::isSoraGame() && nScene == 1053) m_uiFlag |= 0x8000;
         break;
-    case 22:
-        if (nScene == 1025) m_uiFlag |= 0x8000;
-        if (nScene == 1016) m_uiFlag |= 0x2000;
-        if (CGame::isRikuGame() && nScene == 1023) m_uiFlag |= 0x800;
-        break;
+    KH_DEBUG(case 22:)
+        KH_DEBUG(if (nScene == 1025) m_uiFlag |= 0x8000;)
+        KH_DEBUG(if (nScene == 1016) m_uiFlag |= 0x2000;)
+        KH_DEBUG(if (CGame::isRikuGame() && nScene == 1023) m_uiFlag |= 0x800;)
+        KH_DEBUG(break;)
     }
     if (CSceneInfo::isBattleScene() || CSceneInfo::isMinigameScene()) {
         m_uiFlag |= 1;
@@ -377,13 +377,13 @@ void CPlayerManager::init() {
         m_pCB = CardBattle::CCardBattle::getInstance();
     }
     initRsrcBlock();
-    for (i = 0; i < 17; i++) {
-        sprintf(m_strBlock[i], " ");
+    KH_DEBUG(for (i = 0; i < 17; i++) {)
+        KH_DEBUG(sprintf(m_strBlock[i], " ");)
         KH_DEBUG(DebugWork::g_dw.player.m_szBlock[i] = m_strBlock[i];)
-    }
-    m_pWindow = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(701)")
-        CDebugWindow(this, DWTPlayer::debugPlayerBlockInfo);
-    m_pWindow->dispOff(0);
+    KH_DEBUG(})
+    KH_DEBUG(m_pWindow = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(701)"))
+        KH_DEBUG(CDebugWindow(this, DWTPlayer::debugPlayerBlockInfo);)
+    KH_DEBUG(m_pWindow->dispOff(0);)
 }
 
 void CPlayerManager::main() {
@@ -392,19 +392,19 @@ void CPlayerManager::main() {
     if (m_uiFlag & 4) procPlayerDead();
     exeWind();
     m_tqTimer -= getFrameRate();
-    if (KH_DW(DebugWork::g_dw.player.iBlockInfo)) {
-        sprintf(m_strBlock[0], "Current:%d/16 Remain:%06X Reserve:%d/6", m_uiCurrentBlock, m_uiRemain, m_uiReserve);
-        char* col[4] = {"\xf9S", "\xf9U", "\xf9X", "\xf9T"};
-        for (i = 0; i < 16; i++) {
-            RB_DATA& data = m_blockData[i];
-            UINT size = getPlayerRsrcGrpSize(data.nRCID);
-            sprintf(m_strBlock[i + 1], "%sS:%d D:%02d-%04d AD:%08X M:%06X/%06X", col[data.nState], data.nState,
-                    data.nData, data.nRCID, data.pAddr, size, data.nSize);
-        }
-        m_pWindow->dispOn(0);
-    } else {
-        m_pWindow->dispOff(0);
-    }
+    KH_DEBUG(if (KH_DW(DebugWork::g_dw.player.iBlockInfo)) {)
+        KH_DEBUG(sprintf(m_strBlock[0], "Current:%d/16 Remain:%06X Reserve:%d/6", m_uiCurrentBlock, m_uiRemain, m_uiReserve);)
+        KH_DEBUG(char* col[4] = {"\xf9S", "\xf9U", "\xf9X", "\xf9T"};)
+        KH_DEBUG(for (i = 0; i < 16; i++) {)
+            KH_DEBUG(RB_DATA& data = m_blockData[i];)
+            KH_DEBUG(UINT size = getPlayerRsrcGrpSize(data.nRCID);)
+            KH_DEBUG(sprintf(m_strBlock[i + 1], "%sS:%d D:%02d-%04d AD:%08X M:%06X/%06X", col[data.nState], data.nState, data.nData, data.nRCID, data.pAddr, size, data.nSize);)
+
+        KH_DEBUG(})
+        KH_DEBUG(m_pWindow->dispOn(0);)
+    KH_DEBUG(} else {)
+        KH_DEBUG(m_pWindow->dispOff(0);)
+    KH_DEBUG(})
 }
 
 void CPlayerManager::stateBattle() {
@@ -431,27 +431,27 @@ void CPlayerManager::stateBattle() {
                 TRACE("PLM:: \x81\xa6" "error!! Block Over : %d,\n", m_uiCurrentBlock);
                 m_uiCurrentBlock = 0;
             }
-            dbgDispTTY_RsrcBlock();
+            KH_DEBUG(dbgDispTTY_RsrcBlock();)
             setReserveLoad();
         }
-        if (dbgCheckUser(KKIKUCHI) && dbgButtonDown(USR_SYSTEM, 4, 1) && dbgButtonTrg(USR_SYSTEM, 1, 1)) {
-            dbgDispTTY_RsrcBlock();
-        }
+        KH_DEBUG(if (dbgCheckUser(KKIKUCHI) && dbgButtonDown(USR_SYSTEM, 4, 1) && dbgButtonTrg(USR_SYSTEM, 1, 1)) {)
+            KH_DEBUG(dbgDispTTY_RsrcBlock();)
+        KH_DEBUG(})
     }
 }
 
-void CPlayerManager::dbgDispTTY_RsrcBlock() {
-    INT i;
-    TRACE("PLM:: RB_DATA--------------------------------\n");
-    TRACE("PLM:: CurrentBlock=%d, Remain=0x%06x\n", m_uiCurrentBlock, m_uiRemain);
-    for (i = 0; i < 16; i++) {
-        RB_DATA& data = m_blockData[i];
-        UINT size = getPlayerRsrcGrpSize(data.nRCID);
-        TRACE("%2d: state=%d, data=%d, rcid=%d, addr=0x%08x, size=0x%06x(0x%06x),\n", i, data.nState, data.nData,
-              data.nRCID, data.pAddr, data.nSize, size);
-    }
-    TRACE("PLM:: --------------------------------RB_DATA\n");
-}
+KH_DEBUG(void CPlayerManager::dbgDispTTY_RsrcBlock() {)
+    KH_DEBUG(INT i;)
+    KH_DEBUG(TRACE("PLM:: RB_DATA--------------------------------\n");)
+    KH_DEBUG(TRACE("PLM:: CurrentBlock=%d, Remain=0x%06x\n", m_uiCurrentBlock, m_uiRemain);)
+    KH_DEBUG(for (i = 0; i < 16; i++) {)
+        KH_DEBUG(RB_DATA& data = m_blockData[i];)
+        KH_DEBUG(UINT size = getPlayerRsrcGrpSize(data.nRCID);)
+        KH_DEBUG(TRACE("%2d: state=%d, data=%d, rcid=%d, addr=0x%08x, size=0x%06x(0x%06x),\n", i, data.nState, data.nData, data.nRCID, data.pAddr, data.nSize, size);)
+
+    KH_DEBUG(})
+    KH_DEBUG(TRACE("PLM:: --------------------------------RB_DATA\n");)
+KH_DEBUG(})
 
 } // namespace PLM
 
@@ -1626,21 +1626,21 @@ void setVibration(INT inID) {
         break;
     case 4:
         if (RND::genrand_int31() % 1000 >= 500) return;
+        motorL = RND::genrand_int31() % 256;
         motorS = 1;
         tq = 1;
-        motorL = RND::genrand_int31() % 256;
         break;
     default:
         return;
     }
-    if (dbgCheckUser(KKIKUCHI) && KH_DW(DebugWork::g_dw.player.iTemp) == 8) {
-        FLOAT fl = KH_DW(DebugWork::g_dw.player.vTemp.x) * 100.0f;
-        FLOAT fs = KH_DW(DebugWork::g_dw.player.vTemp.y) * 100.0f;
-        FLOAT ft = KH_DW(DebugWork::g_dw.player.vTemp.z) * 10000.0f;
-        motorL = (INT)(fl + 0.5f);
-        motorS = (INT)(fs + 0.5f);
-        tq = (INT)(ft + 0.5f);
-    }
+    KH_DEBUG(if (dbgCheckUser(KKIKUCHI) && KH_DW(DebugWork::g_dw.player.iTemp) == 8) {)
+        KH_DEBUG(FLOAT fl = KH_DW(DebugWork::g_dw.player.vTemp.x) * 100.0f;)
+        KH_DEBUG(FLOAT fs = KH_DW(DebugWork::g_dw.player.vTemp.y) * 100.0f;)
+        KH_DEBUG(FLOAT ft = KH_DW(DebugWork::g_dw.player.vTemp.z) * 10000.0f;)
+        KH_DEBUG(motorL = (INT)(fl + 0.5f);)
+        KH_DEBUG(motorS = (INT)(fs + 0.5f);)
+        KH_DEBUG(tq = (INT)(ft + 0.5f);)
+    KH_DEBUG(})
     CPadIO::startVibration(motorL, motorS, tq, 0);
 }
 

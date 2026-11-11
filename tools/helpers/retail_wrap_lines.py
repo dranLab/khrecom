@@ -1,5 +1,7 @@
-"""Wrap source lines START..END (1-based, inclusive) one by one in KH_DEBUG(...): line-neutral. Each line's
-parentheses must balance (a macro argument). Already wrapped lines are left alone.
+"""Wrap source lines START..END (1-based, inclusive) one by one in KH_DEBUG(...): line-neutral. A statement whose
+parentheses don't balance on its line (a macro argument must) is joined onto its first line from the following lines
+of the range, which stay empty (the beta's line note stays on the statement's first line). Already wrapped lines
+are left alone.
 Usage: retail_wrap_lines.py FILE START END [START END ...]"""
 import sys
 from pathlib import Path
@@ -47,6 +49,14 @@ for start, end in zip(args[::2], args[1::2]):
         if l.lstrip().startswith("#") or "/*" in l and "*/" not in l:
             sys.exit(f"line {i + 1}: directive or block comment: {l}")
         code, comment = split_comment(l)
+        k = i
+        while not balanced(code) and k + 1 < end and not comment:
+            k += 1
+            nxt, comment = split_comment(lines[k])
+            if lines[k].lstrip().startswith("#") or "/*" in nxt:
+                break
+            code = code.rstrip() + " " + nxt.strip()
+            lines[k] = ""
         if not balanced(code):
             sys.exit(f"line {i + 1}: unbalanced parentheses: {l}")
         ind = len(code) - len(code.lstrip())

@@ -190,6 +190,8 @@ System/Graphic/2d/2DSeqCtrl .rodata 0x00402390 0x18
 System/Graphic/Anim .data 0x00332938 0x10
 System/Graphic/Anim .rodata 0x00400CE8 0x28
 System/Graphic/Billboard .rodata 0x00400D10 0x60
+System/Graphic/DeFocus .data 0x00332948 0x4
+System/Graphic/DeFocus .rodata 0x00400D80 0x30
 System/Graphic/Effect/libppp/draw/draw .data 0x00336D68 0x8
 System/Graphic/Effect/libppp/draw/md .data 0x00336DC0 0xe0
 System/Graphic/Effect/libppp/draw/md0 .rodata 0x004036D0 0x20
@@ -214,6 +216,7 @@ System/Graphic/Effect/libppp/ryjProg/pppRyjMegaBirthModel .rodata 0x00403930 0xf
 System/Graphic/Effect/libppp/ryjProg/pppRyjMegaBirthModelFilter .bss 0x0057E160 0x10
 System/Graphic/Fnt .data 0x00332AC0 0x10
 System/Graphic/Fnt .rodata 0x004010B0 0x28
+System/Graphic/Glare .data 0x00332990 0xc
 System/Graphic/MotData .rodata 0x00400EE0 0x20
 System/Graphic/PathCamera .rodata 0x00400F08 0x10
 System/Graphic/TexAnm .rodata 0x00400FD8 0x8

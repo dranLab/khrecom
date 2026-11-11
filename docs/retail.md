@@ -293,6 +293,26 @@ Ninth batch (2026-11-11, the differing functions): **524 units from source in re
     when another unit starts the section (lib/nodebug/_GLOBAL__F_0build.cpp's frame data, absent from retail's
     .data, had displaced System/Coord's .data).
 
+Tenth batch (2026-11-11): **526 units from source in retail**, 324 functions differ. More debug-only code from the
+retail assembly:
+
+- CBlurPrim::m_iDebugID and the debug-override blocks with their `Bak_*`/`BAK_*` save/restore (DeFocus: retail
+  never saves or restores the parameters).
+- CPlayerCamera's camera-info strings, CDebugWindow, C3DLines, the g_ParamTest/pTestCamData test copies, the
+  `iCamRikuShiftY` ternaries and _initialize's else-store; its never-called inline updateParam.
+- DWTPlayer.h's debug window functions and tables (`#ifndef KH_RETAIL` on two former blank lines: the header has
+  no `__LINE__`), Player.cpp's CPlayerDebug section (`#ifndef`/`#endif` prefixed to the two comment lines around
+  it), CPlayerManager's block strings/window/dbgDispTTY_RsrcBlock, setVibration's KKIKUCHI block, init's
+  `case 22` (retail's switch ends at world 13).
+
+21. (decision) A whole region of a file may be gated with `#ifndef KH_RETAIL` ... `#endif` when both directives
+    take the place of existing blank or comment lines (line-neutral); otherwise lines are wrapped one by one.
+22. (decision) A matched beta statement order may change when both versions match with the new one
+    (PLM::setVibration's case 4: `motorL` first, retail sets motorS/tq after the call).
+23. (decision) A data start of a unit that isn't from source may be recorded by hand in unit_starts.txt when the
+    beta's bytes are found there in retail (FrecFont's color table at 0x332950, LightUnit's .data at 0x3329A0):
+    a wrong start in the split shows up as `SHORT` data in the unit before it.
+
 ### Where it stands (end of the unattended run)
 
 - 517/638 units of retail from source; 10,392 functions match retail, 480 differ, 689 are beta-only ("extra").

@@ -66,8 +66,8 @@ private:
     CCollMapCamera* m_pCollMapCamera;   /* 0x194 */
     HANDLE m_hDeadSE;                   /* 0x198 */
     FVECTOR m_vWind;                    /* 0x1a0 */
-    char m_strBlock[17][64];            /* 0x1b0 */
-    CDebugWindow* m_pWindow;            /* 0x5f0 */
+    KH_DEBUG(char m_strBlock[17][64];            /* 0x1b0 */)
+    KH_DEBUG(CDebugWindow* m_pWindow;            /* 0x5f0 */)
 
 public:
     CPlayerManager(CTask* inParent);

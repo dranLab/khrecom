@@ -184,8 +184,8 @@ void CPlayerCamera::setBattleCamData(HANDLE inHandle, const BCAM_PARAM* inParam)
         }
         m_pInstance->m_hOwnerBCAM = 0;
     }
-    pTestCamData[3] = g_pCamData[3];
-    pTestCamData[4] = g_pCamData[4];
+    KH_DEBUG(pTestCamData[3] = g_pCamData[3];)
+    KH_DEBUG(pTestCamData[4] = g_pCamData[4];)
 }
 
 void CPlayerCamera::getBattleCamData(BCAM_PARAM& outParam) {
@@ -217,24 +217,24 @@ CPlayerCamera::CPlayerCamera(CTask* pParent) : CCamera(pParent, -1), m_uiFlag(0)
 
     m_iState = -1;
 
-    m_pLines = NULL;
+    KH_DEBUG(m_pLines = NULL;)
 
-    g_ParamTest = *m_pParam;
-    m_pParam = &g_ParamTest;
+    KH_DEBUG(g_ParamTest = *m_pParam;)
+    KH_DEBUG(m_pParam = &g_ParamTest;)
 
-    sprintf(m_strCamera0, " ");
-    sprintf(m_strCamera1, " ");
-    sprintf(m_strCamera2, " ");
-    sprintf(m_strCamera3, " ");
-    sprintf(m_strCamera4, " ");
+    KH_DEBUG(sprintf(m_strCamera0, " ");)
+    KH_DEBUG(sprintf(m_strCamera1, " ");)
+    KH_DEBUG(sprintf(m_strCamera2, " ");)
+    KH_DEBUG(sprintf(m_strCamera3, " ");)
+    KH_DEBUG(sprintf(m_strCamera4, " ");)
     KH_DEBUG(DebugWork::g_dw.player.m_szCamera[0] = m_strCamera0;)
     KH_DEBUG(DebugWork::g_dw.player.m_szCamera[1] = m_strCamera1;)
     KH_DEBUG(DebugWork::g_dw.player.m_szCamera[2] = m_strCamera2;)
     KH_DEBUG(DebugWork::g_dw.player.m_szCamera[3] = m_strCamera3;)
     KH_DEBUG(DebugWork::g_dw.player.m_szCamera[4] = m_strCamera4;)
 #line 269
-    m_pWindow = new KH_AT("(269)") CDebugWindow(this, DWTPlayer::debugPlayerCameraInfo);
-    m_pWindow->dispOff(0);
+    KH_DEBUG(m_pWindow = new KH_AT("(269)") CDebugWindow(this, DWTPlayer::debugPlayerCameraInfo);)
+    KH_DEBUG(m_pWindow->dispOff(0);)
     KH_DEBUG(DebugWork::g_dw.player.iCamMode = 1;)
     g_pCamData[0] = NULL;
     g_pCamData[1] = &m_pParam->FieldNormal;
@@ -251,18 +251,18 @@ CPlayerCamera::CPlayerCamera(CTask* pParent) : CCamera(pParent, -1), m_uiFlag(0)
             m_uiFlag |= 0x100;
         }
     }
-    pTestCamData[3] = g_pCamData[3];
-    pTestCamData[4] = g_pCamData[4];
+    KH_DEBUG(pTestCamData[3] = g_pCamData[3];)
+    KH_DEBUG(pTestCamData[4] = g_pCamData[4];)
     m_iModeFieldNear = 1;
     m_iModeFieldFar = 2;
     m_fRikuShiftY = 0.0f;
-    m_fRikuShiftY = (KH_DW(DebugWork::g_dw.player.iCamRikuShiftY) && CGame::isRikuGame()) ? 0.4f : 0.0f;
+    KH_DEBUG(m_fRikuShiftY = (KH_DW(DebugWork::g_dw.player.iCamRikuShiftY) && CGame::isRikuGame()) ? 0.4f : 0.0f;)
     _initialize();
 }
 
 CPlayerCamera::~CPlayerCamera() {
-    if (m_pLines) delete m_pLines;
-    m_pLines = NULL;
+    KH_DEBUG(if (m_pLines) delete m_pLines;)
+    KH_DEBUG(m_pLines = NULL;)
     KH_DEBUG(DebugWork::g_dw.player.iCamMode = 0;)
     m_pInstance = NULL;
     m_nBossCamID = 0;
@@ -296,10 +296,10 @@ void CPlayerCamera::_initialize() {
     if (CGame::isRikuGame() && !(bIsBattleScene && (USHORT)(CSceneInfo::getCurrentSceneNum() - 1050) < 149)) {
         KH_DEBUG(DebugWork::g_dw.player.iCamRikuShiftY = 1;)
         m_fRikuShiftY = 0.4f;
-    } else {
+    }KH_DEBUG( else {)
         KH_DEBUG(DebugWork::g_dw.player.iCamRikuShiftY = 0;)
-        m_fRikuShiftY = 0.0f;
-    }
+        KH_DEBUG(m_fRikuShiftY = 0.0f;)
+    KH_DEBUG(})
     if (!bIsBattleScene) {
         m_fXLimitHi = -0.87266463f;
         m_fXLimitLow = 0.20943952f;
@@ -344,7 +344,7 @@ void CPlayerCamera::initCamera(INT inMode, INT inReset, FVECTOR* inDir) {
         m_pPlayer->updateCoord();
         m_pPlayer->coordFix();
     }
-    m_fRikuShiftY = (KH_DW(DebugWork::g_dw.player.iCamRikuShiftY) && CGame::isRikuGame()) ? 0.4f : 0.0f;
+    KH_DEBUG(m_fRikuShiftY = (KH_DW(DebugWork::g_dw.player.iCamRikuShiftY) && CGame::isRikuGame()) ? 0.4f : 0.0f;)
     pos = getNowPlayerPos();
     eye = m_pData->vEye;
     eye.y += m_fRikuShiftY;
@@ -445,49 +445,49 @@ void CPlayerCamera::initCamera(INT inMode, INT inReset, FVECTOR* inDir) {
     lookAt(m_vAim, (const FVECTOR*)NULL);
     m_vPreEye = m_vEye;
     m_vPreAim = m_vAim;
-    if (KH_DW(DebugWork::g_dw.player.iCameraInfo)) {
-        FLOAT deltaRingAngle;
-        G_LINE line;
-        FVECTOR ofs;
-        FMATRIX m;
-        if (m_pLines) delete m_pLines;
-        m_pLines = NULL;
+    KH_DEBUG(if (KH_DW(DebugWork::g_dw.player.iCameraInfo)) {)
+        KH_DEBUG(FLOAT deltaRingAngle;)
+        KH_DEBUG(G_LINE line;)
+        KH_DEBUG(FVECTOR ofs;)
+        KH_DEBUG(FMATRIX m;)
+        KH_DEBUG(if (m_pLines) delete m_pLines;)
+        KH_DEBUG(m_pLines = NULL;)
 #line 608
-        m_pLines = new KH_AT("(608)") C3DLines;
+        KH_DEBUG(m_pLines = new KH_AT("(608)") C3DLines;)
         KH_DEBUG(if (!(m_pLines)) AssertApp(__FILE__, __LINE__, "m_pLines", 0);)
-        m_pLines->m_pCrd = &Crd(0);
-        InverseMatrix(m, Crd(0).getWorldMatrix());
-        ApplyMatrix33(ofs, m, m_vEye);
-        line.C0.col = 0xFF00FF00;
-        line.C1.col = 0xFF00FF00;
-        deltaRingAngle = 0.62831855f;
-        INT ring;
-        INT segNum = 11;
-        for (ring = 0; ring < 5; ring++) {
-            FLOAT r0 = sinf(ring * deltaRingAngle);
-            FLOAT r1 = sinf((ring + 1) * deltaRingAngle);
-            FLOAT y0 = cosf(ring * deltaRingAngle);
-            FLOAT y1 = cosf((ring + 1) * deltaRingAngle);
-            INT seg;
-            for (seg = 0; seg < segNum; seg++) {
-                FLOAT theta = seg * deltaRingAngle;
-                FLOAT x0 = r0 * sinf(theta);
-                FLOAT z0 = r0 * cosf(theta);
-                FLOAT x1 = r1 * sinf(theta);
-                FLOAT z1 = r1 * cosf(theta);
-                line.P0.set(x0, y0, z0);
-                AddVectorXYZ(line.P0, line.P0, ofs);
-                ScaleVectorXYZ(line.P0, line.P0, m_pData->fSize);
-                line.P1.set(x1, y1, z1);
-                AddVectorXYZ(line.P1, line.P1, ofs);
-                ScaleVectorXYZ(line.P1, line.P1, m_pData->fSize);
-                m_pLines->m_vLINE.push_back(line);
-            }
-        }
-    } else {
-        if (m_pLines) delete m_pLines;
-        m_pLines = NULL;
-    }
+        KH_DEBUG(m_pLines->m_pCrd = &Crd(0);)
+        KH_DEBUG(InverseMatrix(m, Crd(0).getWorldMatrix());)
+        KH_DEBUG(ApplyMatrix33(ofs, m, m_vEye);)
+        KH_DEBUG(line.C0.col = 0xFF00FF00;)
+        KH_DEBUG(line.C1.col = 0xFF00FF00;)
+        KH_DEBUG(deltaRingAngle = 0.62831855f;)
+        KH_DEBUG(INT ring;)
+        KH_DEBUG(INT segNum = 11;)
+        KH_DEBUG(for (ring = 0; ring < 5; ring++) {)
+            KH_DEBUG(FLOAT r0 = sinf(ring * deltaRingAngle);)
+            KH_DEBUG(FLOAT r1 = sinf((ring + 1) * deltaRingAngle);)
+            KH_DEBUG(FLOAT y0 = cosf(ring * deltaRingAngle);)
+            KH_DEBUG(FLOAT y1 = cosf((ring + 1) * deltaRingAngle);)
+            KH_DEBUG(INT seg;)
+            KH_DEBUG(for (seg = 0; seg < segNum; seg++) {)
+                KH_DEBUG(FLOAT theta = seg * deltaRingAngle;)
+                KH_DEBUG(FLOAT x0 = r0 * sinf(theta);)
+                KH_DEBUG(FLOAT z0 = r0 * cosf(theta);)
+                KH_DEBUG(FLOAT x1 = r1 * sinf(theta);)
+                KH_DEBUG(FLOAT z1 = r1 * cosf(theta);)
+                KH_DEBUG(line.P0.set(x0, y0, z0);)
+                KH_DEBUG(AddVectorXYZ(line.P0, line.P0, ofs);)
+                KH_DEBUG(ScaleVectorXYZ(line.P0, line.P0, m_pData->fSize);)
+                KH_DEBUG(line.P1.set(x1, y1, z1);)
+                KH_DEBUG(AddVectorXYZ(line.P1, line.P1, ofs);)
+                KH_DEBUG(ScaleVectorXYZ(line.P1, line.P1, m_pData->fSize);)
+                KH_DEBUG(m_pLines->m_vLINE.push_back(line);)
+            KH_DEBUG(})
+        KH_DEBUG(})
+    KH_DEBUG(} else {)
+        KH_DEBUG(if (m_pLines) delete m_pLines;)
+        KH_DEBUG(m_pLines = NULL;)
+    KH_DEBUG(})
 }
 
 void CPlayerCamera::preStateField() {
@@ -560,20 +560,20 @@ void CPlayerCamera::main() {
     update();
     exeFrameEffect();
     m_tqTimer += getFrameRate();
-    if (KH_DW(DebugWork::g_dw.player.iCameraInfo)) {
-        sprintf(m_strCamera0, "Mode %s", szTestCamMode[m_iMode]);
-        sprintf(m_strCamera1, "Aim:  % 10.6f,% 10.6f,% 10.6f", m_vAim.x, m_vAim.y, m_vAim.z);
-        sprintf(m_strCamera2, "Eye:  % 10.6f,% 10.6f,% 10.6f", m_vEye.x, m_vEye.y, m_vEye.z);
-        sprintf(m_strCamera3, "Dir:  % 10.6f,% 10.6f,% 10.6f", m_vDir.x, m_vDir.y, m_vDir.z);
-        sprintf(m_strCamera4, "F-Dir:% 10.6f,% 10.6f,% 10.6f", m_vFinalDir.x, m_vFinalDir.y, m_vFinalDir.z);
-        m_pWindow->dispOn(0);
-    } else {
-        m_pWindow->dispOff(0);
-    }
+    KH_DEBUG(if (KH_DW(DebugWork::g_dw.player.iCameraInfo)) {)
+        KH_DEBUG(sprintf(m_strCamera0, "Mode %s", szTestCamMode[m_iMode]);)
+        KH_DEBUG(sprintf(m_strCamera1, "Aim:  % 10.6f,% 10.6f,% 10.6f", m_vAim.x, m_vAim.y, m_vAim.z);)
+        KH_DEBUG(sprintf(m_strCamera2, "Eye:  % 10.6f,% 10.6f,% 10.6f", m_vEye.x, m_vEye.y, m_vEye.z);)
+        KH_DEBUG(sprintf(m_strCamera3, "Dir:  % 10.6f,% 10.6f,% 10.6f", m_vDir.x, m_vDir.y, m_vDir.z);)
+        KH_DEBUG(sprintf(m_strCamera4, "F-Dir:% 10.6f,% 10.6f,% 10.6f", m_vFinalDir.x, m_vFinalDir.y, m_vFinalDir.z);)
+        KH_DEBUG(m_pWindow->dispOn(0);)
+    KH_DEBUG(} else {)
+        KH_DEBUG(m_pWindow->dispOff(0);)
+    KH_DEBUG(})
 }
 
 void CPlayerCamera::disp() {
-    if (m_pLines) m_pLines->disp();
+    KH_DEBUG(if (m_pLines) m_pLines->disp();)
 }
 
 void CPlayerCamera::calcDirection(FVECTOR& outDir, const FVECTOR& inAim, const FVECTOR& inEye) {
@@ -861,7 +861,7 @@ void CPlayerCamera::changeModeBattle(INT inMode) {
 
     setGakaku(m_pData->fViewAngle);
     m_vOffset.init();
-    m_fRikuShiftY = (KH_DW(DebugWork::g_dw.player.iCamRikuShiftY) && CGame::isRikuGame()) ? 0.4f : 0.0f;
+    KH_DEBUG(m_fRikuShiftY = (KH_DW(DebugWork::g_dw.player.iCamRikuShiftY) && CGame::isRikuGame()) ? 0.4f : 0.0f;)
     FVECTOR eye = m_pData->vEye;
     eye.y += m_fRikuShiftY;
     FVECTOR aim = m_pData->vAim;
