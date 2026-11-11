@@ -905,7 +905,7 @@ BOOL CSceneInfo::reqChangeRoom(INT nRoomID, DOOR_ID nDoor, SHORT nScene) {
         }
         nScene = pRoom->getSceneNum();
     } else {
-        KH_DEBUG(RoomInfo* pRoom = getRoomInfo(nRoomID);)
+        KH_DEBUG(RoomInfo* pRoom = getRoomInfo(nRoomID);) KH_RELEASE(return FALSE;) // MATCH: retail refuses a given scene
         KH_DEBUG(if (!pRoom) return FALSE;)
         KH_DEBUG(if (!pRoom->_pSrcInfo) {)
             KH_DEBUG(nArea = 0;)

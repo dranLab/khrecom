@@ -164,7 +164,7 @@ void CPlayerCamera::setBossCamID(INT inID) {
     }
 }
 
-void CPlayerCamera::setBattleCamData(HANDLE inHandle, const BCAM_PARAM* inParam) {
+template <class T> static inline T& _ref(T& v) { return v; } void CPlayerCamera::setBattleCamData(HANDLE inHandle, const BCAM_PARAM* inParam) {
     if (!m_pInstance) return;
     if (inHandle > 0) {
         m_pInstance->m_hOwnerBCAM = inHandle;
@@ -174,7 +174,7 @@ void CPlayerCamera::setBattleCamData(HANDLE inHandle, const BCAM_PARAM* inParam)
         if (m_pInstance->m_hOwnerBCAM <= 0) return;
         g_pCamData[3] = &m_pInstance->m_pParam->BattleNormal;
         g_pCamData[4] = &m_pInstance->m_pParam->BattleLockon;
-        if (m_nBossCamID > 0) {
+        if (_ref(m_nBossCamID) > 0) { // MATCH: read through _ref: retail loads it after the second m_pParam load
             setBossCamFile(m_nBossCamID);
             BCAM_PARAM* pData = (BCAM_PARAM*)_getRsrcData(g_szBinBCam);
             if (pData) {
@@ -337,9 +337,9 @@ void CPlayerCamera::initCamera(INT inMode, INT inReset, FVECTOR* inDir) {
 
     setGakaku(m_pData->fViewAngle);
     m_vOffset.init();
-    m_vPos.init();
-    m_tqTimer = 0;
+    m_tqTimer = 0; // MATCH: the beta's markers have the timer on the line after setGakaku's next (464)
     m_tqNear = 0;
+    m_vPos.init();
     if (inReset == 1) {
         m_pPlayer->updateCoord();
         m_pPlayer->coordFix();

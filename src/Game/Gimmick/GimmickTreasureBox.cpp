@@ -60,8 +60,8 @@ struct ChatWndCreateCTDParam {
     UINT waitFrame;
     ChatWndSetWordsParam* pCwswp;
     UINT nLine;
+    ChatWndCreateCTDParam() { nLine = 0; } /* MATCH: the beta's markers put the nLine store in WndCmnd.h's inline (VSME.cpp) */
 };
-
 #include "System/Sound/SoundMan.h"
 #line 74
 
@@ -165,7 +165,7 @@ BOOL CGimmickTreasureBox::CardMaxWarningMain() {
     case 0: {
         ChatWndCreateCTDParam CWCP2;
         CWCP2.pos.setPoint(-1, -1);
-        CWCP2.nLine = 0;
+
         CWCP2.cyobiPos.setPoint(0x80, 0x100);
         CWCP2.ctdID = 0x400000;
         CWCP2.pCwswp = NULL;

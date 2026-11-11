@@ -119,6 +119,7 @@ CBattleEnemyManager::CBattleEnemyManager(CTask* inParent) : CTask(inParent, 0x40
         event->setup();
         m_hMonstroEventBattle = event->getHandle();
         setAppearPremiumPrize(TRUE);
+        setAppearRoulettePrize(FALSE); // MATCH: in each arm (the beta's markers: 81 and 194)
         m_iStep = 8;
     } else {
         m_iNextGroupNum = 1;
@@ -156,9 +157,9 @@ CBattleEnemyManager::CBattleEnemyManager(CTask* inParent) : CTask(inParent, 0x40
             }
         }
         setAppearPremiumPrize(FALSE);
+        setAppearRoulettePrize(FALSE);
         m_iStep = 1;
     }
-    setAppearRoulettePrize(FALSE);
     TRACE("---- Constructor CBattleEnemyManager\n");
 }
 

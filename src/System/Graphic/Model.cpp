@@ -816,25 +816,24 @@ BOOL CModel::sendTexture(u_long* tex0) {
     }
     return bSend;
 }
-INT CModel::getTexParam(u_long* tex0) {
+static inline void _getTmpTexArea(INT nID, UINT& nTexPos, UINT& nClutPos) { if (nID == 0) { nTexPos = VRAM::_TEX_TMP1_START; nClutPos = VRAM::_CLUT_TMP1_START; } else { nTexPos = VRAM::_TEX_TMP2_START; nClutPos = VRAM::_CLUT_TMP2_START; } } INT CModel::getTexParam(u_long* tex0) {
     INT nTexMax;
     INT i;
     nTexMax = m_TransTexCount;
     if (nTexMax > 0) {
         UINT nTexPos;
         UINT nClutPos;
-        INT nTmpTex = VRAM::_TEX_TMP1_START;
-        INT nTmpClut = VRAM::_CLUT_TMP1_START;
+        _getTmpTexArea(0, nTexPos, nClutPos);
+
         for (i = 0; i < nTexMax; i++) {
             TexInfoStub* t = (TexInfoStub*)&m_TexInfo[i];
             if (t->isFix()) {
                 tex0[i] = t->getTPage();
             } else {
-                if (t->isFixTex()) nTexPos = t->_pTexInfo->_TexInfo._nDistPos;
-                else nTexPos = nTmpTex + t->_nTexPos;
-                if (t->isFixClut()) nClutPos = t->_pTexInfo->_ClutInfo._nDistPos;
-                else nClutPos = nTmpClut + t->_nClutPos;
-                tex0[i] = t->_pTexInfo->getTPage() | (u_long)nTexPos | ((u_long)nClutPos << 37);
+                tex0[i] = t->_pTexInfo->getTPage(t->isFixTex() ? t->_pTexInfo->_TexInfo._nDistPos : nTexPos + t->_nTexPos,
+                                                 t->isFixClut() ? t->_pTexInfo->_ClutInfo._nDistPos : nClutPos + t->_nClutPos);
+
+
             }
         }
     }
@@ -1340,11 +1339,11 @@ void CSemiZModel::makePkt() {
     CPackMan::pkCloseDirectCode();
     CModel* m = getParentModel();
     m->disp0(getSemiTrans(), getTestFlag(), m_SemiDraw ? 5 : 4);
-    if ((m->m_nFlag & 4) && MODELDATA::isCharacter(m->m_Mode)) {
-        m->m_ShaderOption |= 0x80;
-        m->disp0(getSemiTrans(), m->getTestFlag(), m_SemiDraw != 0);
-        m->m_ShaderOption &= ~0x80;
-    }
+    KH_DEBUG(if ((m->m_nFlag & 4) && MODELDATA::isCharacter(m->m_Mode)) {) // MATCH: beta only (retail draws the semi-transparent model once)
+        KH_DEBUG(m->m_ShaderOption |= 0x80;)
+        KH_DEBUG(m->disp0(getSemiTrans(), m->getTestFlag(), m_SemiDraw != 0);)
+        KH_DEBUG(m->m_ShaderOption &= ~0x80;)
+    KH_DEBUG(})
     CPackMan::pkOpenDirectCode(0);
 }
 void CFadeModel::makePkt() {
