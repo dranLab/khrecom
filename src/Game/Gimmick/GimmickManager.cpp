@@ -565,9 +565,9 @@ found:
 }
 
 DropPrize CGimmickManager::DecideGimmickCard_PossibleNoCheck(INT DropProbNum, GimmickEveryCardProb* pDropDataTable, SHORT* pCardProbTable) {
-    INT breakFlag = 0;
     INT Prob = getRand() % 100;
     DropPrize ret;
+    INT breakFlag = 0; // MATCH: declared after ret, as the ref lists them
     TRACE("\x83J\x81[\x83h\x92\x8a\x91I\x90\x94\x92l 0\x81`99 = %d\n", Prob);
     KH_DEBUG(DebugWork::g_dw.gimDropProb.ProbRandomCard = Prob;)
     ret.StockKind = 0;
@@ -589,11 +589,11 @@ DropPrize CGimmickManager::DecideGimmickCard_PossibleNoCheck(INT DropProbNum, Gi
         case 28:
         case 41:
             if (Prob < pDropDataTable[i].Prob) {
+                ret.Num = 1; // MATCH: the beta's line markers: Num 932, Kind 933, No 934, StockKind 935
                 ret.Kind = (CARD_KIND)(pDropDataTable[i].CardID + 1);
-                ret.Num = 1;
                 ret.No = DecideGimmickCardNo(pCardProbTable);
-                breakFlag = 1;
                 ret.StockKind = 0;
+                breakFlag = 1;
             } else {
                 Prob -= pDropDataTable[i].Prob;
                 TRACE("\x81@-\x8am\x97\xa6(%d)\x81@ = %d\n", pDropDataTable[i].Prob, Prob);
@@ -1704,3 +1704,4 @@ KH_DEBUG(void CGimmickProbDebug::main() {)
 KH_DEBUG(})
 
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .rodata

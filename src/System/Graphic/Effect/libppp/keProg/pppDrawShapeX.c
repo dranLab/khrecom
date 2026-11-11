@@ -28,7 +28,7 @@ void pppDrawShapeX(pppPObject *pobj, PDrawShapeX *p, pppCtrlTable *ctbl) {
     if (p->shape == 0xFFFF) {
         return;
     }
-    debugDpdCheckShapeData(p->shape);
+    KH_DEBUG(debugDpdCheckShapeData(p->shape);) // MATCH: beta only (partMng has no such function in retail)
     shp = &ppvEnv->lpShape[p->shape];
     ah = (OANM_HEADER *)shp->shape;
     seq = &ah->seq[vds->seq_now];

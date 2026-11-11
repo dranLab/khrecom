@@ -92,6 +92,7 @@ Game/Enemy/MapEnemyMushroom
 Game/Enemy/MapEnemyShadow
 Game/Enemy/MonstroEventBattle
 Game/Enemy/SampleEnemy
+Game/Entity
 Game/EntityFactory
 Game/Game
 Game/GameSub
@@ -119,6 +120,7 @@ Game/Gimmick/GimmickHitReturn
 Game/Gimmick/GimmickJackBox
 Game/Gimmick/GimmickJumpStand
 Game/Gimmick/GimmickLotusLeaf
+Game/Gimmick/GimmickManager
 Game/Gimmick/GimmickOnceReaction
 Game/Gimmick/GimmickPlantBullet
 Game/Gimmick/GimmickPlantChild
@@ -431,6 +433,7 @@ System/Graphic/PackMan
 System/Graphic/PathCamera
 System/Graphic/PathDataCamera
 System/Graphic/ScreenMask
+System/Graphic/ShadowModel
 System/Graphic/StrPrim
 System/Graphic/TexAnm
 System/Graphic/TexCtrl

@@ -31,3 +31,6 @@ Game/Gimmick/CreateGimmick .rodata 0x00421440
 # FrecFont's .data (its colour table, the beta's 0x3921A0) is retail's 0x332950 byte for byte; the split's 0x33294C
 # is the previous unit's padding (the vote is off: its only reference is relocated against a symbol)
 System/Graphic/FrecFont .data 0x00332950
+# EntityFactory's .rodata (Task.h's "", then OsdDef.h's "@OSD" and "@EVB"; no code references it, so nothing votes)
+# follows Entity's 0x10 bytes: "" at 0x40E568, "@OSD" 0x40E570, "@EVB" 0x40E578, Game's from 0x40E580
+Game/EntityFactory .rodata 0x0040E568

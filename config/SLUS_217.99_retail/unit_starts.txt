@@ -135,6 +135,7 @@ Game/Enemy/MapEnemyShadow .rodata 0x00421210 0x28
 Game/Enemy/MonstroEventBattle .data 0x0033F870 0x1c
 Game/Enemy/MonstroEventBattle .rodata 0x00421240 0xb0
 Game/Enemy/SampleEnemy .rodata 0x004212F0 0x50
+Game/Entity .rodata 0x0040E558 0x10
 Game/EntityFactory .data 0x0033BC30 0x4
 Game/Game .data 0x0033BC34 0x18
 Game/Game .rodata 0x0040E580 0x170
@@ -162,6 +163,7 @@ Game/Gimmick/GimmickGuillotine .rodata 0x00421F70 0x70
 Game/Gimmick/GimmickHitReturn .rodata 0x00421FF8 0x30
 Game/Gimmick/GimmickJumpStand .rodata 0x00422030 0x140
 Game/Gimmick/GimmickLotusLeaf .rodata 0x00422170 0x18
+Game/Gimmick/GimmickManager .rodata 0x00422190 0x1680
 Game/Gimmick/GimmickOnceReaction .rodata 0x00423810 0xe0
 Game/Gimmick/GimmickPlantBullet .data 0x0033F960 0x40
 Game/Gimmick/GimmickPlantBullet .rodata 0x004238F0 0x1a0
@@ -312,6 +314,8 @@ System/Graphic/MotData .rodata 0x00400EE0 0x20
 System/Graphic/PackMan .bss 0x0043C4C0 0x131140
 System/Graphic/PathCamera .rodata 0x00400F08 0x10
 System/Graphic/PathDataCamera .rodata 0x00400F70 0x50
+System/Graphic/ShadowModel .bss 0x0056D600 0x10
+System/Graphic/ShadowModel .rodata 0x00400FC8 0x10
 System/Graphic/TexAnm .rodata 0x00400FD8 0x8
 System/Graphic/TexUtil .data 0x00332A68 0x20
 System/Graphic/TexUtil .rodata 0x00400FE0 0x50

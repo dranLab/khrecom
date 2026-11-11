@@ -1395,7 +1395,7 @@ void CEntity::translucence_() {
         FLOAT limitAlpha = 1.0f;
         if (trans) {
             CCamera* camera = CWorldEnv::getActiveCamera();
-            if (camera && camera->getTypeID() == 0x8000) camera = NULL;
+            KH_DEBUG(if (camera && camera->getTypeID() == 0x8000) camera = NULL;) // MATCH: beta only (the debug camera type)
             if (camera) {
                 FVECTOR maxVec, minVec;
                 FVECTOR v0, v1;
@@ -1567,3 +1567,4 @@ HANDLE CEntity::setRecoverEffect(const CHAR* inName, INT inNo) {
     return attachEffect(inName, 0, &Crd(*(INT*)(pOther + 0x30)), &v, NULL, 0.0f);
 }
 // SOURCE DATA: .rodata
+// SOURCE DATA SLUS_217.99_retail: .rodata
