@@ -2083,13 +2083,13 @@ void TsInitSif() {
 
     while (1) {
         check = sceSifBindRpc(&cd, 0x1000, 0);
-        num = 0x10001;
+        num = KH_VER(0x10001, 0x10000); /* retail: one wait step less */
         while (num--) {
         }
         if (check < 0) {
             continue;
         }
-        num = 0x10001;
+        num = KH_VER(0x10001, 0x10000);
         while (num--) {
         }
         if (cd.serve != 0) {
@@ -2123,3 +2123,4 @@ void TsSdInitDriver() {
 }
 
 // SOURCE DATA: .rodata
+// SOURCE DATA SLUS_217.99_retail: .rodata

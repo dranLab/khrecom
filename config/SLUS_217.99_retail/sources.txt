@@ -449,6 +449,7 @@ System/Rnd
 System/RootTask
 System/RsrcDB
 System/RsrcData
+System/Sound/driver/sddrv_ee
 System/Spad
 System/Task
 System/TaskMan

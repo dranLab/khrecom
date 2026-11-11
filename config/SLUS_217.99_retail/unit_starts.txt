@@ -329,6 +329,7 @@ System/RootTask .data 0x0033B360 0x4
 System/RsrcDB .bss 0x005BD640 0x120
 System/RsrcDB .rodata 0x004059F0 0x2c0
 System/RsrcData .rodata 0x004058E0 0x110
+System/Sound/driver/sddrv_ee .rodata 0x00403A20 0x17f0
 System/Spad .bss 0x0043BD44 0x4
 System/Task .rodata 0x00405CC0 0x8
 System/TaskMan .bss 0x005BD760 0x1d0
