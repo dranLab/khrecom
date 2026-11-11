@@ -134,9 +134,15 @@ The plan for all remaining work (state, work order, per-function loop, validatio
   `build/<VERSION>/build.ninja` for each; `ninja` checks every image (`check-<VERSION>` for one; the retail's other
   targets carry `-SLUS_217.99_retail`). Tools take `--version` or `KH_VERSION`. A version without its ELF in `iso/` is
   SKIPPED.
-- Retail is built from splat assembly only (`build.yaml` `sources: []`); its split comes from
-  `tools/version_map.py` + `tools/split_version.py` (regenerated, not hand-edited). Decompilation work targets the
-  beta as before; don't edit the retail config in a decompilation task.
+- Retail builds the units of `config/SLUS_217.99_retail/sources.txt` from `src/` with `-DKH_RETAIL` (the rest from
+  splat's assembly of the retail ELF); its split comes from `tools/version_map.py` + `tools/split_version.py`, its
+  unit list and exact data starts from `tools/retail_units.py` (scan/switch/verify) - generated, never hand-edited.
+  A source's retail data comes from source only with `// SOURCE DATA SLUS_217.99_retail: ...` (after the beta's line).
+- Version switches (`include/khversion.h`, via khtypes.h), each on the line it changes (the beta's `__LINE__`s):
+  `KH_DEBUG(x)` beta-only code/members, `KH_RELEASE(x)` retail-only, `KH_VER(beta, retail)`, debug allocations
+  `new KH_AT("(N)") T` / `operator new(n KH_ATARG("(N)"))`, one-line asserts `KH_DEBUG(if (!(e)) AssertApp(...);)`.
+  Declarations of the switched functions are written `(AssertApp)(...)`. A beta change that breaks only the retail
+  image: `tools/retail_units.py verify` switches that unit back (docs/plan.md "Working rules").
 
 ## Shifted build (port step 1; plan and boot log: `docs/port-step1-shiftable.md`)
 

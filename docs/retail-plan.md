@@ -1,6 +1,8 @@
 # Plan: align the decompilation with the US retail ELF (second build target)
 
-Status: Phase 1 done 2026-11-10 (the retail image builds from splat assembly and matches; details at its end).
+Status 2026-11-11: Phases 0-2 done, Phase 3 running (446 of 648 complete units build from source in the retail
+image, `docs/retail.md`), Phase 4 done except the user's part: the repository secret `RETAIL_ELF_URL` (CI checks
+retail only when it is set). Phase 1 done 2026-11-10 (the retail image builds from splat assembly and matches; details at its end).
 Phase 0 done 2026-11-10: **go** (results in `docs/retail.md`: retail is the same source built without `-g`
 and with the debug configuration off; ~225 functions unexplained). Phases 1-4 not started; Phase 0's findings
 (weak functions and vtables in `.gnu.linkonce.*` sections, debug members removed from class layouts) change Phase

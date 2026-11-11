@@ -8,6 +8,9 @@
 #                   repository: https://api.github.com/repos/<owner>/<repo>/releases/assets/<id>
 #   GAME_ELF_TOKEN  optional, sent as "Authorization: Bearer <token>" (for a private repository: a fine-grained
 #                   token with read access to that repository's contents only)
+#   RETAIL_ELF_URL  optional: the US retail ELF (iso/SLUS_217.99_retail, SHA-1 865450e0..., docs/retail-plan.md),
+#                   fetched the same way (with GAME_ELF_TOKEN); without it configure.py skips the retail version and
+#                   only the beta is checked
 name: check
 
 on:
@@ -72,9 +75,24 @@ jobs:
           echo "9bd4535cf74a179bb18165cf17098ca122e1acf9  iso/SLUS_217.99" | sha1sum -c --quiet - \
             || { echo "::error::the downloaded file is not SLUS_217.99"; rm -f iso/SLUS_217.99; exit 1; }
 
+      - name: Retail executable (private, optional)
+        env:
+          RETAIL_ELF_URL: ${{ secrets.RETAIL_ELF_URL }}
+          GAME_ELF_TOKEN: ${{ secrets.GAME_ELF_TOKEN }}
+        run: |
+          if [ -z "$RETAIL_ELF_URL" ]; then
+            echo "RETAIL_ELF_URL not set: the retail version is skipped"
+            exit 0
+          fi
+          auth=()
+          if [ -n "$GAME_ELF_TOKEN" ]; then auth=(-H "Authorization: Bearer $GAME_ELF_TOKEN"); fi
+          curl -fsSL "${auth[@]}" -H "Accept: application/octet-stream" -o iso/SLUS_217.99_retail "$RETAIL_ELF_URL"
+          echo "865450e0befd025b5dff999097e2c089450fad96  iso/SLUS_217.99_retail" | sha1sum -c --quiet - \
+            || { echo "::error::the downloaded file is not the retail SLUS_217.99"; rm -f iso/SLUS_217.99_retail; exit 1; }
+
       - name: tools/check.sh
         run: tools/check.sh
 
       - name: Remove the game data
         if: always()
-        run: rm -rf iso/SLUS_217.99 iso/SLUS_217.99.rom asm build
+        run: rm -rf iso/SLUS_217.99 iso/SLUS_217.99.rom iso/SLUS_217.99_retail iso/SLUS_217.99_retail.rom asm build

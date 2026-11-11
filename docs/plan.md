@@ -219,6 +219,13 @@ Numbers change with every merge: `tools/check.sh` (totals), `tools/leftovers.py 
    kh1 has none of them in C. No matched function goes back to parked for this.
 5. **Header cleanup**, interleaved: one `tools/partials.py --queue` item between two work items (see "Header
    cleanup"). The items waiting on a user decision are listed under "When to stop and ask".
+6. **Retail** (second target, `docs/retail-plan.md` Phase 3, state in `docs/retail.md`): units that don't build
+   from source in `SLUS_217.99_retail` yet. `tools/retail_units.py try <unit> --data` shows what differs; the
+   version switches are in `include/khversion.h` (`KH_DEBUG`, `KH_RELEASE`, `KH_VER`, `KH_AT`, `KH_ATARG`), always
+   on the line they change. Kinds of work, in order of yield: debug-only functions retail lacks (`extra`: their
+   definition line by line in `KH_DEBUG(...)`), text the retail changed (`KH_VER`), `DebugWork::g_dw` uses, and real
+   retail changes (`KH_VER`/`KH_RELEASE` variants decompiled from the retail asm). Then `scan`, `switch --eligible`,
+   `verify` and the gate.
 
 Work on one unit at a time, one function at a time. A unit is done when every function is matched or parked and
 its data comes from source (or is recorded as blocked). Never leave a function that was neither tried nor parked.
@@ -231,6 +238,10 @@ its data comes from source (or is recorded as blocked). Never leave a function t
   `tools/decomp_permuter.py` and `tools/drafts.py` are fine.
 - No changes to `tools/`, `configure.py`, `config/` or the build flags, except `tools/partials.py` (approved)
   and `config/SLUS_217.99/symbol_addrs.txt` lines that name unnamed weak or vtable copies. Anything else: ask.
+- Retail: `tools/check.sh` builds both images, and the units in `config/SLUS_217.99_retail/sources.txt` compile from
+  the same sources with `-DKH_RETAIL`. A beta change that breaks only the retail image: `tools/retail_units.py verify`
+  switches the affected unit back (it rewrites `config/SLUS_217.99_retail/` itself: allowed, never by hand); say so in
+  the commit. Edits for retail stay line-neutral and leave the beta image unchanged.
 - Only real C/C++ (see V4). Keep `MATCH: <reason>` on every kept mechanism.
 - Pushing `main` is the user's (origin is github.com/dranLab/khrecom; CI runs `tools/check.sh` on every push): never
   push unless asked, never rebase `main` or force anything. Never commit `iso/`, `ref/`, `asm/` or
