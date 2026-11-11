@@ -65,6 +65,9 @@ class Version:
         for line in (self.cfg / "elf_symbol_addrs.txt").read_text(encoding="utf-8").splitlines():
             if m := re.match(r"^(\S+) = 0x([0-9A-F]+);", line):
                 self.symbols[m.group(1)] = int(m.group(2), 16)
+        # the pairs by this version's address: a function whose signature this version changed (CMoviePlayer's
+        # constructor without the debug flag) has this version's name, found through its symbol
+        self.pairs_by_other = {int(r["other"], 16): r for r in self.pairs.values() if r["other"]}
         # each unit's subsegment ranges in this version's split: (unit, kind) -> (start, end)
         self.ranges = {}
         rows = []
@@ -159,6 +162,18 @@ def try_unit(v: Version, unit: str, show=(), data=True) -> dict:
                 same = sorted((r for r in local), key=lambda r: int(r["beta"], 16))
                 k = sum(1 for f in res["functions"] if re.sub(r"_[0-9A-F]{8}$", "", f[0]) == name)
                 pair = same[k] if k < len(same) else None
+        if not pair and not linkonce and name in v.symbols:
+            pair = v.pairs_by_other.get(v.symbols[name])
+            if pair and pair["unit"] != unit:
+                pair = None
+        if not pair and not linkonce and "__" in name[1:]:
+            # a file-local function whose signature this version changed (_openMovie without bForDebug): the one
+            # function of the unit with the same base name whose beta symbol our object doesn't define
+            base = name[:name.index("__", 1)]
+            ours = {f[3] for f in funcs}
+            cand = [r for r in v.pairs.values() if r["unit"] == unit and r["other"] and r["name"] not in ours
+                    and "__" in r["name"][1:] and r["name"][:r["name"].index("__", 1)] == base]
+            pair = cand[0] if len(cand) == 1 else None
         if not pair or not pair["other"]:
             res["functions"].append((name, "extra", ""))
             continue

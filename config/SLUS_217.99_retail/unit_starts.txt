@@ -73,6 +73,9 @@ Game/Enemy/EnemyGargoyle .data 0x0033F0A8 0x18
 Game/Enemy/EnemyGargoyle .rodata 0x0041E730 0xb8
 Game/Enemy/EnemyGreenrequiem .data 0x0033F0C0 0x14
 Game/Enemy/EnemyGreenrequiem .rodata 0x0041E7E8 0x160
+Game/Enemy/EnemyHeartsoldier .bss 0x005BEBB0 0x10
+Game/Enemy/EnemyHeartsoldier .data 0x0033F0D4 0x14
+Game/Enemy/EnemyHeartsoldier .rodata 0x0041E948 0x50
 Game/Enemy/EnemyLargebody .data 0x0033F0E8 0x18
 Game/Enemy/EnemyLargebody .rodata 0x0041E998 0x60
 Game/Enemy/EnemyLoudness .data 0x0033F100 0x24
@@ -95,6 +98,9 @@ Game/Enemy/EnemyShadow .data 0x0033F208 0x2c
 Game/Enemy/EnemyShadow .rodata 0x0041EFA0 0xe0
 Game/Enemy/EnemySoldier .data 0x0033F234 0x30
 Game/Enemy/EnemySoldier .rodata 0x0041F080 0xe0
+Game/Enemy/EnemySpadesoldier .bss 0x005BEBC0 0x10
+Game/Enemy/EnemySpadesoldier .data 0x0033F264 0x20
+Game/Enemy/EnemySpadesoldier .rodata 0x0041F160 0x80
 Game/Enemy/EnemyTornadostep .data 0x0033F284 0x24
 Game/Enemy/EnemyTornadostep .rodata 0x0041F1E0 0x90
 Game/Enemy/EnemyWhitemushroom .data 0x0033F2A8 0x48
@@ -117,6 +123,8 @@ Game/Gimmick/GimmickAngelArrow .data 0x0033F8E0 0x40
 Game/Gimmick/GimmickAngelArrow .rodata 0x00421530 0x130
 Game/Gimmick/GimmickDeceiveEnemy .rodata 0x004216D0 0x40
 Game/Gimmick/GimmickDominoPillar .rodata 0x00421710 0x10
+Game/Gimmick/GimmickDoor .bss 0x005BEBD0 0x7e0
+Game/Gimmick/GimmickDoor .rodata 0x00421720 0x558
 Game/Gimmick/GimmickFallTomb .rodata 0x00421C80 0xe0
 Game/Gimmick/GimmickFlowerLump .rodata 0x00421D60 0x110
 Game/Gimmick/GimmickFountain .data 0x0033F920 0x40
@@ -138,6 +146,8 @@ Game/Gimmick/GimmickThunderTrap .rodata 0x00423BA0 0x1a0
 Game/Gimmick/GimmickTutorial .rodata 0x00423E60 0x140
 Game/Gimmick/GimmickUpFloor .rodata 0x00423FA0 0x50
 Game/Gimmick/GimmickWindowLid .rodata 0x00424000 0x10
+Game/Gimmick/SampleGimmick .bss 0x005BF3B0 0x10
+Game/Gimmick/SampleGimmick .rodata 0x00424010 0x10
 Game/Map .data 0x0033BD50 0x160
 Game/Map .rodata 0x0040EAB0 0xf0
 Game/MapCardDef .data 0x0033BEB0 0x20
@@ -166,6 +176,8 @@ Game/Player/FriendKing .rodata 0x004137D0 0x80
 Game/Player/FriendPan .data 0x0033C600 0x8
 Game/Player/FriendPluto .data 0x0033C608 0x18
 Game/Player/FriendPluto .rodata 0x00413858 0x10
+Game/Player/PlayerGauge .data 0x0033E070 0xa0
+Game/Player/PlayerGauge .rodata 0x00418B20 0x14f0
 Game/Player/PlayerRiku .data 0x0033E310 0xb0
 Game/Player/PlayerRiku .rodata 0x0041A8F0 0x170
 Game/Player/PlayerSora .data 0x0033E3C0 0x180
@@ -182,6 +194,8 @@ Game/Player/SummonCloud .rodata 0x0041CCE0 0x40
 Game/Player/SummonDumbo .data 0x0033E628 0x8
 Game/Player/SummonGenie .data 0x0033E630 0x80
 Game/Player/SummonGenie .rodata 0x0041CD30 0x40
+Game/Player/SummonMushu .data 0x0033E6B0 0x80
+Game/Player/SummonMushu .rodata 0x0041CD70 0x10
 Game/Player/SummonSinba .data 0x0033E730 0x10
 Game/Player/SummonSinba .rodata 0x0041CD80 0x40
 Game/Player/SummonTink .data 0x0033E740 0x80
@@ -241,6 +255,8 @@ System/Graphic/Fnt .rodata 0x004010B0 0x28
 System/Graphic/Glare .data 0x00332990 0xc
 System/Graphic/Gprim .data 0x00332AD0 0x118
 System/Graphic/HermitePathCamera .rodata 0x00400E30 0x50
+System/Graphic/MapUnit .bss 0x0043C0C0 0x10
+System/Graphic/MapUnit .rodata 0x00400EA0 0x10
 System/Graphic/ModelMan .bss 0x0043C2C0 0x200
 System/Graphic/ModelMan .rodata 0x00400ED0 0x10
 System/Graphic/MotData .rodata 0x00400EE0 0x20
@@ -249,6 +265,9 @@ System/Graphic/PathDataCamera .rodata 0x00400F70 0x50
 System/Graphic/TexAnm .rodata 0x00400FD8 0x8
 System/LinkedBuf .bss 0x0043BD38 0xc
 System/Movie/AudioDec .data 0x0033B118 0x4
+System/Movie/MSVideo .rodata 0x00405580 0xa0
+System/Movie/Movie .bss 0x005AE300 0x24
+System/Movie/Movie .data 0x0033B11C 0x4
 System/Movie/MovieFiles .bss 0x005AE324 0x8
 System/Movie/MovieScript .bss 0x005AE32C 0x4
 System/Movie/MovieScript .rodata 0x00405568 0x18
@@ -364,3 +383,4 @@ lib/tlbfunc .data 0x00348980 0x64c
 lib/tlbfunc .rodata 0x00436E18 0x7c
 lib/tty .bss 0x005C7FC0 0x3c0
 lib/tty .rodata 0x00436858 0x70
+main .bss 0x005BF530 0x8

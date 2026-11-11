@@ -56,6 +56,7 @@ Game/Enemy/EnemyDefender
 Game/Enemy/EnemyFatbandit
 Game/Enemy/EnemyGargoyle
 Game/Enemy/EnemyGreenrequiem
+Game/Enemy/EnemyHeartsoldier
 Game/Enemy/EnemyLargebody
 Game/Enemy/EnemyLoudness
 Game/Enemy/EnemyNeoshadow
@@ -67,6 +68,7 @@ Game/Enemy/EnemySeaneon
 Game/Enemy/EnemySearchghost
 Game/Enemy/EnemyShadow
 Game/Enemy/EnemySoldier
+Game/Enemy/EnemySpadesoldier
 Game/Enemy/EnemyTornadostep
 Game/Enemy/EnemyWhitemushroom
 Game/Enemy/EnemyWightnight
@@ -88,6 +90,7 @@ Game/Gimmick/GimmickBreakable
 Game/Gimmick/GimmickDeceive
 Game/Gimmick/GimmickDeceiveEnemy
 Game/Gimmick/GimmickDominoPillar
+Game/Gimmick/GimmickDoor
 Game/Gimmick/GimmickFallTomb
 Game/Gimmick/GimmickFlowerLump
 Game/Gimmick/GimmickFountain
@@ -117,6 +120,7 @@ Game/Gimmick/GimmickUpFloor
 Game/Gimmick/GimmickWallHole
 Game/Gimmick/GimmickWarpPoint
 Game/Gimmick/GimmickWindowLid
+Game/Gimmick/SampleGimmick
 Game/InterpolateMove
 Game/Map
 Game/MapCardDef
@@ -134,6 +138,7 @@ Game/Player/FriendJack
 Game/Player/FriendKing
 Game/Player/FriendPan
 Game/Player/FriendPluto
+Game/Player/PlayerGauge
 Game/Player/PlayerRiku
 Game/Player/PlayerSora
 Game/Player/PlayerWeapon
@@ -142,6 +147,7 @@ Game/Player/SummonBambi
 Game/Player/SummonCloud
 Game/Player/SummonDumbo
 Game/Player/SummonGenie
+Game/Player/SummonMushu
 Game/Player/SummonSinba
 Game/Player/SummonTink
 Game/Prize
@@ -392,6 +398,7 @@ System/Graphic/Glare
 System/Graphic/Gprim
 System/Graphic/HermitePath
 System/Graphic/HermitePathCamera
+System/Graphic/MapUnit
 System/Graphic/ModelMan
 System/Graphic/MotData
 System/Graphic/PathCamera
@@ -403,6 +410,8 @@ System/Graphic/TexCtrl
 System/LinkedBuf
 System/MainTaskFactory
 System/Movie/AudioDec
+System/Movie/MSVideo
+System/Movie/Movie
 System/Movie/MovieFiles
 System/Movie/MovieScript
 System/PadHandler
@@ -554,3 +563,4 @@ lib/timer
 lib/timeralarm
 lib/tlbfunc
 lib/tty
+main

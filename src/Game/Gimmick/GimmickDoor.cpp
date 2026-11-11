@@ -237,3 +237,4 @@ void CGimmickDoor::setLockOnMarker(BOOL in_flag) {
     else setEntityFlag(0, 0x10000);
 }
 // SOURCE DATA: .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .rodata

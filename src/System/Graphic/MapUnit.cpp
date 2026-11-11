@@ -122,3 +122,4 @@ public:
 MAPUNITTABLE MUT_ita_ = {"ita_", NewClass<CSampleMapUnit>, 2};
 
 // SOURCE DATA: .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .rodata

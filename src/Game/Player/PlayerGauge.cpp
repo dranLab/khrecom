@@ -97,14 +97,12 @@ CPlayerGauge::~CPlayerGauge() {
 }
 void CPlayerGauge::_initialize() {
     FVECTOR pos;
-    m_nMaxHP = 300;
-    m_nRedHP = 300;
-    m_nHP = 300;
-    m_iState = 1;
     m_uiFlag = 0;
+
+    m_iState = 1;
     m_hAlertSE = 0;
-    m_tqTimer = 0;
-    m_tqRed = 0;
+    m_tqRed = m_tqTimer = 0;
+    m_nHP = m_nRedHP = m_nMaxHP = 300;
     m_szSeqFace = _ref(g_szSeqFace); // MATCH: global load kept after the field stores
     m_pSeqCtrl = NULL;
     m_pSeqCtrl = new KH_AT("(134)") D2::C2DSeqCtrl;
@@ -1875,3 +1873,4 @@ void CFriendGauge::setGauge(INT inState) {
     m_uiState = inState;
 }
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

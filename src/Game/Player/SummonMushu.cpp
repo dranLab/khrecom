@@ -150,7 +150,7 @@ void CSummonMushu::beginStateAction1() {
 }
 
 void CSummonMushu::stateAction1() {
-    PlayerCamera::CPlayerCamera::getBattleCamData(g_MushuCamParam);
+    KH_DEBUG(PlayerCamera::CPlayerCamera::getBattleCamData(g_MushuCamParam);)
     FVECTOR rot = getRot();
     FLOAT x = getAnalogLX(0) * (1.0f / 4096.0f);
     FLOAT y = -(getAnalogLY(0) * (1.0f / 4096.0f));
@@ -244,3 +244,4 @@ void CSummonMushu::getCameraTargetPos(FVECTOR& outPos) {
 
 } // namespace Summon
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

@@ -78,9 +78,9 @@ static inline void _setXYZ(G_XYZ& xyz, FIX4 _x, UINT _y, UINT _z) {
     xyz.z = _z;
 }
 
-static UINT s_nStreamUnderflowCnt = 0;
+KH_DEBUG(static UINT s_nStreamUnderflowCnt = 0;)
 
-CMoviePlayer::CMoviePlayer(CTask* pParent, BOOL bForDebug) : CMoviePlayerBase(pParent) {
+CMoviePlayer::CMoviePlayer(CTask* pParent KH_DEBUG(, BOOL bForDebug)) : CMoviePlayerBase(pParent) {
     m_nStatus = MOVIE_STATUS_NOP;
     m_nFlag = 0;
     m_pStream = NULL;
@@ -98,9 +98,9 @@ CMoviePlayer::CMoviePlayer(CTask* pParent, BOOL bForDebug) : CMoviePlayerBase(pP
     m_pScriptManager = NULL;
     m_hPauseSeq = 0;
     m_pFadeMask = NULL;
-    if (bForDebug) {
-        m_nFlag = 0x80000000;
-    }
+    KH_DEBUG(if (bForDebug) {)
+        KH_DEBUG(m_nFlag = 0x80000000;)
+    KH_DEBUG(})
 }
 
 CMoviePlayer::~CMoviePlayer() {
@@ -221,8 +221,8 @@ void CMoviePlayer::close() {
         sceMpegInit();
     }
     m_nStatus = MOVIE_STATUS_NOP;
-    m_nFlag &= 0x80000000;
     m_bKeySkipEnable = 0;
+    m_nFlag &= KH_VER(0x80000000, 0); /* keeps only the debug player flag (retail has none) */
     if (m_pbyMpegWorkArea) {
         com_free(m_pbyMpegWorkArea);
     }
@@ -267,7 +267,7 @@ void CMoviePlayer::pause(INT nFlag, BOOL bPause) {
             m_pStream->Pause();
             CAudioDec::pause();
             m_iPauseStatus = 1;
-            if (!m_hPauseSeq && !(m_nFlag & 0x80000000) && nFlag == 0x8000) {
+            if (!m_hPauseSeq && KH_DEBUG(!(m_nFlag & 0x80000000) &&) nFlag == 0x8000) {
                 CTask* p;
 #line 405
                 p = new KH_AT("(405)") CPause(this, 5);
@@ -294,7 +294,7 @@ void CMoviePlayer::main() {
         }
     case MOVIE_STATUS_PRE_PLAY:
         m_nStatus = MOVIE_STATUS_PLAYING;
-        s_nStreamUnderflowCnt = 0;
+        KH_DEBUG(s_nStreamUnderflowCnt = 0;)
         break;
     case MOVIE_STATUS_PLAYING:
         if (CPackMan::getDrawMode() == 2) {
@@ -401,18 +401,18 @@ void CMoviePlayer::playing() {
 
 void CMoviePlayer::procPause() {
     BOOL bPauseEnable = m_bKeySkipEnable;
-    if (m_nFlag & 0x80000000) bPauseEnable = TRUE;
+    KH_DEBUG(if (m_nFlag & 0x80000000) bPauseEnable = TRUE;)
     if (!bPauseEnable) return;
     if (m_iPauseStatus == 0) {
         if (CPadHandler::isButtonTrg(0x800)) {
             pause(0x8000, TRUE);
         }
     } else if (m_iPauseStatus == 1) {
-        if (m_nFlag & 0x80000000) {
-            if (CPadHandler::isButtonTrg(0x800)) {
-                pause(0x8000, FALSE);
-            }
-        } else if (m_nFlag & 0x8000) {
+        KH_DEBUG(if (m_nFlag & 0x80000000) {)
+            KH_DEBUG(if (CPadHandler::isButtonTrg(0x800)) {)
+                KH_DEBUG(pause(0x8000, FALSE);)
+            KH_DEBUG(})
+        KH_DEBUG(} else) if (m_nFlag & 0x8000) {
             if (m_hPauseSeq && !CTaskMan::getTask(m_hPauseSeq)) {
                 m_hPauseSeq = 0;
                 if (_ref(CPause::m_nResult) == 1) {
@@ -502,7 +502,7 @@ INT CMoviePlayer::fillBuffer(BOOL bBlock) {
             if (m_dwMuxBuffFullness == 0) {
                 if (!bBlock) {
                     if (m_nStatus == MOVIE_STATUS_PLAYING && m_nNowFrame >= 2) {
-                        s_nStreamUnderflowCnt++;
+                        KH_DEBUG(s_nStreamUnderflowCnt++;)
                         TRACE_USER((USER)4, "*");
                     }
                     return 0;
@@ -757,9 +757,9 @@ void CMoviePlayer::setTransScr0ImageTags(u_int* tags, int width, int height) {
     setDMAscTag(p, 0, 0, 0, 7, 0, 0);
 }
 
-UINT CMoviePlayer::getStreamUnderflowCnt() {
-    return s_nStreamUnderflowCnt;
-}
+KH_DEBUG(UINT CMoviePlayer::getStreamUnderflowCnt() {)
+    KH_DEBUG(return s_nStreamUnderflowCnt;)
+KH_DEBUG(})
 
 CMoviePlayerDummy::CMoviePlayerDummy(CTask* pParent) : CMoviePlayerBase(pParent) {
     m_nStatus = MOVIE_STATUS_NOP;
@@ -828,3 +828,4 @@ void CMoviePlayerDummy::start() {
     setVisible(TRUE);
 }
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .rodata

@@ -339,7 +339,7 @@ void CMainApp::finalize() {
 }
 
 INT CMainApp::run() {
-    DebugWork::initialize();
+    KH_DEBUG(DebugWork::initialize();)
     for (;;) {
         _warmReset();
         _mainLoop();
