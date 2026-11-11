@@ -895,6 +895,7 @@ segments:
       - [0x232C94, data, System/Graphic/Effect/EffectMan]
       - [0x232CC8, data, System/Graphic/Effect/libppp/partMng]
       - [0x234738, data, System/Graphic/Effect/libppp/pppfunctbl]
+      - [0x236D58, data, System/Graphic/Effect/libppp/pppPart]
       - [0x236D68, data, System/Graphic/Effect/libppp/draw/draw]
       - [0x236D80, data, System/Graphic/Effect/libppp/draw/draw_w]
       - [0x236DC0, data, System/Graphic/Effect/libppp/draw/md]
@@ -1654,7 +1655,7 @@ segments:
       - { type: bss, vram: 0x0056D860, name: System/Graphic/Effect/EffectMan }
       - { type: bss, vram: 0x0056D900, name: System/Graphic/Effect/libppp/partMng }
       - { type: bss, vram: 0x0056DBC0, name: System/Graphic/Effect/libppp/pppPart }
-      - { type: bss, vram: 0x0057001C, name: System/Graphic/Effect/libppp/draw/draw_ws }
+      - { type: bss, vram: 0x00575FB0, name: System/Graphic/Effect/libppp/draw/draw_ws }
       - { type: bss, vram: 0x005777D0, name: System/Graphic/Effect/libppp/draw/global_w }
       - { type: bss, vram: 0x00577A10, name: System/Graphic/Effect/libppp/draw/shape }
       - { type: bss, vram: 0x0057BFD0, name: System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly }

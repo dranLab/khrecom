@@ -381,6 +381,7 @@ System/Graphic/Effect/libppp/keProg/pppKeZCrctShp
 System/Graphic/Effect/libppp/partMng
 System/Graphic/Effect/libppp/pppAlloc
 System/Graphic/Effect/libppp/pppDummy
+System/Graphic/Effect/libppp/pppPart
 System/Graphic/Effect/libppp/ppplibdmy
 System/Graphic/Effect/libppp/ryjProg/RyjMegaBirthUserCtrl
 System/Graphic/Effect/libppp/ryjProg/pppRyjDrawKekoto

@@ -18,3 +18,7 @@ _setDraw2Count__FUs 0x00104BF8
 _VBlankStartHandler__Fi 0x001051E8
 _checkSnapShot__Fv 0x00105430
 _checkReportMemory__Fv 0x00105438
+# libppp/pppPart: the call graph paired pppRunPartDraw with callEndProg's address; in link order (pppRunPartCalc,
+# pppRunPartDraw, pppEmptyRunPobject, apeaPObject) they are 0x154E28 (0x478 bytes, as the beta's) and 0x1552A0
+pppRunPartDraw 0x00154E28
+pppEmptyRunPobject 0x001552A0
