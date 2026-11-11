@@ -142,7 +142,7 @@ void EFFECT_DATA::Setup(u_long128* data, BOOL bDownVer) {
     int i;
 #line 127
     ASSERT(0 == (int)data % 16);
-    __asm__ volatile("" : "=r"(p) : "0"(p)); /* MATCH: p stops being a known copy of data: the two header reads go through data */
+    KH_DEBUG(__asm__ volatile("" : "=r"(p) : "0"(p)); /* MATCH: p stops being a known copy of data: the two header reads go through data */)
     TRACE_USER((USER)6, "EFFECT_DATA::Setup() -> DpxVer:%d\n", ((_DPX_HEADER*)data)->DpxVer);
     p += sizeof(_DPX_HEADER);
     TRACE_USER((USER)6, "EFFECT_DATA::Setup() -> ParNum:%d\n", ((_DPX_HEADER*)data)->ParNum);
@@ -196,7 +196,7 @@ void EFFECT_SE::check() const {
 }
 
 const EFFECT_SE_DATA* EFFECT_SE::getData(INT nNo) const {
-    check();
+    KH_DEBUG(check();)
     const EFFECT_SE_DATA* pData = NULL;
     INT nNum = sHead.nNum;
     for (INT i = 0; i < nNum; i++) {
@@ -222,17 +222,17 @@ INT EFFECT_SE::getSeFade(INT nNo) const {
 }
 
 INT EFFECT_SE::getNum() const {
-    check();
+    KH_DEBUG(check();)
     return sHead.nNum;
 }
 
 INT EFFECT_SE::getVer() const {
-    check();
+    KH_DEBUG(check();)
     return sHead.nVer;
 }
 
 INT EFFECT_SE::getDataSize() const {
-    check();
+    KH_DEBUG(check();)
     return sizeof(EFFECT_SE_HEAD) + getNum() * sizeof(EFFECT_SE_DATA);
 }
 
@@ -349,8 +349,8 @@ void CEffect::_setName(const char* pszEffName) {
 
 BOOL CEffect::_checkData() {
     EFFECT_DPD_DATA* pData = (EFFECT_DPD_DATA*)m_pData;
-    if (!pData) return FALSE;
-    if (pData->sHead.ver >= 140 && pData->sHead.mcode == m_nMCode && pData->sHead.head == 0x5044) return TRUE;
+    KH_DEBUG(if (!pData) return FALSE;)
+    if (KH_RELEASE(pData &&) pData->sHead.ver >= 140 && pData->sHead.mcode == m_nMCode && pData->sHead.head == 0x5044) return TRUE;
     TRACE("CEffect::_checkData() Err!! %02x, %02x, %04x MCode:%02x\n", pData->sHead.ver, pData->sHead.mcode, pData->sHead.head, m_nMCode);
     return FALSE;
 }
@@ -696,20 +696,21 @@ CEntity* CEffect::getZSortEntity() {
 }
 
 #line 1191
-char* CEffect::print_prof() {
-    ASSERT(isActive());
-    if (isWaiting()) return "waiting...\n";
-    return pppPrintProf(m_pPartMng);
-}
+KH_DEBUG(char* CEffect::print_prof() {)
+    KH_DEBUG(ASSERT(isActive());)
+    KH_DEBUG(if (isWaiting()) return "waiting...\n";)
+    KH_DEBUG(return pppPrintProf(m_pPartMng);)
+KH_DEBUG(})
 
 #line 1204
-BOOL CEffect::isValid() {
-    ASSERT(this != 0);
-    if (m_eType >= 32) {
-        TRACE("CEffect::isValid(): %p is not valid. %x\n", this, m_eType);
-        return FALSE;
-    }
-    return TRUE;
-}
+KH_DEBUG(BOOL CEffect::isValid() {)
+    KH_DEBUG(ASSERT(this != 0);)
+    KH_DEBUG(if (m_eType >= 32) {)
+        KH_DEBUG(TRACE("CEffect::isValid(): %p is not valid. %x\n", this, m_eType);)
+        KH_DEBUG(return FALSE;)
+    KH_DEBUG(})
+    KH_DEBUG(return TRUE;)
+KH_DEBUG(})
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data

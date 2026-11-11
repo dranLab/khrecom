@@ -343,6 +343,17 @@ Twelfth batch (2026-11-11): **531 units from source in retail**, 235 functions d
   camera dumps) and traces whose arguments retail doesn't evaluate (ProjectionToViewAngle in _init) are wrapped.
 - Note for the wrap helpers: line numbers from compiler errors are `#line` numbers, not file lines.
 
+Thirteenth batch (2026-11-11): **532 units from source in retail**, 224 functions differ.
+
+- EFFECT_SE::check()'s calls (the function stays, empty), CEffect::print_prof/isValid, _checkData without its
+  early `return FALSE` in retail (`if (KH_RELEASE(pData &&) ...)`); EFFECT_DATA::Setup matches without the beta's
+  asm barrier (beta-only now).
+- CPackMan: kickDMA/kickDMAFG's layer switches and size checks, terminateSemiPacket's body, the size accounting
+  (getPkUseSize/getPkTotalSize), swapDBuf's VRAM viewer with its dispfb copy and the PCRTC register writes, the
+  unit's unused EERAM statics (their static initializer is absent in retail). CFifoFpl::debugDump is empty.
+- Correction: `main`'s static initializer is not missing in retail; it pairs under another anonymous suffix
+  (`...main.cpp00aaaa`), which `try` reports as "extra".
+
 ### Where it stands (end of the unattended run)
 
 - 517/638 units of retail from source; 10,392 functions match retail, 480 differ, 689 are beta-only ("extra").

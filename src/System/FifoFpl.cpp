@@ -174,29 +174,29 @@ BOOL CFifoFpl::isValidActiveBlockID(UINT nID) const {
 }
 
 void CFifoFpl::debugDump(UINT nStartIndex, UINT nEndIndex) {
-    BYTE* p;
-    INT nBlockSize;
-    UINT i;
-    UINT n;
+    KH_DEBUG(BYTE* p;)
+    KH_DEBUG(INT nBlockSize;)
+    KH_DEBUG(UINT i;)
+    KH_DEBUG(UINT n;)
 
-    if (nEndIndex == 0 || m_nBlockCountMax < nEndIndex) {
-        nEndIndex = m_nBlockCountMax;
-    }
-    TRACE("\n*** CFifoFpl Debug Dump Start ***\n");
-    TRACE("    Buffer-Address : [%07X]\n", m_pPoolBuf);
-    TRACE("    Block-Head     : [#%d]\n", m_nAvailableBlockHead);
-    TRACE("    Block-Tail     : [#%d]\n", m_nAvailableBlockTail);
-    TRACE("    Available      : [#%d]", m_nAvailableBlockCount);
-    p = (BYTE*)m_pPoolBuf;
-    if (p) {
-        nBlockSize = 1 << m_nBlockSizeShift;
-        for (i = nStartIndex, n = 0; i < nEndIndex; i++, n++, p += nBlockSize) {
-            if ((n & 1) == 0) {
-                TRACE("\n   ");
-            }
-            TRACE(" [%2d]:[ID=%8X][L=%-3d]", i, ((_Tag*)p)->_nID, ((_Tag*)p)->_nLink);
-        }
-        TRACE("\n**** CFifoFpl Debug Dump End ****\n\n");
-    }
+    KH_DEBUG(if (nEndIndex == 0 || m_nBlockCountMax < nEndIndex) {)
+        KH_DEBUG(nEndIndex = m_nBlockCountMax;)
+    KH_DEBUG(})
+    KH_DEBUG(TRACE("\n*** CFifoFpl Debug Dump Start ***\n");)
+    KH_DEBUG(TRACE("    Buffer-Address : [%07X]\n", m_pPoolBuf);)
+    KH_DEBUG(TRACE("    Block-Head     : [#%d]\n", m_nAvailableBlockHead);)
+    KH_DEBUG(TRACE("    Block-Tail     : [#%d]\n", m_nAvailableBlockTail);)
+    KH_DEBUG(TRACE("    Available      : [#%d]", m_nAvailableBlockCount);)
+    KH_DEBUG(p = (BYTE*)m_pPoolBuf;)
+    KH_DEBUG(if (p) {)
+        KH_DEBUG(nBlockSize = 1 << m_nBlockSizeShift;)
+        KH_DEBUG(for (i = nStartIndex, n = 0; i < nEndIndex; i++, n++, p += nBlockSize) {)
+            KH_DEBUG(if ((n & 1) == 0) {)
+                KH_DEBUG(TRACE("\n   ");)
+            KH_DEBUG(})
+            KH_DEBUG(TRACE(" [%2d]:[ID=%8X][L=%-3d]", i, ((_Tag*)p)->_nID, ((_Tag*)p)->_nLink);)
+        KH_DEBUG(})
+        KH_DEBUG(TRACE("\n**** CFifoFpl Debug Dump End ****\n\n");)
+    KH_DEBUG(})
 }
 // SOURCE DATA: .rodata

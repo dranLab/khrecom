@@ -160,6 +160,7 @@ System/Graphic/Billboard
 System/Graphic/Camera
 System/Graphic/ColorFader
 System/Graphic/DeFocus
+System/Graphic/Effect/effect
 System/Graphic/Effect/libppp/draw/draw
 System/Graphic/Effect/libppp/draw/draw_w
 System/Graphic/Effect/libppp/draw/global_w
