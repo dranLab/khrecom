@@ -1,0 +1,9 @@
+# Data starts measured by hand (tools/split_version.py reads them with unit_starts.txt; retail_units.py doesn't
+# touch this file). <unit> <section> <address> [<size>], each with its evidence:
+# pppfunctbl's .rodata (data-only unit): its first string "pppRyjMegaBirthUserCtrl3" (the beta's D_00468BE8)
+System/Graphic/Effect/libppp/pppfunctbl .rodata 0x00402600
+# CardBattle's .data begins with BattleEnemy.h's two file-local statics, as in the beta (0x39AF88), before its
+# first named symbol g_szBinBattleCardList (0x33B400)
+Game/CardBattle .data 0x0033B3F8
+# CardBattle's .rodata likewise begins with those statics' strings "abnormal" and "cure01", right after Card's
+Game/CardBattle .rodata 0x00409958

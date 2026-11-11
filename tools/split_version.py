@@ -203,9 +203,14 @@ def main() -> None:
     # exact starts measured from compiled units (tools/retail_units.py switch): config/<VERSION>/unit_starts.txt
     starts_file = cfg / "unit_starts.txt"
     pushed = set()  # (section, unit) moved to the end of the unit before it: yields when it lands on a real start
-    if starts_file.exists():
+    # unit_starts.manual.txt: starts measured by hand (same format; units the scan can't measure, e.g. a data-only
+    # unit's .rodata or a unit still in assembly whose data starts before its first named symbol)
+    manual_file = cfg / "unit_starts.manual.txt"
+    if starts_file.exists() or manual_file.exists():
         recorded = []
-        for line in starts_file.read_text(encoding="utf-8").splitlines():
+        text = (starts_file.read_text(encoding="utf-8") if starts_file.exists() else "") + "\n" + \
+            (manual_file.read_text(encoding="utf-8") if manual_file.exists() else "")
+        for line in text.splitlines():
             if line.strip() and not line.startswith("#"):
                 unit, section, addr, *size = line.split()
                 recorded.append((unit, section, int(addr, 16), int(size[0], 16) if size else None))
