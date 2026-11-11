@@ -440,6 +440,7 @@ System/Movie/MovieFiles
 System/Movie/MovieScript
 System/PadHandler
 System/PadIO
+System/PlaySpeedCtrl
 System/Rnd
 System/RootTask
 System/RsrcDB
@@ -452,6 +453,7 @@ System/Tsin
 System/Util
 System/VramMan
 System/Wnd
+System/dlmalloc
 System/mcd
 lib/alalc
 lib/alarm

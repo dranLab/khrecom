@@ -2,7 +2,7 @@
 
 namespace {
 FLOAT s_fPlaySpeed = 1.f;
-FLOAT s_fDebugPlaySpeed = 1.f;
+KH_DEBUG(FLOAT s_fDebugPlaySpeed = 1.f;)
 }
 
 void CPlaySpeedCtrl::setPlaySpeed(FLOAT fInSpeed) {
@@ -25,8 +25,9 @@ KH_DEBUG(void CPlaySpeedCtrl::setDebugPlaySpeed(FLOAT fInSpeed) {)
     KH_DEBUG(})
 KH_DEBUG(})
 
-TIMEQ CPlaySpeedCtrl::getSysProgressTime(TIMEQ nInTQ) {
-    return nInTQ * s_fDebugPlaySpeed;
-}
+KH_DEBUG(TIMEQ CPlaySpeedCtrl::getSysProgressTime(TIMEQ nInTQ) {)
+    KH_DEBUG(return nInTQ * s_fDebugPlaySpeed;)
+KH_DEBUG(})
 
 // SOURCE DATA: .data
+// SOURCE DATA SLUS_217.99_retail: .data

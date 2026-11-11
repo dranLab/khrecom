@@ -314,6 +314,7 @@ System/Movie/MovieFiles .bss 0x005AE324 0x8
 System/Movie/MovieScript .bss 0x005AE32C 0x4
 System/Movie/MovieScript .rodata 0x00405568 0x18
 System/PadIO .bss 0x0043B900 0x240
+System/PlaySpeedCtrl .data 0x003328C4 0x4
 System/Rnd .bss 0x00438710 0x9c0
 System/Rnd .data 0x003328C8 0x10
 System/RootTask .data 0x0033B360 0x4
@@ -329,6 +330,7 @@ System/Tsin .rodata 0x003FF958 0xe18
 System/VramMan .bss 0x0043BD48 0xf8
 System/Wnd .data 0x003328D8 0x38
 System/Wnd .rodata 0x00400770 0xe0
+System/dlmalloc .bss 0x0043BB40 0x1e8
 System/mcd .bss 0x0043A140 0x10e0
 System/mcd .data 0x00332920 0x4
 System/mcd .rodata 0x00400888 0x18

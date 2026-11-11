@@ -1131,101 +1131,101 @@ int mspace_mallopt(int param_number, int value) {
     return change_mparam(param_number, value);
 }
 
-void* mspace_malloc_d(mspace msp, size_t bytes, char* msg, unsigned int ra) {
-    void* p = mspace_malloc(msp, bytes);
-    if (p != 0) {
-        mchunkptr pp = mem2chunk(p);
-        pp->comment = msg;
-        pp->ra = ra;
-    }
-    return p;
-}
+KH_DEBUG(void* mspace_malloc_d(mspace msp, size_t bytes, char* msg, unsigned int ra) {)
+    KH_DEBUG(void* p = mspace_malloc(msp, bytes);)
+    KH_DEBUG(if (p != 0) {)
+        KH_DEBUG(mchunkptr pp = mem2chunk(p);)
+        KH_DEBUG(pp->comment = msg;)
+        KH_DEBUG(pp->ra = ra;)
+    KH_DEBUG(})
+    KH_DEBUG(return p;)
+KH_DEBUG(})
 
-void* mspace_realloc_d(mspace msp, void* mem, size_t newsize, char* msg, unsigned int ra) {
-    void* p = mspace_realloc(msp, mem, newsize);
-    if (p != 0) {
-        mchunkptr pp = mem2chunk(p);
-        pp->comment = msg;
-        pp->ra = ra;
-    }
-    return p;
-}
+KH_DEBUG(void* mspace_realloc_d(mspace msp, void* mem, size_t newsize, char* msg, unsigned int ra) {)
+    KH_DEBUG(void* p = mspace_realloc(msp, mem, newsize);)
+    KH_DEBUG(if (p != 0) {)
+        KH_DEBUG(mchunkptr pp = mem2chunk(p);)
+        KH_DEBUG(pp->comment = msg;)
+        KH_DEBUG(pp->ra = ra;)
+    KH_DEBUG(})
+    KH_DEBUG(return p;)
+KH_DEBUG(})
 
-void* mspace_calloc_d(mspace msp, size_t n_elements, size_t elem_size, char* msg, unsigned int ra) {
-    void* p = mspace_calloc(msp, n_elements, elem_size);
-    if (p != 0) {
-        mchunkptr pp = mem2chunk(p);
-        pp->comment = msg;
-        pp->ra = ra;
-    }
-    return p;
-}
+KH_DEBUG(void* mspace_calloc_d(mspace msp, size_t n_elements, size_t elem_size, char* msg, unsigned int ra) {)
+    KH_DEBUG(void* p = mspace_calloc(msp, n_elements, elem_size);)
+    KH_DEBUG(if (p != 0) {)
+        KH_DEBUG(mchunkptr pp = mem2chunk(p);)
+        KH_DEBUG(pp->comment = msg;)
+        KH_DEBUG(pp->ra = ra;)
+    KH_DEBUG(})
+    KH_DEBUG(return p;)
+KH_DEBUG(})
 
-void* mspace_memalign_d(mspace msp, size_t alignment, size_t bytes, char* msg, unsigned int ra) {
-    void* p = mspace_memalign(msp, alignment, bytes);
-    if (p != 0) {
-        mchunkptr pp = mem2chunk(p);
-        pp->comment = msg;
-        pp->ra = ra;
-    }
-    return p;
-}
+KH_DEBUG(void* mspace_memalign_d(mspace msp, size_t alignment, size_t bytes, char* msg, unsigned int ra) {)
+    KH_DEBUG(void* p = mspace_memalign(msp, alignment, bytes);)
+    KH_DEBUG(if (p != 0) {)
+        KH_DEBUG(mchunkptr pp = mem2chunk(p);)
+        KH_DEBUG(pp->comment = msg;)
+        KH_DEBUG(pp->ra = ra;)
+    KH_DEBUG(})
+    KH_DEBUG(return p;)
+KH_DEBUG(})
 
-void* mspace_get_next_chunk(mspace msp, void* chunk) {
-    mchunkptr p = (mchunkptr)chunk;
-    size_t size = chunksize(p);
-    p = chunk_plus_offset(p, size);
-    if ((char*)p < (char*)((mstate)msp)->top)
-        return p;
-    return 0;
-}
+KH_DEBUG(void* mspace_get_next_chunk(mspace msp, void* chunk) {)
+    KH_DEBUG(mchunkptr p = (mchunkptr)chunk;)
+    KH_DEBUG(size_t size = chunksize(p);)
+    KH_DEBUG(p = chunk_plus_offset(p, size);)
+    KH_DEBUG(if ((char*)p < (char*)((mstate)msp)->top))
+        KH_DEBUG(return p;)
+    KH_DEBUG(return 0;)
+KH_DEBUG(})
 
-void* mspace_get_top_chunk(mspace msp) {
-    return mspace_get_next_chunk(msp, ((mstate)msp)->least_addr);
-}
+KH_DEBUG(void* mspace_get_top_chunk(mspace msp) {)
+    KH_DEBUG(return mspace_get_next_chunk(msp, ((mstate)msp)->least_addr);)
+KH_DEBUG(})
 
-size_t mspace_get_chunk_size(void* chunk) {
-    return chunksize((mchunkptr)chunk);
-}
+KH_DEBUG(size_t mspace_get_chunk_size(void* chunk) {)
+    KH_DEBUG(return chunksize((mchunkptr)chunk);)
+KH_DEBUG(})
 
-int mspace_chunk_inuse(void* chunk) {
-    return cinuse((mchunkptr)chunk);
-}
+KH_DEBUG(int mspace_chunk_inuse(void* chunk) {)
+    KH_DEBUG(return cinuse((mchunkptr)chunk);)
+KH_DEBUG(})
 
-int mspace_chunk_is_small(size_t size) {
-    return is_small(size);
-}
+KH_DEBUG(int mspace_chunk_is_small(size_t size) {)
+    KH_DEBUG(return is_small(size);)
+KH_DEBUG(})
 
-void* mspace_chunk2mem(void* chunk) {
-    return chunk2mem(chunk);
-}
+KH_DEBUG(void* mspace_chunk2mem(void* chunk) {)
+    KH_DEBUG(return chunk2mem(chunk);)
+KH_DEBUG(})
 
-void* mspace_mem2chunk(void* chunk) {
-    return mem2chunk(chunk);
-}
+KH_DEBUG(void* mspace_mem2chunk(void* chunk) {)
+    KH_DEBUG(return mem2chunk(chunk);)
+KH_DEBUG(})
 
-void* mspace_get_rest_heap(mspace msp) {
-    return ((mstate)msp)->top;
-}
+KH_DEBUG(void* mspace_get_rest_heap(mspace msp) {)
+    KH_DEBUG(return ((mstate)msp)->top;)
+KH_DEBUG(})
 
-char* mspace_get_chunk_comment(void* chunk) {
-    return ((mchunkptr)chunk)->comment;
-}
+KH_DEBUG(char* mspace_get_chunk_comment(void* chunk) {)
+    KH_DEBUG(return ((mchunkptr)chunk)->comment;)
+KH_DEBUG(})
 
-unsigned int mspace_get_chunk_ra(void* chunk) {
-    return ((mchunkptr)chunk)->ra;
-}
+KH_DEBUG(unsigned int mspace_get_chunk_ra(void* chunk) {)
+    KH_DEBUG(return ((mchunkptr)chunk)->ra;)
+KH_DEBUG(})
 
-int mspace_check_inuse_mem(mspace msp, void* mem) {
-    mchunkptr p = mem2chunk(mem);
-    if (!((is_aligned(chunk2mem(p))) || (p->head == FENCEPOST_HEAD)))
-        return 0;
-    if (!cinuse(p))
-        return 0;
-    if (!next_pinuse(p))
-        return 0;
-    return pinuse(p) || next_chunk(prev_chunk(p)) == p;
-}
+KH_DEBUG(int mspace_check_inuse_mem(mspace msp, void* mem) {)
+    KH_DEBUG(mchunkptr p = mem2chunk(mem);)
+    KH_DEBUG(if (!((is_aligned(chunk2mem(p))) || (p->head == FENCEPOST_HEAD))))
+        KH_DEBUG(return 0;)
+    KH_DEBUG(if (!cinuse(p)))
+        KH_DEBUG(return 0;)
+    KH_DEBUG(if (!next_pinuse(p)))
+        KH_DEBUG(return 0;)
+    KH_DEBUG(return pinuse(p) || next_chunk(prev_chunk(p)) == p;)
+KH_DEBUG(})
 
 size_t mspace_get_rest_heap_size(mspace msp) {
     return ((mstate)msp)->topsize;
@@ -1238,3 +1238,4 @@ size_t mspace_get_chunk_size_from_mem(void* mem) {
 /* (Absolute D_00504D20 / D_00504D4D stood here, for string bytes in .sndata that splat had made references;
    tools/sndll.py generates .sndata now, with only real pointers symbolic.) */
 // SOURCE DATA: .bss
+// SOURCE DATA SLUS_217.99_retail: .bss
