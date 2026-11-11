@@ -1,5 +1,6 @@
 #define GAME_BATTLECARD_CPP
-#include "khtypes.h"
+#include "khtypes.h" /* MATCH: retail's .rodata begins with 16 zero bytes before the "" the tables use (not identified): */
+KH_RELEASE(__asm__(".rdata\n.align 3\n.word 0\n.word 0\n.word 0\n.word 0\n");)
 #define GPRIM_H_PATH "System/Graphic/GPrim.h" /* MATCH: the original includes it under this name */
 #define CARDBATTLE_H_PATH "c:/KHCOM/MainApp/Game/CardBattle.h" /* MATCH: the original includes it under this name */
 #include "System/TaskMan.h"
@@ -33,7 +34,6 @@ extern INT SCREEN_HEIGHT;
 
 
 
-
 extern INT SCREEN_HEIGHT;
 namespace CardBattle {
 static LPCSTR g_szDpxZexion2 = "zexion2";
@@ -41,16 +41,16 @@ static LPCSTR g_szLadLayoutCard = "layout_card.lad";
 unsigned char g_Seq_toLayout[26] = {
     11, 9, 8, 7, 20, 17, 18, 16, 29, 28, 27, 26, 25, 24, 33, 34, 35, 30, 31, 32, 6, 5, 4, 3, 2, 1,
 };
-static char* g_pBC_DbgStateName[9] = {
-    "STATE_USE", "STATE_STOCK", "STATE_HAND", "STATE_DESTROY", "STATE_DUEL", "STATE_SNATCH", "STATE_PRONOUNCE",
-    "STATE_MAX", "STATE_NONE",
-};
-static char* g_pBC_DbgModeName[21] = {
-    "MODE_NULL", "MODE_START", "MODE_EXEC", "MODE_END", "MODE_REFRECT_START", "MODE_REFRECT", "MODE_BREAK",
-    "MODE_ENCHANT", "MODE_STOCK_START", "MODE_STOCK", "MODE_HAND_NONE", "MODE_HAND_ACTIVE", "MODE_HAND_ROLL",
-    "MODE_HAND_HIDE", "MODE_HAND_OUT", "MODE_HAND_RELOAD", "MODE_DUEL_ENTRY", "MODE_SNATCH_START", "MODE_SNATCH",
-    "MODE_TRAP_START", "MODE_DISCARD",
-};
+KH_DEBUG(static char* g_pBC_DbgStateName[9] = {)
+    KH_DEBUG("STATE_USE", "STATE_STOCK", "STATE_HAND", "STATE_DESTROY", "STATE_DUEL", "STATE_SNATCH", "STATE_PRONOUNCE",)
+    KH_DEBUG("STATE_MAX", "STATE_NONE",)
+KH_DEBUG(};)
+KH_DEBUG(static char* g_pBC_DbgModeName[21] = {)
+    KH_DEBUG("MODE_NULL", "MODE_START", "MODE_EXEC", "MODE_END", "MODE_REFRECT_START", "MODE_REFRECT", "MODE_BREAK",)
+    KH_DEBUG("MODE_ENCHANT", "MODE_STOCK_START", "MODE_STOCK", "MODE_HAND_NONE", "MODE_HAND_ACTIVE", "MODE_HAND_ROLL",)
+    KH_DEBUG("MODE_HAND_HIDE", "MODE_HAND_OUT", "MODE_HAND_RELOAD", "MODE_DUEL_ENTRY", "MODE_SNATCH_START", "MODE_SNATCH",)
+    KH_DEBUG("MODE_TRAP_START", "MODE_DISCARD",)
+KH_DEBUG(};)
 CB_LAYOUT g_LayoutData[65] = {
     {0, 0, 0, 0}, // 0
     {0, SCREEN_HEIGHT - 96, 4, 100}, // 1
@@ -138,16 +138,16 @@ void CardBattle::initLayoutData() {
 }
 
 CardBattle::CBattleCard::CBattleCard(CTask* pParent, INT inIndex, INT inNumber, INT inUser, INT inState)
-    : CTask(pParent, 0x4000) {
-    m_uiFlag = 0;
-    m_uiUser = inUser;
-    m_iStock = -1;
-    m_iHandMax = 0;
-    m_tqTimer = 0;
-    m_pCard = NULL;
-    m_pRevolver = NULL;
-    m_iHand = -1;
-    m_uiOwner = inUser;
+    : CTask(pParent, 0x4000), /* MATCH: a mem-initializer list (the beta's markers put these stores on the constructor's line; retail stores them in member order) */
+      m_uiFlag(0),
+      m_uiUser(inUser),
+      m_iStock(-1),
+      m_iHand(-1),
+      m_iHandMax(0),
+      m_uiOwner(inUser),
+      m_tqTimer(0),
+      m_pCard(NULL),
+      m_pRevolver(NULL) {
     m_State[0].set(this, &CBattleCard::preStateUse, &CBattleCard::stateUse, NULL);
     m_State[1].set(this, &CBattleCard::preStateStock, &CBattleCard::stateStock, NULL);
     m_State[2].set(this, &CBattleCard::preStateHand, &CBattleCard::stateHand, NULL);
@@ -156,9 +156,9 @@ CardBattle::CBattleCard::CBattleCard(CTask* pParent, INT inIndex, INT inNumber, 
     m_State[5].set(this, &CBattleCard::preStateSnatch, &CBattleCard::stateSnatch, NULL);
     m_State[6].set(this, &CBattleCard::preStatePronounce, &CBattleCard::statePronounce, NULL);
     m_cardData.init(inIndex, inNumber);
+    m_nNumber = inNumber; /* MATCH: the beta's marker order (243-245) */
     m_nNumberR = -1;
     m_nNumberE = -1;
-    m_nNumber = inNumber;
     m_pCard = new KH_AT("(246)") C2DCard;
     m_iStockCount = 0;
     m_hTarget = 0;
@@ -653,7 +653,7 @@ void CBattleCard::stateHand() {
             if (m_iHand != m_iHandMax - 1) {
                 m_tqTimer = 0;
                 m_uiMode = 10;
-                if (!KH_DW(DebugWork::g_dw.player.iDeckDbgDisp)) m_uiFlag = (INT)m_uiFlag & ~0x1;
+                if (!KH_DW_ON(DebugWork::g_dw.player.iDeckDbgDisp)) m_uiFlag = (INT)m_uiFlag & ~0x1;
             }
         hand_ok1:
             m_Pos = m_EndPos;
@@ -689,7 +689,7 @@ void CBattleCard::stateHand() {
             m_uiFlag |= 0x100000;
             m_uiMode = 10;
             m_tqTimer = 0;
-            if (!KH_DW(DebugWork::g_dw.player.iDeckDbgDisp)) {
+            if (!KH_DW_ON(DebugWork::g_dw.player.iDeckDbgDisp)) {
                 m_uiFlag = (INT)m_uiFlag & ~0x1;
                 m_uiFlag = (INT)m_uiFlag & ~0x2008;
             }
@@ -707,7 +707,7 @@ void CBattleCard::stateHand() {
                 if (m_iHand != m_iHandMax - 1) {
                     m_tqTimer = 0;
                     m_uiMode = 10;
-                    if (!KH_DW(DebugWork::g_dw.player.iDeckDbgDisp)) m_uiFlag = (INT)m_uiFlag & ~0x1;
+                    if (!KH_DW_ON(DebugWork::g_dw.player.iDeckDbgDisp)) m_uiFlag = (INT)m_uiFlag & ~0x1;
                 }
         hand_ok2:
                 m_Pos = m_EndPos;
@@ -934,7 +934,7 @@ void CBattleCard::setHandLocate(INT inNum, INT inMax) {
             }
             m_tqTimer = 0;
             m_uiMode = 10;
-            if (KH_DW(DebugWork::g_dw.player.iDeckDbgDisp)) {
+            if (KH_DW(DebugWork::g_dw.player.iDeckDbgDisp)) { // MATCH: off here in retail, though stateHand's tests behave as on
                 n = inNum * 25;
                 pLayout = &g_LayoutData[15];
             } else {
@@ -946,7 +946,7 @@ void CBattleCard::setHandLocate(INT inNum, INT inMax) {
     set1:
         m_Pos.set(pLayout->x, pLayout->y);
         m_iLayer = pLayout->layer;
-        m_Pos.x += n;
+        KH_DEBUG(m_Pos.x += n;) // MATCH: the debug display's spread, beta only
         m_vRot.set(0.0f, 0.0f, 0.0f, pLayout->scale * 0.01f);
         m_fStartDir = 0.0f;
         m_fEndDir = 0.0f;
@@ -987,7 +987,7 @@ void CBattleCard::setHandLocate(INT inNum, INT inMax) {
         m_iLayer = pLayout->layer;
         m_vRot.x = m_vRot.z = 0.0f;
         m_fEndScale = m_fStartScale = m_vRot.w = pLayout->scale * 0.01f;
-        m_Pos.y -= n;
+        KH_DEBUG(m_Pos.y -= n;)
     }
     m_EndPos = m_Pos;
     m_pCard->changeLayer(m_iLayer);
@@ -1592,3 +1592,4 @@ void CBattleCard::setDiscard(INT inFlag) {
     }
 }
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .data .rodata

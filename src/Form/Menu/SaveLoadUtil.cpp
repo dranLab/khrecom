@@ -577,10 +577,10 @@ void CMemocaAgent::setupSaveData(CBuf& buf) {
     if (bGameClearNow) {
         CGameWork::backup(CGameWork::BACKUP_SECONDARY);
         CGameWork::rollback(CGameWork::BACKUP_PRIMARY);
-        if (CGame::isRikuGame() && !CSceneInfo::getCurrentAreaScene()) {
-            CGameWork::rollback(CGameWork::BACKUP_SECONDARY);
-            CGameWork::backup(CGameWork::BACKUP_SECONDARY);
-        }
+        KH_DEBUG(if (CGame::isRikuGame() && !CSceneInfo::getCurrentAreaScene()) {) // MATCH: not in retail
+            KH_DEBUG(CGameWork::rollback(CGameWork::BACKUP_SECONDARY);)
+            KH_DEBUG(CGameWork::backup(CGameWork::BACKUP_SECONDARY);)
+        KH_DEBUG(})
     } else {
         CSceneInfo::backupEventDoorState();
     }
@@ -1102,3 +1102,4 @@ void CMemocaDataEntries::useOneSavableUnit(UINT nIndex) {
 }
 
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .data .rodata

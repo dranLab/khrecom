@@ -7,8 +7,9 @@ System/Graphic/Effect/libppp/pppfunctbl .rodata 0x00402600
 Game/CardBattle .data 0x0033B3F8
 # CardBattle's .rodata likewise holds those statics' strings "abnormal" and "cure01" (0x409958), after Card's (0x408550 + 0x1400)
 Game/CardBattle .rodata 0x00409950
-# BattleCard's .rodata begins after AttackMotion's (0x406FC0 + 0x50) with header inlines' empty strings before
-# "zexion2" (the beta's 0x473234-0x47323F), not at the split's 0x407058 (retail has no SJIS assert strings there)
+# BattleCard's .rodata begins after AttackMotion's (0x406FC0 + 0x50) with three empty 8-byte blocks before "zexion2"
+# (0x407028; its jump tables' 16-byte alignment needs the 0x407010 start), not at the split's 0x407058 (retail has no
+# SJIS assert strings there)
 Game/BattleCard .rodata 0x00407010
 # Units still in assembly whose data begins with BattleEnemy.h's statics before their first named symbol (starts
 # voted unanimously by their compiled code's relocations in retail_units.py scan):

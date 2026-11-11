@@ -1361,7 +1361,7 @@ KH_DEBUG(};)
 KH_DEBUG(})
 #include "Form/Menu/TitleReportDllStarter.h"
 __asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
-void ATEL::_TRACE(BOOL bDisp, const CHAR* fmt, ...) {
+KH_DEBUG(void ATEL::_TRACE(BOOL bDisp, const CHAR* fmt, ...) {)
     KH_DEBUG(va_list args;)
 
     KH_DEBUG(if (bDisp) {)
@@ -1376,12 +1376,12 @@ void ATEL::_TRACE(BOOL bDisp, const CHAR* fmt, ...) {
         KH_DEBUG(printf("\x1b[0m");)
         KH_DEBUG(va_end(args);)
     KH_DEBUG(})
-}
+KH_DEBUG(})
 CVSM::CVSM(CAtel& atel, BOOL bTrace)
     : m_Atel(atel), m_GAptr(0), m_FAptr(0), m_Pctr(0), m_SP(0), m_Freg(0), m_InsCount(0), m_MaxSD(0), m_MinFP(0x4000),
       m_MaxPC(0), m_CallC(0), m_MaxActorCount(0), m_ActorCount(0), m_pIseg(NULL), m_pDseg(NULL), m_pCurrentActor(NULL) {
     m_nFlag = 0;
-    m_bTrace = bTrace;
+    KH_DEBUG(m_bTrace = bTrace;) // MATCH: beta only (retail never traces the script)
     initActor();
     m_fEventTrapStartWait = 20.0f;
     m_fTalkWait = 0.0f;

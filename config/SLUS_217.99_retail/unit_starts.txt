@@ -19,6 +19,9 @@ Form/Menu/RoomCreation .rodata 0x0042B0C0 0x1500
 Form/Menu/Roulette .data 0x003402F0 0x48
 Form/Menu/Roulette .rodata 0x0042C5C0 0x1350
 Form/Menu/SaveLoadCtrl .rodata 0x0042F1F0 0x20
+Form/Menu/SaveLoadUtil .bss 0x005BF520 0x10
+Form/Menu/SaveLoadUtil .data 0x00340368 0xc
+Form/Menu/SaveLoadUtil .rodata 0x0042F210 0x110
 Form/Menu/TechHelp .data 0x00340374 0xc
 Form/Menu/TechHelp .rodata 0x0042F320 0x120
 Form/Menu/TitleReportDllStarter .data 0x00340380 0x4
@@ -42,6 +45,9 @@ Game/Atel/ChatMan .data 0x0033C40C 0xc
 Game/AttachCard .rodata 0x00405D38 0x1280
 Game/AttackMotion .data 0x0033B370 0x20
 Game/AttackMotion .rodata 0x00406FC0 0x50
+Game/BattleCard .bss 0x005BD930 0x208
+Game/BattleCard .data 0x0033B398 0x28
+Game/BattleCard .rodata 0x00407010 0x1530
 Game/BodyCollision .data 0x0033B3C0 0x10
 Game/Bullet/Bullet .rodata 0x00424020 0x20
 Game/Card .bss 0x005BDB38 0x10

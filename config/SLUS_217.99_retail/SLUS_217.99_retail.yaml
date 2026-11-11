@@ -1386,6 +1386,7 @@ segments:
       - [0x305D38, rodata, Game/AttachCard]
       - [0x306FC0, rodata, Game/AttackMotion]
       - [0x307010, rodata, Game/BattleCard]
+      - [0x308540, rodata, Game/BodyCollision]
       - [0x308550, rodata, Game/Card]
       - [0x309950, rodata, Game/CardBattle]
       - [0x30B160, rodata, Game/CardKind]
