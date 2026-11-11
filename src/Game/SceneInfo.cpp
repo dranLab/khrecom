@@ -39,7 +39,7 @@ union _AREA_SCENE_REG {
         SHORT _nScene;
         SHORT _nArea;
     };
-    INT _nAreaScene;
+    INT _nAreaScene; void operator=(const AREA_SCENE& as) { _nAreaScene = as._nAreaScene; } BOOL operator==(const AREA_SCENE& as) const { return _nAreaScene == as._nAreaScene; } void clear() { _nAreaScene = -1; } BOOL isEmpty() const { return _nAreaScene < 0; } /* AREA_SCENE's inlines (the original's SceneInfo.h:40, 41, 44, 46) */
 };
 
 struct _SceneInfo {
@@ -47,7 +47,7 @@ struct _SceneInfo {
     BYTE _nReverb;
     BYTE _nSeRangeRatio;
     void clear() {
-        _as._nAreaScene = -1;
+        _as.clear();
         _nReverb = 20;
         _nSeRangeRatio = 10;
     }
@@ -1463,8 +1463,8 @@ INT CSceneInfo::addToSceneCache(const AREA_SCENE& as) {
         return -1;
     }
     for (INT i = 0; i < 7; i++) {
-        if (s_SceneCacheTbl[i]._as._nAreaScene < 0) {
-            s_SceneCacheTbl[i]._as._nAreaScene = as._nAreaScene;
+        if (s_SceneCacheTbl[i]._as.isEmpty()) { /* MATCH: AREA_SCENE's inlines, as the ref's locals show (this, as) */
+            s_SceneCacheTbl[i]._as = as;
             KH_DEBUG(if (!(7 >= s_nAvailableSceneCache)) AssertApp(__FILE__, 2622, "_SCENE_CACHE_SIZE >= s_nAvailableSceneCache", 0);)
             s_nAvailableSceneCache--;
             KH_DEBUG(if (!(0 <= s_nAvailableSceneCache)) AssertApp(__FILE__, 2624, "0 <= s_nAvailableSceneCache", 0);)
@@ -1476,7 +1476,7 @@ INT CSceneInfo::addToSceneCache(const AREA_SCENE& as) {
 INT CSceneInfo::removeFromSceneCache(const AREA_SCENE& as) {
     if (as._nAreaScene < 0) return -1;
     for (INT i = 0; i < 7; i++) {
-        if (s_SceneCacheTbl[i]._as._nAreaScene == as._nAreaScene) {
+        if (s_SceneCacheTbl[i]._as == as) {
             s_SceneCacheTbl[i].clear();
             KH_DEBUG(if (!(0 < s_nAvailableSceneCache)) AssertApp(__FILE__, 2643, "0 < s_nAvailableSceneCache", 0);)
             s_nAvailableSceneCache++;
@@ -1762,10 +1762,10 @@ void CSceneInfo::openGoalDoor() {
     setEventRoomSceneNum(_EVENTROOM_GOAL, 2);
     makeRoom(*pRoom, nDoor, 2, getCardIDFromSceneNum(2), CGameWork::m_pMCWork->_nNextRCNormaNum);
 }
-__asm__(".rdata\n" ".align 3\n" "D_00484E38:\n" ".word 0x8B837581\n" ".word 0x80835B81\n" ".word 0x5A836564\n" ".word 0x4E838C83\n" ".word 0x76816783\n" ".word 0x4F8AC888\n" ".word 0xFC93C582\n" ".word 0xC482C182\n" ".word 0xCC82E982\n" ".word 0x4181C582\n" ".word 0x5B815383\n" ".word 0xE0948B83\n" ".word 0x4A8AF082\n" ".word 0xDC82AF82\n" ".word 0xF182B982\n" ".word 0x0000000A\n" ".word 0x00000000\n" ".word 0x00000000\n" ".text\n");
+KH_DEBUG(__asm__(".rdata\n" ".align 3\n" "D_00484E38:\n" ".word 0x8B837581\n" ".word 0x80835B81\n" ".word 0x5A836564\n" ".word 0x4E838C83\n" ".word 0x76816783\n" ".word 0x4F8AC888\n" ".word 0xFC93C582\n" ".word 0xC482C182\n" ".word 0xCC82E982\n" ".word 0x4181C582\n" ".word 0x5B815383\n" ".word 0xE0948B83\n" ".word 0x4A8AF082\n" ".word 0xDC82AF82\n" ".word 0xF182B982\n" ".word 0x0000000A\n" ".word 0x00000000\n" ".word 0x00000000\n" ".text\n");) /* beta only: retail has no such string */
 void CSceneInfo::backupEventDoorState() {
     USHORT nFloorIdx = getCurrentFloorIndex();
-    if (nFloorIdx == 0xff) return;
+    KH_DEBUG(if (nFloorIdx == 0xff) return;) // MATCH: not in retail
     FloorInfo& floor = s_CurrentFloor;
     STORAGE::_EventDoorInfo* pInfoBackupTbl = _SceneInfoWork::mc()->_nEventDoorInfoTbl[nFloorIdx];
     BYTE* pStateBackupTbl = _SceneInfoWork::mc()->_nEventDoorStateTbl[nFloorIdx];
@@ -1811,7 +1811,7 @@ void CSceneInfo::backupEventDoorState() {
 }
 void CSceneInfo::rollbackEventDoorState(BOOL bInitFloor) {
     USHORT nFloorIdx = getCurrentFloorIndex();
-    if (nFloorIdx == 0xff) return;
+    KH_DEBUG(if (nFloorIdx == 0xff) return;) // MATCH: not in retail
     FloorInfo& floor = s_CurrentFloor; /* not in the ref: it got no register (all s-regs taken), so .mdebug has no entry */
     STORAGE::_EventDoorInfo* pInfoBackupTbl = _SceneInfoWork::mc()->_nEventDoorInfoTbl[nFloorIdx];
     BYTE* pStateBackupTbl = _SceneInfoWork::mc()->_nEventDoorStateTbl[nFloorIdx];
@@ -2213,3 +2213,4 @@ INT CSceneInfo::getInconstWorldRsrcID(INT nWorld, BOOL bSora) {
     return 0;
 }
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .data .rodata

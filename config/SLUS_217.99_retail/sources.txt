@@ -180,6 +180,7 @@ Game/Player/SummonTink
 Game/Prize
 Game/SEMotion
 Game/SceneEnv
+Game/SceneInfo
 Game/Status
 Game/StorageWork
 Game/Technic
