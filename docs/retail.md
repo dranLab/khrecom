@@ -692,4 +692,8 @@ what was found):
 - **Data starts:** MapEnemyAir's and MapEnemyGround's `.rodata` (only EnemyParam.h's `""` and `"@ENP"`, 0x10 each)
   at retail's 0x421190/0x4211A0: the split had given them to MapEnemy's `.rodata` ("bytes SHORT").
 
-Tried here without a match: Model sendTexture with incTexSendCount as an empty inline in retail (no change).
+Tried here without a match: Model sendTexture with incTexSendCount as an empty inline in retail (no change); GimmickTreasureBox
+`iFg` declared in the `if` block, initialized there, or before `ret` (no change); VSME loadFromMem with the ref's `i`
+for the actor loops (78 -> 74 lines, but the first actor loop then differs); SaveLoad's CSaveLoadUI constructor
+with an explicit `CState() {}` or `0` for the `NULL` pointer-to-member arguments (gcse table stays 223 buckets);
+retail permuter, 15 minutes each: loadFromMem 51 -> 51 (11,409 candidates), setReqLoad 50 -> 50 (23,588).
