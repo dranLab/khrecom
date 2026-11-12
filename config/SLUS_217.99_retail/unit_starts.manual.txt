@@ -42,3 +42,6 @@ Game/Collision/CollMap .rodata 0x00410700
 # there): retail's {0x40B160 "", 0} after CardBattle's 0x350 bytes; the split had no CardKind .data and gave the 8
 # bytes to CardBattle
 Game/CardKind .data 0x0033B748
+# MapEnemy's .data (still in assembly): g_pIdlingMotion's pointer table {0, p, p+0x10, p+0x20 x4, p+0x30, ...}, the
+# beta's 0x3A93E0, is retail's 0x33F5B0 right after HumanBoss's 0x200 bytes (the split's 0x33F774 is a later item)
+Game/Enemy/MapEnemy .data 0x0033F5B0

@@ -675,7 +675,7 @@ BOOL CHumanBoss::enemyCardProc(const CARD* inActiveCard) {
         if (n < 2 || (RND::genrand_int31() & 1) == 0) {
             if (n <= 0) {
                 setHumanBossFlag(1, 0);
-                m_pCardRevolver->changeMode(-1, 0); KH_RELEASE(return TRUE;) /* retail: no trace, its own return (cross-jumped with the last tail) */
+                m_pCardRevolver->changeMode(-1, 0);
             } else if (m_pCardRevolver->setPlayCard(0, 0)) {
                 playUseEnemyCardVoice();
                 if (n == mode) {
@@ -683,10 +683,10 @@ BOOL CHumanBoss::enemyCardProc(const CARD* inActiveCard) {
                 }
             }
             TRACE("----------- change normal card mode.\n");
-            return TRUE;
-        }
+            KH_DEBUG(return TRUE;) /* retail: one return for both arms (the flag path joins the last tail) */
+        } KH_RELEASE(else {)
         m_pCardRevolver->rollDeck(1, 0, 300);
-        return TRUE;
+        KH_RELEASE(}) return TRUE;
     }
     if (isNoEnemyCard()) {
         return FALSE;
@@ -1148,3 +1148,4 @@ BOOL CHumanBoss::setPlayStock(INT inState) {
     return TRUE;
 }
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata
