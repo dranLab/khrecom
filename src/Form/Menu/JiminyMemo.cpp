@@ -1678,7 +1678,7 @@ void CMemo3DObj::main() {
 #line 2485
                 m_pModels = new KH_AT("(2485)") CModel[m_iModelCount];
 #line 2487
-                KH_DEBUG(if (!m_pModels) AssertApp(__FILE__, __LINE__, "m_pModels", 0);)
+                KH_DEBUG(if (!m_pModels) AssertApp(__FILE__, __LINE__, "m_pModels", 0);) KH_RELEASE(if (!m_pModels) { out(); m_iStep = 0xFFFF; return; })
                 pTexAnimData = CRsrcDB::getRsrcTXA(nID);
                 if (pTexAnimData) {
                     m_iTexAnimNum = pTexAnimData->getDataNum();
@@ -1696,7 +1696,7 @@ void CMemo3DObj::main() {
                 }
                 m_pAnime = new KH_AT("(2525)") CAnim;
 #line 2527
-                KH_DEBUG(if (!m_pAnime) AssertApp(__FILE__, __LINE__, "m_pAnime", 0);)
+                KH_DEBUG(if (!m_pAnime) AssertApp(__FILE__, __LINE__, "m_pAnime", 0);) KH_RELEASE(if (!m_pAnime) { out(); m_iStep = 0xFFFF; return; })
                 m_pAnime->link(this, nID);
                 m_pAnime->init(1, 0);
                 for (INT i = 0; i < m_iModelCount; i++) m_pModels[i].changeLayerExt(1, m_uiDispLayer);

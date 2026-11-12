@@ -2069,7 +2069,7 @@ void CBattleEnemy::makeCard(const FVECTOR* inPos) {
     if (!m_pBasicParam) return;
     if (isNoCreateCard()) return;
     CBattleEnemyManager* bem = (CBattleEnemyManager*)CTaskMan::getSysTask(0x19);
-    KH_DEBUG(if (!bem) AssertApp(__FILE__, 0xFB4, "bem", 0);)
+    KH_DEBUG(if (!bem) AssertApp(__FILE__, 0xFB4, "bem", 0);) KH_RELEASE(__asm__ volatile("" : : "r"(bem));) /* retail: bem stays referenced where the assert was (its priority over inPos) */
     if (!bem->canCreateEnemyCard()) return;
     if (bem->isRoulettePrizeGet()) return;
     if (bem->isAppearRoulettePrize()) return;
@@ -3662,3 +3662,4 @@ BOOL CBattleEnemy::checkResist_(ATK_KIND inDmgKind) {
 }
 typedef char _chk_be[sizeof(CBattleEnemy) == KH_VER(0x830, 0x810) ? 1 : -1]; /* retail: CEntity is 0x20 smaller */
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata
