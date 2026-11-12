@@ -641,7 +641,7 @@ keeping `instance` referenced (much worse), MapEnemy searchGround_ with a precom
 statements (no change), CardRevolver _initialize with the debug-deck switch as `switch (0)` (no change), VSME
 close_dest_se's call forms (a local reference, `mode = 1`, blocks: no change).
 
-Open after this run (18 complete units not from source in retail: 10 have no retail code (DebugMenu, DebugWindow,
+Open after this run (17 complete units not from source in retail after the morning run below: 10 have no retail code (DebugMenu, DebugWindow,
 DebugWindowTBL, CollDisp, KisEnemy, System/Debug, DebugWork, DebugPathData, vprintf, vsprintf); the rest, with
 what was found):
 - Register ties: CardRevolver setPlayCard (s0/s2 and s3/s4 renamed only: card 3*14/161 = 0.261 against pCB
@@ -664,7 +664,32 @@ what was found):
   address-taken scalar; `volatile INT` is worse, and function.c's ADDRESSOF condition (optimize, promoted mode) does
   not depend on -g. The beta (-g) matches with either form, so only the no-g compile tells them apart (likely
   sched1's tie order, which line notes change). Not committed: the ref (the beta's debug info) types both as INT.
-- Layout: PlayerManager mallocBattleRsrcBuffer and setReqLoad (the block loop's moved exit region: the 30-insn
-  scan in stmt.c expand_end_loop and jump.c's 20-insn duplication limit).
-- Loop invariants: MapEnemy searchGround_ (retail hoists 45.0 too).
-- Others: VSME loadFromMem (copy-loop registers; the ref's `i` for the actor loops breaks the beta).
+- Layout: PlayerManager setReqLoad (mallocBattleRsrcBuffer matched 2026-11-12, see below). Jump1 copies the block
+  loop's exit test before the loop in both; retail keeps the copy and its break path branches straight to `stack:`,
+  while ours keeps the post-loop `if (i < 16)` on the break path (cse2 does not fold it: the break edges go to the
+  loop's end label, which has many uses, and cse only follows single-use labels; in the beta the break's TRACE
+  block is such a label) and jump2 then cross-jumps the copy into the loop. Tried without a match: `goto stack` in
+  the loop with or without the post-loop test (the loop gets strength-reduced), other forms of the post-loop test,
+  an empty statement or asm on the break path (much worse).
+- Others: VSME loadFromMem (copy-loop registers: retail gives the counter a0 and the pointer a1 in every copy loop;
+  the ref's `i`/`p` declaration order and dropping the `nMagic` local (the ref has none) change nothing or worse).
+
+### Unattended run 2026-11-12 (morning, /loop): 631 -> 632 units
+
+- **The assert's own `if` is beta-only** (PlayerManager mallocBattleRsrcBuffer): `if (inAssert) { if (!g_pRsrcFirst)
+  AssertApp(...); }` written out leaves the inner test, a conditional jump to the return, in retail's failure block,
+  and loop.c's find_and_verify_loops only moves a block ending in an unconditional exit out of the loop when no jump
+  precedes it in the block (the original has the block at the barrier before the Riku arm). `KH_DEBUG(if
+  (!g_pRsrcFirst) {)` / `KH_DEBUG(})` on the test and its brace. Any hand-written `if (...) AssertApp(...)` without
+  KH_DEBUG around the `if` leaves such a test in retail.
+- **An implicit destructor instead of an empty explicit one** (MapEnemy searchGround_, both builds): an inlined
+  `virtual ~CPointCollision() {}` stores CPointCollision's own vptr before CCollision's (flow drops the dead store
+  later, so no final code shows it, the out-of-line copy included), three insns at loop time. loop.c moves an
+  invariant when threshold * savings * lifetime >= the loop's insn count, threshold = (1 + non-fixed regs) with a
+  call in the loop, 3 less per moved insn (`-dL`: "Loop from .. : N real insns", "move-insn savings 1 not
+  desirable"): the 45.0f increment was the fifth candidate of pass 2 (53 insns), retail hoists it. With the implicit
+  destructor (CSphereCollision already has one) the loop counts 57/50 and 45.0f is hoisted.
+- **Data starts:** MapEnemyAir's and MapEnemyGround's `.rodata` (only EnemyParam.h's `""` and `"@ENP"`, 0x10 each)
+  at retail's 0x421190/0x4211A0: the split had given them to MapEnemy's `.rodata` ("bytes SHORT").
+
+Tried here without a match: Model sendTexture with incTexSendCount as an empty inline in retail (no change).
