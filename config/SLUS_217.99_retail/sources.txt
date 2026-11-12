@@ -4,6 +4,7 @@ Form/Menu/BtlReportCtrl
 Form/Menu/DecknameEdit
 Form/Menu/GameOver
 Form/Menu/JMemoFlag
+Form/Menu/JiminyMemo
 Form/Menu/LevelUp
 Form/Menu/Menu
 Form/Menu/MenuModel

@@ -6,6 +6,9 @@ Form/Menu/GameOver .data 0x0033FDB0 0x8
 Form/Menu/GameOver .rodata 0x004264F0 0xa0
 Form/Menu/JMemoFlag .data 0x00340000 0xc
 Form/Menu/JMemoFlag .rodata 0x00429F50 0xb90
+Form/Menu/JiminyMemo .bss 0x005BF4C0 0x8
+Form/Menu/JiminyMemo .data 0x0033FDB8 0x248
+Form/Menu/JiminyMemo .rodata 0x00426590 0x39c0
 Form/Menu/LevelUp .bss 0x005BF4C8 0x50
 Form/Menu/LevelUp .data 0x00340010 0xd8
 Form/Menu/LevelUp .rodata 0x0042AAE0 0x370

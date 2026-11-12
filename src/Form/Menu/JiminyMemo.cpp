@@ -6641,8 +6641,8 @@ void CJiminyMemo::contentMinigame() {
         pList = createSequence(JiminyMemo::Minigame::NoteSeqData, 0x10, 0x12, 0, NULL);
         if (pList) {
             int bFlag[6];
-            CHAR* pPoint = NULL;
-            CHAR* pMin = NULL;
+            CHAR* pPoint KH_DEBUG(= NULL); /* retail: no dead initializer here (gcse table size: the order of the hoisted string-buffer addresses) */
+            CHAR* pMin KH_DEBUG(= NULL);
             CHAR* pSec = NULL;
             CHAR* pTime = NULL;
             CHAR* pMask = NULL;
@@ -6656,9 +6656,9 @@ void CJiminyMemo::contentMinigame() {
             m_ContentMinigame.pList = pList;
             pList->setInState(0);
             for (INT i = 0; i < 6; i++) {
-                createListSequence(pList, 0x11, 0x11, i + 1, pSeqCtrl++, pString++, 0x8049481F, 16, 0x21000,
+                createListSequence(pList, 0x11, 0x11, i + 1, pSeqCtrl, pString, 0x8049481F, 16, 0x21000,
                                    JiminyMemo::getOpenCloseStringData(0x700301 + i,
-                                                                      CJiminyMemoFlag::isContentOpen(0x18A + i)));
+                                                                      CJiminyMemoFlag::isContentOpen(0x18A + i))); pSeqCtrl++; pString++;
             }
             for (INT i = 0; i < 2; i++) {
                 createListSequence(pList, 0x11, 0x11, i + 0x12, pSeqCtrl, pString, 0x807F7F7F, 16, 0x21000,
@@ -6800,3 +6800,4 @@ void CJiminyMemo::contentMinigame() {
     if (m_ContentMinigame.pList) m_ContentMinigame.pList->main(getFrameRateF());
 }
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .data .rodata
