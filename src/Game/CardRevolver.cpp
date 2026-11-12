@@ -264,7 +264,7 @@ void CCardRevolver::_initialize(CARD* inDeck, INT inShortCut) {
                         m_uiFlag |= 0x800;
                     } else {
                         convBtlDeckToCard(g_deckSoraStarter);
-                        setDeck((CARD*)g_deckSoraStarter, -1);
+                        setDeck((CARD*)g_deckSoraStarter, KH_VER(-1, inShortCut)); /* retail: the starter deck takes the shortcut too */
                     }
                     KH_DEBUG(break;)
                 KH_DEBUG(})
