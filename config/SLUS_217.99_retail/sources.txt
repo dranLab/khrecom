@@ -144,9 +144,11 @@ Game/Gimmick/GimmickWarpPoint
 Game/Gimmick/GimmickWindowLid
 Game/Gimmick/SampleGimmick
 Game/InterpolateMove
+Game/LockOnManager
 Game/Map
 Game/MapCardDef
 Game/MapUnitTable
+Game/MessageManager
 Game/MinigameManager
 Game/ModelObj
 Game/Movement

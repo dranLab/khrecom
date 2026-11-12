@@ -237,3 +237,4 @@ HANDLE CLockOnManager::changeLockOnObject_(HANDLE inHandle) {
 } // namespace LockOnManager
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

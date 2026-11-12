@@ -63,3 +63,4 @@ BOOL CMessageManager::sendMessage(TIMEQ inDelay, HANDLE inSender, HANDLE inRecei
 }  // namespace Message
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data

@@ -189,11 +189,14 @@ Game/Gimmick/GimmickUpFloor .rodata 0x00423FA0 0x50
 Game/Gimmick/GimmickWindowLid .rodata 0x00424000 0x10
 Game/Gimmick/SampleGimmick .bss 0x005BF3B0 0x10
 Game/Gimmick/SampleGimmick .rodata 0x00424010 0x10
+Game/LockOnManager .data 0x0033BD38 0xc
+Game/LockOnManager .rodata 0x0040EA88 0x20
 Game/Map .data 0x0033BD50 0x160
 Game/Map .rodata 0x0040EAB0 0xf0
 Game/MapCardDef .data 0x0033BEB0 0x20
 Game/MapCardDef .rodata 0x0040EBA0 0x8
 Game/MapUnitTable .data 0x0033BED0 0x358
+Game/MessageManager .data 0x0033C228 0x4
 Game/MinigameManager .bss 0x005BDB98 0x24
 Game/MinigameManager .data 0x0033C230 0x88
 Game/MinigameManager .rodata 0x0040EBC0 0xe0

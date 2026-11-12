@@ -55,10 +55,10 @@ protected:
         m_ppListPtrTbl = new KH_AT("(63)") T*[inSize];
         KH_DEBUG(if (!m_pListTbl) AssertApp(__FILE__, __LINE__, "m_pListTbl", 0);)
         KH_DEBUG(if (!m_ppListPtrTbl) AssertApp(__FILE__, __LINE__, "m_ppListPtrTbl", 0);)
-        for (i = 0; i < inSize; i++) {
+        KH_RELEASE(T* pTail = &m_Tail; T* pTop = &m_Top;) for (i = 0; i < inSize; i++) {
             m_ppListPtrTbl[i] = &m_pListTbl[i];
         }
-        erase();
+        KH_DEBUG(erase();) KH_RELEASE(m_Top.pNext = pTail; m_Tail.pPrev = pTop; m_iNowCount = 0; m_iWritePtr = 0; m_iReadPtr = 0; m_Top.pPrev = NULL; m_Tail.pNext = NULL;)
     }
     void release() {
         if (m_pListTbl) com_free(m_pListTbl);
