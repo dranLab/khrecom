@@ -44,6 +44,7 @@ Game/Atel/AtelBlur .data 0x0033C3F8 0x4
 Game/Atel/AtelCrossFade .data 0x0033C3FC 0x4
 Game/Atel/AtelFog .data 0x0033C400 0x4
 Game/Atel/AtelTutorial .rodata 0x00410890 0x18
+Game/Atel/Avatar .rodata 0x004108B0 0x110
 Game/Atel/CameraMan .data 0x0033C404 0x8
 Game/Atel/CameraMan .rodata 0x004109C0 0x30
 Game/Atel/ChatMan .data 0x0033C40C 0xc

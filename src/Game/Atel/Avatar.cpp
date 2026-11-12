@@ -1090,3 +1090,4 @@ BOOL AvatarMoveStruct::updatePosOnPath(FLOAT fTime) {
     return bRet;
 }
 // SOURCE DATA: .rodata
+// SOURCE DATA SLUS_217.99_retail: .rodata

@@ -366,10 +366,10 @@ inline void _addRot(FVECTOR& vOut, const FVECTOR& vInSrc)
                      "vnop\n"
                      "vnop\n"
                      "vnop\n"
-                     "sqc2 $vf1, 0x0(%1)\n"
+                     KH_VER("sqc2 $vf1, 0x0(%1)\n", "sqc2 $vf1, 0x0(%4)\n") /* retail: the store through a second operand for vOut (Avatar RotateAvatarMain: one more use gives vOut its s-register before this) */
                      "vnop\n"
                      "cfc2.ni %0, $vi18\n"
-                     : "=r"(nFlag) : "r"(&vOut), "r"(&vInSrc), "r"(fPI) : "memory");
+                     : "=r"(nFlag) : "r"(&vOut), "r"(&vInSrc), "r"(fPI) KH_RELEASE(, "r"(&vOut)) : "memory");
 
     if (nFlag & 0x3f) roundPI(vOut, nFlag);
 }

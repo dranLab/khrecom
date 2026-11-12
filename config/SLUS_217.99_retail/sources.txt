@@ -29,6 +29,7 @@ Game/Atel/AtelCamera
 Game/Atel/AtelCrossFade
 Game/Atel/AtelFog
 Game/Atel/AtelTutorial
+Game/Atel/Avatar
 Game/Atel/CameraMan
 Game/Atel/ChatMan
 Game/Atel/EventTrap
