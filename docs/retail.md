@@ -534,7 +534,7 @@ Open, with what was tried:
 - Units without retail code: DebugMenu, DebugWindow, DebugWindowTBL, CollDisp, KisEnemy, System/Debug, DebugWork,
   DebugPathData, vprintf, vsprintf.
 
-### Unattended run 2026-11-11/12 (second night): 601 -> 618 units (user: "keep working on the what's-left units")
+### Unattended run 2026-11-11/12 (second night): 601 -> 621 units (user: "keep working on the what's-left units")
 
 The main lever this time: **the beta's line markers give the original statement order** where our beta-matching
 source happened to compile the same with another order (sched2 and cross-jumping hid it); retail's scheduling and
@@ -574,7 +574,10 @@ HeapMan (the debug allocation API, dumps and reports), MainApp (trace screen, ha
 `_bSetupManagers`; retail's IOP module file is 0x8F sectors), SaveLoadUtil (a Riku-game rollback retail lacks),
 BattleCard, pppPart (paired by hand), SceneInfo (AREA_SCENE's inlines `operator=`, `operator==`, `clear`, `isEmpty`
 as the ref's locals and the beta's markers show; the floor-index early returns and openGoalDoor's message
-beta-only), CollMap. Partial: SceneInfo reqChangeRoom (retail refuses a given scene), Model getTexParam (VramDef.h's
+beta-only), CollMap, WorldCard (a block around the per-card `start()` call, found by the retail permuter; the cause
+is not known), MSStream (threadStream's error handling as the beta's markers show it: both tests on one line, one
+count; `if (nErrCnt >= 2) bTrayOpened = TRUE; else ...` gives retail's `li 1; movn`), pppDrawShapeX (`wait = 0` in
+each arm, as its eiProg sibling pppDrawShape that already matched). Partial: SceneInfo reqChangeRoom (retail refuses a given scene), Model getTexParam (VramDef.h's
 `_getTmpTexArea`, as Gprim) and CSemiZModel::makePkt (one pass), TreasureBox (WndCmnd.h's constructor sets nLine),
 VSME (`_TRACE` an empty inline, m_bTrace never set), pppDrawShapeX (no shape check).
 
@@ -583,14 +586,23 @@ CChatMan::instance() returning `*m_pInstance` (no effect where wanted, WorldSele
 (breaks the beta), PlayerManager setReqLoad without the `next` local (breaks the beta), CardRevolver's debug-deck
 switch kept (no effect).
 
-Open after this run (32 complete units not from source in retail: 10 have no retail code (DebugMenu, DebugWindow,
+Levers that worked this run, in order of yield: the beta's line markers read closely (several statements or
+conditions on one line, stores attributed to a header inline, the line order of initialisations), the ref's locals
+(declarations, inline helpers), a sibling function that already matches in retail, the version map's pairing
+(check `how` = call/search for a DIFF function with a very different size), and the retail permuter. An empty
+`__asm__ volatile("")` where a TRACE was reproduces retail's branchy `if (x) return 2;` in CardBattle
+testBreakingCard (kept, retail-only); it is not a general rule: as the TRACE macro it is worse across ~90 units, and
+in HumanBoss stockActProc it also blocks the cross-jump retail has.
+
+Open after this run (29 complete units not from source in retail: 10 have no retail code (DebugMenu, DebugWindow,
 DebugWindowTBL, CollDisp, KisEnemy, System/Debug, DebugWork, DebugPathData, vprintf, vsprintf); the rest, with
 what was found):
 - Global/local register ties (priorities measured with -dl/-dg where noted): Avatar RotateAvatarMain (this vs the
   rotation; the beta has this in s0 as ours), BattleEnemy makeCard (inPos 0.1176 vs bem 0.1165: one more insn of
   inPos's range would flip it; `kind` at function level as the ref lists it changes nothing), CtdMan _sprintf
-  (s6/s7, 33 allocnos), MSStream threadStream (nErrCnt vs the hoisted divisor 6), HumanBoss normalActProc (s5/s6),
-  WorldCard (retail keeps one more callee-saved register), GimmickTreasureBox and VSME close_dest_se (the
+  (s6/s7, 33 allocnos; the ref declares every local at function level, a rewrite that way breaks the beta), HumanBoss
+  normalActProc (s5/s6), JiminyMemo setPlateText (this vs inKind) and contentMinigame (one more callee-saved register),
+  CardRevolver setPlayCard, SaveLoad's constructor (15 pointer-to-member temporaries' stack slots permuted), GimmickTreasureBox and VSME close_dest_se (the
   `CChatMan::instance().reqCommand` call: retail computes the adjusted this before the vtable load, ours and the
   beta after; call-site forms tried), LightUnit _calc and CardBattle exePlaying (two spill slots swapped).
 - Cross-jumping/layout: HumanBoss enemyCardProc (retail shares `changeMode(-1,0); return TRUE`), CardRevolver
@@ -605,4 +617,4 @@ what was found):
   ours 53; threshold 62-64, -3 per move), Model sendTexture.
 - Others: SaveLoad's constructor (spill slots), LockOnManager/MessageManager (CPoolList's list-head addresses
   computed from the derived this before the init loop in retail), CardBattle calcEnchantParam (a copy of
-  `_PLAYER`), pppDrawShapeX (the seq tail stores), VSME loadFromMem.
+  `_PLAYER`), VSME loadFromMem (copy-loop registers; the ref's `i` for the actor loops breaks the beta).
