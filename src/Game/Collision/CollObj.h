@@ -90,7 +90,7 @@ public:
 
 class CPointCollision : public CCollision {
 public:
-    CPointCollision() { m_Type = COLL_TYPE_POINT; } virtual ~CPointCollision() {}
+    CPointCollision() { m_Type = COLL_TYPE_POINT; }
     virtual INT collideMap();
 };
 /* MATCH: collideMap inlines CCollUtil::instance (Game/Collision/CollUtil.h): defined here when CollUtil.h came

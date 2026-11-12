@@ -45,3 +45,7 @@ Game/CardKind .data 0x0033B748
 # MapEnemy's .data (still in assembly): g_pIdlingMotion's pointer table {0, p, p+0x10, p+0x20 x4, p+0x30, ...}, the
 # beta's 0x3A93E0, is retail's 0x33F5B0 right after HumanBoss's 0x200 bytes (the split's 0x33F774 is a later item)
 Game/Enemy/MapEnemy .data 0x0033F5B0
+# MapEnemyAir's and MapEnemyGround's .rodata are only EnemyParam.h's header strings ("" and "@ENP", 0x10 bytes each):
+# retail's 0x421190 and 0x4211A0, after MapEnemy's 0x5A0 bytes (the split had given both to MapEnemy)
+Game/Enemy/MapEnemyAir .rodata 0x00421190
+Game/Enemy/MapEnemyGround .rodata 0x004211A0

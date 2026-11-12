@@ -1493,6 +1493,8 @@ segments:
       - [0x31F7D0, rodata, Game/Enemy/Heartless]
       - [0x31F870, rodata, Game/Enemy/HumanBoss]
       - [0x320BF0, rodata, Game/Enemy/MapEnemy]
+      - [0x321190, rodata, Game/Enemy/MapEnemyAir]
+      - [0x3211A0, rodata, Game/Enemy/MapEnemyGround]
       - [0x3211B0, rodata, Game/Enemy/MapEnemyManager]
       - [0x321200, rodata, Game/Enemy/MapEnemyMushroom]
       - [0x321210, rodata, Game/Enemy/MapEnemyShadow]

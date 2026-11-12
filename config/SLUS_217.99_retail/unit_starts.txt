@@ -152,6 +152,8 @@ Game/Enemy/Heartless .data 0x0033F3A0 0x10
 Game/Enemy/Heartless .rodata 0x0041F7D0 0xa0
 Game/Enemy/HumanBoss .data 0x0033F3B0 0x200
 Game/Enemy/HumanBoss .rodata 0x0041F870 0x1380
+Game/Enemy/MapEnemy .data 0x0033F5B0 0x2c0
+Game/Enemy/MapEnemy .rodata 0x00420BF0 0x5a0
 Game/Enemy/MapEnemyManager .rodata 0x004211B0 0x50
 Game/Enemy/MapEnemyShadow .rodata 0x00421210 0x28
 Game/Enemy/MonstroEventBattle .data 0x0033F870 0x1c

@@ -94,6 +94,7 @@ Game/Enemy/EnemyWyvern
 Game/Enemy/EnemyYellowopera
 Game/Enemy/Heartless
 Game/Enemy/HumanBoss
+Game/Enemy/MapEnemy
 Game/Enemy/MapEnemyAir
 Game/Enemy/MapEnemyGround
 Game/Enemy/MapEnemyManager
