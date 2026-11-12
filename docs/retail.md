@@ -644,8 +644,9 @@ close_dest_se's call forms (a local reference, `mode = 1`, blocks: no change).
 Open after this run (18 complete units not from source in retail: 10 have no retail code (DebugMenu, DebugWindow,
 DebugWindowTBL, CollDisp, KisEnemy, System/Debug, DebugWork, DebugPathData, vprintf, vsprintf); the rest, with
 what was found):
-- Register ties: CardRevolver setPlayCard (s0/s2 and s3/s4 renamed only; the permuter's 36 -> 30 needs declaration moves the ref
-  contradicts), SaveLoad's constructor (15 pointer-to-member temporaries' spill slots permuted; many PRE pseudos,
+- Register ties: CardRevolver setPlayCard (s0/s2 and s3/s4 renamed only: card 3*14/161 = 0.261 against pCB
+  3*8/106 = 0.226; two more uses of pCB (probe: empty asms with pCB as input) fix s0/s2, s3/s4 (category vs inFlag)
+  stays; the permuter's 36 -> 30 needs declaration moves the ref contradicts), SaveLoad's constructor (15 pointer-to-member temporaries' spill slots permuted; many PRE pseudos,
   S = 223), Model sendTexture (s1/s2/s3 permuted: a global-alloc near-tie, `t` 4*23/107 = 0.8598 against
   nClutPos 3*8/28 and its 16-bit copy 2*6/14 = 0.8571; one more insn in t's range before nClutPos is computed flips
   it (an empty asm in the texture-animation block matches, not committed: no natural source found; the ref shapes
