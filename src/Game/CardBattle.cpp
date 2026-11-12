@@ -397,8 +397,8 @@ void CCardBattle::exePlaying(INT inUser) {
     INT iZantetsuken = m_iStock[_ENEMY] == 7;
     INT iDark = m_uiFlag & 0x80000;
     INT iAllBreak = (m_uiFlag & 0x100000) ? inUser : 0;
-    INT iDuelNG = 0;
-    INT iTrg = m_uiFlag & 0x600000;
+    KH_DEBUG(INT iDuelNG = 0;)
+    INT iTrg = m_uiFlag & 0x600000; KH_RELEASE(INT iDuelNG = 0;)
     switch (uiState) {
     case 0:
         m_tqPlayTimer[_PLAYER] = 0;
@@ -1611,7 +1611,7 @@ void ENCHANT_PARAM::init(INT inOwner, UINT inUser) {
 }
 void CCardBattle::calcEnchantParam(ENCHANT_PARAM& ioParam) {
     KH_DEBUG(if (!(ioParam.uiUser)) AssertApp(__FILE__, 3103, "ioParam.uiUser", 0);)
-    UINT _PLAYER = ioParam.uiUser - 1;
+    UINT _PLAYER = KH_DEBUG(ioParam.uiUser - 1) KH_RELEASE(({ UINT u = ioParam.uiUser - 1; u; })); /* retail: a copy of the index (a temporary) */
     CARD& enchant = m_pInstance->m_cardEnchant[_PLAYER];
     if (enchant.m_nKind < 0x44) return;
     switch (ioParam.uiState) {
@@ -2632,3 +2632,4 @@ void CCardBattle::setPronounceEnd(INT inCount) {
     }
 }
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

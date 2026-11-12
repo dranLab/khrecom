@@ -921,6 +921,7 @@ segments:
       - [0x23B3C0, data, Game/BodyCollision]
       - [0x23B3D0, data, Game/Card]
       - [0x23B3F8, data, Game/CardBattle]
+      - [0x23B748, data, Game/CardKind]
       - [0x23B750, data, Game/CardRevolver]
       - [0x23BC30, data, Game/EntityFactory]
       - [0x23BC34, data, Game/Game]

@@ -22,4 +22,4 @@ LPCTSTR CARD::getName() {
 }
 
 // SOURCE DATA: .data .rodata
-// SOURCE DATA SLUS_217.99_retail: .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

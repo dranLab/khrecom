@@ -39,6 +39,7 @@ Game/Bullet/Bullet
 Game/Bullet/BulletManager
 Game/Bullet/CreateBullet
 Game/Card
+Game/CardBattle
 Game/CardKind
 Game/CollParam
 Game/Collision/CollAttack
