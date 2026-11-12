@@ -195,6 +195,7 @@ System/Buf
 System/Component
 System/Coord
 System/CoordMan
+System/Ctd/CtdMan
 System/DebugProcInfo
 System/FifoFpl
 System/FileIO

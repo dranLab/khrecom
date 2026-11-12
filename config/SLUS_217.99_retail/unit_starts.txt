@@ -276,6 +276,8 @@ Game/Status .rodata 0x004105B8 0x28
 System/Coord .data 0x00332880 0x10
 System/Coord .rodata 0x003FF890 0x60
 System/CoordMan .data 0x00332890 0x10
+System/Ctd/CtdMan .data 0x0033B368 0x8
+System/Ctd/CtdMan .rodata 0x00405D30 0x8
 System/FileIO .bss 0x00439100 0x1020
 System/FileIO .data 0x00332910 0x10
 System/FileIO .rodata 0x00400850 0x38

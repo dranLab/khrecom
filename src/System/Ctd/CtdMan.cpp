@@ -166,8 +166,8 @@ INT CCtdMan::_sprintf(LPSTR inBuf, UINT inBufSize, const CHAR* inSrcStr, const C
         const CHAR* pText = pPercent + 1;
         INT fgEnd = FALSE;
         const CHAR** ppWord = pWord;
-        const CHAR* pSrcText = inSrcStr;
         INT fgCtrlCode = 0;
+        const CHAR* pSrcText = inSrcStr;
         do {
             const CHAR* pW0;
             INT lenWord;
@@ -292,3 +292,4 @@ INT CCtdMan::_sprintf(LPSTR inBuf, UINT inBufSize, const CHAR* inSrcStr, const C
 }
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata
