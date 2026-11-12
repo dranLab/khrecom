@@ -878,7 +878,7 @@ segments:
       - [0x232948, data, System/Graphic/DeFocus]
       - [0x232950, data, System/Graphic/FrecFont]
       - [0x232990, data, System/Graphic/Glare]
-      - [0x23299C, data, System/Graphic/LightUnit]
+      - [0x2329A0, data, System/Graphic/LightUnit]
       - [0x232A50, data, System/Graphic/Model]
       - [0x232A68, data, System/Graphic/TexUtil]
       - [0x232A88, data, System/Graphic/TriangleIK]

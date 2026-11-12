@@ -132,7 +132,7 @@ static void _setLightPower(_LIGHT_POWER* ll, INT lbsuu, FLOAT pow, FLOAT dist2, 
 void CLightUnit::_calc(const FVECTOR& ctr) {
     LIGHTDATA* ld;
     int lbsuu;
-    int count;
+    KH_DEBUG(int count;) /* the light count only feeds the map viewer (debug) */
     int i;
     FLOAT fDist2;
     if (isCalc()) {
@@ -153,15 +153,15 @@ void CLightUnit::_calc(const FVECTOR& ctr) {
     _LIGHT_POWER ll[KH_VER(lbsuu, 5)]; /* retail: no map viewer, a fixed array */
     FVECTOR vlight[5];
     FVECTOR vcolor[5];
-    count = 0;
+    KH_DEBUG(count = 0;)
     for (i = 0; i < lbsuu; i++) {
         ll[i].pow = -1.0f;
     }
     for (i = 0; i < ld->point_suu; i++) {
         FLOAT pow = getLightVolume(fDist2, ctr, &ld->point[i]);
-        if (pow > 0.0f) {
-            count++;
-        }
+        KH_DEBUG(if (pow > 0.0f) {)
+            KH_DEBUG(count++;)
+        KH_DEBUG(})
         _setLightPower(ll, lbsuu, pow, fDist2, i, 2);
     }
     for (i = 0; i < ld->infinite_suu; i++) {
@@ -631,3 +631,4 @@ void CEffectLightMan::reset() {
     m_nActiveLightInfo = 0;
 }
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

@@ -442,6 +442,7 @@ System/Graphic/Glare
 System/Graphic/Gprim
 System/Graphic/HermitePath
 System/Graphic/HermitePathCamera
+System/Graphic/LightUnit
 System/Graphic/MapUnit
 System/Graphic/ModelMan
 System/Graphic/MotData

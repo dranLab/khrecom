@@ -340,6 +340,8 @@ System/Graphic/FrecFont .rodata 0x00400DC0 0x60
 System/Graphic/Glare .data 0x00332990 0xc
 System/Graphic/Gprim .data 0x00332AD0 0x118
 System/Graphic/HermitePathCamera .rodata 0x00400E30 0x50
+System/Graphic/LightUnit .data 0x003329A0 0xb0
+System/Graphic/LightUnit .rodata 0x00400E80 0x20
 System/Graphic/MapUnit .bss 0x0043C0C0 0x10
 System/Graphic/MapUnit .rodata 0x00400EA0 0x10
 System/Graphic/ModelMan .bss 0x0043C2C0 0x200
