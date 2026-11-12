@@ -646,8 +646,10 @@ DebugWindowTBL, CollDisp, KisEnemy, System/Debug, DebugWork, DebugPathData, vpri
 what was found):
 - Register ties: CardRevolver setPlayCard (s0/s2 and s3/s4 renamed only: card 3*14/161 = 0.261 against pCB
   3*8/106 = 0.226; two more uses of pCB (probe: empty asms with pCB as input) fix s0/s2, s3/s4 (category vs inFlag)
-  stays; the permuter's 36 -> 30 needs declaration moves the ref contradicts), SaveLoad's constructor (15 pointer-to-member temporaries' spill slots permuted; many PRE pseudos,
-  S = 223), Model sendTexture (s1/s2/s3 permuted: a global-alloc near-tie, `t` 4*23/107 = 0.8598 against
+  stays; the permuter's 36 -> 30 needs declaration moves the ref contradicts), SaveLoad's constructor (15 pointer-to-member temporaries' spill slots permuted: gcse's PRE order; our max_cuid is
+  447 (S = 223), retail's 448-451 (S = 225): 1-4 empty asms anywhere early in the constructor match 124/124, not
+  committed: no natural source found (the Fsm.h set() asserts as conditions change nothing; the ref names all five
+  loop variables `i`, which changes no code)), Model sendTexture (s1/s2/s3 permuted: a global-alloc near-tie, `t` 4*23/107 = 0.8598 against
   nClutPos 3*8/28 and its 16-bit copy 2*6/14 = 0.8571; one more insn in t's range before nClutPos is computed flips
   it (an empty asm in the texture-animation block matches, not committed: no natural source found; the ref shapes
   the loop with TexInfo inlines and no `t` pointer).
