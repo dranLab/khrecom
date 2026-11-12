@@ -69,6 +69,8 @@ Game/Collision/CollMapCamera .data 0x0033C3C8 0x8
 Game/Collision/CollObj .data 0x0033C3D0 0x18
 Game/Collision/CollObj .rodata 0x00410780 0x60
 Game/EffectMotion .rodata 0x0040E548 0x10
+Game/Enemy/BattleEnemyManager .data 0x0033ED38 0xc
+Game/Enemy/BattleEnemyManager .rodata 0x0041D6C0 0x70
 Game/Enemy/BossDeadDemo .data 0x0033ED44 0x24
 Game/Enemy/BossDeadDemo .rodata 0x0041D730 0x3b0
 Game/Enemy/CreateEnemy .rodata 0x0041DAE0 0x450

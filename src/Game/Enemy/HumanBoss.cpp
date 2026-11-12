@@ -675,7 +675,7 @@ BOOL CHumanBoss::enemyCardProc(const CARD* inActiveCard) {
         if (n < 2 || (RND::genrand_int31() & 1) == 0) {
             if (n <= 0) {
                 setHumanBossFlag(1, 0);
-                m_pCardRevolver->changeMode(-1, 0);
+                m_pCardRevolver->changeMode(-1, 0); KH_RELEASE(return TRUE;) /* retail: no trace, its own return (cross-jumped with the last tail) */
             } else if (m_pCardRevolver->setPlayCard(0, 0)) {
                 playUseEnemyCardVoice();
                 if (n == mode) {
@@ -932,13 +932,13 @@ BOOL CHumanBoss::stockActProc(const CARD* inActiveCard) {
                 TRACE("----------- stock boss card = 0x%08x\n", inActiveCard->m_nKind);
                 return TRUE;
             }
-            return FALSE;
-        }
+            KH_DEBUG(return FALSE;) /* retail: falls through to the last return (no store-flag; cross-jumped with setPlayStock's test) */
+        } KH_RELEASE(else {)
         if ((RND::genrand_int31() & 1) == 0) {
             m_pCardRevolver->rollDeck(1, 0, 300);
             return TRUE;
         }
-        return FALSE;
+        KH_DEBUG(return FALSE;) KH_RELEASE(})
     }
     return FALSE;
 }
@@ -950,7 +950,7 @@ BOOL CHumanBoss::normalActProc(const CARD* inActiveCard) {
     INT i;
     INT j;
     INT card;
-    register INT nNone asm("$22"); /* MATCH: the -1 in s6, &tmp[count] in s5 */
+    register INT nNone KH_DEBUG(asm("$22")); /* MATCH: the -1 in s6, &tmp[count] in s5 (beta; retail needs no pin) */
 
     for (i = 0; i < m_iNormalActNum; i++) {
         if (!m_pNormalActs[i].bEnable) {

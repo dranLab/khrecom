@@ -182,11 +182,11 @@ void CBattleEnemyManager::main() {
             if (isRoulettePrizeGet()) {
                 m_iStep = 4;
             } else {
-                if (m_bCreateCard) {
-                    m_tqTimer = 15000;
+                if (KH_RELEASE(!)m_bCreateCard) { /* retail: the arms swapped (the beta's order gives retail's branch reversed) */
+                    m_tqTimer = KH_VER(15000, 6000);
                     m_iStep = 2;
                 } else {
-                    m_tqTimer = 6000;
+                    m_tqTimer = KH_VER(6000, 15000);
                     m_iStep = 2;
                 }
             }
@@ -388,7 +388,7 @@ void CBattleEnemyManager::notifyDead(HANDLE inHandle) {
             if (!event && (((CEntity*)task)->getFlag() & 0x40000)) {
                 if (--m_iTotalEnemyNum <= 0) CPlayer::notifyExterminate();
             }
-            return;
+            break;
         }
     }
 }
@@ -776,3 +776,4 @@ void CBattleEnemyManager::exitBattle_() {
 }
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

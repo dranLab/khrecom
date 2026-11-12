@@ -53,6 +53,7 @@ Game/Collision/CollUtilF
 Game/Collision/CollUtilO
 Game/Collision/Ride
 Game/EffectMotion
+Game/Enemy/BattleEnemyManager
 Game/Enemy/BossDeadDemo
 Game/Enemy/CreateEnemy
 Game/Enemy/EnemyAirpirate
