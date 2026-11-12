@@ -534,7 +534,7 @@ Open, with what was tried:
 - Units without retail code: DebugMenu, DebugWindow, DebugWindowTBL, CollDisp, KisEnemy, System/Debug, DebugWork,
   DebugPathData, vprintf, vsprintf.
 
-### Unattended run 2026-11-11/12 (second night): 601 -> 621 units (user: "keep working on the what's-left units")
+### Unattended run 2026-11-11/12 (second night): 601 -> 627 units (user: "keep working on the what's-left units")
 
 The main lever this time: **the beta's line markers give the original statement order** where our beta-matching
 source happened to compile the same with another order (sched2 and cross-jumping hid it); retail's scheduling and
@@ -594,27 +594,50 @@ conditions on one line, stores attributed to a header inline, the line order of 
 testBreakingCard (kept, retail-only); it is not a general rule: as the TRACE macro it is worse across ~90 units, and
 in HumanBoss stockActProc it also blocks the cross-jump retail has.
 
-Open after this run (29 complete units not from source in retail: 10 have no retail code (DebugMenu, DebugWindow,
+Continued the same night: 621 -> 627 units (LockOnManager, MessageManager, CardBattle, BattleEnemyManager,
+HumanBoss, BattleEnemy). What worked, all retail-only (`KH_RELEASE`/`KH_DEBUG`/`KH_VER`, line-neutral) unless noted:
+
+- **Control flow where a TRACE and a `return` were.** Without the trace, retail's `if (x) { TRACE; return TRUE; }
+  return FALSE;` is not if-converted and gets cross-jumped with a sibling test: the original falls through to the
+  function's last `return` instead (HumanBoss stockActProc: the stock-card arm's `return FALSE` gone and the deck roll
+  in an `else`; enemyCardProc: the normal-card arms and the deck roll share one `return TRUE` through an `else`).
+- **A loop left with `break` instead of `return`** stays unrotated (BattleEnemyManager notifyDead): this one fits
+  both builds and is plain source.
+- **Asserts that are code in retail:** JiminyMemo CMemo3DObj::main's two allocation asserts are checks that leave the
+  object (`if (!m_pModels) { out(); m_iStep = 0xFFFF; return; }`, also `m_pAnime`); BattleEnemy makeCard's `bem`
+  stays referenced where its assert was (an empty `asm volatile` with `bem` as input: the allocno priority over
+  `inPos`; a real check adds a branch retail doesn't have).
+- **Declaration order / temporaries for spill slots and copies:** CardBattle exePlaying declares `iTrg` before
+  `iDuelNG` (pseudo numbers decide the two spill slots; the ref, i.e. the beta, has the other order),
+  calcEnchantParam takes `_PLAYER` through a temporary (retail's extra `move`). PoolList's `init` takes the two
+  sentinel addresses before the fill loop (LockOnManager/MessageManager constructors).
+- **A register pin the beta needs is beta-only:** HumanBoss normalActProc's `register INT nNone asm("$22")`; without
+  the pin retail allocates as the original.
+- **Swapped arms:** BattleEnemyManager main's timer (`if (!m_bCreateCard) 6000 else 15000` in retail; the beta's
+  markers put 6000 four lines after the test, so the beta keeps its order).
+- **Data starts by hand** (`unit_starts.manual.txt`): CardKind's `.data` (getName's `pBlankText`; the split had given
+  its 8 bytes to CardBattle), MapEnemy's `.data` (`g_pIdlingMotion` right after HumanBoss's 0x200 bytes).
+
+Tried here without a match: BattleEnemy makeCard with the asserts as checks (adds the branch), CChatMan::instance()
+keeping `instance` referenced (much worse), MapEnemy searchGround_ with a precomputed loop bound or split
+statements (no change), CardRevolver _initialize with the debug-deck switch as `switch (0)` (no change), VSME
+close_dest_se's call forms (a local reference, `mode = 1`, blocks: no change).
+
+Open after this run (22 complete units not from source in retail: 10 have no retail code (DebugMenu, DebugWindow,
 DebugWindowTBL, CollDisp, KisEnemy, System/Debug, DebugWork, DebugPathData, vprintf, vsprintf); the rest, with
 what was found):
-- Global/local register ties (priorities measured with -dl/-dg where noted): Avatar RotateAvatarMain (this vs the
-  rotation; the beta has this in s0 as ours), BattleEnemy makeCard (inPos 0.1176 vs bem 0.1165: one more insn of
-  inPos's range would flip it; `kind` at function level as the ref lists it changes nothing), CtdMan _sprintf
-  (s6/s7, 33 allocnos; the ref declares every local at function level, a rewrite that way breaks the beta), HumanBoss
-  normalActProc (s5/s6), JiminyMemo setPlateText (this vs inKind) and contentMinigame (one more callee-saved register),
-  CardRevolver setPlayCard, SaveLoad's constructor (15 pointer-to-member temporaries' stack slots permuted), GimmickTreasureBox and VSME close_dest_se (the
-  `CChatMan::instance().reqCommand` call: retail computes the adjusted this before the vtable load, ours and the
-  beta after; call-site forms tried), LightUnit _calc and CardBattle exePlaying (two spill slots swapped).
-- Cross-jumping/layout: HumanBoss enemyCardProc (retail shares `changeMode(-1,0); return TRUE`), CardRevolver
-  _initialize (which copy of the shared deck tail survives) and setPlayCard, VSME execExt2Code/execExt3Code (the
-  CCameraMan/CChatMan reqCommand tails retail shares), JiminyMemo CMemo3DObj::main (loop-rotated effect block placed
-  elsewhere), PlayerManager mallocBattleRsrcBuffer, BattleEnemyManager notifyDead (retail's loop not rotated) and
-  main, PlayerManager setReqLoad (retail rotates the block loop: its moved exit region has fewer insns).
-- "TRACE leaves something": CardBattle testBreakingCard and HumanBoss stockActProc keep `if (x) { TRACE; return
-  TRUE; } return FALSE;` branchy in retail where ours if-converts; every TRACE macro as `do {} while (0)` or
-  `((void)0)` is worse overall.
-- Loop invariants: MapEnemy searchGround_ (retail hoists 45.0 too: its second loop pass has at most ~51 real insns,
-  ours 53; threshold 62-64, -3 per move), Model sendTexture.
-- Others: SaveLoad's constructor (spill slots), LockOnManager/MessageManager (CPoolList's list-head addresses
-  computed from the derived this before the init loop in retail), CardBattle calcEnchantParam (a copy of
-  `_PLAYER`), VSME loadFromMem (copy-loop registers; the ref's `i` for the actor loops breaks the beta).
+- Register ties: Avatar RotateAvatarMain (this vs the rotation; the permuter found nothing in 13,788 tries), CtdMan
+  _sprintf (s6/s7), JiminyMemo setPlateText (this vs inKind) and contentMinigame (one more callee-saved register:
+  every s-register one higher), CardRevolver setPlayCard (permuter 36 -> 30 only with declaration moves the ref
+  contradicts), SaveLoad's constructor (15 pointer-to-member temporaries' spill slots permuted), LightUnit _calc (two
+  spill slots of hoisted stack addresses swapped), Model sendTexture (s1/s2/s3 permuted: the TexInfoStub pointer
+  lower in retail).
+- The CChatMan reqCommand pattern (GimmickTreasureBox CardMaxWarningMain, VSME close_dest_se, execExt2/3Code): where
+  a local was stored just before the call (`iFg = 1; reqCommand(0x3EB, &iFg, 0)`), retail computes `this + 0x40` into
+  its own register and ties the vtable delta to a0 (`addu a0, t0, a0`); ours ties the adjusted this. The calls
+  without such a store match. VSME's execExt tails then cross-jump in retail.
+- Layout: CardRevolver _initialize (retail keeps the tutorial deck's copy of the shared conv+setDeck tail, ours the
+  starter's), PlayerManager mallocBattleRsrcBuffer and setReqLoad (the block loop's moved exit region: the 30-insn
+  scan in stmt.c expand_end_loop and jump.c's 20-insn duplication limit).
+- Loop invariants: MapEnemy searchGround_ (retail hoists 45.0 too).
+- Others: VSME loadFromMem (copy-loop registers; the ref's `i` for the actor loops breaks the beta).
