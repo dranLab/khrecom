@@ -660,7 +660,8 @@ what was found):
   `INT mode`/`INT iFg`. CChatMan::instance() forms make no difference. GimmickTreasureBox switches completely
   with `INT iFg[1]` (26/26), so the whole difference is "in memory from the start" versus gcc's ADDRESSOF for an
   address-taken scalar; `volatile INT` is worse, and function.c's ADDRESSOF condition (optimize, promoted mode) does
-  not depend on -g. Not committed: the ref (the beta's debug info) types both as INT.
+  not depend on -g. The beta (-g) matches with either form, so only the no-g compile tells them apart (likely
+  sched1's tie order, which line notes change). Not committed: the ref (the beta's debug info) types both as INT.
 - Layout: PlayerManager mallocBattleRsrcBuffer and setReqLoad (the block loop's moved exit region: the 30-insn
   scan in stmt.c expand_end_loop and jump.c's 20-insn duplication limit).
 - Loop invariants: MapEnemy searchGround_ (retail hoists 45.0 too).
