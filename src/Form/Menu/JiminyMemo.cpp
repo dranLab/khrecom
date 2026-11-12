@@ -3169,7 +3169,7 @@ INT CJiminyMemo::getPlateState(INT inKind) {
 }
 void CJiminyMemo::setPlateText(INT inKind, INT inCTNo) {
     CHAR* pText;
-    if (inCTNo < 0 || !(pText = CCtdMan::getText(inCTNo))) pText = "";
+    if (inCTNo >= 0) { pText = CCtdMan::getText(inCTNo); if (!pText) pText = ""; } else pText = "";
     CMemo2DLayout* seq = getTaskPointer<CMemo2DLayout*>(m_hLayout);
     if (seq) {
         switch (inKind) {
