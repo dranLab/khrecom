@@ -1050,10 +1050,10 @@ void mallocBattleRsrcBuffer(BOOL inAssert) {
                   CSceneInfo::getCurrentSceneNum(), CSceneInfo::getCurrentRoomID(), CGame::getMapID());
             TRACE("Memory:%d%% VRAM:%d%%\n", (INT)CHeapMan::getUsedHeapRatio(), CVramMan::getUsedRatio());
             if (inAssert) {
-                if (!g_pRsrcFirst) {
+                KH_DEBUG(if (!g_pRsrcFirst) {)
                     AssertApp("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp", 2010, "g_pRsrcFirst",
                               "\x97" "e\x97\xca\x95s\x91\xab:\x8bZ\x83\x81\x83\x82\x83\x8a\x8am\x95\xdb\x82\xc5\x82\xab\x82\xdc\x82\xb9\x82\xf1!!");
-                }
+                KH_DEBUG(})
             } else {
                 TRACE("\x81\xa6\x82\xb1\x82\xb1\x82\xc5\x82\xcd\x8am\x95\xdb\x82\xf0\x92\xfa\x82\xdf\x82\xdc\x82\xb7\x81" "E\x81" "E\x81" "E\n");
             }
