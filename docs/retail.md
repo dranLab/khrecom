@@ -534,7 +534,7 @@ Open, with what was tried:
 - Units without retail code: DebugMenu, DebugWindow, DebugWindowTBL, CollDisp, KisEnemy, System/Debug, DebugWork,
   DebugPathData, vprintf, vsprintf.
 
-### Unattended run 2026-11-11/12 (second night): 601 -> 630 units (user: "keep working on the what's-left units")
+### Unattended run 2026-11-11/12 (second night): 601 -> 631 units (user: "keep working on the what's-left units")
 
 The main lever this time: **the beta's line markers give the original statement order** where our beta-matching
 source happened to compile the same with another order (sched2 and cross-jumping hid it); retail's scheduling and
@@ -594,8 +594,8 @@ conditions on one line, stores attributed to a header inline, the line order of 
 testBreakingCard (kept, retail-only); it is not a general rule: as the TRACE macro it is worse across ~90 units, and
 in HumanBoss stockActProc it also blocks the cross-jump retail has.
 
-Continued the same night: 621 -> 630 units (LockOnManager, MessageManager, CardBattle, BattleEnemyManager,
-HumanBoss, BattleEnemy, CtdMan, JiminyMemo, LightUnit). What worked, all retail-only (`KH_RELEASE`/`KH_DEBUG`/`KH_VER`, line-neutral) unless noted:
+Continued the same night: 621 -> 631 units (LockOnManager, MessageManager, CardBattle, BattleEnemyManager,
+HumanBoss, BattleEnemy, CtdMan, JiminyMemo, LightUnit, Avatar). What worked, all retail-only (`KH_RELEASE`/`KH_DEBUG`/`KH_VER`, line-neutral) unless noted:
 
 - **Control flow where a TRACE and a `return` were.** Without the trace, retail's `if (x) { TRACE; return TRUE; }
   return FALSE;` is not if-converted and gets cross-jumped with a sibling test: the original falls through to the
@@ -611,6 +611,10 @@ HumanBoss, BattleEnemy, CtdMan, JiminyMemo, LightUnit). What worked, all retail-
   `iDuelNG` (pseudo numbers decide the two spill slots; the ref, i.e. the beta, has the other order),
   calcEnchantParam takes `_PLAYER` through a temporary (retail's extra `move`). PoolList's `init` takes the two
   sentinel addresses before the fill loop (LockOnManager/MessageManager constructors).
+- **One more use of a value (allocno priority floor_log2(refs)*refs/live_length, `-dl` "Register N used k times
+  across n insns", `-dg` allocation order):** Avatar RotateAvatarMain's rotation vector had 3 refs over 11 insns
+  (0.27) against this's 0.49; Coord.h `_addRot` stores through a second operand for `vOut` in retail (4 refs, 0.73),
+  which every other `_addRot` user still matches with.
 - **A register pin the beta needs is beta-only:** HumanBoss normalActProc's `register INT nNone asm("$22")`; without
   the pin retail allocates as the original.
 - **Swapped arms:** BattleEnemyManager main's timer (`if (!m_bCreateCard) 6000 else 15000` in retail; the beta's
@@ -637,14 +641,15 @@ keeping `instance` referenced (much worse), MapEnemy searchGround_ with a precom
 statements (no change), CardRevolver _initialize with the debug-deck switch as `switch (0)` (no change), VSME
 close_dest_se's call forms (a local reference, `mode = 1`, blocks: no change).
 
-Open after this run (19 complete units not from source in retail: 10 have no retail code (DebugMenu, DebugWindow,
+Open after this run (18 complete units not from source in retail: 10 have no retail code (DebugMenu, DebugWindow,
 DebugWindowTBL, CollDisp, KisEnemy, System/Debug, DebugWork, DebugPathData, vprintf, vsprintf); the rest, with
 what was found):
-- Register ties: Avatar RotateAvatarMain (this vs the rotation; the permuter found nothing in 13,788 tries),
-  CardRevolver setPlayCard (s0/s2 and s3/s4 renamed only; the permuter's 36 -> 30 needs declaration moves the ref
+- Register ties: CardRevolver setPlayCard (s0/s2 and s3/s4 renamed only; the permuter's 36 -> 30 needs declaration moves the ref
   contradicts), SaveLoad's constructor (15 pointer-to-member temporaries' spill slots permuted; many PRE pseudos,
-  S = 223), Model sendTexture (s1/s2/s3 permuted: the TexInfoStub pointer lower in retail; one PRE expression only,
-  so not gcse's order; the ref shapes it with TexInfo inlines, no `t` pointer).
+  S = 223), Model sendTexture (s1/s2/s3 permuted: a global-alloc near-tie, `t` 4*23/107 = 0.8598 against
+  nClutPos 3*8/28 and its 16-bit copy 2*6/14 = 0.8571; one more insn in t's range before nClutPos is computed flips
+  it (an empty asm in the texture-animation block matches, not committed: no natural source found; the ref shapes
+  the loop with TexInfo inlines and no `t` pointer).
 - The CChatMan reqCommand pattern (GimmickTreasureBox CardMaxWarningMain, VSME close_dest_se, execExt2/3Code): where
   a local was stored just before the call (`iFg = 1; reqCommand(0x3EB, &iFg, 0)`), retail computes `this + 0x40` into
   its own register and ties the vtable delta to a0 (`addu a0, t0, a0`); ours ties the adjusted this. The calls
