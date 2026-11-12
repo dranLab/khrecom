@@ -534,7 +534,7 @@ Open, with what was tried:
 - Units without retail code: DebugMenu, DebugWindow, DebugWindowTBL, CollDisp, KisEnemy, System/Debug, DebugWork,
   DebugPathData, vprintf, vsprintf.
 
-### Unattended run 2026-11-11/12 (second night): 601 -> 627 units (user: "keep working on the what's-left units")
+### Unattended run 2026-11-11/12 (second night): 601 -> 630 units (user: "keep working on the what's-left units")
 
 The main lever this time: **the beta's line markers give the original statement order** where our beta-matching
 source happened to compile the same with another order (sched2 and cross-jumping hid it); retail's scheduling and
@@ -594,8 +594,8 @@ conditions on one line, stores attributed to a header inline, the line order of 
 testBreakingCard (kept, retail-only); it is not a general rule: as the TRACE macro it is worse across ~90 units, and
 in HumanBoss stockActProc it also blocks the cross-jump retail has.
 
-Continued the same night: 621 -> 627 units (LockOnManager, MessageManager, CardBattle, BattleEnemyManager,
-HumanBoss, BattleEnemy). What worked, all retail-only (`KH_RELEASE`/`KH_DEBUG`/`KH_VER`, line-neutral) unless noted:
+Continued the same night: 621 -> 630 units (LockOnManager, MessageManager, CardBattle, BattleEnemyManager,
+HumanBoss, BattleEnemy, CtdMan, JiminyMemo, LightUnit). What worked, all retail-only (`KH_RELEASE`/`KH_DEBUG`/`KH_VER`, line-neutral) unless noted:
 
 - **Control flow where a TRACE and a `return` were.** Without the trace, retail's `if (x) { TRACE; return TRUE; }
   return FALSE;` is not if-converted and gets cross-jumped with a sibling test: the original falls through to the
@@ -615,6 +615,20 @@ HumanBoss, BattleEnemy). What worked, all retail-only (`KH_RELEASE`/`KH_DEBUG`/`
   the pin retail allocates as the original.
 - **Swapped arms:** BattleEnemyManager main's timer (`if (!m_bCreateCard) 6000 else 15000` in retail; the beta's
   markers put 6000 four lines after the test, so the beta keeps its order).
+- **The ref's locals for declaration order** (fits both builds): CtdMan _sprintf declares `fgCtrlCode` before
+  `pSrcText` as the ref lists them (s6/s7). JiminyMemo setPlateText's lookup as `if (inCTNo >= 0) { pText = ...; if
+  (!pText) pText = ""; } else pText = "";` (both builds).
+- **gcse's hash-table size** ([[gcse-bucket-count-lever]] in memory): PRE numbers its hoisted pseudos in bucket order,
+  bucket = raw hash mod S, S = max_cuid/2|1, raw = 13258 + base regno + offset for `reg+const`. Retail has another
+  insn count than the beta at gcse time, so the order (spill slots, s-registers) differs: count it with `-dG`,
+  solve for S, then find the natural source difference. LightUnit _calc: the light count (`count = 0`, `if (pow > 0)
+  count++`) only feeds the debug map viewer, so it is beta-only (S 125 -> 123). JiminyMemo contentMinigame: two of
+  the five dead initializers (added for the beta's S) are beta-only, and the first list loop increments its
+  pointers as statements (both builds). Probe with k empty asms at the function's end to find the needed count
+  first (SaveLoad's constructor: 438 -> 292 only, more than S differs).
+- **Real retail code changes:** CardRevolver _initialize's Sora starter deck takes `inShortCut` (retail shares its
+  tail with Riku's; the beta passes -1). Look for constants and arguments that differ (`build/semdiff.py`: the retail
+  try with registers masked) before treating a difference as a compiler puzzle.
 - **Data starts by hand** (`unit_starts.manual.txt`): CardKind's `.data` (getName's `pBlankText`; the split had given
   its 8 bytes to CardBattle), MapEnemy's `.data` (`g_pIdlingMotion` right after HumanBoss's 0x200 bytes).
 
@@ -623,21 +637,22 @@ keeping `instance` referenced (much worse), MapEnemy searchGround_ with a precom
 statements (no change), CardRevolver _initialize with the debug-deck switch as `switch (0)` (no change), VSME
 close_dest_se's call forms (a local reference, `mode = 1`, blocks: no change).
 
-Open after this run (22 complete units not from source in retail: 10 have no retail code (DebugMenu, DebugWindow,
+Open after this run (19 complete units not from source in retail: 10 have no retail code (DebugMenu, DebugWindow,
 DebugWindowTBL, CollDisp, KisEnemy, System/Debug, DebugWork, DebugPathData, vprintf, vsprintf); the rest, with
 what was found):
-- Register ties: Avatar RotateAvatarMain (this vs the rotation; the permuter found nothing in 13,788 tries), CtdMan
-  _sprintf (s6/s7), JiminyMemo setPlateText (this vs inKind) and contentMinigame (one more callee-saved register:
-  every s-register one higher), CardRevolver setPlayCard (permuter 36 -> 30 only with declaration moves the ref
-  contradicts), SaveLoad's constructor (15 pointer-to-member temporaries' spill slots permuted), LightUnit _calc (two
-  spill slots of hoisted stack addresses swapped), Model sendTexture (s1/s2/s3 permuted: the TexInfoStub pointer
-  lower in retail).
+- Register ties: Avatar RotateAvatarMain (this vs the rotation; the permuter found nothing in 13,788 tries),
+  CardRevolver setPlayCard (s0/s2 and s3/s4 renamed only; the permuter's 36 -> 30 needs declaration moves the ref
+  contradicts), SaveLoad's constructor (15 pointer-to-member temporaries' spill slots permuted; many PRE pseudos,
+  S = 223), Model sendTexture (s1/s2/s3 permuted: the TexInfoStub pointer lower in retail; one PRE expression only,
+  so not gcse's order; the ref shapes it with TexInfo inlines, no `t` pointer).
 - The CChatMan reqCommand pattern (GimmickTreasureBox CardMaxWarningMain, VSME close_dest_se, execExt2/3Code): where
   a local was stored just before the call (`iFg = 1; reqCommand(0x3EB, &iFg, 0)`), retail computes `this + 0x40` into
   its own register and ties the vtable delta to a0 (`addu a0, t0, a0`); ours ties the adjusted this. The calls
-  without such a store match. VSME's execExt tails then cross-jump in retail.
-- Layout: CardRevolver _initialize (retail keeps the tutorial deck's copy of the shared conv+setDeck tail, ours the
-  starter's), PlayerManager mallocBattleRsrcBuffer and setReqLoad (the block loop's moved exit region: the 30-insn
+  without such a store match. VSME's execExt tails then cross-jump in retail. Local-alloc (`-dl`): the delta pseudo
+  outranks the vtable pseudo because sched1 puts the `&mode` setup inside the vtable's life; `INT mode[1]` (an
+  aggregate on the stack from the start, no ADDRESSOF) reproduces retail in close_dest_se, but the ref has plain
+  `INT mode`/`INT iFg`. CChatMan::instance() forms make no difference.
+- Layout: PlayerManager mallocBattleRsrcBuffer and setReqLoad (the block loop's moved exit region: the 30-insn
   scan in stmt.c expand_end_loop and jump.c's 20-insn duplication limit).
 - Loop invariants: MapEnemy searchGround_ (retail hoists 45.0 too).
 - Others: VSME loadFromMem (copy-loop registers; the ref's `i` for the actor loops breaks the beta).
