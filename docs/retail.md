@@ -651,7 +651,10 @@ what was found):
   without such a store match. VSME's execExt tails then cross-jump in retail. Local-alloc (`-dl`): the delta pseudo
   outranks the vtable pseudo because sched1 puts the `&mode` setup inside the vtable's life; `INT mode[1]` (an
   aggregate on the stack from the start, no ADDRESSOF) reproduces retail in close_dest_se, but the ref has plain
-  `INT mode`/`INT iFg`. CChatMan::instance() forms make no difference.
+  `INT mode`/`INT iFg`. CChatMan::instance() forms make no difference. GimmickTreasureBox switches completely
+  with `INT iFg[1]` (26/26), so the whole difference is "in memory from the start" versus gcc's ADDRESSOF for an
+  address-taken scalar; `volatile INT` is worse, and function.c's ADDRESSOF condition (optimize, promoted mode) does
+  not depend on -g. Not committed: the ref (the beta's debug info) types both as INT.
 - Layout: PlayerManager mallocBattleRsrcBuffer and setReqLoad (the block loop's moved exit region: the 30-insn
   scan in stmt.c expand_end_loop and jump.c's 20-insn duplication limit).
 - Loop invariants: MapEnemy searchGround_ (retail hoists 45.0 too).
