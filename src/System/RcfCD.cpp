@@ -355,15 +355,15 @@ static void _initCdRead(BYTE* pDecodedBuf) {
 }
 
 /* Placeholder: the C of _startCdRead__Fii (not matching yet); its strings and vtable uses keep the data in order. */
-__attribute__((section(".sdata"))) static void _startCdRead_c(INT nStartSect, INT nSectCnt) {
-    s_nReadResult = 0xFFFF;
-    while (mcdAsyncRead2(nStartSect, nSectCnt, s_pCdBuff) != 0) {
-        Thread::delayThread_1Frame();
-    }
-    s_nStartSector_R = nStartSect;
-    s_nSectCnt_R = nSectCnt;
-    s_pDecodedBuf_R = s_pDecodedBuf;
-}
+KH_DEBUG(__attribute__((section(".sdata"))) static void _startCdRead_c(INT nStartSect, INT nSectCnt) {)
+    KH_DEBUG(s_nReadResult = 0xFFFF;)
+    KH_DEBUG(while (mcdAsyncRead2(nStartSect, nSectCnt, s_pCdBuff) != 0) {)
+        KH_DEBUG(Thread::delayThread_1Frame();)
+    KH_DEBUG(})
+    KH_DEBUG(s_nStartSector_R = nStartSect;)
+    KH_DEBUG(s_nSectCnt_R = nSectCnt;)
+    KH_DEBUG(s_pDecodedBuf_R = s_pDecodedBuf;)
+KH_DEBUG(})
 /* Parked: 4-8 lines, varying between identical builds (the draft above is the C) - the hoisted lui's of the
  * s_n*_R statics get s5/s6 in an order that changes per compiler run (gcse PRE hash order, memory gcse-pre-hash-order);
  * store orders tried (all worse). Kept asm because the result is not reproducible. */
@@ -465,9 +465,9 @@ INT CRcfCD::getRsrcFileSizeOnMemory(UINT nID) {
 
 static void _allocBuf(CD_MEMBER_DATA& info, INT nAlignSize, BYTE*& pExtBuff) {
     BYTE* p = NULL;
-    char szTmp[256];
+    KH_DEBUG(char szTmp[256];)
 
-    s_nAllocCounter = 0;
+    KH_DEBUG(s_nAllocCounter = 0;)
     while (!p) {
         if (!info._pBuff) {
 #line 658
@@ -491,14 +491,14 @@ static void _allocBuf(CD_MEMBER_DATA& info, INT nAlignSize, BYTE*& pExtBuff) {
                 p = info._pBuff->allocBuf_A64(info._nSize);
                 break;
             }
-            if (!p) {
-                if (++s_nAllocCounter > 120) {
-                    sprintf(szTmp, "\x83\x81\x83\x82\x83\x8a\x8am\x95\xdb\x8e\xb8\x94s: %s -> SIZE:%x\n", info._szDataName, info._nSize);
+            KH_DEBUG(if (!p) {)
+                KH_DEBUG(if (++s_nAllocCounter > 120) {)
+                    KH_DEBUG(sprintf(szTmp, "\x83\x81\x83\x82\x83\x8a\x8am\x95\xdb\x8e\xb8\x94s: %s -> SIZE:%x\n", info._szDataName, info._nSize);)
 #line 691
-                    AssertApp(__FILE__, __LINE__, "0", szTmp);
-                }
-                Thread::delayThread_1Frame();
-            }
+                    KH_DEBUG(AssertApp(__FILE__, __LINE__, "0", szTmp);)
+                KH_DEBUG(})
+                KH_DEBUG(Thread::delayThread_1Frame();)
+            KH_DEBUG(})
         }
     }
 }

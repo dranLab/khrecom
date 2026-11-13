@@ -56,7 +56,7 @@ protected:
     void _startDirectMode();
     void _endDirectMode();
     G_LAYER checkCache(CDrawable& inPrim, G_LAYER nLayer);
-    CDrawable* _draw(CDrawable& inPrim);
+    CDrawable* _draw(CDrawable& inPrim) KH_DEBUG(;) KH_RELEASE({ inPrim.makePkt(); return inPrim.m_pNext; })
     CDrawable* _getNextDrawable(CDrawable& inPrim) { return inPrim.m_pNext; }
 };
 

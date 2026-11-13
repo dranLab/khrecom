@@ -323,9 +323,9 @@ G_LAYER CDispListBase::checkCache(CDrawable& inPrim, G_LAYER nLayer) {
     }
     return nLayer;
 }
-CDrawable* CDispListBase::_draw(CDrawable& inPrim) {
+KH_DEBUG(CDrawable* CDispListBase::_draw(CDrawable& inPrim) {)
     KH_DEBUG(UINT nStart = (UINT)CPackMan::pkGetCurrentPointer();)
-    inPrim.makePkt();
+    KH_DEBUG(inPrim.makePkt();)
     KH_DEBUG(if (dbgButtonDown(USR_SYSTEM, 0x10, 1)) m_iDebugFlags &= ~1;)
     KH_DEBUG(if (!(m_iDebugFlags & 1)) {)
         KH_DEBUG(UINT nUsed = ((UINT)CPackMan::pkGetCurrentPointer() - nStart) >> 4;)
@@ -337,8 +337,8 @@ CDrawable* CDispListBase::_draw(CDrawable& inPrim) {
             KH_DEBUG(m_iDebugFlags |= 1;)
         KH_DEBUG(})
     KH_DEBUG(})
-    return _getNextDrawable(inPrim);
-}
+    KH_DEBUG(return _getNextDrawable(inPrim);)
+KH_DEBUG(})
 void CDispList::insert(CDrawable& inPrim, FIX4 inZ) {
     INT nIdx = inPrim.m_LayerInfo._nDepth;
     if (nIdx >= getOTtagTblSize()) {
