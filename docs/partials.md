@@ -169,14 +169,14 @@ One row per merge into main (`partials.py --summary` before and after).
 ## Summary
 
 ```
-PARTIAL: 157 (131 in 45 headers, 26 in 14 .cpp); MATCH: 1046
+PARTIAL: 157 (131 in 45 headers, 26 in 14 .cpp); MATCH: 1109
   by category: method 30, data member 9, type 12, fwd decl 2, #include 13, changed in place 40, padding 2, gate 5, guessed 8, header-level 22, stand-in 10, other 4
-stand-ins: 8 foreign in 5 files (6 names), 167 unattributed, 181 own
+stand-ins: 7 foreign in 5 files (6 names), 167 unattributed, 177 own
 duplicate class names across headers: 0
 padding: 2 arrays, 0 accessors
-mechanisms: 659 sites (0 untagged); #line: 1408
+mechanisms: 658 sites (0 untagged); #line: 1408
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 1177, superset 17, partial 1, gated 3, missing 6, unattributed 8
+classes: complete 1148, superset 18, partial 23, gated 5, missing 6, unattributed 8
 ```
 
 ## Queue (top 20)
@@ -202,11 +202,11 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | class | readiness | home | stand-in files | also defined in | gaps vs ref |
 |---|---|---|---:|---|---|
 | `sceDmaChan` | missing | System/Graphic/Effect/libppp/draw/draw_w.h | 2 |  |  |
-| `tD_CHCR` | missing | System/Graphic/Effect/libppp/draw/draw_w.h | 2 |  |  |
 | `CCMCSemiModelList` | missing | Game/Collision/CollMapCamera.h | 1 |  |  |
 | `CDispListSemiSingleSort` | missing | System/Graphic/ModelMan.h | 1 |  |  |
 | `CMCSemiModel` | missing | Game/Collision/CollMapCamera.h | 1 |  |  |
 | `ChatWndCreateCTDParam` | missing | Game/Atel/VSME.h | 1 |  |  |
+| `tD_CHCR` | missing | System/Graphic/Effect/libppp/draw/draw_w.h | 1 |  |  |
 
 ## Headers
 
@@ -216,33 +216,43 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Form/Menu/JiminyMemo.h` | 1 | 0/0/0/1 | 2 |
 | `Form/Menu/SaveLoadCtrl.h` | 1 | 8/0/0/0 | 7 |
 | `Form/Menu/SaveLoadUtil.h` | 0 | 3/1/0/0 | 4 |
+| `Game/Atel/Avatar.h` | 0 | 5/0/1/0 | 4 |
+| `Game/Atel/ChatMan.h` | 0 | 0/0/1/0 | 7 |
 | `Game/Atel/CommandAccepter.h` | 1 | 1/0/0/0 | 15 |
-| `Game/Atel/EventTrap.h` | 0 | 4/1/0/0 | 3 |
+| `Game/Atel/EventTrap.h` | 0 | 1/1/3/0 | 3 |
 | `Game/AttackMotion.h` | 1 | 3/0/0/0 | 154 |
+| `Game/Bullet/Bullet.h` | 0 | 4/0/1/0 | 30 |
 | `Game/CardBattle.h` | 1 | 6/0/0/0 | 146 |
 | `Game/CardKindEnum.h` | 1 | 1/0/0/0 | 100 |
 | `Game/Collision/CollInfo.h` | 1 | 1/0/0/0 | 177 |
 | `Game/Collision/CollObj.h` | 2 | 13/0/0/0 | 175 |
 | `Game/Collision/CollUtilA.h` | 1 | 11/0/0/0 | 26 |
 | `Game/Debug/DWTBGM.h` | 1 | 0/0/0/0 | 1 |
-| `Game/Enemy/BattleEnemy.h` | 2 | 2/0/0/0 | 58 |
+| `Game/Debug/DebugPathData.h` | 0 | 0/0/0/2 | 4 |
+| `Game/Enemy/BattleEnemy.h` | 2 | 1/0/1/0 | 58 |
 | `Game/Enemy/EnemyParam.h` | 3 | 4/0/0/0 | 16 |
-| `Game/Entity.h` | 2 | 2/0/0/0 | 150 |
+| `Game/Entity.h` | 2 | 1/0/1/0 | 150 |
 | `Game/EntityFactory.h` | 1 | 2/0/0/0 | 49 |
-| `Game/Map.h` | 4 | 11/1/0/0 | 9 |
+| `Game/Gimmick/GimmickManager.h` | 0 | 6/0/1/0 | 42 |
+| `Game/Map.h` | 4 | 10/1/1/0 | 9 |
 | `Game/Movement.h` | 4 | 1/0/0/0 | 105 |
 | `Game/OsdDef.h` | 1 | 5/1/0/0 | 7 |
 | `Game/Player/DWTPlayer.h` | 2 | 0/0/0/0 | 5 |
 | `Game/Player/Player.h` | 32 | 3/1/0/0 | 72 |
 | `Game/Player/PlayerAnim.h` | 1 | 1/0/0/0 | 1 |
 | `Game/Player/PlayerAttack.h` | 1 | 1/0/0/0 | 26 |
+| `Game/Player/PlayerCamera.h` | 0 | 3/0/1/0 | 25 |
 | `Game/Player/PlayerGauge.h` | 3 | 6/1/0/0 | 15 |
+| `Game/Player/PlayerManager.h` | 0 | 1/0/1/0 | 22 |
 | `Game/PoolList.h` | 1 | 0/0/0/0 | 53 |
 | `Game/SceneEnv.h` | 1 | 1/0/0/0 | 38 |
 | `Game/SceneInfo.h` | 1 | 30/0/0/0 | 86 |
 | `System/Com.h` | 1 | 0/0/0/0 | 9 |
+| `System/Component.h` | 0 | 1/0/1/0 | 6 |
 | `System/Coord.h` | 2 | 8/4/0/0 | 266 |
-| `System/Graphic/Camera.h` | 2 | 6/0/0/0 | 93 |
+| `System/Graphic/Camera.h` | 2 | 6/0/0/0 | 92 |
+| `System/Graphic/DeFocus.h` | 0 | 3/0/1/0 | 6 |
+| `System/Graphic/DispList.h` | 0 | 9/0/1/0 | 2 |
 | `System/Graphic/Effect/EffectMan.h` | 1 | 2/0/0/0 | 173 |
 | `System/Graphic/Effect/ObjType.h` | 1 | 1/0/0/0 | 177 |
 | `System/Graphic/Effect/effect.h` | 3 | 5/1/0/0 | 77 |
@@ -257,13 +267,18 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/Effect/libppp/keProg/pppKeTh.h` | 0 | 6/0/1/0 | 1 |
 | `System/Graphic/Effect/libppp/pppPart.h` | 25 | 21/0/0/0 | 218 |
 | `System/Graphic/Gprim.h` | 1 | 56/0/0/0 | 232 |
-| `System/Graphic/Model.h` | 2 | 9/0/0/0 | 70 |
+| `System/Graphic/HermitePathCamera.h` | 0 | 1/0/1/0 | 4 |
+| `System/Graphic/Model.h` | 2 | 8/0/0/0 | 70 |
+| `System/Graphic/PathData.h` | 0 | 4/0/2/0 | 8 |
+| `System/Graphic/PathDataCamera.h` | 0 | 0/0/1/0 | 3 |
 | `System/Graphic/Str.h` | 1 | 0/0/0/0 | 141 |
-| `System/Graphic/TexInfo.h` | 1 | 2/0/0/0 | 235 |
+| `System/Graphic/TexInfo.h` | 1 | 1/0/1/0 | 235 |
 | `System/Graphic/modeldata.h` | 2 | 3/0/0/1 | 82 |
 | `System/MainApp.h` | 2 | 1/0/0/1 | 274 |
-| `System/RsrcData.h` | 1 | 33/0/0/0 | 29 |
+| `System/Movie/MSVideo.h` | 0 | 10/1/0/0 | 4 |
+| `System/RsrcData.h` | 1 | 32/0/1/0 | 29 |
 | `System/SLContainer.h` | 4 | 0/0/0/0 | 245 |
+| `System/Task.h` | 0 | 2/0/1/0 | 240 |
 | `System/Vector.h` | 6 | 0/0/0/0 | 263 |
 
 ## Mechanisms
@@ -380,7 +395,6 @@ or `untagged`.
 | placeholder | `_oneVector*` | 1 | 1 | the lui in the asm (a constant operand is scheduled to the top of CModel's constructor) |
 | placeholder | `_premiumPrizeMessage*` | 12 | 12 | Placeholders for an unknown header's inline functions (prize messages) that come next in .rodata. |
 | placeholder | `_roPh*` | 1 | 1 | placeholder: an inline function's strings, in the original .rodata order |
-| placeholder | `_roPh0a*` | 1 | 1 | placeholder: an inline function's strings, in the original .rodata order |
 | placeholder | `_roulettePrizeMessage*` | 12 | 12 | placeholder: an inline function's strings, in the original .rodata order |
 | placeholder | `_sampleEnemyEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
 | placeholder | `_saveLoadCtrlAlloc*` | 1 | 1 | placeholder: an inline function's strings, in the original .rodata order |
