@@ -125,6 +125,9 @@ shows a draft's diff after you switch its `#if 0` to `#if 1` (the permuters swit
   (`ee-gcc2.9-991111{,-01}/ee/bin/as`) gives exactly that and matches every other function except `ftoi` and
   `kputchar`, whose `jr ra` slots it never fills (2.10 does; gcc can't: a DI->SI truncation of length 8, a
   volatile store). 2.10/2.12 insert no c.cond nop with any `-mcpu`/`-mipsN`; 990721's as also adds one after `mtc1`.
+  2026-11-13: every installed assembler tried on the 991111-01 output (also the 2.95.2-273a/2.95.3-114/-136
+  `as.exe`, like 2.9; Ps2EeAs breaks `_sceSnprintf` and `printfloat`): the unit needs an assembler that fills open
+  slots like 2.10 and inserts the c.cond nop like 2.9, which none of them is (blocked on the toolchain).
 - **filestub** done 44/44 (2026-11-08): `_sceFs_Rcv_Intr` matched once the selector went straight into the global
   (`ee_retbuf_sel = _fs_rcv_bufdbl ? ((s32*)pkt)[3] : 0;`) and the address was one expression indexed by it
   (`rp = UNCACHED(&_rcv_data_cmd[ee_retbuf_sel]);`); the invented local `sel` was the cause, not a scheduling tie.
