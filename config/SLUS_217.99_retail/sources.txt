@@ -34,6 +34,7 @@ Game/Atel/Avatar
 Game/Atel/CameraMan
 Game/Atel/ChatMan
 Game/Atel/EventTrap
+Game/Atel/VSME
 Game/AttachCard
 Game/AttackMotion
 Game/BattleCard

@@ -44,8 +44,8 @@ static CHAR* MoogleShopPack = "MogCardPack";
 #include "Game/Enemy/HumanBoss.h"
 #include "System/Graphic/Anim.h"
 /* MATCH: Placeholder: .rodata has "e123_062" after Anim.h's strings (from an unidentified header, as in Game/Enemy/CreateEnemy). */
-inline void _vsmeMotionName() {
-    TRACE("e123_062");
+inline const CHAR* _vsmeMotionName() {
+    return "e123_062"; /* returned, as CreateEnemy's: retail keeps the string */
 }
 #include "System/Graphic/Str.h"
 #include "Game/Atel/VSME.h"
@@ -2789,9 +2789,9 @@ INT CVSM::execExt2Code(INT op, eATEL_REQ_RET& ret) {
             ret = ATEL_RET_SWAIT; r = 3;
             break;
         case 0x83: {
-            FLOAT f = m_S[m_SP].F;
-            CCameraMan::instance().reqCommand(0x456, &f, 0);
-            TRACE("CAMCMD_CHANGE_GAKAKU %f\n", f);
+            FLOAT f[1]; asm volatile("" : : "m"(*f)); *f = m_S[m_SP].F; // MATCH: [1] + "m" asm input: retail needs the store to f ordered before the vtable load (a struct MEM in SFmode); user-accepted 2026-11-13
+            CCameraMan::instance().reqCommand(0x456, f, 0);
+            TRACE("CAMCMD_CHANGE_GAKAKU %f\n", f[0]);
             break;
         }
         case 0x85:
@@ -5826,3 +5826,4 @@ KH_DEBUG(void CEventLineDisp::disp() {)
 KH_DEBUG(})
 
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .rodata

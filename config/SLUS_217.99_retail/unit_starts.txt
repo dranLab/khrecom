@@ -51,6 +51,7 @@ Game/Atel/Avatar .rodata 0x004108B0 0x110
 Game/Atel/CameraMan .data 0x0033C404 0x8
 Game/Atel/CameraMan .rodata 0x004109C0 0x30
 Game/Atel/ChatMan .data 0x0033C40C 0xc
+Game/Atel/VSME .rodata 0x00410A00 0x2a20
 Game/AttachCard .rodata 0x00405D38 0x1280
 Game/AttackMotion .data 0x0033B370 0x20
 Game/AttackMotion .rodata 0x00406FC0 0x50
