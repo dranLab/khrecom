@@ -5856,9 +5856,9 @@ void CCamp::setWorldmapCursor() {
                         normaSrc._nColor = pDoorInfo->getNormaColor(nNI);
                         normaSrc._nNumber = pDoorInfo->getNormaNumber(nNI);
                         normaSrc._nOp = pDoorInfo->getNormaOperation(nNI);
-                        {
+                        { /* MATCH: _NORMA_PIECES (2DCard.h) without its register pins, i.e. the RTL size of the original's by-value argument: gcse's table size orders the hoisted this+0x354/0x4D8 spill slots in retail */
                             RCNORMA::NormaSrc t = normaSrc;
-                            _createNormaRaw(p2DCard, _NORMA_PIECES(t), 0);
+                            _createNormaRaw(p2DCard, ({ ULONGLONG lo = (USHORT)t._nOp; ULONGLONG num = (USHORT)t._nNumber; ULONGLONG hi = (USHORT)t._nColor; lo <<= 16; ULONGLONG top = (USHORT)t.__nDummy; lo |= num; hi <<= 32; hi |= lo; top <<= 48; top | hi; }), 0);
                         }
                     }
                 }
