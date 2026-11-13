@@ -1,0 +1,8 @@
+# Data addresses measured by hand: <beta address> <retail address> (configure.py's version_address_map adds them to
+# tools/version_map.py's data.tsv). For addresses only data references, so no code pairs them. Evidence per entry.
+# Camp's static pStrNum (a parked function's .data table in src/Form/Menu/Camp.cpp, D_ labels of Camp's .rodata strings):
+# retail's copy at 0x33FB68 holds 0x4244A0 0x4244B8 0x424518 0x424090, the same strings
+0x004E31F0 0x004244A0 # "%02d/99"
+0x004E3208 0x004244B8 # "%02d"
+0x004E33E8 0x00424518 # SJIS "~" + "%02d"
+0x004E2948 0x00424090 # "" (Camp's first .rodata string)

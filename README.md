@@ -22,9 +22,9 @@ Functions per version by state (percentages: share of the row's code size).
 | `SLUS_217.99`<br>US translation beta (the reference) | Game code (`System/`, `Game/`, `Form/`, `crt0`) | 11323 | 11311 (99.6%) | 5 (0.0%) | 7 (0.4%) | 0 (0.0%) | 0 (0.0%) |
 |  | Libraries (`lib/`: Sony SDK, C library, libgcc) | 988 | 802 (92.3%) | 151 (2.4%) | 31 (5.2%) | 0 (0.0%) | 4 (0.1%) |
 | | **Total** | **12311** | **12113** (99.0%) | **156** (0.2%) | **38** (0.8%) | **0** (0.0%) | **4** (0.0%) |
-| `SLUS_217.99_retail`<br>US retail | Game code (`System/`, `Game/`, `Form/`, `crt0`) | 10472 | 10155 (94.2%) | 4 (0.0%) | 0 (0.0%) | 312 (5.8%) | 1 (0.0%) |
-|  | Libraries (`lib/`: Sony SDK, C library, libgcc) | 983 | 748 (85.9%) | 151 (2.4%) | 0 (0.0%) | 81 (11.6%) | 3 (0.1%) |
-| | **Total** | **11455** | **10903** (93.4%) | **155** (0.3%) | **0** (0.0%) | **393** (6.3%) | **4** (0.0%) |
+| `SLUS_217.99_retail`<br>US retail | Game code (`System/`, `Game/`, `Form/`, `crt0`) | 10472 | 10460 (99.5%) | 4 (0.0%) | 7 (0.4%) | 0 (0.0%) | 1 (0.0%) |
+|  | Libraries (`lib/`: Sony SDK, C library, libgcc) | 983 | 799 (92.4%) | 151 (2.4%) | 30 (5.1%) | 0 (0.0%) | 3 (0.1%) |
+| | **Total** | **11455** | **11259** (98.9%) | **155** (0.3%) | **37** (0.9%) | **0** (0.0%) | **4** (0.0%) |
 
 Matched: compiled from `src/` and byte-identical (the build checks each whole image). Hand-written assembly:
 written in assembly originally (no compiler output to match; stays `.s`). INCLUDE_ASM: the file is compiled

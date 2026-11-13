@@ -749,3 +749,23 @@ function_pairs.manual.txt), and a non-reference version's address labels come fr
 .s files included (CardRevolver.s named BattleCard's D_005BD9E8.. .bss labels; only a stale data .s had defined them
 here). Tested: a fresh worktree at HEAD and the 20ff85c4 state from a clean retail split both pass; the old
 configure.py fails the latter with `undefined reference to D_005BDB00`.
+### 2026-11-13 (on main): the units with INCLUDE_ASM, 638 -> 650
+
+Units with parked (INCLUDE_ASM) functions build from source in retail too: each parked function includes retail's
+assembly of its pair (docs/versions.md 5). Then, with three agents, one worktree each:
+- WorldEnv, shape, mpc, snDebugInit, _setlocale_r, graphdev_checkModelVersion: unchanged sources; kprintf2: its
+  parked function's jump table with retail's labels (beta - 0x72E00) under `#ifdef KH_RETAIL` (the retail library
+  overrides now all pass -DKH_RETAIL).
+- Rcf: the scene/map info (variables, parsers, getSceneInfo/getMapInfo family, _seekRcfSceneInfo templates, the
+  RcfSceneInfo vtable) and NowLoading's mode-1 blocks are beta-only; getMapID returns
+  `CRcfCD::getExtInfo((nArea + 100) * 10000 + nScene, 0)` in retail (a real change). RcfCD's .rodata starts by hand
+  at 0x4056D0 ("ABC").
+- RcfCD: _allocBuf's retry/trace block and the `.sdata` placeholder beta-only. DispList: `CDispListBase::_draw` is
+  an in-class inline in retail (`KH_RELEASE({ inPrim.makePkt(); return inPrim.m_pNext; })`); vu0LoadMatrixVF28
+  declares its vf28-vf31 clobbers (true; an asm with clobbers is a PARALLEL and cse keeps `nIdx = 0`).
+- Camp: setDeckSetWin's getText ternary without the ctdID local, getRoomHelp's early return, setWorldmapCursor's
+  NormaSrc pieces without register pins (gcse table 387), setMainCmd's beta filler asm beta-only, setWorldmap with
+  the ref's block locals, setConfigWin's one pButton; the parked functions' data blocks with retail's strings and
+  jump-table labels (KH_DEBUG/KH_VER); the static pStrNum table's string addresses via
+  `config/SLUS_217.99_retail/data_pairs.manual.txt` (new). __errno: memmove (absent in retail) beta-only.
+- `retail_units.py`'s cut-out functions keep their `.align` only where retail's assembly has it (__errno).

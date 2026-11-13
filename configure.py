@@ -480,6 +480,14 @@ def version_address_map(build_cfg: dict) -> dict[int, int]:
             for row in csv.DictReader(path.open(encoding="utf-8"), delimiter="\t"):
                 if row[other]:
                     out[int(row[beta], 16)] = int(row[other], 16)
+    # data pairs measured by hand, for addresses that only data references (no code to pair them):
+    # config/<VERSION>/data_pairs.manual.txt, `<beta address> <this version's address>` per line, with its evidence
+    manual = ROOT / "config" / Path(build_cfg["elf"]).name / "data_pairs.manual.txt"
+    if manual.exists():
+        for line in manual.read_text(encoding="utf-8").splitlines():
+            if line.strip() and not line.lstrip().startswith("#"):
+                beta, other = line.split()[:2]
+                out[int(beta, 16)] = int(other, 16)
     return out
 
 

@@ -110,7 +110,7 @@ REG_NUMBERS = {"zero": 0, "at": 1, "v0": 2, "v1": 3, "a0": 4, "a1": 5, "a2": 6, 
                "s8": 30, "ra": 31, "t8": 24, "t9": 25, "k0": 26, "k1": 27,
                **{f"t{i}": 8 + i for i in range(8)}, **{f"s{i}": 16 + i for i in range(8)}}
 REG_NAME = re.compile(r"(?<=[\s,(])\$(" + "|".join(sorted(REG_NUMBERS, key=len, reverse=True)) + r")\b")
-FUNC_BLOCK = re.compile(r"^nonmatching (\S+), 0x[0-9A-Fa-f]+$.*?^endlabel \1$", re.M | re.S)
+FUNC_BLOCK = re.compile(r"^(?:(\.align \d+)\n\s*)?(nonmatching (\S+), 0x[0-9A-Fa-f]+$.*?^endlabel \3$)", re.M | re.S)
 
 
 def include_asm_tree(v: Version, unit: str, text: str) -> str:
@@ -127,8 +127,10 @@ def include_asm_tree(v: Version, unit: str, text: str) -> str:
     for path in (ROOT / f"asm/{v.name}/{unit}.s", ROOT / f"asm/{v.name}/{unit}.linkonce.s"):
         if path.exists():
             for m in FUNC_BLOCK.finditer(path.read_text(encoding="latin-1")):
-                body = REG_NAME.sub(lambda r: f"${REG_NUMBERS[r.group(1)]}", m.group(0))
-                (out / f"{m.group(1)}.s").write_text(f".align 3\n{body}\n", encoding="latin-1")
+                # the function's own .align only where this version's assembly has it (lib/nodebug/__errno: memset,
+                # strcat, strchr, strcmp aren't 8-aligned in retail)
+                body = REG_NAME.sub(lambda r: f"${REG_NUMBERS[r.group(1)]}", m.group(2))
+                (out / f"{m.group(3)}.s").write_text(f"{m.group(1) or ''}\n{body}\n", encoding="latin-1")
     return root.relative_to(ROOT).as_posix()
 
 

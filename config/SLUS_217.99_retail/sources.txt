@@ -1,6 +1,7 @@
 # Units this version builds from src/ (configure.py: build.yaml `sources:` names this file); written by
 # tools/retail_units.py switch/verify. One fnmatch pattern per line, `!` excludes.
 Form/Menu/BtlReportCtrl
+Form/Menu/Camp
 Form/Menu/DecknameEdit
 Form/Menu/GameOver
 Form/Menu/JMemoFlag
@@ -551,6 +552,7 @@ lib/mpc
 lib/mpeg
 lib/nodebug/Tim2CheckFileHeader
 lib/nodebug/__assert
+lib/nodebug/__errno
 lib/nodebug/__malloc_lock
 lib/nodebug/__sflags
 lib/nodebug/__smakebuf

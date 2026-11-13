@@ -101,6 +101,9 @@ beta SHA-1 on every commit. Hard-coded `"c:/KHCOM/....cpp(123)"` allocation mess
 - Data from source is marked per version, as the source's last lines:
   `// SOURCE DATA SLUS_217.99_retail: .data .rodata`. Data starts are in `unit_starts.txt` (written by the tool) and
   `unit_starts.manual.txt` (measured by hand, each with its evidence).
+- `D_` labels in sources name beta addresses; for retail, configure translates them through the version map. An
+  address only data refers to (a parked function's table pointing at strings) has no pair there:
+  `config/SLUS_217.99_retail/data_pairs.manual.txt` (`<beta address> <retail address>`, with the evidence).
 
 ### The workflow: `tools/retail_units.py`
 
