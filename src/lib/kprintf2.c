@@ -125,7 +125,12 @@ int printfloat(PutcFunc func, void *ctx, unsigned int *size, double d)
    (not even with -O), so ftoi's and kputchar's `jr ra` slots, which 2.10 fills, open up; 2.10/2.12 insert no
    c.cond nop under any -mcpu/-mipsN, 990721 also adds one after mtc1. No source form found; the data and the
    draft's literals are ready (its .rdata block below). tried: compare_compilers (all compilers, own and
-   unit assemblers), assembler option sweep on a snippet, permuter (earlier) */
+   unit assemblers), assembler option sweep on a snippet, permuter (earlier). 2026-11-13: the 991111-01 output
+   through every assembler we have (GNU 2.9 991111-01, 2.10, the 2.95 packages' as.exe, Ps2EeAs): 2.9 and as.exe
+   leave only ftoi/kputchar, Ps2EeAs also changes _sceSnprintf/printfloat. No C form makes gcc fill those two slots
+   itself: reorg never puts a volatile store in a delay slot (resource_conflicts_p), a plain store to 0x1000F180
+   becomes an $at macro, and ftoi's truncdisi2 is one 8-byte insn. So the unit needs an assembler that fills open
+   slots like 2.10 and inserts the c.cond nop like 2.9; none of the installed ones does both */
 #if 0
 int _sceSnprintf(PutcFunc func, void *ctx, unsigned int size, const char *fmt, va_list ap)
 {

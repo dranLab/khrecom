@@ -159,7 +159,9 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/nodebug/__errno", memmove);
    from (unsigned char)c), d initialised at its declaration (newlib's unsigned int d = c & 0xff: 14, the andi moves to
    the entry block), buffer <<= 8; buffer |= d (19), a one-pass for loop (23), 18 flag sets: cse/combine fold every
    extension of the andi result into one register. The original's block uses neither v0 nor a0-a3 (local-alloc's
-   first choices), as if its pseudos were global or v0 live across the block */
+   first choices), as if its pseudos were global or v0 live across the block. 2026-11-13: the move could be
+   extendsidi2 (a register sign extension prints as move): buffer = d with int/unsigned/unsigned char d and the
+   OR operand as d, (unsigned)d or (unsigned long)(unsigned)d, a separate pcpyh input: cse still folds it (12-18) */
 #if 0
 void *memset(void *m, int c, size_t n)
 {
