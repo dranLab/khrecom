@@ -75,7 +75,7 @@ inline void vu0LoadMatrixVF28(const FMATRIX* m) {
     asm volatile("lqc2 $vf28, 0x0(%0)\n"
                  "lqc2 $vf29, 0x10(%0)\n"
                  "lqc2 $vf30, 0x20(%0)\n"
-                 "lqc2 $vf31, 0x30(%0)" : : "r"(m));
+                 "lqc2 $vf31, 0x30(%0)" : : "r"(m) : "vf28", "vf29", "vf30", "vf31");
 }
 #line 190
 inline void vu0StoreMatrixVF16(FMATRIX* m) {
