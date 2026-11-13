@@ -4395,8 +4395,8 @@ INT CCamp::setDeckSetWin(INT nSetCmd) {
     case 1:
         if (m_pDeckSetWinCtrl->isEnd(0)) {
             m_pDeckSetWinCtrl->replaceSeq(0, m_pSeqName, decksetWinSeqTbl[fgSetOrClear + 1]);
-            UINT ctdID = fgSetOrClear ? 0x50040B : 0x500409;
-            m_pHelpFnt->setText(CCtdMan::getText(ctdID));
+            m_pHelpFnt->setText(CCtdMan::getText(!fgSetOrClear ? 0x500409 : 0x50040B));
+
             m_pDeckSetBC->setDisp(TRUE, FALSE);
             ret = 1;
         }
@@ -6969,17 +6969,17 @@ void CCamp::setWMRoomName(BYTE cardID, INT nRoomSelect, const RoomInfo* pRoomInf
 LPCTSTR CCamp::getRoomHelp(USHORT kind, USHORT idxPooRoom) {
     static LPCTSTR pBlankText = "";
 
-    if (kind >= 0xA1) {
-        if (kind < 0xDB) {
-            UINT ctdID = kind + 0x35F;
-            return CCtdMan::getText(ctdID);
-        }
-        if (kind == 0xDB) {
-            UINT ctdID = idxPooRoom + 0x42A;
-            return CCtdMan::getText(ctdID);
-        }
+    if (kind < 0xA1) {
+        return pBlankText;
+    }
+    if (kind < 0xDB) {
+        return CCtdMan::getText(kind + 0x35F);
+    }
+    if (kind == 0xDB) {
+        return CCtdMan::getText(idxPooRoom + 0x42A);
     }
     return pBlankText;
+
 }
 
 void CCamp::setCurrentRoomName(INT nSetCmd) {
