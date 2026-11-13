@@ -878,13 +878,13 @@ INT CCardRevolver::setPlayCard(INT inFlag, INT inTest) {
     } else {
         switch (category) {
         case 7:
-            if (num == -1 && !KH_DW(DebugWork::g_dw.player.iCardSpend)) card->setReloadNG();
-            break;
+            if (num != -1) break;
+            // fall through (MATCH retail: the ref lists two setReloadNG inlines; 7 -> 4/5/6 -> 14 share one call)
         case 4:
         case 5:
         case 6:
-            if (!KH_DW(DebugWork::g_dw.player.iCardSpend)) card->setReloadNG();
-            break;
+            if (KH_DW(DebugWork::g_dw.player.iCardSpend)) break;
+            // fall through
         case 14:
             card->setReloadNG();
             break;
