@@ -331,7 +331,7 @@ float KeVu0Sqrt(float v) {
     w[1] = v;
     __asm__ __volatile__(
         "lqc2 $vf10, %1\n"
-        "nop\n"
+        KH_VER("nop\n", "")
         "vsqrt $Q, $vf10y\n"
         "vwaitq\n"
         "cfc2.ni %0, $vi22\n"
@@ -403,3 +403,4 @@ void KeIdx_Init(KeIdx *_p, u_short *wk, u_short num) {
     *wk = 0xFFFF;
 }
 // SOURCE DATA: .data .bss
+// SOURCE DATA SLUS_217.99_retail: .data

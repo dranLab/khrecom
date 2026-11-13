@@ -59,9 +59,9 @@ public:
 
     static CCtdMan& initialize() {
 #line 38
-        if (m_pInstance != NULL) AssertApp(__FILE__, __LINE__, "__null == m_pInstance", 0);
-        m_pInstance = new (__FILE__ "(39)") CCtdMan;
-        if (!m_pInstance) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
+        KH_DEBUG(if (m_pInstance != NULL) AssertApp(__FILE__, __LINE__, "__null == m_pInstance", 0);)
+        m_pInstance = new KH_AT("(39)") CCtdMan;
+        KH_DEBUG(if (!m_pInstance) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);)
         m_pInstance->setup();
         return *m_pInstance;
     }
@@ -73,7 +73,7 @@ public:
         /* read through a reference (Form/Menu/LevelUp): keeps the load of m_pInstance after preceding member stores */
         CCtdMan*& pInstance = m_pInstance;
 #line 50
-        if (!pInstance) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
+        KH_DEBUG(if (!pInstance) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);)
         return *pInstance;
     }
     void initializeData(void* pDtHead);

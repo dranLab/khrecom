@@ -25,7 +25,7 @@ inline void _enemyWizardEmptyString() {
 #include "System/Rnd.h"
 #include <math.h>
 #include "Game/Collision/CollBody.h"
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 extern CEntity* g_pPlayer; /* a CPlayer (Game/Player/Player.h) */
 FVECTOR getPlayerPos(BOOL flag);
@@ -248,3 +248,4 @@ void CEnemyWizard::onAbsorb() {
 }
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

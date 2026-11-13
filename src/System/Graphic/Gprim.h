@@ -697,7 +697,7 @@ public:
         m_PRIM = iPrim;
 #line 613 GPRIM_H_PATH
         m_V = (FVERTEX*)com_malloc_d(iVertexNum * sizeof(FVERTEX), __FILE__ "(613)", (UINT)-1);
-        if (!m_V) AssertApp(__FILE__, __LINE__, "m_V", 0);
+        KH_DEBUG(if (!m_V) AssertApp(__FILE__, __LINE__, "m_V", 0);)
     }
 
     void remove() {
@@ -768,7 +768,7 @@ public:
         m_PRIM = iPrim;
 #line 684 GPRIM_H_PATH
         m_V = (FTVERTEX*)com_malloc_d(iVertexNum * sizeof(FTVERTEX), __FILE__ "(684)", (UINT)-1);
-        if (!m_V) AssertApp(__FILE__, __LINE__, "m_V", 0);
+        KH_DEBUG(if (!m_V) AssertApp(__FILE__, __LINE__, "m_V", 0);)
     }
 
     void remove() {

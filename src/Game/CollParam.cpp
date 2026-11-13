@@ -2,7 +2,7 @@
 #include "System/MainApp.h"
 #include "System/Debug.h"
 #include <string.h>
-
+KH_RELEASE(__asm__(".rdata\n.align 3\n.word 0\n.word 0\n");) /* MATCH: retail's .rodata has 8 more zero bytes after CardRevolver's (0x40E4E0), before g_AtkKind (0x40E4E8); not identified, given to this unit as CollMap's and BattleCard's blocks */
 #line 15
 ATK_KIND ATK_COLL_PARAM::getAtkKind() const {
     static const ATK_KIND g_AtkKind[21] = {
@@ -29,7 +29,7 @@ ATK_KIND ATK_COLL_PARAM::getAtkKind() const {
         /* [20] = */ ATK_KIND_DARK_PUNISHER
     };
 
-    if (!(0 <= iAtkKind && iAtkKind < (sizeof(g_AtkKind)/sizeof((g_AtkKind)[0])))) AssertApp(__FILE__, __LINE__, "0 <= iAtkKind && iAtkKind < (sizeof(g_AtkKind)/sizeof((g_AtkKind)[0]))", 0);
+    KH_DEBUG(if (!(0 <= iAtkKind && iAtkKind < (sizeof(g_AtkKind)/sizeof((g_AtkKind)[0])))) AssertApp(__FILE__, __LINE__, "0 <= iAtkKind && iAtkKind < (sizeof(g_AtkKind)/sizeof((g_AtkKind)[0]))", 0);)
     return g_AtkKind[iAtkKind];
 }
 
@@ -69,3 +69,4 @@ BOOL COLL_PARAM_HEADER::addrMapping() {
     return 1;
 }
 // SOURCE DATA: .rodata
+// SOURCE DATA SLUS_217.99_retail: .rodata

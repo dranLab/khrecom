@@ -114,7 +114,7 @@ void MulMatrix(FMATRIX& m0, const FMATRIX& m1, const FMATRIX& m2);
 
 inline FLOAT DegToRad(FLOAT d) { return d * 0.017453292f; }
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 CEffectMotionCtrl::CEffectMotionCtrl(CEffectMotion* inParent) {
     m_iStep = 3;
@@ -596,7 +596,7 @@ BOOL CEffectMotion::initialize_(EET_HEADER* inHeader) {
     }
     m_iEffMotCtrlCount = 32;
 #line 1248
-    m_pEffMotCtrl = new (__FILE__ "(1248)") CEffectMotionCtrl[32](this);
+    m_pEffMotCtrl = new KH_AT("(1248)") CEffectMotionCtrl[32](this);
     if (!m_pEffMotCtrl) {
         m_iEffMotCtrlCount = 0;
         m_iNowCtrlCount = 0;
@@ -710,3 +710,4 @@ void CEffectMotion::releaseObserveEffect_() {
 }
 
 // SOURCE DATA: .rodata
+// SOURCE DATA SLUS_217.99_retail: .rodata

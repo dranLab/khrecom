@@ -44,14 +44,14 @@ extern "C" float atan2f(float y, float x);
 
 
 
-void CCoords::_coord_alart(UINT nIndex) const {
-    TRACE("*** CCoords:: \x94\xcd\x88\xcd\x8aO\x82\xcc Coord \x82\xaa\x8ew\x92\xe8\x82\xb3\x82\xea\x82\xc4\x82\xa2\x82\xdc\x82\xb7 this:%08x pCrdArray:%08x CrdNum:%d Index:%d ***\n",
-          this, m_pCrdArray, m_nCrdNum, nIndex);
-}
-void CCoords::_coord_nullalart() const {
-    TRACE("*** CCoords:: Coord \x82\xaa\x91\xb6\x8d\xdd\x82\xb5\x82\xdc\x82\xb9\x82\xf1 this:%08x pCrdArray:%08x CrdNum:%d ***\n", this,
-          m_pCrdArray, m_nCrdNum);
-}
+KH_DEBUG(void CCoords::_coord_alart(UINT nIndex) const {)
+    KH_DEBUG(TRACE("*** CCoords:: \x94\xcd\x88\xcd\x8aO\x82\xcc Coord \x82\xaa\x8ew\x92\xe8\x82\xb3\x82\xea\x82\xc4\x82\xa2\x82\xdc\x82\xb7 this:%08x pCrdArray:%08x CrdNum:%d Index:%d ***\n", this, m_pCrdArray, m_nCrdNum, nIndex);)
+
+KH_DEBUG(})
+KH_DEBUG(void CCoords::_coord_nullalart() const {)
+    KH_DEBUG(TRACE("*** CCoords:: Coord \x82\xaa\x91\xb6\x8d\xdd\x82\xb5\x82\xdc\x82\xb9\x82\xf1 this:%08x pCrdArray:%08x CrdNum:%d ***\n", this, m_pCrdArray, m_nCrdNum);)
+
+KH_DEBUG(})
 void CCoord::fix(TIMEQ tq) {
     CCoord* pParent = m_pParent;
 
@@ -340,7 +340,7 @@ BOOL CCoords::addCoord(UINT nNum, CCoord* pParent) {
         return FALSE;
     }
 #line 480
-    m_pCrdArray = new (__FILE__ "(480)") CCoord[nNum];
+    m_pCrdArray = new KH_AT("(480)") CCoord[nNum];
     if (!m_pCrdArray) {
         TRACE("\x8cx\x8d\x90\x81" "FCoord\x82\xcc\x83\x81\x83\x82\x83\x8a\x8am\x95\xdb\x82\xaa\x8ds\x82\xa6\x82\xdc\x82\xb9\x82\xf1!!!!!!!!!!\n");
         return FALSE;
@@ -1714,3 +1714,4 @@ extern "C" int sceVu0ClipAll(float* minv, float* maxv, float (*ms)[4], float (*v
                  : "$2");
 }
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

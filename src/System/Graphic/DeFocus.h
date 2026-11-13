@@ -64,7 +64,7 @@ private:
 
 class CBlurPrim : public CGPrim {
 public:
-    INT m_iDebugID;
+    KH_DEBUG(INT m_iDebugID;)
 
 private:
     INT m_iKind;

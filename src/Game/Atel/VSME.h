@@ -139,7 +139,7 @@ union OpStack {
     FLOAT F;
 };
 
-void _TRACE(BOOL bDisp, const CHAR* fmt, ...);
+KH_DEBUG(void _TRACE(BOOL bDisp, const CHAR* fmt, ...);) KH_RELEASE(inline void _TRACE(BOOL bDisp, const CHAR* fmt, ...) {}) /* MATCH: an empty inline in retail (weak, as _TRACE_) */
 inline void _TRACE_(BOOL bDisp, const CHAR* fmt, ...) {}
 
 class CVSM {

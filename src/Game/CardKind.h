@@ -220,7 +220,7 @@ static const CARD_DATA cardDataTbl[224] = {
     { { 0xdb }, 20, 6, 6, "Atlantica" }, // 196
     { { 0xdb }, 20, 7, 6, "Neverland" }, // 197
     { { 0xdb }, 21, 0, 6, "Hollow Bastion" }, // 198
-    { { 0xdb }, 21, 1, 2, "100 Acre Woods" }, // 199
+    { { 0xdb }, 21, 1, 2, KH_VER("100 Acre Woods", "100 Acre Wood") }, // 199
     { { 0xdb }, 21, 2, 6, "Twilight Town" }, // 200
     { { 0xdb }, 21, 3, 6, "Destiny Islands" }, // 201
     { { 0xdb }, 21, 4, 4, "Castle Oblivion" }, // 202

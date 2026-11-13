@@ -160,7 +160,7 @@ HANDLE CGimmickManager::getNearestGimmick(CEntity& inEntity) {
 
 void CGimmickManager::initRoomCreate() {
     INT SaveGimCounter;
-    INT count = 0;
+    KH_DEBUG(INT count = 0;)
     int TrapTabel[3];
     _GimmickRoomInfo* gim;
     INT gimIndex = 0;
@@ -229,29 +229,29 @@ void CGimmickManager::initRoomCreate() {
             case 9010:
                 continue;
             }
-            count++;
-            if (SaveGimCounter >= 48) {
-                TRACE("initRoomCreateERROR:\x83M\x83~\x83""b\x83N\x8f\xee\x95\xf1\x95\xdb\x8e\x9d\x83o\x83""b\x83t\x83@\x82\xaa\x83I\x81[\x83o\x81[\x82\xb5\x82\xdc\x82\xb7\x81I\x81I\x94z\x92u\x90\x94\x82\xf0\x8am\x94""F\x82\xb5\x82\xc4\x82\xad\x82\xbe\x82\xb3\x82\xa2\n");
-                AssertApp(__FILE__, 273, "0", 0);
-                SaveGimCounter = 47;
-            }
+            KH_DEBUG(count++;)
+            KH_DEBUG(if (SaveGimCounter >= 48) {)
+                KH_DEBUG(TRACE("initRoomCreateERROR:\x83M\x83~\x83""b\x83N\x8f\xee\x95\xf1\x95\xdb\x8e\x9d\x83o\x83""b\x83t\x83@\x82\xaa\x83I\x81[\x83o\x81[\x82\xb5\x82\xdc\x82\xb7\x81I\x81I\x94z\x92u\x90\x94\x82\xf0\x8am\x94""F\x82\xb5\x82\xc4\x82\xad\x82\xbe\x82\xb3\x82\xa2\n");)
+                KH_DEBUG(AssertApp(__FILE__, 273, "0", 0);)
+                KH_DEBUG(SaveGimCounter = 47;)
+            KH_DEBUG(})
             gim->_gimmicks[SaveGimCounter]._nID = ((CBaseGimmick*)task)->getUniqueID();
             gim->_gimmicks[SaveGimCounter]._nStat = 0;
             SaveGimCounter++;
         }
         if (CSceneInfo::getCurrentSceneNum() == 8 && task->getTypeID() == 0x2000) {
-            if (gimIndex >= 3) {
-                TRACE("initRoomCreateERROR:\x8bU\x82\xe8\x82\xcc\x95\x94\x89\xae\x82\xcc\x95\xf3\x94\xa0\x82\xaa\x91\xbd\x82\xb7\x82\xac\x82\xdc\x82\xb7\x81I\x81I\n");
-                AssertApp(__FILE__, 292, "0", 0);
-                gimIndex = 2;
-            }
+            KH_DEBUG(if (gimIndex >= 3) {)
+                KH_DEBUG(TRACE("initRoomCreateERROR:\x8bU\x82\xe8\x82\xcc\x95\x94\x89\xae\x82\xcc\x95\xf3\x94\xa0\x82\xaa\x91\xbd\x82\xb7\x82\xac\x82\xdc\x82\xb7\x81I\x81I\n");)
+                KH_DEBUG(AssertApp(__FILE__, 292, "0", 0);)
+                KH_DEBUG(gimIndex = 2;)
+            KH_DEBUG(})
             if (!TrapTabel[gimIndex]) {
                 ((CGimmickTreasureBox*)task)->setState(4);
             }
             gimIndex++;
         }
     }
-    TRACE("\x83V\x81[\x83\x93\x82\xc9\x94z\x92u\x82\xb3\x82\xea\x82\xc4\x82\xa2\x82\xe9\x8f\xf3\x91\xd4\x95\xdb\x91\xb6\x82\xb7\x82\xe9\x83M\x83~\x83""b\x83N\x90\x94\x81""F%d\n", count);
+    KH_DEBUG(TRACE("\x83V\x81[\x83\x93\x82\xc9\x94z\x92u\x82\xb3\x82\xea\x82\xc4\x82\xa2\x82\xe9\x8f\xf3\x91\xd4\x95\xdb\x91\xb6\x82\xb7\x82\xe9\x83M\x83~\x83""b\x83N\x90\x94\x81""F%d\n", count);)
 }
 
 INT CGimmickManager::getStorageGimmickIndex(INT inUniqueID) {
@@ -328,20 +328,20 @@ BOOL CGimmickManager::AfterInit_() {
     case 13:
         CGameWork::setFlag(1, 0x27, TRUE);
         break;
-    case 23:
-        switch (CSceneInfo::getCurrentSceneNum()) {
-        case 1:
-        case 8:
-        case 9:
-        case 11:
-        case 13:
-            CGameWork::setFlag(1, 0x27, TRUE);
-            break;
-        default:
-            CGameWork::setFlag(1, 0x27, FALSE);
-            break;
-        }
-        break;
+    KH_DEBUG(case 23:)
+        KH_DEBUG(switch (CSceneInfo::getCurrentSceneNum()) {)
+        KH_DEBUG(case 1:)
+        KH_DEBUG(case 8:)
+        KH_DEBUG(case 9:)
+        KH_DEBUG(case 11:)
+        KH_DEBUG(case 13:)
+            KH_DEBUG(CGameWork::setFlag(1, 0x27, TRUE);)
+            KH_DEBUG(break;)
+        KH_DEBUG(default:)
+            KH_DEBUG(CGameWork::setFlag(1, 0x27, FALSE);)
+            KH_DEBUG(break;)
+        KH_DEBUG(})
+        KH_DEBUG(break;)
     default:
         CGameWork::setFlag(1, 0x27, FALSE);
         break;
@@ -377,7 +377,7 @@ BOOL CGimmickManager::LoadWorldResrc() {
         SHORT* p = (SHORT*)cmnGimData->getRsrcData();
         p = (SHORT*)((BYTE*)p + 6);
         if ((m_NomalCardDropProbNum = *p++) != 0) {
-            m_pNomalCardDropProbTable = new (__FILE__ "(602)")
+            m_pNomalCardDropProbTable = new KH_AT("(602)")
                 GimmickEveryCardProb[m_NomalCardDropProbNum];
             for (int i = 0; i < m_NomalCardDropProbNum; i++) {
                 m_pNomalCardDropProbTable[i].CardID = *p++;
@@ -385,7 +385,7 @@ BOOL CGimmickManager::LoadWorldResrc() {
             }
         }
         if ((m_TreasureCardDropProbNum = *p++) != 0) {
-            m_pTreasureCardDropProbTable = new (__FILE__ "(614)")
+            m_pTreasureCardDropProbTable = new KH_AT("(614)")
                 GimmickEveryCardProb[m_TreasureCardDropProbNum];
             for (int i = 0; i < m_TreasureCardDropProbNum; i++) {
                 m_pTreasureCardDropProbTable[i].CardID = *p++;
@@ -399,7 +399,7 @@ BOOL CGimmickManager::LoadWorldResrc() {
     if (cmnGimData != NULL) {
         SHORT* p = (SHORT*)cmnGimData->getRsrcData();
         m_WorldGimNum = *p++;
-        m_pGimParam = new (__FILE__ "(642)") GimParam[m_WorldGimNum];
+        m_pGimParam = new KH_AT("(642)") GimParam[m_WorldGimNum];
         for (int i = 0; i < m_WorldGimNum; i++) {
             GimParam info;
             info.GimID = *p;
@@ -457,7 +457,7 @@ BOOL CGimmickManager::LoadWorldResrcMapCard() {
     p = (SHORT*)cmnGimData->getRsrcData();
     p = (SHORT*)((BYTE*)p + 6);
     if ((m_MapCardProb.ProbNum = *p++) != 0) {
-        m_MapCardProb.pProb = new (__FILE__ "(737)")
+        m_MapCardProb.pProb = new KH_AT("(737)")
             GimmickEveryCardProb[m_MapCardProb.ProbNum];
         for (int i = 0; i < m_MapCardProb.ProbNum; i++) {
             m_MapCardProb.pProb[i].CardID = *p++;
@@ -479,8 +479,8 @@ BOOL CGimmickManager::LoadFloorPrizeDropTable() {
     BYTE* pB = cmnGimData->getRsrcData();
     m_GPrizeTableNum = *pB++;
     m_RPrizeTableNum = *pB++;
-    m_pGBallDropTable = new (__FILE__ "(783)") BallDropTable[m_GPrizeTableNum];
-    m_pRBallDropTable = new (__FILE__ "(784)") BallDropTable[m_RPrizeTableNum];
+    m_pGBallDropTable = new KH_AT("(783)") BallDropTable[m_GPrizeTableNum];
+    m_pRBallDropTable = new KH_AT("(784)") BallDropTable[m_RPrizeTableNum];
     for (int i = 0; i < m_GPrizeTableNum; i++) {
         for (int j = 0; j < 6; j++) {
             m_pGBallDropTable[i].type[j] = *pB++;
@@ -522,7 +522,7 @@ DropPrize CGimmickManager::DecideGimmickCard_PossibleCheck(INT DropProbNum, Gimm
     INT Prob = getRand() % 100;
     DropPrize ret;
     TRACE("\x83J\x81[\x83h\x92\x8a\x91I\x90\x94\x92l(\x89\xf0) 0\x81`99 = %d\n", Prob);
-    DebugWork::g_dw.gimDropProb.ProbRandomCardPossible = Prob;
+    KH_DEBUG(DebugWork::g_dw.gimDropProb.ProbRandomCardPossible = Prob;)
     ret.StockKind = 0;
     ret.Kind = CARD_KIND_None;
     ret.Num = 0;
@@ -556,20 +556,20 @@ DropPrize CGimmickManager::DecideGimmickCard_PossibleCheck(INT DropProbNum, Gimm
         }
     }
 found:
-    if (ret.Kind == CARD_KIND_None) {
-        sprintf(DebugWork::g_dw.gimDropProb.PossibleCardName, "%s", cardDataTbl[CARD_KIND_None].pName);
-    } else {
-        sprintf(DebugWork::g_dw.gimDropProb.PossibleCardName, "\x82\xcd\x82\xb8\x82\xea");
-    }
+    KH_DEBUG(if (ret.Kind == CARD_KIND_None) {)
+        KH_DEBUG(sprintf(KH_DW(DebugWork::g_dw.gimDropProb.PossibleCardName), "%s", cardDataTbl[CARD_KIND_None].pName);)
+    KH_DEBUG(} else {)
+        KH_DEBUG(sprintf(KH_DW(DebugWork::g_dw.gimDropProb.PossibleCardName), "\x82\xcd\x82\xb8\x82\xea");)
+    KH_DEBUG(})
     return ret;
 }
 
 DropPrize CGimmickManager::DecideGimmickCard_PossibleNoCheck(INT DropProbNum, GimmickEveryCardProb* pDropDataTable, SHORT* pCardProbTable) {
-    INT breakFlag = 0;
     INT Prob = getRand() % 100;
     DropPrize ret;
+    INT breakFlag = 0; // MATCH: declared after ret, as the ref lists them
     TRACE("\x83J\x81[\x83h\x92\x8a\x91I\x90\x94\x92l 0\x81`99 = %d\n", Prob);
-    DebugWork::g_dw.gimDropProb.ProbRandomCard = Prob;
+    KH_DEBUG(DebugWork::g_dw.gimDropProb.ProbRandomCard = Prob;)
     ret.StockKind = 0;
     ret.Kind = CARD_KIND_None;
     ret.Num = 0;
@@ -589,11 +589,11 @@ DropPrize CGimmickManager::DecideGimmickCard_PossibleNoCheck(INT DropProbNum, Gi
         case 28:
         case 41:
             if (Prob < pDropDataTable[i].Prob) {
+                ret.Num = 1; // MATCH: the beta's line markers: Num 932, Kind 933, No 934, StockKind 935
                 ret.Kind = (CARD_KIND)(pDropDataTable[i].CardID + 1);
-                ret.Num = 1;
                 ret.No = DecideGimmickCardNo(pCardProbTable);
-                breakFlag = 1;
                 ret.StockKind = 0;
+                breakFlag = 1;
             } else {
                 Prob -= pDropDataTable[i].Prob;
                 TRACE("\x81@-\x8am\x97\xa6(%d)\x81@ = %d\n", pDropDataTable[i].Prob, Prob);
@@ -602,7 +602,7 @@ DropPrize CGimmickManager::DecideGimmickCard_PossibleNoCheck(INT DropProbNum, Gi
         }
         if (breakFlag) break;
     }
-    sprintf(DebugWork::g_dw.gimDropProb.CardName, "%s", cardDataTbl[ret.Kind].pName);
+    KH_DEBUG(sprintf(KH_DW(DebugWork::g_dw.gimDropProb.CardName), "%s", cardDataTbl[ret.Kind].pName);)
     return ret;
 }
 
@@ -1198,7 +1198,7 @@ DropPrize CGimmickManager::DecideMapCardPrize(BOOL in_enableKeyCard) {
             ret.No = 0;
             ret.StockKind = 0;
             ret = checkAddCardMapCard(ret);
-            GimDebugTrace(&ret);
+            KH_DEBUG(GimDebugTrace(&ret);)
             return ret;
         }
     }
@@ -1214,13 +1214,13 @@ DropPrize CGimmickManager::DecideMapCardPrize(BOOL in_enableKeyCard) {
                 ret.Kind = (CARD_KIND)0xBD;
                 ret.No = 0;
                 ret.StockKind = 0;
-                GimDebugTrace(&ret);
+                KH_DEBUG(GimDebugTrace(&ret);)
                 return ret;
             }
         }
     }
     ret = DecideMapCard(m_MapCardProb.ProbNum, m_MapCardProb.pProb, m_MapCardProb.CardNumProb);
-    GimDebugTrace(&ret);
+    KH_DEBUG(GimDebugTrace(&ret);)
     return ret;
 }
 
@@ -1243,16 +1243,16 @@ INT CGimmickManager::DecidePrize(INT in_GimmickID, const FVECTOR* Pos, const FVE
     Prize.Num = 0;
     Prize.No = 0;
     param = getGimParam(in_GimmickID);
-    memset(&DebugWork::g_dw.gimDropProb, 0, sizeof(DebugWork::g_dw.gimDropProb));
-    if ((CSceneInfo::getCurrentWorldID(0) >= 14 && CSceneInfo::getCurrentWorldID(0) != 23) || param == NULL) {
-        Prize.Kind = (CARD_KIND)0xD2;
-        Prize.Num = 5;
-        createPrize(Prize, 0, Pos, Rot);
-        return 0;
-    }
+    KH_DEBUG(memset(&DebugWork::g_dw.gimDropProb, 0, sizeof(DebugWork::g_dw.gimDropProb));)
+    KH_DEBUG(if ((CSceneInfo::getCurrentWorldID(0) >= 14 && CSceneInfo::getCurrentWorldID(0) != 23) || param == NULL) {)
+        KH_DEBUG(Prize.Kind = (CARD_KIND)0xD2;)
+        KH_DEBUG(Prize.Num = 5;)
+        KH_DEBUG(createPrize(Prize, 0, Pos, Rot);)
+        KH_DEBUG(return 0;)
+    KH_DEBUG(})
     ret = DecidePrizeKind(param);
-    DebugWork::g_dw.gimDropProb.ProbCategoryKind = ret;
-    if (DebugWork::g_dw.gimPrize.Kind) ret = DebugWork::g_dw.gimPrize.Kind;
+    KH_DEBUG(DebugWork::g_dw.gimDropProb.ProbCategoryKind = ret;)
+    if (KH_DW(DebugWork::g_dw.gimPrize.Kind)) ret = KH_DW(DebugWork::g_dw.gimPrize.Kind);
     switch (ret) {
     case 0:
         TRACE("\x92\x8a\x91I\x8c\x8b\x89\xca\x81""F\x82\xcd\x82\xb8\x82\xea\n");
@@ -1273,7 +1273,7 @@ INT CGimmickManager::DecidePrize(INT in_GimmickID, const FVECTOR* Pos, const FVE
         TRACE("\x92\x8a\x91I\x8c\x8b\x89\xca\x81""F\x83J\x81[\x83h\n");
         Prize = DecideGimmickCard_PossibleCheck(m_NomalCardDropProbNum, m_pNomalCardDropProbTable, m_CardProbNum);
         if (!checkPossibleCard(Prize.Kind)) {
-            DebugWork::g_dw.gimDropProb.PossibleCheck = 1;
+            KH_DEBUG(DebugWork::g_dw.gimDropProb.PossibleCheck = 1;)
             Prize = DecideGimmickCard_PossibleNoCheck(m_NomalCardDropProbNum, m_pNomalCardDropProbTable, m_CardProbNum);
         }
         Prize = checkAddCardGimmick(Prize);
@@ -1296,13 +1296,13 @@ INT CGimmickManager::DecidePrize(INT in_GimmickID, const FVECTOR* Pos, const FVE
 INT CGimmickManager::DecidePrizeKind(const GimParam* in_pParam) {
     INT Prob = getRand() % 100;
     _GimmickRoomInfo* gim;
-    DebugWork::g_dw.gimDropProb.ProbCard = in_pParam->C_Prob;
-    DebugWork::g_dw.gimDropProb.ProbSoraGBall = in_pParam->G_Prob;
-    DebugWork::g_dw.gimDropProb.ProbSoraRBall = in_pParam->R_Prob;
-    DebugWork::g_dw.gimDropProb.ProbSoraBarel = in_pParam->B_Prob;
-    DebugWork::g_dw.gimDropProb.ProbRikuGball = in_pParam->Riku_GProb;
-    DebugWork::g_dw.gimDropProb.ProbRikuBarel = in_pParam->B_Prob;
-    DebugWork::g_dw.gimDropProb.ProbRandomCategory = Prob;
+    KH_DEBUG(DebugWork::g_dw.gimDropProb.ProbCard = in_pParam->C_Prob;)
+    KH_DEBUG(DebugWork::g_dw.gimDropProb.ProbSoraGBall = in_pParam->G_Prob;)
+    KH_DEBUG(DebugWork::g_dw.gimDropProb.ProbSoraRBall = in_pParam->R_Prob;)
+    KH_DEBUG(DebugWork::g_dw.gimDropProb.ProbSoraBarel = in_pParam->B_Prob;)
+    KH_DEBUG(DebugWork::g_dw.gimDropProb.ProbRikuGball = in_pParam->Riku_GProb;)
+    KH_DEBUG(DebugWork::g_dw.gimDropProb.ProbRikuBarel = in_pParam->B_Prob;)
+    KH_DEBUG(DebugWork::g_dw.gimDropProb.ProbRandomCategory = Prob;)
     if (CGameWork::getByte(0, 0x60) == 0) {
         if (Prob < in_pParam->C_Prob) {
             gim = CSceneInfo::getCurrentRoomGimmickInfo();
@@ -1341,7 +1341,7 @@ DropPrize CGimmickManager::DecideGPrize(INT in_DataIndex) {
         return ret;
     }
     Prob = getRand() % 100;
-    DebugWork::g_dw.gimDropProb.ProbRandomGBall = Prob;
+    KH_DEBUG(DebugWork::g_dw.gimDropProb.ProbRandomGBall = Prob;)
     for (int i = 0; i < 6; i++) {
         if (Prob < m_pGBallDropTable[in_DataIndex].prob[i]) {
             if (m_pGBallDropTable[in_DataIndex].type[i]) {
@@ -1350,8 +1350,8 @@ DropPrize CGimmickManager::DecideGPrize(INT in_DataIndex) {
                 ret.Kind = (CARD_KIND)0xD3;
             }
             ret.Num = m_pGBallDropTable[in_DataIndex].num[i];
-            DebugWork::g_dw.gimDropProb.GBallType = ret.Kind - 0xD1;
-            DebugWork::g_dw.gimDropProb.GBallNum = ret.Num;
+            KH_DEBUG(DebugWork::g_dw.gimDropProb.GBallType = ret.Kind - 0xD1;)
+            KH_DEBUG(DebugWork::g_dw.gimDropProb.GBallNum = ret.Num;)
             return ret;
         }
         Prob -= m_pGBallDropTable[in_DataIndex].prob[i];
@@ -1374,7 +1374,7 @@ DropPrize CGimmickManager::DecideRPrize(INT in_DataIndex) {
         return ret;
     }
     Prob = getRand() % 100;
-    DebugWork::g_dw.gimDropProb.ProbRandomRBall = Prob;
+    KH_DEBUG(DebugWork::g_dw.gimDropProb.ProbRandomRBall = Prob;)
     for (int i = 0; i < 6; i++) {
         if (Prob < m_pRBallDropTable[in_DataIndex].prob[i]) {
             if (m_pRBallDropTable[in_DataIndex].type[i]) {
@@ -1383,8 +1383,8 @@ DropPrize CGimmickManager::DecideRPrize(INT in_DataIndex) {
                 ret.Kind = (CARD_KIND)0xD5;
             }
             ret.Num = m_pRBallDropTable[in_DataIndex].num[i];
-            DebugWork::g_dw.gimDropProb.RBallType = ret.Kind - 0xD3;
-            DebugWork::g_dw.gimDropProb.RBallNum = ret.Num;
+            KH_DEBUG(DebugWork::g_dw.gimDropProb.RBallType = ret.Kind - 0xD3;)
+            KH_DEBUG(DebugWork::g_dw.gimDropProb.RBallNum = ret.Num;)
             return ret;
         }
         Prob -= m_pRBallDropTable[in_DataIndex].prob[i];
@@ -1412,7 +1412,7 @@ BOOL CGimmickManager::getSavePointPos(FVECTOR& outPos) {
 }
 
 void CGimmickManager::createPrize(const DropPrize& in_Prize, INT in_Style, const FVECTOR* in_pPos, const FVECTOR* in_pRot) {
-    GimDebugTrace(&in_Prize);
+    KH_DEBUG(GimDebugTrace(&in_Prize);)
     if (in_Prize.Kind == CARD_KIND_None) return;
     switch (in_Style) {
     case 0:
@@ -1616,91 +1616,92 @@ void CGimmickManager::changeTreasureBoxLock(BOOL in_Enable) {
     }
 }
 
-void CGimmickManager::GimDebugTrace(const DropPrize* prize) {
-    if (prize->StockKind == 0) {
-        TRACE("[GimPrize_PARAM] Kind:%d, No:%d, Num:%d\n", prize->Kind, prize->No, prize->Num);
-        if (prize->Kind != CARD_KIND_None) {
-            TRACE("[GimPrize_NAME] %s  \x83J\x81[\x83hNo:%d  \x8c\xc2\x90\x94:%d\n", cardDataTbl[prize->Kind].pName, prize->No, prize->Num);
-        } else {
-            TRACE("[GimPrize_NAME]\x82\xcd\x82\xb8\x82\xea\n");
-        }
-    } else {
-        TRACE("[GimPrize_NAME]\x83X\x83g\x83""b\x83N\x8bZ\x8fK\x93\xbe\x81""F%d\n", prize->StockKind);
-    }
-}
+KH_DEBUG(void CGimmickManager::GimDebugTrace(const DropPrize* prize) {)
+    KH_DEBUG(if (prize->StockKind == 0) {)
+        KH_DEBUG(TRACE("[GimPrize_PARAM] Kind:%d, No:%d, Num:%d\n", prize->Kind, prize->No, prize->Num);)
+        KH_DEBUG(if (prize->Kind != CARD_KIND_None) {)
+            KH_DEBUG(TRACE("[GimPrize_NAME] %s  \x83J\x81[\x83hNo:%d  \x8c\xc2\x90\x94:%d\n", cardDataTbl[prize->Kind].pName, prize->No, prize->Num);)
+        KH_DEBUG(} else {)
+            KH_DEBUG(TRACE("[GimPrize_NAME]\x82\xcd\x82\xb8\x82\xea\n");)
+        KH_DEBUG(})
+    KH_DEBUG(} else {)
+        KH_DEBUG(TRACE("[GimPrize_NAME]\x83X\x83g\x83""b\x83N\x8bZ\x8fK\x93\xbe\x81""F%d\n", prize->StockKind);)
+    KH_DEBUG(})
+KH_DEBUG(})
 
-static char* szdebugGimProbKind[5] = {
-    "\x82\xcd\x82\xb8\x82\xea",
-    "\x82\xdd\x82\xc7\x82\xe8\x8b\xca",
-    "\x82\xa0\x82\xa9\x8b\xca",
-    "\x83J\x81[\x83h",
-    "\x83o\x83\x8c\x83\x8b",
-};
+KH_DEBUG(static char* szdebugGimProbKind[5] = {)
+    KH_DEBUG("\x82\xcd\x82\xb8\x82\xea",)
+    KH_DEBUG("\x82\xdd\x82\xc7\x82\xe8\x8b\xca",)
+    KH_DEBUG("\x82\xa0\x82\xa9\x8b\xca",)
+    KH_DEBUG("\x83J\x81[\x83h",)
+    KH_DEBUG("\x83o\x83\x8c\x83\x8b",)
+KH_DEBUG(};)
 
-static char* szdebugGimBallKind[3] = {
-    "-----",
-    "\x8f\xac\x82\xb3\x82\xa2",
-    "\x91\xe5\x82\xab\x82\xa2",
-};
+KH_DEBUG(static char* szdebugGimBallKind[3] = {)
+    KH_DEBUG("-----",)
+    KH_DEBUG("\x8f\xac\x82\xb3\x82\xa2",)
+    KH_DEBUG("\x91\xe5\x82\xab\x82\xa2",)
+KH_DEBUG(};)
 
-static char* szdebugGimCardPossible[2] = {
-    "\x82n\x82j",
-    "\x82m\x82""f",
-};
+KH_DEBUG(static char* szdebugGimCardPossible[2] = {)
+    KH_DEBUG("\x82n\x82j",)
+    KH_DEBUG("\x82m\x82""f",)
+KH_DEBUG(};)
 
-static LPCSTR szdebugGimPossibleCardName = NULL;
-static LPCSTR szdebugGimCardName = NULL;
+KH_DEBUG(static LPCSTR szdebugGimPossibleCardName = NULL;)
+KH_DEBUG(static LPCSTR szdebugGimCardName = NULL;)
 
 #define GDP DebugWork::g_dw.gimDropProb
 
-static DEBUG_WINDOW_LINE debugGimProbLine[25] = {
-    {"\xf9S--\xf9V\x83J\x83""e\x83S\x83\x8a\xf9S--", &CDebugWindow::none, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
-    {"\x83\\\x83\x89\x81""F\x83J\x81[\x83h\x81@:%d", &GDP.ProbCard, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
-    {"\x81@\x81@\x81""F\x97\xce\x8b\xca\x81@\x81@:%d", &GDP.ProbSoraGBall, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
-    {"\x81@\x81@\x81""F\x90\xd4\x8b\xca\x81@\x81@:%d", &GDP.ProbSoraRBall, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
-    {"\x81@\x81@\x81""F\x83o\x83\x8c\x83\x8b\x81@:%d", &GDP.ProbSoraBarel, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
-    {"\x83\x8a\x83N\x81""F\x97\xce\x8b\xca\x81@\x81@:%d", &GDP.ProbRikuGball, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
-    {"\x81@\x81@\x81""F\x83o\x83\x8c\x83\x8b\x81@:%d", &GDP.ProbRikuBarel, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
-    {"\x83\x89\x83\x93\x83_\x83\x80\x92l    :%d", &GDP.ProbRandomCategory, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
-    {"\x83J\x83""e\x83S\x83\x8a\x82\xaf\x82\xc1\x82\xa9:%s", &GDP.ProbCategoryKind, 1, {0}, 2, 0.0f, 0.0f, 0.0f, (LPCSTR*)&szdebugGimProbKind[GDP.ProbCategoryKind], 0, NULL, NULL},
-    {"\xf9S--\xf9V\x97\xce\x8b\xca\xf9S--", &CDebugWindow::none, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
-    {"\x83\x89\x83\x93\x83_\x83\x80\x92l    :%d", &GDP.ProbRandomGBall, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
-    {"\x97\xce\x8b\xca:TYPE     :%s", &GDP.GBallType, 1, {0}, 2, 0.0f, 0.0f, 0.0f, (LPCSTR*)&szdebugGimBallKind[GDP.GBallType], 0, NULL, NULL},
-    {"\x97\xce\x8b\xca:\x90\x94       :%d", &GDP.GBallNum, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
-    {"\xf9S--\xf9V\x97\xce\x8b\xca\xf9S--", &CDebugWindow::none, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
-    {"\x83\x89\x83\x93\x83_\x83\x80\x92l    :%d", &GDP.ProbRandomRBall, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
-    {"\x90\xd4\x8b\xca:TYPE     :%s", &GDP.RBallType, 1, {0}, 2, 0.0f, 0.0f, 0.0f, (LPCSTR*)&szdebugGimBallKind[GDP.RBallType], 0, NULL, NULL},
-    {"\x90\xd4\x8b\xca:\x90\x94       :%d", &GDP.RBallNum, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
-    {"\xf9S--\xf9V\x83J\x81[\x83h\x81""F\x89\xf0\x8b\xd6\x97L\x82\xe8\xf9S--", &CDebugWindow::none, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
-    {"\x83\x89\x83\x93\x83_\x83\x80\x92l    :%d", &GDP.ProbRandomCardPossible, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
-    {"\x83J\x81[\x83h        :%s", &CDebugWindow::none, 1, {0}, 2, 0.0f, 0.0f, 0.0f, &szdebugGimPossibleCardName, 0, NULL, NULL},
-    {"\x8fo\x82\xc4\x82\xe0\x82\xa2\x82\xa2\x81H  :%s", &GDP.PossibleCheck, 1, {0}, 2, 0.0f, 0.0f, 0.0f, (LPCSTR*)&szdebugGimCardPossible[GDP.PossibleCheck], 0, NULL, NULL},
-    {"\xf9S--\xf9V\x83J\x81[\x83h\x81""F\x89\xf0\x8b\xd6\x96\xb3\x82\xb5\xf9S--", &CDebugWindow::none, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
-    {"\x83\x89\x83\x93\x83_\x83\x80\x92l   :%d", &GDP.ProbRandomCard, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
-    {"\x83J\x81[\x83h       :%s", &CDebugWindow::none, 1, {0}, 2, 0.0f, 0.0f, 0.0f, &szdebugGimCardName, 0, NULL, NULL},
-    {NULL, NULL, 0, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
-};
+KH_DEBUG(static DEBUG_WINDOW_LINE debugGimProbLine[25] = {)
+    KH_DEBUG({"\xf9S--\xf9V\x83J\x83""e\x83S\x83\x8a\xf9S--", &CDebugWindow::none, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},)
+    KH_DEBUG({"\x83\\\x83\x89\x81""F\x83J\x81[\x83h\x81@:%d", &GDP.ProbCard, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},)
+    KH_DEBUG({"\x81@\x81@\x81""F\x97\xce\x8b\xca\x81@\x81@:%d", &GDP.ProbSoraGBall, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},)
+    KH_DEBUG({"\x81@\x81@\x81""F\x90\xd4\x8b\xca\x81@\x81@:%d", &GDP.ProbSoraRBall, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},)
+    KH_DEBUG({"\x81@\x81@\x81""F\x83o\x83\x8c\x83\x8b\x81@:%d", &GDP.ProbSoraBarel, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},)
+    KH_DEBUG({"\x83\x8a\x83N\x81""F\x97\xce\x8b\xca\x81@\x81@:%d", &GDP.ProbRikuGball, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},)
+    KH_DEBUG({"\x81@\x81@\x81""F\x83o\x83\x8c\x83\x8b\x81@:%d", &GDP.ProbRikuBarel, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},)
+    KH_DEBUG({"\x83\x89\x83\x93\x83_\x83\x80\x92l    :%d", &GDP.ProbRandomCategory, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},)
+    KH_DEBUG({"\x83J\x83""e\x83S\x83\x8a\x82\xaf\x82\xc1\x82\xa9:%s", &GDP.ProbCategoryKind, 1, {0}, 2, 0.0f, 0.0f, 0.0f, (LPCSTR*)&szdebugGimProbKind[GDP.ProbCategoryKind], 0, NULL, NULL},)
+    KH_DEBUG({"\xf9S--\xf9V\x97\xce\x8b\xca\xf9S--", &CDebugWindow::none, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},)
+    KH_DEBUG({"\x83\x89\x83\x93\x83_\x83\x80\x92l    :%d", &GDP.ProbRandomGBall, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},)
+    KH_DEBUG({"\x97\xce\x8b\xca:TYPE     :%s", &GDP.GBallType, 1, {0}, 2, 0.0f, 0.0f, 0.0f, (LPCSTR*)&szdebugGimBallKind[GDP.GBallType], 0, NULL, NULL},)
+    KH_DEBUG({"\x97\xce\x8b\xca:\x90\x94       :%d", &GDP.GBallNum, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},)
+    KH_DEBUG({"\xf9S--\xf9V\x97\xce\x8b\xca\xf9S--", &CDebugWindow::none, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},)
+    KH_DEBUG({"\x83\x89\x83\x93\x83_\x83\x80\x92l    :%d", &GDP.ProbRandomRBall, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},)
+    KH_DEBUG({"\x90\xd4\x8b\xca:TYPE     :%s", &GDP.RBallType, 1, {0}, 2, 0.0f, 0.0f, 0.0f, (LPCSTR*)&szdebugGimBallKind[GDP.RBallType], 0, NULL, NULL},)
+    KH_DEBUG({"\x90\xd4\x8b\xca:\x90\x94       :%d", &GDP.RBallNum, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},)
+    KH_DEBUG({"\xf9S--\xf9V\x83J\x81[\x83h\x81""F\x89\xf0\x8b\xd6\x97L\x82\xe8\xf9S--", &CDebugWindow::none, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},)
+    KH_DEBUG({"\x83\x89\x83\x93\x83_\x83\x80\x92l    :%d", &GDP.ProbRandomCardPossible, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},)
+    KH_DEBUG({"\x83J\x81[\x83h        :%s", &CDebugWindow::none, 1, {0}, 2, 0.0f, 0.0f, 0.0f, &szdebugGimPossibleCardName, 0, NULL, NULL},)
+    KH_DEBUG({"\x8fo\x82\xc4\x82\xe0\x82\xa2\x82\xa2\x81H  :%s", &GDP.PossibleCheck, 1, {0}, 2, 0.0f, 0.0f, 0.0f, (LPCSTR*)&szdebugGimCardPossible[GDP.PossibleCheck], 0, NULL, NULL},)
+    KH_DEBUG({"\xf9S--\xf9V\x83J\x81[\x83h\x81""F\x89\xf0\x8b\xd6\x96\xb3\x82\xb5\xf9S--", &CDebugWindow::none, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},)
+    KH_DEBUG({"\x83\x89\x83\x93\x83_\x83\x80\x92l   :%d", &GDP.ProbRandomCard, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},)
+    KH_DEBUG({"\x83J\x81[\x83h       :%s", &CDebugWindow::none, 1, {0}, 2, 0.0f, 0.0f, 0.0f, &szdebugGimCardName, 0, NULL, NULL},)
+    KH_DEBUG({NULL, NULL, 0, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},)
+KH_DEBUG(};)
 
 #undef GDP
 
-CGimmickProbDebug::CGimmickProbDebug(CTask* pParent) : CTask(pParent, 0x8000) {
-    m_pWindow = NULL;
-    DEBUG_WINDOW_TBL debugGimProbInfo = {"\x83M\x83~\x83""b\x83N\x82\xbf\x82\xe3\x82\xa4\x82\xb9\x82\xf1", 0x68, -(SCREEN_HEIGHT >> 1) + 0x28, 13, 24, 12, 0, 6, debugGimProbLine, NULL, NULL};
-    m_pWindow = new (__FILE__ "(2870)") CDebugWindow(this, debugGimProbInfo);
-    m_pWindow->dispOn(0);
-    szdebugGimPossibleCardName = DebugWork::g_dw.gimDropProb.PossibleCardName;
-    szdebugGimCardName = DebugWork::g_dw.gimDropProb.CardName;
-}
+KH_DEBUG(CGimmickProbDebug::CGimmickProbDebug(CTask* pParent) : CTask(pParent, 0x8000) {)
+    KH_DEBUG(m_pWindow = NULL;)
+    KH_DEBUG(DEBUG_WINDOW_TBL debugGimProbInfo = {"\x83M\x83~\x83""b\x83N\x82\xbf\x82\xe3\x82\xa4\x82\xb9\x82\xf1", 0x68, -(SCREEN_HEIGHT >> 1) + 0x28, 13, 24, 12, 0, 6, debugGimProbLine, NULL, NULL};)
+    KH_DEBUG(m_pWindow = new KH_AT("(2870)") CDebugWindow(this, debugGimProbInfo);)
+    KH_DEBUG(m_pWindow->dispOn(0);)
+    KH_DEBUG(szdebugGimPossibleCardName = KH_DW(DebugWork::g_dw.gimDropProb.PossibleCardName);)
+    KH_DEBUG(szdebugGimCardName = KH_DW(DebugWork::g_dw.gimDropProb.CardName);)
+KH_DEBUG(})
 
-CGimmickProbDebug::~CGimmickProbDebug() {
-    if (m_pWindow) m_pWindow->out();
-}
+KH_DEBUG(CGimmickProbDebug::~CGimmickProbDebug() {)
+    KH_DEBUG(if (m_pWindow) m_pWindow->out();)
+KH_DEBUG(})
 
-void CGimmickProbDebug::main() {
-    if (!DebugWork::g_dw.gimPrize.iDisp) {
-        DebugWork::g_dw.gimPrize.pClass = NULL;
-        delete this;
-    }
-}
+KH_DEBUG(void CGimmickProbDebug::main() {)
+    KH_DEBUG(if (!KH_DW(DebugWork::g_dw.gimPrize.iDisp)) {)
+        KH_DEBUG(DebugWork::g_dw.gimPrize.pClass = NULL;)
+        KH_DEBUG(delete this;)
+    KH_DEBUG(})
+KH_DEBUG(})
 
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .rodata

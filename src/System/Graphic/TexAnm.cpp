@@ -116,8 +116,8 @@ void CTexAnm::setup(const TEXANM_DATA& inData, INT nAnmGroupNum) {
                   m_pData->szDstTexName);
             m_pData = NULL;
         } else {
-            m_pClut = new (__FILE__ "(96)") u_long128[m_nClutQSize * 16];
-            if (!m_pClut) AssertApp(__FILE__, __LINE__, "m_pClut", 0);
+            m_pClut = new KH_AT("(96)") u_long128[m_nClutQSize * 16];
+            KH_DEBUG(if (!m_pClut) AssertApp(__FILE__, __LINE__, "m_pClut", 0);)
         }
     }
     setSeq(getDefaultName());
@@ -262,10 +262,10 @@ void CTexAnm::sendTexture(USHORT nTBP, const VTransInfo& Tinfo, USHORT nCBP, con
     INT nLineSize = (pData->DstW >> 1) << psmDhift[Tinfo._nFormat & 7];
     INT nSize = nLineSize * pData->DstH;
 #line 334
-    if (!(!(nSize & 0x0f))) AssertApp(__FILE__, __LINE__, "!(nSize&0x0f)", 0);
+    KH_DEBUG(if (!(!(nSize & 0x0f))) AssertApp(__FILE__, __LINE__, "!(nSize&0x0f)", 0);)
     u_long128* pImage = (u_long128*)pData2.pDataTex;
 #line 339
-    if (!(!((u_int)pImage & 0x0f))) AssertApp(__FILE__, __LINE__, "!((u_int)pImage&0x0f)", 0);
+    KH_DEBUG(if (!(!((u_int)pImage & 0x0f))) AssertApp(__FILE__, __LINE__, "!((u_int)pImage&0x0f)", 0);)
     CPackMan::pkRefLoadImage(nTBP, Tinfo._nFormat, Tinfo._nDistBufW, (unsigned long long*)pImage, nSize >> 4, pData->DstX,
                              pData->DstY, pData->DstW, pData->DstH);
 }
@@ -294,10 +294,10 @@ void CModelTexAnm::setup(CTexAnm* pATbl, INT nANum, TexInfoStub* pTTbl, INT nTNu
     _dispose();
     m_nTexAnmNum = getTexAnmCount(pATbl, nANum, pTTbl, nTNum);
     if (m_nTexAnmNum <= 0) return;
-    m_pTexAnm = new (__FILE__ "(400)") CTexAnm*[m_nTexAnmNum];
-    if (!m_pTexAnm) AssertApp(__FILE__, __LINE__, "m_pTexAnm", 0);
-    m_pID = new (__FILE__ "(402)") UBYTE[m_nTexAnmNum];
-    if (!m_pID) AssertApp(__FILE__, __LINE__, "m_pID", 0);
+    m_pTexAnm = new KH_AT("(400)") CTexAnm*[m_nTexAnmNum];
+    KH_DEBUG(if (!m_pTexAnm) AssertApp(__FILE__, __LINE__, "m_pTexAnm", 0);)
+    m_pID = new KH_AT("(402)") UBYTE[m_nTexAnmNum];
+    KH_DEBUG(if (!m_pID) AssertApp(__FILE__, __LINE__, "m_pID", 0);)
     nCount = 0;
     for (INT i = 0; i < nTNum; i++) {
         TexInfoStub& info = pTTbl[i];
@@ -305,7 +305,7 @@ void CModelTexAnm::setup(CTexAnm* pATbl, INT nANum, TexInfoStub* pTTbl, INT nTNu
             CHAR* pDstTex = pATbl[j].getDstTexName();
             if (pDstTex && !strcasecmp(info._pTexInfo->getName(), pDstTex)) {
 #line 413
-                if (!(!(nCount >= m_nTexAnmNum))) AssertApp(__FILE__, __LINE__, "!(nCount >= m_nTexAnmNum)", 0);
+                KH_DEBUG(if (!(!(nCount >= m_nTexAnmNum))) AssertApp(__FILE__, __LINE__, "!(nCount >= m_nTexAnmNum)", 0);)
                 m_pTexAnm[nCount] = &pATbl[j];
                 m_pID[nCount] = i;
                 nCount++;
@@ -313,7 +313,7 @@ void CModelTexAnm::setup(CTexAnm* pATbl, INT nANum, TexInfoStub* pTTbl, INT nTNu
         }
     }
 #line 421
-    if (!(!(nCount != m_nTexAnmNum))) AssertApp(__FILE__, __LINE__, "!(nCount != m_nTexAnmNum)", 0);
+    KH_DEBUG(if (!(!(nCount != m_nTexAnmNum))) AssertApp(__FILE__, __LINE__, "!(nCount != m_nTexAnmNum)", 0);)
 }
 
 BOOL CModelTexAnm::check(INT nID) {
@@ -381,9 +381,9 @@ void TEXANM_DATA::mapping() {
 
 #line 529
 void TEXANM_DATA::check() const {
-    if (!this) AssertApp(__FILE__, __LINE__, "this", 0);
-    if (!(!(this->sHead.id != (0x00415854)))) AssertApp(__FILE__, __LINE__, "! (this->sHead.id != (0x00415854))", 0);
-    if (!(!(this->sHead.nNum <= 0))) AssertApp(__FILE__, __LINE__, "! (this->sHead.nNum <= 0)", 0);
+    KH_DEBUG(if (!this) AssertApp(__FILE__, __LINE__, "this", 0);)
+    KH_DEBUG(if (!(!(this->sHead.id != (0x00415854)))) AssertApp(__FILE__, __LINE__, "! (this->sHead.id != (0x00415854))", 0);)
+    KH_DEBUG(if (!(!(this->sHead.nNum <= 0))) AssertApp(__FILE__, __LINE__, "! (this->sHead.nNum <= 0)", 0);)
 }
 
 int TEXANM_DATA::getDataNum() const {
@@ -400,3 +400,4 @@ int TEXANM_DATA::getSeqNum(int nDataNum) const {
 }
 
 // SOURCE DATA: .rodata
+// SOURCE DATA SLUS_217.99_retail: .rodata

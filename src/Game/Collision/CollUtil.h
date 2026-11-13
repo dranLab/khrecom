@@ -15,11 +15,11 @@
 #endif
 #line 1 COLLUTIL_H_PATH
 inline void _collUtilCheckInstance(void* inInstance) {
-    if (!(__null == inInstance)) AssertApp(__FILE__, __LINE__, "__null == m_pInstance", 0);
+    KH_DEBUG(if (!(__null == inInstance)) AssertApp(__FILE__, __LINE__, "__null == m_pInstance", 0);)
 }
 inline void* _collUtilCreate() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
     void* p = com_malloc_d(4, __FILE__ "(185)", (UINT)-1);
-    if (!p) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
+    KH_DEBUG(if (!p) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);)
     return p;
 }
 
@@ -31,7 +31,7 @@ inline void* _collUtilCreate() { /* MATCH: placeholder: an inline function's str
 #line 192
 inline CCollUtil& CCollUtil::instance() {
     CCollUtil*& p = m_pInstance;
-    if (!p) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
+    KH_DEBUG(if (!p) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);)
     return *p;
 }
 

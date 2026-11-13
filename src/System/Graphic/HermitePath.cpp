@@ -15,7 +15,7 @@ void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT r);
 void Normalize(FVECTOR& v0, const FVECTOR& v1);
 
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 
 
@@ -91,8 +91,8 @@ BOOL CHermitePath::_allocateMem(INT inNum) {
     }
     if (bAlloc) {
         _deleteMem();
-        m_pPathData = new (__FILE__ "(126)") UNIT_DATA[inNum];
-        m_pRollData = new (__FILE__ "(127)") FLOAT[inNum];
+        m_pPathData = new KH_AT("(126)") UNIT_DATA[inNum];
+        m_pRollData = new KH_AT("(127)") FLOAT[inNum];
 #line 128
         ASSERT((m_pPathData)&&(m_pRollData));
         m_iBufSize = inNum;

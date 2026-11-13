@@ -35,19 +35,19 @@ C2DBaseList* C2DMan::m_p2DBaseList = NULL;
 C2DOSLCManager* C2DMan::m_p2DOSLCManager = NULL;
 TIMEQ C2DMan::m_qTimeD;
 INT C2DMan::m_nLayer;
-INT C2DMan::m_fg2DViewer;
+KH_DEBUG(INT C2DMan::m_fg2DViewer;)
 C2DMan::D2MAN_LEVEL C2DMan::m_nLevel;
 C2DMan::D2MAN_LEVEL C2DMan::m_nLevelReq;
 
 C2DMan::C2DMan(CTask* p) : CTaskSecondary(p) {
 #line 49
-    m_p2DBaseList = new (__FILE__ "(49)") C2DBaseList;
-    _ref(m_p2DOSLCManager) = new (__FILE__ "(50)") C2DOSLCManager;
+    m_p2DBaseList = new KH_AT("(49)") C2DBaseList;
+    _ref(m_p2DOSLCManager) = new KH_AT("(50)") C2DOSLCManager;
     m_p2DOSLCManager->createContainer();
     m_nLayer = 11;
     m_nLevel = D2MAN_LEVEL0;
     m_nLevelReq = D2MAN_LEVEL0;
-    m_fg2DViewer = 0;
+    KH_DEBUG(m_fg2DViewer = 0;)
     C2DSpr::initializeList();
     C2DBase::initialize();
     C2DLayObj::m_uiID = 0;
@@ -83,7 +83,7 @@ void C2DMan::resetTexInfo() {}
 
 HANDLE C2DMan::init(void* inFile, const CHAR* pBaseName) {
     C2DBase* p2DBase;
-    char chrTmp[8];
+    KH_DEBUG(char chrTmp[8];)
 
     if (!m_pInstance) {
         TRACE("C2DMan: C2DMan\x96\xa2\x8b\x4e\x93\xae\n");
@@ -93,15 +93,15 @@ HANDLE C2DMan::init(void* inFile, const CHAR* pBaseName) {
     switch (*(UINT*)inFile) {
     case 0x44525053:
 #line 171
-        p2DBase = new (__FILE__ "(171)") C2DSpr;
+        p2DBase = new KH_AT("(171)") C2DSpr;
         break;
     case 0x44514553:
 #line 174
-        p2DBase = new (__FILE__ "(174)") C2DSeq;
+        p2DBase = new KH_AT("(174)") C2DSeq;
         break;
     case 0x4459414C:
 #line 177
-        p2DBase = new (__FILE__ "(177)") C2DLay;
+        p2DBase = new KH_AT("(177)") C2DLay;
         break;
     }
     if (!p2DBase) {
@@ -114,10 +114,10 @@ HANDLE C2DMan::init(void* inFile, const CHAR* pBaseName) {
         return 0;
     }
     m_p2DBaseList->pushBack(*p2DBase);
-    *(UINT*)chrTmp = *(UINT*)inFile;
-    chrTmp[4] = 0;
-    TRACE_COL((TtyColor)0x21, "C2DMan: %s,%s\x82\xf0\x93\x6f\x98\x5e %d\n", pBaseName, chrTmp,
-              m_p2DBaseList->getListSize());
+    KH_DEBUG(*(UINT*)chrTmp = *(UINT*)inFile;)
+    KH_DEBUG(chrTmp[4] = 0;)
+    KH_DEBUG(TRACE_COL((TtyColor)0x21, "C2DMan: %s,%s\x82\xf0\x93\x6f\x98\x5e %d\n", pBaseName, chrTmp,
+              m_p2DBaseList->getListSize());)
     return p2DBase->getBaseHandle();
 }
 
@@ -284,7 +284,7 @@ void C2DMan::main() {
 }
 
 void C2DMan::disp() {
-    if (m_pInstance && DebugWork::g_dw.sys.m_iFukidasiDisp) C2DSpr::_disp(m_nLevel);
+    if (m_pInstance && KH_DW_ON(DebugWork::g_dw.sys.m_iFukidasiDisp)) C2DSpr::_disp(m_nLevel);
 }
 
 BOOL C2DMan::isEnd(HANDLE handle) {
@@ -396,3 +396,4 @@ void C2DMan::report() {}
 
 }  // namespace D2
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data

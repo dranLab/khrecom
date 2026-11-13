@@ -33,7 +33,7 @@ inline void _emptyStringPlaceholder0() {
 #include <math.h>
 #include "include_asm.h"
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 
 
@@ -91,7 +91,7 @@ extern CPlayer* g_pPlayer;
 
 /* CBaseGimmick::setParam (Game/Gimmick/BaseGimmick.h): m_iParam at 0x1d4 */
 static inline void _setGimmickParam(CEntity* inEntity, INT inParam) {
-    *(INT*)((UBYTE*)inEntity + 0x1d4) = inParam;
+    *(INT*)((UBYTE*)inEntity + KH_VER(0x1d4, 0x1b4)) = inParam;
 }
 
 INT CBattleEnemyManager::m_iBeforeFormation = -1;
@@ -114,11 +114,12 @@ CBattleEnemyManager::CBattleEnemyManager(CTask* inParent) : CTask(inParent, 0x40
     CGameWork::setFlag(1, 2, FALSE);
     if (CMonstroEventBattle::isMonstroEventBattleScene()) {
 #line 76
-        CMonstroEventBattle* event = new (__FILE__ "(76)") CMonstroEventBattle(this);
+        CMonstroEventBattle* event = new KH_AT("(76)") CMonstroEventBattle(this);
         ASSERT(event);
         event->setup();
         m_hMonstroEventBattle = event->getHandle();
         setAppearPremiumPrize(TRUE);
+        setAppearRoulettePrize(FALSE); // MATCH: in each arm (the beta's markers: 81 and 194)
         m_iStep = 8;
     } else {
         m_iNextGroupNum = 1;
@@ -156,9 +157,9 @@ CBattleEnemyManager::CBattleEnemyManager(CTask* inParent) : CTask(inParent, 0x40
             }
         }
         setAppearPremiumPrize(FALSE);
+        setAppearRoulettePrize(FALSE);
         m_iStep = 1;
     }
-    setAppearRoulettePrize(FALSE);
     TRACE("---- Constructor CBattleEnemyManager\n");
 }
 
@@ -181,11 +182,11 @@ void CBattleEnemyManager::main() {
             if (isRoulettePrizeGet()) {
                 m_iStep = 4;
             } else {
-                if (m_bCreateCard) {
-                    m_tqTimer = 15000;
+                if (KH_RELEASE(!)m_bCreateCard) { /* retail: the arms swapped (the beta's order gives retail's branch reversed) */
+                    m_tqTimer = KH_VER(15000, 6000);
                     m_iStep = 2;
                 } else {
-                    m_tqTimer = 6000;
+                    m_tqTimer = KH_VER(6000, 15000);
                     m_iStep = 2;
                 }
             }
@@ -225,11 +226,11 @@ void CBattleEnemyManager::main() {
             endBattle_(1);
             if (isPremiumPrizeGet()) {
 #line 312
-                new (__FILE__ "(312)") CRoulette(this, 0);
+                new KH_AT("(312)") CRoulette(this, 0);
                 m_iStep = 5;
             } else if (isRoulettePrizeGet()) {
 #line 318
-                new (__FILE__ "(318)") CRoulette(this, 1);
+                new KH_AT("(318)") CRoulette(this, 1);
                 m_iStep = 6;
             } else {
                 exitBattle_();
@@ -241,7 +242,7 @@ void CBattleEnemyManager::main() {
         if (!CTaskMan::getSysTask(0x22)) {
             if (isRoulettePrizeGet()) {
 #line 336
-                new (__FILE__ "(336)") CRoulette(this, 1);
+                new KH_AT("(336)") CRoulette(this, 1);
                 m_iStep = 6;
             } else {
                 exitBattle_();
@@ -387,7 +388,7 @@ void CBattleEnemyManager::notifyDead(HANDLE inHandle) {
             if (!event && (((CEntity*)task)->getFlag() & 0x40000)) {
                 if (--m_iTotalEnemyNum <= 0) CPlayer::notifyExterminate();
             }
-            return;
+            break;
         }
     }
 }
@@ -455,7 +456,7 @@ CEntity* CBattleEnemyManager::createPremiumPrize(const FVECTOR& inPos, INT inEne
     if ((USHORT)(CSceneInfo::getCurrentSceneNum() - 1050) < 149) return NULL;
     if (isAppearPremiumPrize()) return NULL;
     if (CCard::isCurrentDeckPremiumFull()) return NULL;
-    if (!(DebugWork::g_dw.enemy.uiFlag & 0x80)) {
+    if (!(KH_DW(DebugWork::g_dw.enemy.uiFlag) & 0x80)) {
         RoomInfo* room = CSceneInfo::getRoomInfo(-1);
         if (!room) return NULL;
         switch (room->getCardID()) {
@@ -488,7 +489,7 @@ CEntity* CBattleEnemyManager::createRoulettePrize(const FVECTOR& inPos) {
     if (isAppearRoulettePrize()) return NULL;
     if (CCard::isMapCardFull()) return NULL;
     if (!CCard::getMapTotal()) return NULL;
-    if (!(DebugWork::g_dw.enemy.uiFlag & 0x100)) {
+    if (!(KH_DW(DebugWork::g_dw.enemy.uiFlag) & 0x100)) {
         RoomInfo* room = CSceneInfo::getRoomInfo(-1);
         if (!room) return NULL;
         if (room->getCardID() != 0xab) return NULL;
@@ -637,8 +638,8 @@ OBJ_FORMATION* CBattleEnemyManager::getFormation_() {
     int select[16];
     INT index;
     INT n;
-    if (DebugWork::g_dw.enemy.uiFlag & 4) {
-        start = end = DebugWork::g_dw.enemy.sFormation;
+    if (KH_DW(DebugWork::g_dw.enemy.uiFlag) & 4) {
+        start = end = KH_DW(DebugWork::g_dw.enemy.sFormation);
     } else {
         _MapEnemyRoomInfo* info = CSceneInfo::getCurrentRoomMapEnemyInfo();
         if (CSceneInfo::getCurrentWorldID(TRUE) == 9) {
@@ -775,3 +776,4 @@ void CBattleEnemyManager::exitBattle_() {
 }
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

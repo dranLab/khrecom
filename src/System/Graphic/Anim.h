@@ -19,7 +19,7 @@
 #line 1 ANIM_H_PATH
 #ifdef ANIM_H_GETFLAG_DECL_ONLY // MATCH: these units' originals call CAnim::getFlag out of line (Entity, EffectMotion, SEMotion, GimmickLotusLeaf)
 inline void _animCheckFlagIdx(UINT idx) {
-    if (!(2 > idx)) AssertApp(__FILE__, __LINE__, "2 > idx", 0);
+    KH_DEBUG(if (!(2 > idx)) AssertApp(__FILE__, __LINE__, "2 > idx", 0);)
 }
 #endif
 typedef ULONG ANIMID;
@@ -168,7 +168,7 @@ public:
 #else
     ULONG getFlag(UINT idx) const {
 #line 296
-        if (!(2 > idx)) AssertApp(__FILE__, __LINE__, "2 > idx", 0);
+        KH_DEBUG(if (!(2 > idx)) AssertApp(__FILE__, __LINE__, "2 > idx", 0);)
         return m_Flags[idx];
     }
 #endif

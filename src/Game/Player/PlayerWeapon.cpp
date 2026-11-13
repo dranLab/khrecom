@@ -69,13 +69,13 @@ CPlayerWeapon::CPlayerWeapon(CTask* inParent, INT inID, INT inBone)
     case 6:
         m_uiFlag = 4;
         addCoord(1, &m_pPlayer->Crd(m_iBoneID));
-        m_pMove = new (__FILE__ "(100)") CMovement(this);
+        m_pMove = new KH_AT("(100)") CMovement(this);
         m_nHitEffWall = 19;
         break;
     default:
         m_uiFlag |= 4;
         addCoord(1, &m_pPlayer->Crd(m_iBoneID));
-        m_pMove = new (__FILE__ "(106)") CMovement(this);
+        m_pMove = new KH_AT("(106)") CMovement(this);
         m_nHitEffWall = 0;
         break;
     }
@@ -465,3 +465,4 @@ void CPlayerWeapon::setDoubleHit(INT inFlag, const FVECTOR* inPos) {
 
 } // namespace PlayerWeapon
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .data .rodata

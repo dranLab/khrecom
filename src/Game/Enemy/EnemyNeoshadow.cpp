@@ -24,7 +24,7 @@ inline void _enemyNeoshadowEmptyString() {
 #include <math.h>
 extern "C" int rand();
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 extern CEntity* g_pPlayer; /* a CPlayer (Game/Player/Player.h) */
 FVECTOR getPlayerPos(BOOL flag);
@@ -295,3 +295,4 @@ void CEnemyNeoshadow::endStateAttack2() {
 }
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

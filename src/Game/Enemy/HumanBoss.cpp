@@ -46,14 +46,14 @@ inline void _humanBossEmptyString() {
 
 
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 void AddVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 
 extern CEntity* g_pPlayer; /* a CPlayer (Game/Player/Player.h) */
 /* CPlayer's HP: m_iHp (0x320), m_iHpMax (0x324) */
-static inline INT _playerHp(CEntity* p) { return *(INT*)((UBYTE*)p + 0x320); }
-static inline INT _playerHpMax(CEntity* p) { return *(INT*)((UBYTE*)p + 0x324); }
+static inline INT _playerHp(CEntity* p) { return *(INT*)((UBYTE*)p + KH_VER(0x320, 0x300)); }
+static inline INT _playerHpMax(CEntity* p) { return *(INT*)((UBYTE*)p + KH_VER(0x324, 0x304)); }
 
 #line 286
 
@@ -266,7 +266,7 @@ void CHumanBoss::beginStateDead() {
     }
     setTexAnmSeq(0, HumanBoss::DeadEyeSeqName);
     setTexAnmSeq(1, HumanBoss::DeadLipSeqName);
-    demo = new (__FILE__ "(483)") CBossDeadDemo(this, 0);
+    demo = new KH_AT("(483)") CBossDeadDemo(this, 0);
     if (demo) {
         demo->setup(getHandle(), __null, -1);
     }
@@ -309,7 +309,7 @@ void CHumanBoss::setupCardRevolver() {
     cardNum += m_pEnemyParam->iEnemyCard;
     m_iTotalCardNum = cardNum;
 #line 537
-    deck = new (__FILE__ "(537)") CARD[cardNum];
+    deck = new KH_AT("(537)") CARD[cardNum];
     cards = deck;
 #line 539
     ASSERT(deck);
@@ -351,8 +351,8 @@ void CHumanBoss::setupCardRevolver() {
         for (j = 0; j < 10; j++) {
             INT k;
             for (k = 0; k < card->bNumber[j]; k++) {
-                if (DebugWork::g_dw.enemy.uiFlag & 0x4000) {
-                    cards->init(cardKind, DebugWork::g_dw.enemy.iCardNumber);
+                if (KH_DW(DebugWork::g_dw.enemy.uiFlag) & 0x4000) {
+                    cards->init(cardKind, KH_DW(DebugWork::g_dw.enemy.iCardNumber));
                 } else {
                     cards->init(cardKind, j);
                 }
@@ -372,7 +372,7 @@ void CHumanBoss::setupCardRevolver() {
         deck[j] = v;
     }
 #line 622
-    m_pCardRevolver = new (__FILE__ "(622)") CardBattle::CCardRevolver(this, deck, 2, -1);
+    m_pCardRevolver = new KH_AT("(622)") CardBattle::CCardRevolver(this, deck, 2, -1);
 #line 623
     ASSERT(m_pCardRevolver);
     if (deck) delete[] deck;
@@ -424,7 +424,7 @@ void CHumanBoss::setupAct()
 
     if (m_iNormalActNum > 0)
     {
-        m_pNormalActs = new (__FILE__ "(674)") ACT_DATA[m_iNormalActNum];
+        m_pNormalActs = new KH_AT("(674)") ACT_DATA[m_iNormalActNum];
         ASSERT(m_pNormalActs);
         for (INT i = 0; i < m_iNormalActNum; i++)
         {
@@ -434,7 +434,7 @@ void CHumanBoss::setupAct()
 
     if (m_iStockNum > 0)
     {
-        m_pStockData = new (__FILE__ "(684)") ACT_DATA[m_iStockNum];
+        m_pStockData = new KH_AT("(684)") ACT_DATA[m_iStockNum];
         ASSERT(m_pStockData);
         for (INT i = 0; i < m_iStockNum; i++)
         {
@@ -656,11 +656,11 @@ BOOL CHumanBoss::reloadCardProc() {
 }
 
 /* placeholder for enemyCardProc (INCLUDE_ASM): its strings */
-__attribute__((section(".sdata"))) void _enemyCardProc_placeholder(void* cb) {
-    TRACE("----------- change normal card mode.\n");
-    if (!cb) AssertApp(__FILE__, 0, "cb", 0);
-    TRACE("----------- change enemy card mode.\n");
-}
+KH_DEBUG(__attribute__((section(".sdata"))) void _enemyCardProc_placeholder(void* cb) {)
+    KH_DEBUG(TRACE("----------- change normal card mode.\n");)
+    KH_DEBUG(if (!cb) AssertApp(__FILE__, 0, "cb", 0);)
+    KH_DEBUG(TRACE("----------- change enemy card mode.\n");)
+KH_DEBUG(})
 BOOL CHumanBoss::enemyCardProc(const CARD* inActiveCard) {
     INT n;
     CardBattle::CCardBattle* cb;
@@ -683,10 +683,10 @@ BOOL CHumanBoss::enemyCardProc(const CARD* inActiveCard) {
                 }
             }
             TRACE("----------- change normal card mode.\n");
-            return TRUE;
-        }
+            KH_DEBUG(return TRUE;) /* retail: one return for both arms (the flag path joins the last tail) */
+        } KH_RELEASE(else {)
         m_pCardRevolver->rollDeck(1, 0, 300);
-        return TRUE;
+        KH_RELEASE(}) return TRUE;
     }
     if (isNoEnemyCard()) {
         return FALSE;
@@ -714,58 +714,58 @@ BOOL CHumanBoss::itemCardProc(const CARD* inActiveCard) {
     INT haveCardNum;
     INT remainCard;
     INT rate;
-    INT kind[16];
+    KH_DEBUG(INT kind[16];)
     INT count;
     INT i;
     ENEMY_CARD* card;
     INT cardKind;
     BOOL find;
 
-    if ((DebugWork::g_dw.enemy.uiFlag & 8) && DebugWork::g_dw.enemy.sActNo + 2 == 10) {
-        count = 0;
-        for (i = 0; i < getEnemyParam()->iCardCount; i++) {
-            card = &getEnemyParam()->pCards[i];
-            cardKind = 0;
-            switch (card->iCardKind) {
-            case 8:
-                cardKind = 0x2a;
-                break;
-            case 9:
-                cardKind = 0x2b;
-                break;
-            case 10:
-                cardKind = 0x2c;
-                break;
-            case 11:
-                cardKind = 0x2d;
-                break;
-            case 12:
-                cardKind = 0x2e;
-                break;
-            case 13:
-                cardKind = 0x2f;
-                break;
-            }
-            find = FALSE;
-            {
-                INT i;
-                for (i = 0; i < count; i++) {
-                    if (kind[i] == cardKind) {
-                        find = TRUE;
-                        break;
-                    }
-                }
-            }
-            if (!find) {
-                kind[count++] = cardKind;
-            }
-        }
-        if (count > 0) {
-            m_iUseItem = kind[RND::genrand_int31() % count];
-            setPlayCard(10);
-            return TRUE;
-        }
-    }
+    KH_DEBUG(if ((KH_DW(DebugWork::g_dw.enemy.uiFlag) & 8) && KH_DW(DebugWork::g_dw.enemy.sActNo) + 2 == 10) {)
+        KH_DEBUG(count = 0;)
+        KH_DEBUG(for (i = 0; i < getEnemyParam()->iCardCount; i++) {)
+            KH_DEBUG(card = &getEnemyParam()->pCards[i];)
+            KH_DEBUG(cardKind = 0;)
+            KH_DEBUG(switch (card->iCardKind) {)
+            KH_DEBUG(case 8:)
+                KH_DEBUG(cardKind = 0x2a;)
+                KH_DEBUG(break;)
+            KH_DEBUG(case 9:)
+                KH_DEBUG(cardKind = 0x2b;)
+                KH_DEBUG(break;)
+            KH_DEBUG(case 10:)
+                KH_DEBUG(cardKind = 0x2c;)
+                KH_DEBUG(break;)
+            KH_DEBUG(case 11:)
+                KH_DEBUG(cardKind = 0x2d;)
+                KH_DEBUG(break;)
+            KH_DEBUG(case 12:)
+                KH_DEBUG(cardKind = 0x2e;)
+                KH_DEBUG(break;)
+            KH_DEBUG(case 13:)
+                KH_DEBUG(cardKind = 0x2f;)
+                KH_DEBUG(break;)
+            KH_DEBUG(})
+            KH_DEBUG(find = FALSE;)
+            KH_DEBUG({)
+                KH_DEBUG(INT i;)
+                KH_DEBUG(for (i = 0; i < count; i++) {)
+                    KH_DEBUG(if (kind[i] == cardKind) {)
+                        KH_DEBUG(find = TRUE;)
+                        KH_DEBUG(break;)
+                    KH_DEBUG(})
+                KH_DEBUG(})
+            KH_DEBUG(})
+            KH_DEBUG(if (!find) {)
+                KH_DEBUG(kind[count++] = cardKind;)
+            KH_DEBUG(})
+        KH_DEBUG(})
+        KH_DEBUG(if (count > 0) {)
+            KH_DEBUG(m_iUseItem = kind[RND::genrand_int31() % count];)
+            KH_DEBUG(setPlayCard(10);)
+            KH_DEBUG(return TRUE;)
+        KH_DEBUG(})
+    KH_DEBUG(})
     noReloadNum = -1;
     cardNum = 0;
     haveCardNum = 0;
@@ -829,10 +829,10 @@ BOOL CHumanBoss::itemCardProc(const CARD* inActiveCard) {
 }
 
 /* placeholder for stockActProc (INCLUDE_ASM): its strings */
-__attribute__((section(".sdata"))) void _stockActProc_placeholder(INT n) {
-    TRACE("CHumanBoss::\x83X\x83g\x83" "b\x83N\x82\xc5\x82\xab\x82\xc8\x82\xa2\n");
-    TRACE("----------- stock boss card = 0x%08x\n", n);
-}
+KH_DEBUG(__attribute__((section(".sdata"))) void _stockActProc_placeholder(INT n) {)
+    KH_DEBUG(TRACE("CHumanBoss::\x83X\x83g\x83" "b\x83N\x82\xc5\x82\xab\x82\xc8\x82\xa2\n");)
+    KH_DEBUG(TRACE("----------- stock boss card = 0x%08x\n", n);)
+KH_DEBUG(})
 BOOL CHumanBoss::stockActProc(const CARD* inActiveCard) {
     INT attackCardNum;
     INT magicCardNum;
@@ -886,26 +886,26 @@ BOOL CHumanBoss::stockActProc(const CARD* inActiveCard) {
         if (!canAttack_(m_pUseStock->pAct)) {
             return FALSE;
         }
-        if (DebugWork::g_dw.enemy.uiFlag & 8) {
-            state = DebugWork::g_dw.enemy.sActNo + 2;
-            {
-                INT i;
-                for (i = 0; i < m_iNormalActNum; i++) {
-                    if (m_pNormalActs[i].iState == state) {
-                        return setPlayStock(state) != 0;
-                    }
-                }
-            }
-            {
-                INT i;
-                for (i = 0; i < m_iStockNum; i++) {
-                    if (m_pStockData[i].iState == state) {
-                        return setPlayStock(state) != 0;
-                    }
-                }
-            }
-            return TRUE;
-        }
+        KH_DEBUG(if (KH_DW(DebugWork::g_dw.enemy.uiFlag) & 8) {)
+            KH_DEBUG(state = KH_DW(DebugWork::g_dw.enemy.sActNo) + 2;)
+            KH_DEBUG({)
+                KH_DEBUG(INT i;)
+                KH_DEBUG(for (i = 0; i < m_iNormalActNum; i++) {)
+                    KH_DEBUG(if (m_pNormalActs[i].iState == state) {)
+                        KH_DEBUG(return setPlayStock(state) != 0;)
+                    KH_DEBUG(})
+                KH_DEBUG(})
+            KH_DEBUG(})
+            KH_DEBUG({)
+                KH_DEBUG(INT i;)
+                KH_DEBUG(for (i = 0; i < m_iStockNum; i++) {)
+                    KH_DEBUG(if (m_pStockData[i].iState == state) {)
+                        KH_DEBUG(return setPlayStock(state) != 0;)
+                    KH_DEBUG(})
+                KH_DEBUG(})
+            KH_DEBUG(})
+            KH_DEBUG(return TRUE;)
+        KH_DEBUG(})
         if (setPlayStock(m_pUseStock->iState)) {
             return TRUE;
         }
@@ -932,13 +932,13 @@ BOOL CHumanBoss::stockActProc(const CARD* inActiveCard) {
                 TRACE("----------- stock boss card = 0x%08x\n", inActiveCard->m_nKind);
                 return TRUE;
             }
-            return FALSE;
-        }
+            KH_DEBUG(return FALSE;) /* retail: falls through to the last return (no store-flag; cross-jumped with setPlayStock's test) */
+        } KH_RELEASE(else {)
         if ((RND::genrand_int31() & 1) == 0) {
             m_pCardRevolver->rollDeck(1, 0, 300);
             return TRUE;
         }
-        return FALSE;
+        KH_DEBUG(return FALSE;) KH_RELEASE(})
     }
     return FALSE;
 }
@@ -950,7 +950,7 @@ BOOL CHumanBoss::normalActProc(const CARD* inActiveCard) {
     INT i;
     INT j;
     INT card;
-    register INT nNone asm("$22"); /* MATCH: the -1 in s6, &tmp[count] in s5 */
+    register INT nNone KH_DEBUG(asm("$22")); /* MATCH: the -1 in s6, &tmp[count] in s5 (beta; retail needs no pin) */
 
     for (i = 0; i < m_iNormalActNum; i++) {
         if (!m_pNormalActs[i].bEnable) {
@@ -966,7 +966,7 @@ BOOL CHumanBoss::normalActProc(const CARD* inActiveCard) {
                     continue;
                 }
             }
-            if (((DebugWork::g_dw.enemy.uiFlag & 8) && canAttack_(m_pNormalActs[i].pAct)) ||
+            if (((KH_DW(DebugWork::g_dw.enemy.uiFlag) & 8) && canAttack_(m_pNormalActs[i].pAct)) ||
                 (m_pCardData->iCardKind[card] == inActiveCard->m_nKind && canAttack_(m_pNormalActs[i].pAct))) {
                 tmp[count++] = &m_pNormalActs[i];
                 break;
@@ -1008,28 +1008,28 @@ void CHumanBoss::setDoBattleAct(const ACT_DATA* inAct) {
 void CHumanBoss::useCard(INT inState) {
     INT state;
 
-    if (DebugWork::g_dw.enemy.uiFlag & 8) {
-        state = DebugWork::g_dw.enemy.sActNo + 2;
-        {
-            INT i;
-            for (i = 0; i < m_iNormalActNum; i++) {
-                if (m_pNormalActs[i].iState == state) {
-                    setPlayCard(state);
-                    return;
-                }
-            }
-        }
-        {
-            INT i;
-            for (i = 0; i < m_iStockNum; i++) {
-                if (m_pStockData[i].iState == state) {
-                    setPlayCard(state);
-                    return;
-                }
-            }
-        }
-        return;
-    }
+    KH_DEBUG(if (KH_DW(DebugWork::g_dw.enemy.uiFlag) & 8) {)
+        KH_DEBUG(state = KH_DW(DebugWork::g_dw.enemy.sActNo) + 2;)
+        KH_DEBUG({)
+            KH_DEBUG(INT i;)
+            KH_DEBUG(for (i = 0; i < m_iNormalActNum; i++) {)
+                KH_DEBUG(if (m_pNormalActs[i].iState == state) {)
+                    KH_DEBUG(setPlayCard(state);)
+                    KH_DEBUG(return;)
+                KH_DEBUG(})
+            KH_DEBUG(})
+        KH_DEBUG(})
+        KH_DEBUG({)
+            KH_DEBUG(INT i;)
+            KH_DEBUG(for (i = 0; i < m_iStockNum; i++) {)
+                KH_DEBUG(if (m_pStockData[i].iState == state) {)
+                    KH_DEBUG(setPlayCard(state);)
+                    KH_DEBUG(return;)
+                KH_DEBUG(})
+            KH_DEBUG(})
+        KH_DEBUG(})
+        KH_DEBUG(return;)
+    KH_DEBUG(})
     setPlayCard(inState);
 }
 
@@ -1148,3 +1148,4 @@ BOOL CHumanBoss::setPlayStock(INT inState) {
     return TRUE;
 }
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

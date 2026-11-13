@@ -36,9 +36,9 @@ private:
 public:
 #line 45 CHATMAN_H_PATH
     static CChatMan& initialize() {
-        if (!(__null == m_pInstance)) AssertApp(__FILE__, __LINE__, "__null == m_pInstance", 0);
-        m_pInstance = new (__FILE__ "(47)") CChatMan;
-        if (!(m_pInstance)) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
+        KH_DEBUG(if (!(__null == m_pInstance)) AssertApp(__FILE__, __LINE__, "__null == m_pInstance", 0);)
+        m_pInstance = new KH_AT("(47)") CChatMan;
+        KH_DEBUG(if (!(m_pInstance)) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);)
         m_pInstance->setup();
         return *m_pInstance;
     }
@@ -50,7 +50,7 @@ public:
      */
 #line 57 CHATMAN_H_PATH
     static CChatMan& instance() { CChatMan*& instance = m_pInstance;
-        if (!(instance)) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
+        KH_DEBUG(if (!(instance)) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);)
         return *instance;
     }
     static BOOL isExist() { return m_pInstance != NULL; }
@@ -98,7 +98,7 @@ public:
         if (nCmd == 0x412) return onSetTextFadeOutTime(nCmd, pParam, nID);
         if (nCmd == 0x413) return onEnableLFDisp(nCmd, pParam, nID);
         return 0;
-    }
+    } KH_RELEASE(virtual void main() {}) /* retail: an empty main override */
 
 private:
     CChatWndDt* searchChatWndDt(INT nID);

@@ -51,14 +51,14 @@ protected:
     void init(INT inSize) {
         INT i;
         m_iSize = inSize;
-        m_pListTbl = new (__FILE__ "(62)") T[inSize];
-        m_ppListPtrTbl = new (__FILE__ "(63)") T*[inSize];
-        if (!m_pListTbl) AssertApp(__FILE__, __LINE__, "m_pListTbl", 0);
-        if (!m_ppListPtrTbl) AssertApp(__FILE__, __LINE__, "m_ppListPtrTbl", 0);
-        for (i = 0; i < inSize; i++) {
+        m_pListTbl = new KH_AT("(62)") T[inSize];
+        m_ppListPtrTbl = new KH_AT("(63)") T*[inSize];
+        KH_DEBUG(if (!m_pListTbl) AssertApp(__FILE__, __LINE__, "m_pListTbl", 0);)
+        KH_DEBUG(if (!m_ppListPtrTbl) AssertApp(__FILE__, __LINE__, "m_ppListPtrTbl", 0);)
+        KH_RELEASE(T* pTail = &m_Tail; T* pTop = &m_Top;) for (i = 0; i < inSize; i++) {
             m_ppListPtrTbl[i] = &m_pListTbl[i];
         }
-        erase();
+        KH_DEBUG(erase();) KH_RELEASE(m_Top.pNext = pTail; m_Tail.pPrev = pTop; m_iNowCount = 0; m_iWritePtr = 0; m_iReadPtr = 0; m_Top.pPrev = NULL; m_Tail.pNext = NULL;)
     }
     void release() {
         if (m_pListTbl) com_free(m_pListTbl);
@@ -84,7 +84,7 @@ protected:
         inList->pPrev->pNext = inList->pNext;
         inList->pNext->pPrev = inList->pPrev;
 #line 93
-        if (!(m_ppListPtrTbl[m_iWritePtr] == __null)) AssertApp(__FILE__, __LINE__, "m_ppListPtrTbl[m_iWritePtr] == __null", 0);
+        KH_DEBUG(if (!(m_ppListPtrTbl[m_iWritePtr] == __null)) AssertApp(__FILE__, __LINE__, "m_ppListPtrTbl[m_iWritePtr] == __null", 0);)
         m_ppListPtrTbl[m_iWritePtr] = inList;
         if (++m_iWritePtr >= m_iSize) m_iWritePtr = 0;
         m_iNowCount--;

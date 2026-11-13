@@ -11,7 +11,7 @@
 #include "Form/Menu/SaveLoadCtrl.h"
 #include "System/Fsm.h"
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 #include "System/RsrcDB.h"
 
@@ -96,14 +96,14 @@ void CTitleReportDllStarter::stateDllLoad() {
         switch (m_LaunchMode) {
         case 0:
 #line 126
-            m_hChildTask = (new (__FILE__ "(126)")
+            m_hChildTask = (new KH_AT("(126)")
                                 CTitle(this, m_nParam))->getHandle();
             break;
         case 1:
             break;
         case 2:
 #line 128
-            new (__FILE__ "(128)") BattleReport::CBtlReport(this);
+            new KH_AT("(128)") BattleReport::CBtlReport(this);
             break;
         }
         changeState(2);
@@ -140,3 +140,4 @@ void CTitleReportDllStarter::changeState(INT state) {
 }
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

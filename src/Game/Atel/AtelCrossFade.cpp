@@ -89,7 +89,7 @@ void CAtelCrossFade::main() {
 
 INT CAtelCrossFade::onCreateTexMemory(INT nCmd, void* pParam, INT nID) {
     if (!m_pCrossFadeImage) {
-        m_pCrossFadeImage = new (__FILE__ "(104)") u_long128[SCREEN_HEIGHT * 128];
+        m_pCrossFadeImage = new KH_AT("(104)") u_long128[SCREEN_HEIGHT * 128];
         if (!m_pCrossFadeImage) {
             TRACE("\x83N\x83\x8d\x83X\x83t\x83" "F\x81[\x83h\x97p\x83\x81\x83\x82\x83\x8a\x8am\x95\xdb\x8e\xb8\x94s\x81I\x81I\n");
             return -1; /* MATCH: return here, goto ret in the other two: keeps the three TRACE calls apart (no cross-jump) */
@@ -257,3 +257,4 @@ BOOL CAtelCrossFade::isCrossFadeDrawImage() {
 } // namespace ATEL
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data

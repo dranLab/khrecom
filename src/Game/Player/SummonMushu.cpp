@@ -80,10 +80,10 @@ void CSummonMushu::adjustPlayer() {
     FVECTOR rot;
 
     m = m_pPlayer->Crd(1).getWorldMatrix();
-    if (dbgCheckUser(KKIKUCHI) && DebugWork::g_dw.player.iTemp == 7) {
-        g_MushuOffset.x = DebugWork::g_dw.player.vTemp.x;
-        g_MushuOffset.y = DebugWork::g_dw.player.vTemp.y;
-        g_MushuOffset.z = DebugWork::g_dw.player.vTemp.z;
+    if (dbgCheckUser(KKIKUCHI) && KH_DW(DebugWork::g_dw.player.iTemp) == 7) {
+        g_MushuOffset.x = KH_DW(DebugWork::g_dw.player.vTemp.x);
+        g_MushuOffset.y = KH_DW(DebugWork::g_dw.player.vTemp.y);
+        g_MushuOffset.z = KH_DW(DebugWork::g_dw.player.vTemp.z);
     }
     ApplyMatrixXYZ(pos, m, g_MushuOffset);
     warp(pos);
@@ -150,7 +150,7 @@ void CSummonMushu::beginStateAction1() {
 }
 
 void CSummonMushu::stateAction1() {
-    PlayerCamera::CPlayerCamera::getBattleCamData(g_MushuCamParam);
+    KH_DEBUG(PlayerCamera::CPlayerCamera::getBattleCamData(g_MushuCamParam);)
     FVECTOR rot = getRot();
     FLOAT x = getAnalogLX(0) * (1.0f / 4096.0f);
     FLOAT y = -(getAnalogLY(0) * (1.0f / 4096.0f));
@@ -244,3 +244,4 @@ void CSummonMushu::getCameraTargetPos(FVECTOR& outPos) {
 
 } // namespace Summon
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

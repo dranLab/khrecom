@@ -13,14 +13,14 @@
 #line 1 "System/../Form/Menu/JiminyMemo.h"
 #endif
 inline void _jiminyMemoCheckId(INT inId) {
-    if (!(inId < 8)) AssertApp(__FILE__, __LINE__, "inId < PARAM_NUM", 0);
+    KH_DEBUG(if (!(inId < 8)) AssertApp(__FILE__, __LINE__, "inId < PARAM_NUM", 0);)
 }
 
 #ifdef FORM_MENU_JIMINYMEMO_CPP /* MATCH: FORM_MENU_JIMINYMEMO_CPP gate: the helper keeps the header file name in the class inlines asserts */
 /* the class inlines setContentParam/getContentParam (header lines 1185/1193) assert their index with the
  * header's file name; the class itself is in Form/Menu/JiminyMemo.cpp */
 inline void _jiminyMemoAssertParamId(INT inId, INT inLine) {
-    if (!(inId < 2)) AssertApp(__FILE__, inLine, "inId < PARAM_NUM", 0);
+    KH_DEBUG(if (!(inId < 2)) AssertApp(__FILE__, inLine, "inId < PARAM_NUM", 0);)
 }
 #endif
 
@@ -30,7 +30,7 @@ public:
     CJiminyMemo(CTask* inParent, INT inMode);
 
 private:
-    BYTE _pad[0x570 - sizeof(CTask)]; // members not known yet
+    BYTE _pad[KH_VER(0x570, 0x530) - sizeof(CTask)]; // members not known yet (retail: no ScaleStr)
 };
 #endif
 

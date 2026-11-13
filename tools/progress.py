@@ -22,6 +22,9 @@ from pathlib import Path
 
 import yaml
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from versions import default_version  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 START, END = "<!-- progress:start -->", "<!-- progress:end -->"
 FUNC = re.compile(r"^nonmatching (\S+), 0x([0-9A-Fa-f]+)", re.M)
@@ -35,12 +38,7 @@ CONDITIONAL = re.compile(r"^\s*#\s*(if|ifdef|ifndef|elif|else|endif)\b(.*)$")
 
 
 def version_dir(version):
-    if version:
-        return version
-    versions = [p.name for p in (ROOT / "config").iterdir() if p.is_dir()]
-    if len(versions) != 1:
-        sys.exit(f"several versions, pass --version: {versions}")
-    return versions[0]
+    return default_version(version)
 
 
 def units(version):

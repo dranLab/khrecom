@@ -34,16 +34,16 @@ CAtWater* CAtWater::m_pInstance = NULL;
 void CAtWater::create(CTask* p) {
     if (!m_pInstance) {
         m_pInstance =
-            new (__FILE__ "(28)") CAtWater(p);
-        if (!m_pInstance) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
+            new KH_AT("(28)") CAtWater(p);
+        KH_DEBUG(if (!m_pInstance) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);)
     }
 }
 
 #line 38
 CAtWater::CAtWater(CTask* p) : CTask(p, 0x4000) {
     m_pAtWater =
-        new (__FILE__ "(40)") CAtWaterPrim();
-    if (!m_pAtWater) AssertApp(__FILE__, __LINE__, "m_pAtWater", 0);
+        new KH_AT("(40)") CAtWaterPrim();
+    KH_DEBUG(if (!m_pAtWater) AssertApp(__FILE__, __LINE__, "m_pAtWater", 0);)
 }
 
 CAtWater::~CAtWater() {
@@ -144,3 +144,4 @@ void CAtWaterPrim::makePkt() {
 }
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data

@@ -38,8 +38,8 @@ struct TexInfo {
     float _fOfs[2];             /* 0x58 */
     CHAR* _pName;               /* 0x60 */
     CTexAnm* _pTexAnm;          /* 0x64 */
-    INT _nTexSize;              /* 0x68 */
-    INT _nClutSize;             /* 0x6c */
+    KH_DEBUG(INT _nTexSize;              /* 0x68 */)
+    KH_DEBUG(INT _nClutSize;             /* 0x6c */)
 
     BOOL isFixTex() const { return !_TexInfo._pImage || (_nFlag & 1); }
     BOOL isFixClut() const { return !_ClutInfo._pImage || (_nFlag & 2); }

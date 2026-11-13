@@ -103,3 +103,4 @@ INT CGimmickSavePoint::getTypeID() const {
     return 0x2004;
 }
 // SOURCE DATA: .rodata
+// SOURCE DATA SLUS_217.99_retail: .rodata

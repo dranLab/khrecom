@@ -17,7 +17,7 @@
 
 
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 
 
@@ -163,9 +163,9 @@ CAnim::~CAnim() {
 }
 void CAnim::_create(INT nSklNum) {
 #line 227
-    m_pQuatHokan = new (__FILE__ "(227)") QUATERNION_DT[nSklNum];
-    m_pQuatNow = new (__FILE__ "(228)") QUATERNION_DT[nSklNum];
-    m_pFixQuat = new (__FILE__ "(229)") QUATERNION_DT[nSklNum];
+    m_pQuatHokan = new KH_AT("(227)") QUATERNION_DT[nSklNum];
+    m_pQuatNow = new KH_AT("(228)") QUATERNION_DT[nSklNum];
+    m_pFixQuat = new KH_AT("(229)") QUATERNION_DT[nSklNum];
 }
 void CAnim::_dispose() {
     if (m_pQuatHokan) delete[] m_pQuatHokan;
@@ -941,7 +941,7 @@ BOOL CAnim::createLegIK(FLOAT fFootLen, FLOAT fToesLen) {
     if (m_pModelData && !m_pLegIK) {
         if (CLegIK::isIK(*m_pModelData)) {
 #line 1831
-            m_pLegIK = new (__FILE__ "(1831)") CLegIK;
+            m_pLegIK = new KH_AT("(1831)") CLegIK;
             ASSERT(m_pLegIK);
             m_pLegIK->init(*m_pCrds, *m_pModelData, fFootLen, fToesLen);
             m_Flags[1] |= 0x400;
@@ -953,7 +953,7 @@ BOOL CAnim::createArmIK() {
     if (m_pModelData && !m_pArmIK) {
         if (CArmIK::isIK(*m_pModelData)) {
 #line 1847
-            m_pArmIK = new (__FILE__ "(1847)") CArmIK;
+            m_pArmIK = new KH_AT("(1847)") CArmIK;
             ASSERT(m_pArmIK);
             m_pArmIK->init(*m_pCrds, *m_pModelData);
             m_Flags[1] |= 0x400;
@@ -1003,3 +1003,4 @@ void CAnim::updateIK(BOOL bBeforeCoordFix, BOOL bAfterCoordFix, FLOAT fr) {
 }
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

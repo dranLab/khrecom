@@ -46,25 +46,25 @@ inline BOOL CEffect::isEntityAlpha() { return m_iFlag & 0x40; }
 
 #line 500 EFFECT_H_PATH
 inline BOOL CEffect::isStop() {
-    if (!(isValid())) AssertApp(__FILE__, __LINE__, "isValid()", 0);
+    KH_DEBUG(if (!(isValid())) AssertApp(__FILE__, __LINE__, "isValid()", 0);)
     return (m_iFlag & 0x200000) != 0;
 }
 
 #line 511 EFFECT_H_PATH
 inline BOOL CEffect::isDrawing() {
-    if (!(isValid())) AssertApp(__FILE__, __LINE__, "isValid()", 0);
+    KH_DEBUG(if (!(isValid())) AssertApp(__FILE__, __LINE__, "isValid()", 0);)
     return (m_iFlag & 0x800000) == 0;
 }
 
 #line 526 EFFECT_H_PATH
 inline BOOL CEffect::isActive() {
-    if (!(isValid())) AssertApp(__FILE__, __LINE__, "isValid()", 0);
+    KH_DEBUG(if (!(isValid())) AssertApp(__FILE__, __LINE__, "isValid()", 0);)
     return m_pPartMng != NULL;
 }
 
 #line 547 EFFECT_H_PATH
 inline BOOL CEffect::isAlive() {
-    if (!(isValid())) AssertApp(__FILE__, __LINE__, "isValid()", 0);
+    KH_DEBUG(if (!(isValid())) AssertApp(__FILE__, __LINE__, "isValid()", 0);)
     return (m_iFlag & 0x10000) == 0;
 }
 

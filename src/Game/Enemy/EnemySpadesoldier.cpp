@@ -151,7 +151,7 @@ void CEnemySpadesoldier::endStateAttack2() {}
 #line 147
 void CEnemySpadesoldier::beginStateDead() {
     CBattleEnemyManager* bem = (CBattleEnemyManager*)CTaskMan::getSysTask(25);
-    if (!bem) AssertApp(__FILE__, __LINE__, "bem", 0);
+    KH_DEBUG(if (!bem) AssertApp(__FILE__, __LINE__, "bem", 0);)
     if (bem->getTotalEnemyNum() >= 2) {
         CBattleEnemy::beginStateDead();
         m_iStep = 0;
@@ -169,7 +169,7 @@ void CEnemySpadesoldier::beginStateDead() {
                 playSmallDamageSE();
             }
         }
-        demo = new (__FILE__ "(180)") CBossDeadDemo(this, 0);
+        demo = new KH_AT("(180)") CBossDeadDemo(this, 0);
         if (demo) {
             demo->setup(getHandle(), &Spadesoldier::g_vDeadDemoPlayerPos, -1);
         }
@@ -190,3 +190,4 @@ void CEnemySpadesoldier::endStateDead() {
 }
 
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .data .rodata

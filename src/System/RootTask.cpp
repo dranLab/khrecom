@@ -90,7 +90,7 @@
 #line 100 "c:/KHCOM/MainApp/System/RootTask.cpp"
 namespace {
 UINT s_nRebootCount = 0;
-BOOL s_bDbgSettingLoaded = 0;
+KH_DEBUG(BOOL s_bDbgSettingLoaded = 0;)
 }
 
 CRootTask::CRootTask() : CTask(NULL, 0x8000) {
@@ -103,9 +103,9 @@ CRootTask::CRootTask() : CTask(NULL, 0x8000) {
 }
 
 CRootTask::~CRootTask() {
-    if (CDebugMenu::getDebugParam()._nThisMenu == 1) {
-        s_bDbgSettingLoaded = 0;
-    }
+    KH_DEBUG(if (CDebugMenu::getDebugParam()._nThisMenu == 1) {)
+        KH_DEBUG(s_bDbgSettingLoaded = 0;)
+    KH_DEBUG(})
     CSceneInfo::dispose();
     CSaveLoad::disposeRsrc();
 }
@@ -128,32 +128,32 @@ void CRootTask::main() {
 }
 
 void CRootTask::_preparePhaseInit() {
-    if (!s_bDbgSettingLoaded) {
-        CDebugMenu::initParam(-1);
-        m_nStep = 0;
-    } else {
+    KH_DEBUG(if (!s_bDbgSettingLoaded) {)
+        KH_DEBUG(CDebugMenu::initParam(-1);)
+        KH_DEBUG(m_nStep = 0;)
+    KH_DEBUG(} else {)
         m_nStep = 2;
-    }
+    KH_DEBUG(})
     m_nPhase = 0;
 }
 
 void CRootTask::_phaseInit() {
     switch (m_nStep) {
-    case 0:
-        if (CDebugMenu::startLoadFromMemoca()) {
-            m_nStep = 1;
-        }
-        break;
-    case 1:
-        if (CDebugMenu::isCompleteLoadFromMemoca()) {
-            INT nLocale = CDebugMenu::getDebugParam()._nLocale;
-            if (nLocale >= 0) {
-                CRcf::setLocale(nLocale);
-            }
-            s_bDbgSettingLoaded = 1;
-            m_nStep = 2;
-        }
-        break;
+    KH_DEBUG(case 0:)
+        KH_DEBUG(if (CDebugMenu::startLoadFromMemoca()) {)
+            KH_DEBUG(m_nStep = 1;)
+        KH_DEBUG(})
+        KH_DEBUG(break;)
+    KH_DEBUG(case 1:)
+        KH_DEBUG(if (CDebugMenu::isCompleteLoadFromMemoca()) {)
+            KH_DEBUG(INT nLocale = CDebugMenu::getDebugParam()._nLocale;)
+            KH_DEBUG(if (nLocale >= 0) {)
+                KH_DEBUG(CRcf::setLocale(nLocale);)
+            KH_DEBUG(})
+            KH_DEBUG(s_bDbgSettingLoaded = 1;)
+            KH_DEBUG(m_nStep = 2;)
+        KH_DEBUG(})
+        KH_DEBUG(break;)
     case 2:
         CMemoca::setupMcName(1);
         CRcf::reqLoadRCF(13, 1, 0, 0, 0);
@@ -166,7 +166,7 @@ void CRootTask::_phaseInit() {
             CModelMan::reset();
             pRootTop = getSysTask(14);
 #line 195
-            new (__FILE__ "(195)") CTexCtrl(this);
+            new KH_AT("(195)") CTexCtrl(this);
             CFrecFont::setupFonts();
             CSceneInfo::clear();
             ATEL::CChatMan::initialize();
@@ -180,15 +180,15 @@ void CRootTask::_phaseInit() {
     case 4:
         if (CRcf::isCompleteLoadRCF(0, 0)) {
             CMainApp::enableWarningPause(1);
-            if (CPadIO::isButtonDown(0x40, 0)) {
-                m_nStep = 5;
-            } else {
+            KH_DEBUG(if (CPadIO::isButtonDown(0x40, 0)) {)
+                KH_DEBUG(m_nStep = 5;)
+            KH_DEBUG(} else {)
                 _preparePhaseChkPad();
-            }
+            KH_DEBUG(})
         }
         break;
-    case 5:
-        _launchTitle(1);
+    KH_DEBUG(case 5:)
+        KH_DEBUG(_launchTitle(1);)
         break;
     }
 }
@@ -237,7 +237,7 @@ void CRootTask::_preparePhaseChkMemoca() {
     m_nStep = 0;
     if (*pCount == 0) {
 #line 317
-        new (__FILE__ "(317)") CSaveLoad(this, SLMODE_BOOT, GAMECLEAR_NONE);
+        new KH_AT("(317)") CSaveLoad(this, SLMODE_BOOT, GAMECLEAR_NONE);
     } else {
         m_nStep = 1;
     }
@@ -253,8 +253,8 @@ void CRootTask::_phaseChkMemoca() {
         break;
     case 1:
 #line 340
-        m_pMemoca = new (__FILE__ "(340)") CMemocaAgent(this);
-        if (!(m_pMemoca)) AssertApp(__FILE__, __LINE__, "m_pMemoca", 0);
+        m_pMemoca = new KH_AT("(340)") CMemocaAgent(this);
+        KH_DEBUG(if (!(m_pMemoca)) AssertApp(__FILE__, __LINE__, "m_pMemoca", 0);)
         m_pMemoca->reqLoadSysData();
         m_nStep = 2;
         break;
@@ -273,11 +273,11 @@ void CRootTask::_phaseChkMemoca() {
 
 void CRootTask::_launchTitle(BOOL bDebug) {
     BOOL bLaunch;
-    if (bDebug) {
-        bLaunch = CTaskMan::reqChangeMainTask(7, MAINTASK_REPLACE);
-    } else {
+    KH_DEBUG(if (bDebug) {)
+        KH_DEBUG(bLaunch = CTaskMan::reqChangeMainTask(7, MAINTASK_REPLACE);)
+    KH_DEBUG(} else {)
         bLaunch = CTaskMan::reqChangeMainTask(CMainApp::isSkipLogo() != 0, MAINTASK_REPLACE);
-    }
+    KH_DEBUG(})
     if (bLaunch) {
         CMainApp::enableSoftReset(1);
         _preparePhaseMain();
@@ -293,3 +293,4 @@ void CRootTask::_phaseMain() {
 }
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data

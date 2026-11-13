@@ -49,7 +49,7 @@ CCollMapCamera::CCollMapCamera() {
     CCMCSemiModelList*& rList = m_pSemiModelList;
     if (!rList) {
 #line 24
-        rList = new (__FILE__ "(24)") CCMCSemiModelList;
+        rList = new KH_AT("(24)") CCMCSemiModelList;
         m_fgListExist = FALSE;
     } else {
         m_fgListExist = TRUE;
@@ -117,7 +117,7 @@ INT CCollMapCamera::collideMapTrueCamera(INT fgContinue) {
                     }
                     if (!fgExist) {
 #line 134
-                        CMCSemiModel* pEntry = new (__FILE__ "(134)") CMCSemiModel;
+                        CMCSemiModel* pEntry = new KH_AT("(134)") CMCSemiModel;
                         pEntry->center = vTrans;
                         pEntry->transparency = 1.0f;
                         pEntry->flag = 1;
@@ -204,3 +204,4 @@ BOOL CCollMapCamera::checkBGforCamera(FVECTOR& vPos, FVECTOR& vAim, FVECTOR& vOu
 }
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data

@@ -24,15 +24,15 @@ CGlare* CGlare::m_pInstance = NULL;
 #line 26
 void CGlare::create(CTask* p) {
     if (!m_pInstance) {
-        m_pInstance = new (__FILE__ "(28)") CGlare(p);
-        if (!m_pInstance) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
+        m_pInstance = new KH_AT("(28)") CGlare(p);
+        KH_DEBUG(if (!m_pInstance) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);)
     }
 }
 
 #line 39
 CGlare::CGlare(CTask* p) : CTask(p, 0x4000) {
-    m_pGlare = new (__FILE__ "(40)") CGlarePrim;
-    if (!m_pGlare) AssertApp(__FILE__, __LINE__, "m_pGlare", 0);
+    m_pGlare = new KH_AT("(40)") CGlarePrim;
+    KH_DEBUG(if (!m_pGlare) AssertApp(__FILE__, __LINE__, "m_pGlare", 0);)
     m_iFlags = 8;
     m_iKey = 0xFF;
     m_fRate = 0;
@@ -128,7 +128,7 @@ void CGlare::main() {
 
 void CGlare::disp() {
     FLOAT fAlphaPer = m_fAlpha;
-    if (DebugWork::g_dw.sys.m_iGlare == 1) fAlphaPer = DebugWork::g_dw.sys.m_fGlareMaxPer;
+    if (KH_DW(DebugWork::g_dw.sys.m_iGlare) == 1) fAlphaPer = KH_DW(DebugWork::g_dw.sys.m_fGlareMaxPer);
     m_pGlare->setAlpha((INT)(fAlphaPer * 128.0f));
     if (!(m_iFlags & 4)) {
         if (m_iFlags & 8) m_pGlare->setFlag(1);
@@ -175,7 +175,7 @@ void CGlarePrim::makePkt() {
     iAlpha = m_iAlpha;
     if (iAlpha >= 256) iAlpha = 255;
 
-    if (DebugWork::g_dw.sys.m_iGlare == 2) iAlpha = 0;
+    if (KH_DW(DebugWork::g_dw.sys.m_iGlare) == 2) iAlpha = 0;
 
     if (iAlpha <= 0) return;
 #line 312
@@ -285,3 +285,4 @@ void CGlarePrim::makePkt() {
 }
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data

@@ -18,7 +18,7 @@
 #include "System/Math3D.h"
 #include "Game/Collision/CollBody.h"
 #include "System/HeapMan.h"
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 
 
@@ -73,10 +73,10 @@ CRootNeedle::~CRootNeedle() {
 #line 88
 BOOL CRootNeedle::setup(const FVECTOR& inPos, INT inAttack, ATK_KIND inAtkKind, ATK_ATTR inAtkAttr) {
     FVECTOR pos;
-    m_pMove = new (__FILE__ "(91)") CMovement(this);
+    m_pMove = new KH_AT("(91)") CMovement(this);
     if (!m_pMove) return FALSE;
     addCoord(1);
-    m_pAttack = new (__FILE__ "(97)") CCollAttack;
+    m_pAttack = new KH_AT("(97)") CCollAttack;
     if (!m_pAttack) return FALSE;
     warp(inPos);
     setStartPos(inPos);
@@ -193,7 +193,7 @@ void CEnemyCreapplant::stateAttack2() {
         turnToPlayerY(0.06981317f);
         if (getMotionCurrentTime() >= 5000) {
             CRootNeedle* pNeedle;
-            pNeedle = new (__FILE__ "(284)") CRootNeedle(this);
+            pNeedle = new KH_AT("(284)") CRootNeedle(this);
             if (pNeedle) {
                 FVECTOR pos = getPlayerPos(FALSE);
                 pos.y = getPos().y;
@@ -239,3 +239,4 @@ void CEnemyCreapplant::onCardBreak() {
 }
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

@@ -128,3 +128,4 @@ int sceSifRebootIop(const char *arg)
     return sceSifResetIop(param, 0);
 }
 // SOURCE DATA: .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .rodata

@@ -79,7 +79,7 @@ void CEnemyLargebody::stateAttack2() {
             param._fCycle = 10.0f;
             param._nTime = 50;
             param._fPower = 0.25f;
-            new (__FILE__ "(105)") CCameraQuakeV(*pCamera, &param, 0.25f);
+            new KH_AT("(105)") CCameraQuakeV(*pCamera, &param, 0.25f);
             m_iStep = 1;
         }
         break;
@@ -98,3 +98,4 @@ void CEnemyLargebody::stateAttack2() {
 }
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

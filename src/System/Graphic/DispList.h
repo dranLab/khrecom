@@ -24,13 +24,13 @@ class CDispListBase {
 private:
     OTtag* m_pOTtagTbl;   /* 0x0 */
     UINT m_nOTtagTblSize; /* 0x4 */
-    UINT m_iDebugFlags;   /* 0x8 */
+    KH_DEBUG(UINT m_iDebugFlags;   /* 0x8 */)
 
 public:
     CDispListBase() {
         m_pOTtagTbl = NULL;
         m_nOTtagTblSize = 0;
-        m_iDebugFlags = 0;
+        KH_DEBUG(m_iDebugFlags = 0;)
     }
     virtual ~CDispListBase();
     virtual void insert(CDrawable& inPrim, FIX4 inZ) = 0;

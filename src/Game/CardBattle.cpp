@@ -173,17 +173,17 @@ CCardBattle::CCardBattle() : CTask(getSysTask(1), 0x4000) {
         void* p = pData ? CRsrcDB::getRsrcData(*pData) : NULL;
         g_pBattleCardList = (BC_PARAM*)p;
     }
-    if (!(g_pBattleCardList)) AssertApp(__FILE__, 101, "g_pBattleCardList", 0);
+    KH_DEBUG(if (!(g_pBattleCardList)) AssertApp(__FILE__, 101, "g_pBattleCardList", 0);)
     {
         CRsrcData* pData = CRsrcDB::getRsrc(1, g_szBinStockSkillList, NAME_CASE_SENSITIVE);
         void* p = pData ? CRsrcDB::getRsrcData(*pData) : NULL;
         g_pStockSkillList = (SS_PARAM*)p;
     }
-    if (!(g_pStockSkillList)) AssertApp(__FILE__, 105, "g_pStockSkillList", 0);
+    KH_DEBUG(if (!(g_pStockSkillList)) AssertApp(__FILE__, 105, "g_pStockSkillList", 0);)
     initLayoutData();
     init();
     m_pMesage = (Message::CMessageManager*)CTaskMan::getSysTask(0x17);
-    if (!(m_pMesage)) AssertApp(__FILE__, 118, "m_pMesage", 0);
+    KH_DEBUG(if (!(m_pMesage)) AssertApp(__FILE__, 118, "m_pMesage", 0);)
 }
 CCardBattle::~CCardBattle() {
     for (INT i = 0; i < 2; i++) {
@@ -212,8 +212,8 @@ CCardBattle::~CCardBattle() {
 }
 CCardBattle* CCardBattle::getInstance() {
     if (!m_pInstance) {
-        m_pInstance = new (__FILE__ "(162)") CCardBattle;
-        if (!(m_pInstance)) AssertApp(__FILE__, 163, "m_pInstance", 0);
+        m_pInstance = new KH_AT("(162)") CCardBattle;
+        KH_DEBUG(if (!(m_pInstance)) AssertApp(__FILE__, 163, "m_pInstance", 0);)
     }
     return m_pInstance;
 }
@@ -269,7 +269,7 @@ void CCardBattle::init() {
     }
     m_cardRoom.init(cardID, cardNum);
     if (!m_pSeqCtrlEnemy) {
-        m_pSeqCtrlEnemy = new (__FILE__ "(237)") D2::C2DSeqCtrl(2);
+        m_pSeqCtrlEnemy = new KH_AT("(237)") D2::C2DSeqCtrl(2);
     }
     initCardBreak(0, 0);
     m_uiDuelState = 0;
@@ -280,7 +280,7 @@ void CCardBattle::init() {
     UINT flag = 0x20000;
     if (m_uiFlag & flag) {
         if (CGameWork::getInt(0, 0x24) & 0x20) m_uiDuelState = 1;
-        m_pDuelGauge = new (__FILE__ "(265)") CDuelGauge(this);
+        m_pDuelGauge = new KH_AT("(265)") CDuelGauge(this);
     }
 }
 void CCardBattle::main() {
@@ -368,7 +368,7 @@ void CCardBattle::calcPlayingCard() {
     }
 }
 void CCardBattle::exePlaying(INT inUser) {
-    if (!(inUser)) AssertApp(__FILE__, 440, "inUser", 0);
+    KH_DEBUG(if (!(inUser)) AssertApp(__FILE__, 440, "inUser", 0);)
     UINT _PLAYER = inUser - 1;
     UINT _ENEMY = _PLAYER ^ 1;
     TIMEQ tqFrameRate = getFrameRate();
@@ -397,8 +397,8 @@ void CCardBattle::exePlaying(INT inUser) {
     INT iZantetsuken = m_iStock[_ENEMY] == 7;
     INT iDark = m_uiFlag & 0x80000;
     INT iAllBreak = (m_uiFlag & 0x100000) ? inUser : 0;
-    INT iDuelNG = 0;
-    INT iTrg = m_uiFlag & 0x600000;
+    KH_DEBUG(INT iDuelNG = 0;)
+    INT iTrg = m_uiFlag & 0x600000; KH_RELEASE(INT iDuelNG = 0;)
     switch (uiState) {
     case 0:
         m_tqPlayTimer[_PLAYER] = 0;
@@ -898,7 +898,7 @@ void CCardBattle::setNumberBreak(UINT _PLAYER, UINT _ENEMY) {
     }
 }
 BOOL CCardBattle::checkNowPlaying(INT inSide, CBattleCard* pCard) {
-    if (!(inSide)) AssertApp(__FILE__, 1425, "inUser", 0);
+    KH_DEBUG(if (!(inSide)) AssertApp(__FILE__, 1425, "inUser", 0);)
     for (INT i = 0; i < 7; i++) {
         if (m_pCard[inSide - 1][i] == pCard) return TRUE;
     }
@@ -974,13 +974,13 @@ INT CCardBattle::testBreakingCard(UINT inPlayer) {
     INT iPointE = m_iPoint[_ENEMY];
     if (!iPointE) return 0;
     if (iPointE < iPoint) {
-        TRACE("CCardBattle::testBreakingCard \x81\xa6pCB->isPlayingCardStandNow==OK! \x81\xa6No.2779 \x91\xce\x8f\x88" "4\n");
+        TRACE("CCardBattle::testBreakingCard \x81\xa6pCB->isPlayingCardStandNow==OK! \x81\xa6No.2779 \x91\xce\x8f\x88" "4\n"); KH_RELEASE(__asm__ volatile("");) /* MATCH: retail keeps this arm branchy (if-conversion blocked) where the trace was */
         return 2;
     }
     return 0;
 }
 INT CCardBattle::setPlayCard(HANDLE inHandle, INT inUser, CBattleCard* inCard, CARD* inData, INT inTest) {
-    if (!(inUser)) AssertApp(__FILE__, 1660, "inUser", 0);
+    KH_DEBUG(if (!(inUser)) AssertApp(__FILE__, 1660, "inUser", 0);)
     UINT _PLAYER = inUser - 1;
     if (m_uiState[_PLAYER]) return 0;
     m_hOwner[_PLAYER] = inHandle;
@@ -997,9 +997,9 @@ INT CCardBattle::setPlayCard(HANDLE inHandle, INT inUser, CBattleCard* inCard, C
         m_cardData[_PLAYER][0] = *inCard->getCardData();
         checkNowPlaying(inUser, inCard);
     } else {
-        if (!(inData)) AssertApp(__FILE__, 1708, "inData", 0);
+        KH_DEBUG(if (!(inData)) AssertApp(__FILE__, 1708, "inData", 0);)
         m_cardData[_PLAYER][0] = *inData;
-        m_pCard[_PLAYER][0] = new (__FILE__ "(1710)")
+        m_pCard[_PLAYER][0] = new KH_AT("(1710)")
             CBattleCard(this, inData->m_nKind, inData->m_nNumber, inUser, 0);
         if (m_pCard[_PLAYER][0]) m_pCard[_PLAYER][0]->setRoomEffect(NULL);
         m_cardData[_PLAYER][0] = *m_pCard[_PLAYER][0]->getCardData();
@@ -1021,7 +1021,7 @@ INT CCardBattle::setPlayCard(HANDLE inHandle, INT inUser, CBattleCard* inCard, C
 }
 INT CCardBattle::setPlayStock(HANDLE inHandle, INT inUser, CBattleCard** inCard, INT inSkill, INT inExtra, INT inFirst,
                               INT inTest) {
-    if (!(inUser)) AssertApp(__FILE__, 1754, "inUser", 0);
+    KH_DEBUG(if (!(inUser)) AssertApp(__FILE__, 1754, "inUser", 0);)
     UINT _PLAYER = inUser - 1;
     if (m_uiState[_PLAYER]) return 0;
     m_hOwner[_PLAYER] = inHandle;
@@ -1051,7 +1051,7 @@ INT CCardBattle::setPlayStock(HANDLE inHandle, INT inUser, CBattleCard** inCard,
     return 1;
 }
 INT CCardBattle::setEnchantCard(HANDLE inHandle, INT inUser, CBattleCard* inCard) {
-    if (!(inUser)) AssertApp(__FILE__, 1823, "inUser", 0);
+    KH_DEBUG(if (!(inUser)) AssertApp(__FILE__, 1823, "inUser", 0);)
     UINT _PLAYER = inUser - 1;
     if (m_uiState[_PLAYER]) return 0;
     if (m_pEnchant[_PLAYER]) resetEnchantCard(inUser);
@@ -1061,7 +1061,7 @@ INT CCardBattle::setEnchantCard(HANDLE inHandle, INT inUser, CBattleCard* inCard
     CSound::playSE(0x20, -1, 0x40);
     if (m_pEnchantGauge[_PLAYER]) delete m_pEnchantGauge[_PLAYER];
     m_pEnchantGauge[_PLAYER] = NULL;
-    m_pEnchantGauge[_PLAYER] = new (__FILE__ "(1858)")
+    m_pEnchantGauge[_PLAYER] = new KH_AT("(1858)")
         CEnchantGauge(this, inUser, m_cardEnchant[_PLAYER]);
     m_nEnchantTime[_PLAYER] = _ref(g_pBattleCardList)[m_cardEnchant[_PLAYER].m_nKind].EFF_TIMES;
     if (_PLAYER == 0) setPlayerEnchant(m_cardEnchant[0].m_nKind);
@@ -1131,7 +1131,7 @@ INT CCardBattle::setEnchantCard(HANDLE inHandle, INT inUser, CBattleCard* inCard
     return 1;
 }
 void CCardBattle::decEnchantTime(INT inUser, INT inPart, INT inKind) {
-    if (!(inUser)) AssertApp(__FILE__, 1977, "inUser", 0);
+    KH_DEBUG(if (!(inUser)) AssertApp(__FILE__, 1977, "inUser", 0);)
     UINT _PLAYER = inUser - 1;
     CARD& card = _ref(m_pInstance)->m_cardEnchant[_PLAYER];
     if (!card.m_nKind) return;
@@ -1149,7 +1149,7 @@ void CCardBattle::decEnchantTime(INT inUser, INT inPart, INT inKind) {
 }
 void CCardBattle::destroyPlayCard(INT inFlag, INT inP1) { resetNowPlaying(inFlag); }
 void CCardBattle::resetNowPlaying(INT inUser) {
-    if (!(inUser)) AssertApp(__FILE__, 2028, "inUser", 0);
+    KH_DEBUG(if (!(inUser)) AssertApp(__FILE__, 2028, "inUser", 0);)
     UINT _PLAYER = inUser - 1;
     if (inUser == 1) {
         if (m_iStock[_PLAYER] > 0) {
@@ -1176,7 +1176,7 @@ void CCardBattle::resetNowPlaying(INT inUser) {
     m_iFirst[_PLAYER] = 0;
 }
 void CCardBattle::resetEnchantCard(INT inUser) {
-    if (!(inUser)) AssertApp(__FILE__, 2069, "inUser", 0);
+    KH_DEBUG(if (!(inUser)) AssertApp(__FILE__, 2069, "inUser", 0);)
     UINT _PLAYER = inUser - 1;
     if (!_PLAYER) {
         resetPlayerEnchant(m_cardEnchant[0].m_nKind);
@@ -1401,7 +1401,7 @@ void CCardBattle::initCardBreak(HANDLE inHandle, UINT inUser) {
     if (!inHandle) {
         m_hBreak = 0;
         if (!m_pSeqCtrlBreak) {
-            m_pSeqCtrlBreak = new (__FILE__ "(2598)") D2::C2DSeqCtrl(2);
+            m_pSeqCtrlBreak = new KH_AT("(2598)") D2::C2DSeqCtrl(2);
             m_pSeqCtrlBreak->setLayer(7);
             m_pSeqCtrlBreak->addSeq(g_szSeqCockpit, 1);
             UINT flag = 0x20000;
@@ -1415,7 +1415,7 @@ void CCardBattle::initCardBreak(HANDLE inHandle, UINT inUser) {
         }
         m_hSpeed = 0;
         if (!m_pSeqCtrlSpeed) {
-            m_pSeqCtrlSpeed = new (__FILE__ "(2616)") D2::C2DSeqCtrl(2);
+            m_pSeqCtrlSpeed = new KH_AT("(2616)") D2::C2DSeqCtrl(2);
             UINT flag = 0x20000;
             if (m_uiFlag & flag) {
                 m_pSeqCtrlSpeed->setLayer(7);
@@ -1496,7 +1496,7 @@ void CCardBattle::destroyEnemyCard(INT inHandle) {
     if (inHandle == m_hOwner[1]) destroyPlayCard(2, inHandle);
 }
 void CCardBattle::destroyRevolver(INT inSide) {
-    if (!(inSide)) AssertApp(__FILE__, 2764, "inUser", 0);
+    KH_DEBUG(if (!(inSide)) AssertApp(__FILE__, 2764, "inUser", 0);)
     UINT _PLAYER = inSide - 1;
     if (m_pRevolver[_PLAYER]) {
         m_pRevolver[_PLAYER]->destroy();
@@ -1504,11 +1504,11 @@ void CCardBattle::destroyRevolver(INT inSide) {
     }
 }
 void CCardBattle::setRevolver(INT inSide, CCardRevolver* pRevolver) {
-    if (!(inSide)) AssertApp(__FILE__, 2774, "inUser", 0);
+    KH_DEBUG(if (!(inSide)) AssertApp(__FILE__, 2774, "inUser", 0);)
     m_pRevolver[inSide - 1] = pRevolver;
 }
 CCardRevolver* CCardBattle::getRevolver(INT inSide) {
-    if (!(inSide)) AssertApp(__FILE__, 2779, "inUser", 0);
+    KH_DEBUG(if (!(inSide)) AssertApp(__FILE__, 2779, "inUser", 0);)
     return m_pRevolver[inSide - 1];
 }
 void CCardBattle::setBattleEnd() {
@@ -1560,13 +1560,13 @@ CStockFolder* CCardBattle::setStockFolder(::CTask* pParent, INT inUser) {
     UINT _PLAYER = inUser - 1;
     if (!m_pInstance->m_pStockFolder[_PLAYER]) {
         m_pInstance->m_pStockFolder[_PLAYER] =
-            new (__FILE__ "(2898)") CStockFolder(pParent, inUser);
+            new KH_AT("(2898)") CStockFolder(pParent, inUser);
         _ref(m_pInstance)->m_hDuelEnemy = pParent->getHandle();
     }
     return m_pInstance->m_pStockFolder[_PLAYER];
 }
 void CCardBattle::destroyStockFolder(INT inSide) {
-    if (!(inSide)) AssertApp(__FILE__, 2905, "inUser", 0);
+    KH_DEBUG(if (!(inSide)) AssertApp(__FILE__, 2905, "inUser", 0);)
     UINT _PLAYER = inSide - 1;
     if (m_pStockFolder[_PLAYER]) {
         m_pStockFolder[_PLAYER]->destroy();
@@ -1610,8 +1610,8 @@ void ENCHANT_PARAM::init(INT inOwner, UINT inUser) {
     iNormal = 0;
 }
 void CCardBattle::calcEnchantParam(ENCHANT_PARAM& ioParam) {
-    if (!(ioParam.uiUser)) AssertApp(__FILE__, 3103, "ioParam.uiUser", 0);
-    UINT _PLAYER = ioParam.uiUser - 1;
+    KH_DEBUG(if (!(ioParam.uiUser)) AssertApp(__FILE__, 3103, "ioParam.uiUser", 0);)
+    UINT _PLAYER = KH_DEBUG(ioParam.uiUser - 1) KH_RELEASE(({ UINT u = ioParam.uiUser - 1; u; })); /* retail: a copy of the index (a temporary) */
     CARD& enchant = m_pInstance->m_cardEnchant[_PLAYER];
     if (enchant.m_nKind < 0x44) return;
     switch (ioParam.uiState) {
@@ -1887,7 +1887,7 @@ void CardBattle::getDropFriendCard(CARD& outData, INT inRate) {
     if (roomID == 0 || roomID == 99) worldID = 13;
     BOOL bCheck = TRUE;
     if (CGame::isRikuGame()) worldID += 13;
-    if (DebugWork::g_dw.player.iFriend > 0) {
+    if (KH_DW(DebugWork::g_dw.player.iFriend) > 0) {
         r = 0;
         bCheck = FALSE;
     }
@@ -1957,11 +1957,11 @@ INT CardBattle::getDropPlutoCard(CARD& outData) {
     BOOL bCheck2 = TRUE;
     INT r = RND::genrand_int31() % 1000;
     BOOL bCheck = TRUE;
-    if (DebugWork::g_dw.player.iFriend > 0) {
+    if (KH_DW(DebugWork::g_dw.player.iFriend) > 0) {
         r = 0;
         bCheck = FALSE;
     }
-    if (DebugWork::g_dw.player.iPluto > 0) {
+    if (KH_DW(DebugWork::g_dw.player.iPluto) > 0) {
         r = 0;
         bCheck = FALSE;
         bCheck2 = FALSE;
@@ -2095,7 +2095,7 @@ void CCardBattle::setDuelStart(INT inFlag) {
     CGameWork::setFlag(1, 11, TRUE);
     CGameWork::setInt(1, 0xE2, CGameWork::getInt(1, 0xE2) | 0x14);
     TIMEQ time = m_nDuelBreakCountMax * 3000 + 3000;
-    if (DebugWork::g_dw.player.iDuelTime > 0) time = DebugWork::g_dw.player.iDuelTime * 3000;
+    if (KH_DW(DebugWork::g_dw.player.iDuelTime) > 0) time = KH_DW(DebugWork::g_dw.player.iDuelTime) * 3000;
     m_pDuelGauge->setStart(time, m_nDuelBreakCountMax);
     PLM::CPlayerManager* pPLM = (PLM::CPlayerManager*)CTaskMan::getSysTask(0x1F);
     INT shiftID = (g_pPlayer->m_uiConditionFlag & 0x400000) ? 3 : 0;
@@ -2264,7 +2264,7 @@ void CDuelGauge::_initialize() {
     m_tqTimer = 0;
     m_tqLimit = 0;
     m_hTimerSE = 0;
-    m_pSeqCtrls = new (__FILE__ "(4378)") D2::C2DSeqCtrl[12];
+    m_pSeqCtrls = new KH_AT("(4378)") D2::C2DSeqCtrl[12];
 }
 void CDuelGauge::main() {
     switch (m_uiState) {
@@ -2632,3 +2632,4 @@ void CCardBattle::setPronounceEnd(INT inCount) {
     }
 }
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

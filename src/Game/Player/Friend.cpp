@@ -87,7 +87,7 @@ void CFriend::initFSM_() {
 static inline void _setNewState(CState*& p, CState& NewState) { p = &NewState; }
 #line 143
 void CFriend::changeState(INT inState) {
-    if (!(0 <= inState && inState < STATE_MAX)) AssertApp(__FILE__, __LINE__, "0 <= inState && inState < STATE_MAX", 0);
+    KH_DEBUG(if (!(0 <= inState && inState < STATE_MAX)) AssertApp(__FILE__, __LINE__, "0 <= inState && inState < STATE_MAX", 0);)
     _setNewState(m_pNewState, m_State[inState]);
 }
 
@@ -720,7 +720,7 @@ INT CFriend::checkChainTrg() {
         }
     } else {
         if (isButtonTrg(0x10, 0)) {
-            if (DebugWork::g_dw.player.iRenda) return FALSE;
+            if (KH_DW(DebugWork::g_dw.player.iRenda)) return FALSE;
             m_uiFlag |= 0x40000;
         }
     }
@@ -797,10 +797,11 @@ void CFriend::endStateExit_() {
 void CFriend::getCameraTargetPos(FVECTOR& outPos) {
     outPos = Crd(0).getWorldMatrix().v[3];
     outPos.y += m_fCamHeight;
-    if (dbgCheckUser(KKIKUCHI) && DebugWork::g_dw.player.iTemp == 6) {
-        outPos.y += DebugWork::g_dw.player.vTemp.y;
+    if (dbgCheckUser(KKIKUCHI) && KH_DW(DebugWork::g_dw.player.iTemp) == 6) {
+        outPos.y += KH_DW(DebugWork::g_dw.player.vTemp.y);
     }
 }
 
 } // namespace Friend
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

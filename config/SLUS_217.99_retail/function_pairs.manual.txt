@@ -1,0 +1,24 @@
+# Function pairs measured by hand (tools/version_map.py reads them before the call graph): <beta name> <retail address>
+# System/MainApp: retail's CMainApp::run no longer calls DebugWork::initialize, which shifted the call-graph pairing of
+# its other calls by one. In link order (kept, as everywhere): run, _mainLoop 0x103C98 (0x1CC bytes, the beta's 0x1D8),
+# _mainProc 0x103E68, _coldReset, _initPS2, _loadIopModules, _setupManagers 0x1044F8, _disposeManagers 0x1046A0,
+# _warmReset 0x104808, isEnableSoftReset, _closeWarningMessageCallback, _checkHardError 0x104968, _checkPause 0x104A60,
+# _softReset 0x104B00, reqSoftReset ... _setProcCount, _setDrawCount 0x104BE8, _setDraw2Count 0x104BF8, ...
+# isDbgUsrPauseDisable, _VBlankStartHandler 0x1051E8, procFlipThread, _checkSnapShot 0x105430, _checkReportMemory 0x105438
+_mainLoop__Fv 0x00103C98
+_mainProc__Fii 0x00103E68
+_setupManagers__Fv 0x001044F8
+_disposeManagers__Fv 0x001046A0
+_warmReset__Fv 0x00104808
+_checkHardError__Fv 0x00104968
+_checkPause__Fv 0x00104A60
+_softReset__Fv 0x00104B00
+_setDrawCount__FUs 0x00104BE8
+_setDraw2Count__FUs 0x00104BF8
+_VBlankStartHandler__Fi 0x001051E8
+_checkSnapShot__Fv 0x00105430
+_checkReportMemory__Fv 0x00105438
+# libppp/pppPart: the call graph paired pppRunPartDraw with callEndProg's address; in link order (pppRunPartCalc,
+# pppRunPartDraw, pppEmptyRunPobject, apeaPObject) they are 0x154E28 (0x478 bytes, as the beta's) and 0x1552A0
+pppRunPartDraw 0x00154E28
+pppEmptyRunPobject 0x001552A0

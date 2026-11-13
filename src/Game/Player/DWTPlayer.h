@@ -19,7 +19,7 @@ extern INT SCREEN_HEIGHT;
 #ifndef DWTPLAYER_TITLE
 #define DWTPLAYER_TITLE(i, s) s
 #endif
-
+#ifndef KH_RETAIL /* retail has no debug windows */
 namespace DWTPlayer {
 
 static BOOL DebugPlayerCamera(CDebugWindow* pObj, INT inY, INT inParam) {
@@ -304,5 +304,5 @@ static DEBUG_WINDOW_LINE debugPlayerBlockInfoLine[18] = {
 static DEBUG_WINDOW_TBL debugPlayerBlockInfo = {DWTPLAYER_TITLE(8, "PLM::RB_DATA\x8f\xee\x95\xf1"), -0x8, -(SCREEN_HEIGHT >> 1) + 0x3C, 21, 17, 12, 0, 6, debugPlayerBlockInfoLine, NULL, NULL};
 
 } // namespace DWTPlayer
-
+#endif
 #endif /* GAME_PLAYER_DWTPLAYER_H */

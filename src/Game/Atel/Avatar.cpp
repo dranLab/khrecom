@@ -158,21 +158,21 @@ void CAvatar::InitAvatar(INT in_flag) {
     enableFade2Path(1, -1);
     setTexAnmSeq(0, "EYE_BLINK");
     if (in_flag == 1) setEntityFlag(1, 0);
-    lineX.m_pCrd = &Crd(0);
-    lineY.m_pCrd = &Crd(0);
-    lineZ.m_pCrd = &Crd(0);
-    lineX.m_C0.set(255, 0, 0, 255);
-    lineX.m_C1.set(255, 0, 0, 255);
-    lineY.m_C0.set(0, 255, 0, 255);
-    lineY.m_C1.set(0, 255, 0, 255);
-    lineZ.m_C0.set(0, 0, 255, 255);
-    lineZ.m_C1.set(0, 0, 255, 255);
-    lineX.m_P0.set(0.0f, 0.0f, 0.0f, 1.0f);
-    lineX.m_P1.set(1.0f, 0.0f, 0.0f, 1.0f);
-    lineY.m_P0.set(0.0f, 0.0f, 0.0f, 1.0f);
-    lineY.m_P1.set(0.0f, 1.0f, 0.0f, 1.0f);
-    lineZ.m_P0.set(0.0f, 0.0f, 0.0f, 1.0f);
-    lineZ.m_P1.set(0.0f, 0.0f, 1.0f, 1.0f);
+    KH_DEBUG(lineX.m_pCrd = &Crd(0);)
+    KH_DEBUG(lineY.m_pCrd = &Crd(0);)
+    KH_DEBUG(lineZ.m_pCrd = &Crd(0);)
+    KH_DEBUG(lineX.m_C0.set(255, 0, 0, 255);)
+    KH_DEBUG(lineX.m_C1.set(255, 0, 0, 255);)
+    KH_DEBUG(lineY.m_C0.set(0, 255, 0, 255);)
+    KH_DEBUG(lineY.m_C1.set(0, 255, 0, 255);)
+    KH_DEBUG(lineZ.m_C0.set(0, 0, 255, 255);)
+    KH_DEBUG(lineZ.m_C1.set(0, 0, 255, 255);)
+    KH_DEBUG(lineX.m_P0.set(0.0f, 0.0f, 0.0f, 1.0f);)
+    KH_DEBUG(lineX.m_P1.set(1.0f, 0.0f, 0.0f, 1.0f);)
+    KH_DEBUG(lineY.m_P0.set(0.0f, 0.0f, 0.0f, 1.0f);)
+    KH_DEBUG(lineY.m_P1.set(0.0f, 1.0f, 0.0f, 1.0f);)
+    KH_DEBUG(lineZ.m_P0.set(0.0f, 0.0f, 0.0f, 1.0f);)
+    KH_DEBUG(lineZ.m_P1.set(0.0f, 0.0f, 1.0f, 1.0f);)
     if ((UINT)getID() % 10000 == 1007 && m_pMove) {
         m_pMove->setRadius(0.15f);
         m_pMove->setShiftY(0.18f);
@@ -181,7 +181,7 @@ void CAvatar::InitAvatar(INT in_flag) {
     LockOnManager::CLockOnManager::registerLockOnObject(getHandle());
 }
 void CAvatar::changeAvatarMainState(INT nState) {
-    if (!((0 <= nState) && (2 > nState))) AssertApp(__FILE__, 154, "(0 <= nState) && (_MAIN_STATE_MAX > nState)", 0);
+    KH_DEBUG(if (!((0 <= nState) && (2 > nState))) AssertApp(__FILE__, 154, "(0 <= nState) && (_MAIN_STATE_MAX > nState)", 0);)
     gotoState(m_MainState[nState]);
 }
 void CAvatar::beginStateMain() {
@@ -243,12 +243,12 @@ void CAvatar::lastUpdate() {
 }
 CAtel& CAvatar::getAtel() {
     CAtel* pAtel = (CAtel*)getParent();
-    if (!(pAtel)) AssertApp(__FILE__, 360, "pAtel", 0);
+    KH_DEBUG(if (!(pAtel)) AssertApp(__FILE__, 360, "pAtel", 0);)
     return *pAtel;
 }
 CVSM& CAvatar::getVSM() {
     CVSM* pVSM = getAtel().getVSM();
-    if (!(pVSM)) AssertApp(__FILE__, 370, "pVSM", 0);
+    KH_DEBUG(if (!(pVSM)) AssertApp(__FILE__, 370, "pVSM", 0);)
     return *pVSM;
 }
 void CAvatar::getNowPosition(FVECTOR& vPos) const { vPos = getPos(); }
@@ -265,36 +265,36 @@ void CAvatar::getFade(INT nModel, FLOAT& fFade) const {
 FLOAT CAvatar::getDirection() const { return 0.0f; }
 INT CAvatar::getTypeID() const { return 0x4000; }
 BOOL CAvatar::createMoveStruct() {
-    if (m_pMoveStruct) return TRUE;
-    m_pMoveStruct = new (__FILE__ "(458)") AvatarMoveStruct;
-    if (!m_pMoveStruct) {
-        TRACE(" ... Fail to create MoveStructure\n");
-        return FALSE;
-    }
-    return TRUE;
+    KH_DEBUG(if (m_pMoveStruct) return TRUE;) KH_RELEASE(if (!m_pMoveStruct))
+    m_pMoveStruct = new KH_AT("(458)") AvatarMoveStruct;
+    KH_DEBUG(if (!m_pMoveStruct) {)
+        KH_DEBUG(TRACE(" ... Fail to create MoveStructure\n");)
+        KH_DEBUG(return FALSE;)
+    KH_DEBUG(})
+    return KH_VER(TRUE, m_pMoveStruct != NULL);
 }
 BOOL CAvatar::createRotateStruct() {
-    if (m_pRotateStruct) return TRUE;
-    m_pRotateStruct = new (__FILE__ "(477)") AvatarRotateStruct;
-    if (!m_pRotateStruct) {
-        TRACE(" ... Fail to create RotateStructure\n");
-        return FALSE;
-    }
-    return TRUE;
+    KH_DEBUG(if (m_pRotateStruct) return TRUE;) KH_RELEASE(if (!m_pRotateStruct))
+    m_pRotateStruct = new KH_AT("(477)") AvatarRotateStruct;
+    KH_DEBUG(if (!m_pRotateStruct) {)
+        KH_DEBUG(TRACE(" ... Fail to create RotateStructure\n");)
+        KH_DEBUG(return FALSE;)
+    KH_DEBUG(})
+    return KH_VER(TRUE, m_pRotateStruct != NULL);
 }
 BOOL CAvatar::createScaleStruct() {
-    if (m_pScaleStruct) return TRUE;
-    m_pScaleStruct = new (__FILE__ "(494)") AvatarScaleStruct;
-    if (!m_pScaleStruct) {
-        TRACE(" ... Fail to create ScalingStructure\n");
-        return FALSE;
-    }
-    return TRUE;
+    KH_DEBUG(if (m_pScaleStruct) return TRUE;) KH_RELEASE(if (!m_pScaleStruct))
+    m_pScaleStruct = new KH_AT("(494)") AvatarScaleStruct;
+    KH_DEBUG(if (!m_pScaleStruct) {)
+        KH_DEBUG(TRACE(" ... Fail to create ScalingStructure\n");)
+        KH_DEBUG(return FALSE;)
+    KH_DEBUG(})
+    return KH_VER(TRUE, m_pScaleStruct != NULL);
 }
 AvatarFadeStruct* CAvatar::createFadeStruct() {
     for (INT i = 0; i < 5; i++) {
         if (!m_pFadeStruct[i]) {
-            m_pFadeStruct[i] = new (__FILE__ "(514)") AvatarFadeStruct;
+            m_pFadeStruct[i] = new KH_AT("(514)") AvatarFadeStruct;
             if (!m_pFadeStruct[i]) {
                 TRACE(" ... Fail to create FadeStructure\n");
                 return NULL;
@@ -398,7 +398,7 @@ INT CAvatar::onSetPosPathTop(INT nCmd, void* pParam, INT nID) {
 }
 INT CAvatar::onMove(INT nCmd, void* pParam, INT nID) {
     AvatarMoveParam* p = (AvatarMoveParam*)pParam;
-    if (!(p)) AssertApp(__FILE__, 779, "p", 0);
+    KH_DEBUG(if (!(p)) AssertApp(__FILE__, 779, "p", 0);)
     if (!m_pMoveStruct && !createMoveStruct()) return -1;
     m_nState = ((m_nState | 0x10) & ~0x20) | 0x400;
     FVECTOR vOrigin;
@@ -582,7 +582,7 @@ static inline void _shortestRad(FLOAT& f, FLOAT fStart) {
 }
 INT CAvatar::onRotate(INT nCmd, void* pParam, INT nID) {
     AvatarRotateParam* p = (AvatarRotateParam*)pParam;
-    if (!(p)) AssertApp(__FILE__, 1232, "p", 0);
+    KH_DEBUG(if (!(p)) AssertApp(__FILE__, 1232, "p", 0);)
     if (!m_pRotateStruct && !createRotateStruct()) return -1;
     m_pRotateStruct->_nRotateType = p->_nType;
     USHORT nType = getAvatarRotType();
@@ -664,7 +664,7 @@ INT CAvatar::onRotate(INT nCmd, void* pParam, INT nID) {
     return -1;
 }
 void CAvatar::setAvatarRotTimeLimit(TIMEQ nTime) {
-    if (!(m_pRotateStruct)) AssertApp(__FILE__, 1381, "m_pRotateStruct", 0);
+    KH_DEBUG(if (!(m_pRotateStruct)) AssertApp(__FILE__, 1381, "m_pRotateStruct", 0);)
     BOOL bEternal = FALSE;
     if (nTime < 0) {
         bEternal = TRUE;
@@ -713,7 +713,7 @@ INT CAvatar::onFadeing(INT nCmd, void* pParam, INT nID) {
     AvatarFadeStruct* pFadeStruct;
     FLOAT alp;
     FLOAT f;
-    if (!(p)) AssertApp(__FILE__, 1468, "p", 0);
+    KH_DEBUG(if (!(p)) AssertApp(__FILE__, 1468, "p", 0);)
     pFadeStruct = createFadeStruct();
     if (!pFadeStruct) return -1;
     pFadeStruct->_ModelNo = nID;
@@ -734,13 +734,13 @@ INT CAvatar::onFadeing(INT nCmd, void* pParam, INT nID) {
     return -1;
 }
 BOOL CAvatar::FadeAvatarMain() {
-    TIMEQ nTQ = getFrameRate();
+    TIMEQ nTQ = getFrameRate(); KH_RELEASE(BOOL bResult;)
     for (INT i = 0; i < 5; i++) {
         if (m_pFadeStruct[i]) {
             countAvatarFadeTime(m_pFadeStruct[i], nTQ);
             if (!isOverAvatarFadeTimeLimit(m_pFadeStruct[i])) {
                 if (isOverAvatarFadeTimeLimit(m_pFadeStruct[i], nTQ)) setAvatarState(0x8000, FALSE);
-                FLOAT fFadeSpeed = getAvatarFadeSpeed(m_pFadeStruct[i]) * nTQ;
+                KH_RELEASE(bResult = FALSE;) FLOAT fFadeSpeed = getAvatarFadeSpeed(m_pFadeStruct[i]) * nTQ;
                 FLOAT fFade;
                 if (m_pFadeStruct[i]->_ModelNo == -1) {
                     getFade(-1, fFade);
@@ -758,14 +758,14 @@ BOOL CAvatar::FadeAvatarMain() {
             }
         }
     }
-    return FALSE;
+    return KH_VER(FALSE, bResult);
 }
 void CAvatar::FadeAvatarEnd() {}
 void CAvatar::cancelFadeAvatar() {}
 INT CAvatar::onScaling(INT nCmd, void* pParam, INT nID) {
     AvatarScaleParam* p = (AvatarScaleParam*)pParam;
     FVECTOR v;
-    if (!(p)) AssertApp(__FILE__, 1607, "p", 0);
+    KH_DEBUG(if (!(p)) AssertApp(__FILE__, 1607, "p", 0);)
     if (!m_pScaleStruct && !createScaleStruct()) return -1;
     setAvatarTargetScale(p->_vTarget);
     getScale(v);
@@ -971,7 +971,7 @@ INT CAvatar::onAvatarAttachEffect(INT nCmd, void* pParam, INT nID) {
 INT CAvatar::onAvatarSetLookPosition(INT nCmd, void* pParam, INT nID) {
     AvatarSetLook* p = (AvatarSetLook*)pParam;
     FVECTOR v = _crdWorldPos(getAtel().getVSM()->getAvatar(p->TargetID)->Crd(0));
-    if (!m_pLookStruct) m_pLookStruct = new (__FILE__ "(2058)") AvatarLookStruct;
+    if (!m_pLookStruct) m_pLookStruct = new KH_AT("(2058)") AvatarLookStruct;
     m_pLookStruct->_nTargetID = p->TargetID;
     m_pLookStruct->_fOffsetY = p->OffsetY;
     v.y += p->OffsetY;
@@ -981,7 +981,7 @@ INT CAvatar::onAvatarSetLookPosition(INT nCmd, void* pParam, INT nID) {
 INT CAvatar::onAvatarSetLookUpdatePosition(INT nCmd, void* pParam, INT nID) {
     AvatarSetLook* p = (AvatarSetLook*)pParam;
     FVECTOR v = _crdWorldPos(getAtel().getVSM()->getAvatar(p->TargetID)->Crd(0));
-    if (!m_pLookStruct) m_pLookStruct = new (__FILE__ "(2079)") AvatarLookStruct;
+    if (!m_pLookStruct) m_pLookStruct = new KH_AT("(2079)") AvatarLookStruct;
     m_pLookStruct->_nTargetID = p->TargetID;
     m_pLookStruct->_fOffsetY = p->OffsetY;
     v.y += p->OffsetY;
@@ -1047,25 +1047,25 @@ FVECTOR* CAvatar::getPathStartPos(const CHAR* pszName) const {
     }
     return pPos;
 }
-void CAvatar::disp() {
-    CEntity::disp();
-    if (DebugWork::g_dw.event.iAtelCoord) {
-        lineX.CGPrim::disp();
-        lineY.CGPrim::disp();
-        lineZ.CGPrim::disp();
-    }
-}
+KH_DEBUG(void CAvatar::disp() {)
+    KH_DEBUG(CEntity::disp();)
+    KH_DEBUG(if (KH_DW(DebugWork::g_dw.event.iAtelCoord)) {)
+        KH_DEBUG(lineX.CGPrim::disp();)
+        KH_DEBUG(lineY.CGPrim::disp();)
+        KH_DEBUG(lineZ.CGPrim::disp();)
+    KH_DEBUG(})
+KH_DEBUG(})
 AvatarMoveStruct::~AvatarMoveStruct() {
     delete _pPathData;
     delete _pHermiteHelper;
 }
 BOOL AvatarMoveStruct::setupPath(const CHAR* pszPath, USHORT nMotion) {
     delete _pPathData;
-    _pPathData = new (__FILE__ "(2268)") CPathData(pszPath);
+    _pPathData = new KH_AT("(2268)") CPathData(pszPath);
     _nMoveMotion = 0;
     if (_pPathData) {
         if (!_pHermiteHelper) {
-            _pHermiteHelper = new (__FILE__ "(2274)") CHermitePath;
+            _pHermiteHelper = new KH_AT("(2274)") CHermitePath;
             if (!_pHermiteHelper) goto end;
         }
         {
@@ -1090,3 +1090,4 @@ BOOL AvatarMoveStruct::updatePosOnPath(FLOAT fTime) {
     return bRet;
 }
 // SOURCE DATA: .rodata
+// SOURCE DATA SLUS_217.99_retail: .rodata

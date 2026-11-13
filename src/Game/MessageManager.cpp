@@ -24,8 +24,8 @@ CMessageManager::~CMessageManager() {
 #line 46
 CMessageManager& CMessageManager::getInstance() {
     if (m_pInstance == NULL) {
-        m_pInstance = new (__FILE__ "(48)") CMessageManager;
-        if (!m_pInstance) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
+        m_pInstance = new KH_AT("(48)") CMessageManager;
+        KH_DEBUG(if (!m_pInstance) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);)
     }
     return *m_pInstance;
 }
@@ -63,3 +63,4 @@ BOOL CMessageManager::sendMessage(TIMEQ inDelay, HANDLE inSender, HANDLE inRecei
 }  // namespace Message
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data

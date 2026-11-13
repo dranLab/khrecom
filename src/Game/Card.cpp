@@ -54,7 +54,7 @@ class CRsrcData;
 
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 #line 287
 
@@ -1016,9 +1016,9 @@ void CCard::setCardPossible(USHORT usKind2) {
     if (!kind) return;
     if (!isValid(usKind2)) return;
     if (getCardAppearance(usKind2)) return;
-    CARD card;
-    card.init(usKind2, 0);
-    if (0) TRACE("\x83J\x81[\x83h\x82\xaa\x89\xf0\x8b\xd6\x82\xb3\x82\xea\x82\xdc\x82\xb5\x82\xbd\x81I [Kind %3d: %s]\n", card.m_nKind2, card.getName());
+    KH_DEBUG(CARD card;)
+    KH_DEBUG(card.init(usKind2, 0);)
+    KH_DEBUG(if (0) TRACE("\x83J\x81[\x83h\x82\xaa\x89\xf0\x8b\xd6\x82\xb3\x82\xea\x82\xdc\x82\xb5\x82\xbd\x81I [Kind %3d: %s]\n", card.m_nKind2, card.getName());)
     setCardAppearance(kind, 1);
     usKind2 = kind | 0x100;
     if (canPremium(kind)) setCardAppearance(usKind2, 1);
@@ -1228,3 +1228,4 @@ void CCard::setCardAppearance(USHORT usKind2, INT nAppear) {
 }
 
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .data .rodata

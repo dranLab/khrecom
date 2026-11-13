@@ -59,7 +59,7 @@ struct MCD_HEADER {
 CCollUtil* CCollUtil::m_pInstance = __null;
 
 CCollUtil::CCollUtil() {
-    m_pCheckColl = new (__FILE__ "(37)") CSphereCollision;
+    m_pCheckColl = new KH_AT("(37)") CSphereCollision;
     m_pCheckColl->m_Kind = COLL_KIND_PLAYER;
     m_pCheckColl->m_shiftY = 0.0f;
     m_pChipStatus = __null;
@@ -204,7 +204,7 @@ void CCollUtil::_backupChipStatus() {
     }
     if (m_pChipStatus) delete[] m_pChipStatus;
     m_pChipStatus = __null;
-    m_pChipStatus = new (__FILE__ "(211)") UINT[m_pMCDInfo->iChipSuu];
+    m_pChipStatus = new KH_AT("(211)") UINT[m_pMCDInfo->iChipSuu];
     for (i = 0, pChip = m_pMCDInfo->pMCChip; i < m_pMCDInfo->iChipSuu; i++, pChip++) {
         m_pChipStatus[i] = pChip->id;
     }
@@ -591,9 +591,9 @@ void CCollUtil::detectMCInit(MC_CHIP* pChip, INT iArea) {
     }
     if (!(m_PrimInfoIdx < 0x240)) {
         TRACE("PRIM_INFO_MAX \203I\201[\203o\201[\n");
-        if (!(m_PrimInfoIdx < 0x240)) AssertApp(__FILE__, 818, "m_PrimInfoIdx < PRIM_INFO_MAX", 0);
+        KH_DEBUG(if (!(m_PrimInfoIdx < 0x240)) AssertApp(__FILE__, 818, "m_PrimInfoIdx < PRIM_INFO_MAX", 0);)
     }
-    if (!(m_PrimInfoIdx2 < 0x40)) AssertApp(__FILE__, 819, "m_PrimInfoIdx2 < PRIM_INFO2_MAX", 0);
+    KH_DEBUG(if (!(m_PrimInfoIdx2 < 0x40)) AssertApp(__FILE__, 819, "m_PrimInfoIdx2 < PRIM_INFO2_MAX", 0);)
 }
 
 INT CCollUtil::_detectMCD(CCollision& collision) {
@@ -655,9 +655,9 @@ INT CCollUtil::_detectMCD(CCollision& collision) {
     vec0 = m_vCkE0 - m_vCkS0;
     DivVector(vec1, vec0, fLenCnt);
     m_pPrimInfo = (PRIM_INFO*)SPAD::allocSpad(0x2400);
-    if (!m_pPrimInfo) AssertApp(__FILE__, 890, "m_pPrimInfo", 0);
+    KH_DEBUG(if (!m_pPrimInfo) AssertApp(__FILE__, 890, "m_pPrimInfo", 0);)
     m_pPrimInfo2 = (PRIM_INFO2*)SPAD::allocSpad(0x1000);
-    if (!m_pPrimInfo2) AssertApp(__FILE__, 892, "m_pPrimInfo2", 0);
+    KH_DEBUG(if (!m_pPrimInfo2) AssertApp(__FILE__, 892, "m_pPrimInfo2", 0);)
     if (m_Radius != 0.0f) {
         m_RadiusL = m_Radius;
         m_Radius2 = m_Radius * m_Radius;
@@ -1278,9 +1278,9 @@ public:
 };
 /* DLL import initEveryInt__8CCollDbgi: 0 in config/SLUS_217.99/dll_imports.ld */
 void CCollUtil::_initDbg() {
-    if (m_pCollDbg) {
-        ((CCollDbg*)m_pCollDbg)->initEveryInt(m_PrimInfoMax);
-        m_PrimInfoMax = 0;
-    }
+    KH_DEBUG(if (m_pCollDbg) {)
+        KH_DEBUG(((CCollDbg*)m_pCollDbg)->initEveryInt(m_PrimInfoMax);)
+        KH_DEBUG(m_PrimInfoMax = 0;)
+    KH_DEBUG(})
 }
 // SOURCE DATA: .data .rodata

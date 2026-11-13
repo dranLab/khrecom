@@ -10,7 +10,7 @@
 #include "System/Math3D.h"
 #include "System/HeapMan.h"
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 
 
@@ -19,7 +19,7 @@ CDeFocus* CDeFocus::m_pInstance = NULL;
 void CDeFocus::create(CTask* p) {
     if (!m_pInstance) {
 #line 28
-        m_pInstance = new (__FILE__ "(28)") CDeFocus(p);
+        m_pInstance = new KH_AT("(28)") CDeFocus(p);
         ASSERT(m_pInstance);
     }
 }
@@ -29,7 +29,7 @@ CDeFocus::CDeFocus(CTask* p) : CTask(p, 0x4000) {
         m_sBlurParam[i].m_fBlurNowTime = 0.0f;
         m_sBlurParam[i].m_fBlurAimRate = 0.0f;
         m_sBlurParam[i].m_fBlurOldRate = 0.0f;
-        m_BlurPrim[i].m_iDebugID = i;
+        KH_DEBUG(m_BlurPrim[i].m_iDebugID = i;)
     }
     m_ZFill.setLayerFG(0);
 }
@@ -139,10 +139,10 @@ CBlurPrim::CBlurPrim() {
     m_iColor.col = 0x40808080;
     m_iAlpha = 0x44;
     m_nCalcZOfs = 0;
-    m_iDebugID = 0;
+    KH_DEBUG(m_iDebugID = 0;)
 }
 FIX4 CBlurPrim::calcZ() {
-    if (!(DebugWork::g_dw.sys.m_iBlurKind && DebugWork::g_dw.sys.m_iBlurCh == m_iDebugID)) {
+    if (!(KH_DW(DebugWork::g_dw.sys.m_iBlurKind) && KH_DW(DebugWork::g_dw.sys.m_iBlurCh == m_iDebugID))) {
         if (!m_iKind || m_iRate <= 0) return 0xf0000000;
     }
     return m_nCalcZOfs + 0xffffc08;
@@ -304,12 +304,12 @@ void CDeFocusPrim::_makePktDeFocus() {
     FLOAT fNearLen;
     FLOAT fFarLen;
     const CCamera* pCam;
-    UINT BAK_Status;
-    FLOAT BAK_Near;
-    FLOAT BAK_Far;
+    KH_DEBUG(UINT BAK_Status;)
+    KH_DEBUG(FLOAT BAK_Near;)
+    KH_DEBUG(FLOAT BAK_Far;)
     QWdata* qp;
 
-    if (DebugWork::g_dw.sys.m_iDeFocus) return;
+    if (KH_DW(DebugWork::g_dw.sys.m_iDeFocus)) return;
     if (m_iStatus & 0x10000) return;
     if ((m_iStatus & 3) == 3) return;
     pCam = CWorldEnv::getActiveCamera();
@@ -319,19 +319,19 @@ void CDeFocusPrim::_makePktDeFocus() {
     vLook = *pCam->getLook();
     SubVectorXYZ(vN, vLook, vPos);
     Normalize(vN, vN);
-    BAK_Status = m_iStatus;
-    BAK_Near = m_fNear;
-    BAK_Far = m_fFar;
-    if (0.0f < DebugWork::g_dw.sys.m_fDeFocusNear) {
-        m_iStatus |= 4;
-        m_iStatus &= ~2;
-        m_fNear = DebugWork::g_dw.sys.m_fDeFocusNear;
-    }
-    if (0.0f < DebugWork::g_dw.sys.m_fDeFocusFar) {
-        m_iStatus |= 4;
-        m_iStatus &= ~1;
-        m_fFar = DebugWork::g_dw.sys.m_fDeFocusFar;
-    }
+    KH_DEBUG(BAK_Status = m_iStatus;)
+    KH_DEBUG(BAK_Near = m_fNear;)
+    KH_DEBUG(BAK_Far = m_fFar;)
+    KH_DEBUG(if (0.0f < KH_DW(DebugWork::g_dw.sys.m_fDeFocusNear)) {)
+        KH_DEBUG(m_iStatus |= 4;)
+        KH_DEBUG(m_iStatus &= ~2;)
+        KH_DEBUG(m_fNear = KH_DW(DebugWork::g_dw.sys.m_fDeFocusNear);)
+    KH_DEBUG(})
+    KH_DEBUG(if (0.0f < KH_DW(DebugWork::g_dw.sys.m_fDeFocusFar)) {)
+        KH_DEBUG(m_iStatus |= 4;)
+        KH_DEBUG(m_iStatus &= ~1;)
+        KH_DEBUG(m_fFar = KH_DW(DebugWork::g_dw.sys.m_fDeFocusFar);)
+    KH_DEBUG(})
     if (m_iStatus & 4) {
         ScaleVectorXYZ(vNear, vN, m_fNear);
         AddVectorXYZ(vNear, vPos, vNear);
@@ -369,7 +369,7 @@ void CDeFocusPrim::_makePktDeFocus() {
             ((u_long*)qp)[0] = 0x356;
             ((u_long*)qp)[1] = 0; qp++;
             ((u_long*)qp)[0] = 0x50808080;
-            if (DebugWork::g_dw.sys.m_iDeFocusCol) ((u_long*)qp)[0] = 0x504040FF;
+            if (KH_DW(DebugWork::g_dw.sys.m_iDeFocusCol)) ((u_long*)qp)[0] = 0x504040FF;
             ((u_long*)qp)[1] = 1;
             CPackMan::pkCloseGifTag(qp + 1);
             qp = __null;
@@ -387,7 +387,7 @@ void CDeFocusPrim::_makePktDeFocus() {
             ((u_long*)qp)[0] = 0x356;
             ((u_long*)qp)[1] = 0; qp++;
             ((u_long*)qp)[0] = 0x50808080;
-            if (DebugWork::g_dw.sys.m_iDeFocusCol) ((u_long*)qp)[0] = 0x5040FF40;
+            if (KH_DW(DebugWork::g_dw.sys.m_iDeFocusCol)) ((u_long*)qp)[0] = 0x5040FF40;
             ((u_long*)qp)[1] = 1;
             CPackMan::pkCloseGifTag(qp + 1);
             qp = __null;
@@ -428,7 +428,7 @@ void CDeFocusPrim::_makePktDeFocus() {
             ((u_long*)qp)[0] = 0x356;
             ((u_long*)qp)[1] = 0; qp++;
             ((u_long*)qp)[0] = 0x80808080;
-            if (DebugWork::g_dw.sys.m_iDeFocusCol) ((u_long*)qp)[0] = 0x80FF4040;
+            if (KH_DW(DebugWork::g_dw.sys.m_iDeFocusCol)) ((u_long*)qp)[0] = 0x80FF4040;
             ((u_long*)qp)[1] = 1;
             CPackMan::pkCloseGifTag(qp + 1);
             set_tsprite32(__null, 32, 0, 0xFFFF28, 0x200, SCREEN_HEIGHT, 0x200, SCREEN_HEIGHT);
@@ -441,41 +441,41 @@ void CDeFocusPrim::_makePktDeFocus() {
     qp[1].ul128 = _makeQW(CPackMan::getDefault_TEST_2(), 0x48);
     qp[2].ul128 = _makeQW(0x60, 0x15);
     CPackMan::pkCloseGifTag(qp + 3);
-    m_iStatus = BAK_Status;
-    m_fNear = BAK_Near;
-    m_fFar = BAK_Far;
+    KH_DEBUG(m_iStatus = BAK_Status;)
+    KH_DEBUG(m_fNear = BAK_Near;)
+    KH_DEBUG(m_fFar = BAK_Far;)
 }
 void CBlurPrim::makePkt() { _makePktBlur(); }
 void CBlurPrim::_makePktBlur() {
-    INT Bak_iBlurKind;
-    INT Bak_iBlurRate;
-    FLOAT Bak_fBlurLen;
-    UINT Bak_iBlurCol;
-    UINT Bak_iBlurAlpha;
+    KH_DEBUG(INT Bak_iBlurKind;)
+    KH_DEBUG(INT Bak_iBlurRate;)
+    KH_DEBUG(FLOAT Bak_fBlurLen;)
+    KH_DEBUG(UINT Bak_iBlurCol;)
+    KH_DEBUG(UINT Bak_iBlurAlpha;)
     INT iZ;
     QWdata* qp;
 
-    Bak_iBlurKind = m_iKind;
-    Bak_iBlurRate = m_iRate;
-    Bak_fBlurLen = m_fLen;
-    Bak_iBlurCol = m_iColor.col;
-    Bak_iBlurAlpha = m_iAlpha;
-    if (DebugWork::g_dw.sys.m_iBlurKind && DebugWork::g_dw.sys.m_iBlurCh == m_iDebugID) {
-        m_iKind = DebugWork::g_dw.sys.m_iBlurKind;
-        m_iRate = DebugWork::g_dw.sys.m_iBlurRate;
-        m_fLen = DebugWork::g_dw.sys.m_fBlurLen;
-        m_iColor.col = (u_char)DebugWork::g_dw.sys.m_iBlurCR |
-                       ((u_char)DebugWork::g_dw.sys.m_iBlurCG << 8) |
-                       ((u_char)DebugWork::g_dw.sys.m_iBlurCB << 16) |
-                       ((u_char)DebugWork::g_dw.sys.m_iBlurCA << 24);
-        m_iAlpha = DebugWork::g_dw.sys.m_iBlurAlpha;
-    }
+    KH_DEBUG(Bak_iBlurKind = m_iKind;)
+    KH_DEBUG(Bak_iBlurRate = m_iRate;)
+    KH_DEBUG(Bak_fBlurLen = m_fLen;)
+    KH_DEBUG(Bak_iBlurCol = m_iColor.col;)
+    KH_DEBUG(Bak_iBlurAlpha = m_iAlpha;)
+    KH_DEBUG(if (KH_DW(DebugWork::g_dw.sys.m_iBlurKind) && KH_DW(DebugWork::g_dw.sys.m_iBlurCh == m_iDebugID)) {)
+        KH_DEBUG(m_iKind = KH_DW(DebugWork::g_dw.sys.m_iBlurKind);)
+        KH_DEBUG(m_iRate = KH_DW(DebugWork::g_dw.sys.m_iBlurRate);)
+        KH_DEBUG(m_fLen = KH_DW(DebugWork::g_dw.sys.m_fBlurLen);)
+        KH_DEBUG(m_iColor.col = (u_char)KH_DW(DebugWork::g_dw.sys.m_iBlurCR) |)
+                       KH_DEBUG(((u_char)KH_DW(DebugWork::g_dw.sys.m_iBlurCG) << 8) |)
+                       KH_DEBUG(((u_char)KH_DW(DebugWork::g_dw.sys.m_iBlurCB) << 16) |)
+                       KH_DEBUG(((u_char)KH_DW(DebugWork::g_dw.sys.m_iBlurCA) << 24);)
+        KH_DEBUG(m_iAlpha = KH_DW(DebugWork::g_dw.sys.m_iBlurAlpha);)
+    KH_DEBUG(})
     if (!m_iKind || m_iRate <= 0) {
-        m_iKind = Bak_iBlurKind;
-        m_iRate = Bak_iBlurRate;
-        m_fLen = Bak_fBlurLen;
-        m_iColor.col = Bak_iBlurCol;
-        m_iAlpha = Bak_iBlurAlpha;
+        KH_DEBUG(m_iKind = Bak_iBlurKind;)
+        KH_DEBUG(m_iRate = Bak_iBlurRate;)
+        KH_DEBUG(m_fLen = Bak_fBlurLen;)
+        KH_DEBUG(m_iColor.col = Bak_iBlurCol;)
+        KH_DEBUG(m_iAlpha = Bak_iBlurAlpha;)
         return;
     }
     if (m_fLen <= 0.0f) {
@@ -489,11 +489,11 @@ void CBlurPrim::_makePktBlur() {
         IVECTOR vIPos;
         pCam = CWorldEnv::getActiveCamera();
         if (!pCam || !pCam->getLook()) {
-            m_iKind = Bak_iBlurKind;
-            m_iRate = Bak_iBlurRate;
-            m_fLen = Bak_fBlurLen;
-            m_iColor.col = Bak_iBlurCol;
-            m_iAlpha = Bak_iBlurAlpha;
+            KH_DEBUG(m_iKind = Bak_iBlurKind;)
+            KH_DEBUG(m_iRate = Bak_iBlurRate;)
+            KH_DEBUG(m_fLen = Bak_fBlurLen;)
+            KH_DEBUG(m_iColor.col = Bak_iBlurCol;)
+            KH_DEBUG(m_iAlpha = Bak_iBlurAlpha;)
             return;
         }
         vCam = ((CCoord&)pCam->Crd(0)).getWorldMatrix().getTransRef();
@@ -505,11 +505,11 @@ void CBlurPrim::_makePktBlur() {
         SetRotTransPersMatrix(CWorldEnv::getWorldScreenMatrix());
         RotTransPersClipW(vIPos, vFPos);
         if (vIPos.w) {
-            m_iKind = Bak_iBlurKind;
-            m_iRate = Bak_iBlurRate;
-            m_fLen = Bak_fBlurLen;
-            m_iColor.col = Bak_iBlurCol;
-            m_iAlpha = Bak_iBlurAlpha;
+            KH_DEBUG(m_iKind = Bak_iBlurKind;)
+            KH_DEBUG(m_iRate = Bak_iBlurRate;)
+            KH_DEBUG(m_fLen = Bak_fBlurLen;)
+            KH_DEBUG(m_iColor.col = Bak_iBlurCol;)
+            KH_DEBUG(m_iAlpha = Bak_iBlurAlpha;)
             return;
         }
         iZ = vIPos.z >> 4;
@@ -596,11 +596,12 @@ void CBlurPrim::_makePktBlur() {
     qp[1].ul128 = _makeQW(CPackMan::getDefault_TEST_2(), 0x48);
     qp[2].ul128 = _makeQW(0x60, 0x15);
     CPackMan::pkCloseGifTag(qp + 3);
-    m_iKind = Bak_iBlurKind;
-    m_iRate = Bak_iBlurRate;
-    m_fLen = Bak_fBlurLen;
-    m_iColor.col = Bak_iBlurCol;
-    m_iAlpha = Bak_iBlurAlpha;
+    KH_DEBUG(m_iKind = Bak_iBlurKind;)
+    KH_DEBUG(m_iRate = Bak_iBlurRate;)
+    KH_DEBUG(m_fLen = Bak_fBlurLen;)
+    KH_DEBUG(m_iColor.col = Bak_iBlurCol;)
+    KH_DEBUG(m_iAlpha = Bak_iBlurAlpha;)
 }
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

@@ -98,9 +98,9 @@ public:
     BOOL getSavePointPos(FVECTOR& outPos);
     CEntity* getGimClassEntityFirst(INT in_ClassType);
     void changeTreasureBoxLock(BOOL in_Enable);
-    void setThrowDirPow(FLOAT in_dirpow) { m_ThrowDirPow = in_dirpow; }
-    void setThrowMaxAngle(FLOAT in_max) { m_ThrowMaxAngle = in_max; }
-    void setThrowMinAngle(FLOAT in_min) { m_ThrowMinAngle = in_min; }
+    KH_DEBUG(void setThrowDirPow(FLOAT in_dirpow) { m_ThrowDirPow = in_dirpow; })
+    KH_DEBUG(void setThrowMaxAngle(FLOAT in_max) { m_ThrowMaxAngle = in_max; })
+    KH_DEBUG(void setThrowMinAngle(FLOAT in_min) { m_ThrowMinAngle = in_min; })
     void GimDebugTrace(const DropPrize* prize);
 
 private:

@@ -20,11 +20,11 @@ typedef unsigned long u_long;
 typedef unsigned short u_short;
 typedef unsigned char u_char;
 
-extern char _end[];
-namespace EERAM {
-static INT _HEAP_START = (((INT)_end - 1) / 64 + 1) * 64;
-static INT _HEAP_SIZE = 0x1FC0000 - _HEAP_START;
-}
+KH_DEBUG(extern char _end[];)
+KH_DEBUG(namespace EERAM {)
+KH_DEBUG(static INT _HEAP_START = (((INT)_end - 1) / 64 + 1) * 64;)
+KH_DEBUG(static INT _HEAP_SIZE = 0x1FC0000 - _HEAP_START;)
+KH_DEBUG(})
 
 struct tD_CHCR { /* PARTIAL: stand-in for System/Graphic/Effect/libppp/draw/draw_w tD_CHCR: owner not written */
     u_int DIR : 1;
@@ -92,7 +92,7 @@ static void _makePkt_SaveScreen();
 extern "C" void FlushCache(int op); /* MATCH: void (the SDK returns int): v0 stays free for the lui after the call in saveScreen */
 extern "C" void sceDmaSend(sceDmaChan* d, void* tag);
 extern "C" int sceGsSyncPath(int mode, u_short timeout);
-extern "C" void TRACE(char* fmt, ...);
+extern "C" void (TRACE)(char* fmt, ...);
 extern "C" int DIntr();
 extern "C" int EIntr();
 extern "C" {
@@ -181,11 +181,11 @@ INT s_nPkUseSize;
 
 #line 179
 static inline void _checkSize(UINT iSize) {
-    if (!(!(iSize >= 0x10000))) AssertApp(__FILE__, __LINE__, "! (iSize >= 0x10000)", 0);
+    KH_DEBUG(if (!(!(iSize >= 0x10000))) AssertApp(__FILE__, __LINE__, "! (iSize >= 0x10000)", 0);)
 }
 static inline void _checkDmaTag() {
-    pacVif1Packet* pPkt = s_pPktVif1;
-    if (pPkt->pDmaTag) _checkSize((u_long128*)(((UINT)pPkt->pCurrent + 15) & ~15) - pPkt->pDmaTag - 1);
+    KH_DEBUG(pacVif1Packet* pPkt = s_pPktVif1;)
+    KH_DEBUG(if (pPkt->pDmaTag) _checkSize((u_long128*)(((UINT)pPkt->pCurrent + 15) & ~15) - pPkt->pDmaTag - 1);)
 }
 
 
@@ -532,11 +532,11 @@ void CPackMan::transFrame() {
     sceDmaSend(s_pDmaChanVif1, (void*)((u_int)s_pktVif1Frame.pBase & 0x0fffffff));
 }
 u_long128* CPackMan::initBGPacket(INT nInIdx) {
-    u_long nZ = (VRAM::_ZBUF_START / 32) | 0x31000000 | ((u_long)1 << 32);
     s_DefaultGpuRegs1._nTEST = 0x300fd;
     s_DefaultGpuRegs2._nTEST = 0x3000d;
-    s_DefaultGpuRegs2._nZBUF = nZ;
-    s_DefaultGpuRegs1._nZBUF = nZ;
+
+    s_DefaultGpuRegs1._nZBUF = s_DefaultGpuRegs2._nZBUF = (VRAM::_ZBUF_START / 32) | 0x31000000 | ((u_long)1 << 32);
+
     _pkInit(s_pPktBufVif1BG[nInIdx], &s_pktVif1BG, 0x600);
     sceVif1PkReset(s_pPktVif1);
     u_long128* pRet = s_pPktVif1->pBase;
@@ -557,11 +557,11 @@ u_long128* CPackMan::initBGPacket(INT nInIdx) {
 BOOL CPackMan::isPacketForBG() { return s_pPktVif1 == &s_pktVif1BG; }
 void CPackMan::terminateBGPacket() {
     changeLayer(1);
-    u_long nZ = (VRAM::_ZBUF_START / 32) | 0x31000000;
     s_DefaultGpuRegs1._nTEST = 0x500fd;
     s_DefaultGpuRegs2._nTEST = *(u_long*)&s_DBuf.clear0.testb;
-    s_DefaultGpuRegs2._nZBUF = nZ;
-    s_DefaultGpuRegs1._nZBUF = nZ;
+
+    s_DefaultGpuRegs1._nZBUF = s_DefaultGpuRegs2._nZBUF = (VRAM::_ZBUF_START / 32) | 0x31000000;
+
     _checkDmaTag();
     sceVif1PkCnt(s_pPktVif1, 0);
     sceVif1PkAddCode(s_pPktVif1, 0x13000000);
@@ -611,12 +611,12 @@ void CPackMan::initSemiPacket() {
     sceVif1PkReset(s_pPktVif1);
 }
 void CPackMan::terminateSemiPacket() {
-    INT nSize = sceVif1PkSize(s_pPktVif1);
-    s_nPkUseSize += nSize;
-    if (s_nMaxPktSizeVif1Semi < nSize) {
-        TRACE("VIF1-SEMI \x83\x70\x83\x50\x83\x62\x83\x67\x83\x49\x81\x5b\x83\x6f\x81\x5b\x81\x49\x81\x49\x81\x49(0x%X)\n", nSize);
-        AssertApp(__FILE__, 1682, "0", 0);
-    }
+    KH_DEBUG(INT nSize = sceVif1PkSize(s_pPktVif1);)
+    KH_DEBUG(s_nPkUseSize += nSize;)
+    KH_DEBUG(if (s_nMaxPktSizeVif1Semi < nSize) {)
+        KH_DEBUG(TRACE("VIF1-SEMI \x83\x70\x83\x50\x83\x62\x83\x67\x83\x49\x81\x5b\x83\x6f\x81\x5b\x81\x49\x81\x49\x81\x49(0x%X)\n", nSize);)
+        KH_DEBUG(AssertApp(__FILE__, 1682, "0", 0);)
+    KH_DEBUG(})
 }
 /* MATCH: the original's Str.h strings follow the semi-packet message in .rodata */
 #include "System/Graphic/Str.h"
@@ -648,11 +648,11 @@ void CPackMan::initFGPacket() {
 }
 void CPackMan::terminateFGPacket() {
     changeLayer(2);
-    u_long nZ = (VRAM::_ZBUF_START / 32) | 0x31000000;
     s_DefaultGpuRegs1._nTEST = 0x500fd;
     s_DefaultGpuRegs2._nTEST = *(u_long*)&s_DBuf.clear0.testb;
-    s_DefaultGpuRegs2._nZBUF = nZ;
-    s_DefaultGpuRegs1._nZBUF = nZ;
+
+    s_DefaultGpuRegs1._nZBUF = s_DefaultGpuRegs2._nZBUF = (VRAM::_ZBUF_START / 32) | 0x31000000;
+
     _checkDmaTag();
     sceVif1PkCnt(s_pPktVif1, 0);
     sceVif1PkAddCode(s_pPktVif1, 0x13000000);
@@ -843,53 +843,53 @@ void CPackMan::swapDBuf(INT nInFrame) {
         }
         s_nReqPcrtcMode = -1;
     }
-    tGS_DISPFB2 dispfb = env.dispfb;
-    if (DebugWork::g_dw.nakamich.iVramDisp) {
-        if (!CDebugWindow::isTopDebugWindow()) {
-            INT pls = dbgButtonDown(USR_SYSTEM, 8, 1) ? 8 : 2;
-            if (dbgButtonDown(USR_SYSTEM, 0x1000, 1)) DebugWork::g_dw.nakamich.iVramDy -= pls;
-            else if (dbgButtonDown(USR_SYSTEM, 0x4000, 1)) DebugWork::g_dw.nakamich.iVramDy += pls;
-            else if (dbgButtonDown(USR_SYSTEM, 0x8000, 1)) DebugWork::g_dw.nakamich.iVramDx -= pls;
-            else if (dbgButtonDown(USR_SYSTEM, 0x2000, 1)) DebugWork::g_dw.nakamich.iVramDx += pls;
-            dispfb.PSM = 0;
-            dispfb.DBX = DebugWork::g_dw.nakamich.iVramDx;
-            dispfb.DBY = DebugWork::g_dw.nakamich.iVramDy;
-        }
-    } else {
-        DebugWork::g_dw.nakamich.iVramDy = 0;
-        DebugWork::g_dw.nakamich.iVramDx = 0;
-    }
-    *(volatile u_long*)0x12000070 = *(u_long*)&dispfb;
-    *(volatile u_long*)0x12000090 = *(u_long*)&dispfb;
+    KH_DEBUG(tGS_DISPFB2 dispfb = env.dispfb;)
+    KH_DEBUG(if (KH_DW(DebugWork::g_dw.nakamich.iVramDisp)) {)
+        KH_DEBUG(if (!CDebugWindow::isTopDebugWindow()) {)
+            KH_DEBUG(INT pls = dbgButtonDown(USR_SYSTEM, 8, 1) ? 8 : 2;)
+            KH_DEBUG(if (dbgButtonDown(USR_SYSTEM, 0x1000, 1)) DebugWork::g_dw.nakamich.iVramDy -= pls;)
+            KH_DEBUG(else if (dbgButtonDown(USR_SYSTEM, 0x4000, 1)) DebugWork::g_dw.nakamich.iVramDy += pls;)
+            KH_DEBUG(else if (dbgButtonDown(USR_SYSTEM, 0x8000, 1)) DebugWork::g_dw.nakamich.iVramDx -= pls;)
+            KH_DEBUG(else if (dbgButtonDown(USR_SYSTEM, 0x2000, 1)) DebugWork::g_dw.nakamich.iVramDx += pls;)
+            KH_DEBUG(dispfb.PSM = 0;)
+            KH_DEBUG(dispfb.DBX = KH_DW(DebugWork::g_dw.nakamich.iVramDx);)
+            KH_DEBUG(dispfb.DBY = KH_DW(DebugWork::g_dw.nakamich.iVramDy);)
+        KH_DEBUG(})
+    KH_DEBUG(} else {)
+        KH_DEBUG(DebugWork::g_dw.nakamich.iVramDy = 0;)
+        KH_DEBUG(DebugWork::g_dw.nakamich.iVramDx = 0;)
+    KH_DEBUG(})
+    KH_DEBUG(*(volatile u_long*)0x12000070 = *(u_long*)&dispfb;)
+    KH_DEBUG(*(volatile u_long*)0x12000090 = *(u_long*)&dispfb;)
 }
 void CPackMan::kickDMA(INT n) {
     if (isSkipPacketDMA()) return;
-    changeLayer(1);
-    INT nSize = sceVif1PkSize(s_pPktVif1);
-    if (nSize > 0x680) {
-        TRACE("VIF1-BG \x83\x70\x83\x50\x83\x62\x83\x67\x83\x49\x81\x5b\x83\x6f\x81\x5b\x81\x49\x81\x49\x81\x49(0x%X)\n", nSize);
-        AssertApp(__FILE__, 2128, "0", 0);
-    }
-    changeLayer(0);
-    nSize = sceVif1PkSize(s_pPktVif1);
-    s_nPkUseSize += nSize;
-    if (nSize > 0x9080) {
-        TRACE("VIF1 \x83\x70\x83\x50\x83\x62\x83\x67\x83\x49\x81\x5b\x83\x6f\x81\x5b\x81\x49\x81\x49\x81\x49(0x%X)\n", nSize);
-        AssertApp(__FILE__, 2137, "0", 0);
-    }
+    KH_DEBUG(changeLayer(1);)
+    KH_DEBUG(INT nSize = sceVif1PkSize(s_pPktVif1);)
+    KH_DEBUG(if (nSize > 0x680) {)
+        KH_DEBUG(TRACE("VIF1-BG \x83\x70\x83\x50\x83\x62\x83\x67\x83\x49\x81\x5b\x83\x6f\x81\x5b\x81\x49\x81\x49\x81\x49(0x%X)\n", nSize);)
+        KH_DEBUG(AssertApp(__FILE__, 2128, "0", 0);)
+    KH_DEBUG(})
+    KH_DEBUG(changeLayer(0);)
+    KH_DEBUG(nSize = sceVif1PkSize(s_pPktVif1);)
+    KH_DEBUG(s_nPkUseSize += nSize;)
+    KH_DEBUG(if (nSize > 0x9080) {)
+        KH_DEBUG(TRACE("VIF1 \x83\x70\x83\x50\x83\x62\x83\x67\x83\x49\x81\x5b\x83\x6f\x81\x5b\x81\x49\x81\x49\x81\x49(0x%X)\n", nSize);)
+        KH_DEBUG(AssertApp(__FILE__, 2137, "0", 0);)
+    KH_DEBUG(})
     FlushCache(0);
     sceDmaSend(s_pDmaChanVif1, (void*)((u_int)s_pktVif1.pBase & 0x0fffffff));
 }
 void CPackMan::kickDMAFG(INT n) {
-    s_nPkUseSize = 0;
-    changeLayer(2);
-    INT nSize = sceVif1PkSize(s_pPktVif1);
-    s_nPkUseSize += nSize;
-    if (s_nMaxPktSizeVif1FG + 0x880 < nSize) {
-        TRACE("VIF1-FG \x83\x70\x83\x50\x83\x62\x83\x67\x83\x49\x81\x5b\x83\x6f\x81\x5b\x81\x49\x81\x49\x81\x49(0x%X)\n", nSize);
-        AssertApp(__FILE__, 2172, "0", 0);
-    }
-    changeLayer(0);
+    KH_DEBUG(s_nPkUseSize = 0;)
+    KH_DEBUG(changeLayer(2);)
+    KH_DEBUG(INT nSize = sceVif1PkSize(s_pPktVif1);)
+    KH_DEBUG(s_nPkUseSize += nSize;)
+    KH_DEBUG(if (s_nMaxPktSizeVif1FG + 0x880 < nSize) {)
+        KH_DEBUG(TRACE("VIF1-FG \x83\x70\x83\x50\x83\x62\x83\x67\x83\x49\x81\x5b\x83\x6f\x81\x5b\x81\x49\x81\x49\x81\x49(0x%X)\n", nSize);)
+        KH_DEBUG(AssertApp(__FILE__, 2172, "0", 0);)
+    KH_DEBUG(})
+    KH_DEBUG(changeLayer(0);)
     if (s_pktVif1FGBase && s_nDrawMode != 3) {
         *(u_int*)&s_pDmaChanVif1->chcr |= 0x40;
         FlushCache(0);
@@ -1225,8 +1225,8 @@ void CPackMan::setFGPacketMaxNorml() {
     s_nMaxPktSizeVif1Normal = s_nMaxPktSizeVif1FG;
 }
 void CPackMan::extFGPacketMaxForFlex() { s_nMaxPktSizeVif1Normal = s_nMaxPktSizeVif1 = s_nMaxPktSizeVif1 + 0x800; }
-INT CPackMan::getPkUseSize() { return s_nPkUseSize; }
-INT CPackMan::getPkTotalSize() { return 0x9080; }
+KH_DEBUG(INT CPackMan::getPkUseSize() { return s_nPkUseSize; })
+KH_DEBUG(INT CPackMan::getPkTotalSize() { return 0x9080; })
 void sceVif1PkInit(pacVif1Packet* pPacket, u_long128* pBase) {
     pPacket->pDmaTag = NULL;
     pPacket->pCurrent = (u_int*)(pPacket->pBase = (u_long128*)(((u_int)pBase & 0x0fffffff) | 0x30000000));
@@ -1528,9 +1528,9 @@ void sceVif1PkRefLoadImage(pacVif1Packet* pPacket, u_short bp, u_char psm, u_sho
     UINT iLoadImageMaxSize = 0x10000;
     UINT iLoadImageStartAddr = 0x100000;
     UINT iLoadImageEndAddr = 0x1fc0000;
-    if (!(!(size > iLoadImageMaxSize))) AssertApp(__FILE__, 3668, "! (size > iLoadImageMaxSize)", 0);
-    if (!(!((UINT)image < iLoadImageStartAddr))) AssertApp(__FILE__, 3669, "! ((UINT)image < iLoadImageStartAddr)", 0);
-    if (!(!((UINT)image >= iLoadImageEndAddr))) AssertApp(__FILE__, 3670, "! ((UINT)image >= iLoadImageEndAddr )", 0);
+    KH_DEBUG(if (!(!(size > iLoadImageMaxSize))) AssertApp(__FILE__, 3668, "! (size > iLoadImageMaxSize)", 0);)
+    KH_DEBUG(if (!(!((UINT)image < iLoadImageStartAddr))) AssertApp(__FILE__, 3669, "! ((UINT)image < iLoadImageStartAddr)", 0);)
+    KH_DEBUG(if (!(!((UINT)image >= iLoadImageEndAddr))) AssertApp(__FILE__, 3670, "! ((UINT)image >= iLoadImageEndAddr )", 0);)
     sceVif1PkCnt(pPacket, 0);
     ULONGLONG* p64 = (ULONGLONG*)pPacket->pCurrent;
     p64[0] = 0x5100000500000000;
@@ -1572,3 +1572,4 @@ void sceVif1PkRefMpg(pacVif1Packet* pPacket, u_short vuaddr, u_long128* pMicro, 
     }
 }
 // SOURCE DATA: .bss .rodata
+// SOURCE DATA SLUS_217.99_retail: .bss

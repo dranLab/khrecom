@@ -156,8 +156,8 @@ void CFriendPan::beginStateAction3() {
     setTimer(m_pAtkData->MOVE_END_FRAME * 1000);
     m_nLogCount = 0;
     m_nLogCountMax = m_pAtkData->WORK0;
-    m_pTrgLog = new (__FILE__ "(268)") TIMEQ[m_nLogCountMax];
-    if (!m_pTrgLog) AssertApp(__FILE__, __LINE__, "m_pTrgLog", 0);
+    m_pTrgLog = new KH_AT("(268)") TIMEQ[m_nLogCountMax];
+    KH_DEBUG(if (!m_pTrgLog) AssertApp(__FILE__, __LINE__, "m_pTrgLog", 0);)
     for (i = 0; i < m_nLogCountMax; i++) {
         m_pTrgLog[i] = getTimer() + m_pAtkData->TRG_FRAME * 100;
     }
@@ -242,3 +242,4 @@ void CFriendPan::stateAction3() {
 } // namespace Friend
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data

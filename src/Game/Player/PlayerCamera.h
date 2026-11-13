@@ -58,13 +58,13 @@ private:
     INT m_iModeFieldNear;                      /* 0x108 */
     INT m_iModeFieldFar;                       /* 0x10c */
     UINT m_uiFlag;                             /* 0x110 */
-    C3DLines* m_pLines;                        /* 0x114 */
-    char m_strCamera0[64];                     /* 0x118 */
-    char m_strCamera1[64];                     /* 0x158 */
-    char m_strCamera2[64];                     /* 0x198 */
-    char m_strCamera3[64];                     /* 0x1d8 */
-    char m_strCamera4[64];                     /* 0x218 */
-    CDebugWindow* m_pWindow;                   /* 0x258 */
+    KH_DEBUG(C3DLines* m_pLines;                        /* 0x114 */)
+    KH_DEBUG(char m_strCamera0[64];                     /* 0x118 */)
+    KH_DEBUG(char m_strCamera1[64];                     /* 0x158 */)
+    KH_DEBUG(char m_strCamera2[64];                     /* 0x198 */)
+    KH_DEBUG(char m_strCamera3[64];                     /* 0x1d8 */)
+    KH_DEBUG(char m_strCamera4[64];                     /* 0x218 */)
+    KH_DEBUG(CDebugWindow* m_pWindow;                   /* 0x258 */)
     CCollMapCamera m_collMap;                  /* 0x25c */
     FVECTOR m_vPos;                            /* 0x290 */
     FVECTOR m_vPreAim;                         /* 0x2a0 */
@@ -146,9 +146,9 @@ public:
     void changeNowPlayer(HANDLE inPlayer, HANDLE inTarget);
     void changeCamMode(INT inMode, INT inReset);
     void enableRikuShiftY();
-    static void updateParam(INT inMode) {
-        if (m_pInstance && inMode == m_pInstance->m_iMode) m_pInstance->initCamera(inMode, 0, NULL);
-    }
+    KH_DEBUG(static void updateParam(INT inMode) {)
+        KH_DEBUG(if (m_pInstance && inMode == m_pInstance->m_iMode) m_pInstance->initCamera(inMode, 0, NULL);)
+    KH_DEBUG(})
     static INT getNowCamMode() {
         /* MATCH: m_pInstance read through a reference (Game/Player/PlayerRiku and PlayerDRiku's exeFriend reload it) */
         CPlayerCamera*& p = m_pInstance;

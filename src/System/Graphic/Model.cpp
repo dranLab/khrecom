@@ -207,7 +207,7 @@ void CModel::releaseData() {
     m_pTexAnm = NULL;
 }
 INT CModel::link(CTask* p, const CHAR* pName) {
-    if (!(p)) AssertApp(__FILE__, 451, "p", 0);
+    KH_DEBUG(if (!(p)) AssertApp(__FILE__, 451, "p", 0);)
     CCoords* pCrds = p->getCoords();
     if (!pCrds) {
         p->createCoords();
@@ -240,18 +240,18 @@ INT CModel::getBoneIndex(const CHAR* pName) const {
 }
 MODELDATA* AMFfromMDL(const CHAR* pszName, INT nIdx) {
     MODELDATA** ret = CRsrcDB::getRsrcMDL(pszName, NAME_CASE_SENSITIVE);
-    if (!(ret)) AssertApp(__FILE__, 500, "ret", 0);
+    KH_DEBUG(if (!(ret)) AssertApp(__FILE__, 500, "ret", 0);)
     return ret[nIdx];
 }
 MODELDATA* AMFfromMDL(INT nGroup, INT nIdx) {
     MODELDATA** ret = CRsrcDB::getRsrcMDL(nGroup);
-    if (!(ret)) AssertApp(__FILE__, 508, "ret", 0);
+    KH_DEBUG(if (!(ret)) AssertApp(__FILE__, 508, "ret", 0);)
     return ret[nIdx];
 }
 INT CModel::assign(CTask* p, const CHAR* pName, INT n) {
-    if (!(p)) AssertApp(__FILE__, 516, "p", 0);
+    KH_DEBUG(if (!(p)) AssertApp(__FILE__, 516, "p", 0);)
     CCoords* pCrds = p->getCoords();
-    if (!(pCrds)) AssertApp(__FILE__, 518, "pCrds", 0);
+    KH_DEBUG(if (!(pCrds)) AssertApp(__FILE__, 518, "pCrds", 0);)
     m_pTask = p;
     return assign(*pCrds, pName, n);
 }
@@ -265,21 +265,21 @@ INT CModel::assign(CCoords& crds, const CHAR* pName, INT n) {
     return assign(crds, n);
 }
 INT CModel::assign(CTask* p, INT n) {
-    if (!(p)) AssertApp(__FILE__, 537, "p", 0);
+    KH_DEBUG(if (!(p)) AssertApp(__FILE__, 537, "p", 0);)
     CCoords* pCrds = p->getCoords();
-    if (!(pCrds)) AssertApp(__FILE__, 539, "pCrds", 0);
+    KH_DEBUG(if (!(pCrds)) AssertApp(__FILE__, 539, "pCrds", 0);)
     m_pTask = p;
     return assign(*pCrds, n);
 }
 INT CModel::assign(CCoords& crds, INT crdidx) {
     INT i;
-    if (!(m_pData)) AssertApp(__FILE__, 546, "m_pData", 0);
+    KH_DEBUG(if (!(m_pData)) AssertApp(__FILE__, 546, "m_pData", 0);)
     m_pCrds = &crds;
     m_BoneStart = crdidx;
     m_BoneSkip = 0;
     m_BoneIdx = 0;
     m_TransTexCount = m_pData->m_nTexNum;
-    if (!(!(m_TransTexCount > 16))) AssertApp(__FILE__, 579, "! (m_TransTexCount > TEXMAX)", 0);
+    KH_DEBUG(if (!(!(m_TransTexCount > 16))) AssertApp(__FILE__, 579, "! (m_TransTexCount > TEXMAX)", 0);)
     for (i = 0; i < m_TransTexCount; i++) {
         *(u_long*)&m_TexInfo[i] = *(u_long*)((BYTE*)m_pData->m_pTexParam + i * 0x20 + 0x10);
     }
@@ -293,7 +293,7 @@ void CModel::setModelData(const MODELDATA* pData) {
     link(m_pTask);
 }
 INT CModel::link(CTask* p) {
-    if (!(p)) AssertApp(__FILE__, 620, "p", 0);
+    KH_DEBUG(if (!(p)) AssertApp(__FILE__, 620, "p", 0);)
     CCoords* pCrds = p->getCoords();
     if (!pCrds) {
         p->createCoords();
@@ -306,7 +306,7 @@ INT CModel::link(CCoords& crds) {
     BOOL add;
     INT nBoneNum;
     INT i;
-    if (!(m_pData)) AssertApp(__FILE__, 633, "m_pData", 0);
+    KH_DEBUG(if (!(m_pData)) AssertApp(__FILE__, 633, "m_pData", 0);)
     m_pCrds = &crds;
     INT nCrd = crds.getCoordNum();
     m_BoneSkip = nCrd;
@@ -333,7 +333,7 @@ INT CModel::link(CCoords& crds) {
         m_BoneIdx = m_BoneStart = m_pData->m_BoneIndex - 1;
     }
     m_TransTexCount = m_pData->m_nTexNum;
-    if (!(!(m_TransTexCount > 16))) AssertApp(__FILE__, 707, "! (m_TransTexCount > TEXMAX)", 0);
+    KH_DEBUG(if (!(!(m_TransTexCount > 16))) AssertApp(__FILE__, 707, "! (m_TransTexCount > TEXMAX)", 0);)
     for (INT i = 0; i < m_TransTexCount; i++) {
         *(u_long*)&m_TexInfo[i] = *(u_long*)((BYTE*)m_pData->m_pTexParam + i * 0x20 + 0x10);
     }
@@ -346,13 +346,13 @@ CCoord& CModel::getCrd(INT idx) {
     return m_pCrds->Crd(m_BoneStart + idx);
 }
 INT CModel::getCoordNum() const {
-    if (!(m_pCrds)) AssertApp(__FILE__, 737, "m_pCrds", 0);
+    KH_DEBUG(if (!(m_pCrds)) AssertApp(__FILE__, 737, "m_pCrds", 0);)
     return m_pCrds->getCoordNum();
 }
 void CModel::setLocal(INT index) {
-    if (!(m_pCrds != __null)) AssertApp(__FILE__, 743, "m_pCrds != __null", 0);
-    if (!(0 <= index && index < m_pCrds->getCoordNum())) AssertApp(__FILE__, 744, "0 <= index && index < m_pCrds->getCoordNum()", 0);
-    if (!(m_pData != __null)) AssertApp(__FILE__, 745, "m_pData != __null", 0);
+    KH_DEBUG(if (!(m_pCrds != __null)) AssertApp(__FILE__, 743, "m_pCrds != __null", 0);)
+    KH_DEBUG(if (!(0 <= index && index < m_pCrds->getCoordNum())) AssertApp(__FILE__, 744, "0 <= index && index < m_pCrds->getCoordNum()", 0);)
+    KH_DEBUG(if (!(m_pData != __null)) AssertApp(__FILE__, 745, "m_pData != __null", 0);)
     m_pCrds->Crd(index).m_Local = ((const FMATRIX*)m_pData->m_pBones)[index]; /* PARTIAL: CCoord::setLocal is Camera's compare+touch form */
 }
 INT CModel::getTextureIndex(const CHAR* pName) const {
@@ -549,7 +549,7 @@ void CModel::calcWorldBBox(BOOL bCalc) {
         FVECTOR vMin;
         CCoord* pCrd;
         INT iBoneNum;
-        if (!(m_pData)) AssertApp(__FILE__, 1067, "m_pData", 0);
+        KH_DEBUG(if (!(m_pData)) AssertApp(__FILE__, 1067, "m_pData", 0);)
         pCrd = &getCrd(0);
         iBoneNum = m_pData->m_nBoneNum;
         vMax.set(-1.70141183e+38f, -1.70141183e+38f, -1.70141183e+38f, 1.0f);
@@ -689,7 +689,7 @@ void CModel::linksub() {
     BOOL bHasSemiData;
     m_Mode = m_pData->getMode();
     m_pShader = searchShaderDesc(m_Mode);
-    if (!(m_pShader)) AssertApp(__FILE__, 1738, "m_pShader", 0);
+    KH_DEBUG(if (!(m_pShader)) AssertApp(__FILE__, 1738, "m_pShader", 0);)
     rawMode = m_pData->getRawMode();
     if (rawMode & 0x20000000) m_nTestFlag = (INT)m_nTestFlag & -2;
     else m_nTestFlag = ((INT)m_nTestFlag & -0x4000) | 0xFD;
@@ -710,7 +710,7 @@ void CModel::linksub() {
         }
     }
     if (m_Mode == 0x10 && !m_pFadeModel) {
-        m_pFadeModel = new (__FILE__ "(1781)") CShadowModel;
+        m_pFadeModel = new KH_AT("(1781)") CShadowModel;
         if (m_pFadeModel) {
             m_pFadeModel->link(this);
             m_pWSMat = &CShadowModelMan::getWorldScreenMatrix();
@@ -727,7 +727,7 @@ void CModel::addTexture(const CHAR* texName, INT idx) {
     INT i;
     if (m_TransTexCount < m_pData->m_nTexNum + 1) {
         m_TransTexCount = m_pData->m_nTexNum + 1;
-        if (!(!(m_TransTexCount > 16))) AssertApp(__FILE__, 1867, "! (m_TransTexCount > TEXMAX)", 0);
+        KH_DEBUG(if (!(!(m_TransTexCount > 16))) AssertApp(__FILE__, 1867, "! (m_TransTexCount > TEXMAX)", 0);)
     }
     ((TexInfoStub*)&m_TexInfo[m_pData->m_nTexNum])->init(CRsrcDB::getRsrcTex(texName, NAME_CASE_SENSITIVE), -1, -1);
     nTmpTex = 0;
@@ -753,7 +753,7 @@ void CModel::setShadowMapModel() {
     }
     rawMode = m_pData->getRawMode();
     if (!(rawMode & 0x100000)) return;
-    m_pShadowMapModel = new (__FILE__ "(1909)") CShadowMapModel;
+    m_pShadowMapModel = new KH_AT("(1909)") CShadowMapModel;
     if (m_pShadowMapModel) {
         m_pShadowMapModel->link(this);
         m_ColorScale.w = 1.0f;
@@ -795,7 +795,7 @@ BOOL CModel::sendTexture(u_long* tex0) {
             bTexAnm = FALSE;
             if (m_pTexAnm && m_pTexAnm->check(i)) {
                 bUpdate = TRUE;
-                bTexAnm = TRUE;
+                bTexAnm = TRUE; KH_RELEASE(asm volatile("");) // MATCH: retail needs one more insn in t's range (global-alloc near-tie t/nClutPos), user-accepted 2026-11-13
             }
             bSend |= bUpdate;
             if (t->isFixTex()) nTexPos = t->_pTexInfo->_TexInfo._nDistPos;
@@ -805,7 +805,7 @@ BOOL CModel::sendTexture(u_long* tex0) {
             if (bUpdate) {
                 CPackMan::pkRefLoadImage(nClutPos, t->_pTexInfo->_ClutInfo);
                 CPackMan::pkRefLoadImage(nTexPos, t->_pTexInfo->_TexInfo);
-                CModelMan::incTexSendCount(0);
+                KH_DEBUG(CModelMan::incTexSendCount(0);)
                 if (bTexAnm) m_pTexAnm->sendTexture(i, nTexPos, t->_pTexInfo->_TexInfo, nClutPos, t->_pTexInfo->_ClutInfo);
             }
             if (tex) {
@@ -816,25 +816,24 @@ BOOL CModel::sendTexture(u_long* tex0) {
     }
     return bSend;
 }
-INT CModel::getTexParam(u_long* tex0) {
+static inline void _getTmpTexArea(INT nID, UINT& nTexPos, UINT& nClutPos) { if (nID == 0) { nTexPos = VRAM::_TEX_TMP1_START; nClutPos = VRAM::_CLUT_TMP1_START; } else { nTexPos = VRAM::_TEX_TMP2_START; nClutPos = VRAM::_CLUT_TMP2_START; } } INT CModel::getTexParam(u_long* tex0) {
     INT nTexMax;
     INT i;
     nTexMax = m_TransTexCount;
     if (nTexMax > 0) {
         UINT nTexPos;
         UINT nClutPos;
-        INT nTmpTex = VRAM::_TEX_TMP1_START;
-        INT nTmpClut = VRAM::_CLUT_TMP1_START;
+        _getTmpTexArea(0, nTexPos, nClutPos);
+
         for (i = 0; i < nTexMax; i++) {
             TexInfoStub* t = (TexInfoStub*)&m_TexInfo[i];
             if (t->isFix()) {
                 tex0[i] = t->getTPage();
             } else {
-                if (t->isFixTex()) nTexPos = t->_pTexInfo->_TexInfo._nDistPos;
-                else nTexPos = nTmpTex + t->_nTexPos;
-                if (t->isFixClut()) nClutPos = t->_pTexInfo->_ClutInfo._nDistPos;
-                else nClutPos = nTmpClut + t->_nClutPos;
-                tex0[i] = t->_pTexInfo->getTPage() | (u_long)nTexPos | ((u_long)nClutPos << 37);
+                tex0[i] = t->_pTexInfo->getTPage(t->isFixTex() ? t->_pTexInfo->_TexInfo._nDistPos : nTexPos + t->_nTexPos,
+                                                 t->isFixClut() ? t->_pTexInfo->_ClutInfo._nDistPos : nClutPos + t->_nClutPos);
+
+
             }
         }
     }
@@ -872,12 +871,12 @@ void CModel::dispImpl() {
     setDispFlag(FALSE);
     if (!isDispOff()) {
         if (!isDataEmpty() && m_ColorScale.w > 0.0f) {
-            if (isDispWireframe() && MODELDATA::isCharacter(m_Mode)) {
-                disp0(-1, getTestFlag(), 0);
-                m_ShaderOption |= 0x80;
-                disp0(-1, getTestFlag(), 0);
-                m_ShaderOption &= ~0x80;
-            } else if (m_ColorScale.w >= 1.0f && m_Mode != 0x10) {
+            KH_DEBUG(if (isDispWireframe() && MODELDATA::isCharacter(m_Mode)) {)
+                KH_DEBUG(disp0(-1, getTestFlag(), 0);)
+                KH_DEBUG(m_ShaderOption |= 0x80;)
+                KH_DEBUG(disp0(-1, getTestFlag(), 0);)
+                KH_DEBUG(m_ShaderOption &= ~0x80;)
+            KH_DEBUG(} else) if (m_ColorScale.w >= 1.0f && m_Mode != 0x10) {
                 INT id = getLayerID() & 0xF;
                 if (id >= 2 && (id < 4 || id == 0xB)) {
                     CModelMan::add2DispList(*this, 0);
@@ -887,7 +886,7 @@ void CModel::dispImpl() {
                 }
             } else {
                 if (!m_pFadeModel) {
-                    m_pFadeModel = new (__FILE__ "(2262)") CFadeModel;
+                    m_pFadeModel = new KH_AT("(2262)") CFadeModel;
                     if (m_pFadeModel) {
                         INT id;
                         m_pFadeModel->link(this);
@@ -937,7 +936,7 @@ void CModel::disp0(INT semikind, u_long nInTest, INT iFlags) {
     const int (*pData)[4];
     UINT nMode;
     u_long tex0[16];
-    if (!(m_pShader)) AssertApp(__FILE__, 2446, "m_pShader", 0);
+    KH_DEBUG(if (!(m_pShader)) AssertApp(__FILE__, 2446, "m_pShader", 0);)
     pData = (const int (*)[4])_disp0_GetData(nMode, iFlags);
     if (pData) {
         if (!(m_iSendFlg & 1)) disp0_SetMicroCode(m_pShader->m_pMpg);
@@ -961,7 +960,7 @@ u_long* CModel::_disp0_GetData(UINT& nMode, INT iFlags) {
     return (u_long*)pData;
 }
 void CModel::disp0_SetMicroCode(u_long128* pMProg) {
-    if (!((m_pMpg == g_mpg0) || (m_pMpg == g_mpg2) || (m_pMpg == __null))) AssertApp(__FILE__, 2539, "(m_pMpg==g_mpg0)||(m_pMpg==g_mpg2)||(m_pMpg == __null)", 0);
+    KH_DEBUG(if (!((m_pMpg == g_mpg0) || (m_pMpg == g_mpg2) || (m_pMpg == __null))) AssertApp(__FILE__, 2539, "(m_pMpg==g_mpg0)||(m_pMpg==g_mpg2)||(m_pMpg == __null)", 0);)
     if (pMProg != m_pMpg || (m_iSendFlg & 0x100)) {
         m_pMpg = pMProg;
         CPackMan::pkCall(pMProg, 0);
@@ -1228,7 +1227,7 @@ void CModel::_disp0_SetPacket(UINT nMode, const int (*pData)[4], INT semikind, u
         CPackMan::pkCloseGifTagManual((UINT*)pQw);
         CPackMan::pkCloseDirectCode();
     }
-    CModelMan::incDrawCount();
+    KH_DEBUG(CModelMan::incDrawCount();)
 }
 void CSemiModel::link(CModel* m) {
     UINT rawMode;
@@ -1248,7 +1247,7 @@ void CSemiModel::initSemiZModel() {
     mode = m_pModel->getMode();
     rawMode = m_pModel->getModelData()->getRawMode();
     if (MODELDATA::isCharacterAndMap(mode) && !(rawMode & 0x1200000) && !(getSemiTrans() == ALPHA_BLEND)) {
-        m_pSemiZ = new (__FILE__ "(3441)") CSemiZModel;
+        m_pSemiZ = new KH_AT("(3441)") CSemiZModel;
         if (m_pSemiZ) {
             m_pSemiZ->m_SemiDraw = m_SemiDraw;
             m_pSemiZ->m_pModel = m_pModel;
@@ -1316,7 +1315,7 @@ void CSemiModel::makePkt() {
 void CSemiModel::setSemiTrans(ALPHA a) {
     UINT rawMode;
     if (!(a == ALPHA_PLUS) && !(a == ALPHA_MINUS) && !(a == ALPHA_BLEND)) {
-        if (!(m_pModel)) AssertApp(__FILE__, 3588, "m_pModel", 0);
+        KH_DEBUG(if (!(m_pModel)) AssertApp(__FILE__, 3588, "m_pModel", 0);)
         rawMode = m_pModel->getModelData()->getRawMode();
         if (rawMode & 0x10000000) a = ALPHA_BLEND;
         else a = ALPHA_PLUS;
@@ -1340,11 +1339,11 @@ void CSemiZModel::makePkt() {
     CPackMan::pkCloseDirectCode();
     CModel* m = getParentModel();
     m->disp0(getSemiTrans(), getTestFlag(), m_SemiDraw ? 5 : 4);
-    if ((m->m_nFlag & 4) && MODELDATA::isCharacter(m->m_Mode)) {
-        m->m_ShaderOption |= 0x80;
-        m->disp0(getSemiTrans(), m->getTestFlag(), m_SemiDraw != 0);
-        m->m_ShaderOption &= ~0x80;
-    }
+    KH_DEBUG(if ((m->m_nFlag & 4) && MODELDATA::isCharacter(m->m_Mode)) {) // MATCH: beta only (retail draws the semi-transparent model once)
+        KH_DEBUG(m->m_ShaderOption |= 0x80;)
+        KH_DEBUG(m->disp0(getSemiTrans(), m->getTestFlag(), m_SemiDraw != 0);)
+        KH_DEBUG(m->m_ShaderOption &= ~0x80;)
+    KH_DEBUG(})
     CPackMan::pkOpenDirectCode(0);
 }
 void CFadeModel::makePkt() {
@@ -1408,117 +1407,117 @@ void CModelBG::makePkt() {
     if (isAvailableSemiModel() && getSemiModel()) getSemiModel()->dispDirect();
     CPackMan::pkOpenDirectCode(0);
 }
-FIX4 CBBox::calcZ() { return 0x640; }
+KH_DEBUG(FIX4 CBBox::calcZ() { return 0x640; })
 static inline u_long _xyz(const IVECTOR& v) { return (u_long)v.x | ((u_long)v.y << 16) | ((u_long)v.z << 32); }
-void CBBox::makePkt() {
-    int abort;
-    FMATRIX rtp;
-    FVECTOR v;
-    IVECTOR c[2][2][2];
-    float w[2][2][2];
-    int x;
-    int y;
-    int z;
-    INT xmin;
-    INT xmax;
-    INT ymin;
-    INT ymax;
-    FLOAT wmax;
-    FLOAT wmin;
-    QWdata giftag;
-    if (m_bbox.x[0] > m_bbox.x[1]) return;
-    abort = 0;
-    m_pCrd->getRotTransPersMatrix(rtp);
-    m_C0.set(0xFF, 0, 0);
-    xmin = 0x10000;
-    xmax = 0;
-    ymin = 0x10000;
-    ymax = 0;
-    wmax = 0.0f;
-    wmin = 1.0f;
-    for (x = 0; x < 2; x++) {
-        for (y = 0; y < 2; y++) {
-            for (z = 0; z < 2; z++) {
+KH_DEBUG(void CBBox::makePkt() {)
+    KH_DEBUG(int abort;)
+    KH_DEBUG(FMATRIX rtp;)
+    KH_DEBUG(FVECTOR v;)
+    KH_DEBUG(IVECTOR c[2][2][2];)
+    KH_DEBUG(float w[2][2][2];)
+    KH_DEBUG(int x;)
+    KH_DEBUG(int y;)
+    KH_DEBUG(int z;)
+    KH_DEBUG(INT xmin;)
+    KH_DEBUG(INT xmax;)
+    KH_DEBUG(INT ymin;)
+    KH_DEBUG(INT ymax;)
+    KH_DEBUG(FLOAT wmax;)
+    KH_DEBUG(FLOAT wmin;)
+    KH_DEBUG(QWdata giftag;)
+    KH_DEBUG(if (m_bbox.x[0] > m_bbox.x[1]) return;)
+    KH_DEBUG(abort = 0;)
+    KH_DEBUG(m_pCrd->getRotTransPersMatrix(rtp);)
+    KH_DEBUG(m_C0.set(0xFF, 0, 0);)
+    KH_DEBUG(xmin = 0x10000;)
+    KH_DEBUG(xmax = 0;)
+    KH_DEBUG(ymin = 0x10000;)
+    KH_DEBUG(ymax = 0;)
+    KH_DEBUG(wmax = 0.0f;)
+    KH_DEBUG(wmin = 1.0f;)
+    KH_DEBUG(for (x = 0; x < 2; x++) {)
+        KH_DEBUG(for (y = 0; y < 2; y++) {)
+            KH_DEBUG(for (z = 0; z < 2; z++) {)
                 /* MATCH: the corner as a reference local: the RotTransPers argument and the .x/.y reads share one
                    pointer giv (c + x*64 + y*32, s0); c[x][y][z].x reads build a second one. Invisible in the
                    original's .mdebug as here (loop.c reduces it to a giv, the local gets no register). */
-                IVECTOR& p = c[x][y][z];
-                v.x = m_bbox.x[x];
-                v.y = m_bbox.y[y];
-                v.z = m_bbox.z[z];
-                v.w = 1.0f;
-                w[x][y][z] = RotTransPers(p, rtp, v);
-                if (w[x][y][z] < 0.0f) {
-                    m_C0.set(0, 0, 0xFF);
-                    abort = 1;
-                } else {
-                    if (wmax < w[x][y][z]) wmax = w[x][y][z];
-                    if (w[x][y][z] < wmin) wmin = w[x][y][z];
-                }
-                if (p.x < 0 || p.x > 0xFFFF || p.y < 0 || p.y > 0xFFFF) {
-                    m_C0.set(0, 0xFF, 0xFF);
-                    abort = 1;
-                }
-                if (p.x < xmin) xmin = p.x;
-                if (p.x > xmax) xmax = p.x;
-                if (p.y < ymin) ymin = p.y;
-                if (p.y > ymax) ymax = p.y;
-            }
-        }
-    }
-    if (abort) return;
-    if (wmax < 1.0f / CWorldEnv::getDispFar()) {
-        m_C0.set(0xFF, 0xFF, 0);
-    }
-    if (1.0f / CWorldEnv::getFogNear() < wmin) {
-        m_C0.set(0xFF, 0, 0xFF);
-    }
-    if (xmin > 0x9000 || xmax < 0x7000 || ymin > 0x8C00 || ymax < 0x7400) {
-        m_C0.set(0xFF, 0xFF, 0xFF);
-    }
-    giftag.ul64[0] = 0x6400000000008000;
-    giftag.ul64[1] = 0x444410;
-    CPackMan::pkOpenGifTag(giftag.ul128);
-    CPackMan::pkAddGsData(0x282 | ((u_long)isSemiTrans() << 6));
-    CPackMan::pkAddGsData(m_C0.col);
-    CPackMan::pkAddGsData(_xyz(c[0][0][0]));
-    CPackMan::pkAddGsData(_xyz(c[1][0][0]));
-    CPackMan::pkAddGsData(_xyz(c[1][1][0]));
-    CPackMan::pkAddGsData(_xyz(c[1][1][1]));
-    CPackMan::pkCloseGifTag();
-    CPackMan::pkOpenGifTag(giftag.ul128);
-    CPackMan::pkAddGsData(0x282 | ((u_long)isSemiTrans() << 6));
-    CPackMan::pkAddGsData(m_C0.col);
-    CPackMan::pkAddGsData(_xyz(c[1][1][0]));
-    CPackMan::pkAddGsData(_xyz(c[0][1][0]));
-    CPackMan::pkAddGsData(_xyz(c[0][0][0]));
-    CPackMan::pkAddGsData(_xyz(c[0][0][1]));
-    CPackMan::pkCloseGifTag();
-    CPackMan::pkOpenGifTag(giftag.ul128);
-    CPackMan::pkAddGsData(0x282 | ((u_long)isSemiTrans() << 6));
-    CPackMan::pkAddGsData(m_C0.col);
-    CPackMan::pkAddGsData(_xyz(c[1][0][1]));
-    CPackMan::pkAddGsData(_xyz(c[1][1][1]));
-    CPackMan::pkAddGsData(_xyz(c[0][1][1]));
-    CPackMan::pkAddGsData(_xyz(c[0][1][0]));
-    CPackMan::pkCloseGifTag();
-    CPackMan::pkOpenGifTag(giftag.ul128);
-    CPackMan::pkAddGsData(0x282 | ((u_long)isSemiTrans() << 6));
-    CPackMan::pkAddGsData(m_C0.col);
-    CPackMan::pkAddGsData(_xyz(c[0][1][1]));
-    CPackMan::pkAddGsData(_xyz(c[0][0][1]));
-    CPackMan::pkAddGsData(_xyz(c[1][0][1]));
-    CPackMan::pkAddGsData(_xyz(c[1][0][0]));
-    CPackMan::pkCloseGifTag();
-}
+                KH_DEBUG(IVECTOR& p = c[x][y][z];)
+                KH_DEBUG(v.x = m_bbox.x[x];)
+                KH_DEBUG(v.y = m_bbox.y[y];)
+                KH_DEBUG(v.z = m_bbox.z[z];)
+                KH_DEBUG(v.w = 1.0f;)
+                KH_DEBUG(w[x][y][z] = RotTransPers(p, rtp, v);)
+                KH_DEBUG(if (w[x][y][z] < 0.0f) {)
+                    KH_DEBUG(m_C0.set(0, 0, 0xFF);)
+                    KH_DEBUG(abort = 1;)
+                KH_DEBUG(} else {)
+                    KH_DEBUG(if (wmax < w[x][y][z]) wmax = w[x][y][z];)
+                    KH_DEBUG(if (w[x][y][z] < wmin) wmin = w[x][y][z];)
+                KH_DEBUG(})
+                KH_DEBUG(if (p.x < 0 || p.x > 0xFFFF || p.y < 0 || p.y > 0xFFFF) {)
+                    KH_DEBUG(m_C0.set(0, 0xFF, 0xFF);)
+                    KH_DEBUG(abort = 1;)
+                KH_DEBUG(})
+                KH_DEBUG(if (p.x < xmin) xmin = p.x;)
+                KH_DEBUG(if (p.x > xmax) xmax = p.x;)
+                KH_DEBUG(if (p.y < ymin) ymin = p.y;)
+                KH_DEBUG(if (p.y > ymax) ymax = p.y;)
+            KH_DEBUG(})
+        KH_DEBUG(})
+    KH_DEBUG(})
+    KH_DEBUG(if (abort) return;)
+    KH_DEBUG(if (wmax < 1.0f / CWorldEnv::getDispFar()) {)
+        KH_DEBUG(m_C0.set(0xFF, 0xFF, 0);)
+    KH_DEBUG(})
+    KH_DEBUG(if (1.0f / CWorldEnv::getFogNear() < wmin) {)
+        KH_DEBUG(m_C0.set(0xFF, 0, 0xFF);)
+    KH_DEBUG(})
+    KH_DEBUG(if (xmin > 0x9000 || xmax < 0x7000 || ymin > 0x8C00 || ymax < 0x7400) {)
+        KH_DEBUG(m_C0.set(0xFF, 0xFF, 0xFF);)
+    KH_DEBUG(})
+    KH_DEBUG(giftag.ul64[0] = 0x6400000000008000;)
+    KH_DEBUG(giftag.ul64[1] = 0x444410;)
+    KH_DEBUG(CPackMan::pkOpenGifTag(giftag.ul128);)
+    KH_DEBUG(CPackMan::pkAddGsData(0x282 | ((u_long)isSemiTrans() << 6));)
+    KH_DEBUG(CPackMan::pkAddGsData(m_C0.col);)
+    KH_DEBUG(CPackMan::pkAddGsData(_xyz(c[0][0][0]));)
+    KH_DEBUG(CPackMan::pkAddGsData(_xyz(c[1][0][0]));)
+    KH_DEBUG(CPackMan::pkAddGsData(_xyz(c[1][1][0]));)
+    KH_DEBUG(CPackMan::pkAddGsData(_xyz(c[1][1][1]));)
+    KH_DEBUG(CPackMan::pkCloseGifTag();)
+    KH_DEBUG(CPackMan::pkOpenGifTag(giftag.ul128);)
+    KH_DEBUG(CPackMan::pkAddGsData(0x282 | ((u_long)isSemiTrans() << 6));)
+    KH_DEBUG(CPackMan::pkAddGsData(m_C0.col);)
+    KH_DEBUG(CPackMan::pkAddGsData(_xyz(c[1][1][0]));)
+    KH_DEBUG(CPackMan::pkAddGsData(_xyz(c[0][1][0]));)
+    KH_DEBUG(CPackMan::pkAddGsData(_xyz(c[0][0][0]));)
+    KH_DEBUG(CPackMan::pkAddGsData(_xyz(c[0][0][1]));)
+    KH_DEBUG(CPackMan::pkCloseGifTag();)
+    KH_DEBUG(CPackMan::pkOpenGifTag(giftag.ul128);)
+    KH_DEBUG(CPackMan::pkAddGsData(0x282 | ((u_long)isSemiTrans() << 6));)
+    KH_DEBUG(CPackMan::pkAddGsData(m_C0.col);)
+    KH_DEBUG(CPackMan::pkAddGsData(_xyz(c[1][0][1]));)
+    KH_DEBUG(CPackMan::pkAddGsData(_xyz(c[1][1][1]));)
+    KH_DEBUG(CPackMan::pkAddGsData(_xyz(c[0][1][1]));)
+    KH_DEBUG(CPackMan::pkAddGsData(_xyz(c[0][1][0]));)
+    KH_DEBUG(CPackMan::pkCloseGifTag();)
+    KH_DEBUG(CPackMan::pkOpenGifTag(giftag.ul128);)
+    KH_DEBUG(CPackMan::pkAddGsData(0x282 | ((u_long)isSemiTrans() << 6));)
+    KH_DEBUG(CPackMan::pkAddGsData(m_C0.col);)
+    KH_DEBUG(CPackMan::pkAddGsData(_xyz(c[0][1][1]));)
+    KH_DEBUG(CPackMan::pkAddGsData(_xyz(c[0][0][1]));)
+    KH_DEBUG(CPackMan::pkAddGsData(_xyz(c[1][0][1]));)
+    KH_DEBUG(CPackMan::pkAddGsData(_xyz(c[1][0][0]));)
+    KH_DEBUG(CPackMan::pkCloseGifTag();)
+KH_DEBUG(})
 
 void CModel::linkTexAnm(CTexAnm* pATbl, INT nANum) {
     INT nTexMax;
     if (pATbl && nANum > 0) {
         nTexMax = m_TransTexCount;
         if (!m_pTexAnm && nTexMax > 0 && CModelTexAnm::getTexAnmCount(pATbl, nANum, (TexInfoStub*)m_TexInfo, nTexMax) > 0) {
-            m_pTexAnm = new (__FILE__ "(4066)") CModelTexAnm;
-            if (!(m_pTexAnm)) AssertApp(__FILE__, 4067, "m_pTexAnm", 0);
+            m_pTexAnm = new KH_AT("(4066)") CModelTexAnm;
+            KH_DEBUG(if (!(m_pTexAnm)) AssertApp(__FILE__, 4067, "m_pTexAnm", 0);)
             m_pTexAnm->setup(pATbl, nANum, (TexInfoStub*)m_TexInfo, nTexMax);
         }
     }
@@ -1532,7 +1531,7 @@ void CModel::setupUVScroll(INT bVal) {
         if ((m_TexInfo[i].m_pTex[0x55] & 0x80) || bVal) {
             m_nFlag |= 0x80;
             bVal = m_TransTexCount;
-            m_TexUV = new (__FILE__ "(4086)") _TEX_UV_OFFSET[bVal];
+            m_TexUV = new KH_AT("(4086)") _TEX_UV_OFFSET[bVal];
             m_nFlag |= 0x40;
             break;
         }
@@ -1708,9 +1707,10 @@ INT Mad::getModelAttachData(const MODEL_ATTACH_DATA** outMad, INT iRId) {
         return 0;
     }
     mad = (MODEL_ATTACH_DATA*)((BYTE*)header + header->uiOffset);
-    if (!(mad)) AssertApp(__FILE__, 4422, "mad", 0);
+    KH_DEBUG(if (!(mad)) AssertApp(__FILE__, 4422, "mad", 0);)
     *outMad = mad;
     return header->uiNum;
 }
 
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .data .rodata

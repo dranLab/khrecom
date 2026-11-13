@@ -97,7 +97,7 @@ void CGimmickWarpPoint::stateMain() {
             g_pPlayer->getPlayerState() == WALK || g_pPlayer->getPlayerState() == RUN) {
             m_reqFlag = 1;
             CGameWork::setFlag(1, 5, TRUE);
-            new (__FILE__ "(190)") CWorldWarp(CTaskMan::getSysTask(1), FALSE);
+            new KH_AT("(190)") CWorldWarp(CTaskMan::getSysTask(1), FALSE);
         }
     }
 }

@@ -13,7 +13,7 @@ extern "C" const char _ctype_[];
 #define isdigit(c) ((_ctype_ + 1)[(int)(c)] & 4)
 
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 struct SemaParam {
     int currentCount;
@@ -415,7 +415,7 @@ void CRcf::reqLoadRCF(INT nGroup, INT nMember, INT nType, BYTE* pBuff, INT nLink
     pPrev = s_pReadQueue;
     _waitsema();
 #line 527
-    pData = new (__FILE__ "(527)") CRCFQueueData(nGroup, nMember, nType, pBuff, nLinkOwner);
+    pData = new KH_AT("(527)") CRCFQueueData(nGroup, nMember, nType, pBuff, nLinkOwner);
     ASSERT(pData);
     pData->linkTail();
     _signalsema();
@@ -433,7 +433,7 @@ void CRcf::reqLoadRCFFront(INT nGroup, INT nMember, INT nType, BYTE* pBuff, INT 
     pPrev = s_pReadQueue;
     _waitsema();
 #line 553
-    pData = new (__FILE__ "(553)") CRCFQueueData(nGroup, nMember, nType, pBuff, nLinkOwner);
+    pData = new KH_AT("(553)") CRCFQueueData(nGroup, nMember, nType, pBuff, nLinkOwner);
     ASSERT(pData);
     pData->linkFront();
     _signalsema();
@@ -638,7 +638,7 @@ INT _loadRCF(ULONG nInGroup) {
     if (s_pFileBuf) delete s_pFileBuf;
     s_pFileBuf = __null;
 #line 1051
-    s_pFileBuf = new (__FILE__ "(1051)") CBuf;
+    s_pFileBuf = new KH_AT("(1051)") CBuf;
     sprintf(szFileName, "cdrom0:\\RCF\\G%03d.RCF", nInGroup / 10000);
     s_nReadFileSize = CFileIO::loadFile(szFileName, *s_pFileBuf, 0);
     if (s_nReadFileSize > -1) return 1;
@@ -1223,7 +1223,7 @@ INT CRcf::loadNextCategoryInfo(INT nCategory, CHAR* pOutLabel, INT nLabelMax, IN
         if (s_pDbgFileBuf) delete s_pDbgFileBuf;
         s_pDbgFileBuf = __null;
 #line 2113
-        s_pDbgFileBuf = new (__FILE__ "(2113)") CBuf;
+        s_pDbgFileBuf = new KH_AT("(2113)") CBuf;
         ASSERT(s_pDbgFileBuf);
         sprintf(szFileName, "cdrom0:\\rcf\\g%03d.rcf", nCategory);
         if (CFileIO::loadFile(szFileName, *s_pDbgFileBuf, 0) < 0) {
@@ -1323,7 +1323,7 @@ BOOL _loadRcfInfoFile(const CHAR* pszFile) {
         return FALSE;
     }
 #line 2257
-    s_pDbgFileBuf = new (__FILE__ "(2257)") CBuf;
+    s_pDbgFileBuf = new KH_AT("(2257)") CBuf;
     ASSERT(s_pDbgFileBuf);
     pBuf = s_pDbgFileBuf->allocBuf_A64(nLen + 1);
     ASSERT(pBuf);
@@ -1463,12 +1463,12 @@ void _loadDbgRcfSceneInfo() {
     if (s_nRcfSceneCount > 0) {
 #line 2475
         ASSERT(__null == s_pRcfSceneArray);
-        s_pRcfSceneArray = new (__FILE__ "(2476)") RcfSceneInfo[s_nRcfSceneCount];
+        s_pRcfSceneArray = new KH_AT("(2476)") RcfSceneInfo[s_nRcfSceneCount];
     }
     if (s_nRcfMapCount > 0) {
 #line 2480
         ASSERT(__null == s_pRcfMapArray);
-        s_pRcfMapArray = new (__FILE__ "(2481)") RcfMapInfo[s_nRcfMapCount];
+        s_pRcfMapArray = new KH_AT("(2481)") RcfMapInfo[s_nRcfMapCount];
     }
     _parseRcfSceneAndMapInfo();
     _disposeRcfInfoFile();

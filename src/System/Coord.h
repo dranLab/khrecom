@@ -366,10 +366,10 @@ inline void _addRot(FVECTOR& vOut, const FVECTOR& vInSrc)
                      "vnop\n"
                      "vnop\n"
                      "vnop\n"
-                     "sqc2 $vf1, 0x0(%1)\n"
+                     KH_VER("sqc2 $vf1, 0x0(%1)\n", "sqc2 $vf1, 0x0(%4)\n") /* retail: the store through a second operand for vOut (Avatar RotateAvatarMain: one more use gives vOut its s-register before this) */
                      "vnop\n"
                      "cfc2.ni %0, $vi18\n"
-                     : "=r"(nFlag) : "r"(&vOut), "r"(&vInSrc), "r"(fPI) : "memory");
+                     : "=r"(nFlag) : "r"(&vOut), "r"(&vInSrc), "r"(fPI) KH_RELEASE(, "r"(&vOut)) : "memory");
 
     if (nFlag & 0x3f) roundPI(vOut, nFlag);
 }
@@ -621,7 +621,7 @@ public:
         if (m_nCrdNum && m_pCrdArray && nIndex < m_nCrdNum) {
             return m_pCrdArray[nIndex];
         }
-        _coord_alart(nIndex);
+        KH_DEBUG(_coord_alart(nIndex);)
         return getExceptCoord();
     }
 
@@ -630,7 +630,7 @@ public:
         if (m_nCrdNum && m_pCrdArray && nIndex < m_nCrdNum) {
             return m_pCrdArray[nIndex];
         }
-        _coord_alart(nIndex);
+        KH_DEBUG(_coord_alart(nIndex);)
         return getExceptCoord();
     }
 
@@ -638,7 +638,7 @@ public:
     CCoord* Crd() {
         if (m_nCrdNum && m_pCrdArray)
             return m_pCrdArray;
-        _coord_nullalart();
+        KH_DEBUG(_coord_nullalart();)
         return __null;
     }
 
@@ -646,7 +646,7 @@ public:
     CCoord* Crd() const {
         if (m_nCrdNum && m_pCrdArray)
             return m_pCrdArray;
-        _coord_nullalart();
+        KH_DEBUG(_coord_nullalart();)
         return __null;
     }
 

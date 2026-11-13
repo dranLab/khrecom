@@ -8,37 +8,37 @@
 
 
 
-class CDbgCube {
-private:
-    CCoord m_Coord;                /* 0x000 */
-    C3DPolyStrip m_gpPolyStrip;    /* 0x0d0 */
+KH_DEBUG(class CDbgCube {)
+KH_DEBUG(private:)
+    KH_DEBUG(CCoord m_Coord;                /* 0x000 */)
+    KH_DEBUG(C3DPolyStrip m_gpPolyStrip;    /* 0x0d0 */)
 
-public:
-    CDbgCube(CCoord* pCrd);
-    CDbgCube();
-    ~CDbgCube();
-    void disp();
-    void setCoord(FVECTOR* pvPos, FVECTOR* pvRot);
-    CCoord& getCoord() { return m_Coord; }
-private:
-    void init(CCoord* pCrd);
-};
+KH_DEBUG(public:)
+    KH_DEBUG(CDbgCube(CCoord* pCrd);)
+    KH_DEBUG(CDbgCube();)
+    KH_DEBUG(~CDbgCube();)
+    KH_DEBUG(void disp();)
+    KH_DEBUG(void setCoord(FVECTOR* pvPos, FVECTOR* pvRot);)
+    KH_DEBUG(CCoord& getCoord() { return m_Coord; })
+KH_DEBUG(private:)
+    KH_DEBUG(void init(CCoord* pCrd);)
+KH_DEBUG(};)
 
-class CDbgArrow {
-private:
-    CCoord m_Coord;                /* 0x000 */
-    C3DPolyStrip m_gpPolyStrip;    /* 0x0d0 */
+KH_DEBUG(class CDbgArrow {)
+KH_DEBUG(private:)
+    KH_DEBUG(CCoord m_Coord;                /* 0x000 */)
+    KH_DEBUG(C3DPolyStrip m_gpPolyStrip;    /* 0x0d0 */)
 
-public:
-    CDbgArrow(CCoord* pCrd);
-    CDbgArrow();
-    ~CDbgArrow();
-    void disp();
-    void setCoord(FVECTOR* pvPos, FVECTOR* pvRot);
-    CCoord& getCoord() { return m_Coord; }
-private:
-    void init(CCoord* pCrd);
-};
+KH_DEBUG(public:)
+    KH_DEBUG(CDbgArrow(CCoord* pCrd);)
+    KH_DEBUG(CDbgArrow();)
+    KH_DEBUG(~CDbgArrow();)
+    KH_DEBUG(void disp();)
+    KH_DEBUG(void setCoord(FVECTOR* pvPos, FVECTOR* pvRot);)
+    KH_DEBUG(CCoord& getCoord() { return m_Coord; })
+KH_DEBUG(private:)
+    KH_DEBUG(void init(CCoord* pCrd);)
+KH_DEBUG(};)
 
 struct PATH_DATA_HEAD {
     INT iId;
@@ -85,16 +85,16 @@ private:
     FVECTOR* m_pVec;               /* 0x000 */
     INT m_iVecMax;                 /* 0x004 */
     PATH_VECTOR* m_pPathData;      /* 0x008 */
-    PATH_PARAM m_sParam;           /* 0x010 */
-    INT m_iStatus;                 /* 0x040 */
-    INT m_iVecMemMax;              /* 0x044 */
-    INT m_iActive;                 /* 0x048 */
-    FVECTOR m_vRot;                /* 0x050 */
-    C3DLineStrip m_DDPathLines;    /* 0x060 */
-    C3DLineStrip m_DDXYZLines;     /* 0x0a4 */
-    CCoord m_DDXYZCoord;           /* 0x0f0 */
-    class CDbgCube* m_pCube;       /* 0x1c0 */
-    C3DPolyStrip m_DDPathPolys;    /* 0x1c4 */
+    KH_DEBUG(PATH_PARAM m_sParam;           /* 0x010 */)
+    KH_DEBUG(INT m_iStatus;                 /* 0x040 */)
+    KH_DEBUG(INT m_iVecMemMax;              /* 0x044 */)
+    KH_DEBUG(INT m_iActive;                 /* 0x048 */)
+    KH_DEBUG(FVECTOR m_vRot;                /* 0x050 */)
+    KH_DEBUG(C3DLineStrip m_DDPathLines;    /* 0x060 */)
+    KH_DEBUG(C3DLineStrip m_DDXYZLines;     /* 0x0a4 */)
+    KH_DEBUG(CCoord m_DDXYZCoord;           /* 0x0f0 */)
+    KH_DEBUG(class CDbgCube* m_pCube;       /* 0x1c0 */)
+    KH_DEBUG(C3DPolyStrip m_DDPathPolys;    /* 0x1c4 */)
 
 public:
     CPathVector(const FVECTOR* pPath, INT iPathMax) { init(pPath, iPathMax, 0); }
@@ -117,7 +117,7 @@ public:
     float getPathStepToVector4(const FVECTOR** pv, float fstep);
     void setPathParam(PATH_PARAM& sParam);
     void setPathPosition(INT iNum, const FVECTOR& vPos) { m_pVec[iNum] = vPos; }
-    void setActive(INT iNum) { *(INT*)&m_iActive = iNum; } // MATCH: not a struct-field store, so callers reload statics after it (gcc 2.95 alias heuristic; CDebugPathData::setActivePathVecNum)
+    KH_DEBUG(void setActive(INT iNum) { *(INT*)&m_iActive = iNum; }) // MATCH: not a struct-field store, so callers reload statics after it (gcc 2.95 alias heuristic; CDebugPathData::setActivePathVecNum)
     BOOL addPath(INT iNum);
     BOOL delPath(INT iNum);
     void dispDebugLine(INT iFlg);
@@ -135,10 +135,10 @@ private:
     CPathVector* m_pPath;          /* 0x00 */
     INT m_iPathMax;                /* 0x04 */
     PATH_DATA* m_pPathData;        /* 0x08 */
-    INT m_iStatus;                 /* 0x0c */
-    INT m_iPathMemMax;             /* 0x10 */
-    INT m_iActive;                 /* 0x14 */
-    C3DLineStrip m_DDLinkLines;    /* 0x18 */
+    KH_DEBUG(INT m_iStatus;                 /* 0x0c */)
+    KH_DEBUG(INT m_iPathMemMax;             /* 0x10 */)
+    KH_DEBUG(INT m_iActive;                 /* 0x14 */)
+    KH_DEBUG(C3DLineStrip m_DDLinkLines;    /* 0x18 */)
 
 public:
     CPathData(const CHAR* pszName) { init(pszName, 0); }
@@ -163,10 +163,10 @@ public:
     }
     void setPathParam(INT iPathNum, PATH_PARAM& sParam) { m_pPath[iPathNum].setPathParam(sParam); }
     void setPathPosition(INT iPathNum, INT iNum, const FVECTOR& vPos) { m_pPath[iPathNum].setPathPosition(iNum, vPos); }
-    void setActive(INT iPathNum, INT iNum) {
-        *(INT*)&m_iActive = iPathNum; // MATCH: as CPathVector::setActive
-        m_pPath[iPathNum].setActive(iNum);
-    }
+    KH_DEBUG(void setActive(INT iPathNum, INT iNum) {)
+        KH_DEBUG(*(INT*)&m_iActive = iPathNum;) // MATCH: as CPathVector::setActive
+        KH_DEBUG(m_pPath[iPathNum].setActive(iNum);)
+    KH_DEBUG(})
     BOOL addPath(const FVECTOR* pVec, INT iNum);
     BOOL delPath(INT iNum);
     BOOL addPathVector(INT iPathNum, INT iNum) { return m_pPath[iPathNum].addPath(iNum); }

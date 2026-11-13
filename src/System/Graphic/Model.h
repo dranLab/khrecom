@@ -243,7 +243,7 @@ public:
     INT getBBoxFlag() { return m_BBoxFlag; }
     void setBBoxFlag(INT nFlag) { m_BBoxFlag = nFlag; }
     BBOX* getBBox(INT nIndex) {
-        if (!(m_pData != NULL)) AssertApp(__FILE__, 262, "m_pData != __null", 0);
+        KH_DEBUG(if (!(m_pData != NULL)) AssertApp(__FILE__, 262, "m_pData != __null", 0);)
         return &m_pData->m_pBBox[nIndex];
     }
     MODELDATA* getModelData() { return (MODELDATA*)m_pData; }
@@ -384,7 +384,7 @@ private:
     void _disp0_SetPacket(UINT nMode, const int (*pData)[4], INT semikind, u_long nInTest, INT iFlags, u_long* tex0);
 protected:
     void disp0(INT semikind, u_long nInTest, INT iFlags);
-    virtual CSemiModel* createSemiModel() { return new (__FILE__ "(569)") CSemiModel; }
+    virtual CSemiModel* createSemiModel() { return new KH_AT("(569)") CSemiModel; }
     BOOL isManagedSemiModel() const { return m_nFlag & 1; }
     void manageSemiModel(BOOL bOn) {
         if (bOn) m_nFlag |= 1;
@@ -462,7 +462,7 @@ private:
     void setLayerFG(BYTE nInDepth) { AssertApp(__FILE__, 675, "0", 0); }
 };
 
-class CBBox : public CGPrim {
+class CBBox KH_DEBUG(: public CGPrim) {
 public: // as in the ref (struct)
     CCoord* m_pCrd;  /* 0x1c */
     G_RGBA m_C0;     /* 0x20 */
@@ -470,10 +470,10 @@ public: // as in the ref (struct)
 
 public:
     CBBox() { m_C0.set(0xFF, 0, 0, 0x80); }
-    virtual UINT getPacketSize() const { return 0x10; }
-private:
-    virtual FIX4 calcZ();
-    virtual void makePkt();
+    KH_DEBUG(virtual UINT getPacketSize() const { return 0x10; })
+KH_DEBUG(private:)
+    KH_DEBUG(virtual FIX4 calcZ();)
+    KH_DEBUG(virtual void makePkt();)
 };
 
 struct CShader {
@@ -503,7 +503,7 @@ public:
  * "delete CMCShader\n") are in .rodata of every includer, in this order. Only line 569 is known. */
 #line 1 MODEL_H_PATH
 inline void _modelCheckData(void* inData) {
-    if (!(inData != __null)) AssertApp(__FILE__, __LINE__, "m_pData != __null", 0);
+    KH_DEBUG(if (!(inData != __null)) AssertApp(__FILE__, __LINE__, "m_pData != __null", 0);)
 }
 inline void* _modelCreate() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
     return com_malloc_d(4, __FILE__ "(569)", (UINT)-1);

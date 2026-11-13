@@ -241,3 +241,4 @@ void CFriendKing::adjustPlayer(INT inWarp) {
 } // namespace Friend
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

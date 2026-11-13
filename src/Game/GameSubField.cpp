@@ -89,11 +89,11 @@ extern "C" int sprintf(char* s, const char* fmt, ...);
 /* Game/Collision/CollUtil.h's dispose accessor (line 202) */
 static inline void _collUtilDispose() {
     CCollUtil*& instance = CCollUtil::m_pInstance;
-    if (!instance) AssertApp(COLLUTIL_H_PATH, 202, "m_pInstance", 0);
+    KH_DEBUG(if (!instance) AssertApp(COLLUTIL_H_PATH, 202, "m_pInstance", 0);)
     instance->dispose();
 }
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 static int s_preEventMovieFlags[2] = {0x20000, 0x40000};
 static int s_preEventMovieNums[2] = {132, 133};
@@ -114,7 +114,7 @@ CGameSubField::CGameSubField() : CGameSub((CStateTemplate<CGameSub>*)m_State) {
     m_State[11].set(this, &CGameSubField::preToNextRoomDispose, &CGameSubField::toNextRoomDispose, NULL);
     m_State[12].set(this, &CGameSubField::preSleep, &CGameSubField::sleeping, NULL);
     nStartState = 0;
-    if (CGame::isDbgStartFromBattle()) {
+    if (KH_DW(CGame::isDbgStartFromBattle())) {
         nStartState = (USHORT)(CSceneInfo::getCurrentBattleSceneNum() - 1050) < 149;
     }
     changeState(nStartState);
@@ -288,22 +288,22 @@ void CGameSubField::preSetupTasks() {}
 
 #line 376
 void CGameSubField::setupTasks() {
-    if (CGame::isDbgStartFromBattle()) {
+    if (KH_DW(CGame::isDbgStartFromBattle())) {
         changeState(6);
         return;
     }
     CTask* pSysTask = CTaskMan::getSysTask(1);
-    CMap* pMap = new (__FILE__ "(382)") CMap(pSysTask, CRcf::getMapID(CSceneInfo::getCurrentAreaNum(), CSceneInfo::getCurrentSceneNum()));
+    CMap* pMap = new KH_AT("(382)") CMap(pSysTask, CRcf::getMapID(CSceneInfo::getCurrentAreaNum(), CSceneInfo::getCurrentSceneNum()));
     ASSERT(pMap);
     Message::CMessageManager::getInstance();
     LockOnManager::CLockOnManager::getInstance();
     CEntityFactory::getInstance();
-    CGimmickManager* pGimmickManager = new (__FILE__ "(395)") CGimmickManager(pSysTask);
+    CGimmickManager* pGimmickManager = new KH_AT("(395)") CGimmickManager(pSysTask);
     CMapEnemyManager* pMapEnemyManager = NULL;
     if ((USHORT)(CSceneInfo::getCurrentBattleSceneNum() - 1000) < 50) {
-        pMapEnemyManager = new (__FILE__ "(400)") CMapEnemyManager(pSysTask);
+        pMapEnemyManager = new KH_AT("(400)") CMapEnemyManager(pSysTask);
     }
-    new (__FILE__ "(403)") PLM::CPlayerManager(pSysTask);
+    new KH_AT("(403)") PLM::CPlayerManager(pSysTask);
     PLM::createPlayer(0, NULL, 0);
     pMap->init(1, 1);
     CShadowModelMan::setAutomatic();
@@ -322,7 +322,7 @@ void CGameSubField::setupTasks() {
     }
     CDeFocus::create(pSysTask);
     CDeFocus::offNear();
-    CCollDisp::initialize(pSysTask, dbgButtonDown(USR_SYSTEM, 0x100, 1) | CCollDisp::m_fgDisp, CCollDisp::m_fgMapZoneDisp);
+    KH_DEBUG(CCollDisp::initialize(pSysTask, dbgButtonDown(USR_SYSTEM, 0x100, 1) | CCollDisp::m_fgDisp, CCollDisp::m_fgMapZoneDisp);)
     changeState(5);
 }
 
@@ -350,7 +350,7 @@ void CGameSubField::disposeTasks() {
     if (!CGameWork::getFlag(1, 0x33)) {
         D2::C2DSpr::destroyAllForSceneChange();
     }
-    CCollDisp::finalize();
+    KH_DEBUG(CCollDisp::finalize();)
     _collUtilDispose();
 }
 
@@ -400,7 +400,7 @@ void CGameSubField::prePlay() {
         CWorldEnv::readyMike(1, 0);
     }
     CSceneInfo::doneChangeScene();
-    if (CGame::isDbgStartFromBattle()) {
+    if (KH_DW(CGame::isDbgStartFromBattle())) {
         CSceneInfo::reqEnterBattle(CSceneInfo::getCurrentBattleSceneNum());
     }
 }
@@ -500,3 +500,4 @@ void CGameSubField::preSleep() {}
 
 void CGameSubField::sleeping() {}
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

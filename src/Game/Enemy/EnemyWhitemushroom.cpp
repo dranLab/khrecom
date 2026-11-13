@@ -17,7 +17,7 @@
 #include "System/Math3D.h"
 #include "System/Rnd.h"
 #include "Game/Collision/CollBody.h"
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 extern CEntity* g_pPlayer; /* a CPlayer (Game/Player/Player.h) */
 
@@ -245,3 +245,4 @@ void CEnemyWhitemushroom::setupDisappear_() {
 }
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

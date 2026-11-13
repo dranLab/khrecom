@@ -25,6 +25,8 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "tools"))
 from compare_compilers import ANONYMOUS, functions, pair_unnamed, target_name  # noqa: E402
 
+from versions import default_version  # noqa: E402
+
 
 def disassemble(obj: Path, name: str, size: int) -> list[str]:
     """The function's instructions (and their relocations), without the padding after it.
@@ -152,8 +154,7 @@ def main() -> None:
                         help="side by side: matching lines shown around each difference (default 3)")
     args = parser.parse_args()
 
-    versions = sorted(p.name for p in (ROOT / "config").iterdir() if (p / f"{p.name}.yaml").exists())
-    version = args.version or versions[0]
+    version = default_version(args.version)
     opts = yaml.safe_load((ROOT / "config" / version / f"{version}.yaml").read_text(encoding="utf-8"))["options"]
     build = Path(opts["build_path"])
     target, base = build / "expected" / "units" / f"{args.unit}.o", build / "src" / f"{args.unit}.o"

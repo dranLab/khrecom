@@ -144,21 +144,21 @@ static void _createWindow() {
 
     /* through a reference: keeps the store before the virtual call (scheduling) */
     D2::C2DSeqCtrl*& rCtrl = s_pSysWindowCtrl;
-    rCtrl = new (__FILE__ "(213)") D2::C2DSeqCtrl;
+    rCtrl = new KH_AT("(213)") D2::C2DSeqCtrl;
     rCtrl->addSeq(s_pszSysWndSeq, tbl._tbl[0]);
     s_pSysWindowCtrl->changeLayer(25);
     rgba.col = 0x80707070;
-    pFnt = new (__FILE__ "(220)") D2::C2DFnt(0, 0, &rgba, 15, s_szSysMessage, 0x46);
+    pFnt = new KH_AT("(220)") D2::C2DFnt(0, 0, &rgba, 15, s_szSysMessage, 0x46);
     pFnt->m_Space.set(0, 0x30);
 
     s_szSysMessage[0] = '\0';
     s_pSysWindowCtrl->addFntShift(s_pszSysWndSeq, pFnt, 0.0f, -8.0f);
     s_pSysWindowCtrl->addSeqShift(s_pszSysWndSeq, 0, -150.0f, -36.0f);
     rgba.col = 0x80000070;
-    pFnt = new (__FILE__ "(229)") D2::C2DFnt(0, 0, &rgba, 15, "INFORMATION", 0x40);
+    pFnt = new KH_AT("(229)") D2::C2DFnt(0, 0, &rgba, 15, "INFORMATION", 0x40);
     s_pSysWindowCtrl->addFntShift(s_pszSysWndSeq, pFnt, -120.0f, -40.0f);
     s_pSysWindowCtrl->enableColorCtrl(TRUE);
-    s_pSysWindowAgent = new (__FILE__ "(233)") C2DSeqAgent(CTaskMan::getSysTask(0));
+    s_pSysWindowAgent = new KH_AT("(233)") C2DSeqAgent(CTaskMan::getSysTask(0));
     s_pSysWindowAgent->setupSeq(*s_pSysWindowCtrl, s_pszSysWndSeq, 0);
     s_pSysWindowAgent->setupState(tbl._tbl[0], tbl._tbl[1], tbl._tbl[2], _callbackSysMessageLoop,
                                   _callbackSysMessageClosed);
@@ -173,3 +173,4 @@ static void _setVisibleContents(BOOL bOn) {
     }
 }
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .data .rodata

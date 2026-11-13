@@ -361,11 +361,11 @@ void CPlayerManager::init() {
     case 13:
         if (CGame::isSoraGame() && nScene == 1053) m_uiFlag |= 0x8000;
         break;
-    case 22:
-        if (nScene == 1025) m_uiFlag |= 0x8000;
-        if (nScene == 1016) m_uiFlag |= 0x2000;
-        if (CGame::isRikuGame() && nScene == 1023) m_uiFlag |= 0x800;
-        break;
+    KH_DEBUG(case 22:)
+        KH_DEBUG(if (nScene == 1025) m_uiFlag |= 0x8000;)
+        KH_DEBUG(if (nScene == 1016) m_uiFlag |= 0x2000;)
+        KH_DEBUG(if (CGame::isRikuGame() && nScene == 1023) m_uiFlag |= 0x800;)
+        KH_DEBUG(break;)
     }
     if (CSceneInfo::isBattleScene() || CSceneInfo::isMinigameScene()) {
         m_uiFlag |= 1;
@@ -377,13 +377,13 @@ void CPlayerManager::init() {
         m_pCB = CardBattle::CCardBattle::getInstance();
     }
     initRsrcBlock();
-    for (i = 0; i < 17; i++) {
-        sprintf(m_strBlock[i], " ");
-        DebugWork::g_dw.player.m_szBlock[i] = m_strBlock[i];
-    }
-    m_pWindow = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(701)")
-        CDebugWindow(this, DWTPlayer::debugPlayerBlockInfo);
-    m_pWindow->dispOff(0);
+    KH_DEBUG(for (i = 0; i < 17; i++) {)
+        KH_DEBUG(sprintf(m_strBlock[i], " ");)
+        KH_DEBUG(DebugWork::g_dw.player.m_szBlock[i] = m_strBlock[i];)
+    KH_DEBUG(})
+    KH_DEBUG(m_pWindow = new KH_AT("(701)"))
+        KH_DEBUG(CDebugWindow(this, DWTPlayer::debugPlayerBlockInfo);)
+    KH_DEBUG(m_pWindow->dispOff(0);)
 }
 
 void CPlayerManager::main() {
@@ -392,19 +392,19 @@ void CPlayerManager::main() {
     if (m_uiFlag & 4) procPlayerDead();
     exeWind();
     m_tqTimer -= getFrameRate();
-    if (DebugWork::g_dw.player.iBlockInfo) {
-        sprintf(m_strBlock[0], "Current:%d/16 Remain:%06X Reserve:%d/6", m_uiCurrentBlock, m_uiRemain, m_uiReserve);
-        char* col[4] = {"\xf9S", "\xf9U", "\xf9X", "\xf9T"};
-        for (i = 0; i < 16; i++) {
-            RB_DATA& data = m_blockData[i];
-            UINT size = getPlayerRsrcGrpSize(data.nRCID);
-            sprintf(m_strBlock[i + 1], "%sS:%d D:%02d-%04d AD:%08X M:%06X/%06X", col[data.nState], data.nState,
-                    data.nData, data.nRCID, data.pAddr, size, data.nSize);
-        }
-        m_pWindow->dispOn(0);
-    } else {
-        m_pWindow->dispOff(0);
-    }
+    KH_DEBUG(if (KH_DW(DebugWork::g_dw.player.iBlockInfo)) {)
+        KH_DEBUG(sprintf(m_strBlock[0], "Current:%d/16 Remain:%06X Reserve:%d/6", m_uiCurrentBlock, m_uiRemain, m_uiReserve);)
+        KH_DEBUG(char* col[4] = {"\xf9S", "\xf9U", "\xf9X", "\xf9T"};)
+        KH_DEBUG(for (i = 0; i < 16; i++) {)
+            KH_DEBUG(RB_DATA& data = m_blockData[i];)
+            KH_DEBUG(UINT size = getPlayerRsrcGrpSize(data.nRCID);)
+            KH_DEBUG(sprintf(m_strBlock[i + 1], "%sS:%d D:%02d-%04d AD:%08X M:%06X/%06X", col[data.nState], data.nState, data.nData, data.nRCID, data.pAddr, size, data.nSize);)
+
+        KH_DEBUG(})
+        KH_DEBUG(m_pWindow->dispOn(0);)
+    KH_DEBUG(} else {)
+        KH_DEBUG(m_pWindow->dispOff(0);)
+    KH_DEBUG(})
 }
 
 void CPlayerManager::stateBattle() {
@@ -431,27 +431,27 @@ void CPlayerManager::stateBattle() {
                 TRACE("PLM:: \x81\xa6" "error!! Block Over : %d,\n", m_uiCurrentBlock);
                 m_uiCurrentBlock = 0;
             }
-            dbgDispTTY_RsrcBlock();
+            KH_DEBUG(dbgDispTTY_RsrcBlock();)
             setReserveLoad();
         }
-        if (dbgCheckUser(KKIKUCHI) && dbgButtonDown(USR_SYSTEM, 4, 1) && dbgButtonTrg(USR_SYSTEM, 1, 1)) {
-            dbgDispTTY_RsrcBlock();
-        }
+        KH_DEBUG(if (dbgCheckUser(KKIKUCHI) && dbgButtonDown(USR_SYSTEM, 4, 1) && dbgButtonTrg(USR_SYSTEM, 1, 1)) {)
+            KH_DEBUG(dbgDispTTY_RsrcBlock();)
+        KH_DEBUG(})
     }
 }
 
-void CPlayerManager::dbgDispTTY_RsrcBlock() {
-    INT i;
-    TRACE("PLM:: RB_DATA--------------------------------\n");
-    TRACE("PLM:: CurrentBlock=%d, Remain=0x%06x\n", m_uiCurrentBlock, m_uiRemain);
-    for (i = 0; i < 16; i++) {
-        RB_DATA& data = m_blockData[i];
-        UINT size = getPlayerRsrcGrpSize(data.nRCID);
-        TRACE("%2d: state=%d, data=%d, rcid=%d, addr=0x%08x, size=0x%06x(0x%06x),\n", i, data.nState, data.nData,
-              data.nRCID, data.pAddr, data.nSize, size);
-    }
-    TRACE("PLM:: --------------------------------RB_DATA\n");
-}
+KH_DEBUG(void CPlayerManager::dbgDispTTY_RsrcBlock() {)
+    KH_DEBUG(INT i;)
+    KH_DEBUG(TRACE("PLM:: RB_DATA--------------------------------\n");)
+    KH_DEBUG(TRACE("PLM:: CurrentBlock=%d, Remain=0x%06x\n", m_uiCurrentBlock, m_uiRemain);)
+    KH_DEBUG(for (i = 0; i < 16; i++) {)
+        KH_DEBUG(RB_DATA& data = m_blockData[i];)
+        KH_DEBUG(UINT size = getPlayerRsrcGrpSize(data.nRCID);)
+        KH_DEBUG(TRACE("%2d: state=%d, data=%d, rcid=%d, addr=0x%08x, size=0x%06x(0x%06x),\n", i, data.nState, data.nData, data.nRCID, data.pAddr, data.nSize, size);)
+
+    KH_DEBUG(})
+    KH_DEBUG(TRACE("PLM:: --------------------------------RB_DATA\n");)
+KH_DEBUG(})
 
 } // namespace PLM
 
@@ -499,16 +499,16 @@ void CPlayerManager::procPlayerDead() {
         CPackMan::setFrameEffect(2, 0, 0, 0);
         CPlaySpeedCtrl::setPlaySpeed(0.1f);
         pPlayer->getPlayerCamera()->setFlag(0x20, 0);
-        m_pPathCamera = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(892)")
+        m_pPathCamera = new KH_AT("(892)")
             CPathCamera(pPlayer);
-        if (!m_pPathCamera) AssertApp("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp", 893, "m_pPathCamera", 0);
+        KH_DEBUG(if (!m_pPathCamera) AssertApp("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp", 893, "m_pPathCamera", 0);)
         m_pPathCamera->setLocal(TRUE);
         m_pPathCamera->init(_ref(g_szCamPDead000), TRUE, FALSE, 0xC0);
         m_pPathCamera->initBGCheck(FALSE);
         m_pPathCamera->ignorePlaySpeed(FALSE);
         m_pPathCamera->run();
         if (!m_pCollMapCamera) {
-            m_pCollMapCamera = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(901)")
+            m_pCollMapCamera = new KH_AT("(901)")
                 CCollMapCamera();
         }
         if (m_pCollMapCamera) m_pCollMapCamera->init((COLL_KIND)0x8000000C, (COLL_TYPE)2, 0, getHandle());
@@ -667,7 +667,7 @@ void CPlayerManager::calcFieldStartPos() {
 namespace PLM {
 
 UINT CPlayerManager::getPlayerRsrcGrpSize(INT nMemberID) {
-    return CRsrcDB::getRsrcGrpSizeOnMemory(1, nMemberID);
+    return CRsrcDB::KH_VER(getRsrcGrpSizeOnMemory, getRsrcGrpSize)(1, nMemberID); // MATCH: a retail code change (retail calls getRsrcGrpSize)
 }
 
 void CPlayerManager::setReqLoad(UINT inID, INT inReady) {
@@ -696,7 +696,7 @@ void CPlayerManager::setReqLoad(UINT inID, INT inReady) {
             if (nextBlock < 16) {
                 BYTE* addr = m_pRsrcCurrent + g_nRCDataBlockSize[rc_data];
                 TRACE("PLM:: addr : 0x%x, 0x%x + 0x%x,\n", addr, m_pRsrcCurrent, g_nRCDataBlockSize[rc_data]);
-                for (i = nextBlock; i < 16; i++) {
+                for (i = nextBlock; ; i++) { if (i >= 16) goto nostack;
                     RB_DATA& next = m_blockData[i];
                     if (next.pAddr < addr) {
                         TRACE("PLM:: next->pAddr %d: 0x%x,", i, next.pAddr);
@@ -711,7 +711,7 @@ void CPlayerManager::setReqLoad(UINT inID, INT inReady) {
                         }
                     }
                 }
-                if (i < 16) goto stack;
+                goto stack; nostack:;
             }
             if (data.nState == 0) {
                 data.nRCID = rc_id;
@@ -1050,10 +1050,10 @@ void mallocBattleRsrcBuffer(BOOL inAssert) {
                   CSceneInfo::getCurrentSceneNum(), CSceneInfo::getCurrentRoomID(), CGame::getMapID());
             TRACE("Memory:%d%% VRAM:%d%%\n", (INT)CHeapMan::getUsedHeapRatio(), CVramMan::getUsedRatio());
             if (inAssert) {
-                if (!g_pRsrcFirst) {
+                KH_DEBUG(if (!g_pRsrcFirst) {)
                     AssertApp("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp", 2010, "g_pRsrcFirst",
                               "\x97" "e\x97\xca\x95s\x91\xab:\x8bZ\x83\x81\x83\x82\x83\x8a\x8am\x95\xdb\x82\xc5\x82\xab\x82\xdc\x82\xb9\x82\xf1!!");
-                }
+                KH_DEBUG(})
             } else {
                 TRACE("\x81\xa6\x82\xb1\x82\xb1\x82\xc5\x82\xcd\x8am\x95\xdb\x82\xf0\x92\xfa\x82\xdf\x82\xdc\x82\xb7\x81" "E\x81" "E\x81" "E\n");
             }
@@ -1225,28 +1225,28 @@ CPlayer* createPlayer(UINT inID, CTask* inParent, INT inEx) {
         switch (uiPlayerID) {
         case 1:
         case 2:
-            pPlayer = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2297)")
+            pPlayer = new KH_AT("(2297)")
                 PL::CPlayerSora(parent);
             break;
         case 3:
         case 4:
-            pPlayer = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2301)")
+            pPlayer = new KH_AT("(2301)")
                 PL::CPlayerRiku(parent);
             break;
         case 5:
-            pPlayer = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2305)")
+            pPlayer = new KH_AT("(2305)")
                 PL::CPlayerDRiku(parent, 5, inEx);
             break;
         case 6:
-            pPlayer = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2308)")
+            pPlayer = new KH_AT("(2308)")
                 PL::CPlayerDRiku(parent, 6, inEx);
             break;
         default:
-            pPlayer = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2312)")
+            pPlayer = new KH_AT("(2312)")
                 CPlayer(parent, g_uiPlayerID, 0);
             break;
         }
-        if (!pPlayer) AssertApp("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp", 2315, "pPlayer", 0);
+        KH_DEBUG(if (!pPlayer) AssertApp("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp", 2315, "pPlayer", 0);)
         pPLM->notifyPlayer(pPlayer, inEx);
     } else {
         TRACE("\x81\xa6\x83\x8a\x83\\\x81[\x83X\x82\xaa\x96\xb3\x82\xa2\x82\xcc\x82\xc5\x90\xb6\x90\xac\x8e\xb8\x94s\x81I %d,%d\n",
@@ -1305,45 +1305,45 @@ CEntity* CPlayerManager::createFriend(UINT inID, CTask* inParent) {
     offFlag(m_uiFlag, 0x42);
     switch (inID) {
     case 1:
-        m_pFriend = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2418)")
+        m_pFriend = new KH_AT("(2418)")
             Friend::CFriendDonald(parent);
         break;
     case 2:
-        m_pFriend = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2421)")
+        m_pFriend = new KH_AT("(2421)")
             Friend::CFriendGoofy(parent, 0);
         break;
     case 3:
-        m_pFriend = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2424)")
+        m_pFriend = new KH_AT("(2424)")
             Friend::CFriendAladdin(parent);
         break;
     case 4:
-        m_pFriend = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2427)")
+        m_pFriend = new KH_AT("(2427)")
             Friend::CFriendAriel(parent);
         break;
     case 5:
-        m_pFriend = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2430)")
+        m_pFriend = new KH_AT("(2430)")
             Friend::CFriendJack(parent);
         break;
     case 6:
-        m_pFriend = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2433)")
+        m_pFriend = new KH_AT("(2433)")
             Friend::CFriendPan(parent);
         break;
     case 7:
-        m_pFriend = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2436)")
+        m_pFriend = new KH_AT("(2436)")
             Friend::CFriendBeast(parent);
         break;
     case 8:
-        m_pFriend = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2439)")
+        m_pFriend = new KH_AT("(2439)")
             Friend::CFriendKing(parent);
         break;
     case 9:
-        m_pFriend = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2442)")
+        m_pFriend = new KH_AT("(2442)")
             Friend::CFriendPluto(parent);
         break;
     case 10:
-        m_pFriendEx = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2445)")
+        m_pFriendEx = new KH_AT("(2445)")
             Friend::CFriendGoofy(parent, 1);
-        m_pFriend = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2446)")
+        m_pFriend = new KH_AT("(2446)")
             Friend::CFriendDonald(parent);
         break;
     }
@@ -1461,31 +1461,31 @@ CEntity* CPlayerManager::createSummon(UINT inID, CTask* inParent) {
     offFlag(m_uiFlag, 0x20);
     switch (inID) {
     case 1:
-        m_pSummon = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2687)")
+        m_pSummon = new KH_AT("(2687)")
             Summon::CSummonSinba(parent);
         break;
     case 2:
-        m_pSummon = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2690)")
+        m_pSummon = new KH_AT("(2690)")
             Summon::CSummonGenie(parent);
         break;
     case 3:
-        m_pSummon = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2693)")
+        m_pSummon = new KH_AT("(2693)")
             Summon::CSummonBambi(parent);
         break;
     case 4:
-        m_pSummon = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2696)")
+        m_pSummon = new KH_AT("(2696)")
             Summon::CSummonDumbo(parent);
         break;
     case 5:
-        m_pSummon = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2699)")
+        m_pSummon = new KH_AT("(2699)")
             Summon::CSummonTink(parent);
         break;
     case 6:
-        m_pSummon = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2702)")
+        m_pSummon = new KH_AT("(2702)")
             Summon::CSummonMushu(parent);
         break;
     case 7:
-        m_pSummon = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2705)")
+        m_pSummon = new KH_AT("(2705)")
             Summon::CSummonCloud(parent);
         break;
     }
@@ -1626,21 +1626,21 @@ void setVibration(INT inID) {
         break;
     case 4:
         if (RND::genrand_int31() % 1000 >= 500) return;
+        motorL = RND::genrand_int31() % 256;
         motorS = 1;
         tq = 1;
-        motorL = RND::genrand_int31() % 256;
         break;
     default:
         return;
     }
-    if (dbgCheckUser(KKIKUCHI) && DebugWork::g_dw.player.iTemp == 8) {
-        FLOAT fl = DebugWork::g_dw.player.vTemp.x * 100.0f;
-        FLOAT fs = DebugWork::g_dw.player.vTemp.y * 100.0f;
-        FLOAT ft = DebugWork::g_dw.player.vTemp.z * 10000.0f;
-        motorL = (INT)(fl + 0.5f);
-        motorS = (INT)(fs + 0.5f);
-        tq = (INT)(ft + 0.5f);
-    }
+    KH_DEBUG(if (dbgCheckUser(KKIKUCHI) && KH_DW(DebugWork::g_dw.player.iTemp) == 8) {)
+        KH_DEBUG(FLOAT fl = KH_DW(DebugWork::g_dw.player.vTemp.x) * 100.0f;)
+        KH_DEBUG(FLOAT fs = KH_DW(DebugWork::g_dw.player.vTemp.y) * 100.0f;)
+        KH_DEBUG(FLOAT ft = KH_DW(DebugWork::g_dw.player.vTemp.z) * 10000.0f;)
+        KH_DEBUG(motorL = (INT)(fl + 0.5f);)
+        KH_DEBUG(motorS = (INT)(fs + 0.5f);)
+        KH_DEBUG(tq = (INT)(ft + 0.5f);)
+    KH_DEBUG(})
     CPadIO::startVibration(motorL, motorS, tq, 0);
 }
 
@@ -1711,3 +1711,4 @@ INT getWorldRotY(FLOAT& outRotY, const FMATRIX& inMat) {
 } // namespace PLM
 
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

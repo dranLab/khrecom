@@ -1,0 +1,5 @@
+# The game versions configure.py builds (config/<VERSION>/) and tools/check.sh checks, reference first: the US
+# translation beta, whose debug info gives ref/, the split and the line markers. Tools without --version use the
+# first (or the environment's KH_VERSION). docs/retail-plan.md adds the retail ELF as a second target.
+- SLUS_217.99
+- SLUS_217.99_retail

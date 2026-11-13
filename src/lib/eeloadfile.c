@@ -323,3 +323,4 @@ int sceSifSetIopAddr(unsigned int addr, void *buf, unsigned int type)
     return 0;
 }
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .data .rodata

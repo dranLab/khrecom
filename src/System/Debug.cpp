@@ -18,7 +18,7 @@ int vsprintf(char* buf, const char* fmt, va_list ap);
 
 char _szTraceBuf[1536];
 
-extern "C" int dbgCheckUser(USER uid) {
+extern "C" int (dbgCheckUser)(USER uid) {
     USER mdb;
 
     if (uid == USR_SYSTEM) {
@@ -63,63 +63,63 @@ extern "C" int dbgCheckUser(USER uid) {
     return 0;
 }
 
-INT dbgButtonTrg(USER uid, UINT button, INT padId) {
+INT (dbgButtonTrg)(USER uid, UINT button, INT padId) {
     if (!dbgCheckUser(uid)) {
         return 0;
     }
     return CPadIO::isButtonTrg(button, padId);
 }
 
-INT dbgButtonDown(USER uid, UINT button, INT padId) {
+INT (dbgButtonDown)(USER uid, UINT button, INT padId) {
     if (!dbgCheckUser(uid)) {
         return 0;
     }
     return CPadIO::isButtonDown(button, padId);
 }
 
-INT dbgButtonRTrg(USER uid, UINT button, INT padId) {
+INT (dbgButtonRTrg)(USER uid, UINT button, INT padId) {
     if (!dbgCheckUser(uid)) {
         return 0;
     }
     return CPadIO::isButtonRTrg(button, padId);
 }
 
-INT dbgButtonRpt(USER uid, UINT button, INT padId) {
+INT (dbgButtonRpt)(USER uid, UINT button, INT padId) {
     if (!dbgCheckUser(uid)) {
         return 0;
     }
     return CPadIO::isButtonRpt(button, padId);
 }
 
-INT dbgAnalogRX(USER uid, INT padId) {
+INT (dbgAnalogRX)(USER uid, INT padId) {
     if (!dbgCheckUser(uid)) {
         return 0;
     }
     return CPadIO::getAnalogRX(padId);
 }
 
-INT dbgAnalogRY(USER uid, INT padId) {
+INT (dbgAnalogRY)(USER uid, INT padId) {
     if (!dbgCheckUser(uid)) {
         return 0;
     }
     return CPadIO::getAnalogRY(padId);
 }
 
-INT dbgAnalogLX(USER uid, INT padId) {
+INT (dbgAnalogLX)(USER uid, INT padId) {
     if (!dbgCheckUser(uid)) {
         return 0;
     }
     return CPadIO::getAnalogLX(padId);
 }
 
-INT dbgAnalogLY(USER uid, INT padId) {
+INT (dbgAnalogLY)(USER uid, INT padId) {
     if (!dbgCheckUser(uid)) {
         return 0;
     }
     return CPadIO::getAnalogLY(padId);
 }
 
-extern "C" void TRACE(char* fmt, ...) {
+extern "C" void (TRACE)(char* fmt, ...) {
     va_list args;
 
     va_start(args, fmt);
@@ -132,7 +132,7 @@ extern "C" void TRACE(char* fmt, ...) {
     va_end(args);
 }
 
-extern "C" void TRACE_COL(TtyColor nCol, char* fmt, ...) {
+extern "C" void (TRACE_COL)(TtyColor nCol, char* fmt, ...) {
     va_list args;
 
     printf("\x1B[%dm", nCol);
@@ -147,7 +147,7 @@ extern "C" void TRACE_COL(TtyColor nCol, char* fmt, ...) {
     va_end(args);
 }
 
-extern "C" void TRACE_USER(USER uid, char* fmt, ...) {
+extern "C" void (TRACE_USER)(USER uid, char* fmt, ...) {
     va_list args;
 
     if (dbgCheckUser(uid)) {
@@ -162,7 +162,7 @@ extern "C" void TRACE_USER(USER uid, char* fmt, ...) {
     }
 }
 
-extern "C" void TRACE_USER_COL(USER uid, TtyColor nCol, char* fmt, ...) {
+extern "C" void (TRACE_USER_COL)(USER uid, TtyColor nCol, char* fmt, ...) {
     va_list args;
 
     if (dbgCheckUser(uid)) {

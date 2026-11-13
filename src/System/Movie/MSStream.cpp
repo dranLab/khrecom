@@ -50,8 +50,8 @@ asm(".section .bss\n"
     "\t.space 0x1000\n"
     "\t.text");
 static INT s_nMssThreadID;
-static volatile SHORT s_nMssPtr;
-static volatile SHORT s_nMssPutCnt;
+static volatile KH_VER(SHORT, INT) s_nMssPtr; /* retail: a word */
+static volatile KH_VER(SHORT, INT) s_nMssPutCnt;
 static BYTE* s_pMssBufBank[6];
 static unsigned int s_nMssSizeTbl[6];
 static UINT s_nMssSector;
@@ -71,7 +71,7 @@ CMSStream::CMSStream() {
     m_bPauseStatus = 0;
     /* read through a reference: the load must not be scheduled above the member stores */
     CMSStream*& rpMSS = s_pMSS;
-    if (!(__null == rpMSS)) AssertApp(__FILE__, __LINE__, "__null == s_pMSS", 0);
+    KH_DEBUG(if (!(__null == rpMSS)) AssertApp(__FILE__, __LINE__, "__null == s_pMSS", 0);)
     s_nMssPtr = 0;
     s_pMSS = this;
     s_nMssThreadID = -1;
@@ -153,11 +153,11 @@ static void threadStream(void* p) {
     INT r;
     BOOL bTrayOpened;
     while (s_nMssThreadStat < 3) {
-        if (s_nMssThreadStat == 2 || s_nMssPutCnt == 6) {
+        if (s_nMssThreadStat == 2 || KH_VER(s_nMssPutCnt == 6, s_nMssPutCnt - s_nMssPtr >= 6)) { /* retail: absolute counters */
             SleepThread();
             continue;
         }
-        INT idx = (s_nMssPtr + s_nMssPutCnt) % 6;
+        INT idx = KH_VER((s_nMssPtr + s_nMssPutCnt), s_nMssPutCnt) % 6;
         nSect = s_nChunkSize >> 11;
         r = mcdRead2(s_nMssSector, nSect, s_pMssBufBank[idx]);
         if (r == 0) {
@@ -167,17 +167,17 @@ static void threadStream(void* p) {
             nErrCnt = 0;
         } else {
             TRACE_USER(TGOTO, "stream read error... %d\n", r);
-            if (r < -1) {
-                if (r < -3) {
-                    nErrCnt++;
-                    bTrayOpened = nErrCnt >= 2;
-                } else {
-                    bTrayOpened = TRUE;
-                }
+            if (r < -1 && r > -4) { /* MATCH: the beta's markers: both tests on one line (427), TRUE (432), one count and test (434-435); retail's registers need this form */
+
+
+                bTrayOpened = TRUE;
             } else {
+
                 nErrCnt++;
-                bTrayOpened = nErrCnt >= 2;
+                if (nErrCnt >= 2) bTrayOpened = TRUE; else bTrayOpened = FALSE;
             }
+
+
             if (bTrayOpened) {
                 CFileIO::setTrayOpened();
                 s_nMssThreadStat = 2;
@@ -228,12 +228,12 @@ static void _terminateStreamer() {
 }
 
 static UINT _readStream(void* pOutBuf) {
-    UINT size = 0;
-    if (s_nMssPutCnt > 0) {
-        memcpy(pOutBuf, s_pMssBufBank[s_nMssPtr], size = s_nMssSizeTbl[s_nMssPtr]);
-        INT r = s_nMssPutCnt;
-        s_nMssPutCnt--;
-        s_nMssPtr = (s_nMssPtr + 1) % 6;
+    UINT size = 0; KH_RELEASE(INT r = s_nMssPutCnt - s_nMssPtr;) /* retail: absolute counters */
+    if (KH_VER(s_nMssPutCnt, r) > 0) {
+        KH_RELEASE(INT i = s_nMssPtr % 6;) memcpy(pOutBuf, s_pMssBufBank[KH_VER(s_nMssPtr, i)], size = s_nMssSizeTbl[KH_VER(s_nMssPtr, i)]);
+        KH_DEBUG(INT r = s_nMssPutCnt;)
+        KH_DEBUG(s_nMssPutCnt--;)
+        s_nMssPtr = KH_VER((s_nMssPtr + 1) % 6, s_nMssPtr + 1);
         if (r == 6) {
             WakeupThread(s_nMssThreadID);
             CancelWakeupThread(s_nMssThreadID);
@@ -242,3 +242,4 @@ static UINT _readStream(void* pOutBuf) {
     return size;
 }
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .data

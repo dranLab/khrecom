@@ -4,8 +4,13 @@
 The boot ELF is found via the BOOT2 line in SYSTEM.CNF, e.g.
     BOOT2 = cdrom0:\\SLUS_217.99;1
 
+Several versions of a game boot an ELF of the same name (the beta and the retail disc both boot SLUS_217.99):
+`--name` writes the ELF under another name, and SYSTEM.CNF then as <name>.SYSTEM.CNF. An existing file with other
+contents is never overwritten.
+
 Usage:
     python tools/extract_iso.py iso/game.iso
+    python tools/extract_iso.py iso/game_retail.iso --name SLUS_217.99_retail
     python tools/extract_iso.py iso/game.iso --all iso/files
 """
 
@@ -47,6 +52,7 @@ def main() -> None:
     parser.add_argument("iso", type=Path, help="path to the disc image")
     parser.add_argument("--out", type=Path, default=Path("iso"), help="where to write the ELF (default: iso/)")
     parser.add_argument("--all", type=Path, metavar="DIR", help="also extract every file on the disc into DIR")
+    parser.add_argument("--name", help="file name for the ELF (default: the boot ELF's name on the disc)")
     args = parser.parse_args()
 
     iso = pycdlib.PyCdlib()
@@ -57,8 +63,13 @@ def main() -> None:
         elf = read_file(iso, f"/{boot_name.upper()};1")
 
         args.out.mkdir(parents=True, exist_ok=True)
-        elf_name = boot_name.split("/")[-1]
-        (args.out / "SYSTEM.CNF").write_bytes(system_cnf)
+        elf_name = args.name or boot_name.split("/")[-1]
+        cnf_name = f"{args.name}.SYSTEM.CNF" if args.name else "SYSTEM.CNF"
+        for name, data in ((cnf_name, system_cnf), (elf_name, elf)):
+            dest = args.out / name
+            if dest.exists() and dest.read_bytes() != data:
+                sys.exit(f"error: {dest} exists with other contents (another version's?): pass --name")
+        (args.out / cnf_name).write_bytes(system_cnf)
         (args.out / elf_name).write_bytes(elf)
 
         print("SYSTEM.CNF:")

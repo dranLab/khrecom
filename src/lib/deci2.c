@@ -112,3 +112,4 @@ int kputs(char *s)
     return Deci2Call(0x10, param);
 }
 // SOURCE DATA: .bss
+// SOURCE DATA SLUS_217.99_retail: .bss

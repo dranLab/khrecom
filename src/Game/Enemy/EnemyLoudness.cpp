@@ -35,7 +35,7 @@ inline void _enemyLoudnessEmptyString() {
 #include "Game/Debug/DebugWork.h"
 #include <math.h>
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 #include "Game/Enemy/BattleEnemyManager.h"
 
@@ -229,16 +229,16 @@ void CEnemyLoudness::aiCardBattle() {
     }
     if (count == 0) return;
     if (!canCardBattle()) return;
-    if (DebugWork::g_dw.enemy.uiFlag & 8) {
-        for (INT i = 0; i < param->iActCount; i++) {
-            if (param->pActs[i].iActNo == DebugWork::g_dw.enemy.sActNo) {
-                setBattleEnemyFlag(0x200, 0);
-                setAttackState(DebugWork::g_dw.enemy.sActNo + 2);
-                return;
-            }
-        }
-        return;
-    }
+    KH_DEBUG(if (KH_DW(DebugWork::g_dw.enemy.uiFlag) & 8) {)
+        KH_DEBUG(for (INT i = 0; i < param->iActCount; i++) {)
+            KH_DEBUG(if (param->pActs[i].iActNo == KH_DW(DebugWork::g_dw.enemy.sActNo)) {)
+                KH_DEBUG(setBattleEnemyFlag(0x200, 0);)
+                KH_DEBUG(setAttackState(KH_DW(DebugWork::g_dw.enemy.sActNo) + 2);)
+                KH_DEBUG(return;)
+            KH_DEBUG(})
+        KH_DEBUG(})
+        KH_DEBUG(return;)
+    KH_DEBUG(})
     setBattleEnemyFlag(0x200, 0);
     setAttackState(act[RND::genrand_int31() % count] + 2);
 }
@@ -293,3 +293,4 @@ BOOL CEnemyLoudness::canSetEnemy_(const FVECTOR& inTarget) {
 }
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

@@ -96,7 +96,7 @@ float powf(float, float);
 
 using namespace D2;
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 CRoulette::CRoulette(CTask* p, BOOL fgRoulette) : CMenu(p, -1) {
     declareSysTask(0x22);
@@ -233,7 +233,7 @@ void CRoulette::main() {
             if (m_fgRoulette || (CCard::canPremium(pDeck[i].m_nKind) && !pDeck[i].m_fgPremium)) {
                 m_idxDeck[m_nCardMax] = i;
 #line 201
-                p2DCard = m_pCard[m_nCardMax++] = new (__FILE__ "(201)") C2DCard;
+                p2DCard = m_pCard[m_nCardMax++] = new KH_AT("(201)") C2DCard;
                 p2DCard->setLayer(12);
                 p2DCard->create(pDeck[i]);
                 p2DCard->setScl(0.9f);
@@ -248,7 +248,7 @@ void CRoulette::main() {
             while (m_nCardDummyMax < 11) {
                 for (INT j = 0; j < m_nCardMax; j++) {
 #line 213
-                    p2DCard = m_pCard[m_nCardDummyMax++] = new (__FILE__ "(213)") C2DCard;
+                    p2DCard = m_pCard[m_nCardDummyMax++] = new KH_AT("(213)") C2DCard;
                     p2DCard->setLayer(12);
                     p2DCard->create(m_pCard[j]->m_card);
                     p2DCard->setScl(0.9f);
@@ -259,7 +259,7 @@ void CRoulette::main() {
         }
         for (INT i = 0; i < 11; i++) {
 #line 223
-            C2DSeqCtrl* pCtrl = m_pCardCtrl[i] = new (__FILE__ "(223)") C2DSeqCtrl;
+            C2DSeqCtrl* pCtrl = m_pCardCtrl[i] = new KH_AT("(223)") C2DSeqCtrl;
             pCtrl->enableColorCtrl(TRUE);
             pCtrl->addSeq(m_pSeqName, 0x1B);
             if (m_pCard[10 - i]) {
@@ -273,13 +273,13 @@ void CRoulette::main() {
     }
     case 4:
 #line 239
-        m_pBaseCtrl = new (__FILE__ "(239)") C2DSeqCtrl;
+        m_pBaseCtrl = new KH_AT("(239)") C2DSeqCtrl;
         m_pBaseCtrl->addSeq(m_pSeqName, 0);
         vec.init();
         m_pBaseCtrl->setPos(vec);
         m_hLay = C2DMan::create(m_pLadName, m_fgRoulette ? 0 : 5);
 #line 245
-        m_pHelpButton = new (__FILE__ "(245)") CButton;
+        m_pHelpButton = new KH_AT("(245)") CButton;
         vec.set(-256.0f, -192.0f, 0.0f, 1.0f);
         m_pHelpButton->init(m_pSeqName, 0xE, helpSeqTbl, vec, NULL, pStr[m_fgRoulette], 0xF, 0.0f, 0.0f, 0x40, NULL,
                             -1);
@@ -369,7 +369,7 @@ INT CRoulette::menuMain() {
         m_fTimer += (FLOAT)getFrameRate() * 0.0200000014f;
         if (m_fTimer > 120.0f) {
 #line 371
-            m_pCursorCtrl = new (__FILE__ "(371)") C2DSeqCtrl;
+            m_pCursorCtrl = new KH_AT("(371)") C2DSeqCtrl;
             m_pCursorCtrl->setLayer(14);
             m_pCursorCtrl->addSeq(m_pSeqName, 3);
             m_pCursorCtrl->setScl(0.9f);
@@ -380,12 +380,12 @@ INT CRoulette::menuMain() {
             }
             m_pCursorCtrl->setPos(vec);
 #line 381
-            m_pEffectCtrl = new (__FILE__ "(381)") C2DSeqCtrl;
+            m_pEffectCtrl = new KH_AT("(381)") C2DSeqCtrl;
             m_pEffectCtrl->setLayer(11);
             m_pEffectCtrl->addSeq(m_pSeqName, 0x20);
             m_pEffectCtrl->setPos(vec);
 #line 387
-            m_pBaloonCtrl = new (__FILE__ "(387)") C2DSeqCtrl;
+            m_pBaloonCtrl = new KH_AT("(387)") C2DSeqCtrl;
             m_pBaloonCtrl->setLayer(14);
             m_pBaloonCtrl->addSeq(m_pSeqName, 7);
             vec.x += 16.0f;
@@ -480,7 +480,7 @@ INT CRoulette::menuMain() {
     case 7:
         m_fTimer = 0.0f;
 #line 495
-        m_pCardGetCtrl = new (__FILE__ "(495)") C2DSeqCtrl;
+        m_pCardGetCtrl = new KH_AT("(495)") C2DSeqCtrl;
         m_pCardGetCtrl->setLayer(14);
         m_pCardGetCtrl->enableColorCtrl(TRUE);
         m_pCardGetCtrl->addSeq(pSeqName2, m_fgRoulette ? 2 : 9);
@@ -488,19 +488,19 @@ INT CRoulette::menuMain() {
         m_pCardGetCtrl->setPos(vec);
         rgba.col = 0x807C7C7C;
 #line 503
-        m_pGetCardFnt[0] = new (__FILE__ "(503)") C2DFnt(0, 0, &rgba, 16, m_pCard[m_nSelect]->m_card.getName(), 0x42);
+        m_pGetCardFnt[0] = new KH_AT("(503)") C2DFnt(0, 0, &rgba, 16, m_pCard[m_nSelect]->m_card.getName(), 0x42);
         m_pCardGetCtrl->addFnt(pSeqName2, m_pGetCardFnt[0]);
         sprintf(buf, pStr, m_pCard[m_nSelect]->m_card.getName());
         if (!m_fgRoulette) {
 #line 509
-            m_pGetCardFnt[1] = new (__FILE__ "(509)") C2DFnt(0, 0, &rgba, 16, NULL, 0x42);
+            m_pGetCardFnt[1] = new KH_AT("(509)") C2DFnt(0, 0, &rgba, 16, NULL, 0x42);
             m_pGetCardFnt[1]->allocText(buf);
             m_pGetCardFnt[1]->setSpace(16, 0x60);
             m_pCardGetCtrl->addFntShift(_ref(pSeqName2), m_pGetCardFnt[1], 0.0f, 243.0f);
             m_pCard[m_nSelect]->m_card.m_fgPremium = 1;
         }
 #line 516
-        m_pGetCardCtrl = new (__FILE__ "(516)") C2DSeqCtrl;
+        m_pGetCardCtrl = new KH_AT("(516)") C2DSeqCtrl;
         m_pGetCardCtrl->addSeq(_ref(pSeqName2), 0);
         m_pGetCardCtrl->setPos(vec);
         m_pCard[m_nSelect]->changeLayer(14);
@@ -630,7 +630,7 @@ INT CRoulette::setCardInfo(INT nCmd) {
     switch (nCmd) {
     case 0:
 #line 693
-        m_pCardInfoCtrl = new (__FILE__ "(693)") C2DSeqCtrl;
+        m_pCardInfoCtrl = new KH_AT("(693)") C2DSeqCtrl;
         m_pCardInfoCtrl->setLayer(11);
         m_pCardInfoCtrl->enableColorCtrl(TRUE);
         m_pCardInfoCtrl->addSeq(m_pSeqName, 0x35);
@@ -657,7 +657,7 @@ INT CRoulette::setCardInfo(INT nCmd) {
             char buf[16];
             if (!m_pNumButton[i]) {
 #line 722
-                pButton = m_pNumButton[i] = new (__FILE__ "(722)") CButton;
+                pButton = m_pNumButton[i] = new KH_AT("(722)") CButton;
                 C2DMan::getLayPosition(m_pLadName, 3, i + 1, vec, 0);
                 sprintf(buf, pFmt, m_nMapCard[i]);
                 pButton->init(m_pSeqName, 12, &numSeqTbl[(i / 10) * 5], vec, m_pCardInfoCtrl, buf, 14, 0.0f, 0.0f,
@@ -683,3 +683,4 @@ INT CRoulette::setCardInfo(INT nCmd) {
     return ret;
 }
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

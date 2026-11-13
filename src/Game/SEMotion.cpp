@@ -123,7 +123,7 @@ void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 inline INT _seSeq(INT nFile, INT nID) { return nFile * 1000 + nID; }
 inline INT _voiceSeq(INT nFile, INT nID) { return _seSeq(nFile, nID) | 0x10000000; }
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 namespace SEMotion {
 static const INT g_iSoraFileIDTbl[14] = {661, 641, 656, 601, 621, 616, 626, 611, 606, 631, 651, 646, 636, 661};
@@ -528,7 +528,7 @@ BOOL CSEMotion::initialize_(SES_HEADER* inHeader) {
     m_iSEMotCtrlCount = 16;
     m_iNowCtrlCount = 0;
 #line 887
-    m_pSEMotCtrl = new (__FILE__ "(887)") CSEMotionCtrl[16](this);
+    m_pSEMotCtrl = new KH_AT("(887)") CSEMotionCtrl[16](this);
     for (INT i = 0; i < m_iSEMotCtrlCount; i++) {
         m_pSEMotCtrl[i].initalize(m_pOwner);
     }
@@ -546,7 +546,7 @@ BOOL CSEMotion::initialize_(SES_HEADER* inHeader) {
     if (count > 0) {
         m_iRandomDataNum = count;
 #line 909
-        RANDOM_DATA* rd = m_pRandomData = new (__FILE__ "(909)") RANDOM_DATA[count];
+        RANDOM_DATA* rd = m_pRandomData = new KH_AT("(909)") RANDOM_DATA[count];
         if (!rd) {
             return FALSE;
         }
@@ -698,3 +698,4 @@ BOOL CSEMotion::isPlayVoice_() {
 }
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

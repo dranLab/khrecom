@@ -31,7 +31,7 @@
 
 
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 
 extern "C" int sprintf(char* s, const char* fmt, ...);
@@ -215,7 +215,7 @@ CMovement::CMovement(CEntity* inOwner) {
     m_vWallNormal.w = 1.0f;
     m_CollInfo.info = 0;
 #line 211
-    m_pMapCollision = new (__FILE__ "(211)") CCollMap;
+    m_pMapCollision = new KH_AT("(211)") CCollMap;
     ASSERT(m_pMapCollision);
     COLL_KIND coll_kind;
     switch (inOwner->getEntityType()) {
@@ -1152,3 +1152,4 @@ void CMovement::calcVelocityXZ_(FLOAT inSpeed, const FVECTOR& inDir) {
     m_vVel.z = v.z;
 }
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

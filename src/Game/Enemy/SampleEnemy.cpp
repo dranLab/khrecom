@@ -87,3 +87,4 @@ void CSampleEnemy2::stateAttack2() {}
 void CSampleEnemy2::endStateAttack2() {}
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .rodata

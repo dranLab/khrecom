@@ -36,14 +36,14 @@ void C2DSeqStrings::setupSeq(SeqTbl stbl, const CHAR* pszLad, SHORT nUnit, const
                              INT in_FontSize) {
     D2::C2DSeqCtrl* pCtrl;
 
-    pCtrl = new (__FILE__ "(78)") D2::C2DSeqCtrl;
+    pCtrl = new KH_AT("(78)") D2::C2DSeqCtrl;
     pCtrl->addSeq(pszLad, nUnit, stbl._tbl[0]);
     pCtrl->changeLayer(nLayer);
     pCtrl->m_seqControl.fgColor = 1;
     if (pStr) {
         memset(m_Str, 0, sizeof(m_Str));
         sprintf(m_Str, pStr);
-        m_pFnt = new (__FILE__ "(88)") D2::C2DFnt(0, 0, NULL, in_FontSize, m_Str, 2);
+        m_pFnt = new KH_AT("(88)") D2::C2DFnt(0, 0, NULL, in_FontSize, m_Str, 2);
         pCtrl->addFnt(pszLad, 0, m_pFnt);
     }
     C2DSeqAgent::setupSeq(*pCtrl, pszLad, nUnit, 0);

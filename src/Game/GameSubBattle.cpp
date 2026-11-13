@@ -100,11 +100,11 @@ extern "C" int sprintf(char* s, const char* fmt, ...);
 /* Game/Collision/CollUtil.h's dispose accessor (line 202) */
 static inline void _collUtilDispose() {
     CCollUtil*& instance = CCollUtil::m_pInstance;
-    if (!instance) AssertApp(COLLUTIL_H_PATH, 202, "m_pInstance", 0);
+    KH_DEBUG(if (!instance) AssertApp(COLLUTIL_H_PATH, 202, "m_pInstance", 0);)
     instance->dispose();
 }
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 enum _EETYPE {
     _EETYPE_NORMAL = 0,
@@ -312,19 +312,19 @@ void CGameSubBattle::preSetupTasks() {
 #line 350
 void CGameSubBattle::setupTasks() {
     CTask* pGame = CTaskMan::getSysTask(1);
-    CMap* pMap = new (__FILE__ "(352)") CMap(pGame, CRcf::getMapID(CSceneInfo::getCurrentAreaNum(), CSceneInfo::getCurrentSceneNum()));
+    CMap* pMap = new KH_AT("(352)") CMap(pGame, CRcf::getMapID(CSceneInfo::getCurrentAreaNum(), CSceneInfo::getCurrentSceneNum()));
     ASSERT(pMap);
     Message::CMessageManager::getInstance();
     LockOnManager::CLockOnManager::getInstance();
     CEntityFactory::getInstance();
-    new (__FILE__ "(365)") CGimmickManager(pGame);
+    new KH_AT("(365)") CGimmickManager(pGame);
     if (!CSceneInfo::isMinigameScene()) {
-        new (__FILE__ "(370)") CBattleEnemyManager(pGame);
-        new (__FILE__ "(373)") CBulletManager(pGame);
-        new (__FILE__ "(376)") PLM::CPlayerManager(pGame);
+        new KH_AT("(370)") CBattleEnemyManager(pGame);
+        new KH_AT("(373)") CBulletManager(pGame);
+        new KH_AT("(376)") PLM::CPlayerManager(pGame);
         PLM::createPlayer(0, NULL, 0);
     } else {
-        new (__FILE__ "(384)") CMinigameManager(pGame);
+        new KH_AT("(384)") CMinigameManager(pGame);
     }
     pMap->init(1, 1);
     CShadowModelMan::setAutomatic();
@@ -332,7 +332,7 @@ void CGameSubBattle::setupTasks() {
     CShadowModelMan::setDownLen(2.8f);
     CDeFocus::create(pGame);
     CDeFocus::offNear();
-    CCollDisp::initialize(pGame, dbgButtonDown(USR_SYSTEM, 0x100, 1) | CCollDisp::m_fgDisp, CCollDisp::m_fgMapZoneDisp);
+    KH_DEBUG(CCollDisp::initialize(pGame, dbgButtonDown(USR_SYSTEM, 0x100, 1) | CCollDisp::m_fgDisp, CCollDisp::m_fgMapZoneDisp);)
     changeState(4);
 }
 
@@ -416,7 +416,7 @@ void CGameSubBattle::levelUp() {
         m_nStep++;
         break;
     case 1: {
-        CLevelUp* p = new (__FILE__ "(565)") CLevelUp(CTaskMan::getSysTask(1), 0);
+        CLevelUp* p = new KH_AT("(565)") CLevelUp(CTaskMan::getSysTask(1), 0);
         ASSERT(p);
         m_hLevelUp = p->getHandle();
         m_nStep++;
@@ -453,7 +453,7 @@ void CGameSubBattle::disposeTasks() {
     CDeFocus::remove();
     CEffectMan::killAll((ObjType::eObjBit)0xFFFFFFFF, 0.0f);
     D2::C2DSpr::destroyAllForSceneChange();
-    CCollDisp::finalize();
+    KH_DEBUG(CCollDisp::finalize();)
     _collUtilDispose();
 }
 
@@ -462,7 +462,7 @@ CEncountEffectTask::CEncountEffectTask() : CTask(CTask::getSysTask(0), 0x4000) {
     m_nStep = 0;
     m_hEffect = 0;
     m_pCamera = NULL;
-    if (!(_EESEQ_NOP == _ref(s_nEnEffSeq))) AssertApp(__FILE__, __LINE__, "_EESEQ_NOP == s_nEnEffSeq", 0);
+    KH_DEBUG(if (!(_EESEQ_NOP == _ref(s_nEnEffSeq))) AssertApp(__FILE__, __LINE__, "_EESEQ_NOP == s_nEnEffSeq", 0);)
     s_nEnEffSeq = _EESEQ_START;
     m_bNowLoading = CNowLoading::isEnable();
     if (m_bNowLoading) {
@@ -482,7 +482,7 @@ CEncountEffectTask::CEncountEffectTask() : CTask(CTask::getSysTask(0), 0x4000) {
 
 #line 763
 CEncountEffectTask::~CEncountEffectTask() {
-    if (!(_EESEQ_START == _ref(s_nEnEffSeq))) AssertApp(__FILE__, __LINE__, "_EESEQ_START == s_nEnEffSeq", 0);
+    KH_DEBUG(if (!(_EESEQ_START == _ref(s_nEnEffSeq))) AssertApp(__FILE__, __LINE__, "_EESEQ_START == s_nEnEffSeq", 0);)
     _ref(s_nEnEffSeq) = _EESEQ_END;
     if (m_bNowLoading) {
         CNowLoading::enable(TRUE);
@@ -514,7 +514,7 @@ void CEncountEffectTask::main() {
         CGame::dispOffFadeMask();
         m_pCamera = CWorldEnv::getActiveCamera();
         if (!m_pCamera) {
-            m_pCamera = new (__FILE__ "(807)") CCamera(this, -1);
+            m_pCamera = new KH_AT("(807)") CCamera(this, -1);
         }
         if (CGame::isBlackBeforeEncount()) {
             m_pCamera->setProjectionDist(0.0f);
@@ -630,7 +630,7 @@ void CEncountEffect::initialize() {
 #line 924
 void CEncountEffect::start() {
     if (s_nEnEffSeq == _EESEQ_NOP) {
-        new (__FILE__ "(925)") CEncountEffectTask;
+        new KH_AT("(925)") CEncountEffectTask;
     }
 }
 
@@ -646,3 +646,4 @@ BOOL CEncountEffect::isEnd() {
     return s_nEnEffSeq == _EESEQ_END;
 }
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .data .rodata

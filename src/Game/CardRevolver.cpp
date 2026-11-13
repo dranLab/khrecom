@@ -53,31 +53,31 @@ BTL_DECK g_deckRikuStarter[42] = {
     {101, -1}, {102, -1}, {104, -1}, {105, -1}, {106, -1}, {107, -1}, {108, -1}, {109, -1},
     {115, -1}, {255, 0},
 };
-BTL_DECK g_deckSoraDebug[32] = {
-    {1, 7}, {1, 6}, {1, 5}, {1, 5}, {1, 4}, {1, 3}, {1, 4}, {1, 3},
-    {1, 2}, {1, 2}, {1, 1}, {1, 0}, {27, 5}, {42, 6}, {29, 5}, {72, -1},
-    {106, -1}, {35, 9}, {36, 9}, {37, 9}, {38, 9}, {39, 9}, {40, 9}, {41, 9},
-    {68, -1}, {75, -1}, {82, -1}, {83, -1}, {87, -1}, {101, -1}, {94, -1}, {255, 0},
-};
-BTL_DECK g_deckSoraDebug99[100] = {
-    {1, 0}, {1, 1}, {1, 2}, {1, 3}, {1, 4}, {1, 5}, {1, 6}, {1, 7},
-    {1, 8}, {1, 9}, {2, 0}, {2, 1}, {2, 2}, {2, 3}, {2, 4}, {2, 5},
-    {2, 6}, {2, 7}, {2, 8}, {2, 9}, {3, 0}, {3, 1}, {3, 2}, {3, 3},
-    {3, 4}, {3, 5}, {3, 6}, {3, 7}, {3, 8}, {3, 9}, {4, 0}, {4, 1},
-    {4, 2}, {4, 3}, {4, 4}, {4, 5}, {4, 6}, {4, 7}, {4, 8}, {4, 9},
-    {5, 0}, {5, 1}, {5, 2}, {5, 3}, {5, 4}, {5, 5}, {5, 6}, {5, 7},
-    {5, 8}, {5, 9}, {6, 0}, {6, 1}, {6, 2}, {6, 3}, {6, 4}, {6, 5},
-    {6, 6}, {6, 7}, {6, 8}, {6, 9}, {7, 0}, {7, 1}, {7, 2}, {7, 3},
-    {7, 4}, {7, 5}, {7, 6}, {7, 7}, {7, 8}, {7, 9}, {8, 0}, {8, 1},
-    {8, 2}, {8, 3}, {8, 4}, {8, 5}, {8, 6}, {8, 7}, {8, 8}, {8, 9},
-    {9, 0}, {9, 1}, {9, 2}, {9, 3}, {9, 4}, {9, 5}, {9, 6}, {9, 7},
-    {9, 8}, {9, 9}, {10, 0}, {10, 1}, {10, 2}, {10, 3}, {10, 4}, {10, 5},
-    {10, 6}, {10, 7}, {10, 8}, {255, 0},
-};
-char* g_szDbgDeckName[10] = {
-    "OFF (\x92\xca\x8f\xed)", "COM\x94\xc5\x83X\x83^\x81[\x83^", "\x83" "f\x83o\x83" "b\x83O\x97p", "99\x96\x87\x83" "e\x83X\x83g", "4:OFF", "5:OFF",
-    "6:OFF", "7:OFF", "8:OFF", "9:OFF",
-};
+KH_DEBUG(BTL_DECK g_deckSoraDebug[32] = {)
+    KH_DEBUG({1, 7}, {1, 6}, {1, 5}, {1, 5}, {1, 4}, {1, 3}, {1, 4}, {1, 3},)
+    KH_DEBUG({1, 2}, {1, 2}, {1, 1}, {1, 0}, {27, 5}, {42, 6}, {29, 5}, {72, -1},)
+    KH_DEBUG({106, -1}, {35, 9}, {36, 9}, {37, 9}, {38, 9}, {39, 9}, {40, 9}, {41, 9},)
+    KH_DEBUG({68, -1}, {75, -1}, {82, -1}, {83, -1}, {87, -1}, {101, -1}, {94, -1}, {255, 0},)
+KH_DEBUG(};)
+KH_DEBUG(BTL_DECK g_deckSoraDebug99[100] = {)
+    KH_DEBUG({1, 0}, {1, 1}, {1, 2}, {1, 3}, {1, 4}, {1, 5}, {1, 6}, {1, 7},)
+    KH_DEBUG({1, 8}, {1, 9}, {2, 0}, {2, 1}, {2, 2}, {2, 3}, {2, 4}, {2, 5},)
+    KH_DEBUG({2, 6}, {2, 7}, {2, 8}, {2, 9}, {3, 0}, {3, 1}, {3, 2}, {3, 3},)
+    KH_DEBUG({3, 4}, {3, 5}, {3, 6}, {3, 7}, {3, 8}, {3, 9}, {4, 0}, {4, 1},)
+    KH_DEBUG({4, 2}, {4, 3}, {4, 4}, {4, 5}, {4, 6}, {4, 7}, {4, 8}, {4, 9},)
+    KH_DEBUG({5, 0}, {5, 1}, {5, 2}, {5, 3}, {5, 4}, {5, 5}, {5, 6}, {5, 7},)
+    KH_DEBUG({5, 8}, {5, 9}, {6, 0}, {6, 1}, {6, 2}, {6, 3}, {6, 4}, {6, 5},)
+    KH_DEBUG({6, 6}, {6, 7}, {6, 8}, {6, 9}, {7, 0}, {7, 1}, {7, 2}, {7, 3},)
+    KH_DEBUG({7, 4}, {7, 5}, {7, 6}, {7, 7}, {7, 8}, {7, 9}, {8, 0}, {8, 1},)
+    KH_DEBUG({8, 2}, {8, 3}, {8, 4}, {8, 5}, {8, 6}, {8, 7}, {8, 8}, {8, 9},)
+    KH_DEBUG({9, 0}, {9, 1}, {9, 2}, {9, 3}, {9, 4}, {9, 5}, {9, 6}, {9, 7},)
+    KH_DEBUG({9, 8}, {9, 9}, {10, 0}, {10, 1}, {10, 2}, {10, 3}, {10, 4}, {10, 5},)
+    KH_DEBUG({10, 6}, {10, 7}, {10, 8}, {255, 0},)
+KH_DEBUG(};)
+KH_DEBUG(char* g_szDbgDeckName[10] = {)
+    KH_DEBUG("OFF (\x92\xca\x8f\xed)", "COM\x94\xc5\x83X\x83^\x81[\x83^", "\x83" "f\x83o\x83" "b\x83O\x97p", "99\x96\x87\x83" "e\x83X\x83g", "4:OFF", "5:OFF",)
+    KH_DEBUG("6:OFF", "7:OFF", "8:OFF", "9:OFF",)
+KH_DEBUG(};)
 BTL_DECK g_deckSoraPoo[19] = {
     {25, 9}, {25, 0}, {25, 2}, {25, 6}, {25, 9}, {25, 0}, {25, 6}, {25, 2},
     {25, 0}, {33, 7}, {34, 6}, {34, 8}, {25, 0}, {25, 2}, {25, 9}, {25, 3},
@@ -120,7 +120,7 @@ char* g_szEnemyCardEffName[60] = {
     "Attack Haste", "Berserk", "Attack Bracer", "Regen", "Shell", "Second Chance",
     "Overdrive", "Sleight Lock", "Quick Recovery", "Dash", "Auto-Life", "Double Sleight",
     "Warp Break", "Sleightblind", "Confu-Strike", "Quick Barrier", "Shot Charge", "Aero Guard",
-    "Combo Boost", "Water Charge", "Omni Break", "Double Strike", "Premium Guard", "Damage Zero",
+    "Combo Boost", "Water Charge", "Omni Break", "Double Strike", "Premium Guard", KH_VER("Damage Zero", "Invincible"),
 };
 G_UV g_uvCRCounterNumOfs[4] = {{67, 30}, {52, 30}, {56, 20}, {37, 29}};
 extern G_UV g_uvCRCounterNumTex[8][10];
@@ -133,7 +133,7 @@ struct CB_ENCHANT_VIEW {
 };
 /* CCardBattle::getEnchantKind(INT inUser), an inline in Game/CardBattle.h */
 static inline INT _getEnchantKind(CCardBattle* p, INT inUser) {
-    if (!inUser) AssertApp("c:/KHCOM/MainApp/Game/CardBattle.h", 641, "inUser", 0);
+    KH_DEBUG(if (!inUser) AssertApp("c:/KHCOM/MainApp/Game/CardBattle.h", 641, "inUser", 0);)
     return ((CB_ENCHANT_VIEW*)p)->m_cardEnchant[inUser - 1].m_nKind < 0x44 ? 0 : ((CB_ENCHANT_VIEW*)p)->m_cardEnchant[inUser - 1].m_nKind - 0x43;
 }
 static inline BOOL _isEqual(UINT a, UINT b) { return a == b; }
@@ -247,27 +247,27 @@ void CCardRevolver::_initialize(CARD* inDeck, INT inShortCut) {
                 convBtlDeckToCard(g_deckSoraTutorial);
                 setDeck((CARD*)g_deckSoraTutorial, -1);
             } else {
-                switch (DebugWork::g_dw.player.iUseDbgDeck) {
-                case 3:
-                    convBtlDeckToCard(g_deckSoraDebug99);
-                    setDeck((CARD*)g_deckSoraDebug99, -1);
-                    break;
-                case 2:
-                    convBtlDeckToCard(g_deckSoraDebug);
-                    setDeck((CARD*)g_deckSoraDebug, -1);
-                    break;
-                case 0:
-                default:
+                KH_DEBUG(switch (KH_DW(DebugWork::g_dw.player.iUseDbgDeck)) {)
+                KH_DEBUG(case 3:)
+                    KH_DEBUG(convBtlDeckToCard(g_deckSoraDebug99);)
+                    KH_DEBUG(setDeck((CARD*)g_deckSoraDebug99, -1);)
+                    KH_DEBUG(break;)
+                KH_DEBUG(case 2:)
+                    KH_DEBUG(convBtlDeckToCard(g_deckSoraDebug);)
+                    KH_DEBUG(setDeck((CARD*)g_deckSoraDebug, -1);)
+                    KH_DEBUG(break;)
+                KH_DEBUG(case 0:)
+                KH_DEBUG(default:)
                     if (CSceneInfo::isMinigameScene()) {
                         convBtlDeckToCard(g_deckSoraPoo);
                         setDeck((CARD*)g_deckSoraPoo, -1);
                         m_uiFlag |= 0x800;
                     } else {
                         convBtlDeckToCard(g_deckSoraStarter);
-                        setDeck((CARD*)g_deckSoraStarter, -1);
+                        setDeck((CARD*)g_deckSoraStarter, KH_VER(-1, inShortCut)); /* retail: the starter deck takes the shortcut too */
                     }
-                    break;
-                }
+                    KH_DEBUG(break;)
+                KH_DEBUG(})
             }
         } else {
             m_uiFlag |= 0x80;
@@ -287,7 +287,7 @@ void CCardRevolver::_initialize(CARD* inDeck, INT inShortCut) {
 }
 void CCardRevolver::_initCounter() {
     initCounter();
-    m_pEmpty = new ("c:/KHCOM/MainApp/Game/CardRevolver.cpp(810)") C2DCard;
+    m_pEmpty = new KH_AT("(810)") C2DCard;
     m_pEmpty->setLayer(2);
     m_pEmpty->createEmpty();
     FVECTOR vPos;
@@ -357,25 +357,25 @@ void CCardRevolver::main() {
     INT i;
     CBattleCard* pBC;
     m_uiFlag = (INT)m_uiFlag & ~6;
-    if (dbgCheckUser(USR_PROG) && m_uiUser == 1 && dbgButtonDown(USR_SYSTEM, 8, 1)) {
-        TRACE("PLCR: ========================================\n");
-        TRACE("Rev: Mode = MODE_NORMAL\n");
-        TRACE("Rev: nTotal = %d, nRemain = %d, nActive = %d,\n", m_nTotal[0], m_nRemain[0], m_nActive[0]);
-        TRACE("Rev: nLimit = %d, nExtra = %d, iMax = %d\n", m_nLimit, m_nExtra, m_iMax);
-        TRACE("Rev: bActive = %d, tqTimer = %d, uiFlag = %08x,\n", m_bActive, m_tqTimer, m_uiFlag);
-        TRACE("PLCR: Cards--------------------------------\n");
-        for (i = 0; i < m_nLimit; i++) {
-            pBC = &m_pCards[i];
-            if (pBC) {
-                TRACE("%3d: [Card%03d:%d(%d)] iStock=%d, iHand=%d/%d, uiFlag=%08x, uiOwner=%d,\n", i, pBC->m_cardData.m_nKind,
+    KH_DEBUG(if (dbgCheckUser(USR_PROG) && m_uiUser == 1 && dbgButtonDown(USR_SYSTEM, 8, 1)) {)
+        KH_DEBUG(TRACE("PLCR: ========================================\n");)
+        KH_DEBUG(TRACE("Rev: Mode = MODE_NORMAL\n");)
+        KH_DEBUG(TRACE("Rev: nTotal = %d, nRemain = %d, nActive = %d,\n", m_nTotal[0], m_nRemain[0], m_nActive[0]);)
+        KH_DEBUG(TRACE("Rev: nLimit = %d, nExtra = %d, iMax = %d\n", m_nLimit, m_nExtra, m_iMax);)
+        KH_DEBUG(TRACE("Rev: bActive = %d, tqTimer = %d, uiFlag = %08x,\n", m_bActive, m_tqTimer, m_uiFlag);)
+        KH_DEBUG(TRACE("PLCR: Cards--------------------------------\n");)
+        KH_DEBUG(for (i = 0; i < m_nLimit; i++) {)
+            KH_DEBUG(pBC = &m_pCards[i];)
+            KH_DEBUG(if (pBC) {)
+                KH_DEBUG(TRACE("%3d: [Card%03d:%d(%d)] iStock=%d, iHand=%d/%d, uiFlag=%08x, uiOwner=%d,\n", i, pBC->m_cardData.m_nKind,
                       pBC->m_cardData.m_nNumber, pBC->getBaseCardNumber(), pBC->getStock(), pBC->getHand(),
-                      pBC->getHandMax(), pBC->getFlag(), pBC->getCardOwner());
-            } else {
-                TRACE("%3d: NULL,\n", i);
-            }
-        }
-        TRACE("PLCR: ========================================\n");
-    }
+                      pBC->getHandMax(), pBC->getFlag(), pBC->getCardOwner());)
+            KH_DEBUG(} else {)
+                KH_DEBUG(TRACE("%3d: NULL,\n", i);)
+            KH_DEBUG(})
+        KH_DEBUG(})
+        KH_DEBUG(TRACE("PLCR: ========================================\n");)
+    KH_DEBUG(})
     switch (m_iState) {
     case 0:
         exeWait();
@@ -456,13 +456,13 @@ void CCardRevolver::main() {
     }
 }
 void CCardRevolver::exeMain() {
-    if (DebugWork::g_dw.player.iDeckDbgDisp) {
-        if (!(m_uiFlag & 0x10)) rollDeck(0, 0, 300);
-        m_uiFlag |= 0x10;
-    } else {
-        if (m_uiFlag & 0x10) rollDeck(0, 0, 300);
-        m_uiFlag = (INT)m_uiFlag & ~0x10;
-    }
+    KH_DEBUG(if (KH_DW(DebugWork::g_dw.player.iDeckDbgDisp)) {)
+        KH_DEBUG(if (!(m_uiFlag & 0x10)) rollDeck(0, 0, 300);)
+        KH_DEBUG(m_uiFlag |= 0x10;)
+    KH_DEBUG(} else {)
+        KH_DEBUG(if (m_uiFlag & 0x10) rollDeck(0, 0, 300);)
+        KH_DEBUG(m_uiFlag = (INT)m_uiFlag & ~0x10;)
+    KH_DEBUG(})
     INT mode = m_iMode;
     INT nActive = m_nActive[mode];
     INT nRemain = m_nRemain[mode];
@@ -510,7 +510,7 @@ void CCardRevolver::exeMain() {
     }
     if (!m_bActive) return;
     if (m_nReloadCard <= 0) return;
-    if (DebugWork::g_dw.player.iAutoReload && m_iMode == 0 && nRemain == m_nReloadCard && m_iStock == 0) {
+    if (KH_DW(DebugWork::g_dw.player.iAutoReload) && m_iMode == 0 && nRemain == m_nReloadCard && m_iStock == 0) {
         initReload(0);
         return;
     }
@@ -589,8 +589,8 @@ void CCardRevolver::setDeck(CARD* pDeck, INT inShortCut) {
         }
         m_nLimit = m_nTotal[0] + snatch;
     }
-    if (m_nTotal[0] > 0) m_pCards = new ("c:/KHCOM/MainApp/Game/CardRevolver.cpp(1359)") CBattleCard[m_nLimit](this, 0, -1, m_uiUser, 2);
-    if (m_nTotal[1] > 0) m_pCardsE = new ("c:/KHCOM/MainApp/Game/CardRevolver.cpp(1363)") CBattleCard[m_nTotal[1]](this, 0, -1, m_uiUser, 2);
+    if (m_nTotal[0] > 0) m_pCards = new KH_AT("(1359)") CBattleCard[m_nLimit](this, 0, -1, m_uiUser, 2);
+    if (m_nTotal[1] > 0) m_pCardsE = new KH_AT("(1363)") CBattleCard[m_nTotal[1]](this, 0, -1, m_uiUser, 2);
     m_nRemain[1] = 0;
     m_nRemain[0] = 0;
     for (i = 0; i < 99 && (card = pDeck[i], card.m_nKind && card.m_nKind <= 0xCA); i++) {
@@ -615,7 +615,7 @@ void CCardRevolver::setDeck(CARD* pDeck, INT inShortCut) {
     m_uiFlag |= 1;
     rollDeck(0, 1, 300);
     if (m_nTotal[1] == 0) {
-        m_pCardsE = new ("c:/KHCOM/MainApp/Game/CardRevolver.cpp(1417)") CBattleCard[1](this, 0, -1, m_uiUser, 2);
+        m_pCardsE = new KH_AT("(1417)") CBattleCard[1](this, 0, -1, m_uiUser, 2);
         m_pCardsE->setHand(card, 0, 1, 0);
         m_pCardsE->hideHand();
     }
@@ -848,10 +848,10 @@ INT CCardRevolver::setPlayCard(INT inFlag, INT inTest) {
         pCB->resetNowPlaying(m_uiUser);
     }
     if (!bEnchant) {
-        if (DebugWork::g_dw.player.iCardNumLock != -1) {
+        if (KH_DWV(DebugWork::g_dw.player.iCardNumLock, -1) != -1) {
             CARD dbug_card;
-            if (DebugWork::g_dw.player.iCardNumLock < 10) {
-                dbug_card.init(data->m_nKind, DebugWork::g_dw.player.iCardNumLock);
+            if (KH_DWV(DebugWork::g_dw.player.iCardNumLock, -1) < 10) {
+                dbug_card.init(data->m_nKind, KH_DWV(DebugWork::g_dw.player.iCardNumLock, -1));
                 card->changeData(dbug_card);
             } else {
                 num = CCardBattle::getPlayingCardPoint(0);
@@ -863,28 +863,28 @@ INT CCardRevolver::setPlayCard(INT inFlag, INT inTest) {
         }
         result = pCB->setPlayCard(m_hOwner, m_uiUser, card, NULL, inTest);
     } else {
-        if (DebugWork::g_dw.player.iEnemyCardLock) {
+        if (KH_DW(DebugWork::g_dw.player.iEnemyCardLock)) {
             CARD dbug_card;
-            dbug_card.init(DebugWork::g_dw.player.iEnemyCardLock + 0x43, 0xFF);
+            dbug_card.init(KH_DW(DebugWork::g_dw.player.iEnemyCardLock) + 0x43, 0xFF);
             card->changeData(dbug_card);
         }
         result = pCB->setEnchantCard(m_hOwner, m_uiUser, card);
     }
     if (!result) return 0;
     if (data->m_fgPremium && _getEnchantKind(pCB, m_uiUser) != 0x3A) {
-        if (!DebugWork::g_dw.player.iCardSpend) {
+        if (!KH_DW(DebugWork::g_dw.player.iCardSpend)) {
             if (data->m_nCategory1 != 1 || getHave(1, 1, 1, 0, 0) != 1) card->setReloadNG();
         }
     } else {
         switch (category) {
         case 7:
-            if (num == -1 && !DebugWork::g_dw.player.iCardSpend) card->setReloadNG();
-            break;
+            if (num != -1) break;
+            // fall through (MATCH retail: the ref lists two setReloadNG inlines; 7 -> 4/5/6 -> 14 share one call)
         case 4:
         case 5:
         case 6:
-            if (!DebugWork::g_dw.player.iCardSpend) card->setReloadNG();
-            break;
+            if (KH_DW(DebugWork::g_dw.player.iCardSpend)) break;
+            // fall through
         case 14:
             card->setReloadNG();
             break;
@@ -1236,8 +1236,8 @@ INT CCardRevolver::calcStockSkill() {
             }
         }
     }
-    if (DebugWork::g_dw.player.iSkillLock >= 4) {
-        m_iStockSkill = DebugWork::g_dw.player.iSkillLock;
+    if (KH_DW(DebugWork::g_dw.player.iSkillLock) >= 4) {
+        m_iStockSkill = KH_DW(DebugWork::g_dw.player.iSkillLock);
         goto end;
     }
     if (m_uiFlag & 0x200) {
@@ -2085,7 +2085,7 @@ void CCardRevolver::initCounter() {
     if (m_uiUser == 1) {
         m_uiCounterState = 1;
         m_uiScutState = 1;
-        m_pSeqCtrlCounter = new ("c:/KHCOM/MainApp/Game/CardRevolver.cpp(4140)") D2::C2DSeqCtrl;
+        m_pSeqCtrlCounter = new KH_AT("(4140)") D2::C2DSeqCtrl;
         m_pSeqCtrlCounter->setLayer(6);
         m_pSeqCtrlCounter->addSeq(g_szSeqCockpit, 0x42);
         m_pSeqCtrlCounter->addSeq(g_szSeqCockpit, 0x3E);
@@ -2102,14 +2102,14 @@ void CCardRevolver::initCounter() {
             m_uiNumTexID = 4;
         }
         FVECTOR start = pos;
-        m_pSeqCtrlCounter_Num01 = new ("c:/KHCOM/MainApp/Game/CardRevolver.cpp(4165)") D2::C2DSeqCtrl;
+        m_pSeqCtrlCounter_Num01 = new KH_AT("(4165)") D2::C2DSeqCtrl;
         m_pSeqCtrlCounter_Num01->setLayer(8);
         m_pSeqCtrlCounter_Num01->addSeq(g_szSeqCockpit, 0x46);
         pos.x = start.x + g_uvCRCounterNumOfs[ofsID].u;
         pos.y = start.y + g_uvCRCounterNumOfs[ofsID].v;
         m_pSeqCtrlCounter_Num01->setPos(pos);
         m_pSeqCtrlCounter_Num01->enableDisp(FALSE);
-        m_pSeqCtrlCounter_Num10 = new ("c:/KHCOM/MainApp/Game/CardRevolver.cpp(4173)") D2::C2DSeqCtrl;
+        m_pSeqCtrlCounter_Num10 = new KH_AT("(4173)") D2::C2DSeqCtrl;
         m_pSeqCtrlCounter_Num10->setLayer(8);
         m_pSeqCtrlCounter_Num10->addSeq(g_szSeqCockpit, 0x46);
         pos.x = start.x + g_uvCRCounterNumOfs[ofsID + 1].u;
@@ -2308,7 +2308,7 @@ void CCardRevolver::setNumberEffect(INT inKind) {
 }
 void CCardRevolver::_initNumEffect() {
     m_uiNumEffState = 0;
-    m_pSeqCtrlNumEff = new ("c:/KHCOM/MainApp/Game/CardRevolver.cpp(4430)") D2::C2DSeqCtrl;
+    m_pSeqCtrlNumEff = new KH_AT("(4430)") D2::C2DSeqCtrl;
 }
 void CCardRevolver::exeNumEffect() {
     switch (m_uiNumEffState) {
@@ -2336,7 +2336,7 @@ void CCardRevolver::exeNumEffect() {
 }
 void CCardRevolver::setTrapEffect() {
     if (!m_pSeqCtrlTrap) {
-        m_pSeqCtrlTrap = new ("c:/KHCOM/MainApp/Game/CardRevolver.cpp(4469)") D2::C2DSeqCtrl;
+        m_pSeqCtrlTrap = new KH_AT("(4469)") D2::C2DSeqCtrl;
     }
     m_pSeqCtrlTrap->setLayer(8);
     m_pSeqCtrlTrap->addSeq(g_szSeqCockpit, 0x96);
@@ -2361,9 +2361,9 @@ void CCardRevolver::initStock() {
     m_pSeqCtrlStock = NULL;
     m_pSeqCtrlStock_Num01 = NULL;
     m_pSeqCtrlStock_Num10 = NULL;
-    m_pSeqCtrlStock = new ("c:/KHCOM/MainApp/Game/CardRevolver.cpp(4510)") D2::C2DSeqCtrl;
-    m_pSeqCtrlStock_Num10 = new ("c:/KHCOM/MainApp/Game/CardRevolver.cpp(4511)") D2::C2DSeqCtrl;
-    m_pSeqCtrlStock_Num01 = new ("c:/KHCOM/MainApp/Game/CardRevolver.cpp(4512)") D2::C2DSeqCtrl;
+    m_pSeqCtrlStock = new KH_AT("(4510)") D2::C2DSeqCtrl;
+    m_pSeqCtrlStock_Num10 = new KH_AT("(4511)") D2::C2DSeqCtrl;
+    m_pSeqCtrlStock_Num01 = new KH_AT("(4512)") D2::C2DSeqCtrl;
     m_pSeqCtrlStock->setLayer(7);
     m_pSeqCtrlStock_Num01->setLayer(8);
     m_pSeqCtrlStock_Num10->setLayer(8);
@@ -2401,7 +2401,7 @@ void CCardRevolver::initStock() {
 void CCardRevolver::initStockSkillName(D2::C2DSeqCtrl* inSeq) {
     G_RGBA rgba;
     rgba.col = 0x80808080;
-    m_p2DFntStockName = new ("c:/KHCOM/MainApp/Game/CardRevolver.cpp(4567)")
+    m_p2DFntStockName = new KH_AT("(4567)")
         D2::C2DFnt(0, 0, &rgba, 14, g_szStockSkillName[m_iStockSkill], 0x80);
     inSeq->addFntShift(g_szSeqCockpit, m_p2DFntStockName, -4.0f, 0.0f);
     inSeq->m_seqControl.fgColor = 1;
@@ -2835,9 +2835,9 @@ INT CCardRevolver::setPlayerPronounceCard(INT inTest) {
     case 14:
         return 0;
     }
-    if (DebugWork::g_dw.player.iCardNumLock != -1) {
-        if (DebugWork::g_dw.player.iCardNumLock < 10) {
-            tmp.init(data->m_nKind, DebugWork::g_dw.player.iCardNumLock);
+    if (KH_DWV(DebugWork::g_dw.player.iCardNumLock, -1) != -1) {
+        if (KH_DWV(DebugWork::g_dw.player.iCardNumLock, -1) < 10) {
+            tmp.init(data->m_nKind, KH_DWV(DebugWork::g_dw.player.iCardNumLock, -1));
             card->changeData(tmp);
         } else {
             num = CCardBattle::getPlayingCardPoint(0);
@@ -3044,15 +3044,15 @@ void CEnchantGauge::_initialize() {
     BC_PARAM* param;
     INT num;
     m_uiState = 1;
-    m_pSeqCtrls = new ("c:/KHCOM/MainApp/Game/CardRevolver.cpp(5825)") D2::C2DSeqCtrl[3];
-    if (!m_pSeqCtrls) AssertApp("c:/KHCOM/MainApp/Game/CardRevolver.cpp", 5826, "m_pSeqCtrls", "CEnchantGauge:: m_pSeqCtrls=New\x8e\xb8\x94s");
+    m_pSeqCtrls = new KH_AT("(5825)") D2::C2DSeqCtrl[3];
+    KH_DEBUG(if (!m_pSeqCtrls) AssertApp("c:/KHCOM/MainApp/Game/CardRevolver.cpp", 5826, "m_pSeqCtrls", "CEnchantGauge:: m_pSeqCtrls=New\x8e\xb8\x94s");)
     m_pSeqCtrls[0].setLayer(6);
     m_pSeqCtrls[0].addSeq(g_szSeqCockpit, 0x36);
     layout = (m_uiUser == 1) ? 6 : 5;
     D2::C2DMan::getLayPosition(g_szLadCockpit, layout, 0, pos, FALSE);
     m_pSeqCtrls[0].setPos(pos);
     rgba.col = 0x80808080;
-    _ref(m_pFntName) = new ("c:/KHCOM/MainApp/Game/CardRevolver.cpp(5840)") D2::C2DFnt(0, 0, &rgba, 12, NULL, 2); // MATCH: store via reference keeps it before the m_pSeqCtrls reload
+    _ref(m_pFntName) = new KH_AT("(5840)") D2::C2DFnt(0, 0, &rgba, 12, NULL, 2); // MATCH: store via reference keeps it before the m_pSeqCtrls reload
     m_pSeqCtrls[0].addFntShift(g_szSeqCockpit, m_pFntName, 0.0f, 2.0f);
     m_pSeqCtrls[0].enableColorCtrl(TRUE);
     setText();
@@ -3242,9 +3242,9 @@ void CStockFolder::initGauge() {
     m_pSeqCtrl_Num01 = NULL;
     m_pSeqCtrl_Num10 = NULL;
     m_nNumTexID = 0;
-    m_pSeqCtrl = new ("c:/KHCOM/MainApp/Game/CardRevolver.cpp(6211)") D2::C2DSeqCtrl;
-    m_pSeqCtrl_Num10 = new ("c:/KHCOM/MainApp/Game/CardRevolver.cpp(6212)") D2::C2DSeqCtrl;
-    m_pSeqCtrl_Num01 = new ("c:/KHCOM/MainApp/Game/CardRevolver.cpp(6213)") D2::C2DSeqCtrl;
+    m_pSeqCtrl = new KH_AT("(6211)") D2::C2DSeqCtrl;
+    m_pSeqCtrl_Num10 = new KH_AT("(6212)") D2::C2DSeqCtrl;
+    m_pSeqCtrl_Num01 = new KH_AT("(6213)") D2::C2DSeqCtrl;
     m_pSeqCtrl->setLayer(7);
     m_pSeqCtrl_Num01->setLayer(8);
     m_pSeqCtrl_Num10->setLayer(8);
@@ -3268,7 +3268,7 @@ void CStockFolder::initGauge() {
 void CStockFolder::initName(D2::C2DSeqCtrl* inSeq) {
     G_RGBA rgba;
     rgba.col = 0x80808080;
-    m_p2DFntStockName = new ("c:/KHCOM/MainApp/Game/CardRevolver.cpp(6245)")
+    m_p2DFntStockName = new KH_AT("(6245)")
         D2::C2DFnt(0, 0, &rgba, 14, g_szStockSkillName[m_iStockSkill], 0x80);
     inSeq->addFntShift(g_szSeqCockpit, m_p2DFntStockName, -4.0f, 0.0f);
     inSeq->m_seqControl.fgColor = 1;
@@ -3426,7 +3426,7 @@ INT CStockFolder::setStockCard(INT inKind, INT inNumber) {
     if (!pBattle) return 0;
     if (pBattle->isPlayingCard(m_uiUser)) return 0;
     if (m_iStock == 3) return 0;
-    m_pCards[m_iStock] = new ("c:/KHCOM/MainApp/Game/CardRevolver.cpp(6495)") CBattleCard(this, inKind, inNumber, m_uiUser, 0);
+    m_pCards[m_iStock] = new KH_AT("(6495)") CBattleCard(this, inKind, inNumber, m_uiUser, 0);
     CBattleCard* pCard = m_pCards[m_iStock];
     pCard->setFolderON();
     pCard->setRoomEffect(NULL);
@@ -3518,7 +3518,7 @@ INT CStockFolder::setPronounceCard(INT inKind, INT inNumber) {
     }
     return 0;
 ok:
-    m_pCards[m_iStock] = new ("c:/KHCOM/MainApp/Game/CardRevolver.cpp(6700)") CBattleCard(this, inKind, inNumber, m_uiUser, 0);
+    m_pCards[m_iStock] = new KH_AT("(6700)") CBattleCard(this, inKind, inNumber, m_uiUser, 0);
     CBattleCard* pCard = m_pCards[m_iStock];
     pCard->setRoomEffect(NULL);
     m_pData[m_iStock] = pCard->getCardData();
@@ -3552,3 +3552,4 @@ ok:
     return 1;
 }
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

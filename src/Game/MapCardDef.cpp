@@ -34,3 +34,4 @@ MAP_CARD_PARAM* MAP_CARD_PARAM_HEADER::getMapCardParam(BYTE inCardID) {
     return &pParam[iParamNum - 1];
 }
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

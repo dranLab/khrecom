@@ -38,7 +38,7 @@ void CLinkedBuf::release() {
 }
 
 void CDelayedFree::initFreeList() {
-    s_pFreeListTbl = new (__FILE__ "(87)") CPtrList[2];
+    s_pFreeListTbl = new KH_AT("(87)") CPtrList[2];
     s_pFreeListCurrent = NULL;
     s_bEnableFreeList = TRUE;
 }
@@ -92,3 +92,4 @@ void CDelayedFree::flipFreeList(INT nID) {
 }
 
 // SOURCE DATA: .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss

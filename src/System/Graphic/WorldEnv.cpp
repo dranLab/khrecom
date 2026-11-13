@@ -88,11 +88,11 @@ void CWorldEnv::initialize() {
     _nWorldScreenTQ = 0;
     _bMikeReady = FALSE;
 
-    _pFrustum = new (__FILE__ "(103)") CFrustum;
-    _pBBHelper = new (__FILE__ "(104)") CBillboardHelper;
+    _pFrustum = new KH_AT("(103)") CFrustum;
+    _pBBHelper = new KH_AT("(104)") CBillboardHelper;
 
 
-    _pEffLightMan = new (__FILE__ "(107)") CEffectLightMan;
+    _pEffLightMan = new KH_AT("(107)") CEffectLightMan;
 }
 #else
 /* MATCH: placeholder for initialize's .rodata (its allocation messages) */
@@ -364,7 +364,7 @@ static void _makeBillboardMatrix(const FMATRIX* pWorldMat) {
 
 #line 711
 CBillboardHelper& CWorldEnv::getBBHelper() {
-    if (!_pBBHelper) AssertApp(__FILE__, __LINE__, "_pBBHelper", 0);
+    KH_DEBUG(if (!_pBBHelper) AssertApp(__FILE__, __LINE__, "_pBBHelper", 0);)
     return *_pBBHelper;
 }
 

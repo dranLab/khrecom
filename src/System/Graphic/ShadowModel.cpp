@@ -209,7 +209,7 @@ void CShadowModelMan::drawBefore() {
     qp++;
     *(u_long128*)&qp[0] = _makeQW(6, 0);
     *(u_long128*)&qp[1] = _makeQW(0, 1);
-    if (DebugWork::g_dw.shadow.iDispArea) {
+    if (KH_DW(DebugWork::g_dw.shadow.iDispArea)) {
         *(u_long128*)&qp[1] = _makeQW(0x60000080, 1);
     }
     qp += 2;
@@ -323,7 +323,7 @@ static QWdata* setSdwTSprite32(QWdata* qp, FIX4 plsx, FIX4 plsy, UINT z, FLOAT f
 }
 void CShadowModelMan::drawAfter() {
     QWdata* qp;
-    static int cnt = 1;
+    KH_DEBUG(static int cnt = 1;) // MATCH: beta only, as the loop below (retail calls setSdwTSprite32 once)
     qp = (QWdata*)CPackMan::pkOpenGifTag(_makeQW(0x1000000000008000UL, 0xE));
     *(u_long128*)&qp[0] = _makeQW(0x30000, 0x47);
     *(u_long128*)&qp[1] = _makeQW(5, 8);
@@ -334,19 +334,19 @@ void CShadowModelMan::drawAfter() {
     *(u_long128*)&qp[6] = _makeQW(0x80000000A8UL, 0x42);
     *(u_long128*)&qp[7] = _makeQW(0x80808080, 1);
     CPackMan::pkCloseGifTag(&qp[8]);
-    if (dbgCheckUser(NAKAMICH)) {
-        if (dbgButtonDown(NAKAMICH, 0x10, 1)) {
-            if (dbgButtonTrg(NAKAMICH, 0x2000, 1)) {
-                cnt++;
-            } else if (dbgButtonTrg(NAKAMICH, 0x8000, 1)) {
-                cnt--;
-            }
-            if (cnt > 16) cnt = 16;
-            if (cnt < 0) cnt = 0;
-            TRACE("Shadow %d\n", cnt);
-        }
-    }
-    for (int i = 0; i < cnt; i++) {
+    KH_DEBUG(if (dbgCheckUser(NAKAMICH)) {)
+        KH_DEBUG(if (dbgButtonDown(NAKAMICH, 0x10, 1)) {)
+            KH_DEBUG(if (dbgButtonTrg(NAKAMICH, 0x2000, 1)) {)
+                KH_DEBUG(cnt++;)
+            KH_DEBUG(} else if (dbgButtonTrg(NAKAMICH, 0x8000, 1)) {)
+                KH_DEBUG(cnt--;)
+            KH_DEBUG(})
+            KH_DEBUG(if (cnt > 16) cnt = 16;)
+            KH_DEBUG(if (cnt < 0) cnt = 0;)
+            KH_DEBUG(TRACE("Shadow %d\n", cnt);)
+        KH_DEBUG(})
+    KH_DEBUG(})
+    KH_DEBUG(for (int i = 0; i < cnt; i++)) {
         setSdwTSprite32(NULL, -16, -16, 0, 1.0f);
     }
     qp = (QWdata*)CPackMan::pkOpenGifTag(_makeQW(0x1000000000008000UL, 0xE));
@@ -682,3 +682,4 @@ static FLOAT _HitLineLine2D(FVECTOR& p0, FVECTOR& p1, FVECTOR& l0, FVECTOR& l1, 
     return 1.7014118e38f;
 }
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .rodata

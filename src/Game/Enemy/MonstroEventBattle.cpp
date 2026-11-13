@@ -36,7 +36,7 @@ inline void _monstroEventBattleEmptyString() {
 #include "Game/SceneInfo.h"
 #include "Form/Menu/MonstroGauge.h"
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 #include "Game/Player/Player.h"
 
@@ -147,7 +147,7 @@ BOOL CMonstroEventBattle::setup() {
     m_iTotalDead = (INT)param->getValue(MonstroEventBattle::_totalDead());
     m_tqGaugeDownTimer = m_tqGaugeDown = (TIMEQ)(param->getValue(MonstroEventBattle::_gaugeDown()) * 60.0f * 50.0f);
 #line 99
-    CMostroGauge* gauge = new (__FILE__ "(99)") CMostroGauge(this);
+    CMostroGauge* gauge = new KH_AT("(99)") CMostroGauge(this);
     if (!gauge) return FALSE;
     m_hGauge = gauge->getHandle();
     CGameWork::setFlag(1, 5, TRUE);
@@ -333,3 +333,4 @@ BOOL CMonstroEventBattle::isTimeOver_() {
 }
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

@@ -99,3 +99,4 @@ void CGimmickKLotusLeaf::getLockOnPos(FVECTOR& outPos) {
     outPos = Crd(BoneIndex).getWorldMatrix().v[3];
 }
 // SOURCE DATA: .rodata
+// SOURCE DATA SLUS_217.99_retail: .rodata

@@ -586,8 +586,9 @@ void CGimmickCarry::lastUpdate() {
     CBaseGimmick::lastUpdate();
 }
 
-void CGimmickCarry::setFlagSetInfo(INT in_flag) {
-    m_FlagSetInfo = in_flag;
-}
+
+
+
 
 // SOURCE DATA: .rodata
+// SOURCE DATA SLUS_217.99_retail: .rodata

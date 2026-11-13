@@ -97,7 +97,7 @@ struct _MAP_FOG {
     FLOAT screenz; /* 0x18 */
 };
 struct _MAP_TASK {
-    UBYTE _m_0x0000[0x15e0];
+    UBYTE _m_0x0000[KH_VER(0x15e0, 0xee0)];
     _MAP_FOG* m_pFog; /* 0x15e0 */
 };
 
@@ -126,7 +126,7 @@ CCameraMan::~CCameraMan() {
 
 #line 65
 void CCameraMan::setup() {
-    if (!m_pCCameraDtList) m_pCCameraDtList = new (__FILE__ "(66)") CCameraDtList;
+    if (!m_pCCameraDtList) m_pCCameraDtList = new KH_AT("(66)") CCameraDtList;
 }
 
 void CCameraMan::dispose() {
@@ -300,10 +300,10 @@ INT CCameraMan::createCameraFix(void* pParam, INT nID) {
         oldTargetPos.z = 0.0f;
     }
 #line 351
-    CAtelCamera* pAtelCamera = new (__FILE__ "(351)") CAtelCamera(this, -1);
+    CAtelCamera* pAtelCamera = new KH_AT("(351)") CAtelCamera(this, -1);
     pAtelCamera->setGakaku(m_currentGakaku);
 #line 354
-    CCameraDt* pCameraDt = new (__FILE__ "(354)") CCameraDt;
+    CCameraDt* pCameraDt = new KH_AT("(354)") CCameraDt;
     pCameraDt->m_nID = nID;
     pCameraDt->m_pCamera = pAtelCamera;
     pCameraDt->m_changeKind = p->nChangeKind;
@@ -382,14 +382,14 @@ INT CCameraMan::onCreateCameraPath(INT nCmd, void* pParam, INT nID) {
     if (m_pCCameraDtList->getListSize() >= 8) return -1;
     if (searchCameraDt(nID)) return -1;
 #line 476
-    CPathCamera* pPathCamera = new (__FILE__ "(476)") CPathCamera(this);
+    CPathCamera* pPathCamera = new KH_AT("(476)") CPathCamera(this);
     if (!pPathCamera->init(p->pszName, TRUE, FALSE, 0x80)) {
         delete pPathCamera;
         return -1;
     }
     pPathCamera->run();
 #line 484
-    CCameraDt* pCameraDt = new (__FILE__ "(484)") CCameraDt;
+    CCameraDt* pCameraDt = new KH_AT("(484)") CCameraDt;
     pCameraDt->m_pCamera = pPathCamera;
     pCameraDt->m_nID = nID;
     pCameraDt->m_kind = 3;
@@ -411,9 +411,9 @@ INT CCameraMan::onCreateCameraPathData(INT nCmd, void* pParam, INT nID) {
     CTask* pLocalObj = getObjFromId(p->nLocalID, p->pVsm);
     if (!pTargetObj) return -1;
 #line 519
-    CPathDataCamera* pPathDataCamera = new (__FILE__ "(519)") CPathDataCamera(this, p->pszName, p->nKind, pTargetObj, 0, pLocalObj);
+    CPathDataCamera* pPathDataCamera = new KH_AT("(519)") CPathDataCamera(this, p->pszName, p->nKind, pTargetObj, 0, pLocalObj);
 #line 521
-    CCameraDt* pCameraDt = new (__FILE__ "(521)") CCameraDt;
+    CCameraDt* pCameraDt = new KH_AT("(521)") CCameraDt;
     pCameraDt->m_pCamera = pPathDataCamera;
     pCameraDt->m_nID = nID;
     pCameraDt->m_kind = 4;
@@ -528,14 +528,14 @@ INT CCameraMan::onCreateCameraChat(INT nCmd, void* pParam, INT nID) {
 #line 714
 INT CCameraMan::onAddCameraQuakeV(INT nCmd, void* pParam, INT nID) {
     CCamera* pCam = CWorldEnv::getActiveCamera();
-    new (__FILE__ "(715)") CCameraQuakeV(*pCam, (CameraQuakeParam*)pParam, 0.0f);
+    new KH_AT("(715)") CCameraQuakeV(*pCam, (CameraQuakeParam*)pParam, 0.0f);
     return 1;
 }
 
 #line 722
 INT CCameraMan::onAddCameraQuakeH(INT nCmd, void* pParam, INT nID) {
     CCamera* pCam = CWorldEnv::getActiveCamera();
-    new (__FILE__ "(723)") CCameraQuakeH(*pCam, (CameraQuakeParam*)pParam);
+    new KH_AT("(723)") CCameraQuakeH(*pCam, (CameraQuakeParam*)pParam);
     return 1;
 }
 
@@ -696,3 +696,4 @@ CCameraDt* CCameraMan::searchCameraDt(INT nID) {
 } // namespace ATEL
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

@@ -61,15 +61,15 @@ CMenuModel::CMenuModel(CTask* p, INT nRsrcID, CCoord* pParentCoord, INT iPosX, I
         return;
     }
 #line 46
-    m_pModels = new (__FILE__ "(46)") CModel[m_nModelCount];
-    if (!m_pModels) AssertApp(__FILE__, __LINE__, "m_pModels", 0);
+    m_pModels = new KH_AT("(46)") CModel[m_nModelCount];
+    KH_DEBUG(if (!m_pModels) AssertApp(__FILE__, __LINE__, "m_pModels", 0);)
 
     TEXANM_DATA* pTXAData = CRsrcDB::getRsrcTXA(m_nRsrcID);
     if (pTXAData) {
         m_nTexAnmNum = pTXAData->getDataNum();
         if (m_nTexAnmNum > 0) {
 #line 56
-            m_pTexAnm = new (__FILE__ "(56)") CTexAnm[m_nTexAnmNum];
+            m_pTexAnm = new KH_AT("(56)") CTexAnm[m_nTexAnmNum];
             if (m_pTexAnm) {
                 for (INT i = 0; i < m_nTexAnmNum; i++) {
                     m_pTexAnm[i].setup(*pTXAData, i);
@@ -86,7 +86,7 @@ CMenuModel::CMenuModel(CTask* p, INT nRsrcID, CCoord* pParentCoord, INT iPosX, I
         }
     }
 #line 77
-    m_pAnim = new (__FILE__ "(77)") CAnim;
+    m_pAnim = new KH_AT("(77)") CAnim;
     m_pAnim->link(this, m_nRsrcID);
     m_pAnim->init(0, 0);
 

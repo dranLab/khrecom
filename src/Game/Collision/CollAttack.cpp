@@ -15,7 +15,7 @@ extern "C" float atan2f(float y, float x);
 void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void Normalize(FVECTOR& v0, const FVECTOR& v1);
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 /* iterates a CSJointListT, the current entry may be removed (original macro name unknown) */
 #define SJ_FOREACH(T, pEntry, list) \
@@ -69,9 +69,9 @@ INT CCollAttack::collideAttack() {
     INT ret1;
     if (!m_Enable) return 0;
     m_fHitEffectWait = 0;
-    if (m_hTask) {
-        if (m_pCollListA && !m_pCollListA->hasMember(*this)) m_pCollListA->pushBack(*this);
-    }
+    KH_DEBUG(if (m_hTask) {)
+        KH_DEBUG(if (m_pCollListA && !m_pCollListA->hasMember(*this)) m_pCollListA->pushBack(*this);)
+    KH_DEBUG(})
     if ((getKind() & 0xE) == COLL_KIND_PLAYER) {
         ret1 = attackSub(m_pCollListE);
         CTaskMan::getSysTask(1);
@@ -279,3 +279,4 @@ void CCollAttack::setHitEffectParam(const CHAR* inName, INT inNo, ObjType::eObjT
 }
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

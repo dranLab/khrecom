@@ -122,7 +122,7 @@ private:
     CFadeIOMask* m_pFadeMask;
 
 public:
-    CMoviePlayer(CTask* pParent, BOOL bForDebug);
+    CMoviePlayer(CTask* pParent KH_DEBUG(, BOOL bForDebug));
     virtual ~CMoviePlayer();
     virtual void main();
     virtual void disp();

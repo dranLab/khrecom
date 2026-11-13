@@ -17,7 +17,7 @@ extern "C" void qsort(void* base, size_t num, size_t size, int (*cmp)(const void
 #include "System/Graphic/WorldEnv.h"
 #include "include_asm.h"
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 #include "System/Graphic/PackMan.h"
 
@@ -324,19 +324,19 @@ G_LAYER CDispListBase::checkCache(CDrawable& inPrim, G_LAYER nLayer) {
     return nLayer;
 }
 CDrawable* CDispListBase::_draw(CDrawable& inPrim) {
-    UINT nStart = (UINT)CPackMan::pkGetCurrentPointer();
+    KH_DEBUG(UINT nStart = (UINT)CPackMan::pkGetCurrentPointer();)
     inPrim.makePkt();
-    if (dbgButtonDown(USR_SYSTEM, 0x10, 1)) m_iDebugFlags &= ~1;
-    if (!(m_iDebugFlags & 1)) {
-        UINT nUsed = ((UINT)CPackMan::pkGetCurrentPointer() - nStart) >> 4;
-        INT nSize = inPrim.getPacketSize();
-        if (nSize < (INT)nUsed) {
-            TRACE("$$$$$$$$$$$$$ makePkt()\x8a\xd6\x90\x94\x82\xcc\x95\xd4\x82\xb7\x83T\x83" "C\x83Y\x82\xaa\x8f\xad\x82\xc8\x82\xa2\x82\xc5\x82\xb7!!!->(%d) \x8e\xc0\x8d\xdb\x82\xcc\x8eg\x97p\x83T\x83" "C\x83Y(%d) $$$$$$$$$$$$$\n",
-                  nSize, nUsed);
-            inPrim.getPacketSize();
-            m_iDebugFlags |= 1;
-        }
-    }
+    KH_DEBUG(if (dbgButtonDown(USR_SYSTEM, 0x10, 1)) m_iDebugFlags &= ~1;)
+    KH_DEBUG(if (!(m_iDebugFlags & 1)) {)
+        KH_DEBUG(UINT nUsed = ((UINT)CPackMan::pkGetCurrentPointer() - nStart) >> 4;)
+        KH_DEBUG(INT nSize = inPrim.getPacketSize();)
+        KH_DEBUG(if (nSize < (INT)nUsed) {)
+            KH_DEBUG(TRACE("$$$$$$$$$$$$$ makePkt()\x8a\xd6\x90\x94\x82\xcc\x95\xd4\x82\xb7\x83T\x83" "C\x83Y\x82\xaa\x8f\xad\x82\xc8\x82\xa2\x82\xc5\x82\xb7!!!->(%d) \x8e\xc0\x8d\xdb\x82\xcc\x8eg\x97p\x83T\x83" "C\x83Y(%d) $$$$$$$$$$$$$\n", nSize, nUsed);)
+
+            KH_DEBUG(inPrim.getPacketSize();)
+            KH_DEBUG(m_iDebugFlags |= 1;)
+        KH_DEBUG(})
+    KH_DEBUG(})
     return _getNextDrawable(inPrim);
 }
 void CDispList::insert(CDrawable& inPrim, FIX4 inZ) {
@@ -750,7 +750,7 @@ void CDispListShadowDraw::_drawOT(OTtag& inOT) {
     if (!pSMModelFirst) return;
     pPrim = inOT._pHeadPrim;
     nEntryNum = getEntryCount();
-    pSdwBuf = new (__FILE__ "(895)") SHADOWMODELBUF[nEntryNum];
+    pSdwBuf = new KH_AT("(895)") SHADOWMODELBUF[nEntryNum];
 #line 896
     ASSERT(pSdwBuf);
     bFirst = TRUE;

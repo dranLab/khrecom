@@ -51,6 +51,8 @@ disc image and the toolchain.
    ```sh
    python3 tools/extract_iso.py iso/khrecom.iso        # writes iso/SLUS_217.99 + iso/SYSTEM.CNF
    ```
+   The US retail disc (second target, `docs/retail-plan.md`) boots an ELF of the same name: extract it with
+   `--name`, e.g. `tools/extract_iso.py iso/khrecom_retail.iso --name SLUS_217.99_retail`.
 3. **Get the compilers and wibo.** The game's compiler is SN Systems' Windows build of ee-gcc 2.95.3; the
    libraries need four older ee-gcc packages (all listed in `config/SLUS_217.99/build.yaml`). They run under
    [wibo](https://github.com/decompals/wibo), which `download_compiler.py` puts at `tools/wibo/wibo`.
@@ -113,6 +115,30 @@ ninja                                           # build and verify the image
 python3 tools/funcdiff.py <unit> [<function>]   # compare functions with the original
 ```
 
+### Building each version
+
+The same sources build two executables (`config/versions.yaml`; how the switch works: `docs/versions.md`):
+
+| Version | Needs in `iso/` | Built from |
+|---|---|---|
+| `SLUS_217.99`, US translation beta (the reference) | `SLUS_217.99` | `src/` as is |
+| `SLUS_217.99_retail`, US retail release | `SLUS_217.99_retail` (extract it with `--name`, see First steps) | `src/` with `-DKH_RETAIL`, no `-g`: the debug code is compiled out |
+
+`configure.py` sets up every version whose ELF is in `iso/` and skips the others (it says so). With both present:
+
+```sh
+python3 configure.py                  # both versions (the retail one generates its version map on the first run, ~15 s)
+ninja                                 # build and verify both images
+ninja check-SLUS_217.99               # only the beta
+ninja check-SLUS_217.99_retail        # only the retail
+ninja iso                             # beta boot disc; the retail's: ninja iso-SLUS_217.99_retail
+tools/check.sh                        # configure + both builds + checksums; exit 0 = both match
+python3 tools/retail_units.py try <unit> [--show <function>]   # a unit compiled as retail vs the retail ELF
+```
+
+Retail compiles the units listed in `config/SLUS_217.99_retail/sources.txt` from `src/`, and the rest from the
+retail ELF's assembly. `tools/retail_units.py` brings more units over (`docs/versions.md`).
+
 ## Boot testing
 
 ```sh
@@ -120,7 +146,7 @@ ninja iso        # -> build/SLUS_XXX.XX/SLUS_XXX.XX.iso (the first run copies th
 ```
 
 `tools/build_iso.py` writes the built ELF into the original ELF's sectors of a copy of the disc
-image and updates its size in the ISO9660 and UDF directories; every other file keeps its sector.
+image (the image in `iso/` whose boot ELF is the version's original ELF, `build.yaml`'s `elf:`) and updates its size in the ISO9660 and UDF directories; every other file keeps its sector.
 The boot copy of the ELF gets `PhysAddr = VirtAddr` (splat's linker script sets it to the ROM
 offset), and its loadable image is compared with the original's. Boot the result in PCSX2 or on
 hardware. PCSX2 identifies games by serial *and* ELF CRC: settings and patches keyed by the CRC of

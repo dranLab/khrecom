@@ -147,7 +147,7 @@ pppPObject *pppCreatePObject(pppMngSt *mng, pppPDataVal *pdv0) {
     pdt = pdv0->pdt;
     apobj = pppAlloc(&ppvEnv->heapMng, pdt->valbytes + pdt->ctrlTablen * 4);
 #line 222
-    if (!(((int)apobj & 0xf) == 0)) AssertApp(__FILE__, __LINE__, "((int)apobj & 0xf) == 0", 0);
+    KH_DEBUG(if (!(((int)apobj & 0xf) == 0)) AssertApp(__FILE__, __LINE__, "((int)apobj & 0xf) == 0", 0);)
     if (apobj == NULL) {
         TRACE("!!!!!!!!!!!!!!!!!!!!!!!!! Effect pppCreatePObject Malloc FALSE !!!!!!!!!!!!!!!!!!!!!!!\n");
         return NULL;
@@ -697,7 +697,7 @@ static BOOL apeaPObject(pppMngSt *mng) {
     for (pdtct = 0; pdtct < mng->pdtn; pdtct++) {
         pdv = &mng->m_pdtval[pdtct];
 #line 1011
-        if (!(pdv != NULL)) AssertApp(__FILE__, __LINE__, "pdv != ((void *)0)", 0);
+        KH_DEBUG(if (!(pdv != NULL)) AssertApp(__FILE__, __LINE__, "pdv != ((void *)0)", 0);)
         if (mng->time >= pdv->startFrame) {
             pdv->startFrame = 0x7FFFFFFF;
             pdv->pobj = pppCreatePObject(mng, pdv);
@@ -710,7 +710,7 @@ static BOOL apeaPObject(pppMngSt *mng) {
 
 BOOL pppRunPartExec(pppMngSt *mng) {
 #line 1033
-    if (!(mng != NULL)) AssertApp(__FILE__, __LINE__, "mng != ((void *)0)", 0);
+    KH_DEBUG(if (!(mng != NULL)) AssertApp(__FILE__, __LINE__, "mng != ((void *)0)", 0);)
     callStartProg(mng);
     if (!apeaPObject(mng)) return FALSE;
     pppRunPartCalc(mng);
@@ -719,7 +719,7 @@ BOOL pppRunPartExec(pppMngSt *mng) {
 
 BOOL pppRunPart(pppMngSt *mng, BOOL drawf) {
 #line 1053
-    if (!(mng != NULL)) AssertApp(__FILE__, __LINE__, "mng != ((void *)0)", 0);
+    KH_DEBUG(if (!(mng != NULL)) AssertApp(__FILE__, __LINE__, "mng != ((void *)0)", 0);)
     pppRunPartDraw(mng, drawf);
     callEndProg(mng);
     return pppRunPartImpotent(mng);
@@ -727,7 +727,7 @@ BOOL pppRunPart(pppMngSt *mng, BOOL drawf) {
 
 BOOL pppRunPartImpotent(pppMngSt *mng) {
 #line 1067
-    if (!(mng != NULL)) AssertApp(__FILE__, __LINE__, "mng != ((void *)0)", 0);
+    KH_DEBUG(if (!(mng != NULL)) AssertApp(__FILE__, __LINE__, "mng != ((void *)0)", 0);)
     if (ppvUserStopPartF || ppvMng->bFlagStop || ppvMng->bBoolSlow) return FALSE;
     mng->otime = mng->time;
     mng->time += 0x1000;
@@ -747,3 +747,4 @@ BOOL pppRunPartImpotent(pppMngSt *mng) {
     return mng->bEnd;
 }
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .data

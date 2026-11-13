@@ -20,7 +20,7 @@ void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 
 
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 
 
@@ -31,7 +31,7 @@ CHermitePathCamera::CHermitePathCamera(CTask* p, const FVECTOR* pPath, INT iPath
                                        const PATH_TARGET_PARAM& sTargetParam)
     : CCamera(p, -1) {
     m_iStatus = 1;
-    m_pPath = new (__FILE__ "(32)") CPathVector(pPath, iPathMax);
+    m_pPath = new KH_AT("(32)") CPathVector(pPath, iPathMax);
     ASSERT(m_pPath);
     _init(pTarget, sTargetParam);
 }
@@ -99,8 +99,8 @@ void CHermitePathCamera::_init(const CTask* pTarget, const PATH_TARGET_PARAM& sT
     m_fStartProj = sTargetParam.sPDParam.fProj;
     m_fEndProj = sTargetParam.sPDParam.fProj2;
     setProjectionDist(m_fStartProj);
-    TRACE("Proj %f %f\x93x\n", sTargetParam.sPDParam.fProj + 512.0f,
-          ProjectionToViewAngle(sTargetParam.sPDParam.fProj));
+    KH_DEBUG(TRACE("Proj %f %f\x93x\n", sTargetParam.sPDParam.fProj + 512.0f, ProjectionToViewAngle(sTargetParam.sPDParam.fProj));)
+
     if (sTargetParam.pParent && sTargetParam.pParent->getCoordNum() > 0) {
         Crd(0).setParent(&sTargetParam.pParent->Crd(0));
     }
@@ -158,22 +158,22 @@ void CHermitePathCamera::_init(const CTask* pTarget, const PATH_TARGET_PARAM& sT
         }
     }
     updateMatrix(vPos, vLook, updatePos(vPos, vLook, 0.0f, FALSE));
-    FVECTOR _vPos = Crd(0).getWorldMatrix().getTransRef();
-    TRACE("START P:%f %f %f %f\n", _vPos.x, _vPos.y, _vPos.z, _vPos.w);
-    if (m_pTarget) {
-        FVECTOR _vLook = ((CCoord&)m_pTarget->Crd(0)).getWorldMatrix().getTransRef();
-        TRACE("START L:%f %f %f %f\n", _vLook.x, _vLook.y, _vLook.z, _vLook.w);
-    }
-    m_DDPathCamArrow.getCoord().setParent(&Crd(0));
-    FVECTOR vRot;
-    vRot.init0();
-    vRot.w = 5.0f;
-    m_DDPathCamArrow.setCoord(NULL, &vRot);
+    KH_DEBUG(FVECTOR _vPos = Crd(0).getWorldMatrix().getTransRef();)
+    KH_DEBUG(TRACE("START P:%f %f %f %f\n", _vPos.x, _vPos.y, _vPos.z, _vPos.w);)
+    KH_DEBUG(if (m_pTarget) {)
+        KH_DEBUG(FVECTOR _vLook = ((CCoord&)m_pTarget->Crd(0)).getWorldMatrix().getTransRef();)
+        KH_DEBUG(TRACE("START L:%f %f %f %f\n", _vLook.x, _vLook.y, _vLook.z, _vLook.w);)
+    KH_DEBUG(})
+    KH_DEBUG(m_DDPathCamArrow.getCoord().setParent(&Crd(0));)
+    KH_DEBUG(FVECTOR vRot;)
+    KH_DEBUG(vRot.init0();)
+    KH_DEBUG(vRot.w = 5.0f;)
+    KH_DEBUG(m_DDPathCamArrow.setCoord(NULL, &vRot);)
 }
 
 #line 208
 void CHermitePathCamera::_setMyCamPath(const PATH_TARGET_PARAM& sTargetParam) {
-    m_pMyHPath = new (__FILE__ "(209)") CHermitePath;
+    m_pMyHPath = new KH_AT("(209)") CHermitePath;
     ASSERT(m_pMyHPath);
     m_pMyHPath->makePathFromPathVector(m_pPath);
     if (sTargetParam.sPDParam.iFlags & 1) {
@@ -193,23 +193,23 @@ void CHermitePathCamera::_setMyCamPath(const PATH_TARGET_PARAM& sTargetParam) {
 }
 
 void CHermitePathCamera::out() {
-    FVECTOR _vPos = Crd(0).getWorldMatrix().getTransRef();
-    TRACE("END P:%f %f %f %f\n", _vPos.x, _vPos.y, _vPos.z, _vPos.w);
-    if (m_pTarget) {
-        FVECTOR _vLook = ((CCoord&)m_pTarget->Crd(0)).getWorldMatrix().getTransRef();
-        TRACE("END L:%f %f %f %f\n", _vLook.x, _vLook.y, _vLook.z, _vLook.w);
-    }
-    FLOAT fProj = getProjectionDist();
-    TRACE("END Proj %f %f\x93x\n", fProj + 512.0f, ProjectionToViewAngle(fProj));
-    CCamera* pCam = CWorldEnv::getOldCamera();
-    if (pCam && pCam->getLook()) {
-        FVECTOR _vPos = pCam->Crd(0).getWorldMatrix().getTransRef();
-        TRACE("END OP:%f %f %f %f\n", _vPos.x, _vPos.y, _vPos.z, _vPos.w);
-        FVECTOR _vLook = *pCam->getLook();
-        TRACE("END OL:%f %f %f %f\n", _vLook.x, _vLook.y, _vLook.z, _vLook.w);
-        FLOAT fOProj = pCam->getProjectionDist();
-        TRACE("END OProj %f %f\x93x\n", fOProj + 512.0f, ProjectionToViewAngle(fOProj));
-    }
+    KH_DEBUG(FVECTOR _vPos = Crd(0).getWorldMatrix().getTransRef();)
+    KH_DEBUG(TRACE("END P:%f %f %f %f\n", _vPos.x, _vPos.y, _vPos.z, _vPos.w);)
+    KH_DEBUG(if (m_pTarget) {)
+        KH_DEBUG(FVECTOR _vLook = ((CCoord&)m_pTarget->Crd(0)).getWorldMatrix().getTransRef();)
+        KH_DEBUG(TRACE("END L:%f %f %f %f\n", _vLook.x, _vLook.y, _vLook.z, _vLook.w);)
+    KH_DEBUG(})
+    KH_DEBUG(FLOAT fProj = getProjectionDist();)
+    KH_DEBUG(TRACE("END Proj %f %f\x93x\n", fProj + 512.0f, ProjectionToViewAngle(fProj));)
+    KH_DEBUG(CCamera* pCam = CWorldEnv::getOldCamera();)
+    KH_DEBUG(if (pCam && pCam->getLook()) {)
+        KH_DEBUG(FVECTOR _vPos = pCam->Crd(0).getWorldMatrix().getTransRef();)
+        KH_DEBUG(TRACE("END OP:%f %f %f %f\n", _vPos.x, _vPos.y, _vPos.z, _vPos.w);)
+        KH_DEBUG(FVECTOR _vLook = *pCam->getLook();)
+        KH_DEBUG(TRACE("END OL:%f %f %f %f\n", _vLook.x, _vLook.y, _vLook.z, _vLook.w);)
+        KH_DEBUG(FLOAT fOProj = pCam->getProjectionDist();)
+        KH_DEBUG(TRACE("END OProj %f %f\x93x\n", fOProj + 512.0f, ProjectionToViewAngle(fOProj));)
+    KH_DEBUG(})
     if (m_iPathFlags & 0x100) {
         m_iStep = 2;
     } else {
@@ -511,11 +511,11 @@ void CHermitePathCamera::updateMatrix(FVECTOR& vPos, FVECTOR& vLook, FLOAT fRoll
 }
 
 void CHermitePathCamera::disp() {
-    if (CDebugPathData::isDebugPathData() && this != CWorldEnv::getActiveCamera() &&
-        (CDebugPathData::m_iCtrlFlg & 2)) {
-        m_pPath->dispDebugLine(0);
-        m_DDPathCamArrow.disp();
-    }
+    KH_DEBUG(if (CDebugPathData::isDebugPathData() && this != CWorldEnv::getActiveCamera() && (CDebugPathData::m_iCtrlFlg & 2)) {)
+
+        KH_DEBUG(m_pPath->dispDebugLine(0);)
+        KH_DEBUG(m_DDPathCamArrow.disp();)
+    KH_DEBUG(})
 }
 
 void CHermitePathCamera::noLearpOut() {
@@ -533,7 +533,7 @@ void CHermitePathCamera::initBGCheck(BOOL fgTransparency) {
         m_iStatus &= ~4;
     }
     if (!m_pCollMapCamera) {
-        m_pCollMapCamera = new (__FILE__ "(734)") CCollMapCamera;
+        m_pCollMapCamera = new KH_AT("(734)") CCollMapCamera;
     }
 }
 
@@ -561,3 +561,4 @@ BOOL CHermitePathCamera::isEnd() const {
 }
 
 // SOURCE DATA: .rodata
+// SOURCE DATA SLUS_217.99_retail: .rodata

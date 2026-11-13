@@ -13,7 +13,7 @@
 #endif
 #line 1 MODELDATA_H_PATH
 inline void _modelDataCheckTexInfo(void* _pTexInfo) {
-    if (!_pTexInfo) AssertApp(__FILE__, __LINE__, "_pTexInfo", 0);
+    KH_DEBUG(if (!_pTexInfo) AssertApp(__FILE__, __LINE__, "_pTexInfo", 0);)
 }
 
 

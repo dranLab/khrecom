@@ -1,0 +1,51 @@
+# Data starts measured by hand (tools/split_version.py reads them with unit_starts.txt; retail_units.py doesn't
+# touch this file). <unit> <section> <address> [<size>], each with its evidence:
+# pppfunctbl's .rodata (data-only unit): its first string "pppRyjMegaBirthUserCtrl3" (the beta's D_00468BE8)
+System/Graphic/Effect/libppp/pppfunctbl .rodata 0x00402600
+# CardBattle's .data begins with BattleEnemy.h's two file-local statics, as in the beta (0x39AF88), before its
+# first named symbol g_szBinBattleCardList (0x33B400)
+Game/CardBattle .data 0x0033B3F8
+# CardBattle's .rodata likewise holds those statics' strings "abnormal" and "cure01" (0x409958), after Card's (0x408550 + 0x1400)
+Game/CardBattle .rodata 0x00409950
+# BattleCard's .rodata begins after AttackMotion's (0x406FC0 + 0x50) with three empty 8-byte blocks before "zexion2"
+# (0x407028; its jump tables' 16-byte alignment needs the 0x407010 start), not at the split's 0x407058 (retail has no
+# SJIS assert strings there)
+Game/BattleCard .rodata 0x00407010
+# Units still in assembly whose data begins with BattleEnemy.h's statics before their first named symbol (starts
+# voted unanimously by their compiled code's relocations in retail_units.py scan):
+Game/Enemy/HumanBoss .data 0x0033F3B0
+Game/Enemy/HumanBoss .rodata 0x0041F870
+Game/LockOnManager .data 0x0033BD38
+Game/LockOnManager .rodata 0x0040EA88
+# CreateEnemy's .rodata: its .data points at "abnormal" (0x41DAE8) and "cure01" (0x41DAF8) at the start; the vote
+# (0x41DAF0) pairs its code's references with the next unit's copy of "abnormal"
+Game/Enemy/CreateEnemy .rodata 0x0041DAE0
+# VSME's .data follows ChatMan's (as in the beta) and begins with the header statics' name pointers; the split had no
+# VSME .data and gave the range to ChatMan (0x33C40C + 0xC)
+Game/Atel/VSME .data 0x0033C418
+# libpad2's and thread's .rodata: the split's starts match their bytes exactly; their votes split over references
+# into a string's tail
+lib/libpad2 .rodata 0x00433260
+lib/thread .rodata 0x00436800
+# CreateGimmick's .rodata: the split's start matches its bytes exactly (no references to vote with)
+Game/Gimmick/CreateGimmick .rodata 0x00421440
+# FrecFont's .data (its colour table, the beta's 0x3921A0) is retail's 0x332950 byte for byte; the split's 0x33294C
+# is the previous unit's padding (the vote is off: its only reference is relocated against a symbol)
+System/Graphic/FrecFont .data 0x00332950
+# EntityFactory's .rodata (Task.h's "", then OsdDef.h's "@OSD" and "@EVB"; no code references it, so nothing votes)
+# follows Entity's 0x10 bytes: "" at 0x40E568, "@OSD" 0x40E570, "@EVB" 0x40E578, Game's from 0x40E580
+Game/EntityFactory .rodata 0x0040E568
+# CollMap's .rodata (the beta's 0x488670): it takes the 16 zero bytes after CollBody's end (0x410700) that no
+# object produces; its code votes 0x410710 for Task.h's "" and its jump tables at 0x410720 stay 16-aligned
+Game/Collision/CollMap .rodata 0x00410700
+# CardKind's .data is CARD::getName's static pBlankText (the beta's pBlankText.165 at 0x39B2D8, its own subsegment
+# there): retail's {0x40B160 "", 0} after CardBattle's 0x350 bytes; the split had no CardKind .data and gave the 8
+# bytes to CardBattle
+Game/CardKind .data 0x0033B748
+# MapEnemy's .data (still in assembly): g_pIdlingMotion's pointer table {0, p, p+0x10, p+0x20 x4, p+0x30, ...}, the
+# beta's 0x3A93E0, is retail's 0x33F5B0 right after HumanBoss's 0x200 bytes (the split's 0x33F774 is a later item)
+Game/Enemy/MapEnemy .data 0x0033F5B0
+# MapEnemyAir's and MapEnemyGround's .rodata are only EnemyParam.h's header strings ("" and "@ENP", 0x10 bytes each):
+# retail's 0x421190 and 0x4211A0, after MapEnemy's 0x5A0 bytes (the split had given both to MapEnemy)
+Game/Enemy/MapEnemyAir .rodata 0x00421190
+Game/Enemy/MapEnemyGround .rodata 0x004211A0

@@ -156,3 +156,4 @@ unsigned int sceSifQueryBlockSize(void *addr)
     return rdata[0];
 }
 // SOURCE DATA: .data .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .data

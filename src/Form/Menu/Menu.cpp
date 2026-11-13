@@ -23,8 +23,8 @@ CMenu::CMenu(CTask* p, INT fgUseCardArray) : CTask(p, 0x4000) {
     m_nCardKindMax = 0;
     m_fgPadDisable = 0;
     if (fgUseCardArray >= 0) {
-        m_nCardKind10 = new (__FILE__ "(27)") unsigned char[298][10];
-        m_nCardKind = new (__FILE__ "(28)") USHORT[298];
+        m_nCardKind10 = new KH_AT("(27)") unsigned char[298][10];
+        m_nCardKind = new KH_AT("(28)") USHORT[298];
         initCardData(fgUseCardArray);
     } else {
         m_nCardKind = NULL;
@@ -161,3 +161,4 @@ BOOL CMenu::_isTrgNEXT(UINT nInPad) {
     return CPadHandler::isTrgNEXT(nInPad);
 }
 // SOURCE DATA: .rodata
+// SOURCE DATA SLUS_217.99_retail: .rodata

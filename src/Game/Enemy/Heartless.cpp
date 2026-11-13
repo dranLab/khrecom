@@ -47,7 +47,7 @@ void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
 
 template <class T> static inline T& _ref(T& v) { return v; }
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 #define DEG2RAD 0.017453292f
 
 namespace Heartless {
@@ -84,7 +84,7 @@ BOOL CHeartless::startCardBattle() {
         setBattleEnemyFlag(0, 0x200);
         return FALSE;
     }
-    if (!cb->setEnemyCard(getHandle(), *(INT*)((BYTE*)this + 0x240), num)) {
+    if (!cb->setEnemyCard(getHandle(), *(INT*)((BYTE*)this + KH_VER(0x240, 0x220)), num)) {
         setBattleEnemyFlag(2, 0);
         setBattleEnemyFlag(0, 0x200);
         onCardBattleFailed();
@@ -111,11 +111,11 @@ void CHeartless::aiCardBattle() {
     }
     if (count == 0) return;
     if (!canCardBattle()) return;
-    if (DebugWork::g_dw.enemy.uiFlag & 8) {
+    if (KH_DW(DebugWork::g_dw.enemy.uiFlag) & 8) {
         for (INT i = 0; i < getEnemyParam()->iActCount; i++) {
-            if (getEnemyParam()->pActs[i].iActNo == DebugWork::g_dw.enemy.sActNo) {
+            if (getEnemyParam()->pActs[i].iActNo == KH_DW(DebugWork::g_dw.enemy.sActNo)) {
                 setBattleEnemyFlag(0x200, 0);
-                m_iAttackState = DebugWork::g_dw.enemy.sActNo + 2;
+                m_iAttackState = KH_DW(DebugWork::g_dw.enemy.sActNo) + 2;
                 return;
             }
         }
@@ -462,7 +462,7 @@ BOOL CHeartless::canAttack() {
 
 BOOL CHeartless::canAttack(INT inIndex) {
 #line 720
-    if (!(0 <= inIndex && inIndex < getEnemyParam()->iActCount)) AssertApp(__FILE__, __LINE__, "0 <= inIndex && inIndex < m_pEnemyParam->iActCount", 0);
+    KH_DEBUG(if (!(0 <= inIndex && inIndex < getEnemyParam()->iActCount)) AssertApp(__FILE__, __LINE__, "0 <= inIndex && inIndex < m_pEnemyParam->iActCount", 0);)
     return canAttack_(&getEnemyParam()->pActs[inIndex]);
 }
 
@@ -520,7 +520,7 @@ static inline ENEMY_ACT* _findAct(ENEMY_PARAM* param, INT inActNo) {
 
 #define PARAM (((CHeartless*)this)->getEnemyParam())
 INT CHeartless::getCardNumber_(INT inState) const {
-    if (DebugWork::g_dw.enemy.uiFlag & 0x4000) return DebugWork::g_dw.enemy.iCardNumber;
+    if (KH_DW(DebugWork::g_dw.enemy.uiFlag) & 0x4000) return KH_DW(DebugWork::g_dw.enemy.iCardNumber);
     ENEMY_ACT* act = _findAct(PARAM, inState - 2);
 #line 826
     ASSERT(act);
@@ -528,7 +528,7 @@ INT CHeartless::getCardNumber_(INT inState) const {
     INT num = 0;
     if (act->iCard[0] < 0) {
 #line 834
-        if (!(PARAM->iCardCount > 0)) AssertApp(__FILE__, __LINE__, "m_pEnemyParam->iCardCount > 0", 0);
+        KH_DEBUG(if (!(PARAM->iCardCount > 0)) AssertApp(__FILE__, __LINE__, "m_pEnemyParam->iCardCount > 0", 0);)
         card = PARAM->pCards;
     } else {
         for (INT i = 0; i < PARAM->iCardCount; i++) {
@@ -553,3 +553,4 @@ INT CHeartless::getCardNumber_(INT inState) const {
 }
 #undef PARAM
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

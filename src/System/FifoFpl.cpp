@@ -3,7 +3,7 @@
 #include "System/MainApp.h"
 #include "System/Debug.h"
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 CFifoFpl::CFifoFpl() {
     m_pPoolBuf = NULL;
@@ -108,27 +108,27 @@ void CFifoFpl::releaseBlock(void* pBlock) {
 
 #line 124
     ASSERT(m_pPoolBuf);
-    if (!pBlock) {
-        TRACE("NULL \x83" "A\x83h\x83\x8c\x83X\x82\xf0\x8aJ\x95\xfa\x82\xb5\x82\xe6\x82\xa4\x82\xc6\x82\xb5\x82\xc4\x82\xa2\x82\xdc\x82\xb7\n");
-        return;
-    }
+    KH_DEBUG(if (!pBlock) {)
+        KH_DEBUG(TRACE("NULL \x83" "A\x83h\x83\x8c\x83X\x82\xf0\x8aJ\x95\xfa\x82\xb5\x82\xe6\x82\xa4\x82\xc6\x82\xb5\x82\xc4\x82\xa2\x82\xdc\x82\xb7\n");)
+        KH_DEBUG(return;)
+    KH_DEBUG(})
     p = (BYTE*)pBlock;
     nIDMask = m_nBlockCountMax - 1;
     nID = ((_Tag*)p)->_nID;
     nIndex = nID & nIDMask;
-    if (nID & _Tag::_FREE_FLAG) {
-        TRACE("\x82\xb7\x82\xc5\x82\xc9\x8aJ\x95\xfa\x8d\xcf\x82\xdd\x82\xcc\x83u\x83\x8d\x83" "b\x83N\x82\xf0\x8aJ\x95\xfa\x82\xb5\x82\xe6\x82\xa4\x82\xc6\x82\xb5\x82\xc4\x82\xa2\x82\xdc\x82\xb7\n");
-        return;
-    }
-    nCheckIndex = (UINT)(p - (BYTE*)m_pPoolBuf) >> m_nBlockSizeShift;
-    if (nCheckIndex != nIndex) {
-        if (nCheckIndex >= m_nBlockCountMax) {
-            TRACE("\x8a\xc7\x97\x9d\x8aO\x82\xcc\x83u\x83\x8d\x83" "b\x83N\x82\xf0\x8aJ\x95\xfa\x82\xb5\x82\xe6\x82\xa4\x82\xc6\x82\xb5\x82\xc4\x82\xa2\x82\xdc\x82\xb7\n");
-        } else {
-            TRACE("\x83u\x83\x8d\x83" "b\x83N\x82\xcc\x82h\x82" "c\x8f\xee\x95\xf1\x82\xaa\x89\xf3\x82\xb3\x82\xea\x82\xc4\x82\xa2\x82\xe9\x82\xa9\x82\xe0\x81`\n");
-        }
-        return;
-    }
+    KH_DEBUG(if (nID & _Tag::_FREE_FLAG) {)
+        KH_DEBUG(TRACE("\x82\xb7\x82\xc5\x82\xc9\x8aJ\x95\xfa\x8d\xcf\x82\xdd\x82\xcc\x83u\x83\x8d\x83" "b\x83N\x82\xf0\x8aJ\x95\xfa\x82\xb5\x82\xe6\x82\xa4\x82\xc6\x82\xb5\x82\xc4\x82\xa2\x82\xdc\x82\xb7\n");)
+        KH_DEBUG(return;)
+    KH_DEBUG(})
+    KH_DEBUG(nCheckIndex = (UINT)(p - (BYTE*)m_pPoolBuf) >> m_nBlockSizeShift;)
+    KH_DEBUG(if (nCheckIndex != nIndex) {)
+        KH_DEBUG(if (nCheckIndex >= m_nBlockCountMax) {)
+            KH_DEBUG(TRACE("\x8a\xc7\x97\x9d\x8aO\x82\xcc\x83u\x83\x8d\x83" "b\x83N\x82\xf0\x8aJ\x95\xfa\x82\xb5\x82\xe6\x82\xa4\x82\xc6\x82\xb5\x82\xc4\x82\xa2\x82\xdc\x82\xb7\n");)
+        KH_DEBUG(} else {)
+            KH_DEBUG(TRACE("\x83u\x83\x8d\x83" "b\x83N\x82\xcc\x82h\x82" "c\x8f\xee\x95\xf1\x82\xaa\x89\xf3\x82\xb3\x82\xea\x82\xc4\x82\xa2\x82\xe9\x82\xa9\x82\xe0\x81`\n");)
+        KH_DEBUG(})
+        KH_DEBUG(return;)
+    KH_DEBUG(})
     nID += m_nBlockCountMax;
     nID |= _Tag::_FREE_FLAG;
     ((_Tag*)p)->_nID = nID;
@@ -155,10 +155,7 @@ void* CFifoFpl::getValidActiveBlock(UINT nID) {
     ASSERT(m_pPoolBuf);
     nIDMask = m_nBlockCountMax - 1;
     p = (BYTE*)m_pPoolBuf + ((nID & nIDMask) << m_nBlockSizeShift);
-    if (((_Tag*)p)->_nID != nID) {
-        return NULL;
-    }
-    return p;
+    return ((_Tag*)p)->_nID != nID ? NULL : p;
 }
 
 BOOL CFifoFpl::isValidActiveBlockID(UINT nID) const {
@@ -174,29 +171,29 @@ BOOL CFifoFpl::isValidActiveBlockID(UINT nID) const {
 }
 
 void CFifoFpl::debugDump(UINT nStartIndex, UINT nEndIndex) {
-    BYTE* p;
-    INT nBlockSize;
-    UINT i;
-    UINT n;
+    KH_DEBUG(BYTE* p;)
+    KH_DEBUG(INT nBlockSize;)
+    KH_DEBUG(UINT i;)
+    KH_DEBUG(UINT n;)
 
-    if (nEndIndex == 0 || m_nBlockCountMax < nEndIndex) {
-        nEndIndex = m_nBlockCountMax;
-    }
-    TRACE("\n*** CFifoFpl Debug Dump Start ***\n");
-    TRACE("    Buffer-Address : [%07X]\n", m_pPoolBuf);
-    TRACE("    Block-Head     : [#%d]\n", m_nAvailableBlockHead);
-    TRACE("    Block-Tail     : [#%d]\n", m_nAvailableBlockTail);
-    TRACE("    Available      : [#%d]", m_nAvailableBlockCount);
-    p = (BYTE*)m_pPoolBuf;
-    if (p) {
-        nBlockSize = 1 << m_nBlockSizeShift;
-        for (i = nStartIndex, n = 0; i < nEndIndex; i++, n++, p += nBlockSize) {
-            if ((n & 1) == 0) {
-                TRACE("\n   ");
-            }
-            TRACE(" [%2d]:[ID=%8X][L=%-3d]", i, ((_Tag*)p)->_nID, ((_Tag*)p)->_nLink);
-        }
-        TRACE("\n**** CFifoFpl Debug Dump End ****\n\n");
-    }
+    KH_DEBUG(if (nEndIndex == 0 || m_nBlockCountMax < nEndIndex) {)
+        KH_DEBUG(nEndIndex = m_nBlockCountMax;)
+    KH_DEBUG(})
+    KH_DEBUG(TRACE("\n*** CFifoFpl Debug Dump Start ***\n");)
+    KH_DEBUG(TRACE("    Buffer-Address : [%07X]\n", m_pPoolBuf);)
+    KH_DEBUG(TRACE("    Block-Head     : [#%d]\n", m_nAvailableBlockHead);)
+    KH_DEBUG(TRACE("    Block-Tail     : [#%d]\n", m_nAvailableBlockTail);)
+    KH_DEBUG(TRACE("    Available      : [#%d]", m_nAvailableBlockCount);)
+    KH_DEBUG(p = (BYTE*)m_pPoolBuf;)
+    KH_DEBUG(if (p) {)
+        KH_DEBUG(nBlockSize = 1 << m_nBlockSizeShift;)
+        KH_DEBUG(for (i = nStartIndex, n = 0; i < nEndIndex; i++, n++, p += nBlockSize) {)
+            KH_DEBUG(if ((n & 1) == 0) {)
+                KH_DEBUG(TRACE("\n   ");)
+            KH_DEBUG(})
+            KH_DEBUG(TRACE(" [%2d]:[ID=%8X][L=%-3d]", i, ((_Tag*)p)->_nID, ((_Tag*)p)->_nLink);)
+        KH_DEBUG(})
+        KH_DEBUG(TRACE("\n**** CFifoFpl Debug Dump End ****\n\n");)
+    KH_DEBUG(})
 }
 // SOURCE DATA: .rodata

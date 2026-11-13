@@ -7,7 +7,7 @@
 typedef u_long128 u_qword;
 extern u_long128 ot1_mpg_table[];
 
-void AssertApp(char *file, int line, char *exp, int arg);
+void (AssertApp)(char *file, int line, char *exp, int arg);
 void pppSendVu1Prog(int vu1prog);
 void pppSendTagVif1Packet(sceDmaTag *pkt);
 extern u_char ppvVu1SprDbId;
@@ -301,7 +301,7 @@ void pppVu1ShapeDraw(OSHAPE_VU1 *sh, OSHAPE_IN_VU1 *vu1shi) {
 
 
 
-    if (!(sh_counter <= 12)) AssertApp(__FILE__, __LINE__, "sh_counter <= 12", 0);
+    KH_DEBUG(if (!(sh_counter <= 12)) AssertApp(__FILE__, __LINE__, "sh_counter <= 12", 0);)
 
 
     if (ppvMonochrome) {

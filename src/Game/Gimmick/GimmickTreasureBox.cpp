@@ -60,8 +60,8 @@ struct ChatWndCreateCTDParam {
     UINT waitFrame;
     ChatWndSetWordsParam* pCwswp;
     UINT nLine;
+    ChatWndCreateCTDParam() { nLine = 0; } /* MATCH: the beta's markers put the nLine store in WndCmnd.h's inline (VSME.cpp) */
 };
-
 #include "System/Sound/SoundMan.h"
 #line 74
 
@@ -110,7 +110,7 @@ INT CGimmickTreasureBox::getTypeID() const {
 void CGimmickTreasureBox::AfterInit() {
     m_Stat = ((CGimmickManager*)getSysTask(17))->getStorageGimmickState(getUniqueID());
     if (m_Stat == -1) m_Stat = 0;
-    if (getParam() != 0 && getParam() != 10) m_Stat |= 4;
+    KH_DEBUG(if (getParam() != 0 && getParam() != 10) m_Stat |= 4;)
     if (CSceneInfo::getCurrentSceneNum() == 24) {
         if (CGameWork::progMCW()._KeyRoomsCreateState) {
             if (getParam() == 0) out();
@@ -165,11 +165,11 @@ BOOL CGimmickTreasureBox::CardMaxWarningMain() {
     case 0: {
         ChatWndCreateCTDParam CWCP2;
         CWCP2.pos.setPoint(-1, -1);
-        CWCP2.nLine = 0;
+
         CWCP2.cyobiPos.setPoint(0x80, 0x100);
-        CWCP2.ctdID = 0x400000;
-        CWCP2.pCwswp = NULL;
+        CWCP2.pCwswp = NULL; /* MATCH: the beta's marker order (287 pCwswp, 289 ctdID) */
         CWCP2.waitFrame = 0;
+        CWCP2.ctdID = 0x400000;
         ATEL::CChatMan::instance().reqCommand(0x405, &CWCP2, 0);
         ATEL::CChatMan::instance().reqCommand(0x3EA, NULL, 0);
         CSound::playSE(3, -1, 0x40);
@@ -178,12 +178,12 @@ BOOL CGimmickTreasureBox::CardMaxWarningMain() {
     }
     case 10: {
         INT ret;
-        INT iFg;
+        INT iFg[1]; // MATCH: [1]: retail ties this+0x40 as the original only with the local in memory from the start (beta matches both), user-accepted 2026-11-13
         ATEL::CChatMan::instance().reqCommand(0x3ED, &ret, 0);
         if (ret != 5) return FALSE;
         if (CPadHandler::isTrgOK() || CPadHandler::isTrgCANCEL()) {
-            iFg = 1;
-            ATEL::CChatMan::instance().reqCommand(0x3EB, &iFg, 0);
+            iFg[0] = 1;
+            ATEL::CChatMan::instance().reqCommand(0x3EB, iFg, 0);
             CSound::playSE(4, -1, 0x40);
             m_LocalStep = 20;
         }
@@ -191,11 +191,11 @@ BOOL CGimmickTreasureBox::CardMaxWarningMain() {
     }
     case 20: {
         INT ret;
-        INT iFg;
+        INT iFg[1];
         ATEL::CChatMan::instance().reqCommand(0x3ED, &ret, 0);
         if (ret != 9) return FALSE;
-        iFg = 0;
-        ATEL::CChatMan::instance().reqCommand(0x3EC, &iFg, 0);
+        iFg[0] = 0;
+        ATEL::CChatMan::instance().reqCommand(0x3EC, iFg, 0);
         CGameWork::setFlag(1, 5, FALSE);
         CSceneEnv::setStop(ObjType::OBJ_BIT_CLEAR);
         m_Step = 9;
@@ -250,7 +250,7 @@ void CGimmickTreasureBox::NormalMain() {
         setEntityFlag(0, 0x10000);
         g_pPlayer->cancelLockon();
         CSceneEnv::setStop((ObjType::eObjBit)(ObjType::OBJ_BIT_BULLET | ObjType::OBJ_BIT_ENEMY));
-        m_pPathCamera = new (__FILE__ "(486)") CPathCamera(this);
+        m_pPathCamera = new KH_AT("(486)") CPathCamera(this);
         CGameWork::setInt(1, 0xE2, -1);
         if (m_pPathCamera->init("test", TRUE, FALSE, 0x80)) {
             m_pPathCamera->initBGCheck(FALSE);
@@ -274,11 +274,11 @@ void CGimmickTreasureBox::NormalMain() {
             prize.Num = 0;
             prize.No = 0;
             prize = mgr->DecideTreasurePrize();
-            mgr->GimDebugTrace(&prize);
+            KH_DEBUG(mgr->GimDebugTrace(&prize);)
             CSceneEnv::setStop((ObjType::eObjBit)(ObjType::OBJ_BIT_TRUE_ALL & ~(ObjType::OBJ_BIT_2D | ObjType::OBJ_BIT_FUKIDASI | ObjType::OBJ_BIT_GIMMICK)));
             if (prize.StockKind) {
                 CTechnic::addTechnic(prize.StockKind);
-                new (__FILE__ "(525)") CLevelUp(getSysTask(1), prize.StockKind);
+                new KH_AT("(525)") CLevelUp(getSysTask(1), prize.StockKind);
                 m_Step = 7;
                 CGameWork::setFlag(1, 5, TRUE);
             } else if (prize.Kind == 0) {
@@ -358,7 +358,7 @@ void CGimmickTreasureBox::EnemyMain() {
         setEntityFlag(0, 0x10000);
         g_pPlayer->cancelLockon();
         CSceneEnv::setStop((ObjType::eObjBit)(ObjType::OBJ_BIT_BULLET | ObjType::OBJ_BIT_ENEMY));
-        m_pPathCamera = new (__FILE__ "(675)") CPathCamera(this);
+        m_pPathCamera = new KH_AT("(675)") CPathCamera(this);
         CGameWork::setInt(1, 0xE2, -1);
         if (m_pPathCamera->init("test", TRUE, FALSE, 0x80)) {
             m_pPathCamera->initBGCheck(FALSE);
@@ -400,7 +400,7 @@ void CGimmickTreasureBox::EnemyPop() {
     entity = NULL;
     v.y += 1.0f;
     world = CSceneInfo::getCurrentWorldID();
-    if (world == 23) world = CSceneInfo::getCurrentSceneNum();
+    KH_DEBUG(if (world == 23) world = CSceneInfo::getCurrentSceneNum();)
     switch (world) {
     case 0:
     case 10:
@@ -465,3 +465,4 @@ void CGimmickTreasureBoxForEffectID::stateHitAttack() {}
 
 void CGimmickTreasureBoxForEffectID::endStateHitAttack() {}
 // SOURCE DATA: .rodata
+// SOURCE DATA SLUS_217.99_retail: .rodata

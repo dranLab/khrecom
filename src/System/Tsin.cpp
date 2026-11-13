@@ -995,3 +995,4 @@ FLOAT ttanf(FLOAT fa) {
 	return tsinf(fa) / tcosf(fa);
 }
 // SOURCE DATA: .rodata
+// SOURCE DATA SLUS_217.99_retail: .rodata

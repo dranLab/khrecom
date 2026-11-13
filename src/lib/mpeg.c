@@ -764,3 +764,4 @@ static inline int _decPicture(_sceMpegDecoder *d)
 }
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .rodata

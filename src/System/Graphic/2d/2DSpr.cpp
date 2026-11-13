@@ -50,7 +50,7 @@ void C2DSpr::initializeList() {
     INT i;
     for (i = 0; i < 3; i++) {
         if (!m_p2DOSLCL[i]) {
-            m_p2DOSLCL[i] = new (__FILE__ "(55)")
+            m_p2DOSLCL[i] = new KH_AT("(55)")
                 C2DOSLCList(C2DMan::get2DOSLCManager());
         }
     }
@@ -109,7 +109,7 @@ HANDLE C2DSpr::addList(C2DO& Obj) {
     SLContainerT<C2DO>* pNew;
     HANDLE h;
     if (Obj._getHandle()) return -1;
-    if (!m_p2DOSLCList) AssertApp(__FILE__, __LINE__, "m_p2DOSLCList", 0);
+    KH_DEBUG(if (!m_p2DOSLCList) AssertApp(__FILE__, __LINE__, "m_p2DOSLCList", 0);)
     pNew = m_p2DOSLCList->pushBack(Obj);
     if (!pNew) {
         h = -1;
@@ -126,7 +126,7 @@ HANDLE C2DSpr::replaceList(HANDLE hCurrent, C2DO& Obj) {
     HANDLE h;
     SLContainerT<C2DO>* pNew;
     if (!hCurrent) return 0;
-    if (!m_p2DOSLCList) AssertApp(__FILE__, __LINE__, "m_p2DOSLCList", 0);
+    KH_DEBUG(if (!m_p2DOSLCList) AssertApp(__FILE__, __LINE__, "m_p2DOSLCList", 0);)
     h = Obj._getHandle();
     if (h) m_p2DOSLCList->remove(h);
     pNew = m_p2DOSLCList->replace(hCurrent, Obj);
@@ -145,7 +145,7 @@ BOOL C2DSpr::deleteList(C2DO& Obj) {
     HANDLE h = Obj._getHandle();
     BOOL bResult;
     if (!h) return FALSE;
-    if (!m_p2DOSLCList) AssertApp(__FILE__, __LINE__, "m_p2DOSLCList", 0);
+    KH_DEBUG(if (!m_p2DOSLCList) AssertApp(__FILE__, __LINE__, "m_p2DOSLCList", 0);)
     bResult = m_p2DOSLCList->remove(h);
     if (bResult) Obj._setHandle(0);
     return bResult;
@@ -154,7 +154,7 @@ BOOL C2DSpr::deleteList(C2DO& Obj) {
 void C2DSpr::resetTexInfo() {
     if (m_pTexName[0]) {
         m_pTexInfo = CRsrcDB::getRsrcTex(m_pTexName, NAME_CASE_SENSITIVE);
-        if (!m_pTexInfo) m_pTexInfo = CRsrcDB::getRsrcTex("error", NAME_CASE_SENSITIVE);
+        KH_DEBUG(if (!m_pTexInfo) m_pTexInfo = CRsrcDB::getRsrcTex("error", NAME_CASE_SENSITIVE);)
     }
 }
 
@@ -209,11 +209,11 @@ BOOL C2DSpr::init(void* pSpd, const CHAR* pBaseName) {
 HANDLE C2DSpr::create(UINT inNo) {
     if (inNo >= (UINT)m_nSpriteMax) return 0;
     m_pTexInfo = CRsrcDB::getRsrcTex(m_pTexName, NAME_CASE_SENSITIVE);
-    if (!m_pTexInfo) m_pTexInfo = CRsrcDB::getRsrcTex("error", NAME_CASE_SENSITIVE);
+    KH_DEBUG(if (!m_pTexInfo) m_pTexInfo = CRsrcDB::getRsrcTex("error", NAME_CASE_SENSITIVE);)
     SPR_SPRITE* pSprSprite = &m_pSprSprite[inNo];
     INT nIndex = pSprSprite->pos;
     INT nSprite = pSprSprite->max;
-    C2DSeqObj* p2DSeqObj = new (__FILE__ "(324)") C2DSeqObj;
+    C2DSeqObj* p2DSeqObj = new KH_AT("(324)") C2DSeqObj;
     return p2DSeqObj->create(m_hBase, nSprite, m_pTexInfo, &m_pSprGroup[nIndex], m_pSprParts);
 }
 
@@ -221,11 +221,11 @@ HANDLE C2DSpr::create(UINT inNo) {
 HANDLE C2DSpr::createSpr(UINT inUnitNo, UINT inNo) {
     if (inNo >= (UINT)m_nSpriteMax) return 0;
     m_pTexInfo = CRsrcDB::getRsrcTex(m_pTexName, NAME_CASE_SENSITIVE);
-    if (!m_pTexInfo) m_pTexInfo = CRsrcDB::getRsrcTex("error", NAME_CASE_SENSITIVE);
+    KH_DEBUG(if (!m_pTexInfo) m_pTexInfo = CRsrcDB::getRsrcTex("error", NAME_CASE_SENSITIVE);)
     SPR_SPRITE* pSprSprite = &m_pSprSprite[inNo];
     INT nIndex = pSprSprite->pos;
     INT nSprite = pSprSprite->max;
-    C2DSeqObj* p2DSeqObj = new (__FILE__ "(354)") C2DSeqObj;
+    C2DSeqObj* p2DSeqObj = new KH_AT("(354)") C2DSeqObj;
     return p2DSeqObj->create(m_hBase, nSprite, m_pTexInfo, &m_pSprGroup[nIndex], m_pSprParts);
 }
 
@@ -249,3 +249,4 @@ void C2DSpr::enableDisp(HANDLE handle, BOOL bEnable) {
 }  // namespace D2
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data

@@ -196,13 +196,13 @@ BOOL CTexUtil::setupTexInfo(TexInfo& outInfo, const BYTE* pInTim2, INT nAllocTyp
     nClutSize = 0;
     getTransSize(*pHead, nTexSize, nClutSize);
     if (CVramMan::allocTex(nTexSize, nClutSize, nTexPos, nClutPos, nAllocType) < 0) return FALSE;
-    if (nAllocType == 0) {
-        outInfo._nTexSize = nTexSize;
-        outInfo._nClutSize = nClutSize;
-    } else {
-        outInfo._nTexSize = 0;
-        outInfo._nClutSize = 0;
-    }
+    KH_DEBUG(if (nAllocType == 0) {)
+        KH_DEBUG(outInfo._nTexSize = nTexSize;)
+        KH_DEBUG(outInfo._nClutSize = nClutSize;)
+    KH_DEBUG(} else {)
+        KH_DEBUG(outInfo._nTexSize = 0;)
+        KH_DEBUG(outInfo._nClutSize = 0;)
+    KH_DEBUG(})
     VTransInfo& tex = outInfo._TexInfo;
     VTransInfo& clut = outInfo._ClutInfo;
     getTransInfo(*pHead, tex, clut, nTexPos, nClutPos);
@@ -675,13 +675,13 @@ BOOL CTexUtil::setupTexInfoImd(TexInfo& outInfo, const BYTE* pInImd, INT nAllocT
         CTexUtil::getTransSize(tim2Header, nTexSize, nClutSize);
     }
     if (CVramMan::allocTex(nTexSize, nClutSize, nTexPos, nClutPos, nAllocType) < 0) return FALSE;
-    if (nAllocType == 0) {
-        outInfo._nTexSize = nTexSize;
-        outInfo._nClutSize = nClutSize;
-    } else {
-        outInfo._nTexSize = 0;
-        outInfo._nClutSize = 0;
-    }
+    KH_DEBUG(if (nAllocType == 0) {)
+        KH_DEBUG(outInfo._nTexSize = nTexSize;)
+        KH_DEBUG(outInfo._nClutSize = nClutSize;)
+    KH_DEBUG(} else {)
+        KH_DEBUG(outInfo._nTexSize = 0;)
+        KH_DEBUG(outInfo._nClutSize = 0;)
+    KH_DEBUG(})
     { /* block-local references: the debug info (and so the ref) has no entry for this block's locals */
         VTransInfo& tex = outInfo._TexInfo;
         VTransInfo& clut = outInfo._ClutInfo;
@@ -697,3 +697,4 @@ BOOL CTexUtil::setupTexInfoImd(TexInfo& outInfo, const BYTE* pInImd, INT nAllocT
     return TRUE;
 }
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

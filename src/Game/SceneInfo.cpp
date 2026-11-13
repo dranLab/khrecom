@@ -39,7 +39,7 @@ union _AREA_SCENE_REG {
         SHORT _nScene;
         SHORT _nArea;
     };
-    INT _nAreaScene;
+    INT _nAreaScene; void operator=(const AREA_SCENE& as) { _nAreaScene = as._nAreaScene; } BOOL operator==(const AREA_SCENE& as) const { return _nAreaScene == as._nAreaScene; } void clear() { _nAreaScene = -1; } BOOL isEmpty() const { return _nAreaScene < 0; } /* AREA_SCENE's inlines (the original's SceneInfo.h:40, 41, 44, 46) */
 };
 
 struct _SceneInfo {
@@ -47,7 +47,7 @@ struct _SceneInfo {
     BYTE _nReverb;
     BYTE _nSeRangeRatio;
     void clear() {
-        _as._nAreaScene = -1;
+        _as.clear();
         _nReverb = 20;
         _nSeRangeRatio = 10;
     }
@@ -112,7 +112,7 @@ NormaDataHeader* _linkNormaData(const CHAR* pszFile);
 USHORT _getGoalRoomScene(WORLD_ID w);
 void _clearMapRsrcCache();
 FloorLayoutDataHeader* _isValidFloorIdx(USHORT nIdx, BOOL bSora);
-extern "C" void AssertApp(char* pszFile, int nLine, char* pszMsg, char* pszExp);
+extern "C" void (AssertApp)(char* pszFile, int nLine, char* pszMsg, char* pszExp);
 extern "C" int rand();
 
 /* The file's statics, in the original order */
@@ -147,7 +147,7 @@ _SceneInfo s_GlobalScene;
 INT s_nMapCacheField;
 INT s_nMapCacheBattle;
 FloorInfo s_CurrentFloor;
-RoomInfo s_roomExcept;
+KH_DEBUG(RoomInfo s_roomExcept;)
 }
 static const WORLD_ID s_WorldTableSora1[1] = { WORLD_ID_TRAVERSE };
 static const WORLD_ID s_WorldTableSora2[5] = { WORLD_ID_AGRABAH, WORLD_ID_OLYMPOS, WORLD_ID_WONDERLAND, WORLD_ID_MONSTRO, WORLD_ID_HALLOWEEN };
@@ -236,18 +236,18 @@ void CSceneInfo::clear() {
     s_pEventRoomFile_Riku = _linkEventRoomData("EventRooms2.BIN");
     s_pFloorNormaFile_Sora = _linkNormaData("RCNorma1.BIN");
     s_pFloorNormaFile_Riku = _linkNormaData("RCNorma2.BIN");
-    CGame::dbgStartFromBattle(FALSE);
-    s_roomExcept._pSrcInfo = NULL;
-    s_roomExcept._pStorageInfo = NULL;
-    s_roomExcept._pStorageInfo2 = NULL;
-    for (UINT i = 0; i < 4; i++) {
-        DoorInfo& d = s_roomExcept._doors[i];
-        d._id = (DOOR_ID)i;
-        d._shape = DOOR_SHAPE_NORMAL;
-        d._type = _DOOR_TYPE_DEBUG;
-        d._nDstRoom = 0;
-        d._pStorageInfo = NULL;
-    }
+    KH_DEBUG(CGame::dbgStartFromBattle(FALSE);)
+    KH_DEBUG(s_roomExcept._pSrcInfo = NULL;)
+    KH_DEBUG(s_roomExcept._pStorageInfo = NULL;)
+    KH_DEBUG(s_roomExcept._pStorageInfo2 = NULL;)
+    KH_DEBUG(for (UINT i = 0; i < 4; i++) {)
+        KH_DEBUG(DoorInfo& d = s_roomExcept._doors[i];)
+        KH_DEBUG(d._id = (DOOR_ID)i;)
+        KH_DEBUG(d._shape = DOOR_SHAPE_NORMAL;)
+        KH_DEBUG(d._type = _DOOR_TYPE_DEBUG;)
+        KH_DEBUG(d._nDstRoom = 0;)
+        KH_DEBUG(d._pStorageInfo = NULL;)
+    KH_DEBUG(})
 }
 void CSceneInfo::initNewGame(BOOL bSora) {
     clear();
@@ -377,12 +377,12 @@ WorldSelTable* CSceneInfo::getSelectableWorldTable(INT nFloorIndex, BOOL bSora) 
     return NULL;
 }
 EventRoomData* CSceneInfo::getEventRoomData(BOOL bSora) { return bSora ? s_pEventRoomFile_Sora : s_pEventRoomFile_Riku; }
-SHORT CSceneInfo::getEventRoomSceneNum(WORLD_ID world, const FLOOR::RoomSrcInfo& info, BOOL bSora) {
-    EventRoomData* pEventData = getEventRoomData(bSora);
-    INT nTblIdx = -1;
-    if (pEventData) nTblIdx = _getEventRoomSceneIndex(info._nRoomType);
-    return nTblIdx >= 0 ? pEventData->_nSceneTbl[world - 1][nTblIdx] : 0;
-}
+KH_DEBUG(SHORT CSceneInfo::getEventRoomSceneNum(WORLD_ID world, const FLOOR::RoomSrcInfo& info, BOOL bSora) {)
+    KH_DEBUG(EventRoomData* pEventData = getEventRoomData(bSora);)
+    KH_DEBUG(INT nTblIdx = -1;)
+    KH_DEBUG(if (pEventData) nTblIdx = _getEventRoomSceneIndex(info._nRoomType);)
+    KH_DEBUG(return nTblIdx >= 0 ? pEventData->_nSceneTbl[world - 1][nTblIdx] : 0;)
+KH_DEBUG(})
 void CSceneInfo::showAllHiddenDoorsOfCurrentFloor() {
     for (INT i = 0; i < s_CurrentFloor._nRoomCount; i++) {
         RoomInfo& room = s_CurrentFloor._rooms[i];
@@ -410,9 +410,9 @@ void CSceneInfo::initFloor(INT nFloorIdx, WORLD_ID world) {
     if (world == 10) nIdx = getFloorIndex(100, TRUE);
     FLOOR::FloorLayout* pFloorSrc = getFloorDataSrc(nIdx, bSora);
     RCNORMA::FloorNormaSrc* pFloorNormaSrc = getFloorNormaDataSrc(nIdx, bSora);
-    if (!(pFloorSrc && pFloorNormaSrc)) AssertApp(__FILE__, 586, "pFloorSrc && pFloorNormaSrc", 0);
+    KH_DEBUG(if (!(pFloorSrc && pFloorNormaSrc)) AssertApp(__FILE__, 586, "pFloorSrc && pFloorNormaSrc", 0);)
     _SceneInfoWork::mc()->_nFloorIdx = nFloorIdx;
-    if (!(nIdx < 16)) AssertApp(__FILE__, 590, "nIdx < FLOOR_COUNT_MAX", 0);
+    KH_DEBUG(if (!(nIdx < 16)) AssertApp(__FILE__, 590, "nIdx < FLOOR_COUNT_MAX", 0);)
     s_nCurrentFloorNumber = getFloorNumber(nFloorIdx, bSora);
     if (CGameWork::getInt(0, 0x35) < s_nCurrentFloorNumber) CGameWork::setInt(0, 0x35, s_nCurrentFloorNumber);
     FloorInfo& floor = s_CurrentFloor;
@@ -459,7 +459,7 @@ void CSceneInfo::initFloor() {
     if (world == 10) nIdx = getFloorIndex(100, TRUE);
     FLOOR::FloorLayout* pFloorSrc = getFloorDataSrc(nIdx, bSora);
     RCNORMA::FloorNormaSrc* pFloorNormaSrc = getFloorNormaDataSrc(nIdx, bSora);
-    if (!(pFloorSrc && pFloorNormaSrc)) AssertApp(__FILE__, 691, "pFloorSrc && pFloorNormaSrc", 0);
+    KH_DEBUG(if (!(pFloorSrc && pFloorNormaSrc)) AssertApp(__FILE__, 691, "pFloorSrc && pFloorNormaSrc", 0);)
     *(SHORT*)&s_nCurrentFloorNumber = getFloorNumber(nFloorIdx, bSora); // MATCH: not a fixed scalar store: the pFloorSrc loads stay after it
     FloorInfo& floor = s_CurrentFloor;
     floor._nRoomCount = pFloorSrc->_nRoomCount;
@@ -574,9 +574,9 @@ void _setWorldEntrance(WORLD_ID world, SHORT nStartEntScene, SHORT nGoalEntScene
                 break;
             }
         }
-        if (!(nIdx >= 0)) AssertApp(__FILE__, 923, "0 <= nIdx", 0);
+        KH_DEBUG(if (!(nIdx >= 0)) AssertApp(__FILE__, 923, "0 <= nIdx", 0);)
         pRoom = CSceneInfo::getRoomInfo(pRoom->_doors[nIdx]._nDstRoom);
-        if (!(pRoom)) AssertApp(__FILE__, 925, "pRoom", 0);
+        KH_DEBUG(if (!(pRoom)) AssertApp(__FILE__, 925, "pRoom", 0);)
         nDID = _getDstDoorID((DOOR_ID)nIdx);
     } else {
         RoomInfo* p = floor._rooms;
@@ -679,7 +679,7 @@ void CSceneInfo::makeRoom(const RoomInfo& room, DOOR_ID nDoorID, SHORT nScene, B
 void CSceneInfo::makeRoom(DoorInfo& door, BOOL bFromEventRoom) {
     if (door.getDoorState() == DOOR_STAT_CLOSED) door.setDoorState(bFromEventRoom ? DOOR_STAT_UNAVAILABLE : DOOR_STAT_OPENED);
     RoomInfo* pDstRoom = getRoomInfo(door._nDstRoom);
-    if (!(pDstRoom)) AssertApp(__FILE__, 1094, "pDstRoom", 0);
+    KH_DEBUG(if (!(pDstRoom)) AssertApp(__FILE__, 1094, "pDstRoom", 0);)
     INT nCardNumber;
     SHORT nScene;
     BYTE nCardID;
@@ -885,7 +885,7 @@ BOOL CSceneInfo::reqChangeFloor(SHORT nFloor, BOOL bWarp) {
     return bResult;
 }
 BOOL CSceneInfo::reqEnterWorld(WORLD_ID world) {
-    if (!((0 < world) && (14 > world))) AssertApp(__FILE__, 1410, "(WORLD_ID_COMMON < world) && (_WORLD_ID_MAX > world)", 0);
+    KH_DEBUG(if (!((0 < world) && (14 > world))) AssertApp(__FILE__, 1410, "(WORLD_ID_COMMON < world) && (_WORLD_ID_MAX > world)", 0);)
     initFloor(getCurrentFloorIndex(), world);
     reqChangeRoom(1, (DOOR_ID)2, -1);
     return TRUE;
@@ -905,17 +905,17 @@ BOOL CSceneInfo::reqChangeRoom(INT nRoomID, DOOR_ID nDoor, SHORT nScene) {
         }
         nScene = pRoom->getSceneNum();
     } else {
-        RoomInfo* pRoom = getRoomInfo(nRoomID);
-        if (!pRoom) return FALSE;
-        if (!pRoom->_pSrcInfo) {
-            nArea = 0;
-        } else if (!pRoom->isCreated() || pRoom->isFixSceneRoom()) {
-            BYTE nCardID = getCardIDFromSceneNum(nScene);
-            if (!nCardID && !pRoom->isFixSceneRoom()) nCardID = 0xb7;
-            makeRoom(*pRoom, nDoor, nScene, nCardID, 0);
-        } else {
-            pRoom->setScene(nScene);
-        }
+        KH_DEBUG(RoomInfo* pRoom = getRoomInfo(nRoomID);) KH_RELEASE(return FALSE;) // MATCH: retail refuses a given scene
+        KH_DEBUG(if (!pRoom) return FALSE;)
+        KH_DEBUG(if (!pRoom->_pSrcInfo) {)
+            KH_DEBUG(nArea = 0;)
+        KH_DEBUG(} else if (!pRoom->isCreated() || pRoom->isFixSceneRoom()) {)
+            KH_DEBUG(BYTE nCardID = getCardIDFromSceneNum(nScene);)
+            KH_DEBUG(if (!nCardID && !pRoom->isFixSceneRoom()) nCardID = 0xb7;)
+            KH_DEBUG(makeRoom(*pRoom, nDoor, nScene, nCardID, 0);)
+        KH_DEBUG(} else {)
+            KH_DEBUG(pRoom->setScene(nScene);)
+        KH_DEBUG(})
     }
     BOOL bResult = reqChangeScene(nArea, nScene, -1, FALSE, 1);
     if (bResult) {
@@ -937,12 +937,12 @@ BOOL CSceneInfo::reqChangeEventRoom(UINT nEventRoomType, DOOR_ID nDoor, SHORT nS
     RoomInfo* pRoom;
     if (nScene > 0) pRoom = setEventRoomSceneNum(nEventRoomType, nScene);
     else pRoom = getEventRoomInfo(nEventRoomType);
-    if (!pRoom || pRoom->isExceptRoom()) {
-        TRACE_COL(_TTY_RED, "\x81u\x83\x8b\x81[\x83\x80" "de\x83Z\x83\x8c\x83N\x83g\x81v\x88\xc8\x8aO\x82\xc5\x93\xfc\x82\xc1\x82\xc4\x82\xe9\x82\xcc\x82\xc5\x81" "A\x83\x8b\x81[\x83\x80\x83`\x83" "F\x83\x93\x83W\x82\xc5\x82\xab\x82\xdc\x82\xb9\x82\xf1\n");
-        if (s_nGameMode == GAMEMODE_FIELD) reqChangeScene(getCurrentAreaNum(), getCurrentSceneNum(), -1, FALSE, 1);
-        else reqExitBattle();
-        return FALSE;
-    }
+    KH_DEBUG(if (!pRoom || pRoom->isExceptRoom()) {)
+        KH_DEBUG(TRACE_COL(_TTY_RED, "\x81u\x83\x8b\x81[\x83\x80" "de\x83Z\x83\x8c\x83N\x83g\x81v\x88\xc8\x8aO\x82\xc5\x93\xfc\x82\xc1\x82\xc4\x82\xe9\x82\xcc\x82\xc5\x81" "A\x83\x8b\x81[\x83\x80\x83`\x83" "F\x83\x93\x83W\x82\xc5\x82\xab\x82\xdc\x82\xb9\x82\xf1\n");)
+        KH_DEBUG(if (s_nGameMode == GAMEMODE_FIELD) reqChangeScene(getCurrentAreaNum(), getCurrentSceneNum(), -1, FALSE, 1);)
+        KH_DEBUG(else reqExitBattle();)
+        KH_DEBUG(return FALSE;)
+    KH_DEBUG(})
     if ((UINT)nDoor >= 4) nDoor = getEnteredDoorID();
     if (nEventRoomType == 4) nDoor = _openGoalDoor(*pRoom);
     INT nRoomID;
@@ -983,10 +983,10 @@ BOOL CSceneInfo::reqChangeBackupRoom() {
     SHORT nArea = getCurrentAreaNum();
     SHORT nScene = getCurrentSceneNum();
     CGameWork::rollback(CGameWork::BACKUP_SECONDARY);
-    if (nArea < 0 || nScene <= 0) {
-        TRACE_COL(_TTY_RED, "\x83\x8d\x81[\x83\x8b\x83o\x83" "b\x83N\x90\xe6\x82\xcc AREA or SCENE \x82\xaa\x95s\x90\xb3\x82\xc5\x82\xb7\x81i%d, %d\x81j\n", nArea, nScene);
-        return FALSE;
-    }
+    KH_DEBUG(if (nArea < 0 || nScene <= 0) {)
+        KH_DEBUG(TRACE_COL(_TTY_RED, "\x83\x8d\x81[\x83\x8b\x83o\x83" "b\x83N\x90\xe6\x82\xcc AREA or SCENE \x82\xaa\x95s\x90\xb3\x82\xc5\x82\xb7\x81i%d, %d\x81j\n", nArea, nScene);)
+        KH_DEBUG(return FALSE;)
+    KH_DEBUG(})
     BOOL bResult = reqChangeScene(nArea, nScene, -1, FALSE, 1);
     if (bResult) {
         s_nNextRoomID = nRoomID;
@@ -1000,7 +1000,7 @@ BOOL CSceneInfo::reqChangeBackupRoom() {
 BOOL CSceneInfo::reqEnterDoor(DOOR_ID door) {
     if (hasAnyRequest()) return FALSE;
     DoorInfo* pDoor = getDoorInfo(door, -1);
-    if (!(pDoor)) AssertApp(__FILE__, 1632, "pDoor", 0);
+    KH_DEBUG(if (!(pDoor)) AssertApp(__FILE__, 1632, "pDoor", 0);)
     if (pDoor->_type == DOOR_TYPE_SELECT_WORLD) {
         WORLD_ID w = (WORLD_ID)getCurrentWorldID(FALSE);
         if ((UINT)(w - 1) < 13) {
@@ -1013,7 +1013,7 @@ BOOL CSceneInfo::reqEnterDoor(DOOR_ID door) {
     if (stat == DOOR_STAT_CLOSED || stat == DOOR_STAT_OPENED) {
         TRACE(" >>> Try Enter The Door [%d], type = [%d], stat = [%d], dstRoom = [%d]\n", pDoor->_id, pDoor->_type, stat, pDoor->_nDstRoom);
         RoomInfo* pDstRoom = getRoomInfo(pDoor->_nDstRoom);
-        if (!(pDstRoom)) AssertApp(__FILE__, 1657, "pDstRoom", 0);
+        KH_DEBUG(if (!(pDstRoom)) AssertApp(__FILE__, 1657, "pDstRoom", 0);)
         if (pDoor->_shape == 5 && (USHORT)pDstRoom->getSceneNum() == 2 && !pDstRoom->hasEntered()) {
             makeRoom(*pDstRoom, _getDstDoorID(door), 2, getCardIDFromSceneNum(2), CGameWork::m_pMCWork->_nNextRCNormaNum);
         } else if (!pDstRoom->isCreated() || (pDstRoom->isFixSceneRoom() && !pDstRoom->hasEntered())) {
@@ -1179,128 +1179,128 @@ WORLD_ID CSceneInfo::getWorldID(USHORT nFloorIndex) {
     if (nFloorIndex >= p->_nFloorCount) return (WORLD_ID)0;
     return (WORLD_ID)_SceneInfoWork::mc2()->_nWorldOnFloor[n][nFloorIndex];
 }
-void CSceneInfo::setupCompleteFloorWorld(WORLD_ID excludeWorld) {
-    USHORT i = 0;
-    USHORT nFloorIdx = getCurrentFloorIndex();
-    BOOL bSora = CGame::isSoraGame();
-    STORAGE::MCWork2* p = _SceneInfoWork::mc2();
-    BYTE* pFloorTbl = !bSora ? p->_nWorldOnFloor[1] : p->_nWorldOnFloor[0];
-    WORLD_ID w;
-    for (; i < nFloorIdx; i++) {
-        WorldSelTable* pSel = getSelectableWorldTable(i, bSora);
-        if (pSel->_nCount == 1) {
-            w = pSel->_pTbl[0];
-        } else {
-            for (UINT j = 0; j < pSel->_nCount; j++) {
-                w = pSel->_pTbl[j];
-                if (excludeWorld == w) {
-                    w = (WORLD_ID)0;
-                    continue;
-                }
-                for (USHORT f = 0; f < nFloorIdx; f++) {
-                    if (pFloorTbl[f] == w) {
-                        w = (WORLD_ID)0;
-                        break;
-                    }
-                }
-                if (w) break;
-            }
-        }
-        pFloorTbl[i] = w;
-        CAtel::setWorldCompleteFlag(w);
-        _setGoalRoomScene(w, 2);
-    }
-}
-void CSceneInfo::setEventDoorUnavailable(INT nFloorIdx, INT nRoomID) {
-    FLOOR::FloorLayout* pFloorSrc = getFloorDataSrc(nFloorIdx, CGame::isSoraGame());
-    if (!pFloorSrc) return;
-    INT nEvIdx;
-    BOOL bAll = nRoomID == 0 || nRoomID == 99;
-    if (bAll) {
-        nEvIdx = nRoomID == 99 ? 4 : -1;
-    } else {
-        FLOOR::RoomSrcInfo* pRoom = NULL;
-        for (INT i = 0; i < pFloorSrc->_nRoomCount; i++) {
-            if (pFloorSrc->_rooms[i]._nID == nRoomID) {
-                pRoom = &pFloorSrc->_rooms[i];
-                break;
-            }
-        }
-        if (!pRoom) return;
-        switch (pRoom->_nRoomType) {
-        case 2:
-            nEvIdx = 0;
-            break;
-        case 3:
-            nEvIdx = 1;
-            break;
-        case 4:
-            nEvIdx = 2;
-            break;
-        case 5:
-        case 7:
-            nEvIdx = 4;
-            break;
-        default:
-            {
-                BOOL bSora = CGame::isSoraGame();
-                nEvIdx = -1;
-                if (bSora && nFloorIdx == 12 && nRoomID == 19) nEvIdx = 0;
-            }
-            break;
-        }
-    }
-    for (INT i = 0; i < nFloorIdx; i++) {
-        BYTE* pTbl = _SceneInfoWork::mc()->_nEventDoorStateTbl[i];
-        pTbl[1] = 4;
-        pTbl[2] = 4;
-        pTbl[4] = 1;
-        pTbl[0] = 4;
-        pTbl = _SceneInfoWork::mc2()->_nEventDoorOpenTbl[i];
-        pTbl[0] = 1;
-        pTbl[1] = 1;
-        pTbl[2] = 1;
-    }
-    BYTE* pTbl = _SceneInfoWork::mc()->_nEventDoorStateTbl[nFloorIdx];
-    BYTE* pTbl2 = _SceneInfoWork::mc2()->_nEventDoorOpenTbl[nFloorIdx];
-    for (INT r = 0; r <= nEvIdx; r++) {
-        if (r == 3) continue;
-        BYTE st = r == 4 ? 2 : 4;
-        pTbl[r] = st;
-        if (r < 3) pTbl2[r] = 1;
-    }
-}
-DOOR_ID CSceneInfo::setTmpCurrentRoomID(SHORT nRoomType) {
-    DOOR_TYPE nType;
-    switch (nRoomType) {
-    case 2:
-        nType = DOOR_TYPE_TO_EVENT1;
-        break;
-    case 3:
-        nType = DOOR_TYPE_TO_EVENT2;
-        break;
-    case 4:
-        nType = DOOR_TYPE_TO_EVENT3;
-        break;
-    default:
-        return (DOOR_ID)4;
-    }
-    DOOR_ID doorID = (DOOR_ID)4;
-    FloorInfo& floor = s_CurrentFloor;
-    for (USHORT i = 0; i < floor._nRoomCount; i++) {
-        RoomInfo& room = floor._rooms[i];
-        for (INT j = 0; j < 4; j++) {
-            if (nType == room._doors[j]._type) {
-                if (room._pSrcInfo) {
-                    CGameWork::m_pMCWork->_nRoomID = room._pSrcInfo->_nID;
-                    doorID = _getDstDoorID((DOOR_ID)j);
-                }
-                break;
-            }
-        }
-    }
-    return doorID;
-}
+KH_DEBUG(void CSceneInfo::setupCompleteFloorWorld(WORLD_ID excludeWorld) {)
+    KH_DEBUG(USHORT i = 0;)
+    KH_DEBUG(USHORT nFloorIdx = getCurrentFloorIndex();)
+    KH_DEBUG(BOOL bSora = CGame::isSoraGame();)
+    KH_DEBUG(STORAGE::MCWork2* p = _SceneInfoWork::mc2();)
+    KH_DEBUG(BYTE* pFloorTbl = !bSora ? p->_nWorldOnFloor[1] : p->_nWorldOnFloor[0];)
+    KH_DEBUG(WORLD_ID w;)
+    KH_DEBUG(for (; i < nFloorIdx; i++) {)
+        KH_DEBUG(WorldSelTable* pSel = getSelectableWorldTable(i, bSora);)
+        KH_DEBUG(if (pSel->_nCount == 1) {)
+            KH_DEBUG(w = pSel->_pTbl[0];)
+        KH_DEBUG(} else {)
+            KH_DEBUG(for (UINT j = 0; j < pSel->_nCount; j++) {)
+                KH_DEBUG(w = pSel->_pTbl[j];)
+                KH_DEBUG(if (excludeWorld == w) {)
+                    KH_DEBUG(w = (WORLD_ID)0;)
+                    KH_DEBUG(continue;)
+                KH_DEBUG(})
+                KH_DEBUG(for (USHORT f = 0; f < nFloorIdx; f++) {)
+                    KH_DEBUG(if (pFloorTbl[f] == w) {)
+                        KH_DEBUG(w = (WORLD_ID)0;)
+                        KH_DEBUG(break;)
+                    KH_DEBUG(})
+                KH_DEBUG(})
+                KH_DEBUG(if (w) break;)
+            KH_DEBUG(})
+        KH_DEBUG(})
+        KH_DEBUG(pFloorTbl[i] = w;)
+        KH_DEBUG(CAtel::setWorldCompleteFlag(w);)
+        KH_DEBUG(_setGoalRoomScene(w, 2);)
+    KH_DEBUG(})
+KH_DEBUG(})
+KH_DEBUG(void CSceneInfo::setEventDoorUnavailable(INT nFloorIdx, INT nRoomID) {)
+    KH_DEBUG(FLOOR::FloorLayout* pFloorSrc = getFloorDataSrc(nFloorIdx, CGame::isSoraGame());)
+    KH_DEBUG(if (!pFloorSrc) return;)
+    KH_DEBUG(INT nEvIdx;)
+    KH_DEBUG(BOOL bAll = nRoomID == 0 || nRoomID == 99;)
+    KH_DEBUG(if (bAll) {)
+        KH_DEBUG(nEvIdx = nRoomID == 99 ? 4 : -1;)
+    KH_DEBUG(} else {)
+        KH_DEBUG(FLOOR::RoomSrcInfo* pRoom = NULL;)
+        KH_DEBUG(for (INT i = 0; i < pFloorSrc->_nRoomCount; i++) {)
+            KH_DEBUG(if (pFloorSrc->_rooms[i]._nID == nRoomID) {)
+                KH_DEBUG(pRoom = &pFloorSrc->_rooms[i];)
+                KH_DEBUG(break;)
+            KH_DEBUG(})
+        KH_DEBUG(})
+        KH_DEBUG(if (!pRoom) return;)
+        KH_DEBUG(switch (pRoom->_nRoomType) {)
+        KH_DEBUG(case 2:)
+            KH_DEBUG(nEvIdx = 0;)
+            KH_DEBUG(break;)
+        KH_DEBUG(case 3:)
+            KH_DEBUG(nEvIdx = 1;)
+            KH_DEBUG(break;)
+        KH_DEBUG(case 4:)
+            KH_DEBUG(nEvIdx = 2;)
+            KH_DEBUG(break;)
+        KH_DEBUG(case 5:)
+        KH_DEBUG(case 7:)
+            KH_DEBUG(nEvIdx = 4;)
+            KH_DEBUG(break;)
+        KH_DEBUG(default:)
+            KH_DEBUG({)
+                KH_DEBUG(BOOL bSora = CGame::isSoraGame();)
+                KH_DEBUG(nEvIdx = -1;)
+                KH_DEBUG(if (bSora && nFloorIdx == 12 && nRoomID == 19) nEvIdx = 0;)
+            KH_DEBUG(})
+            KH_DEBUG(break;)
+        KH_DEBUG(})
+    KH_DEBUG(})
+    KH_DEBUG(for (INT i = 0; i < nFloorIdx; i++) {)
+        KH_DEBUG(BYTE* pTbl = _SceneInfoWork::mc()->_nEventDoorStateTbl[i];)
+        KH_DEBUG(pTbl[1] = 4;)
+        KH_DEBUG(pTbl[2] = 4;)
+        KH_DEBUG(pTbl[4] = 1;)
+        KH_DEBUG(pTbl[0] = 4;)
+        KH_DEBUG(pTbl = _SceneInfoWork::mc2()->_nEventDoorOpenTbl[i];)
+        KH_DEBUG(pTbl[0] = 1;)
+        KH_DEBUG(pTbl[1] = 1;)
+        KH_DEBUG(pTbl[2] = 1;)
+    KH_DEBUG(})
+    KH_DEBUG(BYTE* pTbl = _SceneInfoWork::mc()->_nEventDoorStateTbl[nFloorIdx];)
+    KH_DEBUG(BYTE* pTbl2 = _SceneInfoWork::mc2()->_nEventDoorOpenTbl[nFloorIdx];)
+    KH_DEBUG(for (INT r = 0; r <= nEvIdx; r++) {)
+        KH_DEBUG(if (r == 3) continue;)
+        KH_DEBUG(BYTE st = r == 4 ? 2 : 4;)
+        KH_DEBUG(pTbl[r] = st;)
+        KH_DEBUG(if (r < 3) pTbl2[r] = 1;)
+    KH_DEBUG(})
+KH_DEBUG(})
+KH_DEBUG(DOOR_ID CSceneInfo::setTmpCurrentRoomID(SHORT nRoomType) {)
+    KH_DEBUG(DOOR_TYPE nType;)
+    KH_DEBUG(switch (nRoomType) {)
+    KH_DEBUG(case 2:)
+        KH_DEBUG(nType = DOOR_TYPE_TO_EVENT1;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 3:)
+        KH_DEBUG(nType = DOOR_TYPE_TO_EVENT2;)
+        KH_DEBUG(break;)
+    KH_DEBUG(case 4:)
+        KH_DEBUG(nType = DOOR_TYPE_TO_EVENT3;)
+        KH_DEBUG(break;)
+    KH_DEBUG(default:)
+        KH_DEBUG(return (DOOR_ID)4;)
+    KH_DEBUG(})
+    KH_DEBUG(DOOR_ID doorID = (DOOR_ID)4;)
+    KH_DEBUG(FloorInfo& floor = s_CurrentFloor;)
+    KH_DEBUG(for (USHORT i = 0; i < floor._nRoomCount; i++) {)
+        KH_DEBUG(RoomInfo& room = floor._rooms[i];)
+        KH_DEBUG(for (INT j = 0; j < 4; j++) {)
+            KH_DEBUG(if (nType == room._doors[j]._type) {)
+                KH_DEBUG(if (room._pSrcInfo) {)
+                    KH_DEBUG(CGameWork::m_pMCWork->_nRoomID = room._pSrcInfo->_nID;)
+                    KH_DEBUG(doorID = _getDstDoorID((DOOR_ID)j);)
+                KH_DEBUG(})
+                KH_DEBUG(break;)
+            KH_DEBUG(})
+        KH_DEBUG(})
+    KH_DEBUG(})
+    KH_DEBUG(return doorID;)
+KH_DEBUG(})
 void CSceneInfo::ignoreFloorInfo() {
     CGameWork::m_pMCWork->_nFloorIdx = 0xff;
     s_nCurrentFloorNumber = 0;
@@ -1395,7 +1395,7 @@ void CSceneInfo::update() {
     } else if (s_nReqExitBattle == 1) {
         *(GAMEMODE*)&s_nGameMode = GAMEMODE_FIELD; // MATCH: scalar store, the original reads p->_nScene after it
         s_nCurrentFieldScene = p->_nScene;
-        if (!CGame::isDbgStartFromBattle()) updateBattleScene();
+        if (!KH_DW(CGame::isDbgStartFromBattle())) updateBattleScene();
     } else {
         s_nCurrentFieldScene = p->_nScene;
         updateBattleScene();
@@ -1431,7 +1431,7 @@ void _updateRoomInfo() {
     }
     _SceneInfoWork::mc()->_nDoorID = s_nNextDoorID;
     RoomInfo* pRoomInfo = CSceneInfo::getRoomInfo(-1);
-    if (!(pRoomInfo)) AssertApp(__FILE__, 2540, "pRoomInfo", 0);
+    KH_DEBUG(if (!(pRoomInfo)) AssertApp(__FILE__, 2540, "pRoomInfo", 0);)
     for (INT i = 0; i < 4; i++) {
         DoorInfo& door = pRoomInfo->_doors[i];
         if (door._type == DOOR_TYPE_TO_EXTRA && _SceneInfoWork::mc()->_KeyRoomsTresureBox[CSceneInfo::getCurrentWorldID(FALSE)]) {
@@ -1463,11 +1463,11 @@ INT CSceneInfo::addToSceneCache(const AREA_SCENE& as) {
         return -1;
     }
     for (INT i = 0; i < 7; i++) {
-        if (s_SceneCacheTbl[i]._as._nAreaScene < 0) {
-            s_SceneCacheTbl[i]._as._nAreaScene = as._nAreaScene;
-            if (!(7 >= s_nAvailableSceneCache)) AssertApp(__FILE__, 2622, "_SCENE_CACHE_SIZE >= s_nAvailableSceneCache", 0);
+        if (s_SceneCacheTbl[i]._as.isEmpty()) { /* MATCH: AREA_SCENE's inlines, as the ref's locals show (this, as) */
+            s_SceneCacheTbl[i]._as = as;
+            KH_DEBUG(if (!(7 >= s_nAvailableSceneCache)) AssertApp(__FILE__, 2622, "_SCENE_CACHE_SIZE >= s_nAvailableSceneCache", 0);)
             s_nAvailableSceneCache--;
-            if (!(0 <= s_nAvailableSceneCache)) AssertApp(__FILE__, 2624, "0 <= s_nAvailableSceneCache", 0);
+            KH_DEBUG(if (!(0 <= s_nAvailableSceneCache)) AssertApp(__FILE__, 2624, "0 <= s_nAvailableSceneCache", 0);)
             return i;
         }
     }
@@ -1476,11 +1476,11 @@ INT CSceneInfo::addToSceneCache(const AREA_SCENE& as) {
 INT CSceneInfo::removeFromSceneCache(const AREA_SCENE& as) {
     if (as._nAreaScene < 0) return -1;
     for (INT i = 0; i < 7; i++) {
-        if (s_SceneCacheTbl[i]._as._nAreaScene == as._nAreaScene) {
+        if (s_SceneCacheTbl[i]._as == as) {
             s_SceneCacheTbl[i].clear();
-            if (!(0 < s_nAvailableSceneCache)) AssertApp(__FILE__, 2643, "0 < s_nAvailableSceneCache", 0);
+            KH_DEBUG(if (!(0 < s_nAvailableSceneCache)) AssertApp(__FILE__, 2643, "0 < s_nAvailableSceneCache", 0);)
             s_nAvailableSceneCache++;
-            if (!(7 >= s_nAvailableSceneCache)) AssertApp(__FILE__, 2645, "_SCENE_CACHE_SIZE >= s_nAvailableSceneCache", 0);
+            KH_DEBUG(if (!(7 >= s_nAvailableSceneCache)) AssertApp(__FILE__, 2645, "_SCENE_CACHE_SIZE >= s_nAvailableSceneCache", 0);)
             return i;
         }
     }
@@ -1519,17 +1519,17 @@ BYTE CSceneInfo::getReverbVal(const AREA_SCENE& as) {
     return i < 0 ? s_GlobalScene._nReverb : s_SceneCacheTbl[i]._nReverb;
 }
 void CSceneInfo::setSeRangeRatio(BYTE nRatio) {
-    char szTmp[64];
-    CHAR* pTmp = szTmp;
+    KH_DEBUG(char szTmp[64];)
+    KH_DEBUG(CHAR* pTmp = szTmp;)
     if (CRsrcDB::isSceneAttachMode()) {
         _SceneInfo& info = s_SceneCacheTbl[CRsrcDB::getSceneAttachNum()];
         info._nSeRangeRatio = nRatio;
-        sprintf(szTmp, "%d-%d", info._as._nArea, info._as._nScene);
+        KH_DEBUG(sprintf(szTmp, "%d-%d", info._as._nArea, info._as._nScene);)
     } else {
         s_GlobalScene._nSeRangeRatio = nRatio;
-        pTmp = "Global";
+        KH_DEBUG(pTmp = "Global";)
     }
-    TRACE_COL(_TTY_RED, "=*=*=*=* SE_RANGE (%s) = [%d%%] *=*=*=*=\n", pTmp, nRatio * 10);
+    KH_DEBUG(TRACE_COL(_TTY_RED, "=*=*=*=* SE_RANGE (%s) = [%d%%] *=*=*=*=\n", pTmp, nRatio * 10);)
 }
 BYTE CSceneInfo::getSeRangeRatio() {
     INT i = getCurrentSceneCacheID();
@@ -1683,7 +1683,7 @@ RCNORMA::FloorNormaSrc* CSceneInfo::getFloorNormaDataSrc(USHORT nIdx, BOOL bSora
     return &pHeader->_FloorSrc[nIdx];
 }
 RoomInfo* CSceneInfo::getRoomInfo(INT nRoomID) {
-    if (getCurrentFloorIndex() == 0xff) return &s_roomExcept;
+    if (getCurrentFloorIndex() == 0xff) return KH_VER(&s_roomExcept, NULL);
     if (nRoomID < 0) nRoomID = getCurrentRoomID();
     if (nRoomID == 0) return &s_CurrentFloor._roomStartEnt;
     if (nRoomID == 99) return &s_CurrentFloor._roomGoalEnt;
@@ -1694,7 +1694,7 @@ RoomInfo* CSceneInfo::getRoomInfo(INT nRoomID) {
     return NULL;
 }
 RoomInfo* CSceneInfo::getEventRoomInfo(UINT nEventRoomType) {
-    if (getCurrentFloorIndex() == 0xff) return &s_roomExcept;
+    if (getCurrentFloorIndex() == 0xff) return KH_VER(&s_roomExcept, NULL);
     RoomInfo* pRoom = NULL;
     EVENTROOM_TBLIDX i = (EVENTROOM_TBLIDX)nEventRoomType;
     if (i < __EVENTROOM_MAX) {
@@ -1748,7 +1748,7 @@ DOOR_ID _openGoalDoor(const RoomInfo& roomGoal) {
         }
         nDoor++;
     }
-    if (!(pGoalDoor)) AssertApp(__FILE__, 3094, "pGoalDoor", 0);
+    KH_DEBUG(if (!(pGoalDoor)) AssertApp(__FILE__, 3094, "pGoalDoor", 0);)
     pGoalDoor->setDoorState(DOOR_STAT_OPENED);
     return (DOOR_ID)nDoor;
 }
@@ -1762,10 +1762,10 @@ void CSceneInfo::openGoalDoor() {
     setEventRoomSceneNum(_EVENTROOM_GOAL, 2);
     makeRoom(*pRoom, nDoor, 2, getCardIDFromSceneNum(2), CGameWork::m_pMCWork->_nNextRCNormaNum);
 }
-__asm__(".rdata\n" ".align 3\n" "D_00484E38:\n" ".word 0x8B837581\n" ".word 0x80835B81\n" ".word 0x5A836564\n" ".word 0x4E838C83\n" ".word 0x76816783\n" ".word 0x4F8AC888\n" ".word 0xFC93C582\n" ".word 0xC482C182\n" ".word 0xCC82E982\n" ".word 0x4181C582\n" ".word 0x5B815383\n" ".word 0xE0948B83\n" ".word 0x4A8AF082\n" ".word 0xDC82AF82\n" ".word 0xF182B982\n" ".word 0x0000000A\n" ".word 0x00000000\n" ".word 0x00000000\n" ".text\n");
+KH_DEBUG(__asm__(".rdata\n" ".align 3\n" "D_00484E38:\n" ".word 0x8B837581\n" ".word 0x80835B81\n" ".word 0x5A836564\n" ".word 0x4E838C83\n" ".word 0x76816783\n" ".word 0x4F8AC888\n" ".word 0xFC93C582\n" ".word 0xC482C182\n" ".word 0xCC82E982\n" ".word 0x4181C582\n" ".word 0x5B815383\n" ".word 0xE0948B83\n" ".word 0x4A8AF082\n" ".word 0xDC82AF82\n" ".word 0xF182B982\n" ".word 0x0000000A\n" ".word 0x00000000\n" ".word 0x00000000\n" ".text\n");) /* beta only: retail has no such string */
 void CSceneInfo::backupEventDoorState() {
     USHORT nFloorIdx = getCurrentFloorIndex();
-    if (nFloorIdx == 0xff) return;
+    KH_DEBUG(if (nFloorIdx == 0xff) return;) // MATCH: not in retail
     FloorInfo& floor = s_CurrentFloor;
     STORAGE::_EventDoorInfo* pInfoBackupTbl = _SceneInfoWork::mc()->_nEventDoorInfoTbl[nFloorIdx];
     BYTE* pStateBackupTbl = _SceneInfoWork::mc()->_nEventDoorStateTbl[nFloorIdx];
@@ -1811,7 +1811,7 @@ void CSceneInfo::backupEventDoorState() {
 }
 void CSceneInfo::rollbackEventDoorState(BOOL bInitFloor) {
     USHORT nFloorIdx = getCurrentFloorIndex();
-    if (nFloorIdx == 0xff) return;
+    KH_DEBUG(if (nFloorIdx == 0xff) return;) // MATCH: not in retail
     FloorInfo& floor = s_CurrentFloor; /* not in the ref: it got no register (all s-regs taken), so .mdebug has no entry */
     STORAGE::_EventDoorInfo* pInfoBackupTbl = _SceneInfoWork::mc()->_nEventDoorInfoTbl[nFloorIdx];
     BYTE* pStateBackupTbl = _SceneInfoWork::mc()->_nEventDoorStateTbl[nFloorIdx];
@@ -1872,7 +1872,7 @@ void CSceneInfo::rollbackEventDoorState(BOOL bInitFloor) {
                 if (bResetNorma) {
                     DOOR_STORAGE* pDst = (DOOR_STORAGE*)door._pStorageInfo;
                     if (pDst) {
-                        if (!(door._pNormaSrcInfo)) AssertApp(__FILE__, 3249, "door._pNormaSrcInfo", 0);
+                        KH_DEBUG(if (!(door._pNormaSrcInfo)) AssertApp(__FILE__, 3249, "door._pNormaSrcInfo", 0);)
                         RCNORMA::DoorNormaSrc& src = *(RCNORMA::DoorNormaSrc*)door._pNormaSrcInfo;
                         for (INT k = 0; k < 3; k++) pDst->_nNormaNums[k] = src._normas[k]._nNumber;
                     }
@@ -2013,9 +2013,9 @@ USHORT DoorInfo::getNormaCount() const {
     return ((RCNORMA::DoorNormaSrc*)_pNormaSrcInfo)->_nCount + 1;
 }
 BOOL DoorInfo::isValidNormaIndex(USHORT nIndex) const {
-    if (nIndex < getNormaCount()) return TRUE;
-    TRACE("\x83\x8b\x81[\x83\x80\x83N\x83\x8a\x83G\x83" "C\x83V\x83\x87\x83\x93\x83m\x83\x8b\x83}\x90\x94\x82\xc9\x91\xce\x82\xb7\x82\xe9 INDEX \x92l\x82\xaa\x95s\x90\xb3\x82\xc5\x82\xb7\n");
-    return FALSE;
+    KH_DEBUG(if (nIndex < getNormaCount()) return TRUE;)
+    KH_DEBUG(TRACE("\x83\x8b\x81[\x83\x80\x83N\x83\x8a\x83G\x83" "C\x83V\x83\x87\x83\x93\x83m\x83\x8b\x83}\x90\x94\x82\xc9\x91\xce\x82\xb7\x82\xe9 INDEX \x92l\x82\xaa\x95s\x90\xb3\x82\xc5\x82\xb7\n");)
+    return KH_VER(FALSE, TRUE);
 }
 RCNORMA_COLOR DoorInfo::getNormaColor(USHORT nIndex) const {
     INT nKey = getNormaKeyCardID();
@@ -2213,3 +2213,4 @@ INT CSceneInfo::getInconstWorldRsrcID(INT nWorld, BOOL bSora) {
     return 0;
 }
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .data .rodata

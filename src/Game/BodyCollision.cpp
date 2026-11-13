@@ -15,7 +15,7 @@ void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT r);
 
 
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 CBodyCollision::CBodyCollision(CEntity* inOwner) {
     m_pOwner = inOwner;
@@ -614,3 +614,4 @@ BOOL CBodyCollision::collideBody_(FVECTOR* outPos, FVECTOR* outNormal, FVECTOR* 
     return FALSE;
 }
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data

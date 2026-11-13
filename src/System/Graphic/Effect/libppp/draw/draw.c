@@ -440,3 +440,4 @@ void op_fog_clamp_set(u_char min, u_char max) {
     OsFog.fFogMax = min;
 }
 // SOURCE DATA: .data
+// SOURCE DATA SLUS_217.99_retail: .data

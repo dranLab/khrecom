@@ -112,7 +112,7 @@ INT CTechnic::getAppearance(USHORT inKind) {
     USHORT idx = inKind >> 2;
     USHORT shift = (inKind & 3) << 1;
     BYTE* pTop = (BYTE*)m_pTechnicInfo;
-    if (!(idx < TECHNIC_BUFF_SIZE)) AssertApp(__FILE__, __LINE__, "idx < TECHNIC_BUFF_SIZE", 0);
+    KH_DEBUG(if (!(idx < TECHNIC_BUFF_SIZE)) AssertApp(__FILE__, __LINE__, "idx < TECHNIC_BUFF_SIZE", 0);)
     return (pTop[idx] >> shift) & 3;
 }
 
@@ -122,7 +122,7 @@ void CTechnic::setAppearance(USHORT inKind, INT nAppear) {
     USHORT shift = (inKind & 3) << 1;
     BYTE* pTop = (BYTE*)m_pTechnicInfo;
     BYTE value = nAppear & 3;
-    if (!(idx < TECHNIC_BUFF_SIZE)) AssertApp(__FILE__, __LINE__, "idx < TECHNIC_BUFF_SIZE", 0);
+    KH_DEBUG(if (!(idx < TECHNIC_BUFF_SIZE)) AssertApp(__FILE__, __LINE__, "idx < TECHNIC_BUFF_SIZE", 0);)
     pTop[idx] = (pTop[idx] & ~(3 << shift)) | (value << shift);
 }
 

@@ -28,7 +28,7 @@ void pppDrawShapeX(pppPObject *pobj, PDrawShapeX *p, pppCtrlTable *ctbl) {
     if (p->shape == 0xFFFF) {
         return;
     }
-    debugDpdCheckShapeData(p->shape);
+    KH_DEBUG(debugDpdCheckShapeData(p->shape);) // MATCH: beta only (partMng has no such function in retail)
     shp = &ppvEnv->lpShape[p->shape];
     ah = (OANM_HEADER *)shp->shape;
     seq = &ah->seq[vds->seq_now];
@@ -40,15 +40,15 @@ void pppDrawShapeX(pppPObject *pobj, PDrawShapeX *p, pppCtrlTable *ctbl) {
         if (vds->seq >= ah->seqc) {
             if (seq->flag & 0x80) {
                 vds->seq = 0;
+                vds->wait = 0; /* MATCH: in each arm, as pppDrawShape (eiProg) */
             } else {
                 vds->seq = vds->seq_now;
-            }
-            vds->wait = 0;
+                vds->wait = 0; }
 #line 48
-            if (!(vds->seq < ah->seqc)) AssertApp(__FILE__, __LINE__, "vds->seq<ah->seqc", 0);
+            KH_DEBUG(if (!(vds->seq < ah->seqc)) AssertApp(__FILE__, __LINE__, "vds->seq<ah->seqc", 0);)
         }
 #line 49
-        if (!(vds->seq_now < ah->seqc)) AssertApp(__FILE__, __LINE__, "vds->seq_now<ah->seqc", 0);
+        KH_DEBUG(if (!(vds->seq_now < ah->seqc)) AssertApp(__FILE__, __LINE__, "vds->seq_now<ah->seqc", 0);)
     }
 }
 
@@ -96,10 +96,10 @@ void pppDrawDrawShapeX(pppPObject *pobj, PDrawShapeX *p, pppCtrlTable *ctbl) {
     shi.pri = 0;
     ah = (OANM_HEADER *)shp->shape;
 #line 96
-    if (!(ah->id == 'F')) AssertApp(__FILE__, __LINE__, "ah->id=='F'", 0);
+    KH_DEBUG(if (!(ah->id == 'F')) AssertApp(__FILE__, __LINE__, "ah->id=='F'", 0);)
     seq = &ah->seq[vds->seq_now];
 #line 99
-    if (!(vds->seq_now < ah->seqc)) AssertApp(__FILE__, __LINE__, "vds->seq_now<ah->seqc", 0);
+    KH_DEBUG(if (!(vds->seq_now < ah->seqc)) AssertApp(__FILE__, __LINE__, "vds->seq_now<ah->seqc", 0);)
     {
         OSHAPE_VU1 *sh = (OSHAPE_VU1 *)((char *)ah + seq->sha);
         shi.packet = ppvCurPrimp;

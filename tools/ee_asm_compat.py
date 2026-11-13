@@ -31,6 +31,10 @@ Always:
   but the original code already contains those nops. Branches are PC-relative, so their encodings
   stay valid as long as nothing moves.
 
+--asm-path asm/<VERSION> (every assembler): INCLUDE_ASM paths name the beta's tree (asm/SLUS_217.99/nonmatchings/...);
+they are read from the building version's tree instead, where splat wrote that version's functions under the same
+names (docs/retail-plan.md).
+
 Usage (from configure.py's cc rule):
     ee_asm_compat.py IN.s OUT.s [--assembler gas|snas] [--source src/X.cpp --symbols elf_symbol_addrs.txt]
                    [--own-data 0xSTART-0xEND,...] [--unit-data 0xSTART-0xEND,...]
@@ -46,6 +50,12 @@ CVT_W_S = re.compile(r"^(\s*)cvt\.w\.s\s+\$f(\d+)\s*,\s*\$f(\d+)\s*$")
 ANON_NAMESPACE = re.compile(r"(?:(?<=Q\d)|(?<![\dQ]))\d+(_GLOBAL_\$N\$[\w.]*?\.(?:cpp|cc|c)[A-Za-z0-9]{6})(?=\$|\d|\W|$)")
 GLOBAL_CDTOR = re.compile(r"_GLOBAL_\$([ID])\$[\w.]*?\.(?:cpp|cc|c)[A-Za-z0-9]{6}(?=\$|\W|$)")
 INCLUDE = re.compile(r'^\s*\.include\s+"([^"]+)"\s*$')
+ASM_PATH = None  # --asm-path
+
+
+def version_path(path: str) -> str:
+    """An INCLUDE_ASM path in the building version's splat tree (see --asm-path)."""
+    return re.sub(r"^asm/[^/]+/nonmatchings/", f"{ASM_PATH}/nonmatchings/", path) if ASM_PATH else path
 MACRO = re.compile(r'^\s*(glabel|alabel|ehlabel|jlabel|dlabel|endlabel|enddlabel|nonmatching)\s+"?([^",\s]+)"?\s*(?:,\s*(\S+))?\s*$')
 SPLAT_INSN = re.compile(r"^\s*/\* [0-9A-F]+ [0-9A-F]+ ([0-9A-F]{8}) \*/\s+(\S+)")
 SECTION = re.compile(r'^\s*\.section\s+(\.\w+)\s*,\s*"[a-z]*"\s*$')
@@ -98,6 +108,26 @@ def branch_word(mnemonic: str, operands: str | None) -> int:
     return (opcode << 26) | (regs[0] << 21) | ((regs[1] if nregs == 2 else rt) << 16)
 
 
+RELEASE = False  # --release
+
+
+def fix_table_jumps(lines: list[str]) -> list[str]:
+    """--release (built without -g): a jump through a register in reorder code followed by an alignment and the
+    jump table's section switch gets its delay slot nop explicitly. With -g a line marker follows the table's
+    targets and Ps2EeAs leaves the slot alone; without it Ps2EeAs crashes trying to fill it (the retail ELF has the
+    nop: 414 of its 418 jr's through a register)."""
+    out, noreorder = [], False
+    for i, line in enumerate(lines):
+        if m := SET_REORDER.match(line):
+            noreorder = m.group(1) == "no"
+        nxt = next((l for l in lines[i + 1:i + 4] if l.strip()), "")
+        if not noreorder and re.match(r"^\tj\t\$\d+\s*$", line) and re.match(r"^\t\.(?:p2)?align\b", nxt):
+            out += ["\t.set\tnoreorder", line, "\tnop", "\t.set\treorder"]
+            continue
+        out.append(line)
+    return out
+
+
 def fix_short_loops(lines: list[str]) -> list[str]:
     """Pad short loops the way the original assembler did.
 
@@ -111,6 +141,7 @@ def fix_short_loops(lines: list[str]) -> list[str]:
     out: list[str] = []
     labels: dict[str, int] = {}  # label -> index in out
     noreorder = False
+    no_g = RELEASE
     n = 0
     for i, line in enumerate(lines):
         if m := SET_REORDER.match(line):
@@ -119,8 +150,16 @@ def fix_short_loops(lines: list[str]) -> list[str]:
             labels.clear()
         elif m := LABEL.match(line):
             labels[m.group(1)] = len(out)
-        elif (m := BRANCH.match(line)) and m.group(3) in labels:
-            body = [l for l in out[labels[m.group(3)] + 1:] if INSN.match(l)]
+        elif (m := BRANCH.match(line)) and m.group(3) in labels and not (no_g and any(
+                OTHER_SECTION.match(l) or DATA_SECTION.match(l) for l in out[labels[m.group(3)] + 1:])):
+            # (built without -g, the retail build: a section switch between label and branch is a jump table's
+            # target block, no loop)
+            span = out[labels[m.group(3)] + 1:]
+            # an alignment (> 2: `.p2align 2` is a no-op in code) makes the distance no constant for the
+            # assembler: then the padding is counted from the instructions (the alignment taken as no padding)
+            aligned = no_g and any((a := re.match(r"^\t\.(?:p2)?align\s+(\d+)", l)) and int(a.group(1)) > 2
+                                   for l in span)
+            body = [l for l in span if INSN.match(l)]
             # gcc leaves the nop between an FP compare and its bc1t/bc1f to the assembler ("#nop"), even when it
             # puts the branch in a noreorder block; it is part of the loop, and the .word branch would hide the
             # hazard from Ps2EeAs, so it is counted and emitted here
@@ -128,7 +167,8 @@ def fix_short_loops(lines: list[str]) -> list[str]:
                       and INSN.match(body[-1]).group(1).startswith("c."))
             if len(body) + hazard + 1 <= SHORT_LOOP + 1:  # macros only make loops longer
                 label, pad, at = m.group(3), f"$LSLp{n}", f"$LSLb{n}"
-                count = f"{SHORT_LOOP} - (({pad} - {label}) >> 2) - 1"
+                count = (f"{SHORT_LOOP} - {len(body) + hazard} - 1" if aligned
+                         else f"{SHORT_LOOP} - (({pad} - {label}) >> 2) - 1")
                 word = f"\t.word 0x{branch_word(m.group(1), m.group(2)):08X} | ((({label} - {at} - 4) >> 2) & 0xFFFF)"
                 out += ([] if noreorder else ["\t.set\tnoreorder"]) + (["\tnop"] if hazard else []) + [
                     f"{pad}:", f"\t.if {count} > 0", f"\t.rept {count}", "\tnop", "\t.endr", "\t.endif",
@@ -193,6 +233,65 @@ def drop_foreign_weak_data(lines: list[str], symbols_path: str, own_data: str) -
     return drop_data_definitions(lines, data_labels)
 
 
+LINKONCE = re.compile(r'^\t\.section\s+\.gnu\.linkonce\.[a-z]+\.(\S+?),')
+SECTION_DIRECTIVE = re.compile(r"^\t\.(?:section|text|data|rdata|sdata|bss|sbss)\b")
+
+
+def drop_foreign_linkonce(lines: list[str], symbols_path: str, linkonce: str) -> list[str]:
+    """Without -g (the retail build) gcc puts weak functions and vtables into .gnu.linkonce.{t,d}.<name> sections. The
+    original linker kept one copy of each, in link order: a copy whose original address (symbol file) lies outside
+    this unit's linkonce ranges (its <unit>.linkonce subsegments) was kept from another object, so it is removed
+    here (section and its .weak line); the references resolve to that copy. Copies the symbol file doesn't know stay."""
+    own = parse_ranges(linkonce)
+    names = {m.group(1) for line in lines if (m := LINKONCE.match(line))}
+    if not names:
+        return lines
+    addrs = symbol_addresses(symbols_path, names)
+    foreign = {n for n, a in addrs.items() if not any(lo <= a < hi for lo, hi in own)}
+    out, dropping = [], None
+    for line in lines:
+        m = LINKONCE.match(line)
+        w = WEAK.match(line)
+        if m:
+            dropping = m.group(1) if m.group(1) in foreign else None
+            if dropping and out and out[-1] == f"\t.weak\t{m.group(1)}":
+                out.pop()
+            if dropping:
+                continue
+        elif dropping and (SECTION_DIRECTIVE.match(line) or (w and w.group(1) != dropping)
+                           or line.startswith("\t.globl\t")):
+            # the next section, the .weak gcc writes before the next vtable's section, or the .globl it writes before
+            # the next global's section (TaskMan's _pRootList after a dropped weak destructor)
+            dropping = None
+        if not dropping:
+            out.append(line)
+    return out
+
+
+def drop_foreign_globals(lines: list[str], symbols_path: str, own_data: str) -> list[str]:
+    """Remove global data definitions (static members, globals) whose original address lies outside this object's
+    data from source: that data stays assembly (a version whose data don't come from this source, e.g. the retail
+    build with the beta's `// SOURCE DATA:`), which defines the symbol; objcopy would remove gcc's copy with its
+    section while the code still references it. Names the symbol file doesn't know are kept."""
+    own = parse_ranges(own_data)
+    globl = {m.group(1) for line in lines if (m := re.match(r"^\t\.globl\t(\S+)\s*$", line))}
+    objects = {m.group(1) for line in lines if (m := re.match(r"^\t\.type\t\s*([^,\s]+),\s*@object", line))}
+    globl &= objects  # data only: functions stay, whatever section tracking says
+    in_data, labels = False, set()
+    for line in lines:
+        if DATA_SECTION.match(line):
+            in_data = True
+        elif OTHER_SECTION.match(line):
+            in_data = False
+        elif in_data and line.endswith(":") and line[:-1] in globl:
+            labels.add(line[:-1])
+    if not labels:
+        return lines
+    addrs = symbol_addresses(symbols_path, labels)
+    foreign = {n for n, a in addrs.items() if not any(lo <= a < hi for lo, hi in own)}
+    return drop_data_definitions(lines, foreign)
+
+
 def drop_data_definitions(lines: list[str], data_labels: set[str]) -> list[str]:
     """Remove the definitions (label, .weak/.type/.size, alignment, data directives, .stabs) of these data labels: the
     references then resolve to the original copy."""
@@ -206,6 +305,8 @@ def drop_data_definitions(lines: list[str], data_labels: set[str]) -> list[str]:
                 continue
             dropping = False
         if (m := WEAK.match(line)) and m.group(1) in data_labels:
+            continue
+        if (m := re.match(r"^\t\.globl\t(\S+)\s*$", line)) and m.group(1) in data_labels:
             continue
         if (m := STABS_SYMBOL.match(line)) and m.group(1) in data_labels:
             continue  # debug info for a static: Ps2EeAs crashes on it once the symbol is undefined
@@ -306,7 +407,7 @@ def inline_splat_asm(path: Path) -> list[str]:
     for line in path.read_text(encoding="utf-8").splitlines():
         if m := INCLUDE.match(line):
             if m.group(1).endswith(".s"):
-                out += inline_splat_asm(Path(m.group(1)))
+                out += inline_splat_asm(Path(version_path(m.group(1))))
             continue  # macro.inc / labels.inc
         if m := MACRO.match(line):
             out += expand_macro(*m.groups())
@@ -335,7 +436,17 @@ def main() -> None:
     parser.add_argument("--source-root", help='original path prefix for "src/" in string literals')
     parser.add_argument("--unit-data", help='address ranges of all the unit\'s data, from source or not (as --own-data)')
     parser.add_argument("--own-data", help='address ranges of the data from source ("0xSTART-0xEND,..." or "none")')
+    parser.add_argument("--linkonce", help="address ranges of the unit's .gnu.linkonce code and data (its "
+                                           "<unit>.linkonce subsegments, \"0xSTART-0xEND,...\" or \"none\"): other copies "
+                                           "are removed")
+    parser.add_argument("--asm-path", help="the building version's splat tree (asm/<VERSION>): INCLUDE_ASM paths "
+                                           "asm/<any version>/nonmatchings/... are read from it")
+    parser.add_argument("--release", action="store_true",
+                        help="a version built without -g (retail): see fix_short_loops")
     args = parser.parse_args()
+    global ASM_PATH, RELEASE
+    RELEASE = args.release
+    ASM_PATH = args.asm_path
 
     with open(args.input, encoding="latin-1") as f:
         text = f.read()
@@ -353,16 +464,23 @@ def main() -> None:
     source_lines = text.splitlines()
     if args.symbols and args.own_data:
         source_lines = drop_foreign_weak_data(source_lines, args.symbols, args.own_data)
+        source_lines = drop_foreign_globals(source_lines, args.symbols, args.own_data)
+    if args.symbols and args.linkonce:
+        source_lines = drop_foreign_linkonce(source_lines, args.symbols, args.linkonce)
     if args.symbols and args.unit_data:
         source_lines = rename_local_statics(source_lines, args.symbols, args.unit_data, args.own_data)
     if args.assembler == "snas":
         source_lines = fix_short_loops(source_lines)  # compiled code only: INCLUDE_ASM'd code is inlined below
+        if RELEASE:
+            source_lines = fix_table_jumps(source_lines)
     for line in source_lines:
         if args.assembler == "gas":
+            if (m := INCLUDE.match(line)) and m.group(1).endswith(".s"):
+                line = line.replace(m.group(1), version_path(m.group(1)))
             lines.append(fix_cvt_w_s(line))
         elif m := INCLUDE.match(line):
             if m.group(1).endswith(".s"):
-                lines += inline_splat_asm(Path(m.group(1)))
+                lines += inline_splat_asm(Path(version_path(m.group(1))))
             # else: splat's macro.inc / labels.inc, expanded above instead
         else:
             lines.append(line)

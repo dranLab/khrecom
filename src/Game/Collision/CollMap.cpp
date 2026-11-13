@@ -8,7 +8,7 @@
 #include "Game/Collision/Ride.h"
 #include "System/Debug.h"
 #include "include_asm.h"
-
+KH_RELEASE(__asm__(".rdata\n.align 3\n.word 0\n.word 0\n.word 0\n.word 0\n");) /* MATCH: retail's .rodata has 16 more zero bytes before this unit's jump tables (not identified; given to it, as BattleCard's) */
 
 
 
@@ -49,11 +49,11 @@ void CCollMap::init(COLL_KIND collKind, COLL_TYPE collType, INT fgStatus, HANDLE
         switch (collType) {
         case COLL_TYPE_POINT:
 #line 55
-            m_pCollision = new (__FILE__ "(55)") CPointCollision;
+            m_pCollision = new KH_AT("(55)") CPointCollision;
             break;
         case COLL_TYPE_SPHERE:
 #line 58
-            m_pCollision = new (__FILE__ "(58)") CSphereCollision;
+            m_pCollision = new KH_AT("(58)") CSphereCollision;
             break;
         default:
             return;
@@ -204,7 +204,7 @@ void CCollMap::registerLastRide(HANDLE hTask) {
         removeRide();
     }
 #line 298
-    m_pRider = new (__FILE__ "(298)")
+    m_pRider = new KH_AT("(298)")
         CRider(hTask, getShiftY(), getRadius(), (COLL_KIND)getKind(), FALSE);
     m_pLastRide->addRiderList(*m_pRider);
     m_pNowRide = m_pLastRide;
@@ -241,7 +241,7 @@ void CCollMap::removeRide() {
 
 void CCollMap::setRidePosition(FVECTOR& Rotate, FVECTOR& Position) {
 #line 341
-    if (!m_pRider) AssertApp(__FILE__, __LINE__, "m_pRider", 0);
+    KH_DEBUG(if (!m_pRider) AssertApp(__FILE__, __LINE__, "m_pRider", 0);)
     m_pRider->setPosition(Rotate, Position);
 }
 
@@ -279,7 +279,7 @@ void CCollMap::registerLastHang(HANDLE hTask) {
         removeHang();
     }
 #line 391
-    m_pHanger = new (__FILE__ "(391)")
+    m_pHanger = new KH_AT("(391)")
         CRider(hTask, getShiftY(), getRadius(), (COLL_KIND)getKind(), TRUE);
     m_pLastRide->addRiderList(*m_pHanger);
     m_pNowHang = m_pLastRide;
@@ -316,7 +316,7 @@ void CCollMap::removeHang() {
 
 void CCollMap::setHangPosition(FVECTOR& Rotate, FVECTOR& Position) {
 #line 434
-    if (!m_pHanger) AssertApp(__FILE__, __LINE__, "m_pHanger", 0);
+    KH_DEBUG(if (!m_pHanger) AssertApp(__FILE__, __LINE__, "m_pHanger", 0);)
     m_pHanger->setPosition(Rotate, Position);
 }
 
@@ -363,3 +363,4 @@ INT CCollMap::checkWaterSurface(FVECTOR& inPos, FLOAT inHeight) {
 }
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

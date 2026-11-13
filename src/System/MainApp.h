@@ -12,7 +12,7 @@ enum SOFTRESET_MODE {
 #ifdef __cplusplus
 extern "C"
 #endif
-void AssertApp(char* pszFile, int nLine, char* pszMsg, char* pszExp);
+void (AssertApp)(char* pszFile, int nLine, char* pszMsg, char* pszExp);
 
 // PARTIAL: added for System/Debug
 extern int g_bTraceOnScreen;

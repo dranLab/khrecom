@@ -11,9 +11,9 @@
 
 #include "System/Buf.h"
 #include "System/SJoint.h"
-#include "System/Task.h"
+#include "System/Debug.h" /* MATCH: Task.h's own includes, not Task.h (unused here): its getDebugInfo "" is missing from retail FrecFont/SoundMan */
+#include "System/SLContainer.h"
 #include <string.h>
-
 
 
 
@@ -122,7 +122,7 @@ public:
 #line 155 RSRCDATA_H_PATH
     CRsrcData(const RsrcInfo& info, CBuf& data) {
         init(info);
-        m_pDataSrc = new (__FILE__ "(156)") CBuf;
+        m_pDataSrc = new KH_AT("(156)") CBuf;
         data.copyTo(*m_pDataSrc);
     }
     CRsrcData(const RsrcInfo& info) : m_pDataSrc(NULL) { init(info); }
@@ -169,7 +169,7 @@ public:
     BOOL hasGroupTag(INT nID) const { return m_refTagList.hasTag(nID); }
     BOOL hasGroupTagOpt(INT nFlag) const { return m_refTagList.hasTagOpt(nFlag); }
     BOOL isGroupTagEmpty() const { return m_refTagList.isEmpty(); }
-    const CRsrcGroupTagList& getGroupTagList() const { return m_refTagList; }
+    KH_DEBUG(const CRsrcGroupTagList& getGroupTagList() const { return m_refTagList; })
     HANDLE getHandle() const { return m_hThis; }
     HANDLE getParentHandle() const { return m_hParent; }
     BOOL hasChild() const { return m_nChildRest != 0; }

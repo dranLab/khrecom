@@ -86,12 +86,12 @@ protected:
     INT isButtonRTrg(UINT b, UINT nInPad = 0) const {
         return m_bIgnoreKey ? 0 : CPadHandler::isButtonRTrg(b, nInPad);
     }
-    INT dbgButtonTrg(USER uid, UINT button, INT padId = 0) {
-        return m_bIgnoreKey ? 0 : ::dbgButtonTrg(uid, button, padId);
-    }
-    INT dbgButtonRTrg(USER uid, UINT button, INT padId = 0) {
-        return m_bIgnoreKey ? 0 : ::dbgButtonRTrg(uid, button, padId);
-    }
+    KH_DEBUG(INT (dbgButtonTrg)(USER uid, UINT button, INT padId = 0) {)
+        KH_DEBUG(return m_bIgnoreKey ? 0 : ::dbgButtonTrg(uid, button, padId);)
+    KH_DEBUG(})
+    KH_DEBUG(INT (dbgButtonRTrg)(USER uid, UINT button, INT padId = 0) {)
+        KH_DEBUG(return m_bIgnoreKey ? 0 : ::dbgButtonRTrg(uid, button, padId);)
+    KH_DEBUG(})
 
 public:
     virtual void main();

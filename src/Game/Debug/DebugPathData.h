@@ -1,6 +1,6 @@
 #ifndef GAME_DEBUG_DEBUGPATHDATA_H
 #define GAME_DEBUG_DEBUGPATHDATA_H
-
+#ifndef KH_RETAIL /* retail has no path debugger */
 #include "khtypes.h"
 #include "System/Task.h"
 #include "System/MainApp.h"
@@ -189,9 +189,9 @@ private:
     BOOL isEnd();
     static CDebugPathData* getInstance() {
 #line 259 DEBUGPATHDATA_H_PATH
-        if (!(m_pInstance)) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
+        KH_DEBUG(if (!(m_pInstance)) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);)
         return m_pInstance;
     }
 };
-
+#endif /* KH_RETAIL */
 #endif /* GAME_DEBUG_DEBUGPATHDATA_H */

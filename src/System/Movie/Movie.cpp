@@ -77,23 +77,23 @@ void CMovie::disposeScriptRsrc() {
 
 
 #line 136
-static BOOL _openMovie(const CHAR* pszFile, BOOL bForDebug) {
-    if (s_hVideoTask) {
-        if (CTaskMan::getTask(s_hVideoTask)) {
-            TRACE("\x82\xb7\x82\xc5\x82\xc9\x8a\x4a\x82\xa2\x82\xc4\x82\xa2\x82\xe9\x83\x80\x81\x5b\x83\x72\x81\x5b\x83\x74\x83\x40\x83\x43\x83\x8b\x82\xaa\x82\xa0\x82\xe8\x82\xdc\x82\xb7\n");
-            return TRUE;
-        }
-        s_hVideoTask = 0;
-    }
+static BOOL _openMovie(const CHAR* pszFile KH_DEBUG(, BOOL bForDebug)) {
+    KH_DEBUG(if (s_hVideoTask) {)
+        KH_DEBUG(if (CTaskMan::getTask(s_hVideoTask)) {)
+            KH_DEBUG(TRACE("\x82\xb7\x82\xc5\x82\xc9\x8a\x4a\x82\xa2\x82\xc4\x82\xa2\x82\xe9\x83\x80\x81\x5b\x83\x72\x81\x5b\x83\x74\x83\x40\x83\x43\x83\x8b\x82\xaa\x82\xa0\x82\xe8\x82\xdc\x82\xb7\n");)
+            KH_DEBUG(return TRUE;)
+        KH_DEBUG(})
+        KH_DEBUG(s_hVideoTask = 0;)
+    KH_DEBUG(})
     BOOL bFileOK = CMovieFiles::hasFile(pszFile);
     CTask* pParent = CTaskMan::getSysTask(14);
     CMoviePlayerBase* p;
-    if (bFileOK) {
-        p = new (__FILE__ "(148)") CMoviePlayer(pParent, bForDebug);
-    } else {
-        p = new (__FILE__ "(148)") CMoviePlayerDummy(pParent);
-    }
-    if (!p) AssertApp(__FILE__, __LINE__, "p", 0);
+    KH_DEBUG(if (bFileOK) {)
+        p = new KH_AT("(148)") CMoviePlayer(pParent KH_DEBUG(, bForDebug));
+    KH_DEBUG(} else {)
+        KH_DEBUG(p = new KH_AT("(148)") CMoviePlayerDummy(pParent);)
+    KH_DEBUG(})
+    KH_DEBUG(if (!p) AssertApp(__FILE__, __LINE__, "p", 0);)
     /* volatile: keeps the store ahead of the vtable load (the original schedules it there) */
     *(volatile HANDLE*)&s_hVideoTask = p->getHandle();
     BOOL bResult = p->open(pszFile);
@@ -106,12 +106,12 @@ static BOOL _openMovie(const CHAR* pszFile, BOOL bForDebug) {
 }
 
 BOOL CMovie::open(const CHAR* pszFile) {
-    return _openMovie(pszFile, FALSE);
+    return _openMovie(pszFile KH_DEBUG(, FALSE));
 }
 
-BOOL CMovie::openDbg(const CHAR* pszFile) {
-    return _openMovie(pszFile, TRUE);
-}
+KH_DEBUG(BOOL CMovie::openDbg(const CHAR* pszFile) {)
+    KH_DEBUG(return _openMovie(pszFile, TRUE);)
+KH_DEBUG(})
 
 BOOL CMovie::play(UINT nFlags) {
     if (s_hVideoTask) {
@@ -172,3 +172,4 @@ void CMovie::draw() {
     }
 }
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .data

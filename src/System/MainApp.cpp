@@ -204,9 +204,9 @@ extern "C" char _gp[];
 /* the singletons' inline creation/deletion (from their headers) */
 struct MainAppSingletons {
     static void initCollUtil() {
-        if (!(__null == CCollUtil::m_pInstance)) AssertApp("Game/Collision/CollUtil.h", 184, "__null == m_pInstance", 0);
-        CCollUtil::m_pInstance = new ("Game/Collision/CollUtil.h(185)") CCollUtil;
-        if (!(CCollUtil::m_pInstance)) AssertApp("Game/Collision/CollUtil.h", 186, "m_pInstance", 0);
+        KH_DEBUG(if (!(__null == CCollUtil::m_pInstance)) AssertApp("Game/Collision/CollUtil.h", 184, "__null == m_pInstance", 0);)
+        CCollUtil::m_pInstance = new KH_DEBUG(("Game/Collision/CollUtil.h(185)")) CCollUtil;
+        KH_DEBUG(if (!(CCollUtil::m_pInstance)) AssertApp("Game/Collision/CollUtil.h", 186, "m_pInstance", 0);)
         CCollUtil::m_pInstance->setup();
     }
     static void finalizeCollUtil() {
@@ -233,8 +233,8 @@ struct IopmodFileHeader {
 
 namespace {
 USHORT _nBootMode = 0;
-INT _nSnapShotCount = 0;
-BOOL _bHalt = 0;
+KH_DEBUG(INT _nSnapShotCount = 0;) /* MATCH: the debug and halt state, beta only (retail's .data: _nBootMode, then GRAVITY) */
+KH_DEBUG(BOOL _bHalt = 0;)
 }
 FLOAT GRAVITY = -0.0816666707f;
 INT SCAN_RATE_H = 15734;
@@ -244,10 +244,10 @@ INT SCREEN_HEIGHT = 384;
 INT DISP_HEIGHT = 448;
 FLOAT ASPECT_RATE_X = 0.8f;
 FLOAT ASPECT_RATE_Y = 0.8f;
-static UINT s_nTrScrWriteIndex = 0;
-static UINT s_nTrScrWriteIndexX = 0;
-static UINT s_nTrScrDispIndex = 0;
-int g_bTraceOnScreen = 0;
+KH_DEBUG(static UINT s_nTrScrWriteIndex = 0;)
+KH_DEBUG(static UINT s_nTrScrWriteIndexX = 0;)
+KH_DEBUG(static UINT s_nTrScrDispIndex = 0;)
+KH_DEBUG(int g_bTraceOnScreen = 0;)
 
 namespace EERAM {
 static INT _HEAP_START = (((INT)_end - 1) / 64 + 1) * 64;
@@ -255,9 +255,9 @@ static INT _HEAP_SIZE = 0x1FC0000 - _HEAP_START;
 }
 INT VSYNC_TIMEQ = 3000 / VSYNC_PER_SEC;
 char s_FlipThreadStack[4096];
-static char s_szTrScrBuf[24][57];
-static CFnt* s_pTrScrStrTbl;
-static CTile* s_pTrScrZabu;
+KH_DEBUG(static char s_szTrScrBuf[24][57];)
+KH_DEBUG(static CFnt* s_pTrScrStrTbl;)
+KH_DEBUG(static CTile* s_pTrScrZabu;)
 namespace {
 TIMEQ _nTickCount;
 TIMEQ _nMainCount;
@@ -291,7 +291,7 @@ INT _nProcCount;
 INT _nDrawCount;
 INT _nDraw2Count;
 INT _nProcCountMax;
-BOOL _bSetupManagers;
+KH_DEBUG(BOOL _bSetupManagers;)
 }
 
 static INT _mainLoop();
@@ -339,7 +339,7 @@ void CMainApp::finalize() {
 }
 
 INT CMainApp::run() {
-    DebugWork::initialize();
+    KH_DEBUG(DebugWork::initialize();)
     for (;;) {
         _warmReset();
         _mainLoop();
@@ -390,8 +390,8 @@ static INT _mainLoop() {
         if (nTQ > nMax) {
             nTQ = nMax;
         }
-        _checkSnapShot();
-        _checkReportMemory();
+        KH_DEBUG(_checkSnapShot();) // MATCH: beta only (retail keeps the empty functions, uncalled)
+        KH_DEBUG(_checkReportMemory();)
         CPackMan::kickDMA(++_nFrameCount);
     }
 end:
@@ -439,16 +439,16 @@ static INT _mainProc(INT nTcount, TIMEQ nTQ) {
     CTaskMan::update(_nTickCount, _nDispFrameRate, bPause);
     CVramMan::transTexProc();
     CRcf::mainProc();
-    _dispTraceOnScreen();
-    if (CPadIO::isButtonDown(1, 1) && CPadIO::isButtonTrg(0x400, 1)) {
-        g_bTraceOnScreen = !g_bTraceOnScreen;
-    }
+    KH_DEBUG(_dispTraceOnScreen();)
+    KH_DEBUG(if (CPadIO::isButtonDown(1, 1) && CPadIO::isButtonTrg(0x400, 1)) {)
+        KH_DEBUG(g_bTraceOnScreen = !g_bTraceOnScreen;)
+    KH_DEBUG(})
     CPackMan::endScene();
     CModelMan::drawDispListFG();
     CEffectMan::setup();
-    if (DebugWork::g_dw.sys.m_HeapDispDetail) {
+    if (KH_DW(DebugWork::g_dw.sys.m_HeapDispDetail)) {
         dbgReportHeapPerFile();
-        DebugWork::g_dw.sys.m_HeapDispDetail = 0;
+        KH_DEBUG(DebugWork::g_dw.sys.m_HeapDispDetail = 0;)
     }
     if (CPadIO::isButtonDown(0x80, 1)) {
         _nProcCountMax = 0;
@@ -547,13 +547,13 @@ static void _loadIopModules() {
     UINT value;
 
 #line 778
-    p = (BYTE*)com_memalign_d(0x50000, 64, __FILE__ "(778)", (UINT)-1);
+    p = (BYTE*)com_memalign_d(KH_VER(0x50000, 0x47800), 64, __FILE__ "(778)", (UINT)-1); /* MATCH: retail's module file is smaller (0x8F sectors) */
     memset(&mode, 0, sizeof(mode));
     mode.spindlctrl = 1;
-    while (sceCdRead(0x19C, 0xA0, p, &mode) != 1 || sceCdSync(0) || sceCdGetError()) {
+    while (sceCdRead(0x19C, KH_VER(0xA0, 0x8F), p, &mode) != 1 || sceCdSync(0) || sceCdGetError()) {
     }
+    pIopTmp = sceSifAllocIopHeap(0x20800); /* MATCH: before pInfo, as the beta's markers (788, 791) */
     pInfo = ((IopmodFileHeader*)p)->_infoTbl;
-    pIopTmp = sceSifAllocIopHeap(0x20800);
     for (i = 0; i < ((IopmodFileHeader*)p)->_nModCount; i++, pInfo++) {
         TRACE("[%s]\n", pInfo->_szName);
         sdd.data = pInfo->_nOffset + (u_int)p;
@@ -581,7 +581,7 @@ static void _setupManagers() {
     CCoordMan::initialize();
     CModelMan::initialize();
     CTaskMan::initialize();
-    _pMasterFader = new (__FILE__ "(840)") CColorFader;
+    _pMasterFader = new KH_AT("(840)") CColorFader;
     CCollObj::collisionInit();
     MainAppSingletons::initCollUtil();
     CRsrcDB::initialize();
@@ -596,11 +596,11 @@ static void _setupManagers() {
     CCard::initialize();
     CTechnic::initialize();
     CStatus::initialize();
-    _bSetupManagers = 1;
+    KH_DEBUG(_bSetupManagers = 1;) // MATCH: beta only (read by the debug halt screen)
 }
 
 static void _disposeManagers() {
-    _bSetupManagers = 0;
+    KH_DEBUG(_bSetupManagers = 0;)
     TRACE("---- CVramMan::halt() ----\n");
     CVramMan::halt(1);
     TRACE("---- CRcf::finalize() ----\n");
@@ -664,7 +664,7 @@ static void _warmReset() {
     _nUsrPause = 0;
     _nHardError = 0;
     _nHardErrorMsg = 0;
-    _initTraceOnScreen();
+    KH_DEBUG(_initTraceOnScreen();)
     CWorldEnv::initialize();
     CPackMan::initialize();
     _initThread();
@@ -674,7 +674,7 @@ static void _warmReset() {
     sceGsSyncV(0);
     sceGsSyncPath(0, 0);
     TRACE("%.2f\x81\x93 memory used after warm reset.\n", CHeapMan::getUsedHeapRatio());
-    CDebugWindow::enableTopDebugWindow(1);
+    KH_DEBUG(CDebugWindow::enableTopDebugWindow(1);)
     _nProcCountMax = 0;
     if (mcdReadClock(&rtc) == 0) {
         nSeed = rtc.hour * 3600 + rtc.minute * 60 + rtc.second;
@@ -738,25 +738,25 @@ static BOOL _checkPause() {
         _nUsrPauseReq = 0;
     }
     if (CMainApp::isDbgUsrPauseDisable()) return 0;
-    if (CPadIO::isButtonTrg(0x100, 1)) {
-        bPause = !CMainApp::isDbgUsrPauseNow();
-        if (bPause) {
-            _nUsrPause |= 1;
-        } else {
-            _nUsrPause &= ~1;
-        }
-        if (bPause) {
-            CTaskMan::setDbgSteppingMode(0);
-        } else {
-            CTaskMan::resetDbgPlaySpeed();
-        }
-    } else {
+    KH_DEBUG(if (CPadIO::isButtonTrg(0x100, 1)) {)
+        KH_DEBUG(bPause = !CMainApp::isDbgUsrPauseNow();)
+        KH_DEBUG(if (bPause) {)
+            KH_DEBUG(_nUsrPause |= 1;)
+        KH_DEBUG(} else {)
+            KH_DEBUG(_nUsrPause &= ~1;)
+        KH_DEBUG(})
+        KH_DEBUG(if (bPause) {)
+            KH_DEBUG(CTaskMan::setDbgSteppingMode(0);)
+        KH_DEBUG(} else {)
+            KH_DEBUG(CTaskMan::resetDbgPlaySpeed();)
+        KH_DEBUG(})
+    KH_DEBUG(} else {)
         bPause = CMainApp::isDbgUsrPauseNow();
-    }
-    if (bPause) {
-        return CTaskMan::setupDbgPlaySpeed();
-    }
-    return 0;
+    KH_DEBUG(})
+    KH_DEBUG(if (bPause) {)
+        KH_DEBUG(return CTaskMan::setupDbgPlaySpeed();)
+    KH_DEBUG(})
+    KH_DEBUG(return 0;) KH_RELEASE(return bPause;) // MATCH: retail has no debug pause stepping
 }
 
 static void _softReset() {
@@ -771,7 +771,7 @@ static void _softReset() {
     _disposeThread();
     TRACE("\x81\xaa\x81\xaa\x81\xaa\x81\xaa _disposeThread() End \x81\xaa\x81\xaa\x81\xaa\x81\xaa\n");
     TRACE("\x81\xab\x81\xab\x81\xab\x81\xab _disposeTraceOnScreen() Start \x81\xab\x81\xab\x81\xab\x81\xab\n");
-    _disposeTraceOnScreen();
+    KH_DEBUG(_disposeTraceOnScreen();)
     TRACE("\x81\xaa\x81\xaa\x81\xaa\x81\xaa _disposeTraceOnScreen() End \x81\xaa\x81\xaa\x81\xaa\x81\xaa\n");
     TRACE("\x81\xab\x81\xab\x81\xab\x81\xab CHeapMan::resetHeap() Start \x81\xab\x81\xab\x81\xab\x81\xab\n");
     CHeapMan::resetHeap();
@@ -848,14 +848,14 @@ void CMainApp::setFpsFull() {
     _nVWaitCount = 0;
     _bForceHalfFps = 0;
     TRACE_COL(_TTY_RED, " --- 60fps ---\n");
-    DebugWork::g_dw.sys.m_iFps = 0;
+    KH_DEBUG(DebugWork::g_dw.sys.m_iFps = 0;)
 }
 
 void CMainApp::setFpsHalf() {
     _nVWaitCount = 1;
     _bForceHalfFps = 1;
     TRACE_COL(_TTY_RED, " --- 30fps ---\n");
-    DebugWork::g_dw.sys.m_iFps = 1;
+    KH_DEBUG(DebugWork::g_dw.sys.m_iFps = 1;)
 }
 
 BOOL CMainApp::isFpsHalf() {
@@ -1217,217 +1217,218 @@ void CMainApp::resetProcCountMax() {
     _nProcCountMax = 0;
 }
 
-void AssertApp(char* pszFile, int nLine, char* pszMsg, char* pszExp) {
-    CHeapMan::reportMemory();
-    CMainApp::halt(pszFile, nLine, pszMsg, pszExp);
-}
+KH_DEBUG(void (AssertApp)(char* pszFile, int nLine, char* pszMsg, char* pszExp) {)
+    KH_DEBUG(CHeapMan::reportMemory();)
+    KH_DEBUG(CMainApp::halt(pszFile, nLine, pszMsg, pszExp);)
+KH_DEBUG(})
 
-static void _halt(const CHAR* pszMsg, const CHAR* pszExp) {
-    extern CHAR* __BUILD;
-    INT nThreadID;
+KH_DEBUG(static void _halt(const CHAR* pszMsg, const CHAR* pszExp) {)
+    KH_DEBUG(extern CHAR* __BUILD;)
+    KH_DEBUG(INT nThreadID;)
 
-    _bHalt = 1;
-    nThreadID = GetThreadId();
-    if (nThreadID != _nMainThreadID) {
-        SemaParam sema;
-        if (nThreadID == _nFlipThreadID) return;
-        SuspendThread(_nMainThreadID);
-        ChangeThreadPriority(nThreadID, 1);
-        ReferSemaStatus(_FlipSema, &sema);
-        if (sema.numWaitThreads) SignalSema(_FlipSema);
-    }
-    _nDrawEnd = 1;
-    WaitSema(_FlipSema);
-    _nFrameCount++;
-    CWorldEnv::setFogColor(0, 0, 0);
-    CMainApp::setFpsFull();
-    char szBuf[256];
-    sprintf(szBuf, "BUILD-VER.: %s", __BUILD);
-    CFnt strBuild;
-    strBuild.setText(szBuf);
-    strBuild.setPosition(-240, 40 - SCREEN_HEIGHT / 2, 0xFFFF28);
-    strBuild.setLayerFG(25);
-    strBuild.setStyle(0x40);
-    CFnt strMsg;
-    strMsg.setText(pszMsg);
-    strMsg.setPosition(-240, 60 - SCREEN_HEIGHT / 2, 0xFFFF28);
-    strMsg.setLayerFG(25);
-    strMsg.setStyle(0x40);
-    char szEtc[256];
-    sprintf(szEtc, "FREE-HEAP: %d  /  MAX-SIZE: %d", CHeapMan::getFreeHeapSize(), CHeapMan::getMaxFreeBlockSize());
-    CFnt strEtc;
-    strEtc.setText(szEtc);
-    strEtc.setPosition(-240, 80 - SCREEN_HEIGHT / 2, 0xFFFF28);
-    strEtc.setLayerFG(25);
-    strEtc.setStyle(0x40);
-    CFnt strExp;
-    strExp.setText(pszExp);
-    strExp.setPosition(-240, 100 - SCREEN_HEIGHT / 2, 0xFFFF28);
-    strExp.setLayerFG(25);
-    strExp.setStyle(0x40);
-    INT nCount = 2;
-    while (nCount--) {
-        CPackMan::beginScene();
-        CGTexPrim::clearTexCache();
-        CModelMan::clearDispList();
-        strBuild.disp();
-        strMsg.disp();
-        strEtc.disp();
-        if (pszExp) strExp.disp();
-        CModelMan::drawDispList();
-        CPackMan::endScene();
-        FlushCache(0);
-        sceGsSyncPath(0, 0);
-        CModelMan::drawDispListFG();
-        CPackMan::kickDMAFG(_nFrameCount);
-        sceGsSyncPath(0, 0);
-        _nDrawEnd = 1;
-        WaitSema(_FlipSema);
-        _nFrameCount++;
-        sceGsSyncPath(0, 0);
-        CPackMan::kickDMA(_nFrameCount);
-    }
-}
+    KH_DEBUG(_bHalt = 1;)
+    KH_DEBUG(nThreadID = GetThreadId();)
+    KH_DEBUG(if (nThreadID != _nMainThreadID) {)
+        KH_DEBUG(SemaParam sema;)
+        KH_DEBUG(if (nThreadID == _nFlipThreadID) return;)
+        KH_DEBUG(SuspendThread(_nMainThreadID);)
+        KH_DEBUG(ChangeThreadPriority(nThreadID, 1);)
+        KH_DEBUG(ReferSemaStatus(_FlipSema, &sema);)
+        KH_DEBUG(if (sema.numWaitThreads) SignalSema(_FlipSema);)
+    KH_DEBUG(})
+    KH_DEBUG(_nDrawEnd = 1;)
+    KH_DEBUG(WaitSema(_FlipSema);)
+    KH_DEBUG(_nFrameCount++;)
+    KH_DEBUG(CWorldEnv::setFogColor(0, 0, 0);)
+    KH_DEBUG(CMainApp::setFpsFull();)
+    KH_DEBUG(char szBuf[256];)
+    KH_DEBUG(sprintf(szBuf, "BUILD-VER.: %s", __BUILD);)
+    KH_DEBUG(CFnt strBuild;)
+    KH_DEBUG(strBuild.setText(szBuf);)
+    KH_DEBUG(strBuild.setPosition(-240, 40 - SCREEN_HEIGHT / 2, 0xFFFF28);)
+    KH_DEBUG(strBuild.setLayerFG(25);)
+    KH_DEBUG(strBuild.setStyle(0x40);)
+    KH_DEBUG(CFnt strMsg;)
+    KH_DEBUG(strMsg.setText(pszMsg);)
+    KH_DEBUG(strMsg.setPosition(-240, 60 - SCREEN_HEIGHT / 2, 0xFFFF28);)
+    KH_DEBUG(strMsg.setLayerFG(25);)
+    KH_DEBUG(strMsg.setStyle(0x40);)
+    KH_DEBUG(char szEtc[256];)
+    KH_DEBUG(sprintf(szEtc, "FREE-HEAP: %d  /  MAX-SIZE: %d", CHeapMan::getFreeHeapSize(), CHeapMan::getMaxFreeBlockSize());)
+    KH_DEBUG(CFnt strEtc;)
+    KH_DEBUG(strEtc.setText(szEtc);)
+    KH_DEBUG(strEtc.setPosition(-240, 80 - SCREEN_HEIGHT / 2, 0xFFFF28);)
+    KH_DEBUG(strEtc.setLayerFG(25);)
+    KH_DEBUG(strEtc.setStyle(0x40);)
+    KH_DEBUG(CFnt strExp;)
+    KH_DEBUG(strExp.setText(pszExp);)
+    KH_DEBUG(strExp.setPosition(-240, 100 - SCREEN_HEIGHT / 2, 0xFFFF28);)
+    KH_DEBUG(strExp.setLayerFG(25);)
+    KH_DEBUG(strExp.setStyle(0x40);)
+    KH_DEBUG(INT nCount = 2;)
+    KH_DEBUG(while (nCount--) {)
+        KH_DEBUG(CPackMan::beginScene();)
+        KH_DEBUG(CGTexPrim::clearTexCache();)
+        KH_DEBUG(CModelMan::clearDispList();)
+        KH_DEBUG(strBuild.disp();)
+        KH_DEBUG(strMsg.disp();)
+        KH_DEBUG(strEtc.disp();)
+        KH_DEBUG(if (pszExp) strExp.disp();)
+        KH_DEBUG(CModelMan::drawDispList();)
+        KH_DEBUG(CPackMan::endScene();)
+        KH_DEBUG(FlushCache(0);)
+        KH_DEBUG(sceGsSyncPath(0, 0);)
+        KH_DEBUG(CModelMan::drawDispListFG();)
+        KH_DEBUG(CPackMan::kickDMAFG(_nFrameCount);)
+        KH_DEBUG(sceGsSyncPath(0, 0);)
+        KH_DEBUG(_nDrawEnd = 1;)
+        KH_DEBUG(WaitSema(_FlipSema);)
+        KH_DEBUG(_nFrameCount++;)
+        KH_DEBUG(sceGsSyncPath(0, 0);)
+        KH_DEBUG(CPackMan::kickDMA(_nFrameCount);)
+    KH_DEBUG(})
+KH_DEBUG(})
 
-void CMainApp::halt(const CHAR* pszFile, INT nLine, const CHAR* pszMsg, const CHAR* pszExp) {
-    char szBuf[512];
-    const CHAR* pszPath;
+KH_DEBUG(void CMainApp::halt(const CHAR* pszFile, INT nLine, const CHAR* pszMsg, const CHAR* pszExp) {)
+    KH_DEBUG(char szBuf[512];)
+    KH_DEBUG(const CHAR* pszPath;)
 
-    CPackMan::changeDrawMode(0);
-    pszPath = strrchr(pszFile, '/');
-    if (pszPath) {
-        pszPath++;
-    } else {
-        pszPath = pszFile;
-    }
-    sprintf(szBuf, "ASSERT: %s(%d) -> \"%s\"\n", pszPath, nLine, pszMsg);
-    if (!g_bTraceOnScreen) {
-        TRACE(szBuf);
-    }
-    if (_bSetupManagers && !_bHalt) {
-        _halt(szBuf, pszExp);
-    }
-    __asm__ volatile("break 0");
-}
+    KH_DEBUG(CPackMan::changeDrawMode(0);)
+    KH_DEBUG(pszPath = strrchr(pszFile, '/');)
+    KH_DEBUG(if (pszPath) {)
+        KH_DEBUG(pszPath++;)
+    KH_DEBUG(} else {)
+        KH_DEBUG(pszPath = pszFile;)
+    KH_DEBUG(})
+    KH_DEBUG(sprintf(szBuf, "ASSERT: %s(%d) -> \"%s\"\n", pszPath, nLine, pszMsg);)
+    KH_DEBUG(if (!g_bTraceOnScreen) {)
+        KH_DEBUG(TRACE(szBuf);)
+    KH_DEBUG(})
+    KH_DEBUG(if (_bSetupManagers && !_bHalt) {)
+        KH_DEBUG(_halt(szBuf, pszExp);)
+    KH_DEBUG(})
+    KH_DEBUG(__asm__ volatile("break 0");)
+KH_DEBUG(})
 
-static void _initTraceOnScreen() {
-    UINT i;
+KH_DEBUG(static void _initTraceOnScreen() {)
+    KH_DEBUG(UINT i;)
 
-    s_nTrScrWriteIndex = 0;
-    s_nTrScrWriteIndexX = 0;
-    s_nTrScrDispIndex = 0;
-    s_pTrScrStrTbl = __null;
-    s_pTrScrZabu = __null;
-    for (i = 0; i < 24; i++) {
-        s_szTrScrBuf[i][0] = 0;
-    }
-}
+    KH_DEBUG(s_nTrScrWriteIndex = 0;)
+    KH_DEBUG(s_nTrScrWriteIndexX = 0;)
+    KH_DEBUG(s_nTrScrDispIndex = 0;)
+    KH_DEBUG(s_pTrScrStrTbl = __null;)
+    KH_DEBUG(s_pTrScrZabu = __null;)
+    KH_DEBUG(for (i = 0; i < 24; i++) {)
+        KH_DEBUG(s_szTrScrBuf[i][0] = 0;)
+    KH_DEBUG(})
+KH_DEBUG(})
 
-static void _disposeTraceOnScreen() {
-    s_nTrScrWriteIndex = 0;
-    s_nTrScrWriteIndexX = 0;
-    s_nTrScrDispIndex = 0;
-    if (s_pTrScrStrTbl) delete[] s_pTrScrStrTbl;
-    s_pTrScrStrTbl = __null;
-    if (s_pTrScrZabu) delete s_pTrScrZabu;
-    s_pTrScrZabu = __null;
-    g_bTraceOnScreen = 0;
-}
+KH_DEBUG(static void _disposeTraceOnScreen() {)
+    KH_DEBUG(s_nTrScrWriteIndex = 0;)
+    KH_DEBUG(s_nTrScrWriteIndexX = 0;)
+    KH_DEBUG(s_nTrScrDispIndex = 0;)
+    KH_DEBUG(if (s_pTrScrStrTbl) delete[] s_pTrScrStrTbl;)
+    KH_DEBUG(s_pTrScrStrTbl = __null;)
+    KH_DEBUG(if (s_pTrScrZabu) delete s_pTrScrZabu;)
+    KH_DEBUG(s_pTrScrZabu = __null;)
+    KH_DEBUG(g_bTraceOnScreen = 0;)
+KH_DEBUG(})
 
-static void _initFntTbl() {
+KH_DEBUG(static void _initFntTbl() {)
 #line 2334
-    s_pTrScrStrTbl = new (__FILE__ "(2334)") CFnt[24];
-    if (!(s_pTrScrStrTbl)) AssertApp(__FILE__, __LINE__, "s_pTrScrStrTbl", 0);
-    for (UINT i = 0; i < 24; i++) {
-        CFnt& f = s_pTrScrStrTbl[i];
-        f.setSize(13);
-        f.setPosition(-220, i * 14 - 156, 0xFFFF28);
-        f.setStyle(0x8000);
-        f.setColor(0x80, 0x80, 0x80);
-        f.setLayerFG(25);
-    }
+    KH_DEBUG(s_pTrScrStrTbl = new KH_AT("(2334)") CFnt[24];)
+    KH_DEBUG(if (!(s_pTrScrStrTbl)) AssertApp(__FILE__, __LINE__, "s_pTrScrStrTbl", 0);)
+    KH_DEBUG(for (UINT i = 0; i < 24; i++) {)
+        KH_DEBUG(CFnt& f = s_pTrScrStrTbl[i];)
+        KH_DEBUG(f.setSize(13);)
+        KH_DEBUG(f.setPosition(-220, i * 14 - 156, 0xFFFF28);)
+        KH_DEBUG(f.setStyle(0x8000);)
+        KH_DEBUG(f.setColor(0x80, 0x80, 0x80);)
+        KH_DEBUG(f.setLayerFG(25);)
+    KH_DEBUG(})
 #line 2348
-    s_pTrScrZabu = new (__FILE__ "(2348)") CTile;
-    s_pTrScrZabu->m_P0.set(-0xDC0, -0xAA0); // MATCH: the original reloads s_pTrScrZabu for each later statement (volatile reads)
-    (*(CTile* volatile*)&s_pTrScrZabu)->m_P1.set(0xDC0, 0xAA0);
-    (*(CTile* volatile*)&s_pTrScrZabu)->m_C0.set(1, 1, 1, 0x40);
-    (*(CTile* volatile*)&s_pTrScrZabu)->setSemiTrans(ALPHA_BLEND);
-    (*(CTile* volatile*)&s_pTrScrZabu)->setLayerFG(25);
-}
+    KH_DEBUG(s_pTrScrZabu = new KH_AT("(2348)") CTile;)
+    KH_DEBUG(s_pTrScrZabu->m_P0.set(-0xDC0, -0xAA0); /* MATCH: the original reloads s_pTrScrZabu for each later statement (volatile reads) */)
+    KH_DEBUG((*(CTile* volatile*)&s_pTrScrZabu)->m_P1.set(0xDC0, 0xAA0);)
+    KH_DEBUG((*(CTile* volatile*)&s_pTrScrZabu)->m_C0.set(1, 1, 1, 0x40);)
+    KH_DEBUG((*(CTile* volatile*)&s_pTrScrZabu)->setSemiTrans(ALPHA_BLEND);)
+    KH_DEBUG((*(CTile* volatile*)&s_pTrScrZabu)->setLayerFG(25);)
+KH_DEBUG(})
 
-void addTraceString(CHAR* pszSrc) {
-    CHAR* p;
-    CHAR c;
-    UINT j;
-    BOOL bCR;
+KH_DEBUG(void addTraceString(CHAR* pszSrc) {)
+    KH_DEBUG(CHAR* p;)
+    KH_DEBUG(CHAR c;)
+    KH_DEBUG(UINT j;)
+    KH_DEBUG(BOOL bCR;)
 
-    if (!g_bTraceOnScreen || !pszSrc) {
-        return;
-    }
-    if (!s_pTrScrStrTbl) {
-        _initFntTbl();
-    }
-    p = s_szTrScrBuf[s_nTrScrWriteIndex % 24];
-    bCR = 0;
-    j = s_nTrScrWriteIndexX;
-    {
-        UINT i;
-        for (i = j; i < 56; i++) {
-            c = *pszSrc++;
-            if (!c) break;
-            if (c == '\n') {
-                bCR = 1;
-                break;
-            }
-            if (c == '\t') {
-                c = ' ';
-            }
-            p[j++] = c;
-        }
-    }
-    p[j] = 0;
-    if (!bCR) {
-        if (!c) {
-            s_nTrScrWriteIndexX = j;
-            return;
-        }
-        while (*pszSrc && *pszSrc != '\n') {
-            pszSrc++;
-        }
-        if (*pszSrc != '\n') {
-            return;
-        }
-    }
-    s_nTrScrWriteIndexX = 0;
-    if (++s_nTrScrWriteIndex > 24) {
-        if (++s_nTrScrDispIndex >= 24) {
-            s_nTrScrDispIndex = 0;
-        }
-    }
-    {
-        UINT i;
-        for (i = 0, j = s_nTrScrDispIndex; i < 24; i++) {
-            s_pTrScrStrTbl[i].setText(s_szTrScrBuf[j]);
-            if (++j >= 24) {
-                j = 0;
-            }
-        }
-    }
-}
+    KH_DEBUG(if (!g_bTraceOnScreen || !pszSrc) {)
+        KH_DEBUG(return;)
+    KH_DEBUG(})
+    KH_DEBUG(if (!s_pTrScrStrTbl) {)
+        KH_DEBUG(_initFntTbl();)
+    KH_DEBUG(})
+    KH_DEBUG(p = s_szTrScrBuf[s_nTrScrWriteIndex % 24];)
+    KH_DEBUG(bCR = 0;)
+    KH_DEBUG(j = s_nTrScrWriteIndexX;)
+    KH_DEBUG({)
+        KH_DEBUG(UINT i;)
+        KH_DEBUG(for (i = j; i < 56; i++) {)
+            KH_DEBUG(c = *pszSrc++;)
+            KH_DEBUG(if (!c) break;)
+            KH_DEBUG(if (c == '\n') {)
+                KH_DEBUG(bCR = 1;)
+                KH_DEBUG(break;)
+            KH_DEBUG(})
+            KH_DEBUG(if (c == '\t') {)
+                KH_DEBUG(c = ' ';)
+            KH_DEBUG(})
+            KH_DEBUG(p[j++] = c;)
+        KH_DEBUG(})
+    KH_DEBUG(})
+    KH_DEBUG(p[j] = 0;)
+    KH_DEBUG(if (!bCR) {)
+        KH_DEBUG(if (!c) {)
+            KH_DEBUG(s_nTrScrWriteIndexX = j;)
+            KH_DEBUG(return;)
+        KH_DEBUG(})
+        KH_DEBUG(while (*pszSrc && *pszSrc != '\n') {)
+            KH_DEBUG(pszSrc++;)
+        KH_DEBUG(})
+        KH_DEBUG(if (*pszSrc != '\n') {)
+            KH_DEBUG(return;)
+        KH_DEBUG(})
+    KH_DEBUG(})
+    KH_DEBUG(s_nTrScrWriteIndexX = 0;)
+    KH_DEBUG(if (++s_nTrScrWriteIndex > 24) {)
+        KH_DEBUG(if (++s_nTrScrDispIndex >= 24) {)
+            KH_DEBUG(s_nTrScrDispIndex = 0;)
+        KH_DEBUG(})
+    KH_DEBUG(})
+    KH_DEBUG({)
+        KH_DEBUG(UINT i;)
+        KH_DEBUG(for (i = 0, j = s_nTrScrDispIndex; i < 24; i++) {)
+            KH_DEBUG(s_pTrScrStrTbl[i].setText(s_szTrScrBuf[j]);)
+            KH_DEBUG(if (++j >= 24) {)
+                KH_DEBUG(j = 0;)
+            KH_DEBUG(})
+        KH_DEBUG(})
+    KH_DEBUG(})
+KH_DEBUG(})
 
-static void _dispTraceOnScreen() {
-    UINT i;
+KH_DEBUG(static void _dispTraceOnScreen() {)
+    KH_DEBUG(UINT i;)
 
-    if (!g_bTraceOnScreen) {
-        return;
-    }
-    if (s_pTrScrZabu) {
-        s_pTrScrZabu->disp();
-    }
-    if (s_pTrScrStrTbl) {
-        for (i = 0; i < 24; i++) {
-            s_pTrScrStrTbl[i].disp();
-        }
-    }
-}
+    KH_DEBUG(if (!g_bTraceOnScreen) {)
+        KH_DEBUG(return;)
+    KH_DEBUG(})
+    KH_DEBUG(if (s_pTrScrZabu) {)
+        KH_DEBUG(s_pTrScrZabu->disp();)
+    KH_DEBUG(})
+    KH_DEBUG(if (s_pTrScrStrTbl) {)
+        KH_DEBUG(for (i = 0; i < 24; i++) {)
+            KH_DEBUG(s_pTrScrStrTbl[i].disp();)
+        KH_DEBUG(})
+    KH_DEBUG(})
+KH_DEBUG(})
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .data .rodata

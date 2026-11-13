@@ -9,9 +9,9 @@
 // PARTIAL: added for System/MainTaskFactory. Only __alloc/__getSize are known (out-of-class template members,
 // instantiated wherever an inline function uses push_back); the other members are guesses.
 #include <string.h>
-extern "C" void* com_malloc_d(size_t bytes, char* msg, unsigned int ra);
+extern "C" void* (com_malloc_d)(size_t bytes, char* msg, unsigned int ra);
 extern "C" void com_free(void* mem);
-extern "C" void AssertApp(char* pszFile, int nLine, char* pszMsg, char* pszExp);
+extern "C" void (AssertApp)(char* pszFile, int nLine, char* pszMsg, char* pszExp);
 
 /* __FILE__ as in the original (the header is found through "-I src" here). Line numbers are not known. */
 /* MATCH: path override for System/TaskMan ("c:/KHCOM/MainApp/System/Vector.h") */
@@ -54,14 +54,14 @@ public:
     }
     INT size() const { return m_iIdx; }
     T& operator[](INT i) {
-        if (!(!((m_pObj == __null)))) AssertApp(__FILE__, __LINE__, "!((m_pObj==__null))", 0);
+        KH_DEBUG(if (!(!((m_pObj == __null)))) AssertApp(__FILE__, __LINE__, "!((m_pObj==__null))", 0);)
         return m_pObj[i];
     }
     /* PARTIAL: added for Form/DebugWindow (names unknown; the original line of back()'s assert is 162) */
     T* getBuffer() { return m_pObj; }
     T& back() {
 #line 162
-        if (!(!((m_pObj == __null)))) AssertApp(__FILE__, __LINE__, "!((m_pObj==__null))", 0);
+        KH_DEBUG(if (!(!((m_pObj == __null)))) AssertApp(__FILE__, __LINE__, "!((m_pObj==__null))", 0);)
 #line 233
         return *(m_pObj + m_iIdx - 1);
     }
@@ -69,12 +69,12 @@ public:
     /* PARTIAL: added for System/TaskMan (lines of the asserts from the original) */
 #line 150
     T* begin() {
-        if (!(!((m_pObj == __null)))) AssertApp(__FILE__, __LINE__, "!((m_pObj==__null))", 0);
+        KH_DEBUG(if (!(!((m_pObj == __null)))) AssertApp(__FILE__, __LINE__, "!((m_pObj==__null))", 0);)
         return m_pObj;
     }
 #line 161
     T* end() {
-        if (!(!((m_pObj == __null)))) AssertApp(__FILE__, __LINE__, "!((m_pObj==__null))", 0);
+        KH_DEBUG(if (!(!((m_pObj == __null)))) AssertApp(__FILE__, __LINE__, "!((m_pObj==__null))", 0);)
         return m_pObj + m_iIdx;
     }
 

@@ -10,7 +10,7 @@
 #include "System/Graphic/Str.h"
 #include "Game/Collision/CollUtil.h"
 /* placeholder: 8 zero bytes follow CollUtil.h's strings in the original */
-__asm__(".rdata\n.align 3\n.word 0\n.word 0\n"); /* stays in .rdata: gcc has not left it here */
+KH_DEBUG(__asm__(".rdata\n.align 3\n.word 0\n.word 0\n");) /* stays in .rdata: gcc has not left it here. MATCH: beta only: if it is a "", retail merges it into Task.h's earlier "" */
 
 #include "System/TaskMan.h"
 
@@ -109,7 +109,7 @@ extern "C" char D_0047E328[];
 
 
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 class CGameSub;
 
@@ -243,8 +243,8 @@ CGameMain* s_pMain = NULL;
 CGame::_FADE_PROC_PRIO s_nFadeProcPrio = CGame::FADE_PROC_PRIO_0;
 CFadeIOMask* s_pFadeMask = NULL;
 INT s_nGameStep = 0;
-INT s_nDbgGameMode = 0;
-BOOL s_bDbgStartFromBattle = 0;
+KH_DEBUG(INT s_nDbgGameMode = 0;)
+KH_DEBUG(BOOL s_bDbgStartFromBattle = 0;) // MATCH: retail's .data ends after s_nGameStep (0x33BC44 is padding before GameSubBattle's, as 0x39BA14 in the beta)
 }
 
 
@@ -333,7 +333,7 @@ void CGameMain::pause(BOOL bOn, INT nMode) {
     if (bOn) {
         CSound::pauseAllSE();
 #line 523
-        CPause* p = new (__FILE__ "(523)") CPause(this, nMode);
+        CPause* p = new KH_AT("(523)") CPause(this, nMode);
         ASSERT(p);
         m_hPause = p->getHandle();
         m_nGameProcFlag |= 0x400;
@@ -349,7 +349,7 @@ void CGameMain::camp(BOOL bOn) {
         CSound::pauseAllSE();
         if (CGame::isSoraGame()) PLM::removeBattlePlayerRsrc(0);
 #line 553
-        CCamp* p = new (__FILE__ "(553)") CCamp(this, 0);
+        CCamp* p = new KH_AT("(553)") CCamp(this, 0);
         ASSERT(p);
         m_hCamp = p->getHandle();
         m_nGameProcFlag |= 0x400;
@@ -364,7 +364,7 @@ void CGameMain::worldMap(BOOL bOn) {
     if (bOn) {
         CSound::pauseAllSE();
 #line 578
-        CCamp* p = new (__FILE__ "(578)") CCamp(this, 1);
+        CCamp* p = new KH_AT("(578)") CCamp(this, 1);
         ASSERT(p);
         m_hWorldMap = p->getHandle();
         m_nGameProcFlag |= 0x400;
@@ -386,8 +386,8 @@ void CGameMain::checkStartFieldMenu() {
             camp(TRUE);
         }
     } else if (CPadHandler::isButtonTrg(0x100, 0)) {
-        if (!CGameWork::getFlag(1, 4) && !_isStartRoom(CSceneInfo::getCurrentRoomID()) && !bFlag &&
-            CSceneInfo::getCurrentFloorIndex() < 16) {
+        if (!CGameWork::getFlag(1, 4) && !_isStartRoom(CSceneInfo::getCurrentRoomID()) && !bFlag KH_DEBUG(&&)
+            KH_DEBUG(CSceneInfo::getCurrentFloorIndex() < 16)) {
             worldMap(TRUE);
         }
     }
@@ -423,7 +423,7 @@ void CGameMain::checkStartBattleMenu() {
                 nMode = 4;
                 if (CSceneInfo::getCurrentSceneNum() != 0x41b) nMode = 0;
             }
-            TsSdDebugPrint();
+            KH_DEBUG(TsSdDebugPrint();)
         }
         pause(TRUE, nMode);
         suspendTaskInGame(2);
@@ -603,8 +603,8 @@ void CGameMain::setupWorld() {
                 nState = 3;
                 CSound::clearForEventScene();
             } else {
+                nState = 2; // MATCH: before the call as in the other arm (beta: TRACE_COL 1008, clear 1010); retail's registers need it
                 CSound::clearForBattleScene();
-                nState = 2;
             }
             changeState(nState);
         }
@@ -624,12 +624,12 @@ void CGameMain::setupBattleRsrc() {
         }
         if (!m_pSubBattle) {
 #line 1066
-            m_pSubBattle = new (__FILE__ "(1066)") CGameSubBattle();
+            m_pSubBattle = new KH_AT("(1066)") CGameSubBattle();
             ASSERT(m_pSubBattle);
         }
         reqLoadInconstGameRsrc();
         if (!CSceneInfo::isBossBattleScene(-1)) {
-            if (!CGame::isDbgStartFromBattle() || (USHORT)(CSceneInfo::getCurrentBattleSceneNum() - 1050) >= 149) {
+            if (!KH_DW(CGame::isDbgStartFromBattle()) || (USHORT)(CSceneInfo::getCurrentBattleSceneNum() - 1050) >= 149) {
                 reqLoadInconstWorldRsrc();
             }
         }
@@ -670,7 +670,7 @@ void CGameMain::setupField() {
         resumeTaskInGame(1);
         if (!m_pSubField) {
 #line 1156
-            m_pSubField = new (__FILE__ "(1156)") CGameSubField();
+            m_pSubField = new KH_AT("(1156)") CGameSubField();
             if (!CSceneInfo::isEventScene()) {
                 reqLoadInconstGameRsrc();
                 reqLoadInconstWorldRsrc();
@@ -729,7 +729,7 @@ check:
     if (CSceneInfo::hasReqChangeScene() || CSceneInfo::hasReqEnterBattle() || bFlag) {
         INT nSub;
         if (!bFlag && CSceneInfo::hasReqEnterBattle()) {
-            if (CGame::isDbgStartFromBattle()) CGameWork::backup(CGameWork::BACKUP_PRIMARY);
+            if (KH_DW(CGame::isDbgStartFromBattle())) CGameWork::backup(CGameWork::BACKUP_PRIMARY);
             CGame::setBlackBeforeEncount(CAtel::isFadeActive());
             nSub = 3;
         } else {
@@ -988,7 +988,7 @@ void CGameMain::endBattleSub() {
     BOOL bChangeArea = (nCurArea != nNextArea);
     if (bChangeArea && (nCurArea == 0 || nNextArea == 0)) bChangeWorld = TRUE;
     if (bNextEvent || bChangeFloor || bChangeArea ||
-        (!CGame::isDbgStartFromBattle() && (USHORT)(CSceneInfo::getCurrentSceneNum() - 1050) < 149)) {
+        (!KH_DW(CGame::isDbgStartFromBattle()) && (USHORT)(CSceneInfo::getCurrentSceneNum() - 1050) < 149)) {
         m_pSubBattle->terminate();
         delete m_pSubBattle;
         m_pSubBattle = NULL;
@@ -1034,7 +1034,7 @@ void CGameMain::endBattleSub() {
     CSceneInfo::update();
     CPlaySpeedCtrl::setPlaySpeed(1.0f);
     CPackMan::setFrameEffect(0, 0, 0, 0);
-    if (m_pSubField && CGame::isDbgStartFromBattle()) {
+    if (m_pSubField && KH_DW(CGame::isDbgStartFromBattle())) {
         CGameWork::rollback(CGameWork::BACKUP_PRIMARY);
     } else if (bChangeFloor) {
         removeConstFloorRsrc();
@@ -1222,7 +1222,7 @@ BOOL CGameMain::reqSave() {
     if (!isPauseEnable()) return FALSE;
     m_nGameProcFlag |= 0x1000;
 #line 2190
-    new (__FILE__ "(2190)") CSaveLoad(this, (SAVELOAD)0, (GAMECLEAR)0);
+    new KH_AT("(2190)") CSaveLoad(this, (SAVELOAD)0, (GAMECLEAR)0);
     return TRUE;
 }
 BOOL CGameMain::reqGameOver(BOOL bHeartless) {
@@ -1249,7 +1249,7 @@ void CGameMain::preGameover() {
     ASSERT(0 == (m_nGameProcFlag & _PROCFLAG_GAMEOVER_PROC));
     m_nGameProcFlag |= _PROCFLAG_GAMEOVER_PROC;
 #line 2239
-    new (__FILE__ "(2239)") CGameOver(this, (m_nGameProcFlag >> 1) & 1);
+    new KH_AT("(2239)") CGameOver(this, (m_nGameProcFlag >> 1) & 1);
 }
 void CGameMain::gameover() {
     if (m_nGameProcFlag & 0x30) {
@@ -1348,21 +1348,21 @@ void CGameMain::exitTheaterMode() {
 }
 void CGameMain::setBlackBeforeEncount(BOOL bBlack) { m_bBlackBeforeEncount = bBlack; }
 BOOL CGameMain::isBlackBeforeEncount() const { return m_bBlackBeforeEncount; }
-CGame::CGame(CTask* pParent, INT nMode) : CTask(pParent, 0x8000) {
-    ignorePlaySpeed(TRUE);
-    CNowLoading::setMode(0);
+KH_DEBUG(CGame::CGame(CTask* pParent, INT nMode) : CTask(pParent, 0x8000) {)
+    KH_DEBUG(ignorePlaySpeed(TRUE);)
+    KH_DEBUG(CNowLoading::setMode(0);)
 #line 2505
-    ASSERT(__null == s_pMain);
-    s_nDbgGameMode = nMode;
-    s_nGameStep = 0;
-}
+    KH_DEBUG(ASSERT(__null == s_pMain);)
+    KH_DEBUG(s_nDbgGameMode = nMode;)
+    KH_DEBUG(s_nGameStep = 0;)
+KH_DEBUG(})
 CGame::CGame(CTask* pParent) : CTask(pParent, 0x8000) {
     ignorePlaySpeed(TRUE);
     CNowLoading::setMode(0);
 #line 2519
     ASSERT(__null == s_pMain);
     s_nGameStep = 0;
-    s_nDbgGameMode = 0;
+    KH_DEBUG(s_nDbgGameMode = 0;)
 }
 CGame::~CGame() {
     s_pFadeMask = NULL;
@@ -1373,16 +1373,16 @@ void CGame::main() {
     case 0:
         CMainApp::startCountPlayTime();
 #line 2551
-        s_pMain = new (__FILE__ "(2551)") CGameMain(*this);
+        s_pMain = new KH_AT("(2551)") CGameMain(*this);
         ASSERT(s_pMain);
 #line 2555
-        s_pFadeMask = new (__FILE__ "(2555)") CFadeIOMask(*this, 0xb);
+        s_pFadeMask = new KH_AT("(2555)") CFadeIOMask(*this, 0xb);
         s_nFadeProcPrio = FADE_PROC_PRIO_0;
         CAtel::createScreenFader();
 #line 2561
-        new (__FILE__ "(2561)") CPreGameParent(this);
+        new KH_AT("(2561)") CPreGameParent(this);
 #line 2564
-        new (__FILE__ "(2564)") CGameParent(this);
+        new KH_AT("(2564)") CGameParent(this);
         s_nGameStep = 1;
         break;
     case 1:
@@ -1561,14 +1561,15 @@ void CGame::startTheaterMode(CTask* pParent, BOOL bSora, SHORT nArea, SHORT nSce
     CSceneInfo::reqChangeScene(nArea, nScene, -1, 1, 1);
     CSceneInfo::update();
 #line 2961
-    new (__FILE__ "(2961)") CGame(pParent);
+    new KH_AT("(2961)") CGame(pParent);
 }
 BOOL CGame::isExitTheaterMode() {
     BOOL bRes = (s_pMain == NULL);
     if (bRes && CMainApp::isFpsHalf()) CMainApp::setFpsFull();
     return bRes;
 }
-INT CGame::getDbgGameMode() { return s_nDbgGameMode; }
-void CGame::dbgStartFromBattle(BOOL bBattle) { s_bDbgStartFromBattle = bBattle; }
-BOOL CGame::isDbgStartFromBattle() { return s_bDbgStartFromBattle; }
+KH_DEBUG(INT CGame::getDbgGameMode() { return s_nDbgGameMode; })
+KH_DEBUG(void CGame::dbgStartFromBattle(BOOL bBattle) { s_bDbgStartFromBattle = bBattle; })
+KH_DEBUG(BOOL CGame::isDbgStartFromBattle() { return s_bDbgStartFromBattle; })
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

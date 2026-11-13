@@ -30,7 +30,7 @@ inline void _enemyGreenrequiemEmptyString() {
 #include "Game/Movement.h"
 #include <math.h>
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 #include "Game/Enemy/BattleEnemyManager.h"
 
@@ -156,3 +156,4 @@ void CEnemyGreenrequiem::recover_() {
 }
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

@@ -2,9 +2,9 @@
 #include "System/HeapMan.h"
 #include "System/Math3D.h"
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
-extern "C" void AssertApp(char* pszFile, int nLine, char* pszMsg, char* pszExp);
+extern "C" void (AssertApp)(char* pszFile, int nLine, char* pszMsg, char* pszExp);
 
 
 extern FVECTOR ONE_VECTOR;
@@ -128,7 +128,7 @@ void CMotData::DecodeBin(const BYTE* inBuf) {
     pSiz = (const INT*)p;
     p += ttl * sizeof(INT);
 #line 195
-    m_pCmp = new (__FILE__ "(195)") CMPFIX[ttl];
+    m_pCmp = new KH_AT("(195)") CMPFIX[ttl];
     ASSERT(m_pCmp);
 
     pCmp = NULL;
@@ -144,11 +144,11 @@ void CMotData::DecodeBin(const BYTE* inBuf) {
     }
     if (nCmp > 0) {
 #line 211
-        pCmp = new (__FILE__ "(211)") CCmpData[nCmp];
+        pCmp = new KH_AT("(211)") CCmpData[nCmp];
         ASSERT(pCmp);
     }
     if (nDataByteSize > 0) {
-        m_pCmpData = new (__FILE__ "(215)") BYTE[nDataByteSize];
+        m_pCmpData = new KH_AT("(215)") BYTE[nDataByteSize];
         ASSERT(m_pCmpData);
     }
 
@@ -712,3 +712,4 @@ inline BOOL CCmpData::IsKeyFrameShort() {
     return m_Flag & 1;
 }
 // SOURCE DATA: .rodata
+// SOURCE DATA SLUS_217.99_retail: .rodata

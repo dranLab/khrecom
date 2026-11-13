@@ -36,32 +36,32 @@ public:
     }
     void set(T* pInstance, void (T::*pfnBeginState)(), void (T::*pfnState)(), void (T::*pfnEndState)()) {
 #line 41 FSM_H_PATH
-        if (!(pInstance)) AssertApp(__FILE__, __LINE__, "pInstance", 0);
+        KH_DEBUG(if (!(pInstance)) AssertApp(__FILE__, __LINE__, "pInstance", 0);)
         m_pInstance = pInstance;
 #line 44 FSM_H_PATH
-        if (!(pfnBeginState)) AssertApp(__FILE__, __LINE__, "pfnBeginState", 0);
+        KH_DEBUG(if (!(pfnBeginState)) AssertApp(__FILE__, __LINE__, "pfnBeginState", 0);)
         m_pfnBeginState = pfnBeginState;
-        if (!(pfnBeginState)) AssertApp(__FILE__, __LINE__, "pfnBeginState", 0);
+        KH_DEBUG(if (!(pfnBeginState)) AssertApp(__FILE__, __LINE__, "pfnBeginState", 0);)
         m_pfnState = pfnState;
-        if (!(pfnBeginState)) AssertApp(__FILE__, __LINE__, "pfnBeginState", 0);
+        KH_DEBUG(if (!(pfnBeginState)) AssertApp(__FILE__, __LINE__, "pfnBeginState", 0);)
         m_pfnEndState = pfnEndState;
     }
 
     virtual void executeBeginState() {
 #line 57 FSM_H_PATH
-        if (!(m_pInstance)) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
+        KH_DEBUG(if (!(m_pInstance)) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);)
         if (m_pfnBeginState) (m_pInstance->*m_pfnBeginState)();
     }
 
     virtual void executeState() {
 #line 65 FSM_H_PATH
-        if (!(m_pInstance)) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
+        KH_DEBUG(if (!(m_pInstance)) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);)
         if (m_pfnState) (m_pInstance->*m_pfnState)();
     }
 
     virtual void executeEndState() {
 #line 73 FSM_H_PATH
-        if (!(m_pInstance)) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
+        KH_DEBUG(if (!(m_pInstance)) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);)
         if (m_pfnEndState) (m_pInstance->*m_pfnEndState)();
     }
 };

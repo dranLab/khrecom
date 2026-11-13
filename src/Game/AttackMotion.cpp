@@ -25,7 +25,7 @@ void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 
 
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 namespace AttackMotion {
 COLL_TYPE g_CollType[5] = {COLL_TYPE_POINT, COLL_TYPE_SPHERE, COLL_TYPE_POLY3, COLL_TYPE_CAPSULE, COLL_TYPE_CIRCLE};
@@ -50,7 +50,7 @@ CAttackMotionCtrl::~CAttackMotionCtrl() {
 BOOL CAttackMotionCtrl::initialize(CEntity* inOwner, COLL_KIND inCollKind) {
     ASSERT(inOwner);
 #line 62
-    m_pCollAttack = new (__FILE__ "(62)") CCollAttack;
+    m_pCollAttack = new KH_AT("(62)") CCollAttack;
     if (!m_pCollAttack) {
         return FALSE;
     }
@@ -363,7 +363,7 @@ BOOL CAttackMotion::initialize(ATK_COLL_PARAM* inAtkCollParam, INT inCount) {
     }
     m_iAtkMotCtrlCount = 12;
 #line 469
-    m_pAtkMotCtrl = new (__FILE__ "(469)") CAttackMotionCtrl[12];
+    m_pAtkMotCtrl = new KH_AT("(469)") CAttackMotionCtrl[12];
     if (!m_pAtkMotCtrl) {
         m_iAtkMotCtrlCount = 0;
         return FALSE;
@@ -585,3 +585,4 @@ BOOL CAttackMotion::checkOnCollisionAtkKind(ATK_KIND inAtkKind) {
 }
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

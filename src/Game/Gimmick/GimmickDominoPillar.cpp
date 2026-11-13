@@ -139,3 +139,4 @@ void CGimmickDominoPillar::stateHitAttack() {}
 
 void CGimmickDominoPillar::endStateHitAttack() {}
 // SOURCE DATA: .rodata
+// SOURCE DATA SLUS_217.99_retail: .rodata

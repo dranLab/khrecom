@@ -79,7 +79,7 @@ BOOL C2DLay::init(void* pLad, const CHAR* pBaseName) {
     if (!p) return FALSE;
     *p = '\0';
 
-    m_pSeqHandle = new (__FILE__ "(63)") HANDLE[m_nSequenceUnitMax];
+    m_pSeqHandle = new KH_AT("(63)") HANDLE[m_nSequenceUnitMax];
     for (i = 0; i < m_nSequenceUnitMax; i++) {
         void* pData = (CHAR*)pLad + m_pLaySequenceUnit[i].ofs;
         sprintf(szSeqName, "%s:%02d", szName, i);
@@ -93,7 +93,7 @@ HANDLE C2DLay::create(UINT inNo) {
     LAY_LAYOUT* pLayout = &m_pLayLayout[inNo];
     UINT nPos = pLayout->pos;
     UINT nMax = pLayout->max;
-    C2DLayObj* p2DLayObj = new (__FILE__ "(84)") C2DLayObj;
+    C2DLayObj* p2DLayObj = new KH_AT("(84)") C2DLayObj;
     HANDLE handle = p2DLayObj->create(m_hBase, nMax, &m_pLayScreen[nPos], m_pSeqHandle);
     if (!handle && p2DLayObj) delete p2DLayObj;
     return handle;
@@ -153,7 +153,7 @@ void C2DLay::enableDisp(HANDLE handle, BOOL bEnable) {
 
 #line 267
 void C2DLay::destroy(HANDLE handle) {
-    if (!(FALSE)) AssertApp(__FILE__, __LINE__, "FALSE", 0);
+    KH_DEBUG(if (!(FALSE)) AssertApp(__FILE__, __LINE__, "FALSE", 0);)
 }
 
 void C2DLay::_main() {}
@@ -163,3 +163,4 @@ void C2DLay::_disp() {}
 }  // namespace D2
 
 // SOURCE DATA: .rodata
+// SOURCE DATA SLUS_217.99_retail: .rodata

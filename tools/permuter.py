@@ -47,6 +47,8 @@ sys.path.insert(0, str(ROOT / "tools"))
 from compare_compilers import functions  # noqa: E402
 from funcdiff import disassemble  # noqa: E402
 
+from versions import default_version  # noqa: E402
+
 KEYWORDS = {"if", "else", "for", "while", "do", "switch", "case", "default", "return", "break", "continue", "goto",
             "sizeof", "int", "unsigned", "signed", "char", "short", "long", "float", "double", "void", "struct",
             "union", "const", "volatile", "static", "register", "inline", "typedef", "enum", "extern"}
@@ -647,7 +649,7 @@ def main() -> None:
                         "whose parameter list contains PARAMS (e.g. 'const FVECTOR&')")
     args = parser.parse_args()
 
-    version = sorted(p.name for p in (ROOT / "config").iterdir() if (p / f"{p.name}.yaml").exists())[0]
+    version = default_version()
     opts = yaml.safe_load((ROOT / "config" / version / f"{version}.yaml").read_text())["options"]
     build = opts["build_path"]
     source = next((ROOT / "src" / f"{args.unit}{e}" for e in (".c", ".cpp")

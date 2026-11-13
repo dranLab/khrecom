@@ -68,8 +68,8 @@ public:
 #endif
 #line 64 CARD_H_PATH
     static CCard& initialize() {
-        if (!(__null == m_pInstance)) AssertApp(__FILE__, __LINE__, "__null == m_pInstance", 0);
-        m_pInstance = new (__FILE__ "(66)") CCard;
+        KH_DEBUG(if (!(__null == m_pInstance)) AssertApp(__FILE__, __LINE__, "__null == m_pInstance", 0);)
+        m_pInstance = new KH_AT("(66)") CCard;
         return *m_pInstance;
     }
     static void finalize() {

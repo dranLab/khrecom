@@ -73,3 +73,4 @@ void sceIpuInit(void)
     IPU_WAIT();
 }
 // SOURCE DATA: .data
+// SOURCE DATA SLUS_217.99_retail: .data

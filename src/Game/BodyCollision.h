@@ -33,12 +33,12 @@ private:
 
     void setFlag(UINT inSet, UINT inMask) { m_uiFlag = (m_uiFlag | inSet) & ~inMask; }
     void setSysBodyFlag(INT inKind, UINT inSet, UINT inMask) {
-        if (!(0 <= inKind && inKind < 2)) AssertApp(__FILE__, __LINE__, "0 <= inKind && inKind < COLLISION_KIND_MAX", 0);
+        KH_DEBUG(if (!(0 <= inKind && inKind < 2)) AssertApp(__FILE__, __LINE__, "0 <= inKind && inKind < COLLISION_KIND_MAX", 0);)
         m_uiSysBodyFlag[inKind] = (m_uiSysBodyFlag[inKind] | inSet) & ~inMask;
     }
 
     void setUserBodyFlag(INT inKind, UINT inSet, UINT inMask) {
-        if (!(0 <= inKind && inKind < 2)) AssertApp(__FILE__, __LINE__, "0 <= inKind && inKind < COLLISION_KIND_MAX", 0);
+        KH_DEBUG(if (!(0 <= inKind && inKind < 2)) AssertApp(__FILE__, __LINE__, "0 <= inKind && inKind < COLLISION_KIND_MAX", 0);)
         m_uiUserBodyFlag[inKind] = (m_uiUserBodyFlag[inKind] | inSet) & ~inMask;
     }
     void setHitCollBody(CCollBody* inHit) { m_pHit = inHit; } friend class CBattleEnemy; // MATCH: Game/Enemy/BattleEnemy (stateTornado) accesses members directly (friends are not in the debug info)

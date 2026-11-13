@@ -11,12 +11,12 @@ struct _GPrimCopy {
     void createFV(INT n) {
 #line 613 "System/Graphic/GPrim.h"
         m_V = (T*)com_malloc_d(n, __FILE__ "(613)", (UINT)-1);
-        if (!m_V) AssertApp(__FILE__, __LINE__, "m_V", 0);
+        KH_DEBUG(if (!m_V) AssertApp(__FILE__, __LINE__, "m_V", 0);)
     }
     void createFTV(INT n) {
 #line 684
         m_V = (T*)com_malloc_d(n, __FILE__ "(684)", (UINT)-1);
-        if (!m_V) AssertApp(__FILE__, __LINE__, "m_V", 0);
+        KH_DEBUG(if (!m_V) AssertApp(__FILE__, __LINE__, "m_V", 0);)
     }
 };
 inline void _gprimCopy(_GPrimCopy<FVERTEX>* p) {
@@ -84,10 +84,10 @@ BOOL C2DSeq::init(void* pSqd, const CHAR* pBaseName) {
 HANDLE C2DSeq::create(UINT inNo) {
     if (inNo >= (UINT)m_nSequenceMax) return 0;
     m_pTexInfo = CRsrcDB::getRsrcTex(m_pTexName, NAME_CASE_SENSITIVE);
-    if (!m_pTexInfo) m_pTexInfo = CRsrcDB::getRsrcTex("error", NAME_CASE_SENSITIVE);
+    KH_DEBUG(if (!m_pTexInfo) m_pTexInfo = CRsrcDB::getRsrcTex("error", NAME_CASE_SENSITIVE);)
     SEQ_SEQUENCE* pSeqSequence = &m_pSeqSequence[inNo];
 #line 73
-    C2DSeqObj* p2DSeqObj = new (__FILE__ "(73)") C2DSeqObj;
+    C2DSeqObj* p2DSeqObj = new KH_AT("(73)") C2DSeqObj;
     HANDLE handle = p2DSeqObj->create(getBaseHandle(), m_pTexInfo, pSeqSequence, m_pSeqAnimation, m_pSprGroup,
                                       m_pSprParts, m_pSprSprite, NULL);
     if (!handle) {
@@ -102,10 +102,10 @@ HANDLE C2DSeq::create(UINT inNo) {
 HANDLE C2DSeq::create(UINT inNo, SeqControl* pSeqControl) {
     if (inNo >= (UINT)m_nSequenceMax) return 0;
     m_pTexInfo = CRsrcDB::getRsrcTex(m_pTexName, NAME_CASE_SENSITIVE);
-    if (!m_pTexInfo) m_pTexInfo = CRsrcDB::getRsrcTex("error", NAME_CASE_SENSITIVE);
+    KH_DEBUG(if (!m_pTexInfo) m_pTexInfo = CRsrcDB::getRsrcTex("error", NAME_CASE_SENSITIVE);)
     SEQ_SEQUENCE* pSeqSequence = &m_pSeqSequence[inNo];
 #line 110
-    C2DSeqObj* p2DSeqObj = new (__FILE__ "(110)") C2DSeqObj(pSeqControl);
+    C2DSeqObj* p2DSeqObj = new KH_AT("(110)") C2DSeqObj(pSeqControl);
     HANDLE handle = p2DSeqObj->create(getBaseHandle(), m_pTexInfo, pSeqSequence, m_pSeqAnimation, m_pSprGroup,
                                       m_pSprParts, m_pSprSprite, NULL);
     if (!handle) {
@@ -119,10 +119,10 @@ HANDLE C2DSeq::create(UINT inNo, SeqControl* pSeqControl) {
 HANDLE C2DSeq::create(LAY_SCREEN* pLayScreen) {
     if (pLayScreen->sequence_id >= (UINT)m_nSequenceMax) return 0;
     m_pTexInfo = CRsrcDB::getRsrcTex(m_pTexName, NAME_CASE_SENSITIVE);
-    if (!m_pTexInfo) m_pTexInfo = CRsrcDB::getRsrcTex("error", NAME_CASE_SENSITIVE);
+    KH_DEBUG(if (!m_pTexInfo) m_pTexInfo = CRsrcDB::getRsrcTex("error", NAME_CASE_SENSITIVE);)
     SEQ_SEQUENCE* pSeqSequence = &m_pSeqSequence[pLayScreen->sequence_id];
 #line 145
-    C2DSeqObj* p2DSeqObj = new (__FILE__ "(145)") C2DSeqObj;
+    C2DSeqObj* p2DSeqObj = new KH_AT("(145)") C2DSeqObj;
     HANDLE handle = p2DSeqObj->create(getBaseHandle(), m_pTexInfo, pSeqSequence, m_pSeqAnimation, m_pSprGroup,
                                       m_pSprParts, m_pSprSprite, pLayScreen);
     if (!handle) {
@@ -137,10 +137,10 @@ HANDLE C2DSeq::create(LAY_SCREEN* pLayScreen) {
 HANDLE C2DSeq::createSeq(UINT inUnitNo, UINT inNo, SeqControl* pSeqControl) {
     if (inNo >= (UINT)m_nSequenceMax) return 0;
     m_pTexInfo = CRsrcDB::getRsrcTex(m_pTexName, NAME_CASE_SENSITIVE);
-    if (!m_pTexInfo) m_pTexInfo = CRsrcDB::getRsrcTex("error", NAME_CASE_SENSITIVE);
+    KH_DEBUG(if (!m_pTexInfo) m_pTexInfo = CRsrcDB::getRsrcTex("error", NAME_CASE_SENSITIVE);)
     SEQ_SEQUENCE* pSeqSequence = &m_pSeqSequence[inNo];
 #line 184
-    C2DSeqObj* p2DSeqObj = new (__FILE__ "(184)") C2DSeqObj(pSeqControl);
+    C2DSeqObj* p2DSeqObj = new KH_AT("(184)") C2DSeqObj(pSeqControl);
     HANDLE handle = p2DSeqObj->create(getBaseHandle(), m_pTexInfo, pSeqSequence, m_pSeqAnimation, m_pSprGroup,
                                       m_pSprParts, m_pSprSprite, NULL);
     if (!handle) {
@@ -154,7 +154,7 @@ HANDLE C2DSeq::createSeq(UINT inUnitNo, UINT inNo, SeqControl* pSeqControl) {
 
 HANDLE C2DSeq::createFnt(C2DFnt* p2DFnt, SeqControl* pSeqControl) {
 #line 211
-    C2DSeqObj* p2DSeqObj = new (__FILE__ "(211)") C2DSeqObj(pSeqControl);
+    C2DSeqObj* p2DSeqObj = new KH_AT("(211)") C2DSeqObj(pSeqControl);
     HANDLE handle = p2DSeqObj->createFnt(getBaseHandle(), p2DFnt);
     if (!handle) {
         if (p2DSeqObj) delete p2DSeqObj;
@@ -171,10 +171,10 @@ HANDLE C2DSeq::replaceSeq(HANDLE hCurrent, UINT inNo, SeqControl* pSeqControl) {
     C2DSeqObj* pCurrent = (C2DSeqObj*)C2DMan::get2DOSLCManager().get2DO(hCurrent);
     if (!pCurrent) return 0;
     m_pTexInfo = CRsrcDB::getRsrcTex(m_pTexName, NAME_CASE_SENSITIVE);
-    if (!m_pTexInfo) m_pTexInfo = CRsrcDB::getRsrcTex("error", NAME_CASE_SENSITIVE);
+    KH_DEBUG(if (!m_pTexInfo) m_pTexInfo = CRsrcDB::getRsrcTex("error", NAME_CASE_SENSITIVE);)
     SEQ_SEQUENCE* pSeqSequence = &m_pSeqSequence[inNo];
 #line 245
-    C2DSeqObj* p2DSeqObj = new (__FILE__ "(245)") C2DSeqObj(pSeqControl);
+    C2DSeqObj* p2DSeqObj = new KH_AT("(245)") C2DSeqObj(pSeqControl);
     HANDLE handle = p2DSeqObj->create(getBaseHandle(), m_pTexInfo, pSeqSequence, m_pSeqAnimation, m_pSprGroup,
                                       m_pSprParts, m_pSprSprite, NULL);
     if (!handle) {
@@ -205,7 +205,7 @@ HANDLE C2DSeq::replaceFnt(HANDLE hCurrent, C2DFnt* p2DFnt, SeqControl* pSeqContr
     C2DSeqObj* pCurrent = (C2DSeqObj*)C2DMan::get2DOSLCManager().get2DO(hCurrent);
     if (!pCurrent) return 0;
 #line 287
-    C2DSeqObj* p2DSeqObj = new (__FILE__ "(287)") C2DSeqObj(pSeqControl);
+    C2DSeqObj* p2DSeqObj = new KH_AT("(287)") C2DSeqObj(pSeqControl);
     HANDLE handle = p2DSeqObj->createFnt(getBaseHandle(), p2DFnt);
     if (!handle) {
         if (p2DSeqObj) delete p2DSeqObj;
@@ -257,3 +257,4 @@ BOOL C2DSeq::isEnd(HANDLE handle) {
 }  // namespace D2
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data

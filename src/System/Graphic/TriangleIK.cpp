@@ -11,7 +11,7 @@
 #include "System/Graphic/Effect/effect.h"
 #include "System/Graphic/TriangleIK.h"
 #include "System/Graphic/Effect/EffectMan.h"
-#include "System/Graphic/Camera.h"
+// MATCH: no Camera.h here (nothing uses it): it brings Task.h, whose getDebugInfo "" retail's .rodata lacks
 #include "Game/Collision/CollMap.h"
 #include "System/Math3D.h"
 #include "System/Debug.h"
@@ -381,3 +381,4 @@ void CLegIK::updateFootEffect(CCoords& Crds) {
     }
 }
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

@@ -41,8 +41,8 @@ CLockOnManager::~CLockOnManager() {
 #line 53
 CLockOnManager& CLockOnManager::getInstance() {
     if (m_pInstance == NULL) {
-        m_pInstance = new (__FILE__ "(55)") CLockOnManager;
-        if (!m_pInstance) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
+        m_pInstance = new KH_AT("(55)") CLockOnManager;
+        KH_DEBUG(if (!m_pInstance) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);)
     }
     return *m_pInstance;
 }
@@ -237,3 +237,4 @@ HANDLE CLockOnManager::changeLockOnObject_(HANDLE inHandle) {
 } // namespace LockOnManager
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

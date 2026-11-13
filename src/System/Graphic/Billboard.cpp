@@ -121,3 +121,4 @@ void CBillboardHelper::vu0CalcBillboardMatrix_vf02_05(const FVECTOR& vInPos, con
 }
 
 // SOURCE DATA: .rodata
+// SOURCE DATA SLUS_217.99_retail: .rodata

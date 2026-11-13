@@ -58,7 +58,7 @@ CBaseGimmick::CBaseGimmick(CTask* inParent, const ZONEPARTS& inParts)
         initFSM_();
     } else {
 #line 148
-        m_pMove = new (__FILE__ "(148)") CMovement(this);
+        m_pMove = new KH_AT("(148)") CMovement(this);
         if (!m_pMove) {
             out();
             return;
@@ -144,7 +144,7 @@ void CBaseGimmick::lastUpdate() {
 static inline void _setNewState(CState*& p, CState& NewState) { p = &NewState; }
 #line 328
 void CBaseGimmick::changeGimmickState(INT inState) {
-    if (!(0 <= inState && inState < GM_STATE_MAX)) AssertApp(__FILE__, __LINE__, "0 <= inState && inState < GM_STATE_MAX", 0);
+    KH_DEBUG(if (!(0 <= inState && inState < GM_STATE_MAX)) AssertApp(__FILE__, __LINE__, "0 <= inState && inState < GM_STATE_MAX", 0);)
     _setNewState(m_pNewState, m_GimmickState[inState]);
 }
 
@@ -176,7 +176,7 @@ BOOL CBaseGimmick::hitTest_() {
     if (!m_pBodyColl->isHit()) return FALSE;
     CCollBody* hit = m_pBodyColl->getHitCollBody();
 #line 384
-    if (!(hit)) AssertApp(__FILE__, __LINE__, "hit", 0);
+    KH_DEBUG(if (!(hit)) AssertApp(__FILE__, __LINE__, "hit", 0);)
     switch (hit->getDamageKind()) {
     case 7:
     case 8:
@@ -234,3 +234,4 @@ INT CBaseGimmick::saveStat(INT in_Stat) {
 }
 
 // SOURCE DATA: .rodata
+// SOURCE DATA SLUS_217.99_retail: .rodata

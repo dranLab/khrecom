@@ -62,7 +62,7 @@ void SubVector(FVECTOR& outV, const FVECTOR& inV0, const FVECTOR& inV1);
 FLOAT InnerProduct(const FVECTOR& inV0, const FVECTOR& inV1);
 
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 #define SEQ_VSB 0x10000000
 #define SEQ_ID(n) (((n) & 0x0FFFFFFF) % 1000)
@@ -343,14 +343,14 @@ void CSound::initialize() {
     _setBGMMasterVolume(128);
     for (i = 0; i < 2; i++) {
 #line 408
-        s_pBGMAgents[i] = new (__FILE__ "(408)") CBGMAgentStream(i);
+        s_pBGMAgents[i] = new KH_AT("(408)") CBGMAgentStream(i);
         ASSERT(s_pBGMAgents[i]);
     }
 #line 417
-    s_pVoiceAgent = new (__FILE__ "(417)") CVoiceAgent(i);
+    s_pVoiceAgent = new KH_AT("(417)") CVoiceAgent(i);
     ASSERT(s_pVoiceAgent);
 #line 424
-    s_pBGMMasterVolAgent = new (__FILE__ "(424)") CMasterVolAgent;
+    s_pBGMMasterVolAgent = new KH_AT("(424)") CMasterVolAgent;
     ASSERT(s_pBGMMasterVolAgent);
 }
 
@@ -1886,3 +1886,4 @@ static CHAR* _getBgmName_withID(UINT nID) {
     return s_BgmTbl[nID - 1];
 }
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .data .rodata

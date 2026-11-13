@@ -154,7 +154,7 @@ private:
     LIGHTDATA m_MapLight;     /* 0x1608 */
     CSky* m_pSky;             /* 0x1628 */
     CMapLightUnit* m_LightUnit; /* 0x162c */
-    C3DLineStrip m_gpPosDir;  /* 0x1630 */
+    KH_DEBUG(C3DLineStrip m_gpPosDir;  /* 0x1630 */)
 
 public:
     CMap(CTask* p, UINT nRsrcGrpID);

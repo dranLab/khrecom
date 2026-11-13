@@ -265,3 +265,4 @@ void CGimmickOnceReaction::GimColChangeMain() {
     }
 }
 // SOURCE DATA: .rodata
+// SOURCE DATA SLUS_217.99_retail: .rodata

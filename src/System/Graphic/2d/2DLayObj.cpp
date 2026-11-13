@@ -64,7 +64,7 @@ C2DLayObj::~C2DLayObj() {
 HANDLE C2DLayObj::create(HANDLE handle, UINT nScreen, LAY_SCREEN* pLayScreen, HANDLE* pSeqHandle) {
     UINT i;
     m_nSeqObj = nScreen;
-    m_pSeqObjHandle = new (__FILE__ "(65)") HANDLE[nScreen];
+    m_pSeqObjHandle = new KH_AT("(65)") HANDLE[nScreen];
     for (i = 0; i < nScreen; i++, pLayScreen++) {
         C2DBase* p2DBase = C2DMan::getBase(pSeqHandle[pLayScreen->sequence_unit]);
         if (p2DBase) {
@@ -118,3 +118,4 @@ void C2DLayObj::enableDisp(HANDLE handle, BOOL bEnable) {
 }  // namespace D2
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data

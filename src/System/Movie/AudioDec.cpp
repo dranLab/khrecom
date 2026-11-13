@@ -352,7 +352,7 @@ void CAudioDecImpl::getIopEmptyArea(INT& pd0, INT& d0, INT& pd1, INT& d1, INT nP
 }
 
 void CAudioDec::create() {
-    s_pAudioDec = new (__FILE__ "(631)") CAudioDecImpl;
+    s_pAudioDec = new KH_AT("(631)") CAudioDecImpl;
     if (!s_pAudioDec) {
         AssertApp(__FILE__, 632, "s_pAudioDec", 0);
     }
@@ -411,7 +411,7 @@ void CAudioDec::reset() {
     if (s_pAudioDec) {
         s_pAudioDec->reset();
     } else {
-        s_pAudioDec = new (__FILE__ "(701)") CAudioDecImpl;
+        s_pAudioDec = new KH_AT("(701)") CAudioDecImpl;
     }
 }
 
@@ -494,3 +494,4 @@ static int _copy2area(BYTE* pd0, INT nD0, BYTE* pd1, INT nD1, const BYTE* pSrc, 
 }
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data

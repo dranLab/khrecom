@@ -24,7 +24,7 @@
 
 
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 #include "System/RsrcDB.h"
 
@@ -170,12 +170,12 @@ void CNaviMap::_initialize() {
         if (pModelTbl) {
             INT i;
 #line 194
-            m_pModels = new (__FILE__ "(194)") CModel[m_nModelCount];
+            m_pModels = new KH_AT("(194)") CModel[m_nModelCount];
             ASSERT(m_pModels);
             for (i = 0; i < m_nModelCount; i++) {
                 if (pModelTbl[i]->enableLight()) {
 #line 201
-                    m_pLight = new (__FILE__ "(201)") CLightUnit;
+                    m_pLight = new KH_AT("(201)") CLightUnit;
                     ASSERT(m_pLight);
                     break;
                 }
@@ -215,11 +215,11 @@ void CNaviMap::_initialize() {
     if (pRoom) {
         m_cardRoom.init(pRoom->getRoomNameCardID(), 0xFF);
 #line 254
-        m_pRoomName = new (__FILE__ "(254)") C2DSeqCtrl[2];
+        m_pRoomName = new KH_AT("(254)") C2DSeqCtrl[2];
     }
     if (m_cardRoom.m_nCategory20 == 9) {
 #line 257
-        m_pCard = new (__FILE__ "(257)") C2DCard;
+        m_pCard = new KH_AT("(257)") C2DCard;
     }
 }
 
@@ -352,7 +352,7 @@ void CNaviMap::main() {
         FVECTOR rot;
         rot.x = _roundRot(_deg2rad(55.0f));
         rot.y = 0.0f;
-        if (2 == DebugWork::g_dw.player.iTemp) {
+        if (2 == KH_DW(DebugWork::g_dw.player.iTemp)) {
             rot = DebugWork::g_dw.player.vTemp;
             rot.x = _roundRot(_deg2rad(rot.x * 100.0f));
         }
@@ -381,7 +381,7 @@ void CNaviMap::disp() {
     if (m_uiDispFlag & 0x800000) {
         return;
     }
-    if (!DebugWork::g_dw.sys.m_iFukidasiDisp) {
+    if (!KH_DW_ON(DebugWork::g_dw.sys.m_iFukidasiDisp)) {
         return;
     }
     if (!m_pModels) {
@@ -471,7 +471,7 @@ void CNaviMap::initRoomName(const CHAR* inFile, UINT inIdxSeq) {
     G_RGBA rgba;
     rgba.col = 0x80808080;
 #line 689
-    C2DFnt* p2DFnt = new (__FILE__ "(689)") C2DFnt(0, 0, &rgba, 13, m_cardRoom.getName(), 0x42);
+    C2DFnt* p2DFnt = new KH_AT("(689)") C2DFnt(0, 0, &rgba, 13, m_cardRoom.getName(), 0x42);
     pSeq->addFnt((LPCTSTR)inFile, 0, p2DFnt);
     pSeq->enableColorCtrl(TRUE);
     if (!m_pCard) {
@@ -507,3 +507,4 @@ void CNaviMap::initRoomName(const CHAR* inFile, UINT inIdxSeq) {
 }  // namespace Gauge
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

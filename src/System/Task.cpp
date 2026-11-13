@@ -11,7 +11,7 @@
 
 
 #define _ASSERT_STR(e) #e
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, _ASSERT_STR(e), 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, _ASSERT_STR(e), 0))
 
 
 
@@ -24,10 +24,10 @@ CTask::CTask(CTask* pParent, INT nProcPrio)
         pParent->addChild(*this);
     }
     CMainApp::incObjCount();
-    m_pszDebugInfo = CHeapMan::getDebugComment(this);
-    if (!m_pszDebugInfo) {
-        m_pszDebugInfo = "";
-    }
+    KH_DEBUG(m_pszDebugInfo = CHeapMan::getDebugComment(this);)
+    KH_DEBUG(if (!m_pszDebugInfo) {)
+    KH_DEBUG(    m_pszDebugInfo = "";)
+    KH_DEBUG(})
 }
 
 CTask::~CTask() {
@@ -139,7 +139,7 @@ TIMEQ CTask::getDispFrameRate() const {
 void CTask::createCoords() {
     if (!m_pCrds || !isCoordManaged()) {
 #line 214
-        m_pCrds = new (__FILE__ "(214)") CCoords(isSecondaryObj() ? CCoords::_PP_SECONDARY : CCoords::_PP_PRIMARY);
+        m_pCrds = new KH_AT("(214)") CCoords(isSecondaryObj() ? CCoords::_PP_SECONDARY : CCoords::_PP_PRIMARY);
         ASSERT(m_pCrds);
         manageCoord(TRUE);
     }
@@ -353,3 +353,4 @@ void CTask::removeMainTask() {
     CTaskMan::removeMainTask(*this);
 }
 // SOURCE DATA: .rodata
+// SOURCE DATA SLUS_217.99_retail: .rodata

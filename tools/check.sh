@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Gate before committing (workers) and after merging (coordinator):
-#   1. configure.py (picks up new/changed sources and SOURCE DATA comments)
-#   2. full build, which only succeeds if the rebuilt image matches the original byte for byte
+#   1. configure.py (picks up new/changed sources and SOURCE DATA comments), every version of config/versions.yaml
+#      whose original ELF is in iso/ (the others are reported as SKIPPED)
+#   2. full build, which only succeeds if every rebuilt image matches its original byte for byte
 #   3. objdiff overview of every file compiled from source (informational)
 #   4. whether this branch contains the current main, and uncommitted changes
 # Exit code 0 only if 1 and 2 pass.
@@ -36,17 +37,20 @@ if ! $PY configure.py > build.configure.log 2>&1; then
     tail -20 build.configure.log
     exit 1
 fi
-tail -1 build.configure.log
+grep -E "^[A-Za-z0-9_.]+: (wrote|SKIPPED)" build.configure.log
 
 echo "== build"
+built=$(sed -n 's|^subninja build/\(.*\)/build.ninja$|\1|p' build.ninja | tr '\n' ' ')
 if ninja > build.ninja.log 2>&1; then
-    echo "OK: the rebuilt image matches the original"
+    echo "OK: the rebuilt images match the originals ($built)"
 else
-    grep -E "^FAILED|: [Ee]rror|[Ee]rror:|did NOT match" build.ninja.log | head -20
-    if grep -q "did NOT match" build.ninja.log; then
-        echo "-- where the image differs (tools/imagediff.py):"
-        $PY tools/imagediff.py -n 5
-    fi
+    grep -E "^FAILED|: [Ee]rror|[Ee]rror:|did NOT match|: FAILED$" build.ninja.log | head -20
+    for v in $built; do
+        if grep -q "build/$v/$v.rom: FAILED" build.ninja.log; then
+            echo "-- where the $v image differs (tools/imagediff.py):"
+            $PY tools/imagediff.py --version "$v" -n 5
+        fi
+    done
     echo "FAIL: see build.ninja.log"
     status=1
 fi

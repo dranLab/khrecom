@@ -1,5 +1,6 @@
 #ifndef KHTYPES_H
 #define KHTYPES_H
+#include "khversion.h"
 
 /* The game's basic types, as recorded in the .mdebug debug info. EE-GCC: int and LONG are 32-bit,
  * long is 64-bit, and TImode gives the EE's 128-bit integers. */

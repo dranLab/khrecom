@@ -1,0 +1,58 @@
+# Read by configure.py. The US retail ELF (docs/retail-plan.md): the beta's toolchains; the libraries are the same
+# objects. `sources`: the units whose source in src/ this version builds (a list of fnmatch patterns, or a file of them;
+# the others stay splat's assembly of this version): tools/retail_units.py maintains the file.
+sources: config/SLUS_217.99_retail/sources.txt
+elf: iso/SLUS_217.99_retail     # original ELF (not committed): the US retail disc's boot ELF
+compiler: ee-gcc2.95.3-136   # SN Systems ProDG build (Windows, runs under wibo)
+cflags: -O2 -G0 -fno-exceptions -fno-rtti -DKH_RETAIL   # the beta's without -g (docs/retail.md): weak functions and vtables then go to
+                                            # .gnu.linkonce sections, as in the retail link; KH_RETAIL: include/khversion.h
+source_root: c:/KHCOM/MainApp/   # original path prefix of __FILE__ (src/ in this repo)
+# Per-unit toolchains (the libraries were built with other compilers than the game): the first entry whose `match`
+# (an fnmatch pattern on the unit name) matches overrides compiler / cflags / source_root. More specific first.
+overrides:
+  - match: lib/hncAt3dec        # ATRAC3 decoder front end: saves registers 8 bytes apart like 2.96
+    compiler: ee-gcc2.96
+    cflags: -O2 -G0 -g
+    source_root: null
+    assembler: ee-gcc2.96
+  - match: lib/libat3dec        # ATRAC3 decoder core: saves registers 8 bytes apart like 2.96
+    compiler: ee-gcc2.96
+    cflags: -O2 -G0 -g
+    source_root: null
+    assembler: ee-gcc2.96
+  - match: lib/init             # libat3dec (ATRAC3 decoder): atrac2_mode_* only match 2.96
+    compiler: ee-gcc2.96
+    cflags: -O2 -G0 -g
+    source_root: null
+    assembler: ee-gcc2.96
+  - match: lib/src/newlib/*     # newlib libm: the 991111-01 compiler pads div.s (EE erratum, ef_fmod); its as adds hazard nops only before .set noreorder
+    compiler: ee-gcc2.9-991111-01
+    cflags: -O2 -G0 -g -fno-builtin
+    source_root: null
+    assembler: ee-gcc2.9-991111-01
+  - match: lib/src/gcc/libgcc2___default_terminate   # libgcc2.c L_eh: libgcc's Makefile builds it with -fexceptions (frame info in .data)
+    compiler: ee-gcc2.9-991111
+    cflags: -O2 -G0 -g -fexceptions
+    source_root: null
+    assembler: ee-gcc2.9-990721
+  - match: lib/src/gcc/frame    # as below; KH_RETAIL drops the beta's build stamp before frame's .rodata (src/lib/src/gcc/frame.c)
+    compiler: ee-gcc2.9-991111
+    cflags: -O2 -G0 -g -DKH_RETAIL
+    source_root: null
+    assembler: ee-gcc2.9-990721
+  - match: lib/src/gcc/*        # libgcc (GCC 2.9 libgcc2.c): __floatdisf's open jal delay slot needs the 2.9 assembler
+    compiler: ee-gcc2.9-991111
+    cflags: -O2 -G0 -g
+    source_root: null
+    assembler: ee-gcc2.9-990721
+  - match: lib/nodebug/*        # newlib libc / libsn without debug info: the game's toolchain (ProDG 2.95.3-136 + Ps2EeAs; strstr's loop-head nops)
+    compiler: ee-gcc2.95.3-136
+    cflags: -O2 -G0
+    source_root: null
+  - match: lib/*                # Sony SDK: libkernl, libmpeg, libdma, ... (one toolchain; the libs that matched 2.95.3 match it too)
+    compiler: ee-gcc2.9-991111-01  # the 991111 patch release: its only change is nops before div.s (EE erratum), and
+                                   # lib/timer has the only two div.s of the Sony code (all other units build the same).
+                                   # kCopy in alarm.c only matches the 991111 family; libmpeg error.c saves with sd (2.95.3: sq)
+    cflags: -O2 -G0 -g
+    source_root: null
+    assembler: ee-gcc2.96       # GNU ee-as 2.10, not Ps2EeAs: it fills open delay slots, pads short loops (lib/diei)

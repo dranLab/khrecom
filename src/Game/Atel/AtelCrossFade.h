@@ -41,10 +41,10 @@ public:
         if (m_pInstance) return;
         TRACE("CAtelCrossFade::initialize\n");
 #line 110 ATELCROSSFADE_H_PATH
-        if (!(__null == m_pInstance)) AssertApp(__FILE__, __LINE__, "__null == m_pInstance", 0);
-        m_pInstance = new (__FILE__ "(111)") CAtelCrossFade(pParent);
+        KH_DEBUG(if (!(__null == m_pInstance)) AssertApp(__FILE__, __LINE__, "__null == m_pInstance", 0);)
+        m_pInstance = new KH_AT("(111)") CAtelCrossFade(pParent);
 #line 112
-        if (!(m_pInstance)) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
+        KH_DEBUG(if (!(m_pInstance)) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);)
     }
     static void finalize() {
         CAtelCrossFade*& p = m_pInstance;
@@ -54,7 +54,7 @@ public:
     static CAtelCrossFade& instance() {
         CAtelCrossFade*& p = m_pInstance;
 #line 122
-        if (!(p)) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
+        KH_DEBUG(if (!(p)) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);)
         return *p;
     }
     virtual void main();

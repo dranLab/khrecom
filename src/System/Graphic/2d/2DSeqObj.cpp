@@ -52,7 +52,7 @@ C2DSeqObj::C2DSeqObj(SeqControl* pSeqControl) {
 #line 40
 void C2DSeqObj::initialize() {
     m_uiID++;
-    m_p2DObjList = new (__FILE__ "(43)") C2DObjList;
+    m_p2DObjList = new KH_AT("(43)") C2DObjList;
     m_qTimeExt = -1;
     m_bEnable = 1;
     m_qTime = 0;
@@ -72,7 +72,7 @@ C2DSeqObj::~C2DSeqObj() {
 HANDLE C2DSeqObj::create(HANDLE handle, UINT nSpr, const TexInfo* pTexInfo, SPR_GROUP* pSprGroupe,
                          SPR_PARTS* pSprParts) {
     m_bSeq = 0;
-    if (C2DMan::m_fg2DViewer) setParent();
+    KH_DEBUG(if (C2DMan::m_fg2DViewer) setParent();)
     createSub(nSpr, pTexInfo, pSprGroupe, pSprParts);
     SJ_FOREACH(C2DObj, pEntry, *get2DObjList()) {
         pEntry->enableDisp(TRUE);
@@ -86,7 +86,7 @@ HANDLE C2DSeqObj::create(HANDLE handle, const TexInfo* pTexInfo, SEQ_SEQUENCE* p
                          SEQ_ANIMATION* pSeqAnimation, SPR_GROUP* pSprGroupe, SPR_PARTS* pSprParts,
                          SPR_SPRITE* pSprSprite, LAY_SCREEN* pLayScreen) {
     m_bSeq = 1;
-    if (C2DMan::m_fg2DViewer) setParent();
+    KH_DEBUG(if (C2DMan::m_fg2DViewer) setParent();)
     INT nIndex = pSeqSequence->pos;
     INT nAnim = pSeqSequence->max;
     m_nLoop = pSeqSequence->loop;
@@ -114,7 +114,7 @@ HANDLE C2DSeqObj::create(HANDLE handle, const TexInfo* pTexInfo, SEQ_SEQUENCE* p
 C2DSprObj* C2DSeqObj::createSub(UINT nSpr, const TexInfo* pTexInfo, SPR_GROUP* pSprGroupe, SPR_PARTS* pSprParts) {
     C2DSprObj* p2DSprObj;
     INT i;
-    p2DSprObj = new (__FILE__ "(142)") C2DSprObj(m_pSeqControl, pTexInfo);
+    p2DSprObj = new KH_AT("(142)") C2DSprObj(m_pSeqControl, pTexInfo);
     p2DSprObj->init(nSpr);
     for (i = 0; i < nSpr; i++) {
         p2DSprObj->initSprite(i, &pSprGroupe[i], &pSprParts[pSprGroupe[i].parts_id]);
@@ -129,7 +129,7 @@ HANDLE C2DSeqObj::createFnt(HANDLE handle, C2DFnt* p2DFnt) {
     m_bSeq = 1;
     m_nLoop = 0;
     m_nLoopFrame = 0;
-    p2DFntObj = new (__FILE__ "(164)") C2DFntObj(m_pSeqControl);
+    p2DFntObj = new KH_AT("(164)") C2DFntObj(m_pSeqControl);
     m_qTimeMax = p2DFntObj->init(p2DFnt);
     get2DObjList()->pushBack(*p2DFntObj);
     m_hBaseHandle = handle;
@@ -196,7 +196,7 @@ void C2DSeqObj::_disp() {
     if (fgScissoringEnd) {
         if (!m_pScissoringEnd) {
 #line 253
-            m_pScissoringEnd = new (__FILE__ "(253)") CScissoring;
+            m_pScissoringEnd = new KH_AT("(253)") CScissoring;
             m_pScissoringEnd->setSemiTrans(ALPHA_BLEND);
             m_pScissoringEnd->setDefault();
         }
@@ -234,7 +234,7 @@ void C2DSeqObj::changeTexture(INT inSprIdx, CHAR* pTexName, G_UV* pStart, G_UV* 
         TexInfo* pTexInfo = NULL;
         if (pTexName) {
             pTexInfo = CRsrcDB::getRsrcTex(pTexName, NAME_CASE_SENSITIVE);
-            if (!pTexInfo) pTexInfo = CRsrcDB::getRsrcTex("error", NAME_CASE_SENSITIVE);
+            KH_DEBUG(if (!pTexInfo) pTexInfo = CRsrcDB::getRsrcTex("error", NAME_CASE_SENSITIVE);)
         }
         p2DObj->changeTexture(inSprIdx, pTexInfo, pStart, pEnd);
     }
@@ -248,7 +248,7 @@ void C2DSeqObj::changeTexture(INT inSeqIdx, INT inSprIdx, CHAR* pTexName, G_UV* 
         TexInfo* pTexInfo = NULL;
         if (pTexName) {
             pTexInfo = CRsrcDB::getRsrcTex(pTexName, NAME_CASE_SENSITIVE);
-            if (!pTexInfo) pTexInfo = CRsrcDB::getRsrcTex("error", NAME_CASE_SENSITIVE);
+            KH_DEBUG(if (!pTexInfo) pTexInfo = CRsrcDB::getRsrcTex("error", NAME_CASE_SENSITIVE);)
         }
         p2DObj->changeTexture(inSprIdx, pTexInfo, pStart, pEnd);
     }
@@ -281,3 +281,4 @@ void C2DSeqObj::setFukidasiSize(FLOAT fSizeX, FLOAT fSizeY) {
 }  // namespace D2
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data

@@ -131,8 +131,8 @@ CBullet::~CBullet() {
         if (m_pExtraEffectHandle) delete m_pExtraEffectHandle;
         m_pExtraEffectHandle = NULL;
     }
-    delete m_pCollLines;
-    m_pCollLines = NULL;
+    KH_DEBUG(delete m_pCollLines;)
+    KH_DEBUG(m_pCollLines = NULL;)
     TRACE("class CBullet destructor\n");
 }
 
@@ -144,7 +144,7 @@ BOOL CBullet::setup(const BULLET_PARAM& inParam) {
     pos = inParam.vPos;
     m_uiFlag = inParam.uiFlag;
     if (inParam.iGroupID == 3) {
-        m_pMove = new (__FILE__ "(149)") CMovement(this);
+        m_pMove = new KH_AT("(149)") CMovement(this);
         if (!m_pMove) {
             return FALSE;
         }
@@ -195,7 +195,7 @@ BOOL CBullet::setup(const BULLET_PARAM& inParam) {
     if (inParam.pExtraEffectTbl) {
         m_iExtraEffectHandleNum = inParam.iExtraEffectNum;
         m_pExtraEffectHandle =
-            new (__FILE__ "(233)") HANDLE[inParam.iExtraEffectNum];
+            new KH_AT("(233)") HANDLE[inParam.iExtraEffectNum];
         if (!m_pExtraEffectHandle) {
             return FALSE;
         }
@@ -219,7 +219,7 @@ BOOL CBullet::setup(const BULLET_PARAM& inParam) {
         }
     }
     setTimer(inParam.tqHomingTime);
-    m_pAttack = new (__FILE__ "(279)") CCollAttack;
+    m_pAttack = new KH_AT("(279)") CCollAttack;
     if (!m_pAttack) {
         return FALSE;
     }
@@ -278,48 +278,48 @@ BOOL CBullet::setup(const BULLET_PARAM& inParam) {
     m_State.set(this, &CBullet::beginMainState, &CBullet::mainState, &CBullet::endMainState);
     _setNewState(m_pNewState, m_State);
 #line 352
-    if (CCollDisp::m_fgDisp) {
-        FLOAT deltaRingAngle;
-        G_LINE line;
-        FVECTOR ofs;
-        FMATRIX m;
-        m_pCollLines = new (__FILE__ "(357)") C3DLines;
-        if (!(m_pCollLines)) AssertApp(__FILE__, __LINE__, "m_pCollLines", 0);
-        m_pCollLines->m_pCrd = &Crd(0);
-        {
-            INT ring;
-            INT segNum = 11;
-            deltaRingAngle = 0.62831855f;
-            ofs.set(0.0f, inParam.fShiftY, 0.0f);
-            FMATRIX& w = Crd(0).getWorldMatrix();
-            InverseMatrix(m, w);
-            _apply33(ofs, m, ofs);
-            line.C1.col = line.C0.col = 0xFF00FF00;
-            for (ring = 0; ring < 5; ring++) {
-                FLOAT r0 = sinf(ring * deltaRingAngle);
-                FLOAT r1 = sinf((ring + 1) * deltaRingAngle);
-                FLOAT y0 = cosf(ring * deltaRingAngle);
-                FLOAT y1 = cosf((ring + 1) * deltaRingAngle);
-                INT seg;
-                for (seg = 0; seg < segNum; seg++) {
-                    FLOAT theta = seg * deltaRingAngle;
-                    FLOAT x0 = r0 * sinf(theta);
-                    FLOAT z0 = r0 * cosf(theta);
-                    FLOAT x1 = r1 * sinf(theta);
-                    FLOAT z1 = r1 * cosf(theta);
-                    line.P0.set(x0, y0, z0);
-                    AddVectorXYZ(line.P0, line.P0, ofs);
-                    ScaleVectorXYZ(line.P0, line.P0, inParam.fCollRadius);
-                    line.P1.set(x1, y1, z1);
-                    AddVectorXYZ(line.P1, line.P1, ofs);
-                    ScaleVectorXYZ(line.P1, line.P1, inParam.fCollRadius);
-                    m_pCollLines->m_vLINE.push_back(line);
-                }
-            }
-        }
-    } else {
-        m_pCollLines = NULL;
-    }
+    KH_DEBUG(if (CCollDisp::m_fgDisp) {)
+        KH_DEBUG(FLOAT deltaRingAngle;)
+        KH_DEBUG(G_LINE line;)
+        KH_DEBUG(FVECTOR ofs;)
+        KH_DEBUG(FMATRIX m;)
+        KH_DEBUG(m_pCollLines = new KH_AT("(357)") C3DLines;)
+        KH_DEBUG(if (!(m_pCollLines)) AssertApp(__FILE__, __LINE__, "m_pCollLines", 0);)
+        KH_DEBUG(m_pCollLines->m_pCrd = &Crd(0);)
+        KH_DEBUG({)
+            KH_DEBUG(INT ring;)
+            KH_DEBUG(INT segNum = 11;)
+            KH_DEBUG(deltaRingAngle = 0.62831855f;)
+            KH_DEBUG(ofs.set(0.0f, inParam.fShiftY, 0.0f);)
+            KH_DEBUG(FMATRIX& w = Crd(0).getWorldMatrix();)
+            KH_DEBUG(InverseMatrix(m, w);)
+            KH_DEBUG(_apply33(ofs, m, ofs);)
+            KH_DEBUG(line.C1.col = line.C0.col = 0xFF00FF00;)
+            KH_DEBUG(for (ring = 0; ring < 5; ring++) {)
+                KH_DEBUG(FLOAT r0 = sinf(ring * deltaRingAngle);)
+                KH_DEBUG(FLOAT r1 = sinf((ring + 1) * deltaRingAngle);)
+                KH_DEBUG(FLOAT y0 = cosf(ring * deltaRingAngle);)
+                KH_DEBUG(FLOAT y1 = cosf((ring + 1) * deltaRingAngle);)
+                KH_DEBUG(INT seg;)
+                KH_DEBUG(for (seg = 0; seg < segNum; seg++) {)
+                    KH_DEBUG(FLOAT theta = seg * deltaRingAngle;)
+                    KH_DEBUG(FLOAT x0 = r0 * sinf(theta);)
+                    KH_DEBUG(FLOAT z0 = r0 * cosf(theta);)
+                    KH_DEBUG(FLOAT x1 = r1 * sinf(theta);)
+                    KH_DEBUG(FLOAT z1 = r1 * cosf(theta);)
+                    KH_DEBUG(line.P0.set(x0, y0, z0);)
+                    KH_DEBUG(AddVectorXYZ(line.P0, line.P0, ofs);)
+                    KH_DEBUG(ScaleVectorXYZ(line.P0, line.P0, inParam.fCollRadius);)
+                    KH_DEBUG(line.P1.set(x1, y1, z1);)
+                    KH_DEBUG(AddVectorXYZ(line.P1, line.P1, ofs);)
+                    KH_DEBUG(ScaleVectorXYZ(line.P1, line.P1, inParam.fCollRadius);)
+                    KH_DEBUG(m_pCollLines->m_vLINE.push_back(line);)
+                KH_DEBUG(})
+            KH_DEBUG(})
+        KH_DEBUG(})
+    KH_DEBUG(} else {)
+        KH_DEBUG(m_pCollLines = NULL;)
+    KH_DEBUG(})
     return TRUE;
 }
 
@@ -345,27 +345,27 @@ void CBullet::setCollAttackPos(const FVECTOR& inPos) {
 
 #line 439
 void CBullet::setAttackID(UINT inID) {
-    if (!(m_pAttack)) AssertApp(__FILE__, __LINE__, "m_pAttack", 0);
+    KH_DEBUG(if (!(m_pAttack)) AssertApp(__FILE__, __LINE__, "m_pAttack", 0);)
     m_pAttack->setAttackID(inID);
 }
 
 #line 447
 UINT CBullet::getAttackID() const {
-    if (!(m_pAttack)) AssertApp(__FILE__, __LINE__, "m_pAttack", 0);
+    KH_DEBUG(if (!(m_pAttack)) AssertApp(__FILE__, __LINE__, "m_pAttack", 0);)
     return m_pAttack->getAttackID();
 }
 
 #line 455
 void CBullet::updateAttackID() {
-    if (!(m_pAttack)) AssertApp(__FILE__, __LINE__, "m_pAttack", 0);
+    KH_DEBUG(if (!(m_pAttack)) AssertApp(__FILE__, __LINE__, "m_pAttack", 0);)
     m_pAttack->updateAttackID();
 }
 
 void CBullet::disp() {
     CEntity::disp();
-    if (CCollDisp::m_fgDisp && m_pCollLines) {
-        m_pCollLines->disp();
-    }
+    KH_DEBUG(if (CCollDisp::m_fgDisp && m_pCollLines) {)
+        KH_DEBUG(m_pCollLines->disp();)
+    KH_DEBUG(})
 }
 
 CEffect* CBullet::getAttachEffectBullet() { return CEffectMan::getEffect(m_hEffectHandle); }
@@ -633,7 +633,7 @@ void CBullet::updateShadow() {
         return;
     }
     coll = m_pMove->getMapCollision();
-    if (!(coll)) AssertApp(__FILE__, __LINE__, "coll", 0);
+    KH_DEBUG(if (!(coll)) AssertApp(__FILE__, __LINE__, "coll", 0);)
     pos = getPos();
     pos.y += 0.1f;
     coll->setStartPos(pos);
@@ -718,11 +718,11 @@ BOOL CHomingBullet::setup(const BULLET_PARAM& inParam) {
     m_vTwist.y = 0.008726646f;
     m_vTwist.z = -0.08726646f;
     m_vTwist.w = 1.0f;
-    if (DebugWork::g_dw.player.iTemp == 3) {
-        m_vTwist.w = DebugWork::g_dw.player.vTemp.w;
-        m_vTwist.x = DebugWork::g_dw.player.vTemp.x * 10.0f * 0.017453292f;
-        m_vTwist.y = DebugWork::g_dw.player.vTemp.y * 10.0f * 0.017453292f;
-        m_vTwist.z = DebugWork::g_dw.player.vTemp.z * 10.0f * 0.017453292f;
+    if (KH_DW(DebugWork::g_dw.player.iTemp) == 3) {
+        m_vTwist.w = KH_DW(DebugWork::g_dw.player.vTemp.w);
+        m_vTwist.x = KH_DW(DebugWork::g_dw.player.vTemp.x) * 10.0f * 0.017453292f;
+        m_vTwist.y = KH_DW(DebugWork::g_dw.player.vTemp.y) * 10.0f * 0.017453292f;
+        m_vTwist.z = KH_DW(DebugWork::g_dw.player.vTemp.z) * 10.0f * 0.017453292f;
     }
     m_iStep = 0;
     if (isHitExplodeOnly()) {
@@ -901,8 +901,8 @@ void CHomingBullet::lastUpdate() {
         if (getTimer() > 0) {
             m_pAttack->collideAttack();
         } else {
-            delete m_pCollLines;
-            m_pCollLines = NULL;
+            KH_DEBUG(delete m_pCollLines;)
+            KH_DEBUG(m_pCollLines = NULL;)
         }
     }
     if (m_hEffectHandle && !getAttachEffectBullet()) {
@@ -970,41 +970,41 @@ INT CHomingBullet::initExplode() {
     m_hEffectHandle = makeEffect(4);
     playBulletSE_(1);
     m_iStep++;
-    delete m_pCollLines;
-    m_pCollLines = NULL;
+    KH_DEBUG(delete m_pCollLines;)
+    KH_DEBUG(m_pCollLines = NULL;)
 #line 1524
-    if (_collDispRef()) {
-        FLOAT deltaRingAngle;
-        G_LINE line;
-        m_pCollLines = new (__FILE__ "(1527)") C3DLines;
-        if (!(m_pCollLines)) AssertApp(__FILE__, __LINE__, "m_pCollLines", 0);
-        m_pCollLines->m_pCrd = &Crd(0);
-        {
-            INT ring;
-            INT segNum = 11;
-            deltaRingAngle = 0.62831855f;
-            line.C1.col = line.C0.col = 0xFF00FF00;
-            for (ring = 0; ring < 5; ring++) {
-                FLOAT r0 = sinf(ring * deltaRingAngle);
-                FLOAT r1 = sinf((ring + 1) * deltaRingAngle);
-                FLOAT y0 = cosf(ring * deltaRingAngle);
-                FLOAT y1 = cosf((ring + 1) * deltaRingAngle);
-                INT seg;
-                for (seg = 0; seg < segNum; seg++) {
-                    FLOAT theta = seg * deltaRingAngle;
-                    FLOAT x0 = r0 * sinf(theta);
-                    FLOAT z0 = r0 * cosf(theta);
-                    FLOAT x1 = r1 * sinf(theta);
-                    FLOAT z1 = r1 * cosf(theta);
-                    line.P0.set(x0, y0, z0);
-                    ScaleVectorXYZ(line.P0, line.P0, m_fExplodeRadius);
-                    line.P1.set(x1, y1, z1);
-                    ScaleVectorXYZ(line.P1, line.P1, m_fExplodeRadius);
-                    m_pCollLines->m_vLINE.push_back(line);
-                }
-            }
-        }
-    }
+    KH_DEBUG(if (_collDispRef()) {)
+        KH_DEBUG(FLOAT deltaRingAngle;)
+        KH_DEBUG(G_LINE line;)
+        KH_DEBUG(m_pCollLines = new KH_AT("(1527)") C3DLines;)
+        KH_DEBUG(if (!(m_pCollLines)) AssertApp(__FILE__, __LINE__, "m_pCollLines", 0);)
+        KH_DEBUG(m_pCollLines->m_pCrd = &Crd(0);)
+        KH_DEBUG({)
+            KH_DEBUG(INT ring;)
+            KH_DEBUG(INT segNum = 11;)
+            KH_DEBUG(deltaRingAngle = 0.62831855f;)
+            KH_DEBUG(line.C1.col = line.C0.col = 0xFF00FF00;)
+            KH_DEBUG(for (ring = 0; ring < 5; ring++) {)
+                KH_DEBUG(FLOAT r0 = sinf(ring * deltaRingAngle);)
+                KH_DEBUG(FLOAT r1 = sinf((ring + 1) * deltaRingAngle);)
+                KH_DEBUG(FLOAT y0 = cosf(ring * deltaRingAngle);)
+                KH_DEBUG(FLOAT y1 = cosf((ring + 1) * deltaRingAngle);)
+                KH_DEBUG(INT seg;)
+                KH_DEBUG(for (seg = 0; seg < segNum; seg++) {)
+                    KH_DEBUG(FLOAT theta = seg * deltaRingAngle;)
+                    KH_DEBUG(FLOAT x0 = r0 * sinf(theta);)
+                    KH_DEBUG(FLOAT z0 = r0 * cosf(theta);)
+                    KH_DEBUG(FLOAT x1 = r1 * sinf(theta);)
+                    KH_DEBUG(FLOAT z1 = r1 * cosf(theta);)
+                    KH_DEBUG(line.P0.set(x0, y0, z0);)
+                    KH_DEBUG(ScaleVectorXYZ(line.P0, line.P0, m_fExplodeRadius);)
+                    KH_DEBUG(line.P1.set(x1, y1, z1);)
+                    KH_DEBUG(ScaleVectorXYZ(line.P1, line.P1, m_fExplodeRadius);)
+                    KH_DEBUG(m_pCollLines->m_vLINE.push_back(line);)
+                KH_DEBUG(})
+            KH_DEBUG(})
+        KH_DEBUG(})
+    KH_DEBUG(})
     return 1;
 }
 
@@ -1022,41 +1022,41 @@ void CHomingBullet::exeSpread() {
     radius = m_pAttack->getRadius() + m_fExplodeRadius;
     m_pAttack->setRadius(radius);
     m_pAttack->setShiftY(0.0f);
-    delete m_pCollLines;
-    m_pCollLines = NULL;
+    KH_DEBUG(delete m_pCollLines;)
+    KH_DEBUG(m_pCollLines = NULL;)
 #line 1590
-    if (_collDispRef()) {
-        FLOAT deltaRingAngle;
-        G_LINE line;
-        m_pCollLines = new (__FILE__ "(1593)") C3DLines;
-        if (!(m_pCollLines)) AssertApp(__FILE__, __LINE__, "m_pCollLines", 0);
-        m_pCollLines->m_pCrd = &Crd(0);
-        {
-            INT ring;
-            INT segNum = 11;
-            deltaRingAngle = 0.62831855f;
-            line.C1.col = line.C0.col = 0xFF00FF00;
-            for (ring = 0; ring < 5; ring++) {
-                FLOAT r0 = sinf(ring * deltaRingAngle);
-                FLOAT r1 = sinf((ring + 1) * deltaRingAngle);
-                FLOAT y0 = cosf(ring * deltaRingAngle);
-                FLOAT y1 = cosf((ring + 1) * deltaRingAngle);
-                INT seg;
-                for (seg = 0; seg < segNum; seg++) {
-                    FLOAT theta = seg * deltaRingAngle;
-                    FLOAT x0 = r0 * sinf(theta);
-                    FLOAT z0 = r0 * cosf(theta);
-                    FLOAT x1 = r1 * sinf(theta);
-                    FLOAT z1 = r1 * cosf(theta);
-                    line.P0.set(x0, y0, z0);
-                    ScaleVectorXYZ(line.P0, line.P0, radius);
-                    line.P1.set(x1, y1, z1);
-                    ScaleVectorXYZ(line.P1, line.P1, radius);
-                    m_pCollLines->m_vLINE.push_back(line);
-                }
-            }
-        }
-    }
+    KH_DEBUG(if (_collDispRef()) {)
+        KH_DEBUG(FLOAT deltaRingAngle;)
+        KH_DEBUG(G_LINE line;)
+        KH_DEBUG(m_pCollLines = new KH_AT("(1593)") C3DLines;)
+        KH_DEBUG(if (!(m_pCollLines)) AssertApp(__FILE__, __LINE__, "m_pCollLines", 0);)
+        KH_DEBUG(m_pCollLines->m_pCrd = &Crd(0);)
+        KH_DEBUG({)
+            KH_DEBUG(INT ring;)
+            KH_DEBUG(INT segNum = 11;)
+            KH_DEBUG(deltaRingAngle = 0.62831855f;)
+            KH_DEBUG(line.C1.col = line.C0.col = 0xFF00FF00;)
+            KH_DEBUG(for (ring = 0; ring < 5; ring++) {)
+                KH_DEBUG(FLOAT r0 = sinf(ring * deltaRingAngle);)
+                KH_DEBUG(FLOAT r1 = sinf((ring + 1) * deltaRingAngle);)
+                KH_DEBUG(FLOAT y0 = cosf(ring * deltaRingAngle);)
+                KH_DEBUG(FLOAT y1 = cosf((ring + 1) * deltaRingAngle);)
+                KH_DEBUG(INT seg;)
+                KH_DEBUG(for (seg = 0; seg < segNum; seg++) {)
+                    KH_DEBUG(FLOAT theta = seg * deltaRingAngle;)
+                    KH_DEBUG(FLOAT x0 = r0 * sinf(theta);)
+                    KH_DEBUG(FLOAT z0 = r0 * cosf(theta);)
+                    KH_DEBUG(FLOAT x1 = r1 * sinf(theta);)
+                    KH_DEBUG(FLOAT z1 = r1 * cosf(theta);)
+                    KH_DEBUG(line.P0.set(x0, y0, z0);)
+                    KH_DEBUG(ScaleVectorXYZ(line.P0, line.P0, radius);)
+                    KH_DEBUG(line.P1.set(x1, y1, z1);)
+                    KH_DEBUG(ScaleVectorXYZ(line.P1, line.P1, radius);)
+                    KH_DEBUG(m_pCollLines->m_vLINE.push_back(line);)
+                KH_DEBUG(})
+            KH_DEBUG(})
+        KH_DEBUG(})
+    KH_DEBUG(})
 }
 
 static inline FLOAT _roundRad(FLOAT in) {
@@ -1152,3 +1152,4 @@ BOOL CHomingBullet::bound_() {
 }
 
 // SOURCE DATA: .rodata
+// SOURCE DATA SLUS_217.99_retail: .rodata

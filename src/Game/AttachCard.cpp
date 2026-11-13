@@ -15,7 +15,7 @@
 
 
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 typedef int MODELTAG[4];
 
@@ -42,7 +42,7 @@ CAttachCard::~CAttachCard() {
 BOOL CAttachCard::setup(CARD_KIND inKind, CCoord* inParent, const FVECTOR* inPos, const FVECTOR* inRot, FLOAT inScale) {
     m_CardKind = inKind;
 #line 54
-    m_pMove = new (__FILE__ "(54)") CMovement(this);
+    m_pMove = new KH_AT("(54)") CMovement(this);
     if (!m_pMove) return FALSE;
     m_pMove->setFlag(9, 0);
     FVECTOR pos;
@@ -95,7 +95,7 @@ BOOL CAttachCard::initCard_() {
 #line 162
     ASSERT(orgMdl);
 #line 164
-    MODELDATA* d = m_pCardModel = new (__FILE__ "(164)") MODELDATA;
+    MODELDATA* d = m_pCardModel = new KH_AT("(164)") MODELDATA;
     if (!d) return FALSE;
     ((u_long128*)d)[0] = ((u_long128*)orgMdl)[0];
     ((u_long128*)d)[1] = ((u_long128*)orgMdl)[1];
@@ -113,7 +113,7 @@ BOOL CAttachCard::initCard_() {
         dataSize2 >>= 4;
     }
 #line 191
-    MODELTAG* newMdl = new (__FILE__ "(191)") MODELTAG[dataSize1 + dataSize2];
+    MODELTAG* newMdl = new KH_AT("(191)") MODELTAG[dataSize1 + dataSize2];
     if (!newMdl) return FALSE;
     memcpy(newMdl, orgMdl->m_pData, (dataSize1 + dataSize2) * sizeof(MODELTAG));
     if (orgMdl->m_pData) m_pCardModel->m_pData = newMdl;
@@ -149,16 +149,16 @@ BOOL CAttachCard::initCard_() {
     }
     m_iModelCount = 1;
 #line 290
-    m_pModels = new (__FILE__ "(290)") CModel[1];
+    m_pModels = new KH_AT("(290)") CModel[1];
     if (!m_pModels) return FALSE;
     if (m_pCardModel->enableLight()) {
 #line 297
-        m_pNLight = new (__FILE__ "(297)") CLightUnit;
+        m_pNLight = new KH_AT("(297)") CLightUnit;
         if (!m_pNLight) return FALSE;
     }
     if (m_pCardModel->enablePointLight()) {
 #line 304
-        m_pGLight = new (__FILE__ "(304)") CGimmickLightUnit;
+        m_pGLight = new KH_AT("(304)") CGimmickLightUnit;
         if (!m_pGLight) return FALSE;
     }
     m_pModels->link(this, m_pCardModel);
@@ -175,3 +175,4 @@ BOOL CAttachCard::initCard_() {
 }
 
 // SOURCE DATA: .rodata
+// SOURCE DATA SLUS_217.99_retail: .rodata

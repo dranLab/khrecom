@@ -9,7 +9,7 @@
 #include "System/Debug.h"
 #include "System/HeapMan.h"
 
-#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+#define ASSERT(e) KH_DEBUG(if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0))
 
 
 
@@ -44,7 +44,7 @@ CEntityFactory::~CEntityFactory() {
 #line 46
 CEntityFactory* CEntityFactory::getInstance() {
     if (!m_pInstance) {
-        m_pInstance = new (__FILE__ "(48)") CEntityFactory;
+        m_pInstance = new KH_AT("(48)") CEntityFactory;
         ASSERT(m_pInstance);
     }
     return m_pInstance;
@@ -128,7 +128,7 @@ CEntity* CEntityFactory::createPrize(const PRIZE_PARAM& inParam, CTask* inParent
     } else {
         parent = inParent;
     }
-    CPrize* prize = new (__FILE__ "(198)") CPrize(parent);
+    CPrize* prize = new KH_AT("(198)") CPrize(parent);
     /* two failure paths with their own TRACE (cross-jumped): with one shared tail the first null test's
      * delay slot is filled from the target instead of the fallthrough */
     if (prize == NULL) {
@@ -162,3 +162,4 @@ void LoadBattleEnemy() {
 }
 
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data

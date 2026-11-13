@@ -160,27 +160,27 @@ void CPause::main() {
         break;
     case 2:
         pos.init();
-        m_pScreenCtrl = new (__FILE__ "(197)") C2DSeqCtrl;
+        m_pScreenCtrl = new KH_AT("(197)") C2DSeqCtrl;
         m_pScreenCtrl->setLayer(12);
         m_pScreenCtrl->setPos(pos);
         if (bgSeqTbl[nPauseKind]) {
             m_pScreenCtrl->addSeq(pSeqName, bgSeqTbl[nPauseKind]);
         }
         if (selectSeqTbl[nPauseKind][0]) {
-            m_pSelectCtrl = new (__FILE__ "(205)") C2DSeqCtrl;
+            m_pSelectCtrl = new KH_AT("(205)") C2DSeqCtrl;
             m_pSelectCtrl->setLayer(12);
             m_pSelectCtrl->addSeq(pSeqName, selectSeqTbl[nPauseKind][0]);
             m_pSelectCtrl->setPos(pos);
         }
         rgba.col = 0x80707070;
         for (INT i = 0; i < m_nSelectMax; i++) {
-            m_pSelectFnt[i] = p2DFnt = new (__FILE__ "(213)") C2DFnt(0, 0, &rgba, 17, selectWordTbl[nPauseKind][i], 0x42);
+            m_pSelectFnt[i] = p2DFnt = new KH_AT("(213)") C2DFnt(0, 0, &rgba, 17, selectWordTbl[nPauseKind][i], 0x42);
             _setFntLayer(p2DFnt, 12, 0);
             m_pSelectCtrl->addFntShift(pSeqName, p2DFnt, 0.0f, i * 33.0f + 9.0f);
             rgba.col = 0x80303030;
         }
         if (m_nSelectMax) {
-            m_pCursorCtrl = new (__FILE__ "(221)") C2DSeqCtrl;
+            m_pCursorCtrl = new KH_AT("(221)") C2DSeqCtrl;
             m_pCursorCtrl->setLayer(13);
             m_pCursorCtrl->addSeq(pSeqName, 0);
             m_vPosCursorCurrent.set(350.0f, m_fCursorBaseY, 0.0f);
@@ -321,3 +321,4 @@ void CPause::moveCursor() {
     }
 }
 // SOURCE DATA: .data .rodata
+// SOURCE DATA SLUS_217.99_retail: .data .rodata
