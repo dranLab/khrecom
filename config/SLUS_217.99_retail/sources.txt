@@ -225,6 +225,7 @@ System/Graphic/Billboard
 System/Graphic/Camera
 System/Graphic/ColorFader
 System/Graphic/DeFocus
+System/Graphic/DispList
 System/Graphic/Effect/EffectMan
 System/Graphic/Effect/effect
 System/Graphic/Effect/libppp/draw/draw
@@ -483,6 +484,7 @@ System/PadHandler
 System/PadIO
 System/PlaySpeedCtrl
 System/Rcf
+System/RcfCD
 System/Rnd
 System/RootTask
 System/RsrcDB
