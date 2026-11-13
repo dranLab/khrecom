@@ -1441,13 +1441,13 @@ void CVSM::initActor() {
 __asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
 void CVSM::loadFromMem(const BYTE* pAddr) {
     INT* pIntPtr;
-    BYTE* p;
     INT i;
+    BYTE* p;
     _TRACE_(TRUE, "Load I-Seg\n");
     pIntPtr = (INT*)pAddr;
-    INT nMagic = *pIntPtr;
+    i = *pIntPtr;
     pAddr += 4;
-    if (nMagic != 0x6362612F) {
+    if (i != 0x6362612F) {
         _TRACE(TRUE, "ATEL \x83R\x83\x93\x83p\x83" "C\x83\x89\x82\xcc\x83o\x81[\x83W\x83\x87\x83\x93\x82\xaa\x88\xe1\x82\xa2\x82\xdc\x82\xb7\n");
         return;
     }
@@ -1458,8 +1458,8 @@ void CVSM::loadFromMem(const BYTE* pAddr) {
 #line 343
         AssertApp(__FILE__, __LINE__, "0", 0);
     }
-    for (INT n = 0; n < m_MaxActorCount; n++) {
-        m_ActorTbl[n]._nID = *pIntPtr++;
+    for (INT j = 0; j < m_MaxActorCount; j++) {
+        m_ActorTbl[j]._nID = *pIntPtr++;
     }
     pAddr += 4 + 64 * 4;
     pIntPtr = (INT*)pAddr;
@@ -1471,7 +1471,7 @@ void CVSM::loadFromMem(const BYTE* pAddr) {
 #line 358
     KH_DEBUG(if (!(m_pIseg)) AssertApp(__FILE__, __LINE__, "m_pIseg", 0);)
     p = (BYTE*)m_pIseg;
-    for (INT j = 0; j < m_MaxPC * sizeof(INSTR); j++) {
+    for (i = 0; i < m_MaxPC * sizeof(INSTR); i++) {
         *p++ = *pAddr++;
     }
     pIntPtr = (INT*)pAddr;
@@ -1488,7 +1488,7 @@ void CVSM::loadFromMem(const BYTE* pAddr) {
 #line 377
     KH_DEBUG(if (!(m_pDseg)) AssertApp(__FILE__, __LINE__, "m_pDseg", 0);)
     p = m_pDseg;
-    for (INT j = 0; j < m_GAptr; j++) {
+    for (i = 0; i < m_GAptr; i++) {
         *p++ = *pAddr++;
     }
     m_ActorCount = *pAddr;
@@ -1498,9 +1498,9 @@ void CVSM::loadFromMem(const BYTE* pAddr) {
 #line 390
         AssertApp(__FILE__, __LINE__, "0", 0);
     }
-    for (INT n = 0; n < m_ActorCount; n++) {
-        p = (BYTE*)&m_ActorTbl[n]._ATP;
-        for (UINT k = 0; k < sizeof(ATP); k++) {
+    for (i = 0; i < m_ActorCount; i++) {
+        p = (BYTE*)&m_ActorTbl[i]._ATP;
+        for (INT j = 0; j < sizeof(ATP); j++) {
             *p++ = *pAddr++;
         }
     }
