@@ -115,6 +115,30 @@ ninja                                           # build and verify the image
 python3 tools/funcdiff.py <unit> [<function>]   # compare functions with the original
 ```
 
+### Building each version
+
+The same sources build two executables (`config/versions.yaml`; how the switch works: `docs/versions.md`):
+
+| Version | Needs in `iso/` | Built from |
+|---|---|---|
+| `SLUS_217.99`, US translation beta (the reference) | `SLUS_217.99` | `src/` as is |
+| `SLUS_217.99_retail`, US retail release | `SLUS_217.99_retail` (extract it with `--name`, see First steps) | `src/` with `-DKH_RETAIL`, no `-g`: the debug code is compiled out |
+
+`configure.py` sets up every version whose ELF is in `iso/` and skips the others (it says so). With both present:
+
+```sh
+python3 configure.py                  # both versions (the retail one generates its version map on the first run, ~15 s)
+ninja                                 # build and verify both images
+ninja check-SLUS_217.99               # only the beta
+ninja check-SLUS_217.99_retail        # only the retail
+ninja iso                             # beta boot disc; the retail's: ninja iso-SLUS_217.99_retail
+tools/check.sh                        # configure + both builds + checksums; exit 0 = both match
+python3 tools/retail_units.py try <unit> [--show <function>]   # a unit compiled as retail vs the retail ELF
+```
+
+Retail compiles the units listed in `config/SLUS_217.99_retail/sources.txt` from `src/`, and the rest from the
+retail ELF's assembly. `tools/retail_units.py` brings more units over (`docs/versions.md`).
+
 ## Boot testing
 
 ```sh
