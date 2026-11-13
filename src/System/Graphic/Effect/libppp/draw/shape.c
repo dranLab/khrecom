@@ -1876,3 +1876,4 @@ void *pppGetVu1DrawSpad(void) {
     return ppvVu1SprDbId ? (void *)0x70002D00 : (void *)0x70001A00;
 }
 // SOURCE DATA: .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss

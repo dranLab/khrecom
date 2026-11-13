@@ -147,3 +147,4 @@ static inline void sceGsSetDefDispEnv_strings(void)
 }
 
 // SOURCE DATA: .rodata
+// SOURCE DATA SLUS_217.99_retail: .rodata

@@ -6,7 +6,8 @@ switch them to source there, and verify.
                                          (masked: relocated fields, lui-based addresses) with its retail pair
                                          (tools/version_map.py's functions.tsv); --data: each data section's original
                                          start, voted by the relocations of the matching functions, and its bytes
-    scan [-j N] [units...]               `try --data` for every complete unit (no INCLUDE_ASM; default: all of them) and
+    scan [-j N] [units...]               `try --data` for every unit with a C/C++ source (default: all of them; INCLUDE_ASM'd
+                                         functions include this version's assembly of their pair) and
                                          whether it can switch: every .text function matches, its own linkonce
                                          functions match, its code and linkonce code have retail's sizes, every data
                                          section the code references is voted unanimously and (except .bss) has
@@ -105,6 +106,32 @@ def masked(words, base):
     return [x[0] for x in decode(words, base)], decode(words, base)
 
 
+REG_NUMBERS = {"zero": 0, "at": 1, "v0": 2, "v1": 3, "a0": 4, "a1": 5, "a2": 6, "a3": 7, "gp": 28, "sp": 29, "fp": 30,
+               "s8": 30, "ra": 31, "t8": 24, "t9": 25, "k0": 26, "k1": 27,
+               **{f"t{i}": 8 + i for i in range(8)}, **{f"s{i}": 16 + i for i in range(8)}}
+REG_NAME = re.compile(r"(?<=[\s,(])\$(" + "|".join(sorted(REG_NUMBERS, key=len, reverse=True)) + r")\b")
+FUNC_BLOCK = re.compile(r"^nonmatching (\S+), 0x[0-9A-Fa-f]+$.*?^endlabel \1$", re.M | re.S)
+
+
+def include_asm_tree(v: Version, unit: str, text: str) -> str:
+    """The asm tree INCLUDE_ASM reads from for a unit (ee_asm_compat --asm-path). Once this version builds the unit
+    from source, splat writes asm/<VERSION>/nonmatchings/<unit>/ (numeric registers, named_regs_for_c_funcs: False).
+    Before that, the unit's functions are cut out of this version's whole-unit assembly (asm/<VERSION>/<unit>.s and
+    its .linkonce.s) into build/<VERSION>/retail_units/asm/nonmatchings/<unit>/, with splat's register names turned
+    into numbers (Ps2EeAs reads INCLUDE_ASM'd code as the compiler's: numeric registers)."""
+    if "INCLUDE_ASM(" not in text or (ROOT / f"asm/{v.name}/nonmatchings/{unit}").is_dir():
+        return f"asm/{v.name}"
+    root = v.out / "asm"
+    out = root / "nonmatchings" / unit
+    out.mkdir(parents=True, exist_ok=True)
+    for path in (ROOT / f"asm/{v.name}/{unit}.s", ROOT / f"asm/{v.name}/{unit}.linkonce.s"):
+        if path.exists():
+            for m in FUNC_BLOCK.finditer(path.read_text(encoding="latin-1")):
+                body = REG_NAME.sub(lambda r: f"${REG_NUMBERS[r.group(1)]}", m.group(0))
+                (out / f"{m.group(1)}.s").write_text(f".align 3\n{body}\n", encoding="latin-1")
+    return root.relative_to(ROOT).as_posix()
+
+
 def try_unit(v: Version, unit: str, show=(), data=True) -> dict:
     """Compile and compare; returns a result dict (see scan)."""
     src = source_of(unit)
@@ -116,10 +143,11 @@ def try_unit(v: Version, unit: str, show=(), data=True) -> dict:
     out.parent.mkdir(parents=True, exist_ok=True)
     src = src.relative_to(ROOT)  # as the build passes it: gcc's _GLOBAL_$I$<path> names come from it
     tc = v.toolchain(unit)  # the unit's compiler, flags and assembler (build.yaml overrides: the libraries)
+    asm_tree = include_asm_tree(v, unit, (ROOT / src).read_text(encoding="latin-1"))
     cmd = (f"{tc['cc']} -S {tc['cflags']} -I include -I src -o {out}.gcc.s {src} && "
            f"{sys.executable} tools/ee_asm_compat.py {out}.gcc.s {out}.s --source {src} "
            f"--symbols {v.cfg}/elf_symbol_addrs.txt --own-data 0x0-0xFFFFFFFF --unit-data none "
-           f"--asm-path asm/{v.name} --release {tc['compat_extra']} && {tc['assemble']} -o {out} {out}.s")
+           f"--asm-path {asm_tree} --release {tc['compat_extra']} && {tc['assemble']} -o {out} {out}.s")
     r = subprocess.run(cmd, shell=True, capture_output=True, text=True, cwd=ROOT)
     if r.returncode:
         err = [l for l in (r.stdout + r.stderr).splitlines() if "rror" in l or ": parse" in l]
@@ -394,12 +422,10 @@ def layout_culprits(v: Version) -> set[str]:
 
 
 def complete_units() -> list[str]:
-    units = []
-    for p in sorted((ROOT / "src").rglob("*")):
-        if p.suffix in (".c", ".cpp"):
-            if "INCLUDE_ASM(" not in p.read_text(encoding="latin-1"):
-                units.append(p.relative_to(ROOT / "src").with_suffix("").as_posix())
-    return units
+    """Every unit with a C/C++ source, INCLUDE_ASM'd functions or not (try_unit includes this version's assembly of
+    their pairs: include_asm_tree)."""
+    return [p.relative_to(ROOT / "src").with_suffix("").as_posix()
+            for p in sorted((ROOT / "src").rglob("*")) if p.suffix in (".c", ".cpp")]
 
 
 def _scan_one(args):

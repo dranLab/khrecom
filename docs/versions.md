@@ -90,8 +90,14 @@ beta SHA-1 on every commit. Hard-coded `"c:/KHCOM/....cpp(123)"` allocation mess
 - `tools/split_version.py` derives the retail split (`config/SLUS_217.99_retail/SLUS_217.99_retail.yaml`) from that
   map and the recorded data starts.
 - `config/SLUS_217.99_retail/sources.txt` lists the units compiled from source in retail. Every other unit links
-  from retail's own assembly, as the beta did before its units were decompiled. A unit still with `INCLUDE_ASM` in the
-  beta stays assembly in retail.
+  from retail's own assembly, as the beta did before its units were decompiled.
+- A unit with `INCLUDE_ASM`'d (parked) functions can build from source in retail too: each parked function includes
+  retail's assembly of its pair. The path names the beta's tree (`asm/SLUS_217.99/nonmatchings/...`);
+  `ee_asm_compat.py --asm-path` reads it from the building version's tree, where splat writes the per-function files
+  once the unit is selected. Before that, `retail_units.py try` cuts them out of retail's whole-unit assembly
+  (`build/SLUS_217.99_retail/retail_units/asm/`). A parked function that retail lacks needs its `INCLUDE_ASM` line
+  out of the retail build; data blocks written for a parked function (jump tables with `.L` code labels) need
+  retail's labels under `#ifdef KH_RETAIL` (kprintf2). The libraries get `-DKH_RETAIL` in every retail override.
 - Data from source is marked per version, as the source's last lines:
   `// SOURCE DATA SLUS_217.99_retail: .data .rodata`. Data starts are in `unit_starts.txt` (written by the tool) and
   `unit_starts.manual.txt` (measured by hand, each with its evidence).

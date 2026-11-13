@@ -239,6 +239,7 @@ System/Graphic/Effect/libppp/draw/md0_one
 System/Graphic/Effect/libppp/draw/md0_onef
 System/Graphic/Effect/libppp/draw/md0_p3
 System/Graphic/Effect/libppp/draw/md0_p3f
+System/Graphic/Effect/libppp/draw/shape
 System/Graphic/Effect/libppp/eiProg/pppAccele
 System/Graphic/Effect/libppp/eiProg/pppAngAccele
 System/Graphic/Effect/libppp/eiProg/pppAngMove
@@ -465,6 +466,7 @@ System/Graphic/TexAnm
 System/Graphic/TexCtrl
 System/Graphic/TexUtil
 System/Graphic/TriangleIK
+System/Graphic/WorldEnv
 System/HeapMan
 System/LinkedBuf
 System/MainApp
@@ -515,6 +517,7 @@ lib/ext
 lib/filestub
 lib/fp-bit
 lib/glue
+lib/graphdev_checkModelVersion
 lib/graphdev_sceGsExecLoadImage
 lib/graphdev_sceGsExecStoreImage
 lib/graphdev_sceGsResetGraph
@@ -532,6 +535,7 @@ lib/iopheap
 lib/iopnotify
 lib/iopreset
 lib/ipuinit
+lib/kprintf2
 lib/libat3dec
 lib/libdbc
 lib/libdma
@@ -540,6 +544,7 @@ lib/libmc
 lib/libosd
 lib/libpad2
 lib/libvib
+lib/mpc
 lib/mpeg
 lib/nodebug/Tim2CheckFileHeader
 lib/nodebug/__assert
@@ -558,6 +563,7 @@ lib/nodebug/_open_r
 lib/nodebug/_printf_r
 lib/nodebug/_read_r
 lib/nodebug/_sbrk_r
+lib/nodebug/_setlocale_r
 lib/nodebug/_sprintf_r
 lib/nodebug/_strtol_r
 lib/nodebug/_tolower
@@ -575,6 +581,7 @@ lib/nodebug/malloc
 lib/nodebug/malloc_extend_top
 lib/nodebug/qsort
 lib/nodebug/sceGsResetPath
+lib/nodebug/snDebugInit
 lib/nodebug/snDllCacheFlush
 lib/nodebug/sn_floor
 lib/nodebug/srand

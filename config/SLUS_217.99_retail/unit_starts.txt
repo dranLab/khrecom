@@ -322,6 +322,7 @@ System/Graphic/Effect/libppp/draw/md0 .rodata 0x004036D0 0x20
 System/Graphic/Effect/libppp/draw/md0_one .rodata 0x004036F0 0x20
 System/Graphic/Effect/libppp/draw/md0_onef .rodata 0x00403710 0x20
 System/Graphic/Effect/libppp/draw/md0_p3 .rodata 0x00403730 0x90
+System/Graphic/Effect/libppp/draw/shape .bss 0x00577A10 0x45c0
 System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly .bss 0x0057BFD0 0x2000
 System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly .data 0x0033AF50 0x20
 System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly .rodata 0x004037C0 0x20
@@ -373,6 +374,7 @@ System/Graphic/TexUtil .data 0x00332A68 0x20
 System/Graphic/TexUtil .rodata 0x00400FE0 0x50
 System/Graphic/TriangleIK .data 0x00332A88 0x38
 System/Graphic/TriangleIK .rodata 0x00401030 0x78
+System/Graphic/WorldEnv .bss 0x0056D610 0x250
 System/HeapMan .bss 0x0043BD28 0x10
 System/HeapMan .data 0x00332928 0xc
 System/LinkedBuf .bss 0x0043BD38 0xc
@@ -440,6 +442,7 @@ lib/filestub .data 0x00347918 0x9c
 lib/filestub .rodata 0x00436B00 0x2ad
 lib/fp-bit .bss 0x005BF558 0x10
 lib/glue .data 0x00347900 0x8
+lib/graphdev_checkModelVersion .rodata 0x00432FA0 0x44
 lib/graphdev_sceGsExecLoadImage .rodata 0x00432FE8 0x32
 lib/graphdev_sceGsExecStoreImage .data 0x00343A20 0x10
 lib/graphdev_sceGsExecStoreImage .rodata 0x00433020 0x1cc
@@ -454,6 +457,9 @@ lib/iopnotify .data 0x00348978 0x8
 lib/iopreset .bss 0x005CBB80 0x68
 lib/iopreset .rodata 0x00436DC0 0x29
 lib/ipuinit .data 0x00343C80 0x80
+lib/kprintf2 .bss 0x005C8380 0x80
+lib/kprintf2 .data 0x0034790C 0x4
+lib/kprintf2 .rodata 0x004368D0 0x1c4
 lib/libat3dec .data 0x00345A00 0x13f0
 lib/libat3dec .rodata 0x00434A70 0x221
 lib/libdbc .bss 0x005C2DC0 0x8c4
@@ -469,13 +475,18 @@ lib/libosd .data 0x003479E0 0x7c0
 lib/libpad2 .bss 0x005BF5C0 0x3340
 lib/libpad2 .data 0x00343A68 0x30
 lib/libpad2 .rodata 0x00433260 0x59
+lib/mpc .bss 0x005C2900 0x200
+lib/mpc .data 0x00343B88 0x40
+lib/mpc .rodata 0x00433C90 0x162
 lib/mpeg .rodata 0x00433A10 0x183
 lib/nodebug/Tim2CheckFileHeader .rodata 0x00434600 0x470
 lib/nodebug/__assert .rodata 0x004361E8 0x30
 lib/nodebug/_mbtowc_r .rodata 0x004367C0 0x40
+lib/nodebug/_setlocale_r .rodata 0x004366E0 0x30
 lib/nodebug/_vfwrite .bss 0x005C76F8 0x80
 lib/nodebug/_vfwrite .rodata 0x004364E0 0x1d0
 lib/nodebug/check_dll .rodata 0x00432F40 0x60
+lib/nodebug/snDebugInit .bss 0x005BF598 0x10
 lib/nodebug/sn_floor .rodata 0x00436718 0xa0
 lib/nodebug/strround .bss 0x005C75D0 0x128
 lib/nodebug/strround .rodata 0x00436220 0x2a0

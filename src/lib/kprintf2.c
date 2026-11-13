@@ -487,6 +487,30 @@ int _sceSnprintf(PutcFunc func, void *ctx, unsigned int size, const char *fmt, v
 int _sceSnprintf(PutcFunc func, void *ctx, unsigned int size, const char *fmt, va_list ap);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/kprintf2", _sceSnprintf);
 /* _sceSnprintf's strings and jump table (the function is still assembly). */
+#ifdef KH_RETAIL /* the same table at retail's addresses (every case label 0x72E00 lower) */
+asm(".rdata\n.align 3\nD_00436900:\n.asciz \"0123456789abcdef\"\n"
+    ".align 3\nD_00436918:\n.asciz \"0123456789ABCDEF\"\n"
+    ".align 3\njtbl_00436930:\n"
+    ".word .L00312E34\n.word .L0031345C\n.word .L0031345C\n.word .L00312E3C\n.word .L0031345C\n"
+    ".word .L0031345C\n.word .L0031345C\n.word .L0031345C\n.word .L0031345C\n.word .L0031345C\n"
+    ".word .L0031345C\n.word .L00312D54\n.word .L0031345C\n.word .L00312D4C\n.word .L00312DAC\n"
+    ".word .L0031345C\n.word .L00312D5C\n.word .L00312D64\n.word .L00312D64\n.word .L00312D64\n"
+    ".word .L00312D64\n.word .L00312D64\n.word .L00312D64\n.word .L00312D64\n.word .L00312D64\n"
+    ".word .L00312D64\n.word .L0031345C\n.word .L0031345C\n.word .L0031345C\n.word .L0031345C\n"
+    ".word .L0031345C\n.word .L0031345C\n.word .L0031345C\n.word .L0031345C\n.word .L0031345C\n"
+    ".word .L0031345C\n.word .L0031345C\n.word .L0031345C\n.word .L0031345C\n.word .L0031345C\n"
+    ".word .L0031345C\n.word .L0031345C\n.word .L0031345C\n.word .L0031345C\n.word .L0031345C\n"
+    ".word .L0031345C\n.word .L0031345C\n.word .L0031345C\n.word .L0031345C\n.word .L0031345C\n"
+    ".word .L0031345C\n.word .L0031345C\n.word .L0031345C\n.word .L0031345C\n.word .L0031345C\n"
+    ".word .L0031345C\n.word .L00312F34\n.word .L0031345C\n.word .L0031345C\n.word .L0031345C\n"
+    ".word .L0031345C\n.word .L0031345C\n.word .L0031345C\n.word .L0031345C\n.word .L0031345C\n"
+    ".word .L0031345C\n.word .L0031345C\n.word .L00313378\n.word .L00312FF4\n.word .L003131D0\n"
+    ".word .L003131D0\n.word .L0031345C\n.word .L00312E4C\n.word .L00312FF4\n.word .L0031345C\n"
+    ".word .L0031345C\n.word .L00312E44\n.word .L0031345C\n.word .L0031345C\n.word .L00312E54\n"
+    ".word .L003133B0\n.word .L0031345C\n.word .L0031345C\n.word .L00313234\n.word .L0031345C\n"
+    ".word .L0031310C\n.word .L0031345C\n.word .L0031345C\n.word .L00312F08\n"
+    ".text\n");
+#else
 asm(".rdata\n.align 3\nD_004FECC0:\n.asciz \"0123456789abcdef\"\n"
     ".align 3\nD_004FECD8:\n.asciz \"0123456789ABCDEF\"\n"
     ".align 3\njtbl_004FECF0:\n"
@@ -509,6 +533,7 @@ asm(".rdata\n.align 3\nD_004FECC0:\n.asciz \"0123456789abcdef\"\n"
     ".word .L003861B0\n.word .L0038625C\n.word .L0038625C\n.word .L00386034\n.word .L0038625C\n"
     ".word .L00385F0C\n.word .L0038625C\n.word .L0038625C\n.word .L00385D08\n"
     ".text\n");
+#endif
 
 /* Into a buffer: ctx is the write pointer; the last byte of the buffer gets the terminating 0. */
 static int snprintf_char(char **pbuf, unsigned int *size, int c)
@@ -608,3 +633,4 @@ void kprintf(const char *fmt, ...)
     }
 }
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .data .rodata
