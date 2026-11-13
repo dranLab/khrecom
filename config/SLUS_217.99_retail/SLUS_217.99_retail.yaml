@@ -1393,7 +1393,7 @@ segments:
       - [0x309950, rodata, Game/CardBattle]
       - [0x30B160, rodata, Game/CardKind]
       - [0x30C380, rodata, Game/CardRevolver]
-      - [0x30E4E8, rodata, Game/CollParam]
+      - [0x30E4E0, rodata, Game/CollParam]
       - [0x30E548, rodata, Game/EffectMotion]
       - [0x30E558, rodata, Game/Entity]
       - [0x30E568, rodata, Game/EntityFactory]

@@ -2,7 +2,7 @@
 #include "System/MainApp.h"
 #include "System/Debug.h"
 #include <string.h>
-
+KH_RELEASE(__asm__(".rdata\n.align 3\n.word 0\n.word 0\n");) /* MATCH: retail's .rodata has 8 more zero bytes after CardRevolver's (0x40E4E0), before g_AtkKind (0x40E4E8); not identified, given to this unit as CollMap's and BattleCard's blocks */
 #line 15
 ATK_KIND ATK_COLL_PARAM::getAtkKind() const {
     static const ATK_KIND g_AtkKind[21] = {

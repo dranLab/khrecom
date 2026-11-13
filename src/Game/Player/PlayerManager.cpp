@@ -381,7 +381,7 @@ void CPlayerManager::init() {
         KH_DEBUG(sprintf(m_strBlock[i], " ");)
         KH_DEBUG(DebugWork::g_dw.player.m_szBlock[i] = m_strBlock[i];)
     KH_DEBUG(})
-    KH_DEBUG(m_pWindow = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(701)"))
+    KH_DEBUG(m_pWindow = new KH_AT("(701)"))
         KH_DEBUG(CDebugWindow(this, DWTPlayer::debugPlayerBlockInfo);)
     KH_DEBUG(m_pWindow->dispOff(0);)
 }
@@ -499,7 +499,7 @@ void CPlayerManager::procPlayerDead() {
         CPackMan::setFrameEffect(2, 0, 0, 0);
         CPlaySpeedCtrl::setPlaySpeed(0.1f);
         pPlayer->getPlayerCamera()->setFlag(0x20, 0);
-        m_pPathCamera = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(892)")
+        m_pPathCamera = new KH_AT("(892)")
             CPathCamera(pPlayer);
         KH_DEBUG(if (!m_pPathCamera) AssertApp("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp", 893, "m_pPathCamera", 0);)
         m_pPathCamera->setLocal(TRUE);
@@ -508,7 +508,7 @@ void CPlayerManager::procPlayerDead() {
         m_pPathCamera->ignorePlaySpeed(FALSE);
         m_pPathCamera->run();
         if (!m_pCollMapCamera) {
-            m_pCollMapCamera = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(901)")
+            m_pCollMapCamera = new KH_AT("(901)")
                 CCollMapCamera();
         }
         if (m_pCollMapCamera) m_pCollMapCamera->init((COLL_KIND)0x8000000C, (COLL_TYPE)2, 0, getHandle());
@@ -667,7 +667,7 @@ void CPlayerManager::calcFieldStartPos() {
 namespace PLM {
 
 UINT CPlayerManager::getPlayerRsrcGrpSize(INT nMemberID) {
-    return CRsrcDB::getRsrcGrpSizeOnMemory(1, nMemberID);
+    return CRsrcDB::KH_VER(getRsrcGrpSizeOnMemory, getRsrcGrpSize)(1, nMemberID); // MATCH: a retail code change (retail calls getRsrcGrpSize)
 }
 
 void CPlayerManager::setReqLoad(UINT inID, INT inReady) {
@@ -696,7 +696,7 @@ void CPlayerManager::setReqLoad(UINT inID, INT inReady) {
             if (nextBlock < 16) {
                 BYTE* addr = m_pRsrcCurrent + g_nRCDataBlockSize[rc_data];
                 TRACE("PLM:: addr : 0x%x, 0x%x + 0x%x,\n", addr, m_pRsrcCurrent, g_nRCDataBlockSize[rc_data]);
-                for (i = nextBlock; i < 16; i++) {
+                for (i = nextBlock; ; i++) { if (i >= 16) goto nostack;
                     RB_DATA& next = m_blockData[i];
                     if (next.pAddr < addr) {
                         TRACE("PLM:: next->pAddr %d: 0x%x,", i, next.pAddr);
@@ -711,7 +711,7 @@ void CPlayerManager::setReqLoad(UINT inID, INT inReady) {
                         }
                     }
                 }
-                if (i < 16) goto stack;
+                goto stack; nostack:;
             }
             if (data.nState == 0) {
                 data.nRCID = rc_id;
@@ -1225,24 +1225,24 @@ CPlayer* createPlayer(UINT inID, CTask* inParent, INT inEx) {
         switch (uiPlayerID) {
         case 1:
         case 2:
-            pPlayer = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2297)")
+            pPlayer = new KH_AT("(2297)")
                 PL::CPlayerSora(parent);
             break;
         case 3:
         case 4:
-            pPlayer = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2301)")
+            pPlayer = new KH_AT("(2301)")
                 PL::CPlayerRiku(parent);
             break;
         case 5:
-            pPlayer = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2305)")
+            pPlayer = new KH_AT("(2305)")
                 PL::CPlayerDRiku(parent, 5, inEx);
             break;
         case 6:
-            pPlayer = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2308)")
+            pPlayer = new KH_AT("(2308)")
                 PL::CPlayerDRiku(parent, 6, inEx);
             break;
         default:
-            pPlayer = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2312)")
+            pPlayer = new KH_AT("(2312)")
                 CPlayer(parent, g_uiPlayerID, 0);
             break;
         }
@@ -1305,45 +1305,45 @@ CEntity* CPlayerManager::createFriend(UINT inID, CTask* inParent) {
     offFlag(m_uiFlag, 0x42);
     switch (inID) {
     case 1:
-        m_pFriend = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2418)")
+        m_pFriend = new KH_AT("(2418)")
             Friend::CFriendDonald(parent);
         break;
     case 2:
-        m_pFriend = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2421)")
+        m_pFriend = new KH_AT("(2421)")
             Friend::CFriendGoofy(parent, 0);
         break;
     case 3:
-        m_pFriend = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2424)")
+        m_pFriend = new KH_AT("(2424)")
             Friend::CFriendAladdin(parent);
         break;
     case 4:
-        m_pFriend = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2427)")
+        m_pFriend = new KH_AT("(2427)")
             Friend::CFriendAriel(parent);
         break;
     case 5:
-        m_pFriend = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2430)")
+        m_pFriend = new KH_AT("(2430)")
             Friend::CFriendJack(parent);
         break;
     case 6:
-        m_pFriend = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2433)")
+        m_pFriend = new KH_AT("(2433)")
             Friend::CFriendPan(parent);
         break;
     case 7:
-        m_pFriend = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2436)")
+        m_pFriend = new KH_AT("(2436)")
             Friend::CFriendBeast(parent);
         break;
     case 8:
-        m_pFriend = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2439)")
+        m_pFriend = new KH_AT("(2439)")
             Friend::CFriendKing(parent);
         break;
     case 9:
-        m_pFriend = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2442)")
+        m_pFriend = new KH_AT("(2442)")
             Friend::CFriendPluto(parent);
         break;
     case 10:
-        m_pFriendEx = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2445)")
+        m_pFriendEx = new KH_AT("(2445)")
             Friend::CFriendGoofy(parent, 1);
-        m_pFriend = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2446)")
+        m_pFriend = new KH_AT("(2446)")
             Friend::CFriendDonald(parent);
         break;
     }
@@ -1461,31 +1461,31 @@ CEntity* CPlayerManager::createSummon(UINT inID, CTask* inParent) {
     offFlag(m_uiFlag, 0x20);
     switch (inID) {
     case 1:
-        m_pSummon = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2687)")
+        m_pSummon = new KH_AT("(2687)")
             Summon::CSummonSinba(parent);
         break;
     case 2:
-        m_pSummon = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2690)")
+        m_pSummon = new KH_AT("(2690)")
             Summon::CSummonGenie(parent);
         break;
     case 3:
-        m_pSummon = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2693)")
+        m_pSummon = new KH_AT("(2693)")
             Summon::CSummonBambi(parent);
         break;
     case 4:
-        m_pSummon = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2696)")
+        m_pSummon = new KH_AT("(2696)")
             Summon::CSummonDumbo(parent);
         break;
     case 5:
-        m_pSummon = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2699)")
+        m_pSummon = new KH_AT("(2699)")
             Summon::CSummonTink(parent);
         break;
     case 6:
-        m_pSummon = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2702)")
+        m_pSummon = new KH_AT("(2702)")
             Summon::CSummonMushu(parent);
         break;
     case 7:
-        m_pSummon = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2705)")
+        m_pSummon = new KH_AT("(2705)")
             Summon::CSummonCloud(parent);
         break;
     }
@@ -1711,3 +1711,4 @@ INT getWorldRotY(FLOAT& outRotY, const FMATRIX& inMat) {
 } // namespace PLM
 
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .data .rodata

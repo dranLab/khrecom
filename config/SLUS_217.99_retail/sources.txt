@@ -44,6 +44,7 @@ Game/Bullet/CreateBullet
 Game/Card
 Game/CardBattle
 Game/CardKind
+Game/CardRevolver
 Game/CollParam
 Game/Collision/CollAttack
 Game/Collision/CollBody
@@ -178,6 +179,7 @@ Game/Player/PlayerCamera
 Game/Player/PlayerControl
 Game/Player/PlayerDRiku
 Game/Player/PlayerGauge
+Game/Player/PlayerManager
 Game/Player/PlayerRiku
 Game/Player/PlayerSora
 Game/Player/PlayerWeapon
