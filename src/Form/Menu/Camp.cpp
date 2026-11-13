@@ -5382,7 +5382,7 @@ INT CCamp::setWorldmap(INT nSetCmd) {
             nCard = 0;
             pRoomSrcInfo = pFloorLayout->_rooms;
             for (INT i = 0; i < pFloorLayout->_nRoomCount; i++, pRoomSrcInfo++) {
-                INT nSearch;
+                INT nSeq; INT fgGuide; CHAR doorInfo;
                 pRoomInfo = CSceneInfo::getRoomInfo(pRoomSrcInfo->_nID);
                 p2DSeqCtrl = m_pRoomCtrl[i] = new (operator new(sizeof(C2DSeqCtrl) KH_ATARG("(6755)"))) C2DSeqCtrl;
                 p2DSeqCtrl->setParent(m_pWMMoveCtrl);
@@ -5394,51 +5394,51 @@ INT CCamp::setWorldmap(INT nSetCmd) {
                 vec2.x = vec.x + (pRoomSrcInfo->_nPosX + pRoomSrcInfo->_nPosY) * 50.0f;
                 vec2.y = vec.y + pRoomSrcInfo->_nPosX * 40.0f + pRoomSrcInfo->_nPosY * -40.0f;
                 p2DSeqCtrl->setLocalPos(vec2);
-                nSearch = -1;
+                fgGuide = -1;
                 switch (pRoomSrcInfo->_nRoomType) {
                 case 0:
                 case 5:
                 case 7:
                 case 8:
                     if (m_roomDiscover[i] < 0) {
-                        idx = 0xE;
+                        nSeq = 0xE;
                     } else if (m_roomDiscover[i] < 16) {
-                        idx = roomSeqTbl[m_roomDiscover[i]];
+                        nSeq = roomSeqTbl[m_roomDiscover[i]];
                     } else {
-                        idx = 0xD;
+                        nSeq = 0xD;
                     }
                     break;
                 case 2:
-                    idx = 0x22;
-                    nSearch = CCard::searchCard(0xBA, 0);
+                    nSeq = 0x22;
+                    fgGuide = CCard::searchCard(0xBA, 0);
                     goto chk;
                 case 3:
-                    idx = 0x20;
-                    nSearch = CCard::searchCard(0xBB, 0);
+                    nSeq = 0x20;
+                    fgGuide = CCard::searchCard(0xBB, 0);
                     goto chk;
                 case 4:
-                    idx = 0x21;
-                    nSearch = CCard::searchCard(0xBC, 0);
+                    nSeq = 0x21;
+                    fgGuide = CCard::searchCard(0xBC, 0);
                     goto chk;
                 case 6:
-                    idx = 0x1E;
-                    nSearch = 0x1000;
+                    nSeq = 0x1E;
+                    fgGuide = 0x1000;
                     if (!CGameWork::progMCW()._KeyRoomsTresureBox[CSceneInfo::getCurrentWorldID(FALSE)]) {
                         if (!pRoomInfo->hasEntered()) {
-                            nSearch = CCard::searchCard(0xBD, 0) | 0x1000;
+                            fgGuide = CCard::searchCard(0xBD, 0) | 0x1000;
                         }
                     }
                 chk:
                     if (m_roomDiscover[i] < 0 && !pRoomInfo->hasEntered()) {
-                        idx = 0x23;
+                        nSeq = 0x23;
                     } else if (m_roomDiscover[i] < 16) {
                         if (pRoomSrcInfo->_nRoomType != 6) {
-                            idx = 0x1F;
-                            nSearch = 0;
+                            nSeq = 0x1F;
+                            fgGuide = 0;
                         } else if (m_roomDiscover[i] >= 0) {
-                            idx = roomSeqTbl[m_roomDiscover[i]];
+                            nSeq = roomSeqTbl[m_roomDiscover[i]];
                         } else {
-                            idx = 0x23;
+                            nSeq = 0x23;
                         }
                     }
                     break;
@@ -5446,28 +5446,28 @@ INT CCamp::setWorldmap(INT nSetCmd) {
                     continue;
                 }
                 p2DSeqCtrl->addSeq(pSeqName, pRoomSrcInfo->_nPosY + 0x57 + fgExpectStart);
-                p2DSeqCtrl->addSeq(pSeqName, idx);
-                if (nSearch >= 0) {
-                    INT nSeq1;
-                    INT nSeq2 = 0;
-                    if (nSearch < 0x1000) {
-                        if (nSearch <= 0 || !m_roomInfo[i]) {
-                            nSeq1 = 0x4E;
+                p2DSeqCtrl->addSeq(pSeqName, nSeq);
+                if (fgGuide >= 0) {
+                    USHORT effectSeq;
+                    USHORT effectSeq2 = 0;
+                    if (fgGuide < 0x1000) {
+                        if (fgGuide <= 0 || !m_roomInfo[i]) {
+                            effectSeq = 0x4E;
                         } else {
-                            nSeq1 = 0x4D;
-                            nSeq2 = 0x4C;
+                            effectSeq = 0x4D;
+                            effectSeq2 = 0x4C;
                         }
-                    } else if (nSearch == 0x1000) {
-                        nSeq1 = 0x4E;
+                    } else if (fgGuide == 0x1000) {
+                        effectSeq = 0x4E;
                     } else {
-                        nSeq1 = 0x50;
-                        nSeq2 = 0x4F;
+                        effectSeq = 0x50;
+                        effectSeq2 = 0x4F;
                     }
-                    p2DSeqObj = p2DSeqCtrl->addSeq(pSeqName, nSeq1);
+                    p2DSeqObj = p2DSeqCtrl->addSeq(pSeqName, effectSeq);
                     p2DSeqObj->changeLayer(0xD);
                     p2DSeqCtrl->enableDisp(2, FALSE);
-                    if (nSeq2) {
-                        p2DSeqObj = p2DSeqCtrl->addSeq(pSeqName, nSeq2);
+                    if (effectSeq2) {
+                        p2DSeqObj = p2DSeqCtrl->addSeq(pSeqName, effectSeq2);
                         p2DSeqObj->changeLayer(0xB);
                         p2DSeqCtrl->enableDisp(3, FALSE);
                     }
@@ -5478,19 +5478,19 @@ INT CCamp::setWorldmap(INT nSetCmd) {
                 p2DSeqCtrl->enableColorCtrl(TRUE);
                 p2DSeqCtrl->setLocalPos(vec2);
                 p2DSeqCtrl->enableDisp(FALSE);
-                INT nDoorBits = m_roomDoor[i];
-                for (j = 0; j < 4; j++) {
-                    INT nDoor = (nDoorBits >> (j * 2)) & 3;
-                    idx = -1;
-                    if (nDoor == 1) {
-                        idx = 4;
-                    } else if (nDoor == 2) {
-                        idx = 8;
-                    } else if (nDoor == 3) {
-                        idx = 0;
+                doorInfo = m_roomDoor[i];
+                for (INT j = 0; j < 4; j++) {
+                    INT info = (doorInfo >> (j * 2)) & 3;
+                    nSeq = -1;
+                    if (info == 1) {
+                        nSeq = 4;
+                    } else if (info == 2) {
+                        nSeq = 8;
+                    } else if (info == 3) {
+                        nSeq = 0;
                     }
-                    if (idx >= 0) {
-                        p2DSeqCtrl->addSeq(pSeqName, idx + ((j + 1) & 3));
+                    if (nSeq >= 0) {
+                        p2DSeqCtrl->addSeq(pSeqName, nSeq + ((j + 1) & 3));
                     }
                 }
                 cardID = pRoomInfo->getRoomNameCardID();
@@ -5928,7 +5928,7 @@ INT CCamp::setMainCmd(INT nSetCmd, INT nMode) {
                 for (INT i = 0; i < m_nCurrentCmdMax; i++) {
                     p2DSeqCtrl = m_pMainCmdCtrl[i];
                     delete m_pMainCmdFnt[i];
-                    asm volatile(""); /* MATCH: one more insn in the loop body: loop.c's second pass then leaves this + 336 in the loop, so &m_pMainCmdFnt[i] is recomputed from i each iteration (only m_pMainCmdCtrl[i] strength-reduced) */
+                    KH_DEBUG(asm volatile("");) /* MATCH: beta only: one more insn in the loop body: loop.c's second pass then leaves this + 336 in the loop, so &m_pMainCmdFnt[i] is recomputed from i each iteration (only m_pMainCmdCtrl[i] strength-reduced); retail matches without it (p2DSeqCtrl's allocno priority 4*22/80 then beats this's 5*45/206: this in s1) */
                     m_pMainCmdFnt[i] = NULL;
                     m_pMainCmdFnt[i] = new KH_AT("(7448)") C2DFnt(0, 0, &rgba, 0xF, m_pMainCmdName[m_bPlayerKind][nMode][i], 0x40);
                     p2DSeqCtrl->replaceFnt(1, m_pSeqName, m_pMainCmdFnt[i]);
