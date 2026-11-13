@@ -467,6 +467,12 @@ def version_address_map(build_cfg: dict) -> dict[int, int]:
     """Beta address -> this version's address (tools/version_map.py: functions.tsv, data.tsv)."""
     out = {}
     vmap = ROOT / "build" / Path(build_cfg["elf"]).name / "version_map"
+    if not (vmap / "functions.tsv").exists() and (ROOT / build_cfg["elf"]).exists():
+        # a fresh checkout or worktree (build/ is not in git): generate it (~15 s); rerun tools/version_map.py by hand
+        # after changing config/<VERSION>/function_pairs.manual.txt
+        print(f"{Path(build_cfg['elf']).name}: no {vmap.relative_to(ROOT)}, running tools/version_map.py", flush=True)
+        subprocess.run([sys.executable, str(ROOT / "tools/version_map.py"), "--other", build_cfg["elf"]], cwd=ROOT,
+                       check=True, stdout=subprocess.DEVNULL)
     for name, beta, other in (("functions.tsv", "beta", "other"), ("data.tsv", "beta", "other")):
         path = vmap / name
         if path.exists():
@@ -492,8 +498,9 @@ def address_labels(opts: dict, address_map: dict[int, int] | None = None,
             for line in symbols_path.read_text(encoding="utf-8").splitlines():
                 if m := re.match(r"^(\S+) = 0x([0-9A-Fa-f]+);", line):
                     known[m.group(1)] = int(m.group(2), 16)
-        for path in sorted([*(ROOT / opts["asm_path"] / "nonmatchings").rglob("*.s"),
-                            *(ROOT / opts["asm_path"] / "data").rglob("*.s")]):
+        # all of the version's assembly: nonmatchings/, data/ and the whole-unit .s files of the units it still builds
+        # from assembly (their code names data of units from source, e.g. BattleCard's .bss)
+        for path in sorted((ROOT / opts["asm_path"]).rglob("*.s")):
             for m in ADDRESS_LABEL.finditer(path.read_text(encoding="latin-1")):
                 labels[m.group(1)] = known.get(m.group(1), int(m.group(2), 16))
         for path in sorted(p for p in (ROOT / "src").rglob("*") if p.suffix in (".c", ".cpp", ".h", ".s")):
