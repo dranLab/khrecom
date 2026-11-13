@@ -587,6 +587,8 @@ class Scorer:
         src.write_text(text)
         obj = d / "out.o"
         cmd = self.command.replace(self.obj, str(obj))
+        # tools/name_data_labels.py's label list is configure's input next to the real object, not an output: keep it
+        cmd = cmd.replace(f"{obj}.labels", f"{self.obj}.labels")
         cmd = re.sub(r"(?<=\s)" + re.escape(str(self.source.relative_to(ROOT))) + r"(?=\s|$)", str(src), cmd)
         # quoted includes of the original directory still resolve (the copy lives elsewhere)
         cmd = cmd.replace(" -I src", f" -I {self.source.parent.relative_to(ROOT)} -I src", 1)
