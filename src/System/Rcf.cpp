@@ -174,10 +174,10 @@ void _clearQueue();
 
 namespace {
 unsigned char s_cReadThreadStack[8192];
-RcfSceneInfo* s_pRcfSceneArray;
-RcfMapInfo* s_pRcfMapArray;
-SHORT s_nRcfSceneCount;
-SHORT s_nRcfMapCount;
+KH_DEBUG(RcfSceneInfo* s_pRcfSceneArray;)
+KH_DEBUG(RcfMapInfo* s_pRcfMapArray;)
+KH_DEBUG(SHORT s_nRcfSceneCount;)
+KH_DEBUG(SHORT s_nRcfMapCount;)
 BOOL s_bSceneManagedMode;
 BYTE* s_pExtBuf;
 INT s_nLocale;
@@ -280,14 +280,14 @@ void CRcf::initialize() {
     CMovieFiles::initialize();
     CRcfCD::initialize();
     s_pDbgFileBuf = __null;
-    s_pRcfSceneArray = __null;
-    s_pRcfMapArray = __null;
-    s_nRcfSceneCount = 0;
-    s_nRcfMapCount = 0;
+    KH_DEBUG(s_pRcfSceneArray = __null;)
+    KH_DEBUG(s_pRcfMapArray = __null;)
+    KH_DEBUG(s_nRcfSceneCount = 0;)
+    KH_DEBUG(s_nRcfMapCount = 0;)
     CNowLoading::enable(TRUE);
     CNowLoading::setMode(0);
     _loadRCFAlias();
-    _loadDbgRcfSceneInfo();
+    KH_DEBUG(_loadDbgRcfSceneInfo();)
 }
 BOOL _hasReadQueue();
 void _setReadThreadEnd();
@@ -389,9 +389,9 @@ void _clearQueue() {
     }
     s_pReadQueue = __null;
     _signalsema();
-    if (CNowLoading::getMode() == 1) {
-        CNowLoading::end(FALSE);
-    }
+    KH_DEBUG(if (CNowLoading::getMode() == 1) {)
+        KH_DEBUG(CNowLoading::end(FALSE);)
+    KH_DEBUG(})
 }
 BOOL _hasReadQueue() {
     return s_pReadQueue != __null;
@@ -412,16 +412,16 @@ void CRcf::reqLoadRCF(INT nGroup, INT nMember, INT nType, BYTE* pBuff, INT nLink
     if (isTerminated()) {
         return;
     }
-    pPrev = s_pReadQueue;
+    KH_DEBUG(pPrev = s_pReadQueue;)
     _waitsema();
 #line 527
     pData = new KH_AT("(527)") CRCFQueueData(nGroup, nMember, nType, pBuff, nLinkOwner);
     ASSERT(pData);
     pData->linkTail();
     _signalsema();
-    if (CNowLoading::getMode() == 1 && !pPrev) {
-        CNowLoading::start();
-    }
+    KH_DEBUG(if (CNowLoading::getMode() == 1 && !pPrev) {)
+        KH_DEBUG(CNowLoading::start();)
+    KH_DEBUG(})
 }
 void CRcf::reqLoadRCFFront(INT nGroup, INT nMember, INT nType, BYTE* pBuff, INT nLinkOwner) {
     CRCFQueueData* pPrev;
@@ -430,16 +430,16 @@ void CRcf::reqLoadRCFFront(INT nGroup, INT nMember, INT nType, BYTE* pBuff, INT 
     if (isTerminated()) {
         return;
     }
-    pPrev = s_pReadQueue;
+    KH_DEBUG(pPrev = s_pReadQueue;)
     _waitsema();
 #line 553
     pData = new KH_AT("(553)") CRCFQueueData(nGroup, nMember, nType, pBuff, nLinkOwner);
     ASSERT(pData);
     pData->linkFront();
     _signalsema();
-    if (CNowLoading::getMode() == 1 && !pPrev) {
-        CNowLoading::start();
-    }
+    KH_DEBUG(if (CNowLoading::getMode() == 1 && !pPrev) {)
+        KH_DEBUG(CNowLoading::start();)
+    KH_DEBUG(})
 }
 
 inline void CRCFQueueData::init(INT nGroupID, INT nMemeberID, INT nType, BYTE* pBuff, INT nLinkOwner) {
@@ -541,9 +541,9 @@ void _checkReadThreadEnd() {
         _waitsema();
         nRes = _setNextRcfQueue();
         _signalsema();
-        if (CNowLoading::getMode() == 1 && !nRes) {
-            CNowLoading::end(FALSE);
-        }
+        KH_DEBUG(if (CNowLoading::getMode() == 1 && !nRes) {)
+            KH_DEBUG(CNowLoading::end(FALSE);)
+        KH_DEBUG(})
     }
 }
 void CRcf::mainProc() {
@@ -1020,17 +1020,17 @@ INT _parseFileType(const CHAR* pInData) {
     return nType;
 }
 INT CRcf::getMapID(SHORT nArea, SHORT nScene) {
-    RcfSceneInfo* pScene = getSceneInfo(nArea, nScene);
-    RcfMapInfo* pMap;
+    KH_DEBUG(RcfSceneInfo* pScene = getSceneInfo(nArea, nScene);)
+    KH_DEBUG(RcfMapInfo* pMap;)
 
-    if (!pScene) {
-        return 0;
-    }
-    pMap = getMapInfo(pScene->_nRcfMapIdx);
-    if (!pMap) {
-        return 0;
-    }
-    return (pMap->_nGroup + 50) * 10000 + pMap->_nMember;
+    KH_DEBUG(if (!pScene) {)
+        KH_DEBUG(return 0;)
+    KH_DEBUG(})
+    KH_DEBUG(pMap = getMapInfo(pScene->_nRcfMapIdx);)
+    KH_DEBUG(if (!pMap) {)
+        KH_DEBUG(return 0;)
+    KH_DEBUG(})
+    return KH_VER((pMap->_nGroup + 50) * 10000 + pMap->_nMember, CRcfCD::getExtInfo((nArea + 100) * 10000 + nScene, 0));
 }
 SHORT CRcf::getBattleScene(SHORT nArea, SHORT nScene) {
     SHORT nBtl = CRcfCD::getMemberOption((nArea + 100) * 10000 + nScene);
@@ -1213,70 +1213,70 @@ INT _getDbgParseRestSize() {
 void _skipDbgLine() {
     s_nDbgFilePtr += _skipLine(_getDbgParsePtr(), _getDbgParseRestSize());
 }
-void CRcf::prepareLoadCategoryInfo() {
-    s_nDbgReadStep = 0;
-}
-INT CRcf::loadNextCategoryInfo(INT nCategory, CHAR* pOutLabel, INT nLabelMax, INT* pOutMemberID) {
-    switch (s_nDbgReadStep) {
-    case 0: {
-        char szFileName[256];
-        if (s_pDbgFileBuf) delete s_pDbgFileBuf;
-        s_pDbgFileBuf = __null;
+KH_DEBUG(void CRcf::prepareLoadCategoryInfo() {)
+    KH_DEBUG(s_nDbgReadStep = 0;)
+KH_DEBUG(})
+KH_DEBUG(INT CRcf::loadNextCategoryInfo(INT nCategory, CHAR* pOutLabel, INT nLabelMax, INT* pOutMemberID) {)
+    KH_DEBUG(switch (s_nDbgReadStep) {)
+    KH_DEBUG(case 0: {)
+        KH_DEBUG(char szFileName[256];)
+        KH_DEBUG(if (s_pDbgFileBuf) delete s_pDbgFileBuf;)
+        KH_DEBUG(s_pDbgFileBuf = __null;)
 #line 2113
-        s_pDbgFileBuf = new KH_AT("(2113)") CBuf;
-        ASSERT(s_pDbgFileBuf);
-        sprintf(szFileName, "cdrom0:\\rcf\\g%03d.rcf", nCategory);
-        if (CFileIO::loadFile(szFileName, *s_pDbgFileBuf, 0) < 0) {
-            if (s_pDbgFileBuf) delete s_pDbgFileBuf;
-            s_pDbgFileBuf = __null;
-            return 2;
-        }
-        s_nDbgFilePtr = 0;
-        s_nDbgReadStep++;
-        break;
-    }
-    case 1: {
-        CHAR* p = _getDbgParsePtr();
-        if (p[0] == ';' && p[1] == ' ') {
-            char szDataName[256];
-            INT i;
-            INT nMember;
-            char szTmp[1024];
-            p += 2;
-            s_nDbgFilePtr += 2;
-            for (i = 0; *p && *p != '$' && i < 255 && !_isStr_CR(p); p++, i++) {
-                szDataName[i] = *p;
-            }
-            szDataName[i] = 0;
-            _skipDbgLine();
-            p = _getDbgParsePtr();
-            while (*p && *p != '#') {
-                p++;
-                s_nDbgFilePtr++;
-            }
-            nMember = _atoi(p);
-            if (pOutMemberID) {
-                *pOutMemberID = nMember;
-            }
-            if (pOutLabel) {
-                sprintf(szTmp, "%04d %s", nMember, szDataName);
-                strncpy(pOutLabel, szTmp, nLabelMax - 2);
-                pOutLabel[nLabelMax - 1] = 0;
-            }
-            return 1;
-        }
-        _skipDbgLine();
-        break;
-    }
-    }
-    if (s_nDbgFilePtr < s_pDbgFileBuf->getBufSize()) {
-        return 0;
-    }
-    s_nDbgReadStep = 0;
-    if (s_pDbgFileBuf) delete s_pDbgFileBuf;
-    s_pDbgFileBuf = __null;
-    return 2;
-}
+        KH_DEBUG(s_pDbgFileBuf = new KH_AT("(2113)") CBuf;)
+        KH_DEBUG(ASSERT(s_pDbgFileBuf);)
+        KH_DEBUG(sprintf(szFileName, "cdrom0:\\rcf\\g%03d.rcf", nCategory);)
+        KH_DEBUG(if (CFileIO::loadFile(szFileName, *s_pDbgFileBuf, 0) < 0) {)
+            KH_DEBUG(if (s_pDbgFileBuf) delete s_pDbgFileBuf;)
+            KH_DEBUG(s_pDbgFileBuf = __null;)
+            KH_DEBUG(return 2;)
+        KH_DEBUG(})
+        KH_DEBUG(s_nDbgFilePtr = 0;)
+        KH_DEBUG(s_nDbgReadStep++;)
+        KH_DEBUG(break;)
+    KH_DEBUG(})
+    KH_DEBUG(case 1: {)
+        KH_DEBUG(CHAR* p = _getDbgParsePtr();)
+        KH_DEBUG(if (p[0] == ';' && p[1] == ' ') {)
+            KH_DEBUG(char szDataName[256];)
+            KH_DEBUG(INT i;)
+            KH_DEBUG(INT nMember;)
+            KH_DEBUG(char szTmp[1024];)
+            KH_DEBUG(p += 2;)
+            KH_DEBUG(s_nDbgFilePtr += 2;)
+            KH_DEBUG(for (i = 0; *p && *p != '$' && i < 255 && !_isStr_CR(p); p++, i++) {)
+                KH_DEBUG(szDataName[i] = *p;)
+            KH_DEBUG(})
+            KH_DEBUG(szDataName[i] = 0;)
+            KH_DEBUG(_skipDbgLine();)
+            KH_DEBUG(p = _getDbgParsePtr();)
+            KH_DEBUG(while (*p && *p != '#') {)
+                KH_DEBUG(p++;)
+                KH_DEBUG(s_nDbgFilePtr++;)
+            KH_DEBUG(})
+            KH_DEBUG(nMember = _atoi(p);)
+            KH_DEBUG(if (pOutMemberID) {)
+                KH_DEBUG(*pOutMemberID = nMember;)
+            KH_DEBUG(})
+            KH_DEBUG(if (pOutLabel) {)
+                KH_DEBUG(sprintf(szTmp, "%04d %s", nMember, szDataName);)
+                KH_DEBUG(strncpy(pOutLabel, szTmp, nLabelMax - 2);)
+                KH_DEBUG(pOutLabel[nLabelMax - 1] = 0;)
+            KH_DEBUG(})
+            KH_DEBUG(return 1;)
+        KH_DEBUG(})
+        KH_DEBUG(_skipDbgLine();)
+        KH_DEBUG(break;)
+    KH_DEBUG(})
+    KH_DEBUG(})
+    KH_DEBUG(if (s_nDbgFilePtr < s_pDbgFileBuf->getBufSize()) {)
+        KH_DEBUG(return 0;)
+    KH_DEBUG(})
+    KH_DEBUG(s_nDbgReadStep = 0;)
+    KH_DEBUG(if (s_pDbgFileBuf) delete s_pDbgFileBuf;)
+    KH_DEBUG(s_pDbgFileBuf = __null;)
+    KH_DEBUG(return 2;)
+KH_DEBUG(})
 BOOL isTokenSCENE(const CHAR* p) {
     return strncmp("$SCENE", p, 6) == 0;
 }
@@ -1312,200 +1312,200 @@ void _getStageInfo(SHORT& nOutGroup, SHORT& nOutMember, CHAR* pOutLabel, INT* pO
     }
     _skipDbgLine();
 }
-BOOL _loadRcfInfoFile(const CHAR* pszFile) {
-    INT nLen;
-    BYTE* pBuf;
+KH_DEBUG(BOOL _loadRcfInfoFile(const CHAR* pszFile) {)
+    KH_DEBUG(INT nLen;)
+    KH_DEBUG(BYTE* pBuf;)
 
-    if (s_pDbgFileBuf) delete s_pDbgFileBuf;
-    nLen = CFileIO::getFileSize(pszFile);
-    if (nLen <= 0) {
-        s_pDbgFileBuf = __null;
-        return FALSE;
-    }
+    KH_DEBUG(if (s_pDbgFileBuf) delete s_pDbgFileBuf;)
+    KH_DEBUG(nLen = CFileIO::getFileSize(pszFile);)
+    KH_DEBUG(if (nLen <= 0) {)
+        KH_DEBUG(s_pDbgFileBuf = __null;)
+        KH_DEBUG(return FALSE;)
+    KH_DEBUG(})
 #line 2257
-    s_pDbgFileBuf = new KH_AT("(2257)") CBuf;
-    ASSERT(s_pDbgFileBuf);
-    pBuf = s_pDbgFileBuf->allocBuf_A64(nLen + 1);
-    ASSERT(pBuf);
-    if (CFileIO::loadFile(pszFile, pBuf, nLen) < 0) {
-        if (s_pDbgFileBuf) delete s_pDbgFileBuf;
-        s_pDbgFileBuf = __null;
-        return FALSE;
-    }
-    pBuf[nLen] = 0;
-    return TRUE;
-}
-void _disposeRcfInfoFile() {
-    if (s_pDbgFileBuf) delete s_pDbgFileBuf;
-    s_pDbgFileBuf = __null;
-}
-void _countRcfSceneAndMap() {
-    BOOL bCont = TRUE;
-    CHAR* p = _getDbgParsePtr();
+    KH_DEBUG(s_pDbgFileBuf = new KH_AT("(2257)") CBuf;)
+    KH_DEBUG(ASSERT(s_pDbgFileBuf);)
+    KH_DEBUG(pBuf = s_pDbgFileBuf->allocBuf_A64(nLen + 1);)
+    KH_DEBUG(ASSERT(pBuf);)
+    KH_DEBUG(if (CFileIO::loadFile(pszFile, pBuf, nLen) < 0) {)
+        KH_DEBUG(if (s_pDbgFileBuf) delete s_pDbgFileBuf;)
+        KH_DEBUG(s_pDbgFileBuf = __null;)
+        KH_DEBUG(return FALSE;)
+    KH_DEBUG(})
+    KH_DEBUG(pBuf[nLen] = 0;)
+    KH_DEBUG(return TRUE;)
+KH_DEBUG(})
+KH_DEBUG(void _disposeRcfInfoFile() {)
+    KH_DEBUG(if (s_pDbgFileBuf) delete s_pDbgFileBuf;)
+    KH_DEBUG(s_pDbgFileBuf = __null;)
+KH_DEBUG(})
+KH_DEBUG(void _countRcfSceneAndMap() {)
+    KH_DEBUG(BOOL bCont = TRUE;)
+    KH_DEBUG(CHAR* p = _getDbgParsePtr();)
 
-    while (*p && bCont) {
-        _skipDbgLine();
-        bCont = !isTokenSCENE(p);
-        p = _getDbgParsePtr();
-    }
-    bCont = TRUE;
-    while (*p && bCont) {
-        _skipDbgLine();
-        if (*p == ';') {
-            s_nRcfSceneCount++;
-        } else if (isTokenEND(p)) {
-            bCont = FALSE;
-        }
-        p = _getDbgParsePtr();
-    }
-    bCont = TRUE;
-    while (*p && bCont) {
-        _skipDbgLine();
-        bCont = !isTokenMAP(p);
-        p = _getDbgParsePtr();
-    }
-    bCont = TRUE;
-    while (*p && bCont) {
-        _skipDbgLine();
-        if (*p == '#') {
-            s_nRcfMapCount++;
-        } else if (isTokenEND(p)) {
-            bCont = FALSE;
-        }
-        p = _getDbgParsePtr();
-    }
-}
-void _parseRcfSceneAndMapInfo() {
-    CHAR* p;
-    BOOL bCont;
-    USHORT nSceneIdx;
-    RcfSceneInfo* pScene;
-    INT nAtelCnt;
-    SHORT nGroup;
-    SHORT nMember;
-    SHORT nMapIdx;
-    RcfMapInfo* pMap;
-    RcfMapInfo* pCurrentMap;
-    INT i;
+    KH_DEBUG(while (*p && bCont) {)
+        KH_DEBUG(_skipDbgLine();)
+        KH_DEBUG(bCont = !isTokenSCENE(p);)
+        KH_DEBUG(p = _getDbgParsePtr();)
+    KH_DEBUG(})
+    KH_DEBUG(bCont = TRUE;)
+    KH_DEBUG(while (*p && bCont) {)
+        KH_DEBUG(_skipDbgLine();)
+        KH_DEBUG(if (*p == ';') {)
+            KH_DEBUG(s_nRcfSceneCount++;)
+        KH_DEBUG(} else if (isTokenEND(p)) {)
+            KH_DEBUG(bCont = FALSE;)
+        KH_DEBUG(})
+        KH_DEBUG(p = _getDbgParsePtr();)
+    KH_DEBUG(})
+    KH_DEBUG(bCont = TRUE;)
+    KH_DEBUG(while (*p && bCont) {)
+        KH_DEBUG(_skipDbgLine();)
+        KH_DEBUG(bCont = !isTokenMAP(p);)
+        KH_DEBUG(p = _getDbgParsePtr();)
+    KH_DEBUG(})
+    KH_DEBUG(bCont = TRUE;)
+    KH_DEBUG(while (*p && bCont) {)
+        KH_DEBUG(_skipDbgLine();)
+        KH_DEBUG(if (*p == '#') {)
+            KH_DEBUG(s_nRcfMapCount++;)
+        KH_DEBUG(} else if (isTokenEND(p)) {)
+            KH_DEBUG(bCont = FALSE;)
+        KH_DEBUG(})
+        KH_DEBUG(p = _getDbgParsePtr();)
+    KH_DEBUG(})
+KH_DEBUG(})
+KH_DEBUG(void _parseRcfSceneAndMapInfo() {)
+    KH_DEBUG(CHAR* p;)
+    KH_DEBUG(BOOL bCont;)
+    KH_DEBUG(USHORT nSceneIdx;)
+    KH_DEBUG(RcfSceneInfo* pScene;)
+    KH_DEBUG(INT nAtelCnt;)
+    KH_DEBUG(SHORT nGroup;)
+    KH_DEBUG(SHORT nMember;)
+    KH_DEBUG(SHORT nMapIdx;)
+    KH_DEBUG(RcfMapInfo* pMap;)
+    KH_DEBUG(RcfMapInfo* pCurrentMap;)
+    KH_DEBUG(INT i;)
 
-    if (!s_pDbgFileBuf) {
-        return;
-    }
-    s_nDbgFilePtr = 0;
-    p = _getDbgParsePtr();
-    if (s_pRcfSceneArray && s_nRcfSceneCount > 0) {
-        bCont = TRUE;
-        while (*p && bCont) {
-            _skipDbgLine();
-            bCont = !isTokenSCENE(p);
-            p = _getDbgParsePtr();
-        }
-        pScene = s_pRcfSceneArray;
-        nSceneIdx = 0;
-        while (*p && nSceneIdx < s_nRcfSceneCount) {
-            if (isTokenEND(p)) {
-                _skipDbgLine();
-                break;
-            }
-            if (*p == ';') {
-                _getStageInfo(pScene->_nGroup, pScene->_nMember, pScene->_szTitle, &nAtelCnt);
-                pScene->_nAtelCount = nAtelCnt;
-                pScene->_nRcfMapIdx = -1;
-                nSceneIdx++;
-                pScene++;
-            }
-            p = _getDbgParsePtr();
-        }
-    }
-    if (s_pRcfMapArray && s_nRcfMapCount > 0) {
-        p = _getDbgParsePtr();
-        bCont = TRUE;
-        while (*p && bCont) {
-            _skipDbgLine();
-            bCont = !isTokenMAP(p);
-            p = _getDbgParsePtr();
-        }
-        pMap = s_pRcfMapArray;
-        nMapIdx = -1;
-        pCurrentMap = __null;
-        while (*p && nMapIdx < s_nRcfMapCount) {
-            if (isTokenEND(p)) {
-                _skipDbgLine();
-                break;
-            }
-            if (*p == '#') {
-                nMapIdx++;
-                _getStageInfo(pMap->_nGroup, pMap->_nMember, pMap->_szTitle, __null);
-                pCurrentMap = pMap;
-                pMap++;
-            } else if (*p == ';' && pCurrentMap) {
-                _getStageInfo(nGroup, nMember, __null, __null);
-                i = _seekRcfSceneInfo(nGroup, nMember, s_pRcfSceneArray, s_nRcfSceneCount);
-                if (i >= 0) {
-                    RcfSceneInfo& s = s_pRcfSceneArray[i];
-                    pCurrentMap->_SceneList.pushBack(s);
-                    s._nRcfMapIdx = nMapIdx;
-                }
-            } else {
-                _skipDbgLine();
-            }
-            p = _getDbgParsePtr();
-        }
-    }
-}
-void _loadDbgRcfSceneInfo() {
-    s_nRcfSceneCount = 0;
-    s_nDbgFilePtr = 0;
-    s_nRcfMapCount = 0;
-    if (_loadRcfInfoFile("cdrom0:\\rcf\\scene.dat")) {
-        _countRcfSceneAndMap();
-    }
-    if (s_nRcfSceneCount > 0) {
+    KH_DEBUG(if (!s_pDbgFileBuf) {)
+        KH_DEBUG(return;)
+    KH_DEBUG(})
+    KH_DEBUG(s_nDbgFilePtr = 0;)
+    KH_DEBUG(p = _getDbgParsePtr();)
+    KH_DEBUG(if (s_pRcfSceneArray && s_nRcfSceneCount > 0) {)
+        KH_DEBUG(bCont = TRUE;)
+        KH_DEBUG(while (*p && bCont) {)
+            KH_DEBUG(_skipDbgLine();)
+            KH_DEBUG(bCont = !isTokenSCENE(p);)
+            KH_DEBUG(p = _getDbgParsePtr();)
+        KH_DEBUG(})
+        KH_DEBUG(pScene = s_pRcfSceneArray;)
+        KH_DEBUG(nSceneIdx = 0;)
+        KH_DEBUG(while (*p && nSceneIdx < s_nRcfSceneCount) {)
+            KH_DEBUG(if (isTokenEND(p)) {)
+                KH_DEBUG(_skipDbgLine();)
+                KH_DEBUG(break;)
+            KH_DEBUG(})
+            KH_DEBUG(if (*p == ';') {)
+                KH_DEBUG(_getStageInfo(pScene->_nGroup, pScene->_nMember, pScene->_szTitle, &nAtelCnt);)
+                KH_DEBUG(pScene->_nAtelCount = nAtelCnt;)
+                KH_DEBUG(pScene->_nRcfMapIdx = -1;)
+                KH_DEBUG(nSceneIdx++;)
+                KH_DEBUG(pScene++;)
+            KH_DEBUG(})
+            KH_DEBUG(p = _getDbgParsePtr();)
+        KH_DEBUG(})
+    KH_DEBUG(})
+    KH_DEBUG(if (s_pRcfMapArray && s_nRcfMapCount > 0) {)
+        KH_DEBUG(p = _getDbgParsePtr();)
+        KH_DEBUG(bCont = TRUE;)
+        KH_DEBUG(while (*p && bCont) {)
+            KH_DEBUG(_skipDbgLine();)
+            KH_DEBUG(bCont = !isTokenMAP(p);)
+            KH_DEBUG(p = _getDbgParsePtr();)
+        KH_DEBUG(})
+        KH_DEBUG(pMap = s_pRcfMapArray;)
+        KH_DEBUG(nMapIdx = -1;)
+        KH_DEBUG(pCurrentMap = __null;)
+        KH_DEBUG(while (*p && nMapIdx < s_nRcfMapCount) {)
+            KH_DEBUG(if (isTokenEND(p)) {)
+                KH_DEBUG(_skipDbgLine();)
+                KH_DEBUG(break;)
+            KH_DEBUG(})
+            KH_DEBUG(if (*p == '#') {)
+                KH_DEBUG(nMapIdx++;)
+                KH_DEBUG(_getStageInfo(pMap->_nGroup, pMap->_nMember, pMap->_szTitle, __null);)
+                KH_DEBUG(pCurrentMap = pMap;)
+                KH_DEBUG(pMap++;)
+            KH_DEBUG(} else if (*p == ';' && pCurrentMap) {)
+                KH_DEBUG(_getStageInfo(nGroup, nMember, __null, __null);)
+                KH_DEBUG(i = _seekRcfSceneInfo(nGroup, nMember, s_pRcfSceneArray, s_nRcfSceneCount);)
+                KH_DEBUG(if (i >= 0) {)
+                    KH_DEBUG(RcfSceneInfo& s = s_pRcfSceneArray[i];)
+                    KH_DEBUG(pCurrentMap->_SceneList.pushBack(s);)
+                    KH_DEBUG(s._nRcfMapIdx = nMapIdx;)
+                KH_DEBUG(})
+            KH_DEBUG(} else {)
+                KH_DEBUG(_skipDbgLine();)
+            KH_DEBUG(})
+            KH_DEBUG(p = _getDbgParsePtr();)
+        KH_DEBUG(})
+    KH_DEBUG(})
+KH_DEBUG(})
+KH_DEBUG(void _loadDbgRcfSceneInfo() {)
+    KH_DEBUG(s_nRcfSceneCount = 0;)
+    KH_DEBUG(s_nDbgFilePtr = 0;)
+    KH_DEBUG(s_nRcfMapCount = 0;)
+    KH_DEBUG(if (_loadRcfInfoFile("cdrom0:\\rcf\\scene.dat")) {)
+        KH_DEBUG(_countRcfSceneAndMap();)
+    KH_DEBUG(})
+    KH_DEBUG(if (s_nRcfSceneCount > 0) {)
 #line 2475
-        ASSERT(__null == s_pRcfSceneArray);
-        s_pRcfSceneArray = new KH_AT("(2476)") RcfSceneInfo[s_nRcfSceneCount];
-    }
-    if (s_nRcfMapCount > 0) {
+        KH_DEBUG(ASSERT(__null == s_pRcfSceneArray);)
+        KH_DEBUG(s_pRcfSceneArray = new KH_AT("(2476)") RcfSceneInfo[s_nRcfSceneCount];)
+    KH_DEBUG(})
+    KH_DEBUG(if (s_nRcfMapCount > 0) {)
 #line 2480
-        ASSERT(__null == s_pRcfMapArray);
-        s_pRcfMapArray = new KH_AT("(2481)") RcfMapInfo[s_nRcfMapCount];
-    }
-    _parseRcfSceneAndMapInfo();
-    _disposeRcfInfoFile();
-}
+        KH_DEBUG(ASSERT(__null == s_pRcfMapArray);)
+        KH_DEBUG(s_pRcfMapArray = new KH_AT("(2481)") RcfMapInfo[s_nRcfMapCount];)
+    KH_DEBUG(})
+    KH_DEBUG(_parseRcfSceneAndMapInfo();)
+    KH_DEBUG(_disposeRcfInfoFile();)
+KH_DEBUG(})
 
-RcfSceneInfo* CRcf::getSceneInfo(SHORT nIndex) {
-    if (!s_pRcfSceneArray || s_nRcfSceneCount <= 0 || nIndex < 0 || nIndex >= s_nRcfSceneCount) {
-        return __null;
-    }
-    return &s_pRcfSceneArray[nIndex];
-}
-RcfSceneInfo* CRcf::getSceneInfo(SHORT nArea, SHORT nScene) {
-    INT nIdx = _seekRcfSceneInfo(nArea, nScene, s_pRcfSceneArray, s_nRcfSceneCount);
-    return nIdx >= 0 ? &s_pRcfSceneArray[nIdx] : __null;
-}
-SHORT CRcf::getSceneInfoIndex(SHORT nArea, SHORT nScene) {
-    return _seekRcfSceneInfo(nArea, nScene, s_pRcfSceneArray, s_nRcfSceneCount);
-}
-SHORT CRcf::getSceneInfoCount() {
-    return s_nRcfSceneCount;
-}
-RcfMapInfo* CRcf::getMapInfo(SHORT nIndex) {
-    if (!s_pRcfMapArray || s_nRcfMapCount <= 0 || nIndex < 0 || nIndex >= s_nRcfMapCount) {
-        return __null;
-    }
-    return &s_pRcfMapArray[nIndex];
-}
-RcfMapInfo* CRcf::getMapInfo(SHORT nArea, SHORT nScene) {
-    INT nIdx = _seekRcfSceneInfo(nArea, nScene, s_pRcfMapArray, s_nRcfMapCount);
-    return nIdx >= 0 ? &s_pRcfMapArray[nIdx] : __null;
-}
-SHORT CRcf::getMapInfoIndex(SHORT nArea, SHORT nScene) {
-    return _seekRcfSceneInfo(nArea, nScene, s_pRcfMapArray, s_nRcfMapCount);
-}
-SHORT CRcf::getMapInfoCount() {
-    return s_nRcfMapCount;
-}
+KH_DEBUG(RcfSceneInfo* CRcf::getSceneInfo(SHORT nIndex) {)
+    KH_DEBUG(if (!s_pRcfSceneArray || s_nRcfSceneCount <= 0 || nIndex < 0 || nIndex >= s_nRcfSceneCount) {)
+        KH_DEBUG(return __null;)
+    KH_DEBUG(})
+    KH_DEBUG(return &s_pRcfSceneArray[nIndex];)
+KH_DEBUG(})
+KH_DEBUG(RcfSceneInfo* CRcf::getSceneInfo(SHORT nArea, SHORT nScene) {)
+    KH_DEBUG(INT nIdx = _seekRcfSceneInfo(nArea, nScene, s_pRcfSceneArray, s_nRcfSceneCount);)
+    KH_DEBUG(return nIdx >= 0 ? &s_pRcfSceneArray[nIdx] : __null;)
+KH_DEBUG(})
+KH_DEBUG(SHORT CRcf::getSceneInfoIndex(SHORT nArea, SHORT nScene) {)
+    KH_DEBUG(return _seekRcfSceneInfo(nArea, nScene, s_pRcfSceneArray, s_nRcfSceneCount);)
+KH_DEBUG(})
+KH_DEBUG(SHORT CRcf::getSceneInfoCount() {)
+    KH_DEBUG(return s_nRcfSceneCount;)
+KH_DEBUG(})
+KH_DEBUG(RcfMapInfo* CRcf::getMapInfo(SHORT nIndex) {)
+    KH_DEBUG(if (!s_pRcfMapArray || s_nRcfMapCount <= 0 || nIndex < 0 || nIndex >= s_nRcfMapCount) {)
+        KH_DEBUG(return __null;)
+    KH_DEBUG(})
+    KH_DEBUG(return &s_pRcfMapArray[nIndex];)
+KH_DEBUG(})
+KH_DEBUG(RcfMapInfo* CRcf::getMapInfo(SHORT nArea, SHORT nScene) {)
+    KH_DEBUG(INT nIdx = _seekRcfSceneInfo(nArea, nScene, s_pRcfMapArray, s_nRcfMapCount);)
+    KH_DEBUG(return nIdx >= 0 ? &s_pRcfMapArray[nIdx] : __null;)
+KH_DEBUG(})
+KH_DEBUG(SHORT CRcf::getMapInfoIndex(SHORT nArea, SHORT nScene) {)
+    KH_DEBUG(return _seekRcfSceneInfo(nArea, nScene, s_pRcfMapArray, s_nRcfMapCount);)
+KH_DEBUG(})
+KH_DEBUG(SHORT CRcf::getMapInfoCount() {)
+    KH_DEBUG(return s_nRcfMapCount;)
+KH_DEBUG(})
 
 
 // SOURCE DATA: .rodata .bss
