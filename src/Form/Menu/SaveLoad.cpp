@@ -334,7 +334,7 @@ CSaveLoadUI::CSaveLoadUI(CSaveLoad& parent, SAVELOAD mode, GAMECLEAR clear)
       m_pDataListContainerAgent(NULL), m_pDataListContainerCtrl(NULL), m_pDataListScrollbar(NULL), m_nDataListTop(0),
       m_nDataListSel(0), m_pMessageDlgAgent(NULL), m_pMessageDlgCtrl(NULL), m_pMessageDlgFntInf(NULL),
       m_pMessageDlgCursor(NULL) {
-    ignorePause(TRUE);
+    ignorePause(TRUE); KH_RELEASE(asm volatile("");) // MATCH: retail needs one more insn at gcse (table 223 -> 225 buckets), user-accepted 2026-11-13
     m_hParent = parent.getHandle();
     m_hThis = getHandle();
     s_pFadeMask = NULL;
@@ -2365,3 +2365,4 @@ BOOL CSystemDataChecker::isExited() {
     return s_hSystemDataChecker == 0;
 }
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .data .rodata

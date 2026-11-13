@@ -21,6 +21,9 @@ Form/Menu/RoomCreation .data 0x00340168 0x188
 Form/Menu/RoomCreation .rodata 0x0042B0C0 0x1500
 Form/Menu/Roulette .data 0x003402F0 0x48
 Form/Menu/Roulette .rodata 0x0042C5C0 0x1350
+Form/Menu/SaveLoad .bss 0x005BF518 0x4
+Form/Menu/SaveLoad .data 0x00340338 0x30
+Form/Menu/SaveLoad .rodata 0x0042D910 0x18e0
 Form/Menu/SaveLoadCtrl .rodata 0x0042F1F0 0x20
 Form/Menu/SaveLoadUtil .bss 0x005BF520 0x10
 Form/Menu/SaveLoadUtil .data 0x00340368 0xc
@@ -198,6 +201,7 @@ Game/Gimmick/GimmickSearchLaser .rodata 0x00423AE0 0xa0
 Game/Gimmick/GimmickStatue .rodata 0x00423B80 0x10
 Game/Gimmick/GimmickThunderTrap .data 0x0033F9A0 0x40
 Game/Gimmick/GimmickThunderTrap .rodata 0x00423BA0 0x1a0
+Game/Gimmick/GimmickTreasureBox .rodata 0x00423D50 0x110
 Game/Gimmick/GimmickTutorial .rodata 0x00423E60 0x140
 Game/Gimmick/GimmickUpFloor .rodata 0x00423FA0 0x50
 Game/Gimmick/GimmickWindowLid .rodata 0x00424000 0x10
@@ -347,6 +351,9 @@ System/Graphic/LightUnit .data 0x003329A0 0xb0
 System/Graphic/LightUnit .rodata 0x00400E80 0x20
 System/Graphic/MapUnit .bss 0x0043C0C0 0x10
 System/Graphic/MapUnit .rodata 0x00400EA0 0x10
+System/Graphic/Model .bss 0x0043C0D0 0x1c0
+System/Graphic/Model .data 0x00332A50 0x14
+System/Graphic/Model .rodata 0x00400EB0 0x20
 System/Graphic/ModelMan .bss 0x0043C2C0 0x200
 System/Graphic/ModelMan .rodata 0x00400ED0 0x10
 System/Graphic/MotData .rodata 0x00400EE0 0x20

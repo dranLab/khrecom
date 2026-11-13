@@ -1527,7 +1527,7 @@ segments:
       - [0x323B80, rodata, Game/Gimmick/GimmickStatue]
       - [0x323BA0, rodata, Game/Gimmick/GimmickThunderTrap]
       - [0x323D40, rodata, Game/Gimmick/GimmickTimeBomb]
-      - [0x323D58, rodata, Game/Gimmick/GimmickTreasureBox]
+      - [0x323D50, rodata, Game/Gimmick/GimmickTreasureBox]
       - [0x323E60, rodata, Game/Gimmick/GimmickTutorial]
       - [0x323FA0, rodata, Game/Gimmick/GimmickUpFloor]
       - [0x324000, rodata, Game/Gimmick/GimmickWindowLid]

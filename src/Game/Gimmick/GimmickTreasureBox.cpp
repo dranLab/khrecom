@@ -178,12 +178,12 @@ BOOL CGimmickTreasureBox::CardMaxWarningMain() {
     }
     case 10: {
         INT ret;
-        INT iFg;
+        INT iFg[1]; // MATCH: [1]: retail ties this+0x40 as the original only with the local in memory from the start (beta matches both), user-accepted 2026-11-13
         ATEL::CChatMan::instance().reqCommand(0x3ED, &ret, 0);
         if (ret != 5) return FALSE;
         if (CPadHandler::isTrgOK() || CPadHandler::isTrgCANCEL()) {
-            iFg = 1;
-            ATEL::CChatMan::instance().reqCommand(0x3EB, &iFg, 0);
+            iFg[0] = 1;
+            ATEL::CChatMan::instance().reqCommand(0x3EB, iFg, 0);
             CSound::playSE(4, -1, 0x40);
             m_LocalStep = 20;
         }
@@ -191,11 +191,11 @@ BOOL CGimmickTreasureBox::CardMaxWarningMain() {
     }
     case 20: {
         INT ret;
-        INT iFg;
+        INT iFg[1];
         ATEL::CChatMan::instance().reqCommand(0x3ED, &ret, 0);
         if (ret != 9) return FALSE;
-        iFg = 0;
-        ATEL::CChatMan::instance().reqCommand(0x3EC, &iFg, 0);
+        iFg[0] = 0;
+        ATEL::CChatMan::instance().reqCommand(0x3EC, iFg, 0);
         CGameWork::setFlag(1, 5, FALSE);
         CSceneEnv::setStop(ObjType::OBJ_BIT_CLEAR);
         m_Step = 9;
@@ -465,3 +465,4 @@ void CGimmickTreasureBoxForEffectID::stateHitAttack() {}
 
 void CGimmickTreasureBoxForEffectID::endStateHitAttack() {}
 // SOURCE DATA: .rodata
+// SOURCE DATA SLUS_217.99_retail: .rodata

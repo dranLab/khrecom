@@ -5765,12 +5765,12 @@ void CVSM::AtelEventSkip() {
 void close_dest_se(INT win_num) {
     INT nState;
     INT ans;
-    INT mode;
+    INT mode[1]; // MATCH: [1] as GimmickTreasureBox iFg (retail ties this+0x40 only so), user-accepted 2026-11-13
     ans = CChatMan::instance().reqCommand(0x3ED, &nState, win_num);
     if (ans == 1) {
         WinCloseSE();
-        mode = ans;
-        CChatMan::instance().reqCommand(0x3EC, &mode, win_num);
+        mode[0] = ans;
+        CChatMan::instance().reqCommand(0x3EC, mode, win_num);
     }
 }
 void WinOpenSE(INT ctd) {}

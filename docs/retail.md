@@ -697,3 +697,19 @@ Tried here without a match: Model sendTexture with incTexSendCount as an empty i
 for the actor loops (78 -> 74 lines, but the first actor loop then differs); SaveLoad's CSaveLoadUI constructor
 with an explicit `CState() {}` or `0` for the `NULL` pointer-to-member arguments (gcse table stays 223 buckets);
 retail permuter, 15 minutes each: loadFromMem 51 -> 51 (11,409 candidates), setReqLoad 50 -> 50 (23,588).
+
+### 2026-11-13: accepted fillers, 632 -> 635 units
+
+User decision (2026-11-13): the two filler kinds left open above are accepted.
+- **`INT x[1]` for a local passed by address to CChatMan::reqCommand** (the CChatMan pattern): GimmickTreasureBox
+  CardMaxWarningMain's two `iFg` (unit from source), VSME close_dest_se's `mode` (matches; VSME still has
+  loadFromMem, execExt2Code and execExt3Code open). The beta matches with either form.
+- **One retail-only empty asm** (`KH_RELEASE(asm volatile("");)`, line-neutral): SaveLoad's CSaveLoadUI constructor
+  (gcse table 223 -> 225 buckets; one asm suffices), Model sendTexture (in the texture-animation block: one more insn
+  in `t`'s range).
+
+Careful: `retail_units.py switch --eligible` writes a fresh list from the last scan (the others lose their markers
+and starts); after a scan of a few units, switch them by name (`switch <unit>...`), which adds to the list.
+
+Open: VSME (loadFromMem; execExt2Code/execExt3Code: the CChatMan pattern with locals shared across many calls),
+CardRevolver setPlayCard, PlayerManager setReqLoad.

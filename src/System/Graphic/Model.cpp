@@ -795,7 +795,7 @@ BOOL CModel::sendTexture(u_long* tex0) {
             bTexAnm = FALSE;
             if (m_pTexAnm && m_pTexAnm->check(i)) {
                 bUpdate = TRUE;
-                bTexAnm = TRUE;
+                bTexAnm = TRUE; KH_RELEASE(asm volatile("");) // MATCH: retail needs one more insn in t's range (global-alloc near-tie t/nClutPos), user-accepted 2026-11-13
             }
             bSend |= bUpdate;
             if (t->isFixTex()) nTexPos = t->_pTexInfo->_TexInfo._nDistPos;
@@ -1713,3 +1713,4 @@ INT Mad::getModelAttachData(const MODEL_ATTACH_DATA** outMad, INT iRId) {
 }
 
 // SOURCE DATA: .data .rodata .bss
+// SOURCE DATA SLUS_217.99_retail: .bss .data .rodata

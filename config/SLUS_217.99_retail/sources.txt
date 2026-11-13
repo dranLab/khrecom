@@ -14,6 +14,7 @@ Form/Menu/MoogleShop
 Form/Menu/Pause
 Form/Menu/RoomCreation
 Form/Menu/Roulette
+Form/Menu/SaveLoad
 Form/Menu/SaveLoadCtrl
 Form/Menu/SaveLoadUtil
 Form/Menu/TechHelp
@@ -144,6 +145,7 @@ Game/Gimmick/GimmickSteamTrap
 Game/Gimmick/GimmickThunderTrap
 Game/Gimmick/GimmickTimeBomb
 Game/Gimmick/GimmickToldPipe
+Game/Gimmick/GimmickTreasureBox
 Game/Gimmick/GimmickTutorial
 Game/Gimmick/GimmickUpFloor
 Game/Gimmick/GimmickWallHole
@@ -446,6 +448,7 @@ System/Graphic/HermitePath
 System/Graphic/HermitePathCamera
 System/Graphic/LightUnit
 System/Graphic/MapUnit
+System/Graphic/Model
 System/Graphic/ModelMan
 System/Graphic/MotData
 System/Graphic/PackMan
