@@ -4127,7 +4127,7 @@ INT CCamp::setButtonHelp(INT nSetCmd, INT nMode, INT nKind) {
     return 1;
 }
 
-/* Parked: 27 of 612 lines (2026-11-10; drop the data block after the INCLUDE_ASM to build the draft): only the s-register
+/* Parked: 27 of 612 lines (2026-11-13; drop the data block after the INCLUDE_ASM to build the draft): only the s-register
    roles in the sleight-list loop differ (original s3 nTechKind, s4 i, s5 nTechSeqIdx, s6 nTechSelectTop, i + 1 in s7;
    this draft s3 nTechSelectTop, s4 nTechKind, s5 i, s6 nTechSeqIdx, nTechSelectTop + 1 in s7). 2026-11-09: 36 -> 27 by
    `C2DFnt* pFnt = m_pTechCategoryFnt[nTechCateCnt++] = new ...; addFntShift(m_pSeqName, pFnt, ...)`: the nTechCateCnt
@@ -4166,7 +4166,22 @@ INT CCamp::setButtonHelp(INT nSetCmd, INT nMode, INT nKind) {
    inlines change nothing). sched1 (-dS) of bb 50 issues T_i (i + 1) and T_sel (nTechSelectTop + 1) together at t=2
    and the zero-extended nTechSeqIdx at t=3; even T_sel at the block end would give nTechSelectTop only ~60 insns of
    life (priority 4500: then nTechKind s3, nTechSelectTop s4), not the 77 needed. pFnt (not in the ref, see above)
-   still awaits the user's decision; without it the draft is 36. */
+   still awaits the user's decision; without it the draft is 36. 2026-11-13 (retail, `retail_units.py try --show`): the
+   retail original has the same loop with other roles (s3 nTechKind, s4 i, s5 nTechSelectTop, s6 nTechSeqIdx); the draft
+   compiled for retail gives this draft's beta roles (4 insns short: nops/reload that follow the roles) and also spills
+   the four PRE-hoisted addresses in another order (ours m_pTechButton 0xD8, &rgba 0xDC, fLightX 0xD0, fLightY 0xD4;
+   retail &rgba 0xD0, fLightX 0xD4, fLightY 0xD8, m_pTechButton 0xDC): bucket order (raw 13258 + R + C) needs S = 263
+   (the only S in 201-331), ours 261 (max_cuid 523): retail has 1-4 more insns at gcse than this draft (beta: our
+   max_cuid 553, S 277; 0-2 more keep beta's order). The roles in BOTH builds follow from one number: nTechSelectTop
+   with 7 refs instead of 9 (the same live lengths 41 beta / 37 retail): beta 2*7/41 = 3414 < nTechSeqIdx 3529, retail
+   2*7/37 = 3783 between nTechSeqIdx 3750 and i 4583. Verified: comparing `i == m_nTechSelect` instead (one in-loop
+   use fewer, wrong code) gives the original's roles in both builds and leaves 1 line (that compare) in beta. So the
+   original has one in-loop occurrence of nTechSelectTop fewer (index, compare, PRE'd `+ 1`, loop-end copy: weight 2
+   each, the init 1); a longer life instead (9 refs) would need >= 77 (beta) with 59-72 (retail), which sched1 cannot
+   give. Not it (both builds measured): increment at the body end, `nTechSelectTop++, i++`, pre-increments, do/while
+   and while forms, reversed or `- == 0` compares, `(*(tbl + n))[0]`, init after rgba, SHORT/UINT nTechSelectTop,
+   `nTechSelectTop + i` without an increment (addu per pass), in-place increments in the body (giv reduced), `++` in
+   the compare or index. Scripts: build/stw/var.py, pri.py, sprobe.sh in the 2026-11-13 worktree. */
 #if 0
 INT CCamp::setTechWin(INT nSetCmd) {
     FVECTOR vec;
@@ -4455,7 +4470,7 @@ INT CCamp::setDeckSetWin(INT nSetCmd) {
     return ret;
 }
 
-/* Parked: 23 of 1407 lines (2026-11-10; drop the data block after the INCLUDE_ASM to build the draft): only the spill
+/* Parked: 23 of 1407 lines (2026-11-13; drop the data block after the INCLUDE_ASM to build the draft): only the spill
    slots of seven PRE-hoisted values differ (orig 0x74 &m_pMCInfoNumFnt, 0x78 &m_nMapKind, 0x7c i + 1, 0x80 nKind - 161,
    0x84 &m_pMCCard, 0x88 &m_pMCFnt, 0x8c &m_pMCInfoNumCtrl; ours 0x74 NumCtrl first, i + 1 before MapKind). Slots follow
    the PRE pseudo numbers = gcse expression-hash bucket order (-dG: raw hash of (plus (reg R) C) = 13258 + R + C, this
@@ -4504,7 +4519,14 @@ INT CCamp::setDeckSetWin(INT nSetCmd) {
    reference local in getText r309, S 701 both (header-wide, not kept); cardOld forms: `.m_nId =` S 699,
    `(CARD)`/`CARD(...)` S 701, none of them keeps cardOld as the register variable the original has (ours: the
    trivial operator= stores through ADDRESSOF into a copy that gcse cprop deletes; the original loads into cardOld
-   directly). */
+   directly). 2026-11-13 (retail, `retail_units.py try --show`): compiled for retail the draft differs from retail's
+   function only in the same spill slots (same size; retail 0x74 this+0x7CC, 0x78 this+0x7F0, 0x7C this+0x808, 0x80
+   i + 1, 0x84 this+0x197C, 0x88 this+0x830; ours i + 1 at 0x7C, 0x830 at 0x84, 0x197C at 0x88). Our retail S is 631
+   (max_cuid 1261, outer i r275); retail needs S 633 (+3..6 insns, i <= r308), 635 (+7..10, i r267..288) or 637
+   (+11..14, i r261..268). Lead (not confirmed): setTechWin's retail order needs 1-4 more insns at gcse too (S 263, its
+   beta 0-2); "+1 insn per `new C2DFnt`" fits all four (setTechWin 2 news: 555/S 277 beta, 525/S 263 retail; here 7:
+   1407/S 703 beta, 1268/S 635 retail, with the outer i needing 10-13 more pseudos in both builds, i.e. about 3 per
+   C2DFnt new before the loop). A `C2DFnt* p = m_pX = new` chain where the source has none adds no insn (setTechWin 5390). */
 #if 0
 INT CCamp::setMapCardWin(INT nSetCmd) {
     static char* pStrNum[4] = { "%02d/99", "%02d", "\x81~%02d", "" };
