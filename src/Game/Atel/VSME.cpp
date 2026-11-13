@@ -2954,8 +2954,8 @@ INT CVSM::execExt2Code(INT op, eATEL_REQ_RET& ret) {
             WinOpenSE(i2);
             CChatMan::instance().reqCommand(0x3EA, &param, i1);
             if (i3 & 0x20000000) {
-                INT n = 0;
-                CChatMan::instance().reqCommand(0x413, &n, i1);
+                INT n[1]; n[0] = 0; // MATCH: [1] as close_dest_se (retail), user-accepted 2026-11-13
+                CChatMan::instance().reqCommand(0x413, n, i1);
             }
             m_pCurrentActor->_ATP.wait_key = i1;
             m_pCurrentActor->_ATP.status = 12;
@@ -2985,15 +2985,15 @@ INT CVSM::execExt2Code(INT op, eATEL_REQ_RET& ret) {
             WinOpenSE(i2);
             CChatMan::instance().reqCommand(0x3EA, &param, i1);
             if (i3 & 0x20000000) {
-                INT n = 0;
-                CChatMan::instance().reqCommand(0x413, &n, i1);
+                INT n[1]; n[0] = 0; // MATCH: [1] as close_dest_se (retail), user-accepted 2026-11-13
+                CChatMan::instance().reqCommand(0x413, n, i1);
             }
             if (i3 & 0x40000000) {
-                INT n = 0;
-                CChatMan::instance().reqCommand(0x404, &n, i1);
+                INT n[1]; n[0] = 0; // MATCH: [1] as close_dest_se (retail), user-accepted 2026-11-13
+                CChatMan::instance().reqCommand(0x404, n, i1);
             } else {
-                INT n = 60;
-                CChatMan::instance().reqCommand(0x404, &n, i1);
+                INT n[1]; n[0] = 60; // MATCH: [1] as close_dest_se
+                CChatMan::instance().reqCommand(0x404, n, i1);
             }
             m_pCurrentActor->_ATP.wait_key = i1;
             m_pCurrentActor->_ATP.status = 12;
@@ -4336,8 +4336,8 @@ INT CVSM::execExt3Code(INT op, eATEL_REQ_RET& ret) {
             FLOAT f20 = m_S[m_SP].F;
             TRACE("UDA:%f,%f,%f,%f\n", f20, f21, f22, f23);
             AvatarSetLookAngle look;
-            look.Rate = f23;
-            look.LookAngle.set(DEG2RAD(f20), DEG2RAD(f21), DEG2RAD(f22));
+            KH_DEBUG(look.Rate = f23;) /* MATCH: retail stores Rate after the angle */
+            look.LookAngle.set(DEG2RAD(f20), DEG2RAD(f21), DEG2RAD(f22)); KH_RELEASE(look.Rate = f23;)
             m_pCurrentActor->_pAvatar->reqCommand(0x33, &look, 0);
             break;
         }
@@ -4457,15 +4457,15 @@ INT CVSM::execExt3Code(INT op, eATEL_REQ_RET& ret) {
         }
         case 0x10E: {
             INT i2 = m_S[m_SP--].I;
-            INT i1 = m_S[m_SP].I;
-            TRACE("enableNotSemiModel: %d,%d", i1, i2);
-            m_pCurrentActor->_pAvatar->reqCommand(0x39, &i1, i2);
+            INT i1[1]; i1[0] = m_S[m_SP].I; // MATCH: [1] as close_dest_se (retail)
+            TRACE("enableNotSemiModel: %d,%d", i1[0], i2);
+            m_pCurrentActor->_pAvatar->reqCommand(0x39, i1, i2);
             break;
         }
         case 0x10F: {
             INT i2 = m_S[m_SP--].I;
             CHAR* pName = (CHAR*)(m_pDseg + m_S[m_SP].I);
-            CGame::reqPlayMovie(pName, 1);
+            CGame::reqPlayMovie(pName, KH_VER(1, i2)); /* retail passes the script argument */
             TRACE("ATEL:playMovie %s, %d\n", pName, i2);
             break;
         }
