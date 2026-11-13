@@ -1379,7 +1379,7 @@ segments:
       - [0x305568, rodata, System/Movie/MovieScript]
       - [0x305580, rodata, System/Movie/MSVideo]
       - [0x305620, rodata, System/Rcf]
-      - [0x3058C0, rodata, System/RcfCD]
+      - [0x3056D0, rodata, System/RcfCD]
       - [0x3058E0, rodata, System/RsrcData]
       - [0x3059F0, rodata, System/RsrcDB]
       - [0x305CC0, rodata, System/Task]

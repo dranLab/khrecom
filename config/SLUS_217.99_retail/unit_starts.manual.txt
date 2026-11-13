@@ -49,3 +49,6 @@ Game/Enemy/MapEnemy .data 0x0033F5B0
 # retail's 0x421190 and 0x4211A0, after MapEnemy's 0x5A0 bytes (the split had given both to MapEnemy)
 Game/Enemy/MapEnemyAir .rodata 0x00421190
 Game/Enemy/MapEnemyGround .rodata 0x004211A0
+# RcfCD's .rodata: its first string "ABC" (s_RcrsExtTbl's first entry; the beta's D_0046D6B0 after 23 header assert
+# strings retail doesn't have) at 0x4056D0, right after Rcf's "$MAP"/"$END" tokens (Rcf's .rodata 0x405620 + 0xB0)
+System/RcfCD .rodata 0x004056D0

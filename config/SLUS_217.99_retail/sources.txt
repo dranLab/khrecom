@@ -482,6 +482,7 @@ System/Movie/MovieScript
 System/PadHandler
 System/PadIO
 System/PlaySpeedCtrl
+System/Rcf
 System/Rnd
 System/RootTask
 System/RsrcDB
