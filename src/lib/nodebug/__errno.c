@@ -140,7 +140,9 @@ void *memmove(void *dst_void, const void *src_void, size_t length)
 }
 #endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/nodebug/__errno", memcpy);
+#ifndef KH_RETAIL /* memmove is not in the retail ELF (nothing calls it there) */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/nodebug/__errno", memmove);
+#endif
 /* Parked: memset 12 of 47 lines, same size (2026-11-08): registers only, in the fill-pattern block: the original
    has andi t1 / move t0,t1 / dsll v1,t0,8 / or t0,v1,t1 / pcpyh v1,t0 (the masked byte in two registers, a copy this
    C never produces: cse merges every same-mode copy, ours is andi t0 / dsll v0 / or t0 / pcpyh t0,t0), its block
