@@ -700,7 +700,7 @@ static BOOL chackBBOX(const FVECTOR& vMax, const FVECTOR& vMin, const FVECTOR& v
     if (vMin.z > vSMMax.z) return FALSE;
     return TRUE;
 }
-/* Parked: 59 of 289 lines (2026-11-10): two independent differences. (1) The draw loop over pBuf[j] (line 940): the
+/* Parked: 59 of 289 lines (2026-11-13): two independent differences. (1) The draw loop over pBuf[j] (line 940): the
  * original keeps `li 12; mult` in the loop, ours strength-reduces it to a pointer. (2) Allocation: ours spills i and
  * keeps hHnd in s8, the original keeps i in s6 and spills hHnd (s6/s7/s8 renamed throughout). (2) does not follow from
  * (1): with the mult kept (draw loop padded to 148 insns with empty asms) i stays spilled. Global-alloc priorities
@@ -723,7 +723,15 @@ static BOOL chackBBOX(const FVECTOR& vMax, const FVECTOR& vMin, const FVECTOR& v
  * local reproduces it), CDrawable::getNextDrawable is an inline at Drawable.h:398, CShadowMapModel's setHandle/getHandle
  * are ShadowModel.h:276/277, HeapMan's delete[] has one more block level. Tried: while/goto/two j++ (layout changes),
  * inline index helper, pointer local, j = 0 / nDispNum = 0 placement, earlier hHnd placement, pSdwBuf[i++]; the draft
- * declares CShadowMapModel and Math3D::VectorMaxMinXYZ itself. */
+ * declares CShadowMapModel and Math3D::VectorMaxMinXYZ itself.
+ * 2026-11-13: retail's original has the same two differences (draw loop keeps li 12 + mult with _draw inlined, i in a
+ * register): the cause is in the source, not in debug code. Experiment (not source): a jump into the draw loop from
+ * outside makes loop.c skip it (loop_invalid) and reproduces its code exactly (li 12 + mult each iteration, layout),
+ * but then the outer loop hoists its own li 12 together with the draw loop's (matched movables), and i stays spilled
+ * (77): so the original's draw loop was not optimized by loop.c at all, and its 12 was no movable of the outer loop
+ * either. Neutral (59): `pPrim = _draw(...)` in the draw and map loops (987's `move s0,v0` has its own line; pPrim and
+ * pSMModel are both $16), _draw before nDispNum++ (953 is a code-less marker after 951: nDispNum++ sits in _draw's
+ * delay slot), if/else and continue forms of the draw body, goto for the break, while with j++ (59-79). */
 #if 0
 class CShadowMapModel : public CFadeModel {
     HANDLE m_hHnd;
